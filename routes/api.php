@@ -23,6 +23,8 @@ $api->version('v1', [
 ], function($api) {
     $api->post('order', 'OrderController@store')
     ->name('api.order.store');
+    $api->post('order/create', 'OrderController@create')
+        ->name('api.order.create');
     $api->post('users', 'UsersController@store')
     ->name('api.users.store');
 });
