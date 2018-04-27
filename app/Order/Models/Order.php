@@ -8,7 +8,7 @@ class Order extends Model
 {
     // Rest omitted for brevity
 
-    protected $table = 'order_info';
+    protected $table = 'admin_menu';
 
     protected $primaryKey='id';
 
