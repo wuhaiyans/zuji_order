@@ -1,24 +1,31 @@
 <?php
 
-namespace App\Models;
-
-use Tymon\JWTAuth\Contracts\JWTSubject;
+namespace App\Order\Models;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Auth;
-use Spatie\Permission\Traits\HasRoles;
-
-class User extends Authenticatable implements JWTSubject
+use Tymon\JWTAuth\Contracts\JWTSubject as AuthenticatableUserContract;
+class User extends Authenticatable implements AuthenticatableUserContract
 {
-    // Rest omitted for brevity
-
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+    /**
+     * @return mixed
+     */
     public function getJWTIdentifier()
-{
-    return $this->getKey();
-}
-
+    {
+        return $this->getKey(); // Eloquent model method
+    }
+    /**
+     * @return array
+     */
     public function getJWTCustomClaims()
-{
-    return [];
-}
+    {
+        return [];
+    }
 }
