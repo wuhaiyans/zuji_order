@@ -16,6 +16,8 @@ class UserController extends Controller
      */
     public function token(Request $request)
     {
+
+        echo ceil(microtime(true) * 1000);exit;
         $credentials=[
             'email' => $request->email,
             'password'  => $request->password,

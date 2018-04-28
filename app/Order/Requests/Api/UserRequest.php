@@ -24,8 +24,8 @@ class UserRequest extends FormRequest
     public function attributes()
     {
         return [
-            'verification_key' => '¶ÌÐÅÑéÖ¤Âë key',
-            'verification_code' => '¶ÌÐÅÑéÖ¤Âë',
+            'verification_key' => 'è¯·è¾“å…¥ key',
+            'verification_code' => 'è¯·è¾“å…¥code',
         ];
     }
 }
