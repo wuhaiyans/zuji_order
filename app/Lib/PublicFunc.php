@@ -26,7 +26,7 @@ function p($data, $exit = '')
 {
     echo "<pre>";
     print_r($data);
-    if($exit != ""){
+    if($exit == ""){
         exit;
     }
 }
@@ -38,7 +38,7 @@ function v($data, $exit = '')
 {
     echo "<pre>";
     var_dump($data);
-    if($exit != ""){
+    if($exit == ""){
         exit;
     }
 }
