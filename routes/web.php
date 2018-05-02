@@ -14,3 +14,15 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('order/{action}', function(App\Order\Controllers\Api\v1\OrderController $index, $action){
+    return $index->$action();
+});
+
+Route::get('users/{action}', function(App\Order\Controllers\Api\v1\UsersController $index, $action){
+    return $index->$action();
+});
+
+Route::get('return/{action}', function(App\Order\Controllers\Api\v1\ReturnController $index, $action){
+    return $index->$action();
+});
