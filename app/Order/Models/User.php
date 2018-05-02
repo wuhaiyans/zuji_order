@@ -6,6 +6,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject as AuthenticatableUserContract;
 class User extends Authenticatable implements AuthenticatableUserContract
 {
+
+    use Notifiable;
+    protected $table = 'users';
+    protected $primaryKey = 'id';
     /**
      * The attributes that should be hidden for arrays.
      *
