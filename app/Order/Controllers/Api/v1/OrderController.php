@@ -2,29 +2,18 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
-use App\Order\Models\Order;
-use App\Order\Modules\Service\order_creater\OrderCreater;
-use App\Order\Modules\Service\order_creater\UserComponnet;
-use App\Order\Modules\Service\order_creater\SkuComponnet;
+use App\Order\Modules\Service;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
+    protected $OrderCreate;
 
-    public function store()
+    public function __construct(Service\OrderCreater $OrderCreate)
     {
-
-        echo 11;die;
-
-//        echo 2344;exit;
-        $order = Order::all();
-        dd($order);
-//        Auth::guard('api')->fromUser($user);
-//         return $this->response->array(['test_message' => 'store verification code']);
-
+        $this->OrderCreate = $OrderCreate;
     }
-    //
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
@@ -45,32 +34,13 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
-        //开启事务
-       // DB::beginTransaction();
-        try{
-            // 订单创建器
-            $orderCreaterComponnet = new OrderCreater($order_no);
-            // 用户
-            $UserComponnet = new UserComponnet($orderCreaterComponnet,1);
-            $orderCreaterComponnet->set_user_componnet($UserComponnet);
-            // 商品
-            $SkuComponnet = new SkuComponnet($orderCreaterComponnet,1,1);
-            $orderCreaterComponnet->set_sku_componnet($SkuComponnet);
-            var_dump($orderCreaterComponnet->create());die;
-
-         //   DB::commit();
-        } catch (\Exception $e){
-      //      DB::rollback();//事务回滚
-            echo $e->getMessage();
-            echo $e->getCode();die;
-        }
-
-        //查询appid 是否是京东小白 如果是 调用小白接口
-
-        //如果是其他渠道 获取支付宝信用
-
-
-
+        $data =[
+            'pay_type'=>$pay_type,
+            'address_id'=>$address_id,
+            'sku_id'=>$sku_id,
+            'coupon_no'=>$coupon_no,
+        ];
+        $res = $this->OrderCreate->create($data);
     }
 
     public function orderList(){

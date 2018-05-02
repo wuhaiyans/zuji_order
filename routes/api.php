@@ -22,7 +22,7 @@ $api->version('v1', [
     $api->post('token', 'UserController@token');    //获取token
     $api->post('refresh-token', 'UserController@refershToken'); //刷新token
 
-    $api->group(['middleware' => ['auth:api']], function($api) {
+   // $api->group(['middleware' => ['auth:api']], function($api) {
         $api->post('order', 'OrderController@store')
             ->name('api.order.store');
         $api->post('order/create', 'OrderController@create')
@@ -34,6 +34,6 @@ $api->version('v1', [
         $api->post('users', 'UsersController@store')
             ->name('api.users.store');
         $api->post('me', 'UserController@me');
-    });
+  //  });
 });
    
