@@ -1,0 +1,5 @@
+
+
+ALTER TABLE `zuji_order2`
+	ADD COLUMN `discount_amount` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT '优惠金额单位分' AFTER `amount`,
+	ADD COLUMN `all_amount` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT '原始金额单位分' AFTER `discount_amount`;

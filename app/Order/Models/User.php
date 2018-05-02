@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Order\Models;
+namespace App\Models;
+
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Tymon\JWTAuth\Contracts\JWTSubject as AuthenticatableUserContract;
-class User extends Authenticatable implements AuthenticatableUserContract
+use Auth;
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable implements JWTSubject
 {
 
     use Notifiable;
@@ -21,14 +25,14 @@ class User extends Authenticatable implements AuthenticatableUserContract
     /**
      * @return mixed
      */
-    public function getJWTIdentifier()
+    // Rest omitted for brevity
+
+       public function getJWTIdentifier()
     {
-        return $this->getKey(); // Eloquent model method
+        return $this->getKey();
     }
-    /**
-     * @return array
-     */
-    public function getJWTCustomClaims()
+
+        public function getJWTCustomClaims()
     {
         return [];
     }
