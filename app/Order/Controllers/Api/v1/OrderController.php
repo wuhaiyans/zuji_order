@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+
     public function store()
     {
+
         echo 11;die;
 
 //        echo 2344;exit;
@@ -42,8 +44,7 @@ class OrderController extends Controller
         if(empty($sku_id)){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-        //生成订单编号
-        $order_no =rand("10000000000000","999999999999999");
+
         //开启事务
        // DB::beginTransaction();
         try{
