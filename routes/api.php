@@ -33,6 +33,7 @@ $api->version('v1', [
             ->name('api.order.orderdetail');//订单列表接口
         $api->post('users', 'UsersController@store')
             ->name('api.users.store');
+        $api->post('me', 'UserController@me');
     });
 });
    

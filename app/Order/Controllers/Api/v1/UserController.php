@@ -19,10 +19,12 @@ class UserController extends Controller
     public function token(Request $request)
     {
 
+
         $credentials=[
             'email' => $request->email,
             'password'  => $request->password,
         ];
+
         try {
             if (! $token = Auth::guard($this->guard)->attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 401);
