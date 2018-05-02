@@ -5,6 +5,7 @@
  * Date: 2018/5/2
  * Time: 10:35
  */
+namespace App\Order\Modules\Service;
 class test{
     private $orderCreater;
     public function __construct(OrderCreater $orderCreater,UserComponnet $userComponnet)
