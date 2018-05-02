@@ -19,5 +19,31 @@ class ThirdInterface{
     public function GetFengkong(){
         echo "获取风控信息<br>";
     }
+    public function GetCredit(){
+        var_dump('获取用户信用');
+    }
+
+    public function GetCoupon(){
+        var_dump('获取优惠券');
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

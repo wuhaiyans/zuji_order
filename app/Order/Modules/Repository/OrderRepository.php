@@ -12,7 +12,7 @@ class OrderRepository
         $this->order = $order;
     }
     public function create(){
-
+        var_dump('创建订单...');
 
     }
 
