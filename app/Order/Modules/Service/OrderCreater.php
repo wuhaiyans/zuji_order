@@ -36,10 +36,19 @@ class OrderCreater
 
         DB::beginTransaction();
         try {
+            //获取用户信息
+            $user_info =$this->third->GetUser($data['user_id']);
+            if(!is_array($user_info)){
+                return $user_info;
+            }
+
             $this->third->GetFengkong();
-            $this->third->GetUser();
-            $this->third->GetSku();
-            var_dump('订单编号：' .$order_no);
+            //获取商品详情
+            $sku_info =$this->third->GetSku($data['sku_id']);
+            if(!is_array($sku_info)){
+                return $sku_info;
+            }
+
             $this->orderRepository->create();
             $this->orderUserInfoRepository->create();
             $this->orderGoodsRepository->create();

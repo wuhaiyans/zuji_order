@@ -37,10 +37,15 @@ class OrderController extends Controller
         $data =[
             'pay_type'=>$pay_type,
             'address_id'=>$address_id,
-            'sku_id'=>$sku_id,
+            'sku_id'=>288,
             'coupon_no'=>$coupon_no,
+            'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
+        if(!is_array($res)){
+            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        }
+        return apiResponse($res,ApiStatus::CODE_0,"success");
     }
 
     public function orderList(){
