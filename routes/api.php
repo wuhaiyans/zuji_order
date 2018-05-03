@@ -12,17 +12,21 @@ use Illuminate\Http\Request;
  |
  */
 $api = app('Dingo\Api\Routing\Router');
-
 $api->version('v1', [
     'namespace' => 'App\Order\Controllers\Api\v1',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
 ], function($api) {
-
     $api->post('token', 'UserController@token');    //获取token
     $api->post('refresh-token', 'UserController@refershToken'); //刷新token
 
    // $api->group(['middleware' => ['auth:api']], function($api) {
+
+        $apiMap = config('apimap');
+        $method = request()->input('method');
+        if (isset($apiMap[$method])) {
+            $api->post('/',  $apiMap[$method]);
+        }
         $api->post('order', 'OrderController@store')
             ->name('api.order.store');
         $api->post('order/create', 'OrderController@create')
@@ -31,9 +35,8 @@ $api->version('v1', [
             ->name('api.order.orderlist');//订单列表接口
         $api->post('order/orderdetail', 'OrderController@orderDetail')
             ->name('api.order.orderdetail');//订单列表接口
-        $api->post('users', 'UsersController@store')
-            ->name('api.users.store');
-        $api->post('me', 'UserController@me');
+//        $api->post('user', 'UserController@me') //获取用户信息接口
+//            ->name('api.user.show');
   //  });
 });
    

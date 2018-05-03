@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Order\Controllers\Api\v1;
-use App\Order\Models\User;
+use App\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Auth;
+use App\Order\Transformers\UserTransformer;
 class UserController extends Controller
 {
     protected $guard = 'api';
@@ -49,7 +50,8 @@ class UserController extends Controller
      */
     public function me()
     {
-        return Auth::guard('api')->user();
+        return $this->response->item($this->user(), new UserTransformer());
+        //return Auth::guard('api')->user();
     }
     /**
      * 退出
