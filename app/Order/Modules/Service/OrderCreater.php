@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\ApiStatus;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
@@ -14,13 +15,15 @@ class OrderCreater
 {
 
     protected $third;
+    protected $verify;
     protected $orderRepository;
     protected $orderUserInfoRepository;
     protected $orderGoodsRepository;
 
-    public function __construct(ThirdInterface $third,OrderRepository $orderRepository,OrderUserInfoRepository $orderUserInfoRepository,OrderGoodsRepository $orderGoodsRepository)
+    public function __construct(ThirdInterface $third,OrderCreateVerify $orderCreateVerify,OrderRepository $orderRepository,OrderUserInfoRepository $orderUserInfoRepository,OrderGoodsRepository $orderGoodsRepository)
     {
         $this->third = $third;
+        $this->verify =$orderCreateVerify;
         $this->orderRepository = $orderRepository;
         $this->orderUserInfoRepository = $orderUserInfoRepository;
         $this->orderGoodsRepository = $orderGoodsRepository;
@@ -42,12 +45,23 @@ class OrderCreater
                 return $user_info;
             }
 
+            //下单验证
+            $res =$this->verify->Verify($data['pay_type'],$user_info);
+            if($res !=ApiStatus::CODE_0){
+                return $res;
+            }
+
+
+            //获取风控信息
             $this->third->GetFengkong();
             //获取商品详情
             $sku_info =$this->third->GetSku($data['sku_id']);
             if(!is_array($sku_info)){
                 return $sku_info;
             }
+
+
+
 
             $this->orderRepository->create();
             $this->orderUserInfoRepository->create();

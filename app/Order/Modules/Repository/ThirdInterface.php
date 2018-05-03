@@ -15,9 +15,9 @@ class ThirdInterface{
 
     public function GetUser($user_id){
         $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.payment';
+        $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
-            'sku_id'=>288,
+            'user_id'=>18,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
