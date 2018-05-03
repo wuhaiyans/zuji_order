@@ -20,6 +20,48 @@ class OrderStatus{
      * @var int 待支付【订单操作的起点】
      */
     const OrderWaitPaying = 1;
+    /**
+     * @var int 已支付
+     */
+    const OrderPayed = 2;
+    /**
+     * @var int 备货中
+     */
+    const OrderInStock  = 3;
+    /**
+     * @var int 已发货
+     */
+    const OrderDeliveryed = 4;
+    /**
+     * @var int 租用中
+     */
+    const OrderInService = 5;
+    /**
+     * @var int 关闭:已取消完成
+     */
+    const OrderClosed = 6;
+    /**
+     * @var int 退货退款完成单
+     */
+    const OrderRefunded = 7;
+    /**
+     * @var int 还机完成单
+     */
+    const OrderGivebacked= 8;
+    /**
+     * @var int 买断完成单
+     */
+    const OrderBuyouted = 9;
+    /**
+     * @var int 换货完成单
+     */
+    const OrderChanged= 10;
+
+
+
+
+
+
     //--------------------------------------------------------------------------------------------
     //--+ 订单状态 end ----------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
@@ -30,6 +72,15 @@ class OrderStatus{
     public static function getStatusList(){
         return [
             self::OrderWaitPaying => '待支付',
+            self::OrderPayed => '已支付',
+            self::OrderInStock => '备货中',
+            self::OrderDeliveryed => '已发货',
+            self::OrderInService => '租用中',
+            self::OrderClosed => '关闭',
+            self::OrderRefunded => '退货退款完成单',
+            self::OrderGivebacked => '还机完成单',
+            self::OrderBuyouted => '买断完成单',
+            self::OrderChanged => '换货完成单',
         ];
     }
 

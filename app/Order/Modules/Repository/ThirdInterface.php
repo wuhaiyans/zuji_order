@@ -12,12 +12,17 @@ use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
 class ThirdInterface{
+    /**
+     * 获取用户信息
+     * @param $user_id
+     * @return string
+     */
 
     public function GetUser($user_id){
         $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.payment';
+        $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
-            'sku_id'=>288,
+            'user_id'=>18,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
@@ -27,19 +32,25 @@ class ThirdInterface{
         }
         return $info['data'];
     }
+
+    /**
+     * 获取商品信息
+     * @param $sku_id
+     * @return string
+     */
     public function GetSku($sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.spusku.get';
         $data['params'] = [
             'sku_id'=>$sku_id,
         ];
-        $good_info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $good_info =json_decode($good_info,true);
-        var_dump($good_info);
-        if($good_info['code']!=0){
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        var_dump($info);
+        if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
-        return $good_info['data'];
+        return $info['data'];
 
     }
     public function GetFengkong(){
@@ -51,6 +62,26 @@ class ThirdInterface{
 
     public function GetCoupon(){
         var_dump('获取优惠券');
+    }
+
+    /**
+     * 获取渠道信息
+     * @param $appid
+     * @return string
+     */
+    public function GetChannel($appid){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.spusku.get';
+        $data['params'] = [
+            'app_id'=>$appid,
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        var_dump($info);
+        if($info['code']!=0){
+            return ApiStatus::CODE_60001;
+        }
+        return $info['data'];
     }
 
 }

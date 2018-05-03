@@ -1,7 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
-use DB;
+use App\Order\Modules\Inc\OrderStatus;
 
 class OrderRepository
 {
@@ -18,24 +18,41 @@ class OrderRepository
 
     }
 
+    /**
+     *
+     * 根据订单id查询信息
+     *
+     */
 
+    public static function getInfoById($orderNo){
+            if (empty($orderNo)) return false;
+            $order =  Order::query()->where([
+                ['order_no', '=', $orderNo],
+            ])->get();
+            if (!$order) return false;
+            return $order->toArray();
+    }
     /**
      * 更新订单
      */
-    public static function closeOrder($orderNo,$status){
+    public static function closeOrder($orderNo){
 
-        if (empty($orderId) or empty($userId)) {
+        if (empty($orderNo)) {
 
             return false;
         }
-        //更新订单状态
-       $orderData =  DB::table('order')->>where([
+        $order =  Order::where([
             ['order_no', '=', $orderNo],
-            ['order_status', '=', '1'],
-        ])->get();
+        ])->first();
+        if (!$order) return false;
+        $order->order_status = OrderStatus::OrderClosed;
 
-        return $orderData;
+        if ($order->save()) {
+            return true;
+        } else {
 
+            return false;
+        }
 
     }
 

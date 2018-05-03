@@ -3,7 +3,7 @@
  *    订单操作类
  */
 namespace App\Order\Modules\Service;
-//use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\OrderRepository;
 
 class OrderOperate
 {
@@ -11,15 +11,15 @@ class OrderOperate
     /**
      * 取消订单
      */
-    public static function cacelOrder($orderId , $status)
+    public static function cacelOrder($orderId)
     {
 
-        echo 1234;exit;
-//        if (empty($orderId)) {
-//            return false;
-//            }
-//       $orderData =  OrderRepository::closeOrder($orderId);
-//        return $orderData;
+        if (empty($orderId)) {
+            return false;
+            }
+
+       $orderData =  OrderRepository::closeOrder($orderId);
+        return $orderData;
 
     }
 
