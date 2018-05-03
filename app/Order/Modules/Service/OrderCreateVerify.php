@@ -2,19 +2,35 @@
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\PayInc;
+use App\Order\Modules\Repository\ThirdInterface;
 
 /**
  * 下单验证类
  */
 class OrderCreateVerify
 {
-    public function Verify($pay_type,$user_info){
-        if($pay_type == PayInc::WithhodingPay){
-            $res =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
-            if($res != ApiStatus::CODE_0){
-                return $res;
+    protected $third;
+
+    public function __construct(ThirdInterface $third)
+    {
+        $this->third = $third;
+    }
+
+    public function Verify($data,$user_info){
+        //判断是否需要签约代扣协议
+        if($data['pay_type'] == PayInc::WithhodingPay){
+            $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
+            if($Withhold != ApiStatus::CODE_0){
+                return $Withhold;
             }
         }
+
+        //判断该渠道是否有效等
+        $channel = $this->Channel($data['appid']);
+
+
+
+
 
     }
     /**
@@ -63,10 +79,25 @@ class OrderCreateVerify
             //未签约代扣协议
             return ApiStatus::CODE_30000;
         }
-       return ApiStatus::CODE_0;
+       return [];
 
 }
     /**
-     *
+     *  验证渠道
      */
+    private function Channel($appid){
+         $info =$this->third->GetChannel($appid);
+         if(!is_array($info)){
+             return $info;
+         }
+
+
+
+
+
+
+    }
+
+
+
 }

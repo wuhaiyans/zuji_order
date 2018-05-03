@@ -46,19 +46,19 @@ class OrderCreater
             }
 
             //下单验证
-            $res =$this->verify->Verify($data['pay_type'],$user_info);
-            if($res !=ApiStatus::CODE_0){
-                return $res;
-            }
+//            $res =$this->verify->Verify($data,$user_info);
+//            if($res !=ApiStatus::CODE_0){
+//                return $res;
+//            }
 
 
             //获取风控信息
             $this->third->GetFengkong();
             //获取商品详情
-            $sku_info =$this->third->GetSku($data['sku_id']);
-            if(!is_array($sku_info)){
-                return $sku_info;
-            }
+//            $sku_info =$this->third->GetSku($data['sku_id']);
+//            if(!is_array($sku_info)){
+//                return $sku_info;
+//            }
 
 
 

@@ -35,6 +35,7 @@ class OrderController extends Controller
         }
 
         $data =[
+            'appid'=>$appid,
             'pay_type'=>$pay_type,
             'address_id'=>$address_id,
             'sku_id'=>288,
