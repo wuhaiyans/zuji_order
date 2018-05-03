@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
+use App\Order\Models\OrderGoodExtend;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -70,4 +71,44 @@ class OrderController extends Controller
 
 
     }
+
+    /**
+     *
+     *  发货后，插入设置imei号
+     *
+     */
+    public function OrderDeliverImei(Request $request){
+
+        $orders = $request->all();
+        $params = $orders['params'];
+
+        //判断参数是否设置
+        if(empty($params['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"订单号不能为空");
+        }
+        if(empty($params['good_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+        }
+        if(empty($params['good_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"商品编码不能为空");
+        }
+        if(empty($params['imei1'])){
+            return apiResponse([],ApiStatus::CODE_20001,"imei不能为空");
+        }
+        if(empty($params['serial_number'])){
+            return apiResponse([],ApiStatus::CODE_20001,"序列号不能为空");
+        }
+
+        $OrderGoodExtend = new OrderGoodExtend();
+        $id = $OrderGoodExtend->create($params);
+        if(!$id){
+            return apiResponse(['id'=>$id],ApiStatus::CODE_20001,"设置imei号失败");
+        }
+
+        return apiResponse(['id'=>$id],ApiStatus::CODE_0,"success");
+
+    }
+
+
+
 }
