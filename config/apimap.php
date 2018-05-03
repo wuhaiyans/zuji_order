@@ -4,6 +4,7 @@ return [
     //订单相关
     'api.order.create' => 'OrderController@create',
 
+    'api.order.cancel' => 'OrderController@cancelOrder',
 
     //用户相关
 

@@ -2,7 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
-use App\Order\Modules\Service;
+use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -10,7 +10,7 @@ class OrderController extends Controller
 {
     protected $OrderCreate;
 
-    public function __construct(Service\OrderCreater $OrderCreate)
+    public function __construct(OrderCreater $OrderCreate)
     {
         $this->OrderCreate = $OrderCreate;
     }
@@ -63,10 +63,12 @@ class OrderController extends Controller
      *  未支付用户取消接口
      *
      */
-    public function cacelOrder(Request $request)
+    public function cancelOrder(Request $request)
     {
+        echo 2344;exit;
 
-
+//        $code = Service\OrderOperate::cacelOrder(12333);
+//        dd($code);
 
 
     }
