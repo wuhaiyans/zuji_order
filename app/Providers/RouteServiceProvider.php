@@ -14,7 +14,8 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    protected $namespace = 'App\Order\Controllers\api\v1';
+    protected $namespace_order = 'App\Order\Controllers\api\v1';
+    protected $namespace_warehouse = 'App\Warehouse\Controllers\api\v1';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -39,7 +40,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        $this->mapWarehouseRoutes();
     }
 
     /**
@@ -52,8 +53,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::middleware('web')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/web.php'));
+            ->namespace($this->namespace_order)
+            ->group(base_path('routes/web.php'));
     }
 
     /**
@@ -65,9 +66,24 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
-    Route::prefix('api')
-        ->middleware('api')
-        ->namespace($this->namespace)
-        ->group(base_path('routes/api.php'));
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace_order)
+            ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "warehouse" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
+    protected function mapWarehouseRoutes()
+    {
+        Route::prefix('warehouse')
+            ->middleware('warehouse')
+            ->namespace($this->namespace_warehouse)
+            ->group(base_path('routes/warehouse.php'));
     }
 }

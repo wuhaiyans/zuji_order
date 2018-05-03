@@ -13,7 +13,6 @@ class OrderRepository
     }
     public function create(){
 
-        var_dump('创建订单...');
 
     }
 
