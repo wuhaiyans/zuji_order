@@ -45,7 +45,7 @@ class OrderRepository
             ['user_id', '=', $userId],
             ['order_status', '<=', OrderStatus::OrderInService],
         ])->get()->toArray();
-        return !empty($orderData)? true:false;
+        return !empty($orderData) ?? false;
 
     }
 
