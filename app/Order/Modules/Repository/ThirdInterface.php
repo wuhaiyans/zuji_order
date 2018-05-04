@@ -133,7 +133,7 @@ class ThirdInterface{
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
-        return $info['data'];
+        return true;
     }
     /**
      * 减少库存
