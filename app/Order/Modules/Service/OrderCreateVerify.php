@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\OldInc;
 use App\Lib\PayInc;
+use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 
 /**
@@ -50,17 +51,24 @@ class OrderCreateVerify
 
         //验证优惠券信息
         $coupon['coupon'] =[];
-        if($data['coupon_no'] !=""){
-            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id'],$goods);
-            if(!is_array($coupon)){
-                return $coupon;
-            }
 
+//        if($data['coupon_no'] !=""){
+//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id'],$goods);
+//            if(!is_array($coupon)){
+//                return $coupon;
+//            }
+//
+//        }
+
+        //分期单信息
+        $instalment['instalment']=[];
+        if($data['pay_type']!=PayInc::WithhodingPay){
+            $instalment =$this->InstalmentVerify([
+                'coupon_type'=>$coupon['coupon']['coupon_type']?$coupon['coupon']['coupon_type']:"",
+            ]);
         }
-        //分期单
 
-
-        $arr =array_merge($channel,$goods,$users,$deposit,$coupon);
+        $arr =array_merge($channel,$goods,$users,$deposit,$coupon,$instalment);
         var_dump($arr);
         return $channel;
 
@@ -110,72 +118,29 @@ class OrderCreateVerify
 
     private function CouponVerify($coupon_no,$user_id,$goods){
         $coupon = $this->third->GetCoupon($coupon_no,$user_id,$goods['sku']['all_amount'],$goods['sku']['spu_id'],$goods['sku']['sku_id']);
-        var_dump($coupon);die;
-        // 根据优惠券编码，获取优惠券对象
-        $validate_coupon = Coupon::validate_coupon(['coupon_no'=>$this->coupon_no,'user_id'=>$this->user_id]);
 
-        if( !$validate_coupon ){
-            $this->get_order_creater()->set_error('该优惠券不可用');
-            return false;
-        }
-
-        $payment =$this->get_order_creater()->get_sku_componnet()->get_all_amount();
-        $spu_id =$this->get_order_creater()->get_sku_componnet()->get_spu_id();
-        $channel_id =$this->get_order_creater()->get_sku_componnet()->get_channel_id();
-        $sku_id=$this->get_order_creater()->get_sku_componnet()->get_sku_id();
-        $data =[
-            'coupon_no'=>$this->coupon_no,
-            'user_id'=>$this->user_id,
-            'payment'=>$payment,
-            'spu_id'=>$spu_id,
-            'sku_id'=>$sku_id,
-            'channel_id'=>$channel_id,
-            'sku_id'=>$sku_id,
-        ];
-
-        $coupon = Coupon::get_coupon_row($data);
-
-        // 判断优惠券有效性，然后获取优惠金额
-        if($coupon['code']==0){
-            $this->get_order_creater()->set_error($coupon['data']);
-            return false;
-        }
-        $coupon['data'] = filter_array($coupon['data'], [
-            'discount_amount' => 'required',
-            'coupon_no' => 'required',
-            'coupon_id' =>'required',
-            'coupon_type' =>'required',
-            'coupon_name' =>'required',
-        ]);
-        if(count($coupon['data'])!=5){
-            $this->get_order_creater()->set_error("优惠券信息错误");
-            return false;
-        }
-        $this->discount_amount = $coupon['data']['discount_amount'];
-        $this->coupon_no = $coupon['data']['coupon_no'];
-        $this->coupon_id = $coupon['data']['coupon_id'];
-        $this->coupon_type = $coupon['data']['coupon_type'];
-        $this->coupon_name = $coupon['data']['coupon_name'];
-        // 订单ID
-        $Creater = $this->get_order_creater();
-
-        // sku
-        $sku = $Creater->get_sku_componnet();
-
-        // 优惠
-        $sku->discount($this->discount_amount);
-
-
-        return array_merge($schema,[
+        $this->discount_amount = $coupon['discount_amount'];
+        $this->coupon_no = $coupon['coupon_no'];
+        $this->coupon_id = $coupon['coupon_id'];
+        $this->coupon_type = $coupon['coupon_type'];
+        $this->coupon_name = $coupon['coupon_name'];
+        return [
             'coupon' => [
                 'coupon_no' => $this->coupon_no,
                 'coupon_name' => $this->coupon_name,
                 'coupon_type' => $this->coupon_type,
                 'discount_amount' => $this->discount_amount,
             ]
-        ]);
-
-
+        ];
+    }
+    private function InstalmentVerify($data){
+        return [
+            'instalment' => [
+                'first_amount' => 299,
+                'fenqi_amount' => 200,
+                'coupon_type' => $data['coupon_type']
+            ]
+        ];
     }
 
     private function UserVerify($info){
@@ -212,9 +177,12 @@ class OrderCreateVerify
         /**
          * 增加信用分判断 是否允许下单
          */
-        /**
-         * 判断是否有其他活跃 未完成订单
-         */
+
+         //判断是否有其他活跃 未完成订单
+        $b =OrderRepository::unCompledOrder($this->user_id);
+        if($b){
+            return ApiStatus::CODE_41004;
+        }
 
         $user =[
             'user' => [

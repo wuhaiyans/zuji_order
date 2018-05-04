@@ -15,6 +15,38 @@ class OrderController extends Controller
     {
         $this->OrderCreate = $OrderCreate;
     }
+
+    public function confirmation(Request $request){
+        $orders =$request->all();
+        //获取appid
+        $appid =$orders['appid'];
+        $pay_type =$orders['params']['pay_type'];//支付方式ID
+        $sku_id =$orders['params']['sku_id'];
+        $coupon_no = $orders['params']['coupon_no'];
+
+        //判断参数是否设置
+        if(empty($pay_type)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($sku_id)){
+            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+        }
+
+        $data =[
+            'appid'=>$appid,
+            'pay_type'=>$pay_type,
+            'sku_id'=>288,
+            'coupon_no'=>$coupon_no,
+            'user_id'=>18,  //增加用户ID
+        ];
+        $res = $this->OrderCreate->confirmation($data);
+        if(!is_array($res)){
+            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        }
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
     public function create(Request $request){
         $orders =$request->all();
         //获取appid

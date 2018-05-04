@@ -32,6 +32,7 @@ class ApiStatus {
      * @var string 状态码：程序异常（程序未捕获的异常：程序发生致命错误）
      */
     const CODE_50000 = '50000'; //
+    const CODE_50010 = '50010'; //优惠券错误
 
     //-+----------------------------------------------------------------------
     // | 依赖接口错误
@@ -70,6 +71,7 @@ class ApiStatus {
     const CODE_41003 = '41003'; //信用认证过期,
     const CODE_41004 = '41004'; //有未完成订单,
     const CODE_41005 = '41005'; //用户地址错误,
+    const CODE_41006 = '41006'; //优惠券不可用,
 
     public static $errCodes = [
         self::CODE_0     => 'success',
@@ -103,6 +105,7 @@ class ApiStatus {
         self::CODE_41003 => '信用认证过期',
         self::CODE_41004 => '有未完成订单',
         self::CODE_41005 => '用户地址错误',
+        self::CODE_50010 => '优惠券不可用',
 
 
     ];

@@ -28,8 +28,11 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
        // var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
@@ -48,8 +51,11 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
        // var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
 
@@ -88,11 +94,14 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        // var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
+
     }
 
     /**
@@ -109,13 +118,16 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
         //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
 
-    /**
+ /**
  * 增加库存
  * @param $spu_id
  * @param $sku_id
@@ -131,8 +143,11 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
         //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
@@ -152,8 +167,11 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
         //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
@@ -182,8 +200,11 @@ class ThirdInterface{
         //var_dump($info);die;
         $info =json_decode($info,true);
         //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
