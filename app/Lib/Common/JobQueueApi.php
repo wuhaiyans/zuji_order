@@ -88,7 +88,7 @@ class JobQueueApi {
 			'desc' => '',
 			'type' => $type,
 			'url' => $url,
-			'data' => json_encode($data),
+			'data' => $data,
 			'callback' => $callback,
 			'start' => $start,
 			'cron' => $cron,
