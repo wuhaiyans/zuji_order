@@ -26,23 +26,27 @@ class TestController extends Controller
 
 		
 		$b = JobQueueApi::addRealTime('test-realtime','https://dev-api-zuji.huishoubao.com/test.php', [
-			'time' => 'test-realtime: '.date('Y-m-d H:i:s'),
+			'key' => 'test-realtime',
+			'time' => date('Y-m-d H:i:s'),
 		],$callback);
 		var_dump( 'test-realtime:'. ($b?'ok':'no' ) );
 		
 		
 		$b = JobQueueApi::addScheduleOnce('test-schedule-once','https://dev-api-zuji.huishoubao.com/test.php', [
-			'time' => 'test-schedule-once: '.date('Y-m-d H:i:s'),
+			'key' => 'test-schedule-once',
+			'time' => date('Y-m-d H:i:s'),
 		],time(),$callback);
 		var_dump( 'test-schedule-once:'. ($b?'ok':'no' ) );
 		
 		$b = JobQueueApi::addScheduleEvery('test-schedule-every','https://dev-api-zuji.huishoubao.com/test.php', [
-			'time' => 'test-schedule-every: '.date('Y-m-d H:i:s'),
+			'key' => 'test-schedule-every',
+			'time' => date('Y-m-d-H:i:s'),
 		],'1s',$callback);
 		var_dump( 'test-schedule-every:'. ($b?'ok':'no' ) );
 		
 		$b = JobQueueApi::addScheduleCron('test-schedule-cron','https://dev-api-zuji.huishoubao.com/test.php', [
-			'time' => 'test-schedule-cron: '.date('Y-m-d H:i:s'),
+			'key' => 'test-schedule-cron',
+			'time' => date('Y-m-d H:i:s'),
 		],'*/1 * * * *',$callback);
 		var_dump( 'test-schedule-cron:'. ($b?'ok':'no' ) );
 		

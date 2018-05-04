@@ -9,8 +9,8 @@ use App\Lib\Curl;
  */
 class JobQueueApi {
 	
-	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
-//	private static $_url = 'http://job-api.hsbbj.com/api';
+//	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
+	private static $_url = 'http://job-api.hsbbj.com/api';
 	
 	private static $_auth = '7ZT%SC8HB4*Ad$bWyEaj2mBy%qd2G49A';
 	
@@ -88,7 +88,7 @@ class JobQueueApi {
 			'desc' => '',
 			'type' => $type,
 			'url' => $url,
-			'data' => $data,
+			'data' => json_encode($data),
 			'callback' => $callback,
 			'start' => $start,
 			'cron' => $cron,
