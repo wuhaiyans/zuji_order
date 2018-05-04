@@ -44,21 +44,23 @@ class OrderCreater
             if(!is_array($user_info)){
                 return $user_info;
             }
+            //var_dump($user_info);die;
 
             //获取商品详情
-            $sku_info =$this->third->GetSku($data['sku_id']);
-            if(!is_array($sku_info)){
-                return $sku_info;
+            $goods_info =$this->third->GetSku($data['sku_id']);
+            if(!is_array($goods_info)){
+                return $goods_info;
             }
-            $data['channel_id'] =$sku_info['spu_info']['channel_id'];
+            //var_dump($goods_info);die;
+            $data['channel_id'] =$goods_info['spu_info']['channel_id'];
             //下单验证
-            $res =$this->verify->Verify($data,$user_info);
-            if($res !=ApiStatus::CODE_0){
+            $res =$this->verify->Verify($data,$user_info,$goods_info);
+            if(!is_array($res)){
                 return $res;
             }
             //获取风控信息
             $this->third->GetFengkong();
-
+            $this->third->GetCredit();
             $this->orderRepository->create();
             $this->orderUserInfoRepository->create();
             $this->orderGoodsRepository->create();

@@ -15,7 +15,7 @@ class ThirdInterface{
     /**
      * 获取用户信息
      * @param $user_id
-     * @return string
+     * @return string or array
      */
 
     public function GetUser($user_id){
@@ -36,7 +36,7 @@ class ThirdInterface{
     /**
      * 获取商品信息
      * @param $sku_id
-     * @return string
+     * @return string or array
      */
     public function GetSku($sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -56,18 +56,48 @@ class ThirdInterface{
     public function GetFengkong(){
         echo "获取风控信息<br>";
     }
+
+    /**
+     * 获取风控系统的分数
+     * @return int
+     */
     public function GetCredit(){
-        var_dump('获取用户信用');
+        echo "获取信用分";
+        return 100;
     }
 
-    public function GetCoupon(){
-        var_dump('获取优惠券');
+    /**
+     * 获取优惠券信息
+     * @param $coupon_no 优惠券码
+     * @param $user_id
+     * @param $payment 商品价格 单位(分)
+     * @param $spu_id
+     * @param $sku_id
+     * @return string
+     */
+    public function GetCoupon($coupon_no,$user_id,$payment,$spu_id,$sku_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.coupon.row.get';
+        $data['params'] = [
+            'sku_id'=>$coupon_no,
+            'sku_id'=>$user_id,
+            'sku_id'=>$payment,
+            'sku_id'=>$spu_id,
+            'sku_id'=>$sku_id,
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        // var_dump($info);die;
+        if($info['code']!=0){
+            return ApiStatus::CODE_60001;
+        }
+        return $info['data'];
     }
 
     /**
      * 获取渠道信息
      * @param $appid
-     * @return string
+     * @return string or array
      */
     public function GetChannel($appid){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -77,7 +107,7 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+        //var_dump($info);
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
@@ -88,6 +118,7 @@ class ThirdInterface{
  * 增加库存
  * @param $spu_id
  * @param $sku_id
+ * @return string or array
  */
     public function AddStock($spu_id,$sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -98,7 +129,7 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+        //var_dump($info);
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
@@ -108,6 +139,7 @@ class ThirdInterface{
      * 减少库存
      * @param $spu_id
      * @param $sku_id
+     * @return string or array
      */
     public function ReduceStock($spu_id,$sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -118,7 +150,36 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+        //var_dump($info);
+        if($info['code']!=0){
+            return ApiStatus::CODE_60001;
+        }
+        return $info['data'];
+    }
+    /**
+     * 获取支付押金接口
+     * @param$data[
+     * $spu_id //spu_id
+     * $pay_type //支付类型
+     * $credit //信用分
+     * $age //年龄
+     * $yajin //商品押金
+     * ]
+     * @return string or array
+     */
+    public function Deposit($data){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.rule.get';
+        $data['params'] = [
+            'spu_id'=>$data['spu_id'],
+            'pay_type'=>$data['pay_type'],
+            'credit'=>$data['credit'],
+            'age'=>$data['age'],
+            'yajin'=>$data['yajin']
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
