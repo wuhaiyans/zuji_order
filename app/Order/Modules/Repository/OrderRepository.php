@@ -32,6 +32,24 @@ class OrderRepository
             if (!$order) return false;
             return $order->toArray();
     }
+
+    /**
+     *
+     * 查询未完成的订单
+     *
+     */
+    public static function unCompledOrder($userId)
+    {
+        if (empty($userId)) return false;
+        $orderData = Order::query()->where([
+            ['user_id', '=', $userId],
+            ['order_status', '<=', OrderStatus::OrderInService],
+        ])->get()->toArray();
+        return !empty($orderData) ?? false;
+
+    }
+
+
     /**
      * 更新订单
      */
