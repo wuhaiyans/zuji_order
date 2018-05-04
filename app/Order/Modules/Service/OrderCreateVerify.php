@@ -10,7 +10,6 @@ use App\Order\Modules\Repository\ThirdInterface;
  */
 class OrderCreateVerify
 {
-    private $discount_amount = 0; //优惠金额
     protected $third;
 
     public function __construct(ThirdInterface $third)
@@ -36,39 +35,234 @@ class OrderCreateVerify
         if(!is_array($goods)){
            return $goods;
         }
+
+        //押金验证计算
+        $deposit =$this->DepositVerify($data,$users,$goods);
+        if(!is_array($deposit)){
+            return $deposit;
+        }
+
         //判断该渠道是否有效等
         $channel = $this->Channel($data['appid'],$data['channel_id']);
         if(!is_array($channel)){
             return $channel;
         }
-        $arr =array_merge($channel,$goods,$users);
+
+        //验证优惠券信息
+        $coupon['coupon'] =[];
+        if($data['coupon_no'] !=""){
+            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id'],$goods);
+            if(!is_array($coupon)){
+                return $coupon;
+            }
+
+        }
+        //分期单
+
+
+        $arr =array_merge($channel,$goods,$users,$deposit,$coupon);
         var_dump($arr);
         return $channel;
 
     }
+    /**
+     *下单验证收货地址
+     * @param $user_info
+     */
+    public function AddressVerify($user_info){
+        // 用户ID
+        $this->user_id = $this->get_order_creater()->get_user_componnet()->get_user_id();
+        if( $user_info['id']!= $user_info['address']['mid'] ){
+           return ApiStatus::CODE_41005;
+        }
+        if( $user_info['address']['status'] != 1 ){
+            return ApiStatus::CODE_41005;
+        }
+        // 赋值
+        $this->address_id = intval($user_info['address']['id']);
+        $this->name = $user_info['address']['name'];
+        $this->mobile = $user_info['address']['mobile'];
+        $this->address = $user_info['address']['address'];
+        $this->status = intval($user_info['address']['status'])?1:0;
+        $this->country_id = intval($user_info['address']['district_id']);// 区县ID
+
+        $this->country_name = "";
+        $this->city_id = 0;
+        $this->city_name = "";
+        $this->province_id = 0;
+        $this->province_name = "";
+        return [
+            'address' => [
+                'user_id' => $this->user_id,
+                'name' => $this->name,
+                'mobile' => $this->mobile,
+                'address' => $this->address,
+                'province_id' => $this->province_id,
+                'province_name' => $this->province_name,
+                'city_id' => $this->city_id,
+                'city_name' => $this->city_name,
+                'country_id' => $this->country_id,
+                'country_name' => $this->country_name,
+            ]
+        ];
+
+    }
+
+    private function CouponVerify($coupon_no,$user_id,$goods){
+        $coupon = $this->third->GetCoupon($coupon_no,$user_id,$goods['sku']['all_amount'],$goods['sku']['spu_id'],$goods['sku']['sku_id']);
+        var_dump($coupon);die;
+        // 根据优惠券编码，获取优惠券对象
+        $validate_coupon = Coupon::validate_coupon(['coupon_no'=>$this->coupon_no,'user_id'=>$this->user_id]);
+
+        if( !$validate_coupon ){
+            $this->get_order_creater()->set_error('该优惠券不可用');
+            return false;
+        }
+
+        $payment =$this->get_order_creater()->get_sku_componnet()->get_all_amount();
+        $spu_id =$this->get_order_creater()->get_sku_componnet()->get_spu_id();
+        $channel_id =$this->get_order_creater()->get_sku_componnet()->get_channel_id();
+        $sku_id=$this->get_order_creater()->get_sku_componnet()->get_sku_id();
+        $data =[
+            'coupon_no'=>$this->coupon_no,
+            'user_id'=>$this->user_id,
+            'payment'=>$payment,
+            'spu_id'=>$spu_id,
+            'sku_id'=>$sku_id,
+            'channel_id'=>$channel_id,
+            'sku_id'=>$sku_id,
+        ];
+
+        $coupon = Coupon::get_coupon_row($data);
+
+        // 判断优惠券有效性，然后获取优惠金额
+        if($coupon['code']==0){
+            $this->get_order_creater()->set_error($coupon['data']);
+            return false;
+        }
+        $coupon['data'] = filter_array($coupon['data'], [
+            'discount_amount' => 'required',
+            'coupon_no' => 'required',
+            'coupon_id' =>'required',
+            'coupon_type' =>'required',
+            'coupon_name' =>'required',
+        ]);
+        if(count($coupon['data'])!=5){
+            $this->get_order_creater()->set_error("优惠券信息错误");
+            return false;
+        }
+        $this->discount_amount = $coupon['data']['discount_amount'];
+        $this->coupon_no = $coupon['data']['coupon_no'];
+        $this->coupon_id = $coupon['data']['coupon_id'];
+        $this->coupon_type = $coupon['data']['coupon_type'];
+        $this->coupon_name = $coupon['data']['coupon_name'];
+        // 订单ID
+        $Creater = $this->get_order_creater();
+
+        // sku
+        $sku = $Creater->get_sku_componnet();
+
+        // 优惠
+        $sku->discount($this->discount_amount);
+
+
+        return array_merge($schema,[
+            'coupon' => [
+                'coupon_no' => $this->coupon_no,
+                'coupon_name' => $this->coupon_name,
+                'coupon_type' => $this->coupon_type,
+                'discount_amount' => $this->discount_amount,
+            ]
+        ]);
+
+
+    }
 
     private function UserVerify($info){
+       // var_dump($info);die;
         $this->user_id = intval($info['id']);
         $this->mobile = $info['username'];
         $this->withholding_no = $info['withholding_no'];
         $this->islock = intval($info['islock'])?1:0;
         $this->block = intval($info['block'])?1:0;
-
+        $this->credit_time = intval( $info['credit_time'] );
+        $this->certified = $info['certified']?1:0;
+        $this->certified_platform = intval($info['certified_platform']);
+        $this->realname = $info['realname'];
+        $this->cert_no = $info['cert_no'];
+        $this->credit = intval($info['credit']);
+        $this->face = $info['face']?1:0;
+        $age =substr($this->cert_no,6,8);
+        $now = date("Ymd");
+        $this->age = intval(($now-$age)/10000);
+        $this->risk = $info['risk']?1:0;
         if( $this->islock ){
             return ApiStatus::CODE_41000;
         }
         if( $this->block ){
             return ApiStatus::CODE_41001;
         }
+        // 信用认证结果有效期
+        if( (time()-$this->credit_time) > 60*60 ){
+           // return ApiStatus::CODE_41003;
+        }
+        if( $this->certified == 0 ){
+            return ApiStatus::CODE_41002;
+        }
+        /**
+         * 增加信用分判断 是否允许下单
+         */
+        /**
+         * 判断是否有其他活跃 未完成订单
+         */
 
-        return [
+        $user =[
             'user' => [
                 'user_id' => $this->user_id,
                 'mobile' => $this->mobile,
                 'withholding_no'=> $this->withholding_no,
             ]
         ];
+        return array_merge($user,[
+            'credit' => [
+                // 已认证，通过人脸识别，通过风控，认证未过期
+                'certified' => $this->certified,
+                'certified_platform' => $this->certified_platform,
+                'realname' => $this->realname,
+                'cert_no' => $this->cert_no,
+                'credit' => $this->credit,
+                'age' =>$this->age,
+                'face' => $this->face,
+                'risk' => $this->risk,
+                'credit_time' => $this->credit_time,
+            ]
+        ]);
     }
+
+    /**
+     * 押金计算验证
+     * @param $users
+     * @param $goods
+     */
+
+    private function DepositVerify($data,$users,$goods){
+        $deposit =$this->third->GetDeposit([
+                    'spu_id'=>$goods['sku']['spu_id'],
+                    'pay_type'=>$data['pay_type'],
+                    'credit'=>$users['credit']['credit']?$users['credit']['credit']:0,
+                    'age'=>$users['credit']['age']?$users['credit']['age']:0,
+                    'yajin'=>$goods['sku']['yajin'],
+
+        ]);
+        return [
+            'deposit' => [
+                'jianmian' => $deposit['jianmian'],
+                'yajin' => $deposit['yajin'],
+            ]];
+    }
+
+
+
     /**
      *  下单商品信息过滤
      */
@@ -167,7 +361,6 @@ class OrderCreateVerify
                 'market_price' => $this->market_price,
                 'chengse' => $this->chengse,
                 'amount' => $this->amount,
-                'discount_amount' => $this->discount_amount,
                 'all_amount' => $this->all_amount,
                 'contract_id'=>$this->contract_id,
                 'stock' => $this->stock,

@@ -40,7 +40,7 @@ class OrderCreater
         DB::beginTransaction();
         try {
             //获取用户信息
-            $user_info =$this->third->GetUser($data['user_id']);
+            $user_info =$this->third->GetUser($data['user_id'],$data['address_id']);
             if(!is_array($user_info)){
                 return $user_info;
             }
@@ -58,6 +58,13 @@ class OrderCreater
             if(!is_array($res)){
                 return $res;
             }
+            //只有提交订单时 要验证 收货地址信息
+            $address =$this->verify->AddressVerify($user_info);
+            if(!is_array($address)){
+                return $address;
+            }
+
+
             //获取风控信息
             $this->third->GetFengkong();
             $this->third->GetCredit();

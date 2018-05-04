@@ -18,11 +18,12 @@ class ThirdInterface{
      * @return string or array
      */
 
-    public function GetUser($user_id){
+    public function GetUser($user_id,$address_id=0){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
             'user_id'=>18,
+            'address_id'=>8,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
@@ -79,10 +80,10 @@ class ThirdInterface{
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.coupon.row.get';
         $data['params'] = [
-            'sku_id'=>$coupon_no,
-            'sku_id'=>$user_id,
-            'sku_id'=>$payment,
-            'sku_id'=>$spu_id,
+            'coupon_no'=>$coupon_no,
+            'user_id'=>$user_id,
+            'payment'=>$payment,
+            'spu_id'=>$spu_id,
             'sku_id'=>$sku_id,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
@@ -158,7 +159,7 @@ class ThirdInterface{
     }
     /**
      * 获取支付押金接口
-     * @param$data[
+     * @param$arr[
      * $spu_id //spu_id
      * $pay_type //支付类型
      * $credit //信用分
@@ -167,17 +168,18 @@ class ThirdInterface{
      * ]
      * @return string or array
      */
-    public function Deposit($data){
+    public function GetDeposit($arr){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.rule.get';
         $data['params'] = [
-            'spu_id'=>$data['spu_id'],
-            'pay_type'=>$data['pay_type'],
-            'credit'=>$data['credit'],
-            'age'=>$data['age'],
-            'yajin'=>$data['yajin']
+            'spu_id'=>$arr['spu_id'],
+            'payment_type_id'=>$arr['pay_type'],
+            'credit'=>$arr['credit'],
+            'age'=>$arr['age'],
+            'yajin'=>$arr['yajin']
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        //var_dump($info);die;
         $info =json_decode($info,true);
         //var_dump($info);
         if($info['code']!=0){
