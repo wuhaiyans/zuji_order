@@ -4,6 +4,8 @@ return [
     //订单相关
     'api.order.create' => 'OrderController@create',
 
+    'api.order.cancel' => 'OrderController@cancelOrder',
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
 

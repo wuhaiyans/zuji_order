@@ -54,8 +54,8 @@ class OrderController extends Controller
         echo "订单列表接口";
     }
 
-    public function orderDetail(Request $request){
-        return apiResponse([],ApiStatus::CODE_0,"请求成功啦啦啦");
+    public function orderDetail(){
+        return apiResponse([],ApiStatus::CODE_0,"success");
         echo "订单详情接口";
 
     }
@@ -65,10 +65,17 @@ class OrderController extends Controller
      *  未支付用户取消接口
      *
      */
-    public function cacelOrder(Request $request)
+    public function cancelOrder(Request $request)
     {
 
+        $orderNo = $request->input('orderNo');
+        if (empty($orderNo)) {
 
+            return apiResponse([],ApiStatus::CODE_30005,"订单号不能为空");
+
+        }
+        $code = Service\OrderOperate::cacelOrder(12333);
+        return apiResponse([],ApiStatus::CODE_0,"success");
 
 
     }

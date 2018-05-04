@@ -35,8 +35,8 @@ $api->version('v1', [
             ->name('api.order.orderlist');//订单列表接口
         $api->post('order/orderdetail', 'OrderController@orderDetail')
             ->name('api.order.orderdetail');//订单列表接口
-//        $api->post('user', 'UserController@me') //获取用户信息接口
-//            ->name('api.user.show');
-  //  });
+        $api->post('user', 'UserController@me') //获取用户信息接口
+            ->name('api.user.show');
+//    });
 });
    
