@@ -21,6 +21,8 @@ class Curl {
         // https请求不验证证书和hosts
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		// 超时
+		curl_setopt($ch, CURLOPT_TIMEOUT,30); 
         $output = curl_exec($ch);
         curl_close($ch);
         return $output;
@@ -38,6 +40,8 @@ class Curl {
         // https请求不验证证书和hosts
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		// 超时
+		curl_setopt($ch, CURLOPT_TIMEOUT,30); 
         $output = curl_exec($ch);
         if (curl_errno($ch)) {
             echo 'Curl error: ' . curl_error($ch).'; URL: '.$url;exit;
