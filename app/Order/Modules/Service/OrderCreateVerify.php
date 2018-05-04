@@ -17,20 +17,22 @@ class OrderCreateVerify
     }
 
     public function Verify($data,$user_info){
+
         //判断是否需要签约代扣协议
         if($data['pay_type'] == PayInc::WithhodingPay){
             $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
-            if($Withhold != ApiStatus::CODE_0){
+            if(!is_array($Withhold)){
                 return $Withhold;
             }
         }
 
         //判断该渠道是否有效等
-        $channel = $this->Channel($data['appid']);
+        $channel = $this->Channel($data['appid'],$data['channel_id']);
+        if(!is_array($channel)){
+            return $channel;
+        }
 
-
-
-
+        return $channel;
 
     }
     /**
@@ -39,7 +41,7 @@ class OrderCreateVerify
     private function UserWithholding($withholding_no,$user_id){
         if( $withholding_no!="" ){
           //  调用支付系统的方法 如下：Y/N
-            $status ="N";
+            $status ="Y";
             if( $status!='Y' ){
                 //用户已经解约代扣协议
                 return ApiStatus::CODE_30001;
@@ -85,17 +87,44 @@ class OrderCreateVerify
     /**
      *  验证渠道
      */
-    private function Channel($appid){
+    private function Channel($appid,$channel_id){
          $info =$this->third->GetChannel($appid);
          if(!is_array($info)){
              return $info;
          }
 
+        $this->app_id = intval($info['appid']['id']);
+        $this->app_name = $info['appid']['name'];
+        $this->app_type = intval($info['appid']['type']);
+        $this->app_status = intval($info['appid']['status'])?1:0;
+        $this->channel_id = intval($info['_channel']['id']);
+        $this->channel_name = $info['_channel']['name'];
+        $this->channel_alone_goods = intval($info['_channel']['alone_goods'])?1:0;
+        $this->channel_status = intval($info['_channel']['status'])?1:0;
 
-
-
-
-
+        if( $this->app_status == 0 ){
+            return ApiStatus::CODE_30002;
+        }
+        if( $this->channel_status == 0 ){
+            return ApiStatus::CODE_30003;
+        }
+        if( $this->channel_alone_goods==1 ){
+            if( $channel_id != $this->channel_id ){
+                return ApiStatus::CODE_30004;
+            }
+        }
+        return [
+            'channel' => [
+                'app_id' => $this->app_id,
+                'app_name' => $this->app_name,
+                'app_type' => $this->app_type,
+                'app_status' => $this->app_status,
+                'channel_id' => $this->channel_id,
+                'channel_name' => $this->channel_name,
+                'channel_status' => $this->channel_status,
+                'channel_alone_goods' => $this->channel_alone_goods,
+            ]
+        ];
     }
 
 

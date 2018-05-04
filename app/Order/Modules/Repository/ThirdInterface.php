@@ -26,7 +26,7 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+       // var_dump($info);
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
@@ -46,7 +46,7 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+       // var_dump($info);die;
         if($info['code']!=0){
             return ApiStatus::CODE_60001;
         }
@@ -71,9 +71,9 @@ class ThirdInterface{
      */
     public function GetChannel($appid){
         $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.spusku.get';
+        $data['method'] ='zuji.goods.channel.appid.get';
         $data['params'] = [
-            'app_id'=>$appid,
+            'appid'=>$appid,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);

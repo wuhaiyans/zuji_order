@@ -45,23 +45,21 @@ class OrderCreater
                 return $user_info;
             }
 
+            //获取商品详情
+            $sku_info =$this->third->GetSku($data['sku_id']);
+            if(!is_array($sku_info)){
+                return $sku_info;
+            }
+            $data['channel_id'] =$sku_info['spu_info']['channel_id'];
             //下单验证
-//            $res =$this->verify->Verify($data,$user_info);
-//            if($res !=ApiStatus::CODE_0){
-//                return $res;
-//            }
+            $res =$this->verify->Verify($data,$user_info);
+            if($res !=ApiStatus::CODE_0){
+                return $res;
+            }
 
 
             //获取风控信息
             $this->third->GetFengkong();
-            //获取商品详情
-//            $sku_info =$this->third->GetSku($data['sku_id']);
-//            if(!is_array($sku_info)){
-//                return $sku_info;
-//            }
-
-
-
 
             $this->orderRepository->create();
             $this->orderUserInfoRepository->create();
