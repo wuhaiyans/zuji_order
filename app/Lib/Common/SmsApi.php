@@ -20,7 +20,7 @@ class SmsApi {
 
 	/**
 	 * 发送短息验证码
-	 * @param type $mobile
+	 * @param string $mobile 手机号
 	 * @return boolean
 	 */
 	public static function sendCode($mobile) {
@@ -137,8 +137,10 @@ class SmsApi {
 	}
 
 	/**
-	 * 发送短息验证码
-	 * @param type $mobile
+	 * 发送模板短息
+	 * @param string $mobile	手机号
+	 * @param string $templateCode	短息模板
+	 * @param array $templateParam	模板参数
 	 * @return boolean
 	 */
 	public static function sendMessage(string $mobile, string $templateCode, array $templateParam=[] ) {
