@@ -84,6 +84,49 @@ class ThirdInterface{
         return $info['data'];
     }
 
+    /**
+ * 增加库存
+ * @param $spu_id
+ * @param $sku_id
+ */
+    public function AddStock($spu_id,$sku_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.number.add';
+        $data['params'] = [
+            'spu_id'=>$spu_id,
+            'sku_id'=>$sku_id
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        var_dump($info);
+        if($info['code']!=0){
+            return ApiStatus::CODE_60001;
+        }
+        return $info['data'];
+    }
+    /**
+     * 减少库存
+     * @param $spu_id
+     * @param $sku_id
+     */
+    public function ReduceStock($spu_id,$sku_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.number.minus';
+        $data['params'] = [
+            'spu_id'=>$spu_id,
+            'sku_id'=>$sku_id
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        var_dump($info);
+        if($info['code']!=0){
+            return ApiStatus::CODE_60001;
+        }
+        return $info['data'];
+    }
+
+
+
 }
 
 

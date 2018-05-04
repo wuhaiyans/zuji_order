@@ -36,6 +36,11 @@ class OrderCreateVerify
 
     }
     /**
+     * 判断库存
+     */
+    private function GoodsNumber()
+
+    /**
      *  验证代扣
      */
     private function UserWithholding($withholding_no,$user_id){

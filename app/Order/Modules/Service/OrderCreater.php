@@ -56,8 +56,6 @@ class OrderCreater
             if($res !=ApiStatus::CODE_0){
                 return $res;
             }
-
-
             //获取风控信息
             $this->third->GetFengkong();
 
