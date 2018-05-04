@@ -9,8 +9,8 @@ use App\Lib\Curl;
  */
 class JobQueueApi {
 	
-//	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
-	private static $_url = 'http://job-api.hsbbj.com/api';
+	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
+//	private static $_url = 'http://job-api.hsbbj.com/api';
 	
 	private static $_auth = '7ZT%SC8HB4*Ad$bWyEaj2mBy%qd2G49A';
 	
@@ -92,7 +92,7 @@ class JobQueueApi {
 			'callback' => $callback,
 			'start' => $start,
 			'cron' => $cron,
-			'retries' => 3, // 重试次数
+			'retries' => 3, // 错误重试次数
 		];
 		// 请求
 		$res = Curl::post(self::$_url, json_encode($_config));
@@ -109,4 +109,24 @@ class JobQueueApi {
 		return true;
 	}
 	
+	public static function disable( string $key):bool{
+		$_config = [
+			'interface' => 'jobDisable',
+			'auth' => self::$_auth,
+			'name' => $key,
+		];
+		// 请求
+		$res = Curl::post(self::$_url, json_encode($_config));
+		if( !$res ){
+			return false;
+		}
+		$res = json_decode($res,true);
+		if( !$res ){
+			return false;
+		}
+		if( $res['status']=='ok'){
+			return true;
+		}
+		return true;
+	}
 }
