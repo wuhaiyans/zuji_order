@@ -33,8 +33,8 @@ class OrderController extends Controller
         }
 
         $data =[
-            'appid'=>$appid,
-            'pay_type'=>$pay_type,
+            'appid'=>1,
+            'pay_type'=>2,
             'sku_id'=>288,
             'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
@@ -68,8 +68,8 @@ class OrderController extends Controller
         }
 
         $data =[
-            'appid'=>$appid,
-            'pay_type'=>$pay_type,
+            'appid'=>1,
+            'pay_type'=>2,
             'address_id'=>$address_id,
             'sku_id'=>288,
             'coupon_no'=>"b997c91a2cec7918",
