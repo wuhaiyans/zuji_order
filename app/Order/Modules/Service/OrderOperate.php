@@ -69,5 +69,18 @@ class OrderOperate
 
     }
 
+    /**
+     * @param $orderType :1,线上; 2,线下  3,小程序
+     *  生成订单号
+     */
+    public static function createOrderNo($orderType=1){
+        $year = array();
+        for($i=65;$i<91;$i++){
+            $year[]= strtoupper(chr($i));
+        }
+        $orderSn = $year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') .$orderType. substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
+        return $orderSn;
+    }
+
 
 }

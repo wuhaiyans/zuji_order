@@ -67,6 +67,10 @@ class OrderController extends Controller
      */
     public function cancelOrder(Request $request)
     {
+
+
+//       $orderNo =  Service\OrderOperate::createOrderNo(1);
+//       dd($orderNo);
         $params = $request->input('params');
 
         if (!isset($params['order_no']) || empty($orderNo)) {
