@@ -44,6 +44,7 @@ function filter_array( $data, array $filters, &$failed_list=[] ){
     }
     return $result;
 }
+
 /**
  * 过滤值
  * @param   mixed   $value  【必须】待过滤的值
@@ -169,6 +170,49 @@ function is_assoc_arr( $arr ){
     }
     return false;
 }
+
+/**
+ * 错误提示
+ * @global string $GLOBALS['__OEEOR__']
+ * @name $__OEEOR__
+ */
+
+$GLOBALS['__OEEOR__'] = '';
+
+/**
+ *  设置错误提示
+ * @param type $error
+ */
+function set_error( $error ){
+    $GLOBALS['__OEEOR__'] = $error;
+}
+/**
+ * 获取错误提示
+ * @return type
+ */
+function get_error( ){
+    return $GLOBALS['__OEEOR__'];
+}
+$GLOBALS['__DEBUGERROR__'] =[];
+/**
+ *  设置错误提示
+ * @param type $error
+ */
+function set_debug_error( $error ){
+    if($error==''){
+        $GLOBALS['__DEBUGERROR__']=[];
+    }else{
+        $GLOBALS['__DEBUGERROR__'][] = $error;
+    }
+}
+/**
+ * 获取错误提示
+ * @return type
+ */
+function get_debug_error( ){
+    return $GLOBALS['__DEBUGERROR__'];
+}
+
 
 
 /**

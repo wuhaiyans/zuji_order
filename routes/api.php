@@ -29,6 +29,8 @@ $api->version('v1', [
         }
         $api->post('order', 'OrderController@store')
             ->name('api.order.store');
+        $api->post('order/confirmation', 'OrderController@confirmation')
+        ->name('api.order.confirmation'); //创建订单接口
         $api->post('order/create', 'OrderController@create')
             ->name('api.order.create'); //创建订单接口
         $api->post('order/orderlist', 'OrderController@orderList')
