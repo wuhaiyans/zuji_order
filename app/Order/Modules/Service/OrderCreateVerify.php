@@ -35,7 +35,7 @@ class OrderCreateVerify
             }
         }
         //判断商品是否允许下单
-        $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info']);
+        $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info'],$data);
         if(!$goods){
             $this->flag =false;
         }
@@ -53,18 +53,16 @@ class OrderCreateVerify
         }
 
         //验证优惠券信息
-//        if($data['coupon_no'] !=""){
-//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
-//            if(!$coupon){
-//                $this->flag =false;
-//            }
-//        }
+        if($data['coupon_no'] !=""){
+            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
+            if(!$coupon){
+                $this->flag =false;
+            }
+        }
 
         //分期单信息
         if($data['pay_type']!=PayInc::WithhodingPay){
-            $instalment =$this->InstalmentVerify([
-                'coupon_type'=>$coupon['coupon']['coupon_type']?$coupon['coupon']['coupon_type']:"",
-            ]);
+            $instalment =$this->InstalmentVerify();
         }
         return $this->flag;
 
@@ -119,7 +117,7 @@ class OrderCreateVerify
     private function CouponVerify($coupon_no,$user_id){
         $arr = $this->GetSchema();
         $coupon = $this->third->GetCoupon($coupon_no,$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
-        var_dump($coupon);die;
+        //var_dump($coupon);die;
         if(is_array($coupon)){
             $this->discount_amount = $coupon['discount_amount'];
             $this->coupon_no = $coupon['coupon_no'];
@@ -141,14 +139,16 @@ class OrderCreateVerify
         $this->set_error($coupon);
         return false;
     }
-    private function InstalmentVerify($data){
-        return [
+    private function InstalmentVerify(){
+        $arr =[
             'instalment' => [
                 'first_amount' => 299,
                 'fenqi_amount' => 200,
-                'coupon_type' => $data['coupon_type']
+                'coupon_type' => 1
             ]
         ];
+        $this->SetSchema($arr);
+        return true;
     }
 
     private function UserVerify($info){
@@ -256,7 +256,7 @@ class OrderCreateVerify
     /**
      *  下单商品信息过滤
      */
-    private function GoodsVerify($sku_info,$spu_info){
+    private function GoodsVerify($sku_info,$spu_info,$data){
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
         $this->zujin = $sku_info['shop_price']*100;
@@ -363,6 +363,9 @@ class OrderCreateVerify
                 'all_amount' => $this->all_amount,
                 'contract_id'=>$this->contract_id,
                 'stock' => $this->stock,
+                'pay_type'=>$data['pay_type'],
+                'discount_amount' => 0,
+                'mianyajin' => 0,
             ]
         ];
         $this->SetSchema($arr);
@@ -490,6 +493,50 @@ class OrderCreateVerify
     }
     public function GetSchema(){
         return $this->schema;
+    }
+    //获取数据之前 计算优惠金额
+    public function CalculatedAmount($data){
+       $data=$this->discrease_yajin($data);
+       var_dump($data);die;
+        return $data;
+    }
+    /**
+     * 免押
+     * @param int $amount
+     */
+    public function discrease_yajin(){
+        $data =$this->schema;
+        if( $data['deposit']['jianmian']<0 ){
+            return $data;
+        }
+        // 优惠金额 大于 总金额 时，总金额设置为0.01
+        if( $data['deposit']['jianmian'] >= $data['sku']['yajin'] ){
+            $data['deposit']['jianmian'] = $data['sku']['yajin'];
+        }
+        $data['sku']['yajin'] -= $data['deposit']['jianmian'];// 更新押金
+        $data['sku']['mianyajin'] += $data['deposit']['jianmian'];// 更新免押金额
+        return $data;
+    }
+    /**
+     * 优惠金额 -启用优惠券后金额
+     * <p>如果优惠金额 大于 订单金额时，优惠金额值取总订单额进行优惠</p>
+     * @param int $amount  金额值，单位：分；必须>=0
+     */
+    public function discount(){
+        // 优惠
+        $data =$this->schema;
+        $amount =$data['coupon']['discount_amount'];
+        if( $amount<0 ){
+            return $data;
+        }
+        $price = $data['sku']['amount']-$data['sku']['yiwaixian'];
+        // 优惠金额最多等于总金额
+        if( $amount >= $price ){
+            $amount = $price;
+        }
+        $data['sku']['amount'] -= $amount;// 更新总金额
+        $data['sku']['discount_amount'] += $amount;// 更新优惠金额
+        return $this;
     }
 
 }
