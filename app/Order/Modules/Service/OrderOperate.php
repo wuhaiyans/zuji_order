@@ -8,38 +8,43 @@ namespace App\Order\Modules\Service;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
+use App\Order\Modules\Service\OrderInstalment;
 use App\Lib\ApiStatus;
 
 
 class OrderOperate
 {
     protected $third;
-    public function __construct(ThirdInterface $third)
+    protected $orderInstal;
+    public function __construct(ThirdInterface $third, OrderInstalment $orderInstal)
     {
 
         $this->third = $third;
+        $this->orderInstal = $orderInstal;
     }
 
     /**
+     * @param string $orderNo 订单编号
+     * @
      * 取消订单
      */
-    public static function cancelOrder($orderId)
+    public static function cancelOrder($orderNo,$userId)
     {
-        if (empty($orderId)) {
+        if (empty($orderNo)) {
             return false;
             }
         //开启事物
         DB::beginTransaction();
         try {
             //关闭订单状态
-            $orderData =  OrderRepository::closeOrder($orderId);
+            $orderData =  OrderRepository::closeOrder($orderNo);
             if (!$orderData) {
                 DB::rollBack();
                return ApiStatus::CODE_31002;
             }
             //释放库存
             //查询商品的信息
-            $orderGoods = OrderRepository::getGoodsListByOrderId($orderId);
+            $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
             if ($orderGoods) {
                 foreach ($orderGoods as $orderGoodsValues){
                     //暂时一对一
@@ -52,15 +57,26 @@ class OrderOperate
                     $prod_id = $orderGoodsValues['prod_id'];
                 }
                 $success = $this->third->AddStock($prod_id, $goodsId);
-                if (!$success) {
-                    DB::rollBack();
-                    return ApiStatus::CODE_31003;
-                }
+
+            }
+
+            if (!$success || empty($orderGoods)) {
+                DB::rollBack();
+                return ApiStatus::CODE_31003;
             }
             //优惠券归还
+           $success =  $this->third->setCoupon（['user_id'=>$userId ,'coupon_id'=>$orderNo]);
+            if (!$success) {
+                DB::rollBack();
+                return ApiStatus::CODE_31003;
+            }
             //分期关闭
-
-            return ApiStatus::CODE_31003;
+           $success =  $this->orderInstal->close($data['order_no'=>$orderNo]);
+             if (!$success) {
+                 DB::rollBack();
+                 return ApiStatus::CODE_31004;
+             }
+            return ApiStatus::CODE_0;
 
         } catch (\Exception $exc) {
             DB::rollBack();
