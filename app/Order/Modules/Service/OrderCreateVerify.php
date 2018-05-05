@@ -12,65 +12,61 @@ use App\Order\Modules\Repository\ThirdInterface;
 class OrderCreateVerify
 {
     protected $third;
+    protected $error;
+    protected $schema=[];
+    protected $flag =true;
 
     public function __construct(ThirdInterface $third)
     {
         $this->third = $third;
     }
-
     public function Verify($data,$user_info,$goods_info){
         //验证用户信息
         $users = $this->UserVerify($user_info);
-        if(!is_array($users)){
-            return $users;
+        if(!$users){
+            $this->flag =false;
         }
+
         //判断是否需要签约代扣协议
         if($data['pay_type'] == PayInc::WithhodingPay){
             $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
-            if(!is_array($Withhold)){
-                return $Withhold;
+            if(!$Withhold){
+                $this->flag =false;
             }
         }
         //判断商品是否允许下单
         $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info']);
-        if(!is_array($goods)){
-           return $goods;
+        if(!$goods){
+            $this->flag =false;
         }
 
         //押金验证计算
-        $deposit =$this->DepositVerify($data,$users,$goods);
-        if(!is_array($deposit)){
-            return $deposit;
+        $deposit =$this->DepositVerify($data,$user_info,$goods_info);
+        if(!$deposit){
+            $this->flag =false;
         }
 
         //判断该渠道是否有效等
         $channel = $this->Channel($data['appid'],$data['channel_id']);
-        if(!is_array($channel)){
-            return $channel;
+        if(!$channel){
+            $this->flag =false;
         }
 
         //验证优惠券信息
-        $coupon['coupon'] =[];
-
 //        if($data['coupon_no'] !=""){
-//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id'],$goods);
-//            if(!is_array($coupon)){
-//                return $coupon;
+//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
+//            if(!$coupon){
+//                $this->flag =false;
 //            }
-//
 //        }
 
         //分期单信息
-        $instalment['instalment']=[];
         if($data['pay_type']!=PayInc::WithhodingPay){
             $instalment =$this->InstalmentVerify([
                 'coupon_type'=>$coupon['coupon']['coupon_type']?$coupon['coupon']['coupon_type']:"",
             ]);
         }
-
-        $arr =array_merge($channel,$goods,$users,$deposit,$coupon,$instalment);
-        var_dump($arr);
-        return $channel;
+        return $this->flag;
 
     }
     /**
@@ -79,12 +75,14 @@ class OrderCreateVerify
      */
     public function AddressVerify($user_info){
         // 用户ID
-        $this->user_id = $this->get_order_creater()->get_user_componnet()->get_user_id();
         if( $user_info['id']!= $user_info['address']['mid'] ){
-           return ApiStatus::CODE_41005;
+            $this->set_error(ApiStatus::CODE_41005);
+            $this->flag =false;
+
         }
         if( $user_info['address']['status'] != 1 ){
-            return ApiStatus::CODE_41005;
+            $this->set_error(ApiStatus::CODE_41005);
+            $this->flag =false;
         }
         // 赋值
         $this->address_id = intval($user_info['address']['id']);
@@ -99,7 +97,7 @@ class OrderCreateVerify
         $this->city_name = "";
         $this->province_id = 0;
         $this->province_name = "";
-        return [
+        $arr =[
             'address' => [
                 'user_id' => $this->user_id,
                 'name' => $this->name,
@@ -113,25 +111,35 @@ class OrderCreateVerify
                 'country_name' => $this->country_name,
             ]
         ];
+        $this->SetSchema($arr);
+        return $this->flag;
 
     }
 
-    private function CouponVerify($coupon_no,$user_id,$goods){
-        $coupon = $this->third->GetCoupon($coupon_no,$user_id,$goods['sku']['all_amount'],$goods['sku']['spu_id'],$goods['sku']['sku_id']);
+    private function CouponVerify($coupon_no,$user_id){
+        $arr = $this->GetSchema();
+        $coupon = $this->third->GetCoupon($coupon_no,$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
+        var_dump($coupon);die;
+        if(is_array($coupon)){
+            $this->discount_amount = $coupon['discount_amount'];
+            $this->coupon_no = $coupon['coupon_no'];
+            $this->coupon_id = $coupon['coupon_id'];
+            $this->coupon_type = $coupon['coupon_type'];
+            $this->coupon_name = $coupon['coupon_name'];
 
-        $this->discount_amount = $coupon['discount_amount'];
-        $this->coupon_no = $coupon['coupon_no'];
-        $this->coupon_id = $coupon['coupon_id'];
-        $this->coupon_type = $coupon['coupon_type'];
-        $this->coupon_name = $coupon['coupon_name'];
-        return [
-            'coupon' => [
-                'coupon_no' => $this->coupon_no,
-                'coupon_name' => $this->coupon_name,
-                'coupon_type' => $this->coupon_type,
-                'discount_amount' => $this->discount_amount,
-            ]
-        ];
+            $arr =[
+                'coupon' => [
+                    'coupon_no' => $this->coupon_no,
+                    'coupon_name' => $this->coupon_name,
+                    'coupon_type' => $this->coupon_type,
+                    'discount_amount' => $this->discount_amount,
+                ]
+            ];
+            $this->SetSchema($arr);
+            return true;
+        }
+        $this->set_error($coupon);
+        return false;
     }
     private function InstalmentVerify($data){
         return [
@@ -162,17 +170,21 @@ class OrderCreateVerify
         $this->age = intval(($now-$age)/10000);
         $this->risk = $info['risk']?1:0;
         if( $this->islock ){
-            return ApiStatus::CODE_41000;
+            $this->set_error(ApiStatus::CODE_41000);
+            $this->flag =false;
         }
         if( $this->block ){
-            return ApiStatus::CODE_41001;
+            $this->set_error(ApiStatus::CODE_41001);
+            $this->flag =false;
         }
         // 信用认证结果有效期
         if( (time()-$this->credit_time) > 60*60 ){
-           // return ApiStatus::CODE_41003;
+            //$this->set_error(ApiStatus::CODE_41003);
+            //$this->flag =false;
         }
         if( $this->certified == 0 ){
-            return ApiStatus::CODE_41002;
+            $this->set_error(ApiStatus::CODE_41002);
+            $this->flag =false;
         }
         /**
          * 增加信用分判断 是否允许下单
@@ -180,10 +192,10 @@ class OrderCreateVerify
 
          //判断是否有其他活跃 未完成订单
         $b =OrderRepository::unCompledOrder($this->user_id);
-        if($b){
-            return ApiStatus::CODE_41004;
+        if($b) {
+            $this->set_error(ApiStatus::CODE_41004);
+            $this->flag =false;
         }
-
         $user =[
             'user' => [
                 'user_id' => $this->user_id,
@@ -191,7 +203,7 @@ class OrderCreateVerify
                 'withholding_no'=> $this->withholding_no,
             ]
         ];
-        return array_merge($user,[
+        $arr =array_merge($user,[
             'credit' => [
                 // 已认证，通过人脸识别，通过风控，认证未过期
                 'certified' => $this->certified,
@@ -205,6 +217,9 @@ class OrderCreateVerify
                 'credit_time' => $this->credit_time,
             ]
         ]);
+        //var_dump($arr);die;
+        $this->SetSchema($arr);
+        return $this->flag;
     }
 
     /**
@@ -213,21 +228,28 @@ class OrderCreateVerify
      * @param $goods
      */
 
-    private function DepositVerify($data,$users,$goods){
+    private function DepositVerify($data){
+        $arr =$this->GetSchema();
         $deposit =$this->third->GetDeposit([
-                    'spu_id'=>$goods['sku']['spu_id'],
+                    'spu_id'=>$arr['sku']['spu_id'],
                     'pay_type'=>$data['pay_type'],
-                    'credit'=>$users['credit']['credit']?$users['credit']['credit']:0,
-                    'age'=>$users['credit']['age']?$users['credit']['age']:0,
-                    'yajin'=>$goods['sku']['yajin'],
+                    'credit'=>$arr['credit']['credit']?$arr['credit']['credit']:0,
+                    'age'=>$arr['credit']['age']?$arr['credit']['age']:0,
+                    'yajin'=>$arr['sku']['yajin'],
 
         ]);
-        return [
-            'deposit' => [
-                'jianmian' => $deposit['jianmian'],
-                'yajin' => $deposit['yajin'],
-            ]];
-    }
+        if(is_array($deposit)){
+            $arr =[
+                'deposit' => [
+                    'jianmian' => $deposit['jianmian'],
+                    'yajin' => $deposit['yajin'],
+                ]];
+            $this->SetSchema($arr);
+            return true;
+        }
+        $this->set_error(ApiStatus::CODE_40002);
+        return false;
+}
 
 
 
@@ -268,48 +290,57 @@ class OrderCreateVerify
         // 计算金额
         $this->amount = $this->all_amount = (($this->zujin * $this->zuqi) + $this->yiwaixian );
         if( $this->amount<0 ){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         // 库存量
         if( $this->stock<1 ){
-            return ApiStatus::CODE_40001;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         // 商品上下架状态
         if( $this->status!=1 ){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         // 成色 100,99,90,80,70,60
         if( $this->chengse<1 || $this->chengse>100 ){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         if( $this->zuqi_type == 1 ){ // 天
             // 租期[1,12]之间的正整数
             if( $this->zuqi<1 || $this->zuqi>31 ){
-                return ApiStatus::CODE_40000;
+                $this->set_error(ApiStatus::CODE_40000);
+                $this->flag =false;
             }
         }else{
             // 租期[1,12]之间的正整数
             if( $this->zuqi<1 || $this->zuqi>12 ){
-                return ApiStatus::CODE_40000;
+                $this->set_error(ApiStatus::CODE_40000);
+                $this->flag =false;
             }
         }
         // sku 必须有 月租金, 且不可低于系统设置的最低月租金
         $zujin_min_price = OldInc::ZUJIN_MIN_PRICE;// 最低月租金
         if( $this->zujin < ($zujin_min_price*100) ){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         // 押金必须
         if( $this->yajin < 1 && $this->payment_type_id != PayInc::MiniAlipay){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
         // 规格
         $must_spec_id_list = OldInc::getMustSpecIdList();
         $spec_ids = array_column($this->specs, 'id');
         $spec_id_diff = array_diff($must_spec_id_list, $spec_ids);
         if( count($spec_id_diff)>0 ){
-            return ApiStatus::CODE_40000;
+            $this->set_error(ApiStatus::CODE_40000);
+            $this->flag =false;
         }
-        return [
+        $arr =[
             'sku' => [
                 'sku_id' => $this->sku_id,
                 'spu_id' => $this->spu_id,
@@ -334,6 +365,8 @@ class OrderCreateVerify
                 'stock' => $this->stock,
             ]
         ];
+        $this->SetSchema($arr);
+        return $this->flag;
     }
 
     /**
@@ -345,7 +378,8 @@ class OrderCreateVerify
             $status ="Y";
             if( $status!='Y' ){
                 //用户已经解约代扣协议
-                return ApiStatus::CODE_30001;
+                $this->set_error(ApiStatus::CODE_30001);
+                $this->flag =false;
             }
 //            // 更新用户签约协议状态
 //            $withholding_table = \hd_load::getInstance()->table('payment/withholding_alipay');
@@ -380,54 +414,82 @@ class OrderCreateVerify
 //            }
         }else{
             //未签约代扣协议
-            return ApiStatus::CODE_30000;
+            $this->set_error(ApiStatus::CODE_30000);
+            $this->flag =false;
         }
-       return [];
+        return $this->flag;
 
 }
     /**
      *  验证渠道
      */
     private function Channel($appid,$channel_id){
-         $info =$this->third->GetChannel($appid);
-         if(!is_array($info)){
-             return $info;
-         }
-
-        $this->app_id = intval($info['appid']['id']);
-        $this->app_name = $info['appid']['name'];
-        $this->app_type = intval($info['appid']['type']);
-        $this->app_status = intval($info['appid']['status'])?1:0;
-        $this->channel_id = intval($info['_channel']['id']);
-        $this->channel_name = $info['_channel']['name'];
-        $this->channel_alone_goods = intval($info['_channel']['alone_goods'])?1:0;
-        $this->channel_status = intval($info['_channel']['status'])?1:0;
-
-        if( $this->app_status == 0 ){
-            return ApiStatus::CODE_30002;
-        }
-        if( $this->channel_status == 0 ){
-            return ApiStatus::CODE_30003;
-        }
-        if( $this->channel_alone_goods==1 ){
-            if( $channel_id != $this->channel_id ){
-                return ApiStatus::CODE_30004;
+            $info = $this->third->GetChannel($appid);
+            if (!is_array($info)) {
+                $this->set_error($info);
+                return false;
             }
+            $this->app_id = intval($info['appid']['id']);
+            $this->app_name = $info['appid']['name'];
+            $this->app_type = intval($info['appid']['type']);
+            $this->app_status = intval($info['appid']['status']) ? 1 : 0;
+            $this->channel_id = intval($info['_channel']['id']);
+            $this->channel_name = $info['_channel']['name'];
+            $this->channel_alone_goods = intval($info['_channel']['alone_goods']) ? 1 : 0;
+            $this->channel_status = intval($info['_channel']['status']) ? 1 : 0;
+
+            if ($this->app_status == 0) {
+                $this->set_error(ApiStatus::CODE_30002);
+                $this->flag =false;
+            }
+            if ($this->channel_status == 0) {
+                $this->set_error(ApiStatus::CODE_30003);
+                $this->flag =false;
+            }
+            if ($this->channel_alone_goods == 1) {
+                if ($channel_id != $this->channel_id) {
+                    $this->set_error(ApiStatus::CODE_30004);
+                    $this->flag =false;
+                }
+            }
+            $arr =[
+                'channel' => [
+                    'app_id' => $this->app_id,
+                    'app_name' => $this->app_name,
+                    'app_type' => $this->app_type,
+                    'app_status' => $this->app_status,
+                    'channel_id' => $this->channel_id,
+                    'channel_name' => $this->channel_name,
+                    'channel_status' => $this->channel_status,
+                    'channel_alone_goods' => $this->channel_alone_goods,
+                ]
+            ];
+        $this->SetSchema($arr);
+        return $this->flag;
         }
-        return [
-            'channel' => [
-                'app_id' => $this->app_id,
-                'app_name' => $this->app_name,
-                'app_type' => $this->app_type,
-                'app_status' => $this->app_status,
-                'channel_id' => $this->channel_id,
-                'channel_name' => $this->channel_name,
-                'channel_status' => $this->channel_status,
-                'channel_alone_goods' => $this->channel_alone_goods,
-            ]
-        ];
+    /**
+     * 设置 错误提示
+     * @param string $error  错误提示信息
+     */
+    public function set_error( string $error ) {
+        $this->error = $error;
+        return $this;
+    }
+    /**
+     * 获取 错误提示
+     * @return string
+     */
+    public function get_error(){
+        return $this->error;
     }
 
-
+    public function SetSchema($arr){
+        $schema = $this->GetSchema();
+        $this->schema =array_merge($schema,$arr);
+        return $this;
+    }
+    public function GetSchema(){
+        return $this->schema;
+    }
 
 }

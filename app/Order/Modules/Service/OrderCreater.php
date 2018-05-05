@@ -57,11 +57,9 @@ class OrderCreater
 
             //下单验证
             $res = $this->verify->Verify($data, $user_info, $goods_info);
-            if (!is_array($res)) {
-                echo $this->verify->get_error();die;
-                return $res;
-            }
-            die;
+           // var_dump($res);die;
+           // var_dump($this->verify->get_error());die;
+            var_dump($this->verify->GetSchema());die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
