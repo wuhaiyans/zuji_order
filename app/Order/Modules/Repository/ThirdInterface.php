@@ -151,7 +151,7 @@ class ThirdInterface{
         if($info['code']!=0){
             return $info['code'];
         }
-        return $info['data'];
+        return true;
     }
     /**
      * 减少库存
