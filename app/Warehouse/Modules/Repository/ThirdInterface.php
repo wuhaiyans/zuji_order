@@ -1,13 +1,13 @@
 <?php
 /**
  *  下单第三方接口调用类
- * Created by PhpStorm.
- * User: wuhaiyan
- * Date: 2018/5/2
+ *
+ * User: wangjinlin
+ * Date: 2018/5/7
  * Time: 16:32
  */
 
-namespace App\Order\Modules\Repository;
+namespace App\Warehouse\Modules\Repository;
 class ThirdInterface{
 
     public function GetUser(){
