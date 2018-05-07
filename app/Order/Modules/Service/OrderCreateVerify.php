@@ -65,9 +65,9 @@ class OrderCreateVerify
 //        }
 
         //分期单信息
-        if($data['pay_type']!=PayInc::WithhodingPay){
-            $instalment =$this->InstalmentVerify();
-        }
+//        if($data['pay_type']!=PayInc::WithhodingPay){
+//            $instalment =$this->InstalmentVerify();
+//        }
         return $this->flag;
 
     }
@@ -160,7 +160,7 @@ class OrderCreateVerify
                 'country_name' => $this->country_name,
             ]
         ];
-        $this->SetSchema($arr);
+        $this->SetUserSchema($arr);
         return $this->flag;
 
     }
@@ -314,6 +314,13 @@ class OrderCreateVerify
      *  下单商品信息过滤
      */
     private function GoodsVerify($sku_info,$spu_info,$data){
+        $this->sku_num =1;
+        foreach ($data['sku'] as $k=>$v){
+            if(intval($sku_info['sku_id']) ==$v['sku_id']){
+                $this->sku_num =$v['sku_num'];
+                continue;
+            }
+        }
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
         $this->zujin = $sku_info['shop_price']*100;
@@ -336,7 +343,7 @@ class OrderCreateVerify
         $this->specs = $_specs;
         $this->thumb = $spu_info['thumb'];
         $this->status = intval($sku_info['status'])?1:0;
-        $this->sku_name = $spu_info['name'];// sku_name 使用 spu 的 name 值
+        $this->sku_name = $sku_info['sku_name'];// sku_name 使用 spu 的 name 值
         $this->spu_name = $spu_info['name'];
         $this->brand_id = intval($spu_info['brand_id']);
         $this->category_id = intval($spu_info['catid']);
@@ -351,7 +358,7 @@ class OrderCreateVerify
             $this->flag =false;
         }
         // 库存量
-        if( $this->stock<1 ){
+        if( $this->stock<$this->sku_num ){
             $this->set_error(ApiStatus::CODE_40000);
             $this->flag =false;
         }
@@ -409,6 +416,11 @@ class OrderCreateVerify
                 'spu_id' => $this->spu_id,
                 'sku_name' => $this->sku_name,
                 'spu_name' => $this->spu_name,
+                'sku_no'=>$sku_info['sn'],
+                'spu_no'=>$spu_info['sn'],
+                'weight'=>$sku_info['weight'],
+                'edition'=>$sku_info['edition'],
+                'sku_num'=>$this->sku_num,
                 'brand_id' => $this->brand_id,
                 'category_id' => $this->category_id,
                 'specs' => $this->specs,
