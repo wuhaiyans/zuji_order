@@ -41,7 +41,6 @@ class OrderCreater
                 return $user_info;
             }
             //var_dump($user_info);die;
-
             //获取风控信息
             $this->third->GetFengkong();
 
@@ -107,10 +106,11 @@ class OrderCreater
     public function create($data)
     {
         $data['order_no'] = OrderOperate::createOrderNo(1);
+        $order_flag =true;
         DB::beginTransaction();
         try {
             //获取用户信息
-            $user_info = $this->third->GetUser($data['user_id'],$data['address_id']);
+            $user_info = $this->third->GetUser($data['user_id']);
             if (!is_array($user_info)) {
                 return $user_info;
             }
@@ -119,47 +119,62 @@ class OrderCreater
             if(!$address){
                 return ApiStatus::CODE_41005;
             }
-
-            //获取商品详情
-            $goods_info = $this->third->GetSku($data['sku_id']);
-            if (!is_array($goods_info)) {
-                return $goods_info;
-            }
-            //var_dump($goods_info);die;
-            $data['channel_id'] = $goods_info['spu_info']['channel_id'];
             //获取风控信息
             $this->third->GetFengkong();
-            $this->third->GetCredit();
 
-            //下单验证
-            $res = $this->verify->Verify($data, $user_info, $goods_info);
-            $error ="";
-            if(!$res){
-                return $this->verify->get_error();
+            //获取商品详情
+            $goods = $this->third->GetSku($data['sku']);
+            if (!is_array($goods)) {
+                return $goods;
             }
-            $schema_data =$this->verify->filter();
-
-            $b =$this->orderRepository->create($data,$schema_data);
-            if(!$b){
-                DB::rollBack();
-                return ApiStatus::CODE_30005;
+           // var_dump($goods);die;
+            foreach ($goods as $k =>$v){
+                $goods_info =$v;
+                $data['channel_id'] = $goods_info['spu_info']['channel_id'];
+                //下单验证
+                $res = $this->verify->Verify($data, $user_info, $goods_info);
+                if(!$res){
+                    $order_flag =false;
+                    $error =$this->verify->get_error();
+                }
+                $goods_data[] =$this->verify->GetSchema();
             }
-
-            //var_dump($schema_data);
+            $user_data =$this->verify->GetUserSchema();
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
-                if( !$schema_data['withholding']['withholding_no'] ){
+                if( !$user_data['user']['withholding_no'] ){
                     $need_to_sign_withholding = 'Y';
                 }
             }
-            //租期类型格式
             if( $data['appid'] == OldInc::Jdxbxy_App_id ) {
                 $need_to_credit_certificate="N";
             }else{
                 $need_to_credit_certificate="Y";
             }
-echo "订单";
+
+            $result = [
+                'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
+                'certified'			=> $user_data['credit']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($user_data['credit']['certified_platform']),
+                'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N'&&$need_to_credit_certificate=='N'?'Y':'N',  // 是否免押金
+                // 是否需要 签收代扣协议
+                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                // 是否需要 信用认证
+                'need_to_credit_certificate'			=> $need_to_credit_certificate,
+                'user_info' => $user_data,
+                'sku_info'=>$goods_data,
+                // 支付方式
+                'pay_type'	 => ''.$data['pay_type'],
+            ];
+            $b =$this->orderRepository->create($data,$result);
+            if(!$b){
+                DB::rollBack();
+                return ApiStatus::CODE_30005;
+            }
+
+           DB::commit();
+            return $result;
         } catch (\Exception $exc) {
             DB::rollBack();
             echo $exc->getMessage();die;
