@@ -134,4 +134,20 @@ class OrderRepository
 
     }
 
+    /**
+     *  获取订单列表
+     *
+     * @param array $param  获取订单列表参数
+     */
+//    public static function getOrderList($param = array())
+//    {
+//            if (isset($param['userId']) && !empty($param['userId'])) {
+//
+//                Order::
+//
+//            }
+//
+//
+//    }
+
 }
