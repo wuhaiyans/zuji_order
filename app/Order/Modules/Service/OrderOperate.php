@@ -27,7 +27,7 @@ class OrderOperate
      * @
      * 取消订单
      */
-    public static function cancelOrder($orderNo,$userId)
+    public static function cancelOrder($orderNo,$userId='')
     {
         if (empty($orderNo)) {
             return false;
@@ -64,13 +64,13 @@ class OrderOperate
                 return ApiStatus::CODE_31003;
             }
             //优惠券归还
-           $success =  $this->third->setCoupon（['user_id'=>$userId ,'coupon_id'=>$orderNo]);
+           $success =  $this->third->setCoupon(['user_id'=>$userId ,'coupon_id'=>$orderNo]);
             if (!$success) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
             //分期关闭
-           $success =  $this->orderInstal->close($data['order_no'=>$orderNo]);
+           $success =  $this->orderInstal->close(['order_no'=>$orderNo]);
              if (!$success) {
                  DB::rollBack();
                  return ApiStatus::CODE_31004;

@@ -6,6 +6,7 @@ use App\Lib\Certification;
 use App\Lib\OldInc;
 use App\Lib\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -15,12 +16,14 @@ class OrderCreater
     protected $third;
     protected $verify;
     protected $orderRepository;
+    protected $orderUserInfoRepository;
 
-    public function __construct(ThirdInterface $third,OrderCreateVerify $orderCreateVerify,OrderRepository $orderRepository)
+    public function __construct(ThirdInterface $third,OrderCreateVerify $orderCreateVerify,OrderRepository $orderRepository,orderUserInfoRepository $orderUserInfoRepository)
     {
         $this->third = $third;
         $this->verify =$orderCreateVerify;
         $this->orderRepository = $orderRepository;
+        $this->orderUserInfoRepository = $orderUserInfoRepository;
 
     }
     /**
@@ -279,5 +282,33 @@ class OrderCreater
             echo $exc->getMessage();die;
         }
 
+    }
+    /*
+    *
+    * 发货后，更新物流单号方法
+    */
+    public function updateDelivery($params){
+        if(empty($params['order_no'])){
+            return ApiStatus::CODE_30005;//订单编码不能为空
+        }
+        if(empty($params['delivery_sn'])){
+            return ApiStatus::CODE_30006;//物流单号不能为空
+        }
+        if(empty($params['delivery_type'])){
+            return ApiStatus::CODE_30007;//物流渠道不能为空
+        }
+        $res = $this->orderUserInfoRepository->update($params);
+        if(!$res){
+            return false;
+        }
+        return true;
+    }
+
+    /*
+     *
+     * 更新物流单号
+     */
+    public function update($params){
+        return $this->orderUserInfoRepository->update($params);
     }
 }

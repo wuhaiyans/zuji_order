@@ -107,9 +107,10 @@ class OrderController extends Controller
 //       dd($orderNo);
         $params = $request->input('params');
 
-        if (!isset($params['order_no']) || empty($orderNo)) {
+        if (!isset($params['order_no']) || empty($params['order_no'])) {
             return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
         }
+
         $code = Service\OrderOperate::cancelOrder($params['order_no']);
 
         return apiResponse([],ApiStatus::CODE_0,"success");
@@ -153,7 +154,31 @@ class OrderController extends Controller
         return apiResponse(['id'=>$id],ApiStatus::CODE_0,"success");
 
     }
+    /*
+      *
+      *
+      * 发货后，更新物流单号
+      *
+      * */
+    public function updateDelivery(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        if(empty($params['order_no'])){
+            return ApiStatus::CODE_30005;//订单编码不能为空
+        }
+        if(empty($params['delivery_sn'])){
+            return ApiStatus::CODE_30006;//物流单号不能为空
+        }
+        if(empty($params['delivery_type'])){
+            return ApiStatus::CODE_30007;//物流渠道不能为空
+        }
+        $res = $this->OrderCreate->update($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_20001,"更新物流单号失败");
+        }
+        return apiResponse(['id'=>$res],ApiStatus::CODE_0,"success");
 
+    }
 
 
 }
