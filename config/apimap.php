@@ -15,5 +15,7 @@ return [
 
     'api.user.show' => 'UserController@me',
 
-
+    //分期相关
+    'api.Instalment.instalment_list' => 'InstalmentController@instalment_list',
+    'api.Instalment.create' => 'InstalmentController@create',
 ];
