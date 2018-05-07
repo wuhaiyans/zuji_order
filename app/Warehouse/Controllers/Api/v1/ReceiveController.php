@@ -22,5 +22,12 @@ class ReceiveController extends Controller
         echo "收货表列表接口";
     }
 
+    /**
+     * 创建发货单
+     */
+    public function receiveCreate(){
+
+    }
+
 }
 
