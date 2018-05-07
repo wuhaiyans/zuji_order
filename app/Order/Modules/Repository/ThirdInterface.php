@@ -43,11 +43,12 @@ class ThirdInterface{
      * @param $sku_id
      * @return string or array
      */
-    public function GetSku($sku_id){
+    public function GetSku($sku){
+        var_dump($sku);die;
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.spusku.get';
         $data['params'] = [
-            'sku_id'=>$sku_id,
+            'list_sku_id'=>$sku,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);

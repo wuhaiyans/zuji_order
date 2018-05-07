@@ -143,16 +143,7 @@ class OrderCreateVerify
     private function InstalmentVerify(){
         $data =$this->GetSchema();
         $instalment =$this->instalment->get_data_schema($data);
-        var_dump($instalment);die;
-
-        $arr =[
-            'instalment' => [
-                'first_amount' => 299,
-                'fenqi_amount' => 200,
-                'coupon_type' => 1
-            ]
-        ];
-        var_dump($data);die;
+        $arr['instalment'] =$instalment['instalment'];
         $this->SetSchema($arr);
         return true;
     }

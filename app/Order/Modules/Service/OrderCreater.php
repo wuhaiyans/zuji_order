@@ -38,7 +38,7 @@ class OrderCreater
             //var_dump($user_info);die;
 
             //获取商品详情
-            $goods_info = $this->third->GetSku($data['sku_id']);
+            $goods_info = $this->third->GetSku($data['sku']);
             if (!is_array($goods_info)) {
                 return $goods_info;
             }
@@ -152,7 +152,7 @@ class OrderCreater
      */
     public function create($data)
     {
-        $data['order_no'] = OrderOperate::createOrderNo(1);
+       // $data['order_no'] = OrderOperate::createOrderNo(1);
         DB::beginTransaction();
         try {
             //获取用户信息
