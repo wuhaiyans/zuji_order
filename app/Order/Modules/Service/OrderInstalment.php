@@ -8,7 +8,29 @@ class OrderInstalment
 
     /**
      * 创建订单分期
-     * @return boolean
+     * @return array
+     *  $array = [
+        'order'=>[
+        'order_no'=>1,
+        ],
+        'sku'=>[
+        'zuqi'=>1,
+        'zuqi_type'=>1,
+        'all_amount'=>1,
+        'amount'=>1,
+        'yiwaixian'=>1,
+        'zujin'=>1,
+        'yiwaixian'=>1,
+        'payment_type_id'=>1,
+        ],
+        'coupon'=>[
+        'discount_amount'=>1,
+        'coupon_type'=>1,
+        ],
+        'user'=>[
+        'withholding_no'=>1,
+        ],
+        ];
      */
     public function create($params){
         $order      = $params['order'];
@@ -50,7 +72,7 @@ class OrderInstalment
     }
 
     /**
-     * 创建分期数据
+     * 获取分期数据
      * @return array
      *  $array = [
             'order'=>[
