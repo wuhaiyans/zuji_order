@@ -213,6 +213,35 @@ class ThirdInterface{
     }
 
 
+    /**
+     * 优惠券恢复
+     * @param$arr[
+     * $user_id //spu_id
+     * $coupon_id //优惠券id
+     * ]
+     * @return string or array
+     */
+    public function setCoupon($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.coupon.status0.set';
+        $data['params'] = [
+            'user_id'=>$arr['user_id'],
+            'coupon_id'=>$arr['coupon_id'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        //var_dump($data);die;
+        $info =json_decode($info,true);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return ApiStatus::CODE_0;
+    }
+
+
 
 }
 
