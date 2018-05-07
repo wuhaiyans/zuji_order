@@ -26,7 +26,7 @@ return [
 
     //退货接口
     // 申请退货接口
-    'api.Return.returnApply'        => 'ReturnController@returnApply',
+    'api.Return.return_apply'        => 'ReturnController@return_apply',
     // 退货记录列表接口
     'api.Return.returnList'         => 'ReturnController@returnList',
     // 退货物流单号上传接口
