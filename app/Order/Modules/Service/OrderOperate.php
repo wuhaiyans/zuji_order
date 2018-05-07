@@ -55,7 +55,7 @@ class OrderOperate
                     $goodsId = $orderGoodsValues['good_id'];
                     $prod_id = $orderGoodsValues['prod_id'];
                 }
-                $success = $this->third->AddStock($prod_id, $goodsId);
+                $success =$this->third->AddStock($prod_id, $goodsId);
 
             }
 

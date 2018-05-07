@@ -44,7 +44,6 @@ class ThirdInterface{
      * @return string or array
      */
     public function GetSku($sku){
-        var_dump($sku);die;
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.spusku.get';
         $data['params'] = [
