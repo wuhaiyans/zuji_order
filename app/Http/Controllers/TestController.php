@@ -66,8 +66,21 @@ class TestController extends Controller
 		
 	}
 	
-	public function index(){
+	public function test_alipay_url(){
 		
+		
+		$params = [
+			'app_id' => '1',	// 业务应用ID
+			'out_no' => time(),	// 业务系统支付编号
+			'amount' => '1',	// 金额，单位：分
+			'name' => '测试商品支付',// 支付名称
+			'back_url' => 'https://alipay/Test/notify',
+			'front_url' => 'https://alipay/Test/front',
+			'fenqi' => 0,	// 分期数
+			'user_id' => 5,// 用户ID
+		];
+		$data = \App\Lib\Payment\Alipay::getUrl($params);
+		var_dump( $data );exit;
 	}
 	
 }

@@ -121,12 +121,53 @@ class ApiStatus {
         //用户错误信息
         self::CODE_41000 => '账号锁定',
         self::CODE_41001 => '退款次数过多，暂时无法下单',
+
         self::CODE_41002 => '账户尚未信用认证',
         self::CODE_41003 => '信用认证过期',
         self::CODE_41004 => '有未完成订单',
         self::CODE_41005 => '用户地址错误',
         self::CODE_50010 => '优惠券不可用',
-
-
     ];
+	
+
+    private $code = '';
+    private $msg = '';
+    
+    public function __construct($code=self::CODE_0, $msg='') {
+        $this->code = $code;
+        $this->msg = $msg;
+    }
+    
+    public function isSuccessed(){
+        return $this->code === self::CODE_0;
+    }
+
+    public function getCode() {
+        return $this->code;
+    }
+
+    public function getMsg() {
+        return $this->msg;
+    }
+
+    /**
+     * 设置成功
+     * @return \app\common\Status
+     */
+    public function success() {
+        $this->setCode(self::CODE_0);
+        return $this;
+    }
+
+    public function setCode($code) {
+        $this->code = $code;
+        return $this;
+    }
+
+    public function setMsg($msg) {
+        $this->msg = $msg;
+        return $this;
+    }
+
+
 }
