@@ -15,6 +15,38 @@ class OrderController extends Controller
     {
         $this->OrderCreate = $OrderCreate;
     }
+
+    public function confirmation(Request $request){
+        $orders =$request->all();
+        //获取appid
+        $appid =$orders['appid'];
+        $pay_type =$orders['params']['pay_type'];//支付方式ID
+        $sku_id =$orders['params']['sku_info']['sku_id'];
+        $coupon_no = $orders['params']['coupon_no'];
+
+        //判断参数是否设置
+        if(empty($pay_type)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($sku_id)){
+            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+        }
+
+        $data =[
+            'appid'=>1,
+            'pay_type'=>2,
+            'sku_id'=>288,
+            'coupon_no'=>"b997c91a2cec7918",
+            'user_id'=>18,  //增加用户ID
+        ];
+        $res = $this->OrderCreate->confirmation($data);
+        if(!is_array($res)){
+            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        }
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
@@ -36,11 +68,11 @@ class OrderController extends Controller
         }
 
         $data =[
-            'appid'=>$appid,
-            'pay_type'=>$pay_type,
+            'appid'=>1,
+            'pay_type'=>2,
             'address_id'=>$address_id,
             'sku_id'=>288,
-            'coupon_no'=>$coupon_no,
+            'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
@@ -68,13 +100,16 @@ class OrderController extends Controller
     public function cancelOrder(Request $request)
     {
 
-        $orderNo = $request->input('orderNo');
-        if (empty($orderNo)) {
 
-            return apiResponse([],ApiStatus::CODE_30005,"订单号不能为空");
+//       $orderNo =  Service\OrderOperate::createOrderNo(1);
+//       dd($orderNo);
+        $params = $request->input('params');
 
+        if (!isset($params['order_no']) || empty($orderNo)) {
+            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
         }
-        $code = Service\OrderOperate::cacelOrder(12333);
+        $code = Service\OrderOperate::cancelOrder($params['order_no']);
+
         return apiResponse([],ApiStatus::CODE_0,"success");
 
 

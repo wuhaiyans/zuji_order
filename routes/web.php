@@ -15,6 +15,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('test/{action}', function(App\Http\Controllers\TestController $controller, $action){
+    return $controller->$action();
+});
 Route::get('order/{action}', function(App\Order\Controllers\Api\v1\OrderController $index, $action){
     return $index->$action();
 });

@@ -15,20 +15,25 @@ class ThirdInterface{
     /**
      * 获取用户信息
      * @param $user_id
-     * @return string
+     * @return string or array
      */
 
-    public function GetUser($user_id){
+    public function GetUser($user_id,$address_id=0){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
             'user_id'=>18,
+            'address_id'=>8,
         ];
+        //var_dump($data);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-       // var_dump($info);
+        //var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
@@ -36,7 +41,7 @@ class ThirdInterface{
     /**
      * 获取商品信息
      * @param $sku_id
-     * @return string
+     * @return string or array
      */
     public function GetSku($sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -47,8 +52,11 @@ class ThirdInterface{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
        // var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
 
@@ -56,18 +64,53 @@ class ThirdInterface{
     public function GetFengkong(){
         echo "获取风控信息<br>";
     }
+
+    /**
+     * 获取风控系统的分数
+     * @return int
+     */
     public function GetCredit(){
-        var_dump('获取用户信用');
+        echo "获取信用分";
+        return 100;
     }
 
-    public function GetCoupon(){
-        var_dump('获取优惠券');
+    /**
+     * 获取优惠券信息
+     * @param $coupon_no 优惠券码
+     * @param $user_id
+     * @param $payment 商品价格 单位(分)
+     * @param $spu_id
+     * @param $sku_id
+     * @return string
+     */
+    public function GetCoupon($coupon_no,$user_id,$payment,$spu_id,$sku_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.coupon.row.get';
+        $data['params'] = [
+            'coupon_no'=>$coupon_no,
+            'user_id'=>$user_id,
+            'payment'=>$payment,
+            'spu_id'=>$spu_id,
+            'sku_id'=>$sku_id,
+        ];
+        //var_dump($data);die;
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+
     }
 
     /**
      * 获取渠道信息
      * @param $appid
-     * @return string
+     * @return string or array
      */
     public function GetChannel($appid){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -77,17 +120,21 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
     }
 
-    /**
+ /**
  * 增加库存
  * @param $spu_id
  * @param $sku_id
+ * @return string or array
  */
     public function AddStock($spu_id,$sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -98,16 +145,20 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
-        if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
         }
-        return $info['data'];
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return true;
     }
     /**
      * 减少库存
      * @param $spu_id
      * @param $sku_id
+     * @return string or array
      */
     public function ReduceStock($spu_id,$sku_id){
         $data = config('tripartite.Interior_Goods_Request_data');
@@ -118,11 +169,76 @@ class ThirdInterface{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
         if($info['code']!=0){
-            return ApiStatus::CODE_60001;
+            return $info['code'];
         }
         return $info['data'];
+    }
+    /**
+     * 获取支付押金接口
+     * @param$arr[
+     * $spu_id //spu_id
+     * $pay_type //支付类型
+     * $credit //信用分
+     * $age //年龄
+     * $yajin //商品押金
+     * ]
+     * @return string or array
+     */
+    public function GetDeposit($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.rule.get';
+        $data['params'] = [
+            'spu_id'=>$arr['spu_id'],
+            'payment_type_id'=>$arr['pay_type'],
+            'credit'=>$arr['credit'],
+            'age'=>$arr['age'],
+            'yajin'=>$arr['yajin']
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        //var_dump($data);die;
+        $info =json_decode($info,true);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+    }
+
+
+    /**
+     * 优惠券恢复
+     * @param$arr[
+     * $user_id //spu_id
+     * $coupon_id //优惠券id
+     * ]
+     * @return string or array
+     */
+    public function setCoupon($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.coupon.status0.set';
+        $data['params'] = [
+            'user_id'=>$arr['user_id'],
+            'coupon_id'=>$arr['coupon_id'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        //var_dump($data);die;
+        $info =json_decode($info,true);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return ApiStatus::CODE_0;
     }
 
 
