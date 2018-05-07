@@ -44,7 +44,7 @@ class OrderInstalmentRepository
     }
 
     public function instalment_init(){
-        $this->order_no         = $this->componnet['order']['order_no'];
+
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zuqi_type        = $this->componnet['sku']['zuqi_type'];
         $this->withholding_no   = $this->componnet['user']['withholding_no'];
@@ -101,6 +101,7 @@ class OrderInstalmentRepository
      * 创建分期
      */
     public function create(){
+        $this->order_no         = $this->componnet['order']['order_no'];
         //支持分期支付方式
         $pay_type = [
             PayInc::WithhodingPay
