@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ReceiveController extends Controller
+class DeliveryController extends Controller
 {
     protected $DeliveryCreate;
 
@@ -17,15 +17,15 @@ class ReceiveController extends Controller
     }
 
 
-    public function receiveList(){
+    public function deliveryList(){
 //        DB::connection('foo');
         echo "收货表列表接口";
     }
 
     /**
-     * 创建收货单
+     * 创建发货单
      */
-    public function receiveCreate(){
+    public function deliveryCreate(){
 
     }
 

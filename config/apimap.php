@@ -34,5 +34,7 @@ return [
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
 
+    // test
+    'api.Test.test'       => 'TestController@test',
 
 ];

@@ -177,7 +177,7 @@ class OrderInstalmentRepository
             'instalment' => [
                 'first_amount' => floor($this->first_amount),
                 'fenqi_amount' => floor($this->fenqi_amount),
-                'coupon_type'  => $this->componnet['coupon']['coupon_type']
+                'coupon_type'  => !empty($this->componnet['coupon']['coupon_type']) ? $this->componnet['coupon']['coupon_type'] : "",
             ]
         ]);
     }
