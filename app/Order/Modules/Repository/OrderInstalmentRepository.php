@@ -56,7 +56,7 @@ class OrderInstalmentRepository
         $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
         $this->fenqi_amount     = $this->componnet['sku']['zujin'];
         $this->first_amount     = $this->zujin + $this->yiwaixian;
-        $this->payment_type_id  = $this->componnet['sku']['payment_type_id'];
+        $this->payment_type_id  = $this->componnet['sku']['pay_type'];
 
         // 如果租期类型是：天，不论几天，统一按一个分期（只生成一个分期）
         // 将 $this->zuqi 设置为 1，后续程序处理不变
@@ -175,8 +175,8 @@ class OrderInstalmentRepository
 
         return array_merge($this->componnet,[
             'instalment' => [
-                'first_amount' => $this->first_amount,
-                'fenqi_amount' => $this->fenqi_amount,
+                'first_amount' => floor($this->first_amount),
+                'fenqi_amount' => floor($this->fenqi_amount),
                 'coupon_type'  => $this->componnet['coupon']['coupon_type']
             ]
         ]);

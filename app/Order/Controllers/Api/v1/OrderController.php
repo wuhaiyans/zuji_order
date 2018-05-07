@@ -21,7 +21,7 @@ class OrderController extends Controller
         //获取appid
         $appid =$orders['appid'];
         $pay_type =$orders['params']['pay_type'];//支付方式ID
-        $sku_id =$orders['params']['sku_id'];
+        $sku_id =$orders['params']['sku_info']['sku_id'];
         $coupon_no = $orders['params']['coupon_no'];
 
         //判断参数是否设置
