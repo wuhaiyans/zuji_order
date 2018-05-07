@@ -98,36 +98,36 @@ class OrderInstalment
         ];
      */
     public function get_data_schema($params){
-        $order      = $params['order'];
         $sku        = $params['sku'];
         $coupon    = $params['coupon'];
         $user     = $params['coupon'];
 
-        $order = filter_array($order, [
-            'order_no' => 'required',    //【必须】int；订单号
-        ]);
-        if(!$order['order_no']){
-            return false;
-        }
-        $sku = filter_array($sku, [
-            'order_no' => 'required',    //【必须】int；订单号
-        ]);
 
+        $sku = filter_array($sku, [
+            'zuqi'=>'required',
+            'zuqi_type'=>'required',
+            'all_amount'=>'required',
+            'amount'=>'required',
+            'yiwaixian'=>'required',
+            'zujin'=>'required',
+            'yiwaixian'=>'required',
+            'payment_type_id'=>'required',
+        ]);
         if(count($sku) < 8){
             return false;
         }
 
         $coupon = filter_array($coupon, [
-            'order_no' => 'required',    //【必须】int；订单号
+            'discount_amount'=>'required',
+            'coupon_type'=>'required',
         ]);
         if(count($coupon) < 2){
             return false;
         }
 
         $user = filter_array($user, [
-            'order_no' => 'required',    //【必须】int；订单号
+            'withholding_no' => 'required',    //【必须】int；订单号
         ]);
-
         if(count($user) < 1){
             return false;
         }
