@@ -44,6 +44,7 @@ function filter_array( $data, array $filters, &$failed_list=[] ){
     }
     return $result;
 }
+
 /**
  * 过滤值
  * @param   mixed   $value  【必须】待过滤的值
@@ -170,7 +171,14 @@ function is_assoc_arr( $arr ){
     return false;
 }
 
-
+/**
+ * @param int $price    价格，单位：分
+ * @return string   格式化价格，单位：元
+ */
+function priceFormat($price){
+    $price = max(0,$price);
+    return sprintf('%0.2f',$price);
+}
 /**
  * 打印函数 print_r
  * @param $data 打印数组

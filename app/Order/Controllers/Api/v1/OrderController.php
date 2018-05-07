@@ -15,6 +15,40 @@ class OrderController extends Controller
     {
         $this->OrderCreate = $OrderCreate;
     }
+
+    public function confirmation(Request $request){
+        $orders =$request->all();
+        //获取appid
+        $appid =$orders['appid'];
+        $pay_type =$orders['params']['pay_type'];//支付方式ID
+        $sku =$orders['params']['sku_info'];
+        $coupon_no = $orders['params']['coupon_no'];
+        var_dump($sku);die;
+
+        //判断参数是否设置
+        if(empty($pay_type)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(count($sku)<1){
+            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+        }
+
+        $data =[
+            'appid'=>1,
+            'pay_type'=>2,
+            'sku'=>$sku,
+            'coupon_no'=>"b997c91a2cec7918",
+            'user_id'=>18,  //增加用户ID
+        ];
+        $res = $this->OrderCreate->confirmation($data);
+        var_dump($res);die;
+        if(!is_array($res)){
+            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        }
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
@@ -36,11 +70,11 @@ class OrderController extends Controller
         }
 
         $data =[
-            'appid'=>$appid,
-            'pay_type'=>$pay_type,
+            'appid'=>1,
+            'pay_type'=>2,
             'address_id'=>$address_id,
             'sku_id'=>288,
-            'coupon_no'=>$coupon_no,
+            'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
@@ -68,13 +102,17 @@ class OrderController extends Controller
     public function cancelOrder(Request $request)
     {
 
-        $orderNo = $request->input('orderNo');
-        if (empty($orderNo)) {
 
-            return apiResponse([],ApiStatus::CODE_30005,"订单号不能为空");
+//       $orderNo =  Service\OrderOperate::createOrderNo(1);
+//       dd($orderNo);
+        $params = $request->input('params');
 
+        if (!isset($params['order_no']) || empty($params['order_no'])) {
+            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
         }
-        $code = Service\OrderOperate::cacelOrder(12333);
+
+        $code = Service\OrderOperate::cancelOrder($params['order_no']);
+
         return apiResponse([],ApiStatus::CODE_0,"success");
 
 
@@ -116,7 +154,31 @@ class OrderController extends Controller
         return apiResponse(['id'=>$id],ApiStatus::CODE_0,"success");
 
     }
+    /*
+      *
+      *
+      * 发货后，更新物流单号
+      *
+      * */
+    public function updateDelivery(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        if(empty($params['order_no'])){
+            return ApiStatus::CODE_30005;//订单编码不能为空
+        }
+        if(empty($params['delivery_sn'])){
+            return ApiStatus::CODE_30006;//物流单号不能为空
+        }
+        if(empty($params['delivery_type'])){
+            return ApiStatus::CODE_30007;//物流渠道不能为空
+        }
+        $res = $this->OrderCreate->update($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_20001,"更新物流单号失败");
+        }
+        return apiResponse(['id'=>$res],ApiStatus::CODE_0,"success");
 
+    }
 
 
 }
