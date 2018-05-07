@@ -50,6 +50,8 @@ class OrderRepository
 
         // 下单减少库存
 
+
+
         // 存储蚁盾信息
 //        $yidun_data =[
 //            'verify_id' => $yidun_schema['yidun']['verify_id'],

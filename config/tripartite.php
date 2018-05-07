@@ -14,6 +14,12 @@ return [
         'sign'=>'',
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
-    ]
+    ],
+    'Interior_Fengkong_Url' =>env("API_FENGKONG_URL","http://admin-zuji.huishoubao.com/api.php"),
+    'Interior_Fengkong_Request_data'=>[
+        'appid'=>1,
+        'version'=>'1.0',
+    ],
+
 
 ];

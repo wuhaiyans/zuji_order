@@ -44,7 +44,6 @@ class ThirdInterface{
      * @return string or array
      */
     public function GetSku($sku){
-        var_dump($sku);die;
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.spusku.get';
         $data['params'] = [
@@ -70,9 +69,23 @@ class ThirdInterface{
      * 获取风控系统的分数
      * @return int
      */
-    public function GetCredit(){
-        echo "获取信用分";
-        return 100;
+    public function GetCredit($data){
+        $data = config('tripartite.Interior_Fengkong_Request_data');
+        $data['method'] ='system.get.risk.score';
+        $data['params'] = [
+            'member_id'=>$data['user_id'],
+        ];
+        //var_dump($data);die;
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
     }
 
     /**
