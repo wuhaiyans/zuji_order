@@ -36,7 +36,7 @@ class OrderInstalment
 
         $order    = $params['order'];
         $sku      = $params['sku'];
-        $coupon   = $params['coupon'];
+        $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
         $order = filter_array($order, [
@@ -109,7 +109,7 @@ class OrderInstalment
      */
     public function get_data_schema($params){
         $sku      = $params['sku'];
-        $coupon   = $params['coupon'];
+        $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
 
