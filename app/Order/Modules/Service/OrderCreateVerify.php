@@ -89,15 +89,14 @@ class OrderCreateVerify
         $this->address = $user_info['address']['address'];
         $this->status = intval($user_info['address']['status'])?1:0;
         $this->country_id = intval($user_info['address']['district_id']);// 区县ID
-
-        $this->country_name = "";
-        $this->city_id = 0;
-        $this->city_name = "";
-        $this->province_id = 0;
-        $this->province_name = "";
+        $this->country_name =$user_info['address']['country_name'];;
+        $this->city_id = intval($user_info['address']['city_id']);
+        $this->city_name = $user_info['address']['city_name'];;
+        $this->province_id = intval($user_info['address']['province_id']);
+        $this->province_name = $user_info['address']['province_name'];;
         $arr =[
             'address' => [
-                'user_id' => $this->user_id,
+                'user_id' => $user_info['id'],
                 'name' => $this->name,
                 'mobile' => $this->mobile,
                 'address' => $this->address,
@@ -495,9 +494,10 @@ class OrderCreateVerify
         return $this->schema;
     }
     //获取数据之前 计算优惠金额
-    public function CalculatedAmount($data){
-       $data=$this->discrease_yajin($data);
-       var_dump($data);die;
+    public function filter(){
+        $data =$this->schema;
+       $data=$this->discrease_yajin();
+       $data=$this->discount();
         return $data;
     }
     /**
@@ -536,7 +536,7 @@ class OrderCreateVerify
         }
         $data['sku']['amount'] -= $amount;// 更新总金额
         $data['sku']['discount_amount'] += $amount;// 更新优惠金额
-        return $this;
+        return $data;
     }
 
 }
