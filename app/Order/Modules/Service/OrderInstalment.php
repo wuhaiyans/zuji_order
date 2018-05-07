@@ -98,6 +98,7 @@ class OrderInstalment
         ];
      */
     public function get_data_schema($params){
+
         $sku        = $params['sku'];
         $coupon    = $params['coupon'];
         $user     = $params['user'];

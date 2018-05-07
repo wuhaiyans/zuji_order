@@ -23,7 +23,6 @@ class OrderController extends Controller
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $sku =$orders['params']['sku_info'];
         $coupon_no = $orders['params']['coupon_no'];
-        var_dump($sku);die;
 
         //判断参数是否设置
         if(empty($pay_type)){
