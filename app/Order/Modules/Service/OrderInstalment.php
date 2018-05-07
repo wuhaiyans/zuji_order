@@ -139,8 +139,7 @@ class OrderInstalment
         if (empty($id)) {
             return false;
         }
-
-        $result =  OrderInstalmentRepository::getInfoById($id);
+        $result = OrderInstalmentRepository::getInfoById($id);
         return $result;
     }
 
@@ -153,8 +152,7 @@ class OrderInstalment
         if (empty($goods_no)) {
             return false;
         }
-
-        $result =  OrderInstalmentRepository::getBygoodsNo($goods_no);
+        $result =OrderInstalmentRepository::getBygoodsNo($goods_no);
         return $result;
     }
 
