@@ -107,7 +107,7 @@ class OrderInstalment
     ],
     ];
      */
-    public function get_data_schema($params){
+    public static function get_data_schema($params){
         $sku      = $params['sku'];
         $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
@@ -148,7 +148,7 @@ class OrderInstalment
      * 根据goods_no查询分期数据
      * @return array
      */
-    public function queryByInstalmentId($id){
+    public static function queryByInstalmentId($id){
         if (empty($id)) {
             return false;
         }
@@ -162,7 +162,7 @@ class OrderInstalment
      * 根据goods_no查询分期数据
      * @return array
      */
-    public function queryByGoodsNo($goods_no){
+    public static function queryByGoodsNo($goods_no){
         if (empty($goods_no)) {
             return false;
         }
@@ -176,7 +176,7 @@ class OrderInstalment
      * 根据用户id和订单号，关闭用户的分期
      * @return array
      */
-    public function close($data){
+    public static function close($data){
         if (!is_array($data) || $data == [] ) {
             return false;
         }
