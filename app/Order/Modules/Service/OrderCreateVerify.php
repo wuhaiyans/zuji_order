@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\OldInc;
 use App\Lib\PayInc;
+use App\Lib\PublicInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 
@@ -235,6 +236,16 @@ class OrderCreateVerify
         /**
          * 增加信用分判断 是否允许下单
          */
+//        $score = $this->third->GetCredit(['user_id'=>$this->user_id]);
+//        if(!is_array($score)){
+//            $this->set_error($score);
+//            $this->flag =false;
+//        }
+        $score['score']=99;
+        if($score['score'] <PublicInc::OrderScore){
+            $this->set_error(ApiStatus::CODE_30006);
+            $this->flag =false;
+        }
 
          //判断是否有其他活跃 未完成订单
         $b =OrderRepository::unCompledOrder($this->user_id);
@@ -256,7 +267,7 @@ class OrderCreateVerify
                 'certified_platform' => $this->certified_platform,
                 'realname' => $this->realname,
                 'cert_no' => $this->cert_no,
-                'credit' => $this->credit,
+                'credit' => $score['score'],
                 'age' =>$this->age,
                 'face' => $this->face,
                 'risk' => $this->risk,
@@ -564,7 +575,6 @@ class OrderCreateVerify
         if(!empty($data['coupon'])){
             $data=$this->discount();
         }
-
         return $data;
     }
     /**

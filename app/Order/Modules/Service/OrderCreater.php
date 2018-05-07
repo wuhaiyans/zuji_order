@@ -44,7 +44,6 @@ class OrderCreater
 
             //获取风控信息
             $this->third->GetFengkong();
-            $this->third->GetCredit();
 
             //获取商品详情
             $goods = $this->third->GetSku($data['sku']);
