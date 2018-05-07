@@ -12,13 +12,15 @@ use App\Order\Modules\Repository\ThirdInterface;
 class OrderCreateVerify
 {
     protected $third;
+    protected $instalment;
     protected $error;
     protected $schema=[];
     protected $flag =true;
 
-    public function __construct(ThirdInterface $third)
+    public function __construct(ThirdInterface $third,OrderInstalment $instalment)
     {
         $this->third = $third;
+        $this->instalment =$instalment;
     }
     public function Verify($data,$user_info,$goods_info){
         //验证用户信息
@@ -139,6 +141,10 @@ class OrderCreateVerify
         return false;
     }
     private function InstalmentVerify(){
+        $data =$this->GetSchema();
+        $instalment =$this->instalment->get_data_schema($data);
+        var_dump($instalment);die;
+
         $arr =[
             'instalment' => [
                 'first_amount' => 299,
@@ -146,6 +152,7 @@ class OrderCreateVerify
                 'coupon_type' => 1
             ]
         ];
+        var_dump($data);die;
         $this->SetSchema($arr);
         return true;
     }

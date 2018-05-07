@@ -56,7 +56,7 @@ class OrderInstalmentRepository
         $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
         $this->fenqi_amount     = $this->componnet['sku']['zujin'];
         $this->first_amount     = $this->zujin + $this->yiwaixian;
-        $this->payment_type_id  = $this->componnet['sku']['payment_type_id'];
+        $this->payment_type_id  = $this->componnet['sku']['pay_type'];
 
         // 如果租期类型是：天，不论几天，统一按一个分期（只生成一个分期）
         // 将 $this->zuqi 设置为 1，后续程序处理不变

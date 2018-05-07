@@ -100,7 +100,7 @@ class OrderInstalment
     public function get_data_schema($params){
         $sku        = $params['sku'];
         $coupon    = $params['coupon'];
-        $user     = $params['coupon'];
+        $user     = $params['user'];
 
 
         $sku = filter_array($sku, [
@@ -110,10 +110,9 @@ class OrderInstalment
             'amount'=>'required',
             'yiwaixian'=>'required',
             'zujin'=>'required',
-            'yiwaixian'=>'required',
-            'payment_type_id'=>'required',
+            'pay_type'=>'required',
         ]);
-        if(count($sku) < 8){
+        if(count($sku) < 7){
             return false;
         }
 
@@ -121,17 +120,10 @@ class OrderInstalment
             'discount_amount'=>'required',
             'coupon_type'=>'required',
         ]);
-        if(count($coupon) < 2){
-            return false;
-        }
 
         $user = filter_array($user, [
             'withholding_no' => 'required',    //【必须】int；订单号
         ]);
-        if(count($user) < 1){
-            return false;
-        }
-
 
         $res = new OrderInstalmentRepository($params);
         return $res->get_data_schema();
