@@ -175,8 +175,8 @@ class OrderInstalmentRepository
 
         return array_merge($this->componnet,[
             'instalment' => [
-                'first_amount' => $this->first_amount,
-                'fenqi_amount' => $this->fenqi_amount,
+                'first_amount' => round($this->first_amount,2),
+                'fenqi_amount' => round($this->fenqi_amount,2),
                 'coupon_type'  => $this->componnet['coupon']['coupon_type']
             ]
         ]);
