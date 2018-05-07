@@ -16,7 +16,6 @@ class OrderOperate
     protected $third;
     public function __construct(ThirdInterface $third)
     {
-
         $this->third = $third;
     }
 

@@ -25,6 +25,7 @@ class ThirdInterface{
             'user_id'=>18,
             'address_id'=>8,
         ];
+        //var_dump($data);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
         //var_dump($info);die;

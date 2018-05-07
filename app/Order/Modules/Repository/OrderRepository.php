@@ -13,11 +13,55 @@ class OrderRepository
     {
         $this->order = $order;
     }
-    public function create(){
+    public function create($data,$schema){
 
         var_dump('创建订单...');
+        var_dump($schema);
+        var_dump('创建订单结束...');die;
+        $time =time();
+        // 创建订单
+        $order_data = [
+            'order_status' => OrderStatus::OrderWaitPaying,
+            'order_no' => $data['order_no'],  // 编号
+            'appid'=>$data['appid'],
+            'create_time' => $time,
+        ];
+        $order_id=1;
+        // 写入用户信息
+        $user_data = [
+            'order_no'=>$data['order_no'],
+            'user_id' =>$schema['address']['user_id'],
+            'mobile' =>$schema['address']['mobile'],
+            'name'=>$schema['address']['name'],
+            'province_id'=>$schema['address']['province_id'],
+            'city_id'=>$schema['address']['city_id'],
+            'area_id'=>$schema['address']['country_id'],
+            'address_info'=>$schema['address']['address'],
+            'certified'=>$schema['credit']['certified'],
+            'cretified_platform'=>$schema['credit']['cretified_platform'],
+            'credit'=>$schema['credit']['credit'],
+            'realname'=>$schema['credit']['realname'],
+            'cret_no'=>$schema['credit']['cret_no'],
+        ];
+        // 保存 商品信息
+        $goods_data = [
 
-    }
+        ];
+
+        // 下单减少库存
+
+        // 存储蚁盾信息
+//        $yidun_data =[
+//            'verify_id' => $yidun_schema['yidun']['verify_id'],
+//            'verify_uri' => $yidun_schema['yidun']['verify_uri'],
+//            'decision' => $yidun_schema['yidun']['decision'],
+//            'score' => $yidun_schema['yidun']['score'],
+//            'strategies' =>$yidun_schema['yidun']['strategies'],
+//            'level' => $yidun_schema['yidun']['level'],
+//            'yidun_id' => $yidun_schema['yidun']['yidun_id'],
+//        ];
+
+}
 
     /**
      *

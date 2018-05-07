@@ -172,49 +172,13 @@ function is_assoc_arr( $arr ){
 }
 
 /**
- * 错误提示
- * @global string $GLOBALS['__OEEOR__']
- * @name $__OEEOR__
+ * @param int $price    价格，单位：分
+ * @return string   格式化价格，单位：元
  */
-
-$GLOBALS['__OEEOR__'] = '';
-
-/**
- *  设置错误提示
- * @param type $error
- */
-function set_error( $error ){
-    $GLOBALS['__OEEOR__'] = $error;
+function priceFormat($price){
+    $price = max(0,$price);
+    return sprintf('%0.2f',$price);
 }
-/**
- * 获取错误提示
- * @return type
- */
-function get_error( ){
-    return $GLOBALS['__OEEOR__'];
-}
-$GLOBALS['__DEBUGERROR__'] =[];
-/**
- *  设置错误提示
- * @param type $error
- */
-function set_debug_error( $error ){
-    if($error==''){
-        $GLOBALS['__DEBUGERROR__']=[];
-    }else{
-        $GLOBALS['__DEBUGERROR__'][] = $error;
-    }
-}
-/**
- * 获取错误提示
- * @return type
- */
-function get_debug_error( ){
-    return $GLOBALS['__DEBUGERROR__'];
-}
-
-
-
 /**
  * 打印函数 print_r
  * @param $data 打印数组
