@@ -107,9 +107,10 @@ class OrderController extends Controller
 //       dd($orderNo);
         $params = $request->input('params');
 
-        if (!isset($params['order_no']) || empty($orderNo)) {
+        if (!isset($params['order_no']) || empty($params['order_no'])) {
             return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
         }
+
         $code = Service\OrderOperate::cancelOrder($params['order_no']);
 
         return apiResponse([],ApiStatus::CODE_0,"success");
