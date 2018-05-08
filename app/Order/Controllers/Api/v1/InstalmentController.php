@@ -71,20 +71,24 @@ class InstalmentController extends Controller
 
     }
 
-    //创建分期接口
+    //分期列表接口
     public function instalment_list(Request $request){
-        $request = $request->all();
-        //获取goods_no
-        $goods_no = $request['params']['goods_no'];
-        if(empty($goods_no)){
-            return apiResponse([],ApiStatus::CODE_20001,"goods_no不能为空");
+        $request = $request->all()['params'];
+
+        $request = filter_array($request, [
+            'goods_no'=>'required',
+            'order_no'=>'required',
+        ]);
+        if(count($request) < 2){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
 
+
         $code = new OrderInstalment();
-        $list = $code->queryByGoodsNo($goods_no);
+        $list = $code->queryList($request);
 
         if(!is_array($list)){
-            return apiResponse([],$list,ApiStatus::$errCodes[$list]);
+            return apiResponse([], $list, ApiStatus::$errCodes[$list]);
         }
         return apiResponse($list,ApiStatus::CODE_0,"success");
 

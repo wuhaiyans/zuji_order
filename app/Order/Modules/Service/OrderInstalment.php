@@ -2,7 +2,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-
+use App\Lib\ApiStatus;
 class OrderInstalment
 {
 
@@ -159,15 +159,19 @@ class OrderInstalment
 
 
     /**
-     * 根据goods_no查询分期数据
+     * 查询分期数据
      * @return array
      */
-    public static function queryByGoodsNo($goods_no){
-        if (empty($goods_no)) {
-            return false;
+    public static function queryList($params = []){
+        if (!is_array($params)) {
+            return ApiStatus::CODE_20001;
         }
+        $params = filter_array($params, [
+            'goods_no'=>'required',
+            'order_no'=>'required',
+        ]);
 
-        $result =  OrderInstalmentRepository::getBygoodsNo($goods_no);
+        $result =  OrderInstalmentRepository::queryList($params);
         return $result;
     }
 
