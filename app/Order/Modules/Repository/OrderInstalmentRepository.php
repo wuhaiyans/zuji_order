@@ -22,6 +22,8 @@ class OrderInstalmentRepository
     //订单原始金额
     private $all_amount = 0;
     //订单实际金额
+    private $goods_no = 0;
+    //订单实际金额
     private $amount = 0;
     //租金
     private $zujin = 0;
@@ -45,6 +47,7 @@ class OrderInstalmentRepository
 
     public function instalment_init(){
 
+        $this->goods_no         = $this->componnet['sku']['goods_no'];
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zuqi_type        = $this->componnet['sku']['zuqi_type'];
         $this->withholding_no   = $this->componnet['user']['withholding_no'];
@@ -133,11 +136,10 @@ class OrderInstalmentRepository
     /**
      * 根据goods_no查询分期信息
      */
-    public static function getBygoodsNo($goods_no){
-        if (empty($goods_no)) return false;
-        $result =  OrderInstalment::query()->where([
-            ['goods_no', '=', $goods_no],
-        ])->get();
+    public static function queryList($params = []){
+        if (empty($params)) return false;
+
+        $result =  OrderInstalment::query()->where($params)->get();
         if (!$result) return false;
         return $result->toArray();
     }
@@ -192,6 +194,7 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
@@ -232,6 +235,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+
+            $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
