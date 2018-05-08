@@ -20,6 +20,17 @@ class DeliveryGoodsImei extends Model
     const STATUS_YES = 1; //有效
 
 
+    public static function boot() {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->create_time =time();
+        });
+    }
+
+    public function delivery()
+    {
+        return $this->belongsTo(Delivery::class);
+    }
 
     /**
      * @param $data
@@ -34,15 +45,25 @@ class DeliveryGoodsImei extends Model
         return $model;
     }
 
+    /**
+     * 取消配货时，删除
+     */
+    public static function cancelMatch($delivery_no)
+    {
+
+       return self::where(['delivery_no'=>$delivery_no])->delete();
+
+    }
+
 
     /**
      * @param $delivery_id
      * @param $imei
      * 删除
      */
-    public static function del($delivery_id, $imei)
+    public static function del($delivery_no, $imei)
     {
-
+        return self::where(['delivery_no'=>$delivery_no, 'imei'=>$imei])->delete();
     }
 
 
@@ -51,21 +72,25 @@ class DeliveryGoodsImei extends Model
      * @param $imei
      * 添加
      */
-    public static function add($delivery_id, $imei)
+    public static function add($delivery_no, $imeis)
     {
-        $model = self::where(['delivery_id'=>$delivery_id, 'imei'=>$imei]);
         $time = time();
 
-        if (!$model) {
-            $model = new self();
-            $model->delivery_id = $delivery_id;
-            $model->imei = $imei;
-            $model->create_time = $time;
+        if (!is_array($imeis)) {
+            throw new \Exception('参数错误');
         }
-        $model->status_time = $time;
-        $model->status = self::STATUS_YES;
 
-        return $model->save();
+        foreach ($imeis as $imei) {
+            $model = new self();
+            $model->delivery_no = $delivery_no;
+            $model->imei = $imei['imei'];
+            $model->status = self::STATUS_YES;
+            $model->status_time = $time;
+            $model->serial_no = $imei['serial_no'];
+            $model->save();
+        }
+
+        return true;
     }
 
     public static function listByDelivery($delivery_id)

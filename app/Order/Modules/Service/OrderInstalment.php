@@ -42,6 +42,7 @@ class OrderInstalment
         $order = filter_array($order, [
             'order_no' => 'required',
         ]);
+
         if(!$order['order_no']){
             return false;
         }
@@ -58,16 +59,15 @@ class OrderInstalment
             'pay_type'=>'required',
         ]);
         if(count($sku) < 8){
+
             return false;
         }
 
-        $coupon = filter_array($coupon, [
+        filter_array($coupon, [
             'discount_amount' => 'required',
             'coupon_type' => 'required',
         ]);
-        if(count($coupon) < 2){
-            return false;
-        }
+
 
         $user = filter_array($user, [
             'withholding_no' => 'required',
@@ -173,6 +173,8 @@ class OrderInstalment
         ]);
 
         $result =  OrderInstalmentRepository::queryList($params);
+        $result = array_group_by($result,'goods_no');
+
         return $result;
     }
 
@@ -190,5 +192,45 @@ class OrderInstalment
         return $result;
     }
 
+    /**
+     * 是否允许扣款
+     * @param  int  $instalment_id 订单分期付款id
+     * @return bool true false
+     */
+    public function allow_withhold($instalment_id){
+        if(empty($instalment_id)){
+            return false;
+        }
+        $alllow = 0;
+        $instalment_info = OrderInstalmentRepository::getInfoById($instalment_id);
+        p($instalment_info);
+        $status = $instalment_info['status'];
+
+        $year   = date("Y");
+        $month  = intval(date("m"));
+        if($month < 10 ){
+            $month = "0".$month;
+        }
+        $term 	= $year.$month;
+        $day 	= intval(date("d"));
+
+        // 是否有扣款记录
+        $fund_auth_record = $this->fund_auth_record_table->where(['instalment_id'=>$instalment_id,'status'=>1])->find();
+        //查询订单记录
+        $order_info = $this->order_service->get_order_info(['order_id'=>$instalment_info['order_id']]);
+
+        if(!$fund_auth_record && ($status == Instalment::UNPAID || $status == Instalment::FAIL)){
+            // 本月15后以后 可扣当月 之前没有扣款的可扣款
+            if(($term == $instalment_info['term'] && $day >= 15) || $term > $instalment_info['term']){
+                //判断订单状态 必须是租用中 或者完成关闭的状态 才允许扣款
+                if($order_info['status']== \oms\state\State::OrderInService || $order_info['status'] == oms\state\State::OrderClosed){
+                    $alllow = 1;
+                }
+            }
+        }
+
+
+        return $alllow;
+    }
 
 }

@@ -32,8 +32,8 @@ class Delivery
      * @param $deliver_no 发货单号
      * 需要写成curl形式 供发货系统使用
      */
-    public static function delivery($order_no, $deliver_no)
+    public static function delivery($order_no)
     {
-
+        return true;
     }
 }
