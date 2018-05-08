@@ -173,6 +173,8 @@ class OrderInstalment
         ]);
 
         $result =  OrderInstalmentRepository::queryList($params);
+        $result = array_group_by($result,'goods_no');
+
         return $result;
     }
 

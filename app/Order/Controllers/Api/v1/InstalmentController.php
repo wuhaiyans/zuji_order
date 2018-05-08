@@ -80,8 +80,8 @@ class InstalmentController extends Controller
             'goods_no'=>'required',
             'order_no'=>'required',
         ]);
-        if(count($request) < 2){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
+        if(empty($request['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"order_no参数错误");
         }
 
 
