@@ -98,9 +98,21 @@ class InstalmentController extends Controller
     //代扣 扣款接口
     public function createpay(Request $request){
         $request = $request->all()['params'];
+        $request = filter_array($request, [
+            'instalment_id'=>'required',
+            'user_id'=>'required',
+            'remark'=>'required',
+        ]);
+
+        $instalment_id  = $request['instalment_id'];
+        $user_id        = $request['user_id'];
+        $remark         = $request['remark'];
+
+        $instalment_info = OrderInstalment::queryByInstalmentId($instalment_id);
 
 
 
+        p($instalment_info);
 
 
     }
