@@ -8,6 +8,7 @@ use App\Order\Modules\Inc\CouponStatus;
 
 class OrderInstalmentRepository
 {
+    private $OrderInstalment;
 
     private $componnet = null;
 
@@ -41,6 +42,7 @@ class OrderInstalmentRepository
     private $payment_type_id = 0;
 
     public function __construct($componnet) {
+        $this->OrderInstalment = new OrderInstalment();
         $this->componnet = $componnet;
         $this->instalment_init();
     }
@@ -217,7 +219,7 @@ class OrderInstalmentRepository
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
 
-            $ret = OrderInstalment::query()->create($_data);
+            $ret = $this->OrderInstalment->create($_data);
             if(!$ret){
                 return false;
             }
@@ -261,8 +263,8 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-
-            $ret = OrderInstalment::query()->create($_data);
+            p($_data);
+            $ret = $this->OrderInstalment->save($_data);
 
             if(!$ret){
                 return false;
