@@ -2,20 +2,20 @@
 
 /**
  *
- *  订单设备列表
+ *  退换货
  */
 namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderGoods extends Model
+class OrderReturn extends Model
 {
 
-    protected $table = 'order_goods';
+    protected $table = 'order_return';
 
     protected $primaryKey='id';
 
-
+    
 
 
 }

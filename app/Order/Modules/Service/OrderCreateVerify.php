@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\OldInc;
 use App\Lib\PayInc;
+use App\Lib\PublicInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 
@@ -15,6 +16,7 @@ class OrderCreateVerify
     protected $instalment;
     protected $error;
     protected $schema=[];
+    protected $Userschema=[];
     protected $flag =true;
 
     public function __construct(ThirdInterface $third,OrderInstalment $instalment)
@@ -36,6 +38,13 @@ class OrderCreateVerify
                 $this->flag =false;
             }
         }
+        //判断该渠道是否有效等
+        $channel = $this->ChannelVerify($data['appid'],$data['channel_id']);
+        if(!$channel){
+            $this->flag =false;
+        }
+
+
         //判断商品是否允许下单
         $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info'],$data);
         if(!$goods){
@@ -47,13 +56,54 @@ class OrderCreateVerify
         if(!$deposit){
             $this->flag =false;
         }
+        //验证优惠券信息
+//        if($data['coupon_no'] !=""){
+//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
+//            if(!$coupon){
+//                $this->flag =false;
+//            }
+//        }
 
+        //分期单信息
+//        if($data['pay_type']!=PayInc::WithhodingPay){
+//            $instalment =$this->InstalmentVerify();
+//        }
+        return $this->flag;
+
+    }
+
+    public function SkuVerify($data,$user_info,$goods_info){
+        //验证用户信息
+        $users = $this->UserVerify($user_info);
+        if(!$users){
+            $this->flag =false;
+        }
+
+        //判断是否需要签约代扣协议
+        if($data['pay_type'] == PayInc::WithhodingPay){
+            $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
+            if(!$Withhold){
+                $this->flag =false;
+            }
+        }
         //判断该渠道是否有效等
-        $channel = $this->Channel($data['appid'],$data['channel_id']);
+        $channel = $this->ChannelVerify($data['appid'],$data['channel_id']);
         if(!$channel){
             $this->flag =false;
         }
 
+
+        //判断商品是否允许下单
+        $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info'],$data);
+        if(!$goods){
+            $this->flag =false;
+        }
+
+        //押金验证计算
+        $deposit =$this->DepositVerify($data,$user_info,$goods_info);
+        if(!$deposit){
+            $this->flag =false;
+        }
         //验证优惠券信息
         if($data['coupon_no'] !=""){
             $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
@@ -110,7 +160,7 @@ class OrderCreateVerify
                 'country_name' => $this->country_name,
             ]
         ];
-        $this->SetSchema($arr);
+        $this->SetUserSchema($arr);
         return $this->flag;
 
     }
@@ -141,18 +191,9 @@ class OrderCreateVerify
         return false;
     }
     private function InstalmentVerify(){
-        $data =$this->GetSchema();
+        $data =array_merge($this->GetSchema(),$this->GetUserSchema());
         $instalment =$this->instalment->get_data_schema($data);
-        var_dump($instalment);die;
-
-        $arr =[
-            'instalment' => [
-                'first_amount' => 299,
-                'fenqi_amount' => 200,
-                'coupon_type' => 1
-            ]
-        ];
-        var_dump($data);die;
+        $arr['instalment'] =$instalment['instalment'];
         $this->SetSchema($arr);
         return true;
     }
@@ -195,6 +236,16 @@ class OrderCreateVerify
         /**
          * 增加信用分判断 是否允许下单
          */
+//        $score = $this->third->GetCredit(['user_id'=>$this->user_id]);
+//        if(!is_array($score)){
+//            $this->set_error($score);
+//            $this->flag =false;
+//        }
+        $score['score']=99;
+        if($score['score'] <PublicInc::OrderScore){
+            $this->set_error(ApiStatus::CODE_30006);
+            $this->flag =false;
+        }
 
          //判断是否有其他活跃 未完成订单
         $b =OrderRepository::unCompledOrder($this->user_id);
@@ -216,7 +267,7 @@ class OrderCreateVerify
                 'certified_platform' => $this->certified_platform,
                 'realname' => $this->realname,
                 'cert_no' => $this->cert_no,
-                'credit' => $this->credit,
+                'credit' => $score['score'],
                 'age' =>$this->age,
                 'face' => $this->face,
                 'risk' => $this->risk,
@@ -224,7 +275,7 @@ class OrderCreateVerify
             ]
         ]);
         //var_dump($arr);die;
-        $this->SetSchema($arr);
+        $this->SetUserSchema($arr);
         return $this->flag;
     }
 
@@ -235,7 +286,7 @@ class OrderCreateVerify
      */
 
     private function DepositVerify($data){
-        $arr =$this->GetSchema();
+        $arr =array_merge($this->GetSchema(),$this->GetUserSchema());
         $deposit =$this->third->GetDeposit([
                     'spu_id'=>$arr['sku']['spu_id'],
                     'pay_type'=>$data['pay_type'],
@@ -263,6 +314,13 @@ class OrderCreateVerify
      *  下单商品信息过滤
      */
     private function GoodsVerify($sku_info,$spu_info,$data){
+        $this->sku_num =1;
+        foreach ($data['sku'] as $k=>$v){
+            if(intval($sku_info['sku_id']) ==$v['sku_id']){
+                $this->sku_num =$v['sku_num'];
+                continue;
+            }
+        }
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
         $this->zujin = $sku_info['shop_price']*100;
@@ -285,7 +343,7 @@ class OrderCreateVerify
         $this->specs = $_specs;
         $this->thumb = $spu_info['thumb'];
         $this->status = intval($sku_info['status'])?1:0;
-        $this->sku_name = $spu_info['name'];// sku_name 使用 spu 的 name 值
+        $this->sku_name = $sku_info['sku_name'];// sku_name 使用 spu 的 name 值
         $this->spu_name = $spu_info['name'];
         $this->brand_id = intval($spu_info['brand_id']);
         $this->category_id = intval($spu_info['catid']);
@@ -300,7 +358,7 @@ class OrderCreateVerify
             $this->flag =false;
         }
         // 库存量
-        if( $this->stock<1 ){
+        if( $this->stock<$this->sku_num ){
             $this->set_error(ApiStatus::CODE_40000);
             $this->flag =false;
         }
@@ -346,32 +404,44 @@ class OrderCreateVerify
             $this->set_error(ApiStatus::CODE_40000);
             $this->flag =false;
         }
+        if($this->zuqi_type==1){
+            $zuqi_type_name = "day";
+        }
+        elseif($this->zuqi_type==2){
+            $zuqi_type_name = "month";
+        }
         $arr =[
             'sku' => [
                 'sku_id' => $this->sku_id,
                 'spu_id' => $this->spu_id,
                 'sku_name' => $this->sku_name,
                 'spu_name' => $this->spu_name,
+                'sku_no'=>$sku_info['sn'],
+                'spu_no'=>$spu_info['sn'],
+                'weight'=>$sku_info['weight'],
+                'edition'=>$sku_info['edition'],
+                'sku_num'=>$this->sku_num,
                 'brand_id' => $this->brand_id,
                 'category_id' => $this->category_id,
                 'specs' => $this->specs,
                 'thumb' => $this->thumb,
-                'yiwaixian' => $this->yiwaixian,
+                'yiwaixian' => priceFormat($this->yiwaixian/100),
                 'yiwaixian_cost' => $this->yiwaixian_cost,
-                'zujin' => $this->zujin,
-                'yajin' => $this->yajin,
+                'zujin' => priceFormat($this->zujin/100),
+                'yajin' => priceFormat($this->yajin/100),
                 'zuqi' => $this->zuqi,
                 'zuqi_type' => $this->zuqi_type,
-                'buyout_price' => $this->buyout_price,
-                'market_price' => $this->market_price,
+                'zuqi_type_name'=>$zuqi_type_name,
+                'buyout_price' => priceFormat($this->buyout_price/100),
+                'market_price' => priceFormat($this->market_price/100),
                 'chengse' => $this->chengse,
-                'amount' => $this->amount,
-                'all_amount' => $this->all_amount,
+                'amount' => priceFormat($this->amount/100),
+                'all_amount' => priceFormat($this->all_amount/100),
                 'contract_id'=>$this->contract_id,
                 'stock' => $this->stock,
                 'pay_type'=>$data['pay_type'],
-                'discount_amount' => 0,
-                'mianyajin' => 0,
+                'discount_amount' => 0.00,
+                'mianyajin' => 0.00,
             ]
         ];
         $this->SetSchema($arr);
@@ -432,7 +502,7 @@ class OrderCreateVerify
     /**
      *  验证渠道
      */
-    private function Channel($appid,$channel_id){
+    private function ChannelVerify($appid,$channel_id){
             $info = $this->third->GetChannel($appid);
             if (!is_array($info)) {
                 $this->set_error($info);
@@ -500,11 +570,23 @@ class OrderCreateVerify
     public function GetSchema(){
         return $this->schema;
     }
+    public function SetUserSchema($arr){
+        $schema = $this->GetUserSchema();
+        $this->Userschema =array_merge($schema,$arr);
+        return $this;
+    }
+    public function GetUserSchema(){
+        return $this->Userschema;
+    }
     //获取数据之前 计算优惠金额
     public function filter(){
         $data =$this->schema;
-       $data=$this->discrease_yajin();
-       $data=$this->discount();
+        if(!empty($data['deposit'])){
+            $data=$this->discrease_yajin();
+        }
+        if(!empty($data['coupon'])){
+            $data=$this->discount();
+        }
         return $data;
     }
     /**

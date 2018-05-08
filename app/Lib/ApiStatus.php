@@ -56,6 +56,7 @@ class ApiStatus {
     const CODE_30003 = '30003'; //[下单][渠道]渠道已被禁用
     const CODE_30004 = '30004'; //[下单][渠道]商品渠道错误
     const CODE_30005 = '30005'; //下单失败
+    const CODE_30006 = '30006'; //分数过低
 
     const CODE_31001 = '31001'; //[取消订单]订单号不能为空
     const CODE_31002 = '31002'; //[取消订单]修改订单状态失败
@@ -104,6 +105,7 @@ class ApiStatus {
         self::CODE_30003 => '[下单][渠道]渠道已被禁用',
         self::CODE_30004 => '[下单][渠道]商品渠道错误',
         self::CODE_30005 => '下单失败',
+        self::CODE_30006 => '分数过低',
 
 
 
@@ -128,12 +130,53 @@ class ApiStatus {
         //用户错误信息
         self::CODE_41000 => '账号锁定',
         self::CODE_41001 => '退款次数过多，暂时无法下单',
+
         self::CODE_41002 => '账户尚未信用认证',
         self::CODE_41003 => '信用认证过期',
         self::CODE_41004 => '有未完成订单',
         self::CODE_41005 => '用户地址错误',
         self::CODE_50010 => '优惠券不可用',
-
-
     ];
+	
+
+    private $code = '';
+    private $msg = '';
+    
+    public function __construct($code=self::CODE_0, $msg='') {
+        $this->code = $code;
+        $this->msg = $msg;
+    }
+    
+    public function isSuccessed(){
+        return $this->code === self::CODE_0;
+    }
+
+    public function getCode() {
+        return $this->code;
+    }
+
+    public function getMsg() {
+        return $this->msg;
+    }
+
+    /**
+     * 设置成功
+     * @return \app\common\Status
+     */
+    public function success() {
+        $this->setCode(self::CODE_0);
+        return $this;
+    }
+
+    public function setCode($code) {
+        $this->code = $code;
+        return $this;
+    }
+
+    public function setMsg($msg) {
+        $this->msg = $msg;
+        return $this;
+    }
+
+
 }

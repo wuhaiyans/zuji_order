@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Order\Models;
+namespace App\Warehouse\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+class Delivery extends Model
 {
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
     // Rest omitted for brevity
 
-    protected $table = 'order_info';
+    protected $table = 'zuji_delivery';
 
-    protected $primaryKey='id';
+    protected $primaryKey='delivery_no';
     /**
      * 默认使用时间戳戳功能
      *

@@ -1,23 +1,21 @@
 <?php
-namespace App\Order\Modules\Service;
+namespace App\Warehouse\Modules\Service;
 
-use App\Order\Models\Order;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderUserInfo;
-use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\ThirdInterface;
+use App\Warehouse\Models\Delivery;
+use App\Warehouse\Modules\Repository\DeliveryRepository;
+use App\Warehouse\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
 
-class OrderCreater
+class DeliveryCreater
 {
 
     protected $third;
-    protected $orderRepository;
+    protected $deliveryRepository;
 
-    public function __construct(ThirdInterface $third,OrderRepository $orderRepository)
+    public function __construct(ThirdInterface $third,DeliveryRepository $deliveryRepository)
     {
         $this->third = $third;
-        $this->orderRepository = $orderRepository;
+        $this->orderRepository = $deliveryRepository;
     }
 
     /**
@@ -33,8 +31,8 @@ class OrderCreater
             $this->third->GetFengkong();
             $this->third->GetUser();
             $this->third->GetSku();
-            var_dump('创建订单...');
-            var_dump('订单编号：' . $data['order_no']);
+            var_dump('创建...');
+            var_dump('编号：' . $data['no']);
             DB::commit();
             die;
         } catch (\Exception $exc) {

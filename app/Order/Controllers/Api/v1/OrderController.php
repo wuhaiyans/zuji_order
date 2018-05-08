@@ -21,25 +21,26 @@ class OrderController extends Controller
         //获取appid
         $appid =$orders['appid'];
         $pay_type =$orders['params']['pay_type'];//支付方式ID
-        $sku_id =$orders['params']['sku_info']['sku_id'];
+        $sku =$orders['params']['sku_info'];
         $coupon_no = $orders['params']['coupon_no'];
 
         //判断参数是否设置
         if(empty($pay_type)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
-        if(empty($sku_id)){
+        if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
         $data =[
             'appid'=>1,
             'pay_type'=>2,
-            'sku_id'=>288,
+            'sku'=>$sku,
             'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
+        var_dump($res);die;
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -53,7 +54,7 @@ class OrderController extends Controller
         $appid =$orders['appid'];
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $address_id=$orders['params']['address_id'];//收货地址ID
-        $sku_id =$orders['params']['sku_id'];
+        $sku =$orders['params']['sku_info'];
         $coupon_no = $orders['params']['coupon_no'];
 
         //判断参数是否设置
@@ -63,7 +64,7 @@ class OrderController extends Controller
         if(empty($address_id)){
             return apiResponse([],ApiStatus::CODE_20001,"收货地址不能为空");
         }
-        if(empty($sku_id)){
+        if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
@@ -71,7 +72,7 @@ class OrderController extends Controller
             'appid'=>1,
             'pay_type'=>2,
             'address_id'=>$address_id,
-            'sku_id'=>288,
+            'sku'=>$sku,
             'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
@@ -152,7 +153,31 @@ class OrderController extends Controller
         return apiResponse(['id'=>$id],ApiStatus::CODE_0,"success");
 
     }
+    /*
+      *
+      *
+      * 发货后，更新物流单号
+      *
+      * */
+    public function updateDelivery(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        if(empty($params['order_no'])){
+            return ApiStatus::CODE_30005;//订单编码不能为空
+        }
+        if(empty($params['delivery_sn'])){
+            return ApiStatus::CODE_30006;//物流单号不能为空
+        }
+        if(empty($params['delivery_type'])){
+            return ApiStatus::CODE_30007;//物流渠道不能为空
+        }
+        $res = $this->OrderCreate->update($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_20001,"更新物流单号失败");
+        }
+        return apiResponse(['id'=>$res],ApiStatus::CODE_0,"success");
 
+    }
 
 
     public function orderInfo(Request $request)

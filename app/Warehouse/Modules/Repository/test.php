@@ -1,5 +1,5 @@
 <?php
-namespace App\Order\Modules\Reposository;
+namespace App\Warehouse\Modules\Reposository;
 /**
  * Created by PhpStorm.
  * User: FF

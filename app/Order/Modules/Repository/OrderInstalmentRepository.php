@@ -51,8 +51,8 @@ class OrderInstalmentRepository
         $this->all_amount       = $this->componnet['sku']['all_amount'];
         $this->amount           = $this->componnet['sku']['amount'];
         $this->zujin            = $this->componnet['sku']['zujin'];
-        $this->discount_amount  = $this->componnet['coupon']['discount_amount'];
-        $this->coupon_type      = $this->componnet['coupon']['coupon_type'];
+        $this->discount_amount  = !empty($this->componnet['coupon']['discount_amount']) ? $this->componnet['coupon']['discount_amount'] : "";
+        $this->coupon_type      = !empty($this->componnet['coupon']['coupon_type']) ? $this->componnet['coupon']['coupon_type'] : "";
         $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
         $this->fenqi_amount     = $this->componnet['sku']['zujin'];
         $this->first_amount     = $this->zujin + $this->yiwaixian;
@@ -177,7 +177,7 @@ class OrderInstalmentRepository
             'instalment' => [
                 'first_amount' => floor($this->first_amount),
                 'fenqi_amount' => floor($this->fenqi_amount),
-                'coupon_type'  => $this->componnet['coupon']['coupon_type']
+                'coupon_type'  => !empty($this->componnet['coupon']['coupon_type']) ? $this->componnet['coupon']['coupon_type'] : "",
             ]
         ]);
     }
