@@ -205,8 +205,7 @@ class OrderController extends Controller
                 }
 
                 $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
-
-                echo 1/0;
+                
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
 
