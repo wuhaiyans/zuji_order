@@ -133,11 +133,10 @@ class OrderInstalmentRepository
     /**
      * 根据goods_no查询分期信息
      */
-    public static function getBygoodsNo($goods_no){
-        if (empty($goods_no)) return false;
-        $result =  OrderInstalment::query()->where([
-            ['goods_no', '=', $goods_no],
-        ])->get();
+    public static function queryList($params = []){
+        if (empty($params)) return false;
+
+        $result =  OrderInstalment::query()->where($params)->get();
         if (!$result) return false;
         return $result->toArray();
     }

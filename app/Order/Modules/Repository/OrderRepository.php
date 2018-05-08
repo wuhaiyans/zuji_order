@@ -111,7 +111,7 @@ class OrderRepository
             if (empty($orderNo)) return false;
             $order =  Order::query()->where([
                 ['order_no', '=', $orderNo],
-            ])->get();
+            ])->first();
             if (!$order) return false;
             return $order->toArray();
     }
@@ -228,7 +228,6 @@ class OrderRepository
     public static function getOrderInfo($param = array())
     {
         if (empty($param)) {
-
             return false;
         }
         if (isset($param['orderNo']) && !empty($param['orderNo']))
@@ -244,8 +243,23 @@ class OrderRepository
             return $orderData->toArray();
         }
 
-
-
     }
-
+    //更新订单状态
+    public static function order_update($order_no){
+        $data['freeze_type']='1';
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    //更新订单状态
+    public static function deny_update($order_no){
+        $data['freeze_type']='0';
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

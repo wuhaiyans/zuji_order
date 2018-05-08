@@ -91,7 +91,6 @@ class OrderCreater
                 // 支付方式
                 'pay_type'	 => ''.$data['pay_type'],
             ];
-            var_dump($result);die;
             return $result;
         } catch (\Exception $exc) {
             echo $exc->getMessage();
@@ -108,6 +107,7 @@ class OrderCreater
         $data['order_no'] = OrderOperate::createOrderNo(1);
         $order_flag =true;
         DB::beginTransaction();
+
         try {
             //获取用户信息
             $user_info = $this->third->GetUser($data['user_id']);
@@ -119,6 +119,7 @@ class OrderCreater
             if(!$address){
                 return ApiStatus::CODE_41005;
             }
+
             //获取风控信息
             $this->third->GetFengkong();
 
@@ -136,9 +137,11 @@ class OrderCreater
                 if(!$res){
                     $order_flag =false;
                     $error =$this->verify->get_error();
+                    return $error;
                 }
                 $goods_data[] =$this->verify->GetSchema();
             }
+
             $user_data =$this->verify->GetUserSchema();
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
@@ -153,6 +156,7 @@ class OrderCreater
                 $need_to_credit_certificate="Y";
             }
 
+
             $result = [
                 'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
                 'certified'			=> $user_data['credit']['certified']?'Y':'N',
@@ -164,8 +168,9 @@ class OrderCreater
                 'need_to_credit_certificate'			=> $need_to_credit_certificate,
                 'user_info' => $user_data,
                 'sku_info'=>$goods_data,
+                'order_no'=>$data['order_no'],
                 // 支付方式
-                'pay_type'	 => ''.$data['pay_type'],
+                'pay_type'	 =>$data['pay_type'],
             ];
             $b =$this->orderRepository->create($data,$result);
             if(!$b){
@@ -212,5 +217,9 @@ class OrderCreater
     //获取订单信息
     public function get_order_info($where){
         return $this->orderRepository->get_order_info($where);
+    }
+    //更新订单状态
+    public function order_update($order_no){
+        return $this->orderRepository->order_update($order_no);
     }
 }

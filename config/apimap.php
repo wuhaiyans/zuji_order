@@ -8,6 +8,8 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
+    'api.order.orderlist'=>'OrderController@orderList',
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
@@ -24,6 +26,8 @@ return [
     'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
+    // 扣款接口
+    'api.Instalment.createpay'             => 'InstalmentController@createpay',
 
 
     //退货接口
