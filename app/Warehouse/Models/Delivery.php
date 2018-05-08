@@ -5,9 +5,12 @@ namespace App\Warehouse\Models;
 use Illuminate\Database\Eloquent\Model;
 use Monolog\Handler\IFTTTHandler;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
+use Illuminate\Support\Facades\DB;
 
 class Delivery extends Model
 {
+
+    public $incrementing=false;
 
     const STATUS_NONE = 0;
     const STATUS_INIT = 1;//待配货
@@ -76,9 +79,9 @@ class Delivery extends Model
     /**
      * 收货
      */
-    public static function receive($delivery_id, $auto=false)
+    public static function receive($delivery_no, $auto=false)
     {
-        $model = self::findOrFail($delivery_id);
+        $model = self::findOrFail($delivery_no);
         $model->status = self::STATUS_RECEIVED;
 
         return $model->update();
@@ -119,7 +122,7 @@ class Delivery extends Model
         $model = self::where(['order_no'=> $order_no, 'status'=>self::STATUS_WAIT_SEND])->first();
 
         if (!$model) {
-            throw new NotFoundResourceException($order_no . ' 订单号未找到');
+            throw new NotFoundResourceException($order_no . '号待发货的订单未找到');
         }
 
         $model->status = self::STATUS_SEND;
@@ -128,21 +131,58 @@ class Delivery extends Model
         return $model->save();
     }
 
+    public static function detail($delivery_no)
+    {
+        $model = self::findOrFail($delivery_no);
+
+        $result = $model->toArray();
+
+
+        if ($model->imeis) {
+            $result['imeis'] = $model->imeis;
+        }
+
+        if ($model->goods) {
+            $result['goods'] = $model->goods;
+        }
+        return $result;
+    }
+
 
     /**
      * @param $delivery_id
      * 取消配货
      */
-    public static function cancelMatch($delivery_id)
+    public static function cancelMatch($delivery_no)
     {
 
+
+        try {
+            DB::beginTransaction();
+
+            $model = self::findOrFail($delivery_no);
+
+            $model->status = self::STATUS_INIT;
+            $model->save();
+
+            DeliveryGoodsImei::cancelMatch($delivery_no);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return false;
+        }
+
+
+        return true;
     }
 
     /**
      * @param $delivery_id
      * 配货完成
      */
-    public static function finishMatch($delivery_id)
+    public static function finishMatch($delivery_no)
     {
 
     }

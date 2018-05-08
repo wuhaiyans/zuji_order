@@ -33,15 +33,20 @@ $api->version('v1', [
 
 
     $api->any('warehouse.delivery.cancel', 'DeliveryController@cancel'); //取消发货
-    $api->any('warehouse.delivery.list', 'DeliveryController@list'); //列表
     $api->any('warehouse.delivery.receive', 'DeliveryController@receive'); //签收
-    $api->any('warehouse.delivery.delImei', 'DeliveryController@delImei'); //删除imei
-    $api->any('warehouse.delivery.addImei', 'DeliveryController@addImei'); //添加imei
-    $api->any('warehouse.delivery.imeis', 'DeliveryController@imeis'); //对应发货单imei列表
-    $api->any('warehouse.delivery.logistics', 'DeliveryController@logistics'); //修改快递物流信息
-    $api->any('warehouse.delivery.send', 'DeliveryController@send'); //修改快递物流信息
     $api->any('warehouse.delivery.show', 'DeliveryController@show'); //清单
+    $api->any('warehouse.delivery.imeis', 'DeliveryController@imeis'); //对应发货单imei列表
+    $api->any('warehouse.delivery.send', 'DeliveryController@send'); //发货反馈
+    $api->any('warehouse.delivery.logistics', 'DeliveryController@logistics'); //修改快递物流信息
     $api->any('warehouse.delivery.cancelMatch', 'DeliveryController@cancelMatch'); //取消配货
+    $api->any('warehouse.delivery.addImei', 'DeliveryController@addImei'); //添加imei
+    $api->any('warehouse.delivery.delImei', 'DeliveryController@delImei'); //删除imei
+
+
+
+    $api->any('warehouse.delivery.list', 'DeliveryController@list'); //列表
+
+
 
 
 
