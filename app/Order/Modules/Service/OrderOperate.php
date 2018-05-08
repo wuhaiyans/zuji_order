@@ -16,10 +16,9 @@ class OrderOperate
 {
     protected $third;
     protected $orderInstal;
-    public function __construct(ThirdInterface $third, OrderInstalment $orderInstal)
+    public function __construct(ThirdInterface $third)
     {
         $this->third = $third;
-        $this->orderInstal = $orderInstal;
     }
 
     /**
@@ -70,7 +69,7 @@ class OrderOperate
                 return ApiStatus::CODE_31003;
             }
             //分期关闭
-           $success =  $this->orderInstal->close(['order_no'=>$orderNo]);
+           $success =  OrderInstalment::close(['order_no'=>$orderNo]);
              if (!$success) {
                  DB::rollBack();
                  return ApiStatus::CODE_31004;
@@ -97,7 +96,11 @@ class OrderOperate
         return $orderSn;
     }
 
-
+    /**
+     * 获取订单详情数据
+     * @param $orderNo string 订单编号
+     * @return array|\Illuminate\Http\JsonResponse
+     */
     public static function getOrderInfo($orderNo)
     {
         $order = array();
@@ -112,13 +115,26 @@ class OrderOperate
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
         $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
-        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+//        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_extend_info'] = $goodsExtendData;
-        //分期信息
-        $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
-        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-        $order['goods_extend_info'] = $goodsExtendData;
+        //分期信息,根据订单号查询分期数据
+//        OrderInstalment::queryList(array(order))
+//        $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
+//        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         return apiResponseArray(ApiStatus::CODE_0,$order);
+
+    }
+
+    /**
+     *
+     */
+    public static function getOrderList($param = array())
+    {
+        //根据用户id查找订单列表
+
+        $orderList = OrderRepository::getOrderList(array('user_id'=>18));
+        return $orderList;
+
 
     }
 

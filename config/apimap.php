@@ -8,6 +8,8 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
+    'api.order.orderlist'=>'OrderController@orderList',
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号

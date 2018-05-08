@@ -225,3 +225,26 @@ function v($data, $exit = '')
         exit;
     }
 }
+
+
+/**
+ * heaven
+ * @param $noType :1,分期交易号; 2,退货编号
+ *  生成退款单号
+ */
+public function createNo($noType=1){
+    $npreNoType = array(
+        //分期交易号
+        1 => 'f',
+        2 => 't'
+    );
+    $year = array();
+    if (!isset($npreNoType[$noType])) {
+        return false;
+    }
+    for($i=65;$i<91;$i++){
+        $year[]= strtoupper(chr($i));
+    }
+    $orderSn = $npreNoType[$noType].$year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') .$orderType. substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
+    return $orderSn;
+}

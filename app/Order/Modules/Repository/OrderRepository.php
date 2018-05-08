@@ -5,7 +5,7 @@ use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Models\order_good_extend;
+use App\Order\Models\OrderGoodExtend;
 use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
 
@@ -190,7 +190,7 @@ class OrderRepository
 
     public static function getGoodsExtendInfo($orderNo){
         if (empty($orderNo)) return false;
-        $orderGoodExtendData =  order_good_extend::query()->where([
+        $orderGoodExtendData =  OrderGoodExtend::query()->where([
             ['order_no', '=', $orderNo],
         ])->get();
         if (!$orderGoodExtendData) return false;
@@ -241,21 +241,7 @@ class OrderRepository
 
     }
 
-    /**
-     *  获取订单列表
-     *
-     * @param array $param  获取订单列表参数
-     */
-//    public static function getOrderList($param = array())
-//    {
-//            if (isset($param['userId']) && !empty($param['userId'])) {
-//
-//                Order::
-//
-//            }
-//
-//
-//    }
+
     //获取订单信息
     public function get_order_info($where){
         $orderNo=$where['order_no'];
@@ -292,7 +278,68 @@ class OrderRepository
             return $orderData->toArray();
         }
 
+    }
 
+
+    /**
+     *  获取订单列表
+     *  heaven
+     * @param array $param  获取订单列表参数
+     */
+    public static function getOrderList($param = array())
+    {
+        $whereArray = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+        //根据手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['appid', '=', $param['order_appid']];
+        }
+
+        //支付类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['pay_type', '=', $param['pay_type']];
+        }
+
+        //支付状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['appid', '=', $param['order_appid']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['appid', '=', $param['order_appid']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['appid', '=', $param['order_appid']];
+        }
+
+
+
+        $orderList = DB::table('order_info')
+            ->leftJoin('order_userinfo', function ($join) {
+                $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
+            })
+
+        ->paginate(1)
+        dd($orderList->toArray());
+        return $orderList;
 
     }
 
