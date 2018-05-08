@@ -163,4 +163,37 @@ class UnionpayApi extends \App\Lib\BaseApi {
 		}
 		return true;
 	}
+
+	/**
+	 * 银联退款接口
+	 * @param string $appid		应用ID
+	 * @param array $params
+	 * [
+	 *		'out_refund_no' => '', //订单系统退款码
+	 *		'payment_no' => '', //支付系统支付码
+	 *		'amount' => '', //支付金额
+	 *		'refund_back_url' => '', //退款回调URL
+	 * ]
+	 * @return mixed false：失败；array：成功
+	 * [
+	 * 		'out_refund_no'=>'', //订单系统退款码
+	 * 		'refund_no'=>'', //支付系统退款码
+	 * ]
+	 */
+	public static function refund( $appid ,array $params ){
+		$ApiRequest = new ApiRequest();
+		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
+		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setMethod('pay.unionpay.refund');
+		$ApiRequest->setParams($params);
+		$Response = $ApiRequest->send();
+
+		if( !$Response->isSuccessed() ){
+			self::$error = '发送验证码失败';
+			return false;
+		}
+		return true;
+	}
+
+
 }
