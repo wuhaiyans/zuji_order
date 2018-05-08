@@ -16,6 +16,12 @@ class DeliveryGoods extends Model
 
     public $timestamps = false;
 
+    public function delivery()
+    {
+        return $this->belongsTo(Delivery::class);
+    }
+
+
     /**
      * @param $data
      * @return DeliveryGoods
@@ -29,10 +35,5 @@ class DeliveryGoods extends Model
 
         return $model;
     }
-
-
-
-
-
 
 }
