@@ -28,5 +28,21 @@ $api->version('v1', [
 
     $api->any('test', 'TestController@test');
     $api->any('apply', 'TestController@apply');
+
+
+
+
+    $api->any('warehouse.delivery.cancel', 'DeliveryController@cancel'); //取消发货
+    $api->any('warehouse.delivery.list', 'DeliveryController@list'); //列表
+    $api->any('warehouse.delivery.receive', 'DeliveryController@receive'); //签收
+    $api->any('warehouse.delivery.delImei', 'DeliveryController@delImei'); //删除imei
+    $api->any('warehouse.delivery.addImei', 'DeliveryController@addImei'); //添加imei
+
+
+
+
+
+
+
 });
    
