@@ -56,7 +56,13 @@ class ReturnController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"退货单已申请");
         }
         $return = $this->OrderReturnCreater->add($params);
-        return apiResponse([$return],ApiStatus::CODE_0,"success");
+        if($return){
+            $return_order = $this->OrderCreate->order_update($params['order_no']);
+            if($return_order){
+                return apiResponse([$return],ApiStatus::CODE_0,"success");
+            }
+        }
+
     }
 
 
