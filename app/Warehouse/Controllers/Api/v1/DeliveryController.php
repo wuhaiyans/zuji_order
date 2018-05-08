@@ -26,16 +26,13 @@ class DeliveryController extends Controller
      * 创建发货单
      */
     public function deliveryCreate(Request $request){
-        $orders =$request->all();
+        $request =$request->all();
 
-        $appid =$orders['appid'];//获取appid
-        $order_no =$orders['params']['order_no'];//订单编号
-        $delivery_detail =$orders['params']['delivery_detail'];//发货清单
+        $appid =$request['appid'];//获取appid
+        $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
+        $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
 
-        $delivery_row = [
-//            'delivery_no'=>
-        ];
-
+        $this->DeliveryCreate->confirmation($delivery_row);
     }
 
 }

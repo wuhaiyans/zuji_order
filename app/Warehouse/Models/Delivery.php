@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Delivery extends Model
 {
     const CREATED_AT = 'create_time';
-    const UPDATED_AT = 'update_time';
+//    const UPDATED_AT = 'update_time';
 
     // Rest omitted for brevity
 
