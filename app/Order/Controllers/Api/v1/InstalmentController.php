@@ -29,6 +29,7 @@ class InstalmentController extends Controller
 
         //获取sku
         $sku = filter_array($sku, [
+            'goods_no'=>'required',
             'zuqi'=>'required',
             'zuqi_type'=>'required',
             'all_amount'=>'required',
@@ -37,7 +38,7 @@ class InstalmentController extends Controller
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
-        if(count($sku) < 7){
+        if(count($sku) < 8){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
 
@@ -94,7 +95,15 @@ class InstalmentController extends Controller
 
     }
 
+    //代扣 扣款接口
+    public function createpay(Request $request){
+        $request = $request->all()['params'];
 
+
+
+
+
+    }
 
 
 
