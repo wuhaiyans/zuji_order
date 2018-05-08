@@ -8,6 +8,7 @@ use App\Order\Modules\Inc\CouponStatus;
 
 class OrderInstalmentRepository
 {
+    private $OrderInstalment;
 
     private $componnet = null;
 
@@ -21,6 +22,8 @@ class OrderInstalmentRepository
     private $withholding_no = null;
     //订单原始金额
     private $all_amount = 0;
+    //订单实际金额
+    private $goods_no = 0;
     //订单实际金额
     private $amount = 0;
     //租金
@@ -39,12 +42,14 @@ class OrderInstalmentRepository
     private $payment_type_id = 0;
 
     public function __construct($componnet) {
+        $this->OrderInstalment = new OrderInstalment();
         $this->componnet = $componnet;
         $this->instalment_init();
     }
 
     public function instalment_init(){
 
+        $this->goods_no         = !empty($this->componnet['sku']['goods_no']) ? $this->componnet['sku']['goods_no'] : "";
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zuqi_type        = $this->componnet['sku']['zuqi_type'];
         $this->withholding_no   = $this->componnet['user']['withholding_no'];
@@ -158,13 +163,38 @@ class OrderInstalmentRepository
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
-        $result =  Order::where($where)->save($status);
+        $result =  OrderInstalment::where($where)->save($status);
         if (!$result) return false;
 
         return true;
 
     }
 
+    /**
+     * 关闭分期
+     */
+    public static function setTradeNo($id, $trade_no){
+
+        if (!$id ) {
+            return false;
+        }
+
+        if (!$trade_no ) {
+            return false;
+        }
+
+        $data = [
+            'trade_no'=>$trade_no
+        ];
+        $result =  OrderInstalment::where(
+            ['id'=>$id]
+        )->update($data);
+
+        if (!$result) return false;
+
+        return true;
+
+    }
 
 
     /**
@@ -191,6 +221,7 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
@@ -213,7 +244,7 @@ class OrderInstalmentRepository
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
 
-            $ret = OrderInstalment::query()->create($_data);
+            $ret = $this->OrderInstalment->create($_data);
             if(!$ret){
                 return false;
             }
@@ -231,6 +262,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+
+            $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
@@ -255,8 +288,7 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-
-            $ret = OrderInstalment::query()->create($_data);
+            $ret = $this->OrderInstalment->save($_data);
 
             if(!$ret){
                 return false;
@@ -271,7 +303,7 @@ class OrderInstalmentRepository
      * int    $times   期数
      * return string
      */
-    public function get_terms($times){
+    public static function get_terms($times){
         $terms = [];
         if($times < 0){
             return $terms;
@@ -300,6 +332,30 @@ class OrderInstalmentRepository
 
         return $terms;
     }
+
+    /*
+     * 修改方法
+     * array    $where
+     * array    $data
+     * return bool
+     */
+    public static function save($where, $data){
+
+        if ( empty($where )) {
+            return false;
+        }
+
+        if ( empty($data )) {
+            return false;
+        }
+
+
+        $result =  OrderInstalment::where($where)->update($data);
+        if (!$result) return false;
+
+        return true;
+    }
+
 
 
 }

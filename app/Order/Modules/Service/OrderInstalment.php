@@ -1,8 +1,14 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
+
 use App\Order\Modules\Repository\OrderInstalmentRepository;
+use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\ApiStatus;
+
 class OrderInstalment
 {
 
@@ -42,12 +48,14 @@ class OrderInstalment
         $order = filter_array($order, [
             'order_no' => 'required',
         ]);
+
         if(!$order['order_no']){
             return false;
         }
 
         //获取sku
         $sku = filter_array($sku, [
+            'goods_no'=>'required',
             'zuqi'=>'required',
             'zuqi_type'=>'required',
             'all_amount'=>'required',
@@ -56,17 +64,16 @@ class OrderInstalment
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
-        if(count($sku) < 7){
+        if(count($sku) < 8){
+
             return false;
         }
 
-        $coupon = filter_array($coupon, [
+        filter_array($coupon, [
             'discount_amount' => 'required',
             'coupon_type' => 'required',
         ]);
-        if(count($coupon) < 2){
-            return false;
-        }
+
 
         $user = filter_array($user, [
             'withholding_no' => 'required',
@@ -150,10 +157,13 @@ class OrderInstalment
      */
     public static function queryByInstalmentId($id){
         if (empty($id)) {
-            return false;
+            return ApiStatus::CODE_20001;
         }
 
         $result =  OrderInstalmentRepository::getInfoById($id);
+        if(!$result){
+            return ApiStatus::CODE_71001;
+        }
         return $result;
     }
 
@@ -172,6 +182,8 @@ class OrderInstalment
         ]);
 
         $result =  OrderInstalmentRepository::queryList($params);
+        $result = array_group_by($result,'goods_no');
+
         return $result;
     }
 
@@ -188,6 +200,64 @@ class OrderInstalment
         $result =  OrderInstalmentRepository::closeInstalment($data);
         return $result;
     }
+
+    /**
+     * 是否允许扣款
+     * @param  int  $instalment_id 订单分期付款id
+     * @return bool true false
+     */
+    public static function allow_withhold($instalment_id){
+        if(empty($instalment_id)){
+            return false;
+        }
+        $alllow = false;
+        $instalment_info = OrderInstalmentRepository::getInfoById($instalment_id);
+
+        $status = $instalment_info['status'];
+
+        $year   = date("Y");
+        $month  = intval(date("m"));
+        if($month < 10 ){
+            $month = "0".$month;
+        }
+        $term 	= $year.$month;
+        $day 	= intval(date("d"));
+
+        //查询订单记录
+        $order_info = OrderRepository::getInfoById($instalment_info['order_no']);
+
+        if($status == OrderInstalmentStatus::UNPAID || $status == OrderInstalmentStatus::FAIL){
+            // 本月15后以后 可扣当月 之前没有扣款的可扣款
+            if(($term == $instalment_info['term'] && $day >= 15) || $term > $instalment_info['term']){
+                //判断订单状态 必须是租用中 或者完成关闭的状态 才允许扣款
+                if($order_info['order_status'] == OrderStatus::OrderInService && $order_info['freeze_type'] == OrderFreezeStatus::Non){
+                    $alllow = true;
+                }
+            }
+        }
+        return $alllow;
+    }
+
+
+    /**
+     * 更新分期扣款的租机交易码
+     * @param int $id	主键ID
+     * @param string $trade_no	交易码
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function set_trade_no($id, $trade_no){
+        if(!$id){
+            return ApiStatus::CODE_20001;
+        }
+
+        if(!$trade_no){
+            return ApiStatus::CODE_20001;
+        }
+
+        return OrderInstalmentRepository::setTradeNo($id, $trade_no);
+
+    }
+
 
 
 }
