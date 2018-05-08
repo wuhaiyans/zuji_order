@@ -180,4 +180,29 @@ class OrderController extends Controller
     }
 
 
+    public function orderInfo(Request $request)
+    {
+        $params = $request->input('params');
+
+        if (!isset($params['order_no']) || empty($params['order_no'])) {
+            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+        }
+
+        $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
+
+
+        if ($orderData['code']===ApiStatus::CODE_0) {
+
+            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+        } else {
+
+            return apiResponse([],ApiStatus::CODE_32002);
+        }
+//
+
+
+    }
+
+
+
 }

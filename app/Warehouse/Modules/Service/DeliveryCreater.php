@@ -19,12 +19,14 @@ class DeliveryCreater
     }
 
     /**
-     * 创建订单
+     * 创建发货单
      * @return bool
      */
     public function create($data)
     {
-        $order_no =rand(10000000000000,99999999999999999);
+        //18位发货单号
+        $rand_no =rand(1000,9999);
+        $delivery_no = date('YmdHis',time()).$rand_no;
 
         DB::beginTransaction();
         try {
@@ -32,7 +34,7 @@ class DeliveryCreater
             $this->third->GetUser();
             $this->third->GetSku();
             var_dump('创建...');
-            var_dump('编号：' . $data['no']);
+            var_dump('编号：' . $delivery_no);
             DB::commit();
             die;
         } catch (\Exception $exc) {

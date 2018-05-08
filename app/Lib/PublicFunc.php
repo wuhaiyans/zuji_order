@@ -13,9 +13,31 @@
  * @return \Illuminate\Http\JsonResponse
  *
  */
+use App\Lib\ApiStatus;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
+    if (empty($errmsg)) {
+
+        $errmsg =  ApiStatus::$errCodes[$errno];
+    }
     return response()->json(['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg]);
+}
+
+/**
+ * @param array $data
+ * @param int $errno
+ * @param string $errmsg
+ * @return array
+ * 接口内部返回
+ *
+ */
+function apiResponseArray($errno=0,$data=[], $errmsg='')
+{
+    if (empty($errmsg)) {
+
+        $errmsg =  ApiStatus::$errCodes[$errno];
+    }
+    return ['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg];
 }
 
 /**
