@@ -102,7 +102,7 @@ class OrderRepository
                 // 生成分期
                 $instalment_data =array_merge($v,['order'=>$data],$user_info);
                 //var_dump($instalment_data);die;
-                $instalment = $this->instalment->create(array_merge($v,['order'=>['order_no'=>$data['order_no']]],$user_info));
+                $instalment = $this->instalment->create($instalment_data);
                 var_dump($instalment);die;
                 if(!$instalment){
                     return ApiStatus::CODE_30005;
@@ -110,6 +110,7 @@ class OrderRepository
 
             }
         }
+
             // 创建订单
             $order_data = [
                 'order_status' => OrderStatus::OrderWaitPaying,
