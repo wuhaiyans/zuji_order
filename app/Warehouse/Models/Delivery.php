@@ -53,6 +53,16 @@ class Delivery extends Model
         return $value;
     }
 
+    public function goods()
+    {
+        return $this->hasMany(DeliveryGoods::class, 'delivery_no');
+    }
+
+    public function imeis()
+    {
+        return $this->hasMany(DeliveryGoodsImei::class, 'delivery_no');
+    }
+
 
     /**
      * 生成单号
@@ -84,15 +94,6 @@ class Delivery extends Model
         $model->status = self::STATUS_CANCEL;
 
         return$model->update();
-    }
-
-    /**
-     * @param $delivery_id
-     * 获取imeis列表
-     */
-    public static function imeis($delivery_id)
-    {
-        return DeliveryGoodsImei::listByDelivery($delivery_id);
     }
 
     /**
@@ -145,6 +146,10 @@ class Delivery extends Model
     {
 
     }
+
+
+
+
 
 
 
