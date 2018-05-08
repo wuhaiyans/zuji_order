@@ -133,7 +133,7 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderList = OrderRepository::getOrderList(array('user_id'=>18));
-        return $orderList;
+        return apiResponseArray(ApiStatus::CODE_0,$orderList);
 
 
     }
