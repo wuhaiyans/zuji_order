@@ -8,15 +8,22 @@
 namespace App\Warehouse\Controllers\Api\v1;
 
 
-use App\Lib\Warehouse\Delivery;
+use App\Warehouse\Models\Delivery;
 
 
 class TestController extends Controller
 {
     public function test()
     {
-        return Delivery::cancel(121);
-        return Delivery::apply(121);
+
+
+        return Delivery::find('a1')->imeis;
+
+
+//        return DeliveryGoods::class;
+//        return \App\Warehouse\Models\Delivery::generateSerial();
+//        return Delivery::cancel(121);
+//        return Delivery::apply(121);
 
     }
 

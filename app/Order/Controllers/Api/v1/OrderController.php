@@ -2,9 +2,11 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\JobQueueApi;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -80,7 +82,12 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],env("API_INNER_URL"), [
+            'method' => 'api.inner.cancelOrder',
+            'time' => date('Y-m-d H:i:s'),
+        ],time()+7200,"");
+        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
+        return apiResponse($res,ApiStatus::CODE_0);
     }
 
     public function orderList(){
@@ -94,9 +101,10 @@ class OrderController extends Controller
     }
 
     /**
-     *
-     *  未支付用户取消接口
-     *
+     * 未支付用户取消接口
+     * @param Request $request
+     * heaven
+     * @return \Illuminate\Http\JsonResponse
      */
     public function cancelOrder(Request $request)
     {
@@ -104,6 +112,7 @@ class OrderController extends Controller
 
 //       $orderNo =  Service\OrderOperate::createOrderNo(1);
 //       dd($orderNo);
+
         $params = $request->input('params');
 
         if (!isset($params['order_no']) || empty($params['order_no'])) {
@@ -179,26 +188,37 @@ class OrderController extends Controller
 
     }
 
-
+    /**
+     * 订单详情接口
+     * heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function orderInfo(Request $request)
     {
-        $params = $request->input('params');
+            try{
 
-        if (!isset($params['order_no']) || empty($params['order_no'])) {
-            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
-        }
+                $params = $request->input('params');
 
-        $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
+                if (!isset($params['order_no']) || empty($params['order_no'])) {
+                    return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+                }
 
+                $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
+                
 
-        if ($orderData['code']===ApiStatus::CODE_0) {
+                if ($orderData['code']===ApiStatus::CODE_0) {
 
-            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-        } else {
+                    return apiResponse($orderData['data'],ApiStatus::CODE_0);
+                } else {
 
-            return apiResponse([],ApiStatus::CODE_32002);
-        }
-//
+                    return apiResponse([],ApiStatus::CODE_32002);
+                }
+
+            }catch (\Exception $e) {
+                return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+            }
 
 
     }

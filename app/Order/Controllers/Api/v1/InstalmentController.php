@@ -29,6 +29,7 @@ class InstalmentController extends Controller
 
         //获取sku
         $sku = filter_array($sku, [
+            'goods_no'=>'required',
             'zuqi'=>'required',
             'zuqi_type'=>'required',
             'all_amount'=>'required',
@@ -37,7 +38,7 @@ class InstalmentController extends Controller
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
-        if(count($sku) < 7){
+        if(count($sku) < 8){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
 
@@ -71,26 +72,50 @@ class InstalmentController extends Controller
 
     }
 
-    //创建分期接口
+    //分期列表接口
     public function instalment_list(Request $request){
-        $request = $request->all();
-        //获取goods_no
-        $goods_no = $request['params']['goods_no'];
-        if(empty($goods_no)){
-            return apiResponse([],ApiStatus::CODE_20001,"goods_no不能为空");
+        $request = $request->all()['params'];
+
+        $request = filter_array($request, [
+            'goods_no'=>'required',
+            'order_no'=>'required',
+        ]);
+        if(empty($request['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"order_no参数错误");
         }
 
+
         $code = new OrderInstalment();
-        $list = $code->queryByGoodsNo($goods_no);
+        $list = $code->queryList($request);
 
         if(!is_array($list)){
-            return apiResponse([],$list,ApiStatus::$errCodes[$list]);
+            return apiResponse([], $list, ApiStatus::$errCodes[$list]);
         }
         return apiResponse($list,ApiStatus::CODE_0,"success");
 
     }
 
+    //代扣 扣款接口
+    public function createpay(Request $request){
+        $request = $request->all()['params'];
+        $request = filter_array($request, [
+            'instalment_id'=>'required',
+            'user_id'=>'required',
+            'remark'=>'required',
+        ]);
 
+        $instalment_id  = $request['instalment_id'];
+        $user_id        = $request['user_id'];
+        $remark         = $request['remark'];
+
+        $instalment_info = OrderInstalment::queryByInstalmentId($instalment_id);
+
+
+
+        p($instalment_info);
+
+
+    }
 
 
 
