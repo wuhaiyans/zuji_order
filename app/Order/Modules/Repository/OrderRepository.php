@@ -230,7 +230,6 @@ class OrderRepository
             $whereArray[] = ['user_id', '=', $userId];
         }
         $order =  Order::where($whereArray)->first();
-        return $order->toArray();
         if (!$order) return false;
         $order->order_status = OrderStatus::OrderClosed;
         if ($order->save()) {

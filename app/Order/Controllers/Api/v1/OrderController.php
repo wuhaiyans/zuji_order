@@ -101,9 +101,10 @@ class OrderController extends Controller
     }
 
     /**
-     *
-     *  未支付用户取消接口
-     *
+     * 未支付用户取消接口
+     * @param Request $request
+     * heaven
+     * @return \Illuminate\Http\JsonResponse
      */
     public function cancelOrder(Request $request)
     {
@@ -111,6 +112,7 @@ class OrderController extends Controller
 
 //       $orderNo =  Service\OrderOperate::createOrderNo(1);
 //       dd($orderNo);
+
         $params = $request->input('params');
 
         if (!isset($params['order_no']) || empty($params['order_no'])) {
@@ -186,26 +188,38 @@ class OrderController extends Controller
 
     }
 
-
+    /**
+     * 订单详情接口
+     * heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function orderInfo(Request $request)
     {
-        $params = $request->input('params');
+            try{
 
-        if (!isset($params['order_no']) || empty($params['order_no'])) {
-            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
-        }
+                $params = $request->input('params');
 
-        $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
+                if (!isset($params['order_no']) || empty($params['order_no'])) {
+                    return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+                }
 
+                $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
 
-        if ($orderData['code']===ApiStatus::CODE_0) {
+                echo 1/0;
 
-            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-        } else {
+                if ($orderData['code']===ApiStatus::CODE_0) {
 
-            return apiResponse([],ApiStatus::CODE_32002);
-        }
-//
+                    return apiResponse($orderData['data'],ApiStatus::CODE_0);
+                } else {
+
+                    return apiResponse([],ApiStatus::CODE_32002);
+                }
+
+            }catch (\Exception $e) {
+                return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+            }
 
 
     }
