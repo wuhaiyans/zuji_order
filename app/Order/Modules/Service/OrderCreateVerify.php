@@ -57,17 +57,17 @@ class OrderCreateVerify
             $this->flag =false;
         }
         //验证优惠券信息
-//        if($data['coupon_no'] !=""){
-//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
-//            if(!$coupon){
-//                $this->flag =false;
-//            }
-//        }
+        if($data['coupon_no'] !=""){
+            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
+            if(!$coupon){
+                $this->flag =false;
+            }
+        }
 
         //分期单信息
-//        if($data['pay_type']!=PayInc::WithhodingPay){
-//            $instalment =$this->InstalmentVerify();
-//        }
+        if($data['pay_type']!=PayInc::WithhodingPay){
+            $instalment =$this->InstalmentVerify();
+        }
         return $this->flag;
 
     }
