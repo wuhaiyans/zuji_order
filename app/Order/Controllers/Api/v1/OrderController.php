@@ -86,7 +86,7 @@ class OrderController extends Controller
             'method' => 'api.inner.cancelOrder',
             'time' => date('Y-m-d H:i:s'),
         ],time()+7200,"");
-        Log::error($b?"IS ok":"IS error");
+        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
@@ -205,8 +205,7 @@ class OrderController extends Controller
                 }
 
                 $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
-
-                echo 1/0;
+                
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
 

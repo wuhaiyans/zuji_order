@@ -3,6 +3,8 @@
 namespace App\Warehouse\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Monolog\Handler\IFTTTHandler;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class Delivery extends Model
 {
@@ -91,6 +93,57 @@ class Delivery extends Model
     public static function imeis($delivery_id)
     {
         return DeliveryGoodsImei::listByDelivery($delivery_id);
+    }
+
+    /**
+     * 修改物流
+     */
+    public static function logistics($delivery_id, $logistics_id, $logistics_no)
+    {
+        $model = self::findOrFail($delivery_id);
+
+        $model->logistics_id = $logistics_id;
+        $model->logistics_no = $logistics_no;
+
+        return $model->save();
+    }
+
+
+    /**
+     * @param $order_no
+     * 发货
+     */
+    public static function send($order_no)
+    {
+        $model = self::where(['order_no'=> $order_no, 'status'=>self::STATUS_WAIT_SEND])->first();
+
+        if (!$model) {
+            throw new NotFoundResourceException($order_no . ' 订单号未找到');
+        }
+
+        $model->status = self::STATUS_SEND;
+        $model->delivery_time = time();
+
+        return $model->save();
+    }
+
+
+    /**
+     * @param $delivery_id
+     * 取消配货
+     */
+    public static function cancelMatch($delivery_id)
+    {
+
+    }
+
+    /**
+     * @param $delivery_id
+     * 配货完成
+     */
+    public static function finishMatch($delivery_id)
+    {
+
     }
 
 
