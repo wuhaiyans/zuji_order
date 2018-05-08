@@ -111,7 +111,7 @@ class OrderRepository
             if (empty($orderNo)) return false;
             $order =  Order::query()->where([
                 ['order_no', '=', $orderNo],
-            ])->get();
+            ])->first();
             if (!$order) return false;
             return $order->toArray();
     }

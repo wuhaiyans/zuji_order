@@ -26,6 +26,8 @@ return [
     'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
+    // 扣款接口
+    'api.Instalment.createpay'             => 'InstalmentController@createpay',
 
 
     //退货接口

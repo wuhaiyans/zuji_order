@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
+use \App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -30,6 +31,7 @@ class OrderReturnCreater
         $to_data['reason_id']=$data['reason_id'];
         $to_data['reason_text']=$data['reason_text'];
         $to_data['status']='1';
+        $to_data['refund_no']=createNo('2');
         $to_data['create_time']=time();
         return $this->orderReturnRepository->add($to_data);
     }
@@ -68,6 +70,8 @@ class OrderReturnCreater
         $res= $this->orderReturnRepository->update_return($params);
         if($res){
                 if($this->orderReturnRepository->goods_update($params['order_no'],$params['status'])) {
+                    //申请退货同意发送短信
+
                     return ApiStatus::CODE_0;//成功
                 }
         }else{
@@ -104,6 +108,7 @@ class OrderReturnCreater
         $res = $this->orderReturnRepository->deny_return($params);
         if($res){
             if($this->orderRepository->deny_update($params['order_no'])){
+                //申请退货拒绝发送短信
                 return ApiStatus::CODE_0;//成功
             }else{
                 return ApiStatus::CODE_33007;//更新审核状态失败
