@@ -2,7 +2,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-
+use App\Lib\ApiStatus;
 class OrderInstalment
 {
 
@@ -48,6 +48,7 @@ class OrderInstalment
 
         //获取sku
         $sku = filter_array($sku, [
+            'goods_no'=>'required',
             'zuqi'=>'required',
             'zuqi_type'=>'required',
             'all_amount'=>'required',
@@ -56,7 +57,7 @@ class OrderInstalment
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
-        if(count($sku) < 7){
+        if(count($sku) < 8){
             return false;
         }
 
@@ -159,15 +160,19 @@ class OrderInstalment
 
 
     /**
-     * 根据goods_no查询分期数据
+     * 查询分期数据
      * @return array
      */
-    public static function queryByGoodsNo($goods_no){
-        if (empty($goods_no)) {
-            return false;
+    public static function queryList($params = []){
+        if (!is_array($params)) {
+            return ApiStatus::CODE_20001;
         }
+        $params = filter_array($params, [
+            'goods_no'=>'required',
+            'order_no'=>'required',
+        ]);
 
-        $result =  OrderInstalmentRepository::getBygoodsNo($goods_no);
+        $result =  OrderInstalmentRepository::queryList($params);
         return $result;
     }
 
