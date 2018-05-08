@@ -26,5 +26,7 @@ $api->version('v1', [
         ->name('warehouse.receive.receivelist');//订单列表接口
     $api->post('me', 'UserController@me');
 
+    $api->any('test', 'TestController@test');
+    $api->any('apply', 'TestController@apply');
 });
    
