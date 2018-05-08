@@ -47,7 +47,7 @@ class OrderInstalmentRepository
 
     public function instalment_init(){
 
-        $this->goods_no         = $this->componnet['sku']['goods_no'];
+        $this->goods_no         = !empty($this->componnet['sku']['goods_no']) ? $this->componnet['sku']['goods_no'] : "";
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zuqi_type        = $this->componnet['sku']['zuqi_type'];
         $this->withholding_no   = $this->componnet['user']['withholding_no'];
