@@ -40,4 +40,13 @@ class Delivery extends Model
         return $value;
     }
 
+
+    /**
+     * 生成单号
+     */
+    public static function generateSerial()
+    {
+        return date('YmdHis').uniqid();
+    }
+
 }

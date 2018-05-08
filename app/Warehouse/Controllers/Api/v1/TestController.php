@@ -15,6 +15,7 @@ class TestController extends Controller
 {
     public function test()
     {
+        return \App\Warehouse\Models\Delivery::generateSerial();
         return Delivery::cancel(121);
         return Delivery::apply(121);
 
