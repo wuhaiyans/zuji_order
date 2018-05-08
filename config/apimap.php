@@ -6,6 +6,8 @@ return [
 
     'api.order.cancel' => 'OrderController@cancelOrder',
 
+    'api.order.orderdetail'=>'OrderController@orderInfo',
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
 

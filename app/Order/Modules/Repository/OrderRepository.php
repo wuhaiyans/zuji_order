@@ -3,6 +3,8 @@ namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Models\order_good_extend;
+use Illuminate\Support\Facades\DB;
 
 class OrderRepository
 {
@@ -94,6 +96,22 @@ class OrderRepository
         return $orderGoodData->toArray();
     }
 
+
+    /**
+     *
+     * 根据订单号查询设备号信息
+     *
+     */
+
+    public static function getGoodsExtendInfo($orderNo){
+        if (empty($orderNo)) return false;
+        $orderGoodExtendData =  order_good_extend::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get();
+        if (!$orderGoodExtendData) return false;
+        return $orderGoodExtendData->toArray();
+    }
+
     /**
      *
      * 查询未完成的订单
@@ -114,15 +132,20 @@ class OrderRepository
     /**
      * 更新订单
      */
-    public static function closeOrder($orderNo){
+    public static function closeOrder($orderNo, $userId=''){
 
         if (empty($orderNo)) {
 
             return false;
         }
-        $order =  Order::where([
-            ['order_no', '=', $orderNo],
-        ])->first();
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        if (!empty($userId)) {
+
+            $whereArray[] = ['user_id', '=', $userId];
+        }
+        $order =  Order::where($whereArray)->first();
+        return $order->toArray();
         if (!$order) return false;
         $order->order_status = OrderStatus::OrderClosed;
         if ($order->save()) {
@@ -149,5 +172,32 @@ class OrderRepository
 //
 //
 //    }
+
+    /**
+     * @param array $param  orderNo 订单号
+     * @return array|bool
+     */
+    public static function getOrderInfo($param = array())
+    {
+        if (empty($param)) {
+
+            return false;
+        }
+        if (isset($param['orderNo']) && !empty($param['orderNo']))
+        {
+
+            $orderData = DB::table('order_info')
+                ->leftJoin('order_userinfo', function ($join) {
+                    $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
+                })
+                ->where('order_info.order_no', '=', $param['orderNo'])
+                ->select('order_info.*','order_userinfo.*')
+                ->get();
+            return $orderData->toArray();
+        }
+
+
+
+    }
 
 }
