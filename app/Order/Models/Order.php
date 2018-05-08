@@ -19,7 +19,7 @@ class Order extends Model
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
      * 获取当前时间

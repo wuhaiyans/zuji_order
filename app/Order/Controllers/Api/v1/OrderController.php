@@ -2,9 +2,11 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\JobQueueApi;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -80,7 +82,12 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],env("API_INNER_URL"), [
+            'method' => 'api.inner.cancelOrder',
+            'time' => date('Y-m-d H:i:s'),
+        ],time()+7200,"");
+        Log::error($b?"IS ok":"IS error");
+        return apiResponse($res,ApiStatus::CODE_0);
     }
 
     public function orderList(){
