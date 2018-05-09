@@ -33,6 +33,8 @@ return [
     'api.Instalment.create'             => 'InstalmentController@create',
     // 扣款接口
     'api.Instalment.createpay'          => 'InstalmentController@createpay',
+    // 多项扣款接口
+    'api.Instalment.multi_createpay'    => 'InstalmentController@multi_createpay',
 
     //分期相关
     // 代扣协议查询
