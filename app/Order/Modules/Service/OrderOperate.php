@@ -27,7 +27,7 @@ class OrderOperate
      * @
      * 取消订单
      */
-    public static function cancelOrder($orderNo,$userId)
+    public static function cancelOrder($orderNo,$userId='')
     {
         if (empty($orderNo)) {
             return false;
@@ -35,8 +35,10 @@ class OrderOperate
         //开启事物
         DB::beginTransaction();
         try {
+
             //关闭订单状态
-            $orderData =  OrderRepository::closeOrder($orderNo);
+            $orderData =  OrderRepository::closeOrder($orderNo,$userId);
+            dd($orderData);
             if (!$orderData) {
                 DB::rollBack();
                return ApiStatus::CODE_31002;
@@ -55,7 +57,7 @@ class OrderOperate
                     $goodsId = $orderGoodsValues['good_id'];
                     $prod_id = $orderGoodsValues['prod_id'];
                 }
-                $success = $this->third->AddStock($prod_id, $goodsId);
+                $success =$this->third->AddStock($prod_id, $goodsId);
 
             }
 
@@ -64,13 +66,13 @@ class OrderOperate
                 return ApiStatus::CODE_31003;
             }
             //优惠券归还
-           $success =  $this->third->setCoupon（['user_id'=>$userId ,'coupon_id'=>$orderNo]);
+           $success =  $this->third->setCoupon(['user_id'=>$userId ,'coupon_id'=>$orderNo]);
             if (!$success) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
             //分期关闭
-           $success =  $this->orderInstal->close($data['order_no'=>$orderNo]);
+           $success =  $this->orderInstal->close(['order_no'=>$orderNo]);
              if (!$success) {
                  DB::rollBack();
                  return ApiStatus::CODE_31004;
@@ -95,6 +97,28 @@ class OrderOperate
         }
         $orderSn = $year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') .$orderType. substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
         return $orderSn;
+    }
+
+
+    public static function getOrderInfo($orderNo)
+    {
+        $order = array();
+        if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
+        //查询订单和用户发货的数据
+        $orderData =  OrderRepository::getOrderInfo(array('orderNo'=>$orderNo));
+        if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        $order['order_info'] = $orderData;
+        //订单商品列表相关的数据
+        $goodsData =  OrderRepository::getGoodsListByOrderId(array('orderNo'=>$orderNo));
+        if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        $order['goods_info'] = $goodsData;
+        //设备扩展信息表
+        $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
+        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        $order['goods_extend_info'] = $goodsExtendData;
+        return apiResponseArray(ApiStatus::CODE_0,$order);
+//        return $orderData;
+
     }
 
 

@@ -13,9 +13,31 @@
  * @return \Illuminate\Http\JsonResponse
  *
  */
+use App\Lib\ApiStatus;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
+    if (empty($errmsg)) {
+
+        $errmsg =  ApiStatus::$errCodes[$errno];
+    }
     return response()->json(['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg]);
+}
+
+/**
+ * @param array $data
+ * @param int $errno
+ * @param string $errmsg
+ * @return array
+ * 接口内部返回
+ *
+ */
+function apiResponseArray($errno=0,$data=[], $errmsg='')
+{
+    if (empty($errmsg)) {
+
+        $errmsg =  ApiStatus::$errCodes[$errno];
+    }
+    return ['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg];
 }
 
 /**
@@ -202,4 +224,27 @@ function v($data, $exit = '')
     if($exit == ""){
         exit;
     }
+}
+
+/**
+ * heaven
+ * @param $noType :1,分期交易号; 2,退货编号3.支付交易
+ *  生成退款单号
+ */
+function createNo($noType=1){
+    $npreNoType = array(
+        //分期交易号
+        1 => 'f',
+        2 => 't',
+        3=> 'p',
+    );
+    $year = array();
+    if (!isset($npreNoType[$noType])) {
+        return false;
+    }
+    for($i=65;$i<91;$i++){
+        $year[]= strtoupper(chr($i));
+    }
+    $orderSn = $npreNoType[$noType].$year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
+    return $orderSn;
 }

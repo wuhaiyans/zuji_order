@@ -1,0 +1,93 @@
+<?php
+/**
+ * User: wansq
+ * Date: 2018/5/7
+ * Time: 17:52
+ */
+
+
+namespace App\Lib\Warehouse;
+use App\Lib\Curl;
+
+/**
+ * Class Delivery
+ * 发货系统
+ */
+class Delivery
+{
+
+
+    /**
+     * 订单请求
+     * 发货申请
+     */
+    public static function apply($order_no)
+    {
+        $base_api = config('api.warehouse_api_uri') . '/apply';
+
+        $info = self::getOrderDetail($order_no);
+
+        $response = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.send',//模拟
+            'data' => json_encode($info)
+        ]);
+
+
+        return $response;
+    }
+
+    /**
+     * 订单请求
+     * 取消发货
+     */
+    public static function cancel($order_no)
+    {
+        $base_api = config('api.warehouse_api_uri').'/apply';
+
+        $response = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.cancel',//模拟
+            'data' => json_encode(['order_no'=>$order_no])
+        ]);
+
+        return $response;
+    }
+
+
+    /**
+     * 客户签收后操作请求 或者自动签收
+     * 接收反馈
+     * 当auto=true时，为系统到期自己修改为签收
+     */
+    public static function receive($order_no, $auto=false)
+    {
+        \App\Lib\Order\Delivery::receive($order_no, $auto);
+    }
+
+
+    /**
+     * Delivery constructor.
+     * 发货反馈
+     */
+    public static function delivery($order_no)
+    {
+        \App\Lib\Order\Delivery::delivery($order_no);
+    }
+
+    /**
+     * 根据order_no取发货详细内容
+     * 直接调用订单那边提供的方法
+     */
+    public static function getOrderDetail($order_no)
+    {
+        return [
+            ['name'=>'张三', 'num'=>12],
+            ['name'=>'李四', 'num'=>10],
+        ];
+    }
+
+
+}
