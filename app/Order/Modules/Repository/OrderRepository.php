@@ -77,7 +77,10 @@ class OrderRepository
                 $goods_amount +=$v['sku']['all_amount'];
                 $goods_yajin  +=$v['sku']['yajin'];
                 $coupon_amount+=$v['sku']['discount_amount'];
-                $coupon[]=$v['coupon']['coupon_no'];
+                if(isset($v['coupon']['coupon_no'])){
+                    $coupon[]=$v['coupon']['coupon_no'];
+                }
+
                 $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
@@ -111,15 +114,14 @@ class OrderRepository
                 if(!$goods_id){
                     return ApiStatus::CODE_30005;
                 }
-//                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
-//                // 生成分期
-//                $instalment_data =array_merge($v,['order'=>$data],$user_info);
-//                //var_dump($instalment_data);die;
-//                $instalment = $this->instalment->create($instalment_data);
-//                //var_dump($instalment);die;
-//                if(!$instalment){
-//                    return ApiStatus::CODE_30005;
-//                }
+                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
+                // 生成分期
+                $instalment_data =array_merge($v,['order'=>$data],$user_info);
+                //var_dump($instalment_data);die;
+                $instalment = $this->instalment->create($instalment_data);
+                if(!$instalment){
+                    return ApiStatus::CODE_30005;
+                }
 
             }
         }
@@ -160,7 +162,7 @@ class OrderRepository
 
         // 下单减少库存
 
-        $b =$this->third->ReduceStock($reduce_data);
+       // $b =$this->third->ReduceStock($reduce_data);
 
         //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
@@ -169,6 +171,35 @@ class OrderRepository
 
         return true;
 }
+
+    /**
+     *  保存支付交易号
+     */
+    public static function updateTrade($orderNo, $trade_no,$userId=''){
+
+        if (empty($orderNo)) {
+            return false;
+        }
+        if (empty($trade_no)) {
+            return false;
+        }
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        if (!empty($userId)) {
+
+            $whereArray[] = ['user_id', '=', $userId];
+        }
+        $order =  Order::where($whereArray)->first();
+        //return $order->toArray();
+        if (!$order) return false;
+        $order->trade_no = $trade_no;
+        if ($order->save()) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 
     /**
      *
@@ -215,6 +246,29 @@ class OrderRepository
         ])->get();
         if (!$orderGoodExtendData) return false;
         return $orderGoodExtendData->toArray();
+    }
+    /**
+     *
+     * 查询订单是否可以支付
+     *
+     */
+    public static function isPay($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderData = Order::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->first()->toArray();
+        if(empty($orderData)){
+            return false;
+        }
+        if($orderData['order_status']!= OrderStatus::OrderWaitPaying || $orderData['pay_time'] >0){
+            return false;
+        }
+        if(($orderData['order_amount']+$orderData['order_yajin'])<=0){
+            return false;
+        }
+        return $orderData;
+
     }
 
     /**

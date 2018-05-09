@@ -20,6 +20,8 @@ $api->version('v1', [
     $api->post('token', 'UserController@token');    //获取token
     $api->post('refresh-token', 'UserController@refershToken'); //刷新token
 
+    $api->post('trade/notify', 'TradeController@notify'); //支付回调接口
+
    // $api->group(['middleware' => ['auth:api']], function($api) {
 
         $apiMap = config('apimap');

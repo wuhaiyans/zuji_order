@@ -43,10 +43,13 @@ class OrderInstalment
     ];
      */
     public static function create($params){
+        //var_dump($params);die;
         $order    = $params['order'];
         $sku      = $params['sku'];
-        $coupon   = !isset($params['coupon']) ? $params['coupon'] : "";
+        $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
+
+
 
         $order = filter_array($order, [
             'order_no' => 'required',
@@ -67,6 +70,7 @@ class OrderInstalment
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
+
         if(count($sku) < 8){
 
             return false;

@@ -236,7 +236,7 @@ function createNo($noType=1){
         //分期交易号
         1 => 'f',
         2 => 't',
-        3=> 'p',
+        3=> 'P',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
