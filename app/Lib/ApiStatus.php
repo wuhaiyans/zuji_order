@@ -105,6 +105,8 @@ class ApiStatus {
     const CODE_71004 = '71004'; //用户代扣协议编号错误
     const CODE_71005 = '71005'; //买家余额不足
     const CODE_71006 = '71006'; //扣款失败
+    const CODE_71007 = '71007'; //查询用户代扣协议出现异常 获取签约代扣URL地址失败
+    const CODE_71008 = '71008'; //获取签约代扣URL地址失败
 
     public static $errCodes = [
         self::CODE_0     => 'success',
@@ -174,6 +176,8 @@ class ApiStatus {
         self::CODE_71004 => '用户代扣协议编号错误',
         self::CODE_71005 => '买家余额不足',
         self::CODE_71006 => '扣款失败',
+        self::CODE_71007 => '查询用户代扣协议出现异常',
+        self::CODE_71008 => '获取签约代扣URL地址失败',
 
     ];
 	
