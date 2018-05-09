@@ -90,7 +90,7 @@ class ReceiveRepository
     /**
      * 取消签收
      */
-    public static function calcelReceive()
+    public static function cancelReceive()
     {
 
     }
