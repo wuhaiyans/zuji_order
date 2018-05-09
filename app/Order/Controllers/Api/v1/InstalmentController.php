@@ -11,6 +11,9 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\ThirdInterface;
+use App\Lib\Common\SmsApi;
+use Illuminate\Support\Facades\DB;
+
 
 class InstalmentController extends Controller
 {
@@ -112,11 +115,16 @@ class InstalmentController extends Controller
         $instalment_id  = $request['instalment_id'];
         $user_id        = $request['user_id'];
         $remark         = $request['remark'];
+        $appid          = 1;
+
+        //开启事务
+        DB::beginTransaction();
 
         // 查询分期信息
         $instalment_info = OrderInstalment::queryByInstalmentId($instalment_id);
 
         if( !is_array($instalment_info)){
+            DB::rollBack();
             // 提交事务
             return apiResponse([], $instalment_info, ApiStatus::$errCodes[$instalment_info]);
         }
@@ -124,15 +132,16 @@ class InstalmentController extends Controller
         $allow = OrderInstalment::allow_withhold($instalment_id);
 
         if(!$allow){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "不允许扣款" );
         }
+
         // 生成交易码
         $trade_no = createNo();
 
-
         // 状态在支付中或已支付时，直接返回成功
         if( $instalment_info['status'] == OrderInstalmentStatus::SUCCESS && $instalment_info['status'] = OrderInstalmentStatus::PAYING ){
-            return apiResponse($list,ApiStatus::CODE_0,"success");
+            return apiResponse($instalment_info,ApiStatus::CODE_0,"success");
         }
 
         // 扣款交易码
@@ -140,6 +149,7 @@ class InstalmentController extends Controller
             // 1)记录租机交易码
             $b = OrderInstalment::set_trade_no($instalment_id, $trade_no);
             if( $b === false ){
+                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71002, "租机交易码错误");
             }
             $instalment_info['trade_no'] = $trade_no;
@@ -150,7 +160,14 @@ class InstalmentController extends Controller
         //查询订单记录
         $order_info = OrderRepository::getInfoById($instalment_info['order_no']);
         if( !$order_info ){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+
+        //判断用户
+        if($order_info['user_id'] != $user_id){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_20001, "user_id参数错误");
         }
 
         // 查询用户协议
@@ -158,6 +175,7 @@ class InstalmentController extends Controller
         $user_info = $third->GetUser($order_info['user_id']);
 
         if( !is_array($user_info )){
+            DB::rollBack();
             return apiResponse([], $instalment_info, ApiStatus::$errCodes[$instalment_info]);
         }
 
@@ -168,6 +186,7 @@ class InstalmentController extends Controller
         ];
         $result = OrderInstalmentRepository::save(['id'=>$instalment_id],$data);
         if(!$result){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71001, '扣款备注保存失败');
         }
         // 商品
@@ -176,6 +195,7 @@ class InstalmentController extends Controller
         // 价格
         $amount = $instalment_info['amount']/100;
         if( $amount<0 ){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
         }
 
@@ -190,40 +210,40 @@ class InstalmentController extends Controller
 
         //判断支付方式
         if( $order_info['pay_type'] == PayInc::MiniAlipay ){
-            $this->zhima_order_confrimed_table =$this->load->table('order2/zhima_order_confirmed');
-            //获取订单的芝麻订单编号
-            $zhima_order_info = $this->zhima_order_confrimed_table->where(['order_no'=>$order_info['order_no']])->find(['lock'=>true]);
-            if(!$zhima_order_info){
-                $this->order_service->rollback();
-                showmessage('该订单没有芝麻订单号！','null',0);
-            }
-            //芝麻小程序下单渠道
-            $Withhold = new \zhima\Withhold();
-            $params['out_order_no'] = $order_info['order_no'];
-            $params['zm_order_no'] = $zhima_order_info['zm_order_no'];
-            $params['out_trans_no'] = $trade_no;
-            $params['pay_amount'] = $amount;
-            $params['remark'] = $remark;
-            $b = $Withhold->withhold( $params );
-            \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求",$params);
-            //判断请求发送是否成功
-            if($b == 'PAY_SUCCESS'){
-                // 提交事务
-                $this->order_service->commit();
-                \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求回执",$b);
-                showmessage('小程序扣款操作成功','null',1);
-            }elseif($b =='PAY_FAILED'){
-                $this->order_service->rollback();
-                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$data_sms);
-                showmessage("小程序支付失败", 'null');
-
-            }elseif($b == 'PAY_INPROGRESS'){
-                $this->order_service->commit();
-                showmessage("小程序支付处理中请等待", 'null');
-            }else{
-                $this->order_service->rollback();
-                showmessage("小程序支付处理失败", 'null');
-            }
+//            $this->zhima_order_confrimed_table =$this->load->table('order2/zhima_order_confirmed');
+//            //获取订单的芝麻订单编号
+//            $zhima_order_info = $this->zhima_order_confrimed_table->where(['order_no'=>$order_info['order_no']])->find(['lock'=>true]);
+//            if(!$zhima_order_info){
+//                $this->order_service->rollback();
+//                showmessage('该订单没有芝麻订单号！','null',0);
+//            }
+//            //芝麻小程序下单渠道
+//            $Withhold = new \zhima\Withhold();
+//            $params['out_order_no'] = $order_info['order_no'];
+//            $params['zm_order_no'] = $zhima_order_info['zm_order_no'];
+//            $params['out_trans_no'] = $trade_no;
+//            $params['pay_amount'] = $amount;
+//            $params['remark'] = $remark;
+//            $b = $Withhold->withhold( $params );
+//            \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求",$params);
+//            //判断请求发送是否成功
+//            if($b == 'PAY_SUCCESS'){
+//                // 提交事务
+//                $this->order_service->commit();
+//                \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求回执",$b);
+//                showmessage('小程序扣款操作成功','null',1);
+//            }elseif($b =='PAY_FAILED'){
+//                $this->order_service->rollback();
+//                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$data_sms);
+//                showmessage("小程序支付失败", 'null');
+//
+//            }elseif($b == 'PAY_INPROGRESS'){
+//                $this->order_service->commit();
+//                showmessage("小程序支付处理中请等待", 'null');
+//            }else{
+//                $this->order_service->rollback();
+//                showmessage("小程序支付处理失败", 'null');
+//            }
 
 
         }else {
@@ -231,25 +251,31 @@ class InstalmentController extends Controller
             // 代扣协议编号
             $agreement_no = $user_info['withholding_no'];
             if (!$agreement_no) {
+                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
             }
             // 代扣接口
             $withholding = new WithholdingApi();
             // 扣款
-//            $b = $withholding->withhold($appid,$parmas,$agreement_no, $trade_no, $subject, $amount);
-            $b = $withholding->withhold($appid,$parmas);
-            if (!$b) {
-                $this->order_service->rollback();
+            $withholding_data = [
+                'agreement_no'=>$agreement_no,
+                'trade_no'=>$trade_no,
+                'subject'=>$subject,
+                'amount'=>$amount,
+            ];
+            $withholding_b = $withholding->withhold($appid,$withholding_data);
+            if (!$withholding_b) {
+                DB::rollBack();
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    $this->instalment_failed($instalment_info['fail_num'], $instalment_id, $instalment_info['term'], $data_sms);
-                    showmessage("买家余额不足", 'null');
+                    OrderInstalment::instalment_failed($instalment_info['fail_num'], $instalment_id, $instalment_info['term'], $data_sms);
+                    return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
                 } else {
-                    showmessage(get_error(), 'null');
+                    return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
                 }
             }
 
             //发送短信
-            \zuji\sms\SendSms::instalment_pay($data_sms);
+            SmsApi::sendMessage($data_sms['mobile'], 'hsb_sms_b427f', $data_sms);
 
             //发送消息通知
 //            //通过用户id查询支付宝用户id
@@ -276,11 +302,10 @@ class InstalmentController extends Controller
 //                }
 //            }
             // 提交事务
-            $this->order_service->commit();
-            showmessage('操作成功', 'null', 1);
+            DB::commit();
+            return apiResponse([],ApiStatus::CODE_0,"success");
 
         }
-        p($allow);
 
 
     }

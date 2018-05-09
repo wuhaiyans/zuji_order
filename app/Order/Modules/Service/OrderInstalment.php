@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\PublicInc;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
@@ -8,6 +9,9 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\ApiStatus;
+use App\Lib\Common\SmsApi;
+use Illuminate\Support\Facades\Log;
+
 
 class OrderInstalment
 {
@@ -258,6 +262,49 @@ class OrderInstalment
 
     }
 
+    /**
+     * 更新分期扣款的租机交易码
+     * @param int $id	主键ID
+     * @param string $trade_no	交易码
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function instalment_failed($fail_num,$instalment_id,$term,$data_sms){
+
+        $data_sms = filter_array($data_sms, [
+            'mobile' => 'required',
+            'orderNo' => 'required',
+            'realName' =>'required',
+            'goodsName' =>'required',
+            'zuJin' =>'required',
+        ]);
+        if( count($data_sms) != 5 ){
+            Log::error('短信参数错误');
+            return false;
+        }
+
+        if ($fail_num == 0) {
+            $model = 'hsb_sms_99a6f';
+        } elseif ($fail_num > 0 && $term == date("Ym")) {
+            $model = 'hsb_sms_16f75';
+        } elseif ($fail_num > 0 && $term <= date("Ym") - 1) {
+            $model = 'hsb_sms_7326b';
+        }
+
+        SmsApi::sendMessage($data_sms['mobile'], $model, [
+            'realName'      => $data_sms['realName'],
+            'orderNo'       => $data_sms['orderNo'],
+            'goodsName'     => $data_sms['goodsName'],
+            'zuJin'         => $data_sms['zuJin'],
+            'serviceTel'    => PublicInc::Customer_Service_Phone,
+        ]);
+
+        $fail_num = intval($fail_num) + 1;
+
+        //修改失败次数
+        $b = OrderInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num]);
+        Log::error('更新失败次数失败');
+        return $b;
+    }
 
 
 }
