@@ -38,6 +38,7 @@ class OrderOperate
 
             //关闭订单状态
             $orderData =  OrderRepository::closeOrder($orderNo,$userId);
+            dd($orderData);
             if (!$orderData) {
                 DB::rollBack();
                return ApiStatus::CODE_31002;
@@ -47,11 +48,12 @@ class OrderOperate
             $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
             if ($orderGoods) {
                 foreach ($orderGoods as $orderGoodsValues){
-                    $stockDelta[] = [
-                        'goodsId'=>$orderGoodsValues['good_id'],
-                        'prod_id'=>$orderGoodsValues['prod_id'],
-                        'quantity'=>$orderGoodsValues['quantity'],
-                    ];
+                    //暂时一对一
+//                    $stockDelta[] = [
+//                        'goodsId'=>$orderGoodsValues['good_id'],
+//                        'prod_id'=>$orderGoodsValues['prod_id'],
+//                        'quantity'=>$orderGoodsValues['quantity'],
+//                    ];
                     $goodsId = $orderGoodsValues['good_id'];
                     $prod_id = $orderGoodsValues['prod_id'];
                 }
@@ -114,11 +116,8 @@ class OrderOperate
         $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
         if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_extend_info'] = $goodsExtendData;
-        //分期信息
-        $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
-        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-        $order['goods_extend_info'] = $goodsExtendData;
         return apiResponseArray(ApiStatus::CODE_0,$order);
+//        return $orderData;
 
     }
 

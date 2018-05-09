@@ -218,4 +218,8 @@ class OrderCreater
     public function get_order_info($where){
         return $this->orderRepository->get_order_info($where);
     }
+    //更新订单状态
+    public function order_update($order_no){
+        return $this->orderRepository->order_update($order_no);
+    }
 }

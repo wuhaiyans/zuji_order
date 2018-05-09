@@ -31,7 +31,7 @@ $api->version('v1', [
 
 
 
-
+    //发货
     $api->any('warehouse.delivery.cancel', 'DeliveryController@cancel'); //取消发货
     $api->any('warehouse.delivery.receive', 'DeliveryController@receive'); //签收
     $api->any('warehouse.delivery.show', 'DeliveryController@show'); //清单
@@ -55,22 +55,6 @@ $api->version('v1', [
     $api->any('warehouse.receive.finishCheck', 'ReceiveController@finishCheck');//验收完成，针对收货单
     $api->any('warehouse.receive.show', 'ReceiveController@show');//清单查询，针对收货单
     $api->any('warehouse.receive.note', 'ReceiveController@note');//录入检测项，针对收货单
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 });

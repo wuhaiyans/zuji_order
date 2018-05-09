@@ -90,8 +90,33 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
-    public function orderList(){
-        echo "订单列表接口";
+
+    /**
+     * 订单列表接口
+     * @param Request $request
+     * heaven
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderList(Request $request){
+        try{
+
+            $params = $request->input('params');
+
+            $orderData = Service\OrderOperate::getOrderList($params);
+
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_33001);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
     }
 
     public function orderDetail(){

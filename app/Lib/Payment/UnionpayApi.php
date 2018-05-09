@@ -27,15 +27,15 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function openBankCard( $appid ,array $params ){
         $ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
-		$ApiRequest->setMethod('pay.unionpay.open');
+        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
+        $ApiRequest->setAppid( $appid );	// 业务应用ID
+        $ApiRequest->setMethod('pay.unionpay.open');
 		$ApiRequest->setParams($params);
-		$Response = $ApiRequest->send();
-		if( !$Response->isSuccessed() ){
+        $Response = $ApiRequest->send();
+        if( !$Response->isSuccessed() ){
 			self::$error = '获取开通银行卡链接与参数失败';
-			return false;
-		}
+            return false;
+        }
 		return $Response->getData();
 	}
 

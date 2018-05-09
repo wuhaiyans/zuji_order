@@ -163,13 +163,38 @@ class OrderInstalmentRepository
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
-        $result =  Order::where($where)->save($status);
+        $result =  OrderInstalment::where($where)->save($status);
         if (!$result) return false;
 
         return true;
 
     }
 
+    /**
+     * 关闭分期
+     */
+    public static function setTradeNo($id, $trade_no){
+
+        if (!$id ) {
+            return false;
+        }
+
+        if (!$trade_no ) {
+            return false;
+        }
+
+        $data = [
+            'trade_no'=>$trade_no
+        ];
+        $result =  OrderInstalment::where(
+            ['id'=>$id]
+        )->update($data);
+
+        if (!$result) return false;
+
+        return true;
+
+    }
 
 
     /**
@@ -263,7 +288,6 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-            p($_data);
             $ret = $this->OrderInstalment->save($_data);
 
             if(!$ret){
@@ -279,7 +303,7 @@ class OrderInstalmentRepository
      * int    $times   期数
      * return string
      */
-    public function get_terms($times){
+    public static function get_terms($times){
         $terms = [];
         if($times < 0){
             return $terms;
@@ -308,6 +332,30 @@ class OrderInstalmentRepository
 
         return $terms;
     }
+
+    /*
+     * 修改方法
+     * array    $where
+     * array    $data
+     * return bool
+     */
+    public static function save($where, $data){
+
+        if ( empty($where )) {
+            return false;
+        }
+
+        if ( empty($data )) {
+            return false;
+        }
+
+
+        $result =  OrderInstalment::where($where)->update($data);
+        if (!$result) return false;
+
+        return true;
+    }
+
 
 
 }

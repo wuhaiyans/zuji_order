@@ -20,7 +20,6 @@ return [
         'appid'=>1,
         'version'=>'1.0',
     ],
-    'API_INNER_URL'=>env("API_INNER_URL","http://dev-order.com/api"),
 
 
 ];
