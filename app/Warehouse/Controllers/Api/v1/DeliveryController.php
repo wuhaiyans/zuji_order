@@ -6,6 +6,7 @@ use App\Lib\ApiStatus;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoodsImei;
 use App\Warehouse\Modules\Service\DeliveryCreater;
+use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,7 @@ class DeliveryController extends Controller
     public function cancel()
     {
 
+        dd('abc');
         $rules = [
             'order_no' => 'required'
         ];
@@ -61,11 +63,8 @@ class DeliveryController extends Controller
 
         try {
 
+            DeliveryService::cancel($params['order_no']);
 
-
-            if (!Delivery::cancel($params['order_no'])) {
-                return \apiResponse([], ApiStatus::CODE_60002, '取消未成功');
-            }
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

@@ -8,7 +8,7 @@
  */
 namespace App\Warehouse\Modules\Repository;
 
-use App\Order\Models\DeliveryLog;
+use App\Warehouse\Models\DeliveryLog;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
 use App\Warehouse\Modules\Inc\DeliveryStatus;
@@ -69,6 +69,20 @@ class DeliveryRepository
 
         DB::commit();
 
+    }
+
+
+
+    /**
+     * @param $order_no
+     * 取消发货
+     */
+    public static function cancel($order_no)
+    {
+        $model = self::where('order_no', $order_no)->first();
+        $model->status = self::STATUS_CANCEL;
+
+        return $model->update();
     }
 
 }

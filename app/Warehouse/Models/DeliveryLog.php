@@ -5,7 +5,7 @@
  *
  *  User: wangjinlin
  */
-namespace App\Order\Models;
+namespace App\Warehouse\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
