@@ -41,10 +41,27 @@ $api->version('v1', [
     $api->any('warehouse.delivery.cancelMatch', 'DeliveryController@cancelMatch'); //取消配货
     $api->any('warehouse.delivery.addImei', 'DeliveryController@addImei'); //添加imei
     $api->any('warehouse.delivery.delImei', 'DeliveryController@delImei'); //删除imei
-
-
-
     $api->any('warehouse.delivery.list', 'DeliveryController@list'); //列表
+
+
+    //收货
+    $api->any('warehouse.receive.list', 'ReceiveController@list'); //列表
+    $api->any('warehouse.receive.create', 'ReceiveController@create'); //创建
+    $api->any('warehouse.receive.cancel', 'ReceiveController@cancel'); //取消
+    $api->any('warehouse.receive.received', 'ReceiveController@received'); //收货
+    $api->any('warehouse.receive.calcelReceive', 'ReceiveController@calcelReceive'); //改变收货状态为未收货
+    $api->any('warehouse.receive.check', 'ReceiveController@check');//验收，针对设备
+    $api->any('warehouse.receive.cancelCheck', 'ReceiveController@cancelCheck');//验收取消，针对设备
+    $api->any('warehouse.receive.finishCheck', 'ReceiveController@finishCheck');//验收完成，针对收货单
+    $api->any('warehouse.receive.show', 'ReceiveController@show');//清单查询，针对收货单
+    $api->any('warehouse.receive.note', 'ReceiveController@note');//录入检测项，针对收货单
+
+
+
+
+
+
+
 
 
 
