@@ -34,23 +34,13 @@ class OrderRepository
     public function create($data,$schema){
 
 //        var_dump('创建订单...');
-   //     var_dump($schema);
+        //     var_dump($schema);
 //        var_dump('创建订单结束...');die;
         $time =time();
         //用户信息
         $user_info = $schema['user_info'];
         //商品信息
         $sku_info = $schema['sku_info'];
-
-        // 创建订单
-        $order_data = [
-            'order_status' => OrderStatus::OrderWaitPaying,
-            'order_no' => $data['order_no'],  // 编号
-            'appid'=>$data['appid'],
-            'create_time' => $time,
-        ];
-        //var_dump($user_info);
-
         // 写入用户信息
         $user_data = [
             'order_no'=>$data['order_no'],
@@ -67,7 +57,6 @@ class OrderRepository
             'realname'=>$user_info['credit']['realname'],
             'cret_no'=>$user_info['credit']['cert_no'],
         ];
-
         $id =$this->user->insertGetId($user_data);
         if(!$id){
             return ApiStatus::CODE_30005;
@@ -88,7 +77,7 @@ class OrderRepository
                 $goods_amount +=$v['sku']['all_amount'];
                 $goods_yajin  +=$v['sku']['yajin'];
                 $coupon_amount+=$v['sku']['discount_amount'];
-               // $coupon[]=$v['coupon']['coupon_no'];
+                $coupon[]=$v['coupon']['coupon_no'];
                 $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
@@ -134,68 +123,51 @@ class OrderRepository
 
             }
         }
-        foreach ($sku_info as $k =>$v){
-           // var_dump($sku_info);die;
-            // 保存 商品信息
-            $goods_data = [
-                'goods_name'=>$v['sku']['spu_name'],
-                'goods_id'=>$v['sku']['sku_id'],
-                'goods_no'=>$v['sku']['sku_no'],
-                'prod_id'=>$v['sku']['spu_id'],
-                'prod_no'=>$v['sku']['spu_no'],
-                'brand_id'=>$v['sku']['brand_id'],
-                'category_id'=>$v['sku']['category_id'],
-                'user_id'=>$user_info['address']['user_id'],
-                'quantity'=>$v['sku']['sku_num'],
-                'goods_yajin'=>$v['sku']['yajin'],
-                'yajin'=>$v['deposit']['yajin'],
-                'zuqi'=>$v['sku']['zuqi'],
-                'zuqi_type'=>$v['sku']['zuqi_type'],
-                'zujin'=>$v['sku']['zujin'],
-                'order_no'=>$data['order_no'],
-                'chengse'=>$v['sku']['chengse'],
-                'discount_amount'=>$v['sku']['discount_amount'],
-                'amount_after_discount'=>$v['sku']['amount'],
-                'edition'=>$v['sku']['edition'],
-                'market_price'=>$v['sku']['market_price'],
-                'price'=>"",
-                'spec'=>json_encode($v['sku']['specs']),
-                'insurance'=>$v['sku']['yiwaixian'],
-                'buyout_price'=>$v['sku']['buyout_price'],
-                'weight'=>$v['sku']['weight'],
-            ];
-            $order_id =$this->order->insertGetId($order_data);
-            if(!$order_id){
-                return ApiStatus::CODE_30005;
-            }
-             //存储蚁盾信息
-            $yidun_data =[
-                'decision' => $user_info['yidun']['decision'],
-                'order_no'=>$data['order_no'],  // 编号
-                'score' => $user_info['yidun']['score'],
-                'strategies' =>$user_info['yidun']['strategies'],
-            ];
-            $yidun_id =$this->yidun->insertGetId($yidun_data);
-            if(!$yidun_id){
-                return ApiStatus::CODE_30005;
-            }
 
-
-            // 如果有优惠券 使用优惠券接口 失败回滚
-            // $this->third->UseCoupon();
-
-            // 下单减少库存
-
-           // $b =$this->third->ReduceStock($reduce_data);
+        // 创建订单
+        $order_data = [
+            'order_status' => OrderStatus::OrderWaitPaying,
+            'order_no' => $data['order_no'],  // 编号
+            'user_id'=>$data['user_id'],
+            'pay_type'=>$data['pay_type'],
+            'goods_amount'=>$goods_amount,
+            'order_amount'=>$order_amount,
+            'credit'=>$user_info['credit']['credit'],
+            'goods_yajin'=>$goods_yajin,
+            'order_yajin'=>$goods_yajin,
+            'coupon_amount'=>$coupon_amount,
+            'appid'=>$data['appid'],
+        ];
+        $order_id =$this->order->insertGetId($order_data);
+        if(!$order_id){
+            return ApiStatus::CODE_30005;
+        }
+        //存储蚁盾信息
+        $yidun_data =[
+            'decision' => $user_info['yidun']['decision'],
+            'order_no'=>$data['order_no'],  // 编号
+            'score' => $user_info['yidun']['score'],
+            'strategies' =>$user_info['yidun']['strategies'],
+        ];
+        $yidun_id =$this->yidun->insertGetId($yidun_data);
+        if(!$yidun_id){
+            return ApiStatus::CODE_30005;
         }
 
-            //创建订单后 发送支付短信。;
+
+        // 如果有优惠券 使用优惠券接口 失败回滚
+        // $this->third->UseCoupon();
+
+        // 下单减少库存
+
+        $b =$this->third->ReduceStock($reduce_data);
+
+        //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
 //                'goodsName' => $goods_name,    // 传递参数
 //            ]);
 
         return true;
-
 }
 
     /**
