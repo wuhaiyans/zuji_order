@@ -1,8 +1,18 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\PublicInc;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
+
 use App\Order\Modules\Repository\OrderInstalmentRepository;
+use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\ApiStatus;
+use App\Lib\Common\SmsApi;
+use Illuminate\Support\Facades\Log;
+
+
 class OrderInstalment
 {
 
@@ -150,10 +160,13 @@ class OrderInstalment
      */
     public static function queryByInstalmentId($id){
         if (empty($id)) {
-            return false;
+            return ApiStatus::CODE_20001;
         }
 
         $result =  OrderInstalmentRepository::getInfoById($id);
+        if(!$result){
+            return ApiStatus::CODE_71001;
+        }
         return $result;
     }
 
@@ -196,13 +209,13 @@ class OrderInstalment
      * @param  int  $instalment_id 订单分期付款id
      * @return bool true false
      */
-    public function allow_withhold($instalment_id){
+    public static function allow_withhold($instalment_id){
         if(empty($instalment_id)){
             return false;
         }
-        $alllow = 0;
+        $alllow = false;
         $instalment_info = OrderInstalmentRepository::getInfoById($instalment_id);
-        p($instalment_info);
+
         $status = $instalment_info['status'];
 
         $year   = date("Y");
@@ -213,23 +226,84 @@ class OrderInstalment
         $term 	= $year.$month;
         $day 	= intval(date("d"));
 
-        // 是否有扣款记录
-        $fund_auth_record = $this->fund_auth_record_table->where(['instalment_id'=>$instalment_id,'status'=>1])->find();
         //查询订单记录
-        $order_info = $this->order_service->get_order_info(['order_id'=>$instalment_info['order_id']]);
+        $order_info = OrderRepository::getInfoById($instalment_info['order_no']);
 
-        if(!$fund_auth_record && ($status == Instalment::UNPAID || $status == Instalment::FAIL)){
+        if($status == OrderInstalmentStatus::UNPAID || $status == OrderInstalmentStatus::FAIL){
             // 本月15后以后 可扣当月 之前没有扣款的可扣款
             if(($term == $instalment_info['term'] && $day >= 15) || $term > $instalment_info['term']){
                 //判断订单状态 必须是租用中 或者完成关闭的状态 才允许扣款
-                if($order_info['status']== \oms\state\State::OrderInService || $order_info['status'] == oms\state\State::OrderClosed){
-                    $alllow = 1;
+                if($order_info['order_status'] == OrderStatus::OrderInService && $order_info['freeze_type'] == OrderFreezeStatus::Non){
+                    $alllow = true;
                 }
             }
         }
-
-
         return $alllow;
     }
+
+
+    /**
+     * 更新分期扣款的租机交易码
+     * @param int $id	主键ID
+     * @param string $trade_no	交易码
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function set_trade_no($id, $trade_no){
+        if(!$id){
+            return ApiStatus::CODE_20001;
+        }
+
+        if(!$trade_no){
+            return ApiStatus::CODE_20001;
+        }
+
+        return OrderInstalmentRepository::setTradeNo($id, $trade_no);
+
+    }
+
+    /**
+     * 更新分期扣款的租机交易码
+     * @param int $id	主键ID
+     * @param string $trade_no	交易码
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function instalment_failed($fail_num,$instalment_id,$term,$data_sms){
+
+        $data_sms = filter_array($data_sms, [
+            'mobile' => 'required',
+            'orderNo' => 'required',
+            'realName' =>'required',
+            'goodsName' =>'required',
+            'zuJin' =>'required',
+        ]);
+        if( count($data_sms) != 5 ){
+            Log::error('短信参数错误');
+            return false;
+        }
+
+        if ($fail_num == 0) {
+            $model = 'hsb_sms_99a6f';
+        } elseif ($fail_num > 0 && $term == date("Ym")) {
+            $model = 'hsb_sms_16f75';
+        } elseif ($fail_num > 0 && $term <= date("Ym") - 1) {
+            $model = 'hsb_sms_7326b';
+        }
+
+        SmsApi::sendMessage($data_sms['mobile'], $model, [
+            'realName'      => $data_sms['realName'],
+            'orderNo'       => $data_sms['orderNo'],
+            'goodsName'     => $data_sms['goodsName'],
+            'zuJin'         => $data_sms['zuJin'],
+            'serviceTel'    => PublicInc::Customer_Service_Phone,
+        ]);
+
+        $fail_num = intval($fail_num) + 1;
+
+        //修改失败次数
+        $b = OrderInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num]);
+        Log::error('更新失败次数失败');
+        return $b;
+    }
+
 
 }

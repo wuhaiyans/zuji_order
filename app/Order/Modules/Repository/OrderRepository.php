@@ -3,12 +3,12 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Order\Models\Order;
+use App\Order\Models\OrderGoodExtend;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Models\order_good_extend;
-use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
 
 class OrderRepository
@@ -29,6 +29,7 @@ class OrderRepository
         $this->instalment =$instalment;
         $this->yidun =$yidun;
         $this->third =$third;
+
     }
     public function create($data,$schema){
 
@@ -40,6 +41,16 @@ class OrderRepository
         $user_info = $schema['user_info'];
         //商品信息
         $sku_info = $schema['sku_info'];
+
+        // 创建订单
+        $order_data = [
+            'order_status' => OrderStatus::OrderWaitPaying,
+            'order_no' => $data['order_no'],  // 编号
+            'appid'=>$data['appid'],
+            'create_time' => $time,
+        ];
+        //var_dump($user_info);
+
         // 写入用户信息
         $user_data = [
             'order_no'=>$data['order_no'],
@@ -56,6 +67,7 @@ class OrderRepository
             'realname'=>$user_info['credit']['realname'],
             'cret_no'=>$user_info['credit']['cert_no'],
         ];
+
         $id =$this->user->insertGetId($user_data);
         if(!$id){
             return ApiStatus::CODE_30005;
@@ -122,20 +134,35 @@ class OrderRepository
 
             }
         }
-
-            // 创建订单
-            $order_data = [
-                'order_status' => OrderStatus::OrderWaitPaying,
-                'order_no' => $data['order_no'],  // 编号
-                'user_id'=>$data['user_id'],
-                'pay_type'=>$data['pay_type'],
-                'goods_amount'=>$goods_amount,
-                'order_amount'=>$order_amount,
-                'credit'=>$user_info['credit']['credit'],
-                'goods_yajin'=>$goods_yajin,
-                'order_yajin'=>$goods_yajin,
-                'coupon_amount'=>$coupon_amount,
-                'appid'=>$data['appid'],
+        foreach ($sku_info as $k =>$v){
+           // var_dump($sku_info);die;
+            // 保存 商品信息
+            $goods_data = [
+                'goods_name'=>$v['sku']['spu_name'],
+                'goods_id'=>$v['sku']['sku_id'],
+                'goods_no'=>$v['sku']['sku_no'],
+                'prod_id'=>$v['sku']['spu_id'],
+                'prod_no'=>$v['sku']['spu_no'],
+                'brand_id'=>$v['sku']['brand_id'],
+                'category_id'=>$v['sku']['category_id'],
+                'user_id'=>$user_info['address']['user_id'],
+                'quantity'=>$v['sku']['num'],
+                'goods_yajin'=>$v['sku']['yajin'],
+                'yajin'=>$v['deposit']['yajin'],
+                'zuqi'=>$v['sku']['zuqi'],
+                'zuqi_type'=>$v['sku']['zuqi_type'],
+                'zujin'=>$v['sku']['zujin'],
+                'order_no'=>$data['order_no'],
+                'chengse'=>$v['sku']['chengse'],
+                'discount_amount'=>$v['sku']['discount_amount'],
+                'amount_after_discount'=>$v['sku']['amount'],
+                'edition'=>$v['sku']['edition'],
+                'market_price'=>$v['sku']['market_price'],
+                'price'=>"",
+                'spec'=>json_encode($v['sku']['specs']),
+                'insurance'=>$v['sku']['yiwaixian'],
+                'buyout_price'=>$v['sku']['buyout_price'],
+                'weight'=>$v['sku']['weight'],
             ];
             $order_id =$this->order->insertGetId($order_data);
             if(!$order_id){
@@ -160,6 +187,7 @@ class OrderRepository
             // 下单减少库存
 
             $b =$this->third->ReduceStock($reduce_data);
+        }
 
             //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
@@ -180,7 +208,7 @@ class OrderRepository
             if (empty($orderNo)) return false;
             $order =  Order::query()->where([
                 ['order_no', '=', $orderNo],
-            ])->get();
+            ])->first();
             if (!$order) return false;
             return $order->toArray();
     }
@@ -210,7 +238,7 @@ class OrderRepository
 
     public static function getGoodsExtendInfo($orderNo){
         if (empty($orderNo)) return false;
-        $orderGoodExtendData =  order_good_extend::query()->where([
+        $orderGoodExtendData =  OrderGoodExtend::query()->where([
             ['order_no', '=', $orderNo],
         ])->get();
         if (!$orderGoodExtendData) return false;
@@ -250,6 +278,7 @@ class OrderRepository
             $whereArray[] = ['user_id', '=', $userId];
         }
         $order =  Order::where($whereArray)->first();
+        return $order->toArray();
         if (!$order) return false;
         $order->order_status = OrderStatus::OrderClosed;
         if ($order->save()) {
@@ -296,7 +325,6 @@ class OrderRepository
     public static function getOrderInfo($param = array())
     {
         if (empty($param)) {
-
             return false;
         }
         if (isset($param['orderNo']) && !empty($param['orderNo']))
@@ -312,8 +340,23 @@ class OrderRepository
             return $orderData->toArray();
         }
 
-
-
     }
-
+    //更新订单状态
+    public static function order_update($order_no){
+        $data['freeze_type']='1';
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    //更新订单状态
+    public static function deny_update($order_no){
+        $data['freeze_type']='0';
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

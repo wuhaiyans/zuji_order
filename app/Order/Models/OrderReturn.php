@@ -15,7 +15,12 @@ class OrderReturn extends Model
 
     protected $primaryKey='id';
 
-    
 
+    /**
+     * 默认使用时间戳戳功能
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
 }

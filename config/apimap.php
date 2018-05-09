@@ -13,6 +13,8 @@ return [
 
     'api.order.pay'=>'OrderController@pay',//订单支付
 
+    'api.order.orderlist'=>'OrderController@orderList',
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
@@ -29,6 +31,16 @@ return [
     'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
+    // 扣款接口
+    'api.Instalment.createpay'          => 'InstalmentController@createpay',
+
+    //分期相关
+    // 代扣协议查询
+    'api.Withholding.query'             => 'WithholdingController@query',
+    // 代扣签约接口
+    'api.Withholding.sign'              => 'WithholdingController@sign',
+    // 代扣解约接口
+    'api.Withholding.unsign'            => 'WithholdingController@unsign',
 
 
     //退货接口

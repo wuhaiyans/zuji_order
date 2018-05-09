@@ -34,66 +34,15 @@ class DeliveryController extends Controller
      * 创建发货单
      */
     public function deliveryCreate(Request $request){
-        $orders =$request->all();
+        $request =$request->all();
 
-        $appid =$orders['appid'];//获取appid
-        $order_no =$orders['params']['order_no'];//订单编号
-        $delivery_detail =$orders['params']['delivery_detail'];//发货清单
+        $appid =$request['appid'];//获取appid
+        $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
+        $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
 
-        $delivery_row = [
-//            'delivery_no'=>
-        ];
-
+        $this->DeliveryCreate->confirmation($delivery_row);
     }
 
-
-    /**
-     * 配货完成
-     */
-    public function finishMatch()
-    {
-        $rules = [
-            'delivery_id' => 'required',
-        ];
-        $params = $this->_dealParams($rules);
-
-        if (!$params) {
-            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
-        }
-
-        try {
-            Delivery::finishMatch($params['delivery_id']);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
-        }
-
-        return \apiResponse([]);
-    }
-
-    /**
-     * 取消配货
-     */
-    public function cancelMatch()
-    {
-        $rules = [
-            'delivery_id' => 'required',
-        ];
-        $params = $this->_dealParams($rules);
-
-        if (!$params) {
-            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
-        }
-
-        try {
-            Delivery::cancelMatch($params['delivery_id']);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
-        }
-
-        return \apiResponse([]);
-    }
 
     /**
      * 列表查询
@@ -102,70 +51,6 @@ class DeliveryController extends Controller
     {
 
     }
-
-    /**
-     * 发货清单
-     */
-    public function show()
-    {
-
-    }
-
-    /**
-     * 发货
-     */
-    public function send()
-    {
-        $rules = [
-            'order_no' => 'required',
-        ];
-        $params = $this->_dealParams($rules);
-
-        if (!$params) {
-            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
-        }
-
-        try {
-            Delivery::send($params['order_no']);
-
-            \App\Lib\Warehouse\Delivery::delivery($params['order_no']);
-
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
-        }
-
-        return \apiResponse([]);
-    }
-
-
-    /**
-     * 修改物流
-     */
-    public function logistics()
-    {
-        $rules = [
-            'delivery_id' => 'required',
-            'logistics_id' => 'required',//物流渠道
-            'logistics_no' => 'required'
-        ];
-        $params = $this->_dealParams($rules);
-
-        if (!$params) {
-            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
-        }
-
-        try {
-            Delivery::logistics($params['delivery_id'], $params['logistics_id'], $params['logistics_no']);
-        } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
-        }
-
-        return \apiResponse([]);
-    }
-
-
-
 
     /**
      * 对应delivery imei列表
@@ -184,7 +69,7 @@ class DeliveryController extends Controller
         try {
             $list = Delivery::imeis($params['delivery_id']);
         } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse($list);
@@ -210,7 +95,7 @@ class DeliveryController extends Controller
                 return \apiResponse([], ApiStatus::CODE_60002, '取消未成功');
             }
         } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
@@ -238,7 +123,7 @@ class DeliveryController extends Controller
         try {
             Delivery::receive($params['delivery_id'], $auto);
         } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
@@ -265,7 +150,7 @@ class DeliveryController extends Controller
                 return \apiResponse([], ApiStatus::CODE_60002, '删除imei失败');
             }
         } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
@@ -291,7 +176,7 @@ class DeliveryController extends Controller
                 return \apiResponse([], ApiStatus::CODE_60002, '添加imei失败');
             }
         } catch (\Exception $e) {
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
