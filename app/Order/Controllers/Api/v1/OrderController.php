@@ -43,7 +43,7 @@ class OrderController extends Controller
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
-        var_dump($res);die;
+        //var_dump($res);die;
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -83,11 +83,12 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
-            'method' => 'api.inner.cancelOrder',
-            'time' => date('Y-m-d H:i:s'),
-        ],time()+7200,"");
-        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
+        //发送取消订单队列
+//        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
+//            'method' => 'api.inner.cancelOrder',
+//            'time' => date('Y-m-d H:i:s'),
+//        ],time()+7200,"");
+//        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
     }
 //订单支付
@@ -96,7 +97,8 @@ class OrderController extends Controller
         $params =$params['params'];
         $return_url =$params['return_url'];
         $order_no =$params['order_no'];
-        echo $order_no;die;
+        $trade_no =createNo(3);
+        echo $trade_no;die;
 
     }
 

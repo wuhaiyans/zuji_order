@@ -8,7 +8,7 @@ use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Models\order_good_extend;
+use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
 
 class OrderRepository
@@ -88,7 +88,7 @@ class OrderRepository
                 $goods_amount +=$v['sku']['all_amount'];
                 $goods_yajin  +=$v['sku']['yajin'];
                 $coupon_amount+=$v['sku']['discount_amount'];
-                $coupon[]=$v['coupon']['coupon_no'];
+               // $coupon[]=$v['coupon']['coupon_no'];
                 $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
@@ -146,7 +146,7 @@ class OrderRepository
                 'brand_id'=>$v['sku']['brand_id'],
                 'category_id'=>$v['sku']['category_id'],
                 'user_id'=>$user_info['address']['user_id'],
-                'quantity'=>$v['sku']['num'],
+                'quantity'=>$v['sku']['sku_num'],
                 'goods_yajin'=>$v['sku']['yajin'],
                 'yajin'=>$v['deposit']['yajin'],
                 'zuqi'=>$v['sku']['zuqi'],
@@ -186,7 +186,7 @@ class OrderRepository
 
             // 下单减少库存
 
-            $b =$this->third->ReduceStock($reduce_data);
+           // $b =$this->third->ReduceStock($reduce_data);
         }
 
             //创建订单后 发送支付短信。;
