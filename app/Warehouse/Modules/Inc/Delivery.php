@@ -86,17 +86,7 @@ class Delivery extends Model
         return $model->update();
     }
 
-    /**
-     * @param $order_no
-     * 取消发货
-     */
-    public static function cancel($order_no)
-    {
-        $model = self::where('order_no', $order_no)->first();
-        $model->status = self::STATUS_CANCEL;
 
-        return$model->update();
-    }
 
     /**
      * 修改物流
