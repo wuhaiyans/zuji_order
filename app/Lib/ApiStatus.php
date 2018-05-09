@@ -103,7 +103,7 @@ class ApiStatus {
     const CODE_71002 = '71002'; //租机交易码错误
     const CODE_71003 = '71003'; //代扣金额错误
     const CODE_71004 = '71004'; //用户代扣协议编号错误
-
+    const CODE_71005 = '71005'; //买家余额不足
 
     public static $errCodes = [
         self::CODE_0     => 'success',
@@ -171,6 +171,8 @@ class ApiStatus {
         self::CODE_71002 => '租机交易码错误',
         self::CODE_71003 => '代扣金额错误',
         self::CODE_71004 => '用户代扣协议编号错误',
+        self::CODE_71005 => '买家余额不足',
+        
     ];
 	
 
