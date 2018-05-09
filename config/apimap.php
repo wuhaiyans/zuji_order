@@ -11,7 +11,7 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
-    'api.order.pay'=>'OrderController@pay',//订单支付
+    'api.alipay.initialize'=>'TradeController@alipayInitialize',//支付宝初始化接口
 
     'api.order.orderlist'=>'OrderController@orderList',
 

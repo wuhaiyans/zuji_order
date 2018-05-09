@@ -63,6 +63,7 @@ class OrderInstalmentRepository
         $this->first_amount     = $this->zujin + $this->yiwaixian;
         $this->payment_type_id  = $this->componnet['sku']['pay_type'];
 
+
         // 如果租期类型是：天，不论几天，统一按一个分期（只生成一个分期）
         // 将 $this->zuqi 设置为 1，后续程序处理不变
         if( $this->zuqi_type == 1 ){
@@ -106,12 +107,13 @@ class OrderInstalmentRepository
      * 创建分期
      */
     public function create(){
+
         $this->order_no         = $this->componnet['order']['order_no'];
         //支持分期支付方式
         $pay_type = [
-            PayInc::WithhodingPay
+            PayInc::WithhodingPay,
+            PayInc::MiniAlipay,
         ];
-
         if(!in_array($this->payment_type_id,$pay_type)){
             return true;
         }
@@ -216,7 +218,6 @@ class OrderInstalmentRepository
 
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
-
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
@@ -243,8 +244,7 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-
-            $ret = $this->OrderInstalment->create($_data);
+            $ret = $this->OrderInstalment->insertGetId($_data);
             if(!$ret){
                 return false;
             }
@@ -288,7 +288,7 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-            $ret = $this->OrderInstalment->save($_data);
+            $ret = $this->OrderInstalment->insertGetId($_data);
 
             if(!$ret){
                 return false;
