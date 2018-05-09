@@ -44,29 +44,6 @@ class DeliveryGoodsImei extends Model
 
     }
 
-
-    /**
-     * @param $delivery_id
-     * @param $imei
-     * 添加
-     */
-    public static function add($delivery_id, $imei)
-    {
-        $model = self::where(['delivery_id'=>$delivery_id, 'imei'=>$imei]);
-        $time = time();
-
-        if (!$model) {
-            $model = new self();
-            $model->delivery_id = $delivery_id;
-            $model->imei = $imei;
-            $model->create_time = $time;
-        }
-        $model->status_time = $time;
-        $model->status = self::STATUS_YES;
-
-        return $model->save();
-    }
-
     public static function listByDelivery($delivery_id)
     {
         return self::where(['delivery_no'=>$delivery_id, 'status'=>self::STATUS_YES])->all();

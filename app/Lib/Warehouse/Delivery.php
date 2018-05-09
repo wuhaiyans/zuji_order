@@ -74,6 +74,7 @@ class Delivery
      */
     public static function delivery($order_no)
     {
+        return true;
         \App\Lib\Order\Delivery::delivery($order_no);
     }
 
