@@ -64,53 +64,5 @@ class Delivery extends Model
     }
 
 
-//
-//    /**
-//     * 生成单号
-//     */
-//    public static function generateSerial()
-//    {
-//        return date('YmdHis').uniqid();
-//    }
-//
-//
-//    /**
-//     * 收货
-//     */
-//    public static function receive($delivery_id, $auto=false)
-//    {
-//        $model = self::findOrFail($delivery_id);
-//        $model->status = self::STATUS_RECEIVED;
-//
-//        return $model->update();
-//    }
-//
-//    /**
-//     * @param $order_no
-//     * 取消发货
-//     */
-//    public static function cancel($order_no)
-//    {
-//        $model = self::where('order_no', $order_no)->first();
-//        $model->status = self::STATUS_CANCEL;
-//
-//        return$model->update();
-//    }
-//
-//    /**
-//     * @param $delivery_id
-//     * 获取imeis列表
-//     */
-//    public static function imeis($delivery_id)
-//    {
-//        return DeliveryGoodsImei::listByDelivery($delivery_id);
-//    }
-//
-//
-
-
-
-
-
 
 }

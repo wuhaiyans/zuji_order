@@ -106,6 +106,11 @@ class DeliveryRepository
     }
 
 
+    /**
+     * @param $delivery_no
+     * @return array
+     * 明细清单
+     */
     public static function detail($delivery_no)
     {
         $model = Delivery::find($delivery_no);
@@ -128,6 +133,11 @@ class DeliveryRepository
     }
 
 
+    /**
+     * @param $delivery_no
+     * @return mixed
+     * 根据$delivery_no取imeis
+     */
     public static function imeis($delivery_no)
     {
         $model = Delivery::find($delivery_no);
@@ -203,6 +213,14 @@ class DeliveryRepository
     }
 
 
+    /**
+     * @param $params
+     * @param $limit
+     * @param null $page
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     *
+     * 列表
+     */
     public static function list($params, $limit, $page=null)
     {
         return Delivery::where($params)->paginate($limit,
@@ -223,11 +241,6 @@ class DeliveryRepository
     {
 
     }
-
-
-
-
-
 
 
 
