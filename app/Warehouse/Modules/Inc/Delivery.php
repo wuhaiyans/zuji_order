@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Warehouse\Models;
+namespace App\Warehouse\Modules\Inc;
 
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
