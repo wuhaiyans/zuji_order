@@ -71,54 +71,6 @@ class OrderCreateVerify
         return $this->flag;
 
     }
-
-    public function SkuVerify($data,$user_info,$goods_info){
-        //验证用户信息
-        $users = $this->UserVerify($user_info);
-        if(!$users){
-            $this->flag =false;
-        }
-
-        //判断是否需要签约代扣协议
-        if($data['pay_type'] == PayInc::WithhodingPay){
-            $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
-            if(!$Withhold){
-                $this->flag =false;
-            }
-        }
-        //判断该渠道是否有效等
-        $channel = $this->ChannelVerify($data['appid'],$data['channel_id']);
-        if(!$channel){
-            $this->flag =false;
-        }
-
-
-        //判断商品是否允许下单
-        $goods =$this->GoodsVerify($goods_info['sku_info'],$goods_info['spu_info'],$data);
-        if(!$goods){
-            $this->flag =false;
-        }
-
-        //押金验证计算
-        $deposit =$this->DepositVerify($data,$user_info,$goods_info);
-        if(!$deposit){
-            $this->flag =false;
-        }
-        //验证优惠券信息
-        if($data['coupon_no'] !=""){
-            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
-            if(!$coupon){
-                $this->flag =false;
-            }
-        }
-
-        //分期单信息
-        if($data['pay_type']!=PayInc::WithhodingPay){
-            $instalment =$this->InstalmentVerify();
-        }
-        return $this->flag;
-
-    }
     /**
      *下单验证收货地址
      * @param $user_info
@@ -241,6 +193,31 @@ class OrderCreateVerify
 //            $this->set_error($score);
 //            $this->flag =false;
 //        }
+
+        $yidun_data =[
+            'yidun'=>[
+                'decision' => "0",
+                'score' => "0",
+                'strategies' =>"111",
+            ]
+        ];
+        //获取风控信息
+//        $yidun =$this->third->GetYidun([
+//            'user_id'=>$this->user_id,
+//            'user_name'=>$this->realname,
+//            'cert_no'=>$this->cert_no,
+//            'mobile'=>$this->mobile,
+//        ]);
+
+//        if(is_array($yidun)){
+//            $yidun_data =[
+//                'yidun'=>[
+//                    'decision' => $yidun['decision'],
+//                    'score' => $yidun['score'],
+//                    'strategies' =>$yidun['strategies'],
+//                ]
+//            ];
+//        }
         $score['score']=99;
         if($score['score'] <PublicInc::OrderScore){
             $this->set_error(ApiStatus::CODE_30006);
@@ -260,7 +237,7 @@ class OrderCreateVerify
                 'withholding_no'=> $this->withholding_no,
             ]
         ];
-        $arr =array_merge($user,[
+        $arr =array_merge($user,$yidun_data,[
             'credit' => [
                 // 已认证，通过人脸识别，通过风控，认证未过期
                 'certified' => $this->certified,

@@ -2,11 +2,16 @@
 //路由映射
 return [
     //订单相关
-    'api.order.create' => 'OrderController@create',
+
+    'api.order.create' => 'OrderController@create',//下单接口
+
+    'api.order.confirmation' => 'OrderController@confirmation',//下单确认查询接口
 
     'api.order.cancel' => 'OrderController@cancelOrder',
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
+
+    'api.order.pay'=>'OrderController@pay',//订单支付
 
     'api.order.orderlist'=>'OrderController@orderList',
 

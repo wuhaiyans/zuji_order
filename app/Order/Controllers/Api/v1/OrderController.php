@@ -18,6 +18,7 @@ class OrderController extends Controller
         $this->OrderCreate = $OrderCreate;
     }
 
+    //下单确认查询接口
     public function confirmation(Request $request){
         $orders =$request->all();
         //获取appid
@@ -49,7 +50,7 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
-
+//下单接口
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
@@ -82,12 +83,21 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],env("API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'time' => date('Y-m-d H:i:s'),
         ],time()+7200,"");
         Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
+    }
+//订单支付
+    public function pay(Request $request){
+        $params =$request->all();
+        $params =$params['params'];
+        $return_url =$params['return_url'];
+        $order_no =$params['order_no'];
+        echo $order_no;die;
+
     }
 
 
