@@ -83,7 +83,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],env("API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'time' => date('Y-m-d H:i:s'),
         ],time()+7200,"");
@@ -96,6 +96,7 @@ class OrderController extends Controller
         $params =$params['params'];
         $return_url =$params['return_url'];
         $order_no =$params['order_no'];
+        echo $order_no;die;
 
     }
 
