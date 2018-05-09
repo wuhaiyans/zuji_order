@@ -1,17 +1,12 @@
 <?php
 
 namespace App\Warehouse\Controllers\Api\v1;
-use App\Lib\ApiResponse;
 use App\Lib\ApiStatus;
-use App\Warehouse\Models\Delivery;
-use App\Warehouse\Models\DeliveryGoodsImei;
-use App\Warehouse\Modules\Repository\DeliveryImeiRepository;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
