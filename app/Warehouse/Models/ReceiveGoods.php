@@ -5,7 +5,7 @@
  * Time: 11:29
  */
 
-namespace App\Warehouse\Modules\Inc;
+namespace App\Warehouse\Models;
 
 class ReceiveGoods extends \Illuminate\Database\Eloquent\Model
 {
