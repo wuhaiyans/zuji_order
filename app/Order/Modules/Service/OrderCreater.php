@@ -41,9 +41,6 @@ class OrderCreater
                 return $user_info;
             }
             //var_dump($user_info);die;
-            //获取风控信息
-            $this->third->GetFengkong();
-
             //获取商品详情
             $goods = $this->third->GetSku($data['sku']);
             if (!is_array($goods)) {
@@ -119,9 +116,6 @@ class OrderCreater
             if(!$address){
                 return ApiStatus::CODE_41005;
             }
-
-            //获取风控信息
-            $this->third->GetFengkong();
 
             //获取商品详情
             $goods = $this->third->GetSku($data['sku']);

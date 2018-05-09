@@ -18,6 +18,7 @@ class OrderController extends Controller
         $this->OrderCreate = $OrderCreate;
     }
 
+    //下单确认查询接口
     public function confirmation(Request $request){
         $orders =$request->all();
         //获取appid
@@ -49,7 +50,7 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
-
+//下单接口
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
@@ -88,6 +89,14 @@ class OrderController extends Controller
         ],time()+7200,"");
         Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
+    }
+//订单支付
+    public function pay(Request $request){
+        $params =$request->all();
+        $params =$params['params'];
+        $return_url =$params['return_url'];
+        $order_no =$params['order_no'];
+
     }
 
     public function orderList(){

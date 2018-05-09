@@ -33,10 +33,9 @@ class OrderInstalment
     ];
      */
     public static function create($params){
-
         $order    = $params['order'];
         $sku      = $params['sku'];
-        $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
+        $coupon   = !isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
         $order = filter_array($order, [

@@ -1,9 +1,11 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
+use App\Lib\Common\SmsApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
+use App\Order\Models\OrderYidun;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Models\order_good_extend;
 use App\Order\Modules\Service\OrderInstalment;
@@ -16,13 +18,17 @@ class OrderRepository
     protected $orderGoods;
     protected $orderUserInfo;
     protected $instalment;
+    protected $yidun;
+    protected $third;
 
-    public function __construct(Order $order,OrderGoods $orderGoods,OrderUserInfo $orderUserInfo,OrderInstalment $instalment)
+    public function __construct(ThirdInterface $third,Order $order,OrderGoods $orderGoods,OrderUserInfo $orderUserInfo,OrderInstalment $instalment,OrderYidun $yidun)
     {
         $this->order = $order;
         $this->goods =$orderGoods;
         $this->user =$orderUserInfo;
         $this->instalment =$instalment;
+        $this->yidun =$yidun;
+        $this->third =$third;
     }
     public function create($data,$schema){
 
@@ -59,13 +65,19 @@ class OrderRepository
         $goods_yajin =0;
         $coupon_amount =0;
         $coupon =[];
+        $reduce_data=[];
+        $goods_name ="";
         foreach ($sku_info as $k =>$v){
+            $reduce_data[$k]['sku_id']=$v['sku']['sku_id'];
+            $reduce_data[$k]['spu_id']=$v['sku']['spu_id'];
+            $reduce_data[$k]['num']=$v['sku']['sku_num'];
             for ($i=0;$i<$v['sku']['sku_num'];$i++){
                 $order_amount +=$v['sku']['amount'];
                 $goods_amount +=$v['sku']['all_amount'];
                 $goods_yajin  +=$v['sku']['yajin'];
                 $coupon_amount+=$v['sku']['discount_amount'];
                 $coupon[]=$v['coupon']['coupon_no'];
+                $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
                     'goods_name'=>$v['sku']['spu_name'],
@@ -98,15 +110,15 @@ class OrderRepository
                 if(!$goods_id){
                     return ApiStatus::CODE_30005;
                 }
-                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
-                // 生成分期
-                $instalment_data =array_merge($v,['order'=>$data],$user_info);
-                //var_dump($instalment_data);die;
-                $instalment = $this->instalment->create($instalment_data);
-                var_dump($instalment);die;
-                if(!$instalment){
-                    return ApiStatus::CODE_30005;
-                }
+//                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
+//                // 生成分期
+//                $instalment_data =array_merge($v,['order'=>$data],$user_info);
+//                //var_dump($instalment_data);die;
+//                $instalment = $this->instalment->create($instalment_data);
+//                //var_dump($instalment);die;
+//                if(!$instalment){
+//                    return ApiStatus::CODE_30005;
+//                }
 
             }
         }
@@ -125,28 +137,36 @@ class OrderRepository
                 'coupon_amount'=>$coupon_amount,
                 'appid'=>$data['appid'],
             ];
-        $order_id =$this->order->insertGetId($order_data);
-        if(!$order_id){
-            return ApiStatus::CODE_30005;
-        }
+            $order_id =$this->order->insertGetId($order_data);
+            if(!$order_id){
+                return ApiStatus::CODE_30005;
+            }
+             //存储蚁盾信息
+            $yidun_data =[
+                'decision' => $user_info['yidun']['decision'],
+                'order_no'=>$data['order_no'],  // 编号
+                'score' => $user_info['yidun']['score'],
+                'strategies' =>$user_info['yidun']['strategies'],
+            ];
+            $yidun_id =$this->yidun->insertGetId($yidun_data);
+            if(!$yidun_id){
+                return ApiStatus::CODE_30005;
+            }
+
+
+            // 如果有优惠券 使用优惠券接口 失败回滚
+            // $this->third->UseCoupon();
+
+            // 下单减少库存
+
+            $b =$this->third->ReduceStock($reduce_data);
+
+            //创建订单后 发送支付短信。;
+//            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
+//                'goodsName' => $goods_name,    // 传递参数
+//            ]);
+
         return true;
-        // 下单减少库存
-
-
-        // 如果有优惠券 使用优惠券接口
-
-        //创建订单后 发送支付短信。
-
-        // 存储蚁盾信息
-//        $yidun_data =[
-//            'verify_id' => $yidun_schema['yidun']['verify_id'],
-//            'verify_uri' => $yidun_schema['yidun']['verify_uri'],
-//            'decision' => $yidun_schema['yidun']['decision'],
-//            'score' => $yidun_schema['yidun']['score'],
-//            'strategies' =>$yidun_schema['yidun']['strategies'],
-//            'level' => $yidun_schema['yidun']['level'],
-//            'yidun_id' => $yidun_schema['yidun']['yidun_id'],
-//        ];
 
 }
 

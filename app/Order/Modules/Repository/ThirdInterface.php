@@ -61,8 +61,26 @@ class ThirdInterface{
         return $info['data'];
 
     }
-    public function GetFengkong(){
-        echo "获取风控信息<br>";
+    public function GetYidun($data){
+        $data = config('tripartite.Interior_Fengkong_Request_data');
+        $data['method'] ='yidun.get.user.yiduninfo';
+        $data['params'] = [
+            'member_id'=>$data['user_id'],
+            'user_name'=>$data['user_name'],
+            'cert_no'=>$data['cert_no'],
+            'mobile'=>$data['mobile'],
+        ];
+        //var_dump($data);die;
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
     }
 
     /**
