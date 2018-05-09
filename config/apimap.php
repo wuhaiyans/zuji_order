@@ -27,7 +27,15 @@ return [
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
     // 扣款接口
-    'api.Instalment.createpay'             => 'InstalmentController@createpay',
+    'api.Instalment.createpay'          => 'InstalmentController@createpay',
+
+    //分期相关
+    // 代扣协议查询
+    'api.Withholding.query'             => 'WithholdingController@query',
+    // 代扣签约接口
+    'api.Withholding.sign'              => 'WithholdingController@sign',
+    // 代扣解约接口
+    'api.Withholding.unsign'            => 'WithholdingController@unsign',
 
 
     //退货接口
