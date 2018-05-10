@@ -85,8 +85,8 @@ class ReceiveRepository
     public static function create($data)
     {
 
-//        try {
-//            DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
             $receiveNo = self::generateReceiveNo();
             $data = [
@@ -97,25 +97,16 @@ class ReceiveRepository
                 'status'    => Receive::STATUS_INIT,
                 'create_time' => time(),
             ];
-
-
             $model = new Receive();
             return $model->create($data);
-//
-//            dd($a);
 
+            DB::commit();
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+            DB::rollBack();
+        }
 
-
-
-//            DB::commit();
-//        } catch (\Exception $e) {
-//
-//            throw new \Exception($e->getMessage());
-//
-//            DB::rollBack();
-//        }
-
-//        return true;
+        return true;
     }
 
     /**
