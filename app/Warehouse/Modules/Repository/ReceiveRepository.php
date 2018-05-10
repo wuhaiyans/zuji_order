@@ -10,6 +10,7 @@ namespace App\Warehouse\Modules\Repository;
 
 
 use App\Warehouse\Models\Receive;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 
@@ -83,9 +84,38 @@ class ReceiveRepository
      */
     public static function create($data)
     {
-        $receiveNo = self::generateReceiveNo();
 
-        $model = new Receive();
+//        try {
+//            DB::beginTransaction();
+
+            $receiveNo = self::generateReceiveNo();
+            $data = [
+                'receive_no' => $receiveNo,
+                'order_no'  => $data['order_no'],
+                'logistics_id' => isset($data['logistics_id']) ? $data['logistics_id'] : 0,
+                'logistics_no' => isset($data['logistics_no']) ? $data['logistics_no'] : 0,
+                'status'    => Receive::STATUS_INIT,
+                'create_time' => time(),
+            ];
+
+
+            $model = new Receive();
+            return $model->create($data);
+//
+//            dd($a);
+
+
+
+
+//            DB::commit();
+//        } catch (\Exception $e) {
+//
+//            throw new \Exception($e->getMessage());
+//
+//            DB::rollBack();
+//        }
+
+//        return true;
     }
 
     /**

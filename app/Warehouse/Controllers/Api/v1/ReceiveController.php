@@ -44,7 +44,13 @@ class ReceiveController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
-        $list = $this->receive->list($params);
+
+        try {
+            $list = $this->receive->list($params);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
         return \apiResponse($list);
     }
 
@@ -61,7 +67,19 @@ class ReceiveController extends Controller
      */
     public function create()
     {
+        $rules = [
+            'order_no' => 'required',
+            'receive_detail' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
 
+        try {
+            $this->receive->create($params);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
