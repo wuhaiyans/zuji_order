@@ -46,6 +46,7 @@ class DeliveryController extends Controller
 
     /**
      * 取消发货
+     * 订单系统过来的请求
      */
     public function cancel()
     {
@@ -58,6 +59,29 @@ class DeliveryController extends Controller
 
         try {
             $this->delivery->cancel($params['order_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * 客服取消发货
+     */
+    public function cancelDelivery()
+    {
+        $rules = ['delivery_no' => 'required'];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->cancelDelivery($params['delivery_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -148,7 +172,7 @@ class DeliveryController extends Controller
     public function send()
     {
         $rules = [
-            'order_no' => 'required',
+            'delivery_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
 
@@ -157,8 +181,9 @@ class DeliveryController extends Controller
         }
 
         try {
-            $this->delivery->send($params['order_no']);
-            \App\Lib\Warehouse\Delivery::delivery($params['order_no']);
+            $this->delivery->send($params['delivery_no']);
+            $order_no = $this->delivery->getOrderNoByDeliveryNo($params['delivery_no']);
+            \App\Lib\Warehouse\Delivery::delivery($order_no);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
@@ -174,7 +199,7 @@ class DeliveryController extends Controller
     public function logistics()
     {
         $rules = [
-            'delivery_no' => 'required',
+            'delivery_no'  => 'required',
             'logistics_id' => 'required',//物流渠道
             'logistics_no' => 'required'
         ];
@@ -267,8 +292,6 @@ class DeliveryController extends Controller
 
         return \apiResponse([]);
     }
-
-
     /**
      * 列表查询
      */
@@ -276,29 +299,13 @@ class DeliveryController extends Controller
     {
         $params = $this->_dealParams([]);
 
-        $limit = 20;
-        if (isset($params['limit']) && $params['limit']) {
-            $limit = $params['limit'];
-        }
 
-        $whereParams = [];
-
-        if (isset($params['order_no']) && $params['order_no']) {
-            $whereParams['order_no'] = $params['order_no'];
-        }
-
-        if (isset($params['delivery_no']) && $params['delivery_no']) {
-            $whereParams['delivery_no'] = $params['delivery_no'];
-        }
-
-        $page = isset($params['page']) ? $params['page'] : null;
-
-
-
-        $list = $this->delivery->list($whereParams, $limit, $page);
+        $list = $this->delivery->list($params);
 
         return \apiResponse($list);
+        return $list;
     }
+
 
 
     /**
