@@ -26,6 +26,12 @@ class ReceiveGoods extends Warehouse
     const CHECK_RESULT_OK       = 1;//合格
     const CHECK_RESULT_FALSE    = 2;//不合格
 
+
+    protected $fillable = ['receive_no', 'serial_no', 'sku_no','quantity',
+        'quantity_delivered', 'status', 'status_time', 'check_time', 'check_result',
+        'check_result','check_description','check_price'
+    ];
+
     /**
      * @param null $status
      * @return array|mixed|string
