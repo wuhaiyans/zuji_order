@@ -79,15 +79,12 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    新订单系统
                 </div>
 
                 <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                    <a href="http://192.168.1.111:10000/html/web/controller/console/console.html">api接口</a>
+                    <a href="https://git.api.10ln.com/tiantang_88/zuji-order">git地址</a>
                 </div>
             </div>
         </div>
