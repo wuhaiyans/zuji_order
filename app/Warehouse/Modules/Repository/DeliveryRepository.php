@@ -77,13 +77,28 @@ class DeliveryRepository
 
     /**
      * @param $order_no
-     * 取消发货
+     * 订单端取消发货
      */
     public static function cancel($order_no)
     {
         $model = Delivery::where('order_no', $order_no)->first();
         if (!$model) {
             throw new NotFoundResourceException('订单号' . $order_no . '未找到');
+        }
+        $model->status = Delivery::STATUS_CANCEL;
+        return $model->update();
+    }
+
+
+    /**
+     * @param $order_no
+     * 前台取消发货
+     */
+    public static function cancelDelivery($delivery_no)
+    {
+        $model = Delivery::where('delivery_no', $delivery_no)->first();
+        if (!$model) {
+            throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
         $model->status = Delivery::STATUS_CANCEL;
         return $model->update();
@@ -154,12 +169,12 @@ class DeliveryRepository
      * @param $order_no
      * 发货
      */
-    public static function send($order_no)
+    public static function send($delivery_no)
     {
-        $model = Delivery::where(['order_no'=> $order_no, 'status'=>Delivery::STATUS_WAIT_SEND])->first();
+        $model = Delivery::where(['delivery_no'=> $delivery_no, 'status'=>Delivery::STATUS_WAIT_SEND])->first();
 
         if (!$model) {
-            throw new NotFoundResourceException($order_no . '号待发货的订单未找到');
+            throw new NotFoundResourceException($delivery_no . '号待发货单未找到');
         }
 
         $model->status = Delivery::STATUS_SEND;
@@ -221,9 +236,16 @@ class DeliveryRepository
      *
      * 列表
      */
-    public static function list($params, $limit, $page=null)
+    public static function list($params, $logic_params, $limit, $page=null)
     {
-        return Delivery::where($params)->paginate($limit,
+        $query = Delivery::where($params);
+
+        if (is_array($logic_params)) {
+            foreach ($logic_params as $logic) {
+                $query->where($logic[0], $logic[1] ,$logic[2]);
+            }
+        }
+        return $query->paginate($limit,
             [
                 'delivery_no','order_no', 'logistics_id','logistics_no',
                 'status', 'create_time', 'delivery_time', 'status_remark'
@@ -242,6 +264,17 @@ class DeliveryRepository
 
     }
 
+
+    public static function getOrderNoByDeliveryNo($delivery_no)
+    {
+        $model = Delivery::find($delivery_no);
+
+        if (!$model) {
+            throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
+        }
+
+        return $model->order_no;
+    }
 
 
 

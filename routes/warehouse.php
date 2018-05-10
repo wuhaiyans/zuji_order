@@ -33,6 +33,7 @@ $api->version('v1', [
 
     //发货
     $api->any('warehouse.delivery.cancel', 'DeliveryController@cancel'); //取消发货
+    $api->any('warehouse.delivery.cancelDelivery', 'DeliveryController@cancelDelivery'); //取消发货
     $api->any('warehouse.delivery.receive', 'DeliveryController@receive'); //签收
     $api->any('warehouse.delivery.show', 'DeliveryController@show'); //清单
     $api->any('warehouse.delivery.imeis', 'DeliveryController@imeis'); //对应发货单imei列表

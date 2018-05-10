@@ -82,10 +82,18 @@ class ReceiveService
             throw new \Exception($receive_no . '取消签收失败');
         }
     }
+
+    /**
+     * 检测
+     */
     public function check()
     {
 
     }
+
+    /**
+     * 取消检测
+     */
     public function cancelCheck()
     {
 

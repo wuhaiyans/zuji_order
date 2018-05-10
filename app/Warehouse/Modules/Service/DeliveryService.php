@@ -9,9 +9,14 @@
 namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Modules\Repository\DeliveryRepository;
+use function Couchbase\defaultDecoder;
 
 class DeliveryService
 {
+
+    const TIME_TYPE_CREATE = 'create';//创建时间
+    const TIME_TYPE_DELIVERY = 'delivery'; //发货时间
+    const TIME_TYPE_NONE = 'none'; //不限时间
 
     /**
      * @param $order_no
@@ -21,6 +26,14 @@ class DeliveryService
     public function cancel($order_no)
     {
         if (!DeliveryRepository::cancel($order_no)) {
+            throw new \Exception('取消发货失败');
+        }
+    }
+
+
+    public function cancelDelivery($delivery_no)
+    {
+        if (!DeliveryRepository::cancelDelivery($delivery_no)) {
             throw new \Exception('取消发货失败');
         }
     }
@@ -74,9 +87,9 @@ class DeliveryService
      * @throws \Exception
      * 发货操作
      */
-    public function send($order_no)
+    public function send($delivery_no)
     {
-        if (!DeliveryRepository::send($order_no)) {
+        if (!DeliveryRepository::send($delivery_no)) {
             throw new \Exception('发货操作失败');
         }
     }
@@ -109,36 +122,85 @@ class DeliveryService
         }
     }
 
-    /**
-     * @param $params
-     * @param $limit
-     * @param $page
-     * @return array
-     * 列表
-     */
-    public function list($params, $limit, $page)
+
+
+
+
+    public function list($params)
     {
-        $collect = DeliveryRepository::list($params, $limit, $page);
+        $limit = 20;
+        if (isset($params['limit']) && $params['limit']) {
+            $limit = $params['limit'];
+        }
+        $whereParams = [];
+
+        if (isset($params['order_no']) && $params['order_no']) {
+            $whereParams['order_no'] = $params['order_no'];
+        }
+
+        if (isset($params['delivery_no']) && $params['delivery_no']) {
+            $whereParams['delivery_no'] = $params['delivery_no'];
+        }
+        $page = isset($params['page']) ? $params['page'] : null;
+
+
+        $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
+
+        if ($time_type != 'none') {
+            if (!isset($params['time_begin']) || !$params['time_begin']) {
+                throw new \Exception('请填写开始时间');
+            }
+
+            if (!isset($params['time_end']) || !$params['time_end']) {
+                throw new \Exception('请填写结束时间');
+            }
+
+            $logic_params = [];
+
+            switch ($time_type) {
+                case self::TIME_TYPE_CREATE:
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['time_end'])]);
+                    array_push($logic_params, ['create_time', '>=', strtotime($params['time_begin'])]);
+                    break;
+
+                case self::TIME_TYPE_DELIVERY:
+                default:
+                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['time_end'])]);
+                    array_push($logic_params, ['delivery_time', '>=', strtotime($params['time_begin'])]);
+            }
+        }
+
+        $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
         if (!$items) {
             return [];
         }
 
-        $result = [];
+        $show_detail = isset($params['detail']) ? $params['detail'] : false;
 
+        if (!$show_detail) {
+            return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+        }
+
+        $result = [];
         foreach ($items as $item) {
 
             $it = $item->toArray();
 
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $item->goods->toArray();
-
-
             array_push($result, $it);
-
         }
 
         return ['data'=>$result, 'limit'=>$limit, 'page'=>$page];
+
     }
+
+
+    public function getOrderNoByDeliveryNo($delivery_no)
+    {
+        return DeliveryRepository::getOrderNoByDeliveryNo($delivery_no);
+    }
+
 }
