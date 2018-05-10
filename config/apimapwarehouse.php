@@ -19,7 +19,7 @@ return [
 
 
 
-    //收货
+    //收货 待完成
     'warehouse.receive.list'=> 'ReceiveController@list', //列表
     'warehouse.receive.create'=> 'ReceiveController@create', //创建
     'warehouse.receive.cancel'=> 'ReceiveController@cancel', //取消

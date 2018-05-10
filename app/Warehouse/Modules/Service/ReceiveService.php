@@ -13,6 +13,10 @@ use App\Warehouse\Modules\Repository\ReceiveRepository;
 class ReceiveService
 {
 
+    const TIME_TYPE_CREATE = 'create';//创建时间
+    const TIME_TYPE_RECEIVE = 'receive'; //发货时间
+    const TIME_TYPE_NONE = 'none'; //不限时间
+
     /**
      * @param $params
      * @param $limit
@@ -21,13 +25,62 @@ class ReceiveService
      *
      * 列表
      */
-    public function list($params, $limit, $page)
+    public function list($params)
     {
-        $collect = ReceiveRepository::list($params, $limit, $page);
+        $limit = 20;
+        if (isset($params['limit']) && $params['limit']) {
+            $limit = $params['limit'];
+        }
+        $whereParams = [];
+
+        if (isset($params['order_no']) && $params['order_no']) {
+            $whereParams['order_no'] = $params['order_no'];
+        }
+
+        if (isset($params['delivery_no']) && $params['delivery_no']) {
+            $whereParams['delivery_no'] = $params['delivery_no'];
+        }
+        $page = isset($params['page']) ? $params['page'] : null;
+
+
+        $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
+
+        $logic_params = [];
+        if ($time_type != 'none') {
+            if (!isset($params['time_begin']) || !$params['time_begin']) {
+                throw new \Exception('请填写开始时间');
+            }
+
+            if (!isset($params['time_end']) || !$params['time_end']) {
+                throw new \Exception('请填写结束时间');
+            }
+
+            switch ($time_type) {
+                case self::TIME_TYPE_CREATE:
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['time_end'])]);
+                    array_push($logic_params, ['create_time', '>=', strtotime($params['time_begin'])]);
+                    break;
+
+                case self::TIME_TYPE_RECEIVE:
+                default:
+                    array_push($logic_params, ['receive_time', '<=', strtotime($params['time_end'])]);
+                    array_push($logic_params, ['receive_time', '>=', strtotime($params['time_begin'])]);
+            }
+        }
+
+        $collect = ReceiveRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
+
         if (!$items) {
             return [];
         }
+
+        $show_detail = isset($params['detail']) ? $params['detail'] : false;
+
+        if (!$show_detail) {
+            return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+        }
+
         $result = [];
         foreach ($items as $item) {
 
@@ -35,10 +88,11 @@ class ReceiveService
 
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $item->goods->toArray();
-
             array_push($result, $it);
         }
+
         return ['data'=>$result, 'limit'=>$limit, 'page'=>$page];
+
     }
 
 
