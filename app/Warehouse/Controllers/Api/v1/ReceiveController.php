@@ -2,18 +2,24 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
-use App\Warehouse\Modules\Service;
+use App\Warehouse\Modules\Service\ReceiveService;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReceiveController extends Controller
 {
+
+    use ValidatesRequests;
+
+    const SESSION_ERR_KEY = 'delivery.error';
+
     protected $DeliveryCreate;
 
-    public function __construct(Service\DeliveryCreater $DeliveryCreate)
+    public function __construct(ReceiveService $service)
     {
-        $this->DeliveryCreate = $DeliveryCreate;
+        $this->receive = $service;
     }
 
 
@@ -37,7 +43,9 @@ class ReceiveController extends Controller
      */
     public function list()
     {
-
+        $params = $this->_dealParams([]);
+        $list = $this->receive->list($params);
+        return \apiResponse($list);
     }
 
     /**
@@ -111,6 +119,34 @@ class ReceiveController extends Controller
     public function note()
     {
 
+    }
+
+
+    /**
+     * 处理传过来的参数
+     */
+    private function _dealParams($rules)
+    {
+        $params = request()->input();
+
+        if (!isset($params['params'])) {
+            return [];
+        }
+
+        if (is_string($params['params'])) {
+            $params = json_decode($params['params'], true);
+        } else if (is_array($params['params'])) {
+            $params = $params['params'];
+        }
+
+        $validator = app('validator')->make($params, $rules);
+
+        if ($validator->fails()) {
+            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
+            return false;
+        }
+
+        return $params;
     }
 
 }

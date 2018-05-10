@@ -20,6 +20,7 @@ $api->version('v1', [
 
     $apiMap = config('apimapwarehouse');
     $method = request()->input('method');
+
     if (isset($apiMap[$method])) {
         $api->any('/',  $apiMap[$method]);
     }

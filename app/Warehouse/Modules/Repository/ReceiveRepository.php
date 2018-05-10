@@ -27,9 +27,31 @@ class ReceiveRepository
      *
      * 列表
      */
-    public static function list($params, $limit, $page=null)
+
+    /**
+     * @param $params
+     * @param $limit
+     * @param null $page
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     *
+     * 列表
+     */
+    public static function list($params, $logic_params, $limit, $page=null)
     {
-        return Receive::where($params)->paginate($limit, ['*'], 'page', $page);
+        $query = Receive::where($params);
+
+        if (is_array($logic_params)) {
+            foreach ($logic_params as $logic) {
+                $query->where($logic[0], $logic[1] ,$logic[2]);
+            }
+        }
+        return $query->paginate($limit,
+            [
+                'receive_no','order_no', 'logistics_id','logistics_no',
+                'status', 'create_time', 'receive_time','check_description',
+                'status_time','check_time','check_result'
+            ],
+            'page', $page);
     }
 
     /**
