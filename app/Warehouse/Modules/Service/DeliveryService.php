@@ -10,6 +10,7 @@ namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use function Couchbase\defaultDecoder;
+use Illuminate\Support\Facades\Log;
 
 class DeliveryService
 {
@@ -146,6 +147,10 @@ class DeliveryService
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
+
+        Log::error($params);
+
+        $logic_params = [];
         if ($time_type != 'none') {
             if (!isset($params['time_begin']) || !$params['time_begin']) {
                 throw new \Exception('请填写开始时间');
@@ -154,8 +159,6 @@ class DeliveryService
             if (!isset($params['time_end']) || !$params['time_end']) {
                 throw new \Exception('请填写结束时间');
             }
-
-            $logic_params = [];
 
             switch ($time_type) {
                 case self::TIME_TYPE_CREATE:

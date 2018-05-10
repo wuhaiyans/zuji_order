@@ -14,6 +14,7 @@ class DeliveryLog extends Model
 
     protected $table = 'zuji_delivery_log';
 
+    public $timestamps = false;
 //    protected $primaryKey='id';
 
 }

@@ -30,6 +30,8 @@ class DeliveryRepository
         $this->deliveryLog = $deliveryLog;
     }
     public function create($data){
+
+
         //创建发货单
         // 18位发货单号(YYYYMMDDHHIISS+4位随机数)
         $rand_no =rand(1000,9999);
@@ -37,6 +39,7 @@ class DeliveryRepository
         $delivery_row['order_no'] = $data['order_no'];
         $delivery_row['status'] = DeliveryStatus::DeliveryStatus1;
         $delivery_row['create_time'] = time();
+
 
         DB::beginTransaction();
         try {
@@ -46,7 +49,7 @@ class DeliveryRepository
             foreach ($data['delivery_detail'] as $k=>$val){
                 $row = [
                     'delivery_no'   =>  $delivery_row['delivery_no'],
-                    'serial_no'     =>  $data['serial_no'],
+                    'serial_no'     =>  $val['serial_no'],
                     'sku_no'        =>  $val['sku_no'],
                     'quantity'      =>  $val['quantity'],
                     'status'        =>  DeliveryStatus::DeliveryGoodsStatus0,
@@ -66,7 +69,6 @@ class DeliveryRepository
 
         } catch (\Exception $exc) {
             DB::rollBack();
-            echo $exc->getMessage();die;
         }
 
         DB::commit();

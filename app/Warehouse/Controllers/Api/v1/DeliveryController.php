@@ -30,6 +30,8 @@ class DeliveryController extends Controller
         echo "收货表列表接口";
     }
 
+
+
     /**
      * 创建发货单
      */
@@ -40,7 +42,15 @@ class DeliveryController extends Controller
         $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
         $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
 
-        $this->DeliveryCreate->confirmation($delivery_row);
+
+        try {
+            $this->DeliveryCreate->confirmation($delivery_row);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+
     }
 
 
@@ -298,12 +308,8 @@ class DeliveryController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
-
-
         $list = $this->delivery->list($params);
-
         return \apiResponse($list);
-        return $list;
     }
 
 
