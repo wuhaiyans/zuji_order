@@ -17,4 +17,6 @@ class DeliveryLog extends Model
     public $timestamps = false;
 //    protected $primaryKey='id';
 
+    protected $fillable = ['delivery_no', 'description', 'serial_no','create_time'];
+
 }

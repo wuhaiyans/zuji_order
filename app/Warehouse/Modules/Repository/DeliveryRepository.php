@@ -30,8 +30,6 @@ class DeliveryRepository
         $this->deliveryLog = $deliveryLog;
     }
     public function create($data){
-
-
         //创建发货单
         // 18位发货单号(YYYYMMDDHHIISS+4位随机数)
         $rand_no =rand(1000,9999);
@@ -40,10 +38,10 @@ class DeliveryRepository
         $delivery_row['status'] = DeliveryStatus::DeliveryStatus1;
         $delivery_row['create_time'] = time();
 
-
         DB::beginTransaction();
         try {
-            $this->delivery->save($delivery_row);
+            $model = new Delivery();
+            $model->create($delivery_row);
 
             //创建发货商品清单
             foreach ($data['delivery_detail'] as $k=>$val){
@@ -55,7 +53,10 @@ class DeliveryRepository
                     'status'        =>  DeliveryStatus::DeliveryGoodsStatus0,
                     'status_time'   =>  time()
                 ];
-                $this->deliveryGoods->save($row);
+
+                $goodsModel = new DeliveryGoods();
+                $goodsModel->create($row);
+
             }
 
             //发货单日志
@@ -65,17 +66,16 @@ class DeliveryRepository
                 'description'   =>  DeliveryStatus::getStatusName(DeliveryStatus::DeliveryStatus1),
                 'create_time'   =>  time()
             ];
-            $this->deliveryLog->save($log_row);
+
+            $logModel = new DeliveryLog();
+            $logModel->create($log_row);
 
         } catch (\Exception $exc) {
             DB::rollBack();
+            return false;
         }
-
         DB::commit();
-
     }
-
-
 
     /**
      * @param $order_no
