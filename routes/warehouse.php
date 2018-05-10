@@ -10,14 +10,17 @@
  | is assigned the "api" middleware group. Enjoy building your API!
  |
  */
+
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
     'namespace' => 'App\Warehouse\Controllers\Api\v1',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
 ], function($api) {
+
     $apiMap = config('apimapwarehouse');
     $method = request()->input('method');
+
     if (isset($apiMap[$method])) {
         $api->any('/',  $apiMap[$method]);
     }

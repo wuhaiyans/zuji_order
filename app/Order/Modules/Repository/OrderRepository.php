@@ -331,7 +331,7 @@ class OrderRepository
 //
 //
 //    }
-    //获取订单信息
+//获取订单信息
     public function get_order_info($where){
         $orderNo=$where['order_no'];
         $order =  Order::where([
@@ -367,7 +367,7 @@ class OrderRepository
         }
 
     }
-    //更新订单状态
+    //更新订单状态-申请退货
     public static function order_update($order_no){
         $data['freeze_type']='1';
         if(Order::where('order_no', '=', $order_no)->update($data)){
@@ -376,7 +376,7 @@ class OrderRepository
             return false;
         }
     }
-    //更新订单状态
+    //更新订单状态-审核拒绝
     public static function deny_update($order_no){
         $data['freeze_type']='0';
         if(Order::where('order_no', '=', $order_no)->update($data)){
@@ -385,6 +385,7 @@ class OrderRepository
             return false;
         }
     }
+
 
 
     /**
@@ -445,8 +446,7 @@ class OrderRepository
         if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
             $whereArray[] = ['order_info_extend.visit_id', '<>', 0];
         }
-
-//        sql_profiler();
+        
         $orderList = DB::table('order_info')
             ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
             ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')

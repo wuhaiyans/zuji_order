@@ -216,4 +216,11 @@ class OrderCreater
     public function order_update($order_no){
         return $this->orderRepository->order_update($order_no);
     }
+    public function get_order_detail($where=[]){
+        return $this->orderRepository->getOrderInfo($where);
+
+
+
+    }
+
 }
