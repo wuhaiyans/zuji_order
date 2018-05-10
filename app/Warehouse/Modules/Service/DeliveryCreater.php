@@ -24,8 +24,9 @@ class DeliveryCreater
     public function confirmation($data)
     {
         //创建发货单
-        $this->orderRepository->create($data);
-
+        if (!$this->orderRepository->create($data)) {
+            throw new \Exception('创建发货单失败');
+        }
     }
 
 

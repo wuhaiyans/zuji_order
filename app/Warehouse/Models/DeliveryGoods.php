@@ -8,14 +8,15 @@
 namespace App\Warehouse\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
-
-class DeliveryGoods extends Model
+class DeliveryGoods extends Warehouse
 {
 
     protected $table = 'zuji_delivery_goods';
 
     public $timestamps = false;
+
+    protected $fillable = ['delivery_no', 'order_no', 'sku_no','quantity',
+        'quantity_delivered', 'status', 'status_time'];
 
     /**
      * @param $data

@@ -2,11 +2,8 @@
 
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Illuminate\Support\Facades\DB;
 
-class Delivery extends Model
+class Delivery extends Warehouse
 {
 
     const STATUS_NONE = 0;
@@ -27,6 +24,11 @@ class Delivery extends Model
     protected $table = 'zuji_delivery';
 
     protected $primaryKey='delivery_no';
+
+    protected $fillable = ['delivery_no', 'order_no', 'logistics_id','status_time',
+        'logistics_no', 'status', 'create_time', 'delivery_time', 'status_remark'];
+
+
     /**
      * 默认使用时间戳戳功能
      *

@@ -7,7 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-class ReceiveGoods extends \Illuminate\Database\Eloquent\Model
+class ReceiveGoods extends Warehouse
 {
     public $incrementing = false;
     protected $table = 'zuji_receive_goods';
