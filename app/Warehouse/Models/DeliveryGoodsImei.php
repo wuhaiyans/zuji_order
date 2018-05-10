@@ -7,9 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DeliveryGoodsImei extends Model
+class DeliveryGoodsImei extends Warehouse
 {
     protected $table = 'zuji_delivery_goods_imei';
 
