@@ -5,6 +5,9 @@ use App\Lib\PayInc;
 use App\Order\Models\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Tests\Profiler\ProfilerTest;
+use Symfony\Component\HttpKernel\Profiler;
 
 class OrderInstalmentRepository
 {
@@ -140,10 +143,15 @@ class OrderInstalmentRepository
     /**
      * 根据goods_no查询分期信息
      */
-    public static function queryList($params = []){
+    public static function queryList($params = [], $additional = []){
         if (empty($params)) return false;
+        $page       = isset($additional['page']) ? $additional['page'] : 1;
+        $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
 
-        $result =  OrderInstalment::query()->where($params)->get();
+        $offset = ($page - 1) * $pageSize;
+
+        $result =  OrderInstalment::query()->where($params)->offset($offset)->limit($pageSize)->get();
+
         if (!$result) return false;
         return $result->toArray();
     }
