@@ -7,9 +7,7 @@
  */
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DeliveryLog extends Model
+class DeliveryLog extends Warehouse
 {
 
     protected $table = 'zuji_delivery_log';

@@ -7,7 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-class ReceiveGoodsImei extends \Illuminate\Database\Eloquent\Model
+class ReceiveGoodsImei extends Warehouse
 {
 
     public $incrementing = false;

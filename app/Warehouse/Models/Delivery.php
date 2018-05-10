@@ -2,11 +2,8 @@
 
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Illuminate\Support\Facades\DB;
 
-class Delivery extends Model
+class Delivery extends Warehouse
 {
 
     const STATUS_NONE = 0;

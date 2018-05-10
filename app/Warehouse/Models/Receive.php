@@ -7,13 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
-use Monolog\Handler\IFTTTHandler;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Illuminate\Support\Facades\DB;
-
-class Receive extends Model
+class Receive extends Warehouse
 {
     public $incrementing = false;
     protected $table = 'zuji_receive';
