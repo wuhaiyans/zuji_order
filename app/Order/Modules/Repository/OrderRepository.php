@@ -385,4 +385,70 @@ class OrderRepository
             return false;
         }
     }
+
+
+    /**
+     *  获取订单列表
+     *  heaven
+     * @param array $param  获取订单列表参数
+     */
+    public static function getOrderList($param = array(), $pagesize=2)
+    {
+        $whereArray = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['order_info.user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_info.order_no', '=', $param['order_no']];
+        }
+
+        //根据手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+        }
+
+        //支付类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
+        }
+
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
+            $whereArray[] = ['order_info.create_time', '<=', $param['end_time']];
+        }
+
+        if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
+            $whereArray[] = ['order_info_extend.visit_id', '<>', 0];
+        }
+
+
+
+        $orderList = DB::table('order_info')
+            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')
+            ->where($whereArray)
+            ->paginate($pagesize);
+        return $orderList;
+
+    }
 }
