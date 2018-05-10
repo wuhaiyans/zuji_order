@@ -56,11 +56,11 @@ return [
 
         'warehouse' => [
             'driver' => 'mysql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'zuji_warehouse'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', 'd^GHL,Oc@De3jW'),
+            'host' => env('DB_WAREHOUSE_HOST', '127.0.0.1'),
+            'port' => env('DB_WAREHOUSE_PORT', '3306'),
+            'database' => env('DB_WAREHOUSE_DATABASE', 'zuji_warehouse'),
+            'username' => env('DB_WAREHOUSE_USERNAME', 'root'),
+            'password' => env('DB_WAREHOUSE_PASSWORD', 'd^GHL,Oc@De3jW'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
