@@ -390,6 +390,11 @@ class OrderRepository
     /**
      *  获取订单列表
      *  heaven
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+        columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+        pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+        page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
     public static function getOrderList($param = array(), $pagesize=2)
@@ -441,13 +446,13 @@ class OrderRepository
             $whereArray[] = ['order_info_extend.visit_id', '<>', 0];
         }
 
-
-
+//        sql_profiler();
         $orderList = DB::table('order_info')
             ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
             ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')
             ->where($whereArray)
-            ->paginate($pagesize);
+            ->select('order_info.*','order_userinfo.*')
+            ->paginate($pagesize,$columns = ['*'], $pageName = '', $param['page']);
         return $orderList;
 
     }
