@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
-
+use App\Order\Models\OrderInstalment;
 
 class WithholdingController extends Controller
 {
@@ -154,26 +154,17 @@ class WithholdingController extends Controller
             Log::error("获取用户支付宝id失败");
             return apiResponse( [], ApiStatus::CODE_71004, '获取用户支付宝id失败');
         }
-
         // 查看用户是否有未扣款的分期
         /* 如果有未扣款的分期信息，则不允许解约 */
-        $n = OrderInstalmentRepository::queryList([
-            ['agreement_no', '=', $user_info['withholding_no']],
-            ['status', 'in', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL]],
-        ]);
+        $n = OrderInstalment::query()->where([
+            'agreement_no'=> $user_info['withholding_no']])
+            ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])->count();
 
-        if( !empty($n) ){
+        if( $n > 0 ){
             Log::error("[代扣解约]订单分期查询错误");
             return apiResponse( [], ApiStatus::CODE_50000, '解约失败，有未完成分期');
         }
-        $data = [
-            'user_id'           => $user_id, //租机平台用户ID
-            'alipay_user_id'    => $user_info['alipay_user_id'], //用户支付宝id（2088开头）
-            'agreement_no'      => $user_info['withholding_no'], //签约协议号
-        ];
-
         try {
-
             $data = [
                 'user_id'           => $user_id, //租机平台用户ID
                 'alipay_user_id'    => $user_info['alipay_user_id'], //用户支付宝id（2088开头）
@@ -192,6 +183,14 @@ class WithholdingController extends Controller
 //            if( $n===false ){
 //                $member_table->rollback();
 //                //\zuji\debug\Debug::error(zuji\debug\Location::L_Withholding, '[代扣解约]清除用户表协议码失败', $data);
+//                api_resopnse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+//                return;
+//            }
+//            // 2) 用户代扣协议 状态改为 解约(status=2)
+//            $withholding_table->where( ['id'=>$withholding_info['id']] )->limit(1)->save(['status'=>2]);
+//            if( $n===false ){
+//                $member_table->rollback();
+//                //\zuji\debug\Debug::error(zuji\debug\Location::L_Withholding, '[代扣解约]更新代扣协议状态失败', $data);
 //                api_resopnse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
 //                return;
 //            }
