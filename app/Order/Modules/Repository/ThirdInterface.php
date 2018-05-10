@@ -18,7 +18,7 @@ class ThirdInterface{
      * @return string or array
      */
 
-    public function GetUser($user_id,$address_id=0){
+    public static function GetUser($user_id,$address_id=0){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
