@@ -14,6 +14,7 @@
  *
  */
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\DB;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
     if (empty($errmsg)) {
@@ -270,4 +271,28 @@ function array_group_by($arr, $key)
         }
     }
     return $grouped;
+}
+
+/**
+ * sql调试
+ */
+function sql_profiler()
+{
+    //sql调试
+        DB::listen(function ($sql) {
+            foreach ($sql->bindings as $i => $binding) {
+                if ($binding instanceof \DateTime) {
+                    $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+                } else {
+                    if (is_string($binding)) {
+                        $sql->bindings[$i] = "'$binding'";
+                    }
+                }
+            }
+            $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
+            $query = vsprintf($query, $sql->bindings);
+            print_r($query);
+            echo '<br />';
+        });
+
 }
