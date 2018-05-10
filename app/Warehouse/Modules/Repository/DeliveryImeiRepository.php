@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Modules\Repository;
 use App\Warehouse\Models\DeliveryGoodsImei;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class DeliveryImeiRepository
 {
@@ -90,6 +91,9 @@ class DeliveryImeiRepository
     public static function del($delivery_no, $imei)
     {
         $model = DeliveryGoodsImei::where(['delivery_no'=>$delivery_no, 'imei'=>$imei])->first();
+        if (!$model) {
+            throw new NotFoundResourceException('对应imei未找到');
+        }
         return $model->delete();
     }
 

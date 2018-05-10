@@ -33,6 +33,8 @@ return [
     'api.Instalment.create'             => 'InstalmentController@create',
     // 扣款接口
     'api.Instalment.createpay'          => 'InstalmentController@createpay',
+    // 多项扣款接口
+    'api.Instalment.multi_createpay'    => 'InstalmentController@multi_createpay',
 
     //分期相关
     // 代扣协议查询
@@ -52,7 +54,8 @@ return [
     'api.Return.returnDeliverNo'    => 'ReturnController@returnDeliverNo',
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
-
+    // 取消退货接口
+    'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
     // test
     'api.Test.test'       => 'TestController@test',
 
