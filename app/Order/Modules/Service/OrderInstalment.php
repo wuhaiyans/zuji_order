@@ -183,12 +183,23 @@ class OrderInstalment
         if (!is_array($params)) {
             return ApiStatus::CODE_20001;
         }
-        $params = filter_array($params, [
-            'goods_no'=>'required',
-            'order_no'=>'required',
-        ]);
 
-        $result =  OrderInstalmentRepository::queryList($params);
+        $params = filter_array($params, [
+            'goods_no'  =>'required',
+            'order_no'  =>'required',
+            'page'      => 'required',
+            'limit'     => 'required',
+        ]);
+        $where = [
+            'goods_no'  => $params['goods_no'],
+            'order_no'  => $params['order_no'],
+        ];
+        $additional = [
+            'page'  => $params['page'],
+            'limit' => $params['limit'],
+        ];
+
+        $result =  OrderInstalmentRepository::queryList($where, $additional);
         $result = array_group_by($result,'goods_no');
 
         return $result;
