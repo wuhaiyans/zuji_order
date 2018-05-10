@@ -38,7 +38,6 @@ class OrderOperate
 
             //关闭订单状态
             $orderData =  OrderRepository::closeOrder($orderNo,$userId);
-            dd($orderData);
             if (!$orderData) {
                 DB::rollBack();
                return ApiStatus::CODE_31002;
@@ -120,6 +119,8 @@ class OrderOperate
 //        return $orderData;
 
     }
+
+
 
 
 }

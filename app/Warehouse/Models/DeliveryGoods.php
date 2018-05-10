@@ -17,6 +17,9 @@ class DeliveryGoods extends Model
 
     public $timestamps = false;
 
+    protected $fillable = ['delivery_no', 'order_no', 'sku_no','quantity',
+        'quantity_delivered', 'status', 'status_time'];
+
     /**
      * @param $data
      * @return DeliveryGoods
