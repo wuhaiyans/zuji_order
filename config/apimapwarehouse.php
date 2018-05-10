@@ -16,4 +16,18 @@ return [
     'warehouse.delivery.delImei' => 'DeliveryController@delImei', //删除imei
     'warehouse.delivery.list' => 'DeliveryController@list', //列表
     'warehouse.delivery.refuse' => 'DeliveryController@refuse', //拒签   待完成
+
+
+
+    //收货
+    'warehouse.receive.list'=> 'ReceiveController@list', //列表
+    'warehouse.receive.create'=> 'ReceiveController@create', //创建
+    'warehouse.receive.cancel'=> 'ReceiveController@cancel', //取消
+    'warehouse.receive.received'=> 'ReceiveController@received', //收货
+    'warehouse.receive.calcelReceive'=> 'ReceiveController@calcelReceive', //改变收货状态为未收货
+    'warehouse.receive.check'=> 'ReceiveController@check',//验收，针对设备
+    'warehouse.receive.cancelCheck'=> 'ReceiveController@cancelCheck',//验收取消，针对设备
+    'warehouse.receive.finishCheck'=> 'ReceiveController@finishCheck',//验收完成，针对收货单
+    'warehouse.receive.show'=> 'ReceiveController@show',//清单查询，针对收货单
+    'warehouse.receive.note'=> 'ReceiveController@note'//录入检测项，针对收货单
 ];

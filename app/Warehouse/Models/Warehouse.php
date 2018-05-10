@@ -13,5 +13,4 @@ class Warehouse extends Model
         $this->setConnection('warehouse');
     }
 
-
 }
