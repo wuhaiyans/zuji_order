@@ -7,7 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-class ReceiveGoods extends \Illuminate\Database\Eloquent\Model
+class ReceiveGoods extends Warehouse
 {
     public $incrementing = false;
     protected $table = 'zuji_receive_goods';
@@ -25,6 +25,12 @@ class ReceiveGoods extends \Illuminate\Database\Eloquent\Model
     const CHECK_RESULT_INVALID  = 0;//无效
     const CHECK_RESULT_OK       = 1;//合格
     const CHECK_RESULT_FALSE    = 2;//不合格
+
+
+    protected $fillable = ['receive_no', 'serial_no', 'sku_no','quantity',
+        'quantity_delivered', 'status', 'status_time', 'check_time', 'check_result',
+        'check_result','check_description','check_price'
+    ];
 
     /**
      * @param null $status

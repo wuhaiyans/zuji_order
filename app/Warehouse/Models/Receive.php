@@ -7,13 +7,9 @@
 
 namespace App\Warehouse\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
-use Monolog\Handler\IFTTTHandler;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Illuminate\Support\Facades\DB;
 
-class Receive extends Model
+class Receive extends Warehouse
 {
     public $incrementing = false;
     protected $table = 'zuji_receive';
@@ -28,6 +24,12 @@ class Receive extends Model
     const CHECK_RESULT_INVALID = 0;//无效
     const CHECK_RESULT_OK = 1;//全部合格
     const CHECK_RESULT_FALSE = 2;//有不合格
+
+
+    protected $fillable = ['receive_no', 'order_no', 'logistics_id',
+        'logistics_no', 'status', 'status_time', 'create_time',
+        'receive_time','check_time','check_result','check_description'];
+
 
     /**
      * @param null $status

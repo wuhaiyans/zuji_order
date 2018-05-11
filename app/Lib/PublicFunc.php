@@ -14,6 +14,7 @@
  *
  */
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\DB;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
     if (empty($errmsg)) {
@@ -247,4 +248,51 @@ function createNo($noType=1){
     }
     $orderSn = $npreNoType[$noType].$year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
     return $orderSn;
+}
+
+/**
+ * 根据key 二维数组分组
+ * @param $arr 数组
+ * @param $key 按照分组的key
+ */
+function array_group_by($arr, $key)
+{
+    $grouped = [];
+    foreach ($arr as $value) {
+        $grouped[$value[$key]][] = $value;
+    }
+    // Recursively build a nested grouping if more parameters are supplied
+    // Each grouped array value is grouped according to the next sequential key
+    if (func_num_args() > 2) {
+        $args = func_get_args();
+        foreach ($grouped as $key => $value) {
+            $parms = array_merge([$value], array_slice($args, 2, func_num_args()));
+            $grouped[$key] = call_user_func_array('array_group_by', $parms);
+        }
+    }
+    return $grouped;
+}
+
+/**
+ * sql调试
+ */
+function sql_profiler()
+{
+    //sql调试
+        DB::listen(function ($sql) {
+            foreach ($sql->bindings as $i => $binding) {
+                if ($binding instanceof \DateTime) {
+                    $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+                } else {
+                    if (is_string($binding)) {
+                        $sql->bindings[$i] = "'$binding'";
+                    }
+                }
+            }
+            $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
+            $query = vsprintf($query, $sql->bindings);
+            print_r($query);
+            echo '<br />';
+        });
+
 }
