@@ -42,6 +42,20 @@ class Receive
      */
     public static function create($order_no,$type, $data)
     {
+
+
+
+
+        $reqData = [
+            'order_no' => $order_no,
+            'type'     => $type,
+            'data'     => $data
+        ];
+
+
+
+
+
         $data = [
             [
                 'sku_no' => 123, //goods_no
@@ -52,6 +66,27 @@ class Receive
                 'imei' => 'abcdef',
             ]
         ];
+
+
+        $base_api = config('api.warehouse_api_uri');
+
+        $response = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.send',//模拟
+            'data' => json_encode(['order_no'=>$order_no])
+        ]);
+
+
+
+
+
+
+
+
+
+
+
 
 
         return json_encode([

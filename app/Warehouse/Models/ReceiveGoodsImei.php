@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Models;
 
+
 class ReceiveGoodsImei extends Warehouse
 {
 
@@ -30,9 +31,9 @@ class ReceiveGoodsImei extends Warehouse
     const RESULT_NOT = 2;
 
 
-    protected $fillable = ['receive_no', 'serial_no','imei',
+    protected $fillable = ['receive_no', 'serial_no','imei','check_price',
         'status', 'create_time', 'cancel_time', 'cancel_remark', 'check_time',
-        'check_result','check_description','type', 'serial_number'
+        'check_result','check_description','type', 'serial_number','sku_no'
     ];
 
     /**
@@ -86,6 +87,12 @@ class ReceiveGoodsImei extends Warehouse
     public function getStatus()
     {
         return self::status($this->status);
+    }
+
+
+    public function receive()
+    {
+        return $this->belongsTo(\App\Warehouse\Models\Receive::class, 'receive_no');
     }
 
 

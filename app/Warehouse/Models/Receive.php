@@ -8,6 +8,9 @@
 namespace App\Warehouse\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Monolog\Handler\IFTTTHandler;
+
+
 
 class Receive extends Warehouse
 {
@@ -23,7 +26,7 @@ class Receive extends Warehouse
 
     const CHECK_RESULT_INVALID = 0;//无效
     const CHECK_RESULT_OK = 1;//全部合格
-    const CHECK_RESULT_FALSE = 2;//有不合格
+    const CHECK_RESULT_PART = 2;//有不合格
 
 
     protected $fillable = ['receive_no', 'order_no', 'logistics_id',
@@ -96,7 +99,7 @@ class Receive extends Warehouse
      */
     public function goods()
     {
-        return $this->hasMany(\ReceiveGoods::class, 'receive_no');
+        return $this->hasMany(\App\Warehouse\Models\ReceiveGoods::class, 'receive_no');
     }
 
     /**
@@ -105,7 +108,26 @@ class Receive extends Warehouse
      */
     public function imeis()
     {
-        return $this->hasMany(\ReceiveGoodsImei::class, 'receive_no');
+        return $this->hasMany(\App\Warehouse\Models\ReceiveGoodsImei::class, 'receive_no');
+    }
+
+
+    /**
+     * 更新检验结果
+     */
+    public function updateCheck()
+    {
+        $imeis = $this->imeis;
+        $count = count($imeis);
+        $checkOk = 0;
+        foreach ($imeis as $imei) {
+            if ($imei->check_result == ReceiveGoodsImei::RESULT_OK) {
+                $checkOk++;
+            }
+        }
+
+        $this->check_result = $checkOk < $count ? self::CHECK_RESULT_PART : self::CHECK_RESULT_OK;
+        return $this->save();
     }
 
 
