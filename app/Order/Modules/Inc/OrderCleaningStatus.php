@@ -27,69 +27,69 @@ class OrderStatus{
 
 /**************************************start claim_status  索赔状态 0：无效；1：待索赔支付；2：已索赔支付；3：无索赔支付*************************************************/
 
-    const claimStatus = 0;
+    const claimStatus = 1;
 
-    const claimStatusUnPayd = 1;
+    const claimStatusUnPayd = 2;
 
-    const claimStatusPayd = 2;
+    const claimStatusPayd = 3;
 
-    const claimStatusNoPay = 3;
+    const claimStatusNoPay = 4;
 
 /***************************************end  *****************************************************************************/
 
 
 /**************************************start 扣除押金状态；0：已取消；1：待扣押金；2：已扣押金；3：无需扣押金*************************************************/
 
-    const depositDeductionStatusCancel = 0;
+    const depositDeductionStatusCancel = 1;
 
-    const depositDeductionStatusUnpayed = 1;
+    const depositDeductionStatusUnpayed = 2;
 
-    const depositDeductionStatusPayd = 2;
+    const depositDeductionStatusPayd = 3;
 
-    const depositDeductionStatusNoPay = 3;
+    const depositDeductionStatusNoPay = 4;
 
 /***************************************end  *****************************************************************************/
 
 
 /**************************************start 退还押金状态；0：已取消；1：待退还押金；2：已退还押金；3：无需退还*************************************************/
 
-    const depositUnfreezeStatusCancel = 0;
+    const depositUnfreezeStatusCancel = 1;
 
-    const depositUnfreezeStatusUnpayed = 1;
+    const depositUnfreezeStatusUnpayed = 2;
 
-    const depositUnfreezeStatusPayd = 2;
+    const depositUnfreezeStatusPayd = 3;
 
-    const depositUnfreezeStatusNoPay = 3;
+    const depositUnfreezeStatusNoPay = 4;
 
 /***************************************end  *****************************************************************************/
 
 
     /**************************************start 退款状态 0：已取消；1：待退款；2：已退款；3：无需退款*************************************************/
 
-    const refundCancel = 0;
+    const refundCancel = 1;
 
-    const refundUnpayed = 1;
+    const refundUnpayed = 2;
 
-    const refundPayd = 2;
+    const refundPayd = 3;
 
-    const refundNoPay = 3;
+    const refundNoPay = 4;
 
     /***************************************end  *****************************************************************************/
 
 
     /**************************************start 清算的状态 0：已取消；1：待索赔支付；2：待扣押金；3：待退还押金；4：待退款；5：清算已完成*************************************************/
 
-    const orderCleaningCancel = 0;
+    const orderCleaningCancel = 1;
 
-    const orderCleaningUnpayed = 1;
+    const orderCleaningUnpayed = 2;
 
-    const orderCleaningDeposit = 2;
+    const orderCleaningDeposit = 3;
 
-    const orderCleaningUnfreeze = 3;
+    const orderCleaningUnfreeze = 4;
 
-    const orderCleaningUnRefund = 4;
+    const orderCleaningUnRefund = 5;
 
-    const orderCleaningComplete= 5;
+    const orderCleaningComplete= 6;
 
     /***************************************end  *****************************************************************************/
 
