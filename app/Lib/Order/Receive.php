@@ -22,6 +22,9 @@ class Receive
      */
     public static function checkResult($order_no, $data)
     {
+
+        dd($data);
+
         $data = [
             [
                 'sku_no' => '123',
@@ -38,6 +41,7 @@ class Receive
                 'check_price' => 200//金额
             ]
         ];
+
     }
 
 
