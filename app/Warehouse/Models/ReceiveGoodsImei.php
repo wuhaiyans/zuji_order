@@ -33,7 +33,7 @@ class ReceiveGoodsImei extends Warehouse
 
     protected $fillable = ['receive_no', 'serial_no','imei','check_price',
         'status', 'create_time', 'cancel_time', 'cancel_remark', 'check_time',
-        'check_result','check_description','type', 'serial_number'
+        'check_result','check_description','type', 'serial_number','sku_no'
     ];
 
     /**

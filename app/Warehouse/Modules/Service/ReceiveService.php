@@ -154,9 +154,17 @@ class ReceiveService
     {
 
     }
-    public function finishCheck()
-    {
 
+    /**
+     * 检测完成
+     */
+    public function finishCheck($receive_no)
+    {
+        $receive = ReceiveRepository::finishCheck($receive_no);
+        if (!$receive) {
+            throw new \Exception($receive_no . '检测完成操作失败');
+        }
+        return $receive;
     }
     public function show()
     {

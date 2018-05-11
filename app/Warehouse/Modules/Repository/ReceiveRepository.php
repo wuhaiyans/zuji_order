@@ -111,7 +111,7 @@ class ReceiveRepository
 
             foreach ($details as $detail) {//存receiveGoods
                 $detail['receive_no'] = $receiveNo;
-                $detail['imei'] = isset($mdetail['imei']) ? $detail['imei'] : '';
+                $detail['imei'] = isset($detail['imei']) ? $detail['imei'] : '';
                 $detail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
                 $detail['create_time'] = $time;
 
@@ -275,9 +275,19 @@ class ReceiveRepository
     /**
      * 完成签收 针对收货单
      */
-    public static function finishCheck()
+    public static function finishCheck($receive_no)
     {
+        $receive = Receive::find($receive_no);
 
+        if (!$receive) {
+            throw new NotFoundResourceException('单号未找到:' . $receive);
+        }
+
+        $receive->status = Receive::STATUS_FINISH;//检测完成
+        if ($receive->save()){
+            return $receive;
+        }
+        return false;
     }
 
     /**

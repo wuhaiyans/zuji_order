@@ -147,10 +147,29 @@ class ReceiveController extends Controller
 
     /**
      * 完成签收 针对收货单
+     * 1.状态修改
+     * 2.通知订单
      */
     public function finishCheck()
     {
+        $rules = [
+            'receive_no' => 'required'
+        ];
 
+        $params = $this->_dealParams($rules);
+
+        try {
+            $receive = $this->receive->finishCheck($params['receive_no']);
+
+            $imeis = $receive->imeis;
+
+            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
+
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
