@@ -140,9 +140,11 @@ class ReceiveService
     /**
      * 检测
      */
-    public function check()
+    public function check($receive_no, $imei, $data)
     {
-
+        if (!ReceiveRepository::check($receive_no, $imei, $data)) {
+            throw new \Exception($receive_no . ' imei:'.$imei.'验签失败');
+        }
     }
 
     /**

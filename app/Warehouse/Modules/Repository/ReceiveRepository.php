@@ -110,16 +110,16 @@ class ReceiveRepository
             }
 
             foreach ($details as $detail) {//存receiveGoods
-                $mdetail['receive_no'] = $receiveNo;
-                $mdetail['imei'] = isset($mdetail['imei']) ? $detail['imei'] : '';
-                $mdetail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
-                $mdetail['create_time'] = $time;
+                $detail['receive_no'] = $receiveNo;
+                $detail['imei'] = isset($mdetail['imei']) ? $detail['imei'] : '';
+                $detail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
+                $detail['create_time'] = $time;
 
                 $gmodel = new ReceiveGoods();
-                $gmodel->create($mdetail);
+                $gmodel->create($detail);
 
                 $mmodel = new ReceiveGoodsImei();
-                $mmodel->create($mdetail);
+                $mmodel->create($detail);
             }
 
             DB::commit();
@@ -149,18 +149,57 @@ class ReceiveRepository
     }
 
     /**
-     * 签收
+     * 签收 收货单签收
      */
     public static function received($receive_no)
     {
+        //收货单更新
         $model = Receive::find($receive_no);
-
         if (!$model) {
             throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
         }
         $model->status = Receive::STATUS_RECEIVED;
+        $model->receive_time = time();
         return $model->update();
     }
+
+
+    /**
+     * 签收
+     */
+//    public static function received1($receive_no, $imei)
+//    {
+//
+//        try {
+//            DB::beginTransaction();
+//
+//            //imei部分更新
+//            $imeiModel = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
+//            if (!$imeiModel) {
+//                throw new NotFoundResourceException('imei' . $imei . '未找到');
+//            }
+//            $imeiModel->status = ReceiveGoodsImei::STATUS_RECEIVED;
+//            $imeiModel->save();
+//
+//
+//            //收货单更新
+//            $model = Receive::find($receive_no);
+//            if (!$model) {
+//                throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
+//            }
+//            $model->status = Receive::STATUS_RECEIVED;
+//            $model->receive_time = time();
+//            $model->update();
+//
+//            DB::commit();
+//        } catch (\Exception $e) {
+//            throw new \Exception($e->getMessage());
+//            DB::rollBack();
+//            return false;
+//        }
+//
+//        return true;
+//    }
 
 //    /**
 //     * 取消签收
@@ -202,13 +241,16 @@ class ReceiveRepository
             $mini->check_result = $data['check_result'];
             $mini->check_time = time();
             $mini->check_description = isset($data['check_description']) ? $data['check_description'] : '';
+            $mini->check_price = isset($data['check_price']) ? $data['check_price'] : 0.00;
             $mini->status = ReceiveGoodsImei::STATUS_CHECK_OVER;//检测完成
             $mini->save();
 
+            $receiver = $mini->receive;
+            $receiver->updateCheck();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return false;
+            throw new \Exception($e->getMessage());
         }
 
         return true;
