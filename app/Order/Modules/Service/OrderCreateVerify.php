@@ -404,7 +404,7 @@ class OrderCreateVerify
                 'specs' => $this->specs,
                 'thumb' => $this->thumb,
                 'yiwaixian' => priceFormat($this->yiwaixian/100),
-                'yiwaixian_cost' => $this->yiwaixian_cost,
+                'yiwaixian_cost' => priceFormat($this->yiwaixian_cost/100),
                 'zujin' => priceFormat($this->zujin/100),
                 'yajin' => priceFormat($this->yajin/100),
                 'zuqi' => $this->zuqi,
@@ -432,12 +432,12 @@ class OrderCreateVerify
     private function UserWithholding($appid,$user_info){
         if( $user_info['withholding_no']!="" ){
           //  调用支付系统的方法 如下：Y/N
-            $res =WithholdingApi::withholdingstatus($appid,[
-                'alipay_user_id' => $user_info['alipay_user_id'],
-                'user_id' => $user_info['id'], //租机平台用户id
-                'agreement_no' => $user_info['withholding_no'], //签约协议号
-
-            ]);
+//            $res =WithholdingApi::withholdingstatus($appid,[
+//                'alipay_user_id' => $user_info['alipay_user_id'],
+//                'user_id' => $user_info['id'], //租机平台用户id
+//                'agreement_no' => $user_info['withholding_no'], //签约协议号
+//
+//            ]);
             $status ="Y";
             if( $status!='Y' ){
                 //用户已经解约代扣协议

@@ -11,7 +11,11 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
-    'api.alipay.initialize'=>'TradeController@alipayInitialize',//支付宝初始化接口
+    'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
+
+    'api.union.bankCardlist'=>'UnionController@bankCardlist',//银联已开通银行卡列表查询接口
+
+    'api.union.openBankCard'=>'UnionController@openBankCard',//银联开通银行卡接口
 
     'api.order.orderlist'=>'OrderController@orderList',
 
