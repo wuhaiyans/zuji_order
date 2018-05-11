@@ -11,8 +11,18 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
+    'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
 
-    'api.alipay.initialize'=>'TradeController@alipayInitialize',//支付宝初始化接口
+    'api.union.bankCardlist'=>'UnionController@bankCardlist',//银联已开通银行卡列表查询接口
+
+    'api.union.openBankCard'=>'UnionController@openBankCard',//银联开通银行卡接口
+
+    'api.union.consume'=>'UnionController@consume',//银联支付消费接口(限已开通银联用户)
+
+    'api.union.getunionstatus'=>'UnionController@getUnionStatus',//银联查询开通结果接口
+
+    'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
+
 
     'api.order.orderlist'=>'OrderController@orderList',
 

@@ -6,7 +6,7 @@ use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 
 
-class TradeController extends Controller
+class AlipayController extends Controller
 {
     protected $orderTrade;
 
@@ -17,6 +17,7 @@ class TradeController extends Controller
 
     //支付宝初始化接口
     public function alipayInitialize(Request $request){
+        var_dump("alipay 初始化接口");die;
         $params =$request->all();
         $params =$params['params'];
         $return_url =$params['return_url'];
@@ -34,11 +35,11 @@ class TradeController extends Controller
             'return_url'=>$return_url,
         ];
 
-        $b= $this->orderTrade->alipayInitialize($data);
-        if($b===false){
+        $res= $this->orderTrade->alipayInitialize($data);
+        if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_50004);
         }
-        return apiResponse($b,ApiStatus::CODE_0);
+        return apiResponse($res,ApiStatus::CODE_0);
         die;
 
 
