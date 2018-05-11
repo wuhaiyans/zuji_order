@@ -58,15 +58,13 @@ class OrderCreateVerify
             $this->flag =false;
         }
         //验证优惠券信息
-//        if($data['coupon_no'] !=""){
-//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
-//            if(!$coupon){
-//                $this->flag =false;
-//            }
-//        }
+        $coupon = $this->CouponVerify($data['coupon'],$data['user_id']);
+        if(!$coupon){
+            $this->flag =false;
+        }
 
         //分期单信息
-        if($data['pay_type']!=PayInc::WithhodingPay){
+        if($data['pay_type']!=PayInc::WithhodingPay || $data['zuqi_type'] ==2){
             $instalment =$this->InstalmentVerify();
         }
         return $this->flag;
@@ -118,30 +116,27 @@ class OrderCreateVerify
 
     }
 
-    private function CouponVerify($coupon_no,$user_id){
+    private function CouponVerify($coupons,$user_id){
         $arr = $this->GetSchema();
-        $coupon = $this->third->GetCoupon($coupon_no,$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
-        //var_dump($coupon);die;
-        if(is_array($coupon)){
-            $this->discount_amount = $coupon['discount_amount'];
-            $this->coupon_no = $coupon['coupon_no'];
-            $this->coupon_id = $coupon['coupon_id'];
-            $this->coupon_type = $coupon['coupon_type'];
-            $this->coupon_name = $coupon['coupon_name'];
+        $arr['coupon']=[];
 
-            $arr =[
-                'coupon' => [
-                    'coupon_no' => $this->coupon_no,
-                    'coupon_name' => $this->coupon_name,
-                    'coupon_type' => $this->coupon_type,
-                    'discount_amount' => $this->discount_amount,
-                ]
+        for($i=0;$i<count($coupons);$i++){
+            $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
+            if(!is_array($coupon)){
+                $this->set_error($coupon);
+                $this->flag =false;
+                continue;
+            }
+            $arr['coupon'][$i]=[
+                'coupon_no' => $coupon['coupon_no'],
+                'coupon_name' => $coupon['coupon_name'],
+                'coupon_type' => $coupon['coupon_type'],
+                'discount_amount' => $coupon['discount_amount'],
             ];
-            $this->SetSchema($arr);
-            return true;
         }
-        $this->set_error($coupon);
-        return false;
+        $this->SetSchema($arr);
+        return $this->flag;
+
     }
     private function InstalmentVerify(){
         $data =array_merge($this->GetSchema(),$this->GetUserSchema());
@@ -292,13 +287,7 @@ class OrderCreateVerify
      *  下单商品信息过滤
      */
     private function GoodsVerify($sku_info,$spu_info,$data){
-        $this->sku_num =1;
-        foreach ($data['sku'] as $k=>$v){
-            if(intval($sku_info['sku_id']) ==$v['sku_id']){
-                $this->sku_num =$v['sku_num'];
-                continue;
-            }
-        }
+        $this->sku_num =intval($sku_info['sku_num']);
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
         $this->zujin = $sku_info['shop_price']*100;

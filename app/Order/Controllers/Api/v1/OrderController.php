@@ -25,7 +25,7 @@ class OrderController extends Controller
         $appid =$orders['appid'];
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $sku =$orders['params']['sku_info'];
-        $coupon_no = $orders['params']['coupon_no'];
+        $coupon = $orders['params']['coupon'];
 
         //判断参数是否设置
         if(empty($appid)){
@@ -42,11 +42,10 @@ class OrderController extends Controller
             'appid'=>1,
             'pay_type'=>1,
             'sku'=>$sku,
-            'coupon_no'=>"b997c91a2cec7918",
+            'coupon'=>["b997c91a2cec7918",],
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
-        var_dump($res);die;
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -61,7 +60,7 @@ class OrderController extends Controller
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $address_id=$orders['params']['address_id'];//收货地址ID
         $sku =$orders['params']['sku_info'];
-        $coupon_no = $orders['params']['coupon_no'];
+        $coupon = $orders['params']['coupon'];
 
         //判断参数是否设置
         if(empty($pay_type)){
@@ -82,7 +81,7 @@ class OrderController extends Controller
             'pay_type'=>1,
             'address_id'=>$address_id,
             'sku'=>$sku,
-            'coupon_no'=>"b997c91a2cec7918",
+            'coupon'=>["b997c91a2cec7918"],
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);

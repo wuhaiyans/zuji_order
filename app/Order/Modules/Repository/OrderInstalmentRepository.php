@@ -101,7 +101,7 @@ class OrderInstalmentRepository
             $this->first_amount = $first >= 0 ? $first + $this->yiwaixian : $this->yiwaixian;
         }
         //不同支付方式呈现不同分期金额
-        if($this->payment_type_id == PayInc::FlowerStagePay or $this->payment_type_id == PayInc::UnionPay){
+        if($this->payment_type_id == PayInc::FlowerStagePay || $this->payment_type_id == PayInc::UnionPay){
             $this->fenqi_amount = $this->amount / $this->zuqi;
         }
     }
