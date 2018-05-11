@@ -7,7 +7,7 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Order\Models\OrderClearing;
 
-class OrderRepository
+class OrderClearingRepository
 {
 
 
@@ -22,14 +22,7 @@ class OrderRepository
         //     var_dump($schema);
 //        var_dump('创建订单结束...');die;
         $orderClearData = new OrderClearing();
-        $orderClearData->order_no = $param['order_no'];
-        $orderClearData->business_type = $param['business_type'];
-        $orderClearData->business_no = $param['business_no'];
-        $orderClearData->claim_name = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
-        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
-        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
-        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
-        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
+
         $orderClearData->order_no = $param['order_no'];
         $orderClearData->order_no = $param['order_no'];
         $orderClearData->order_no = $param['order_no'];
@@ -41,6 +34,14 @@ class OrderRepository
         $sku_info = $schema['sku_info'];
         // 写入用户信息
         $user_data = [
+            $orderClearData->order_no = $param['order_no'];
+        $orderClearData->business_type = $param['business_type'];
+        $orderClearData->business_no = $param['business_no'];
+        $orderClearData->claim_name = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
+        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
+        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
+        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
+        $orderClearData->order_no = isset($param['claim_name']) && !empty($param['claim_name'])?$param['claim_name']:'';
             'order_no'=>$data['order_no'],
             'user_id' =>$user_info['address']['user_id'],
             'mobile' =>$user_info['address']['mobile'],
@@ -55,7 +56,7 @@ class OrderRepository
             'realname'=>$user_info['credit']['realname'],
             'cret_no'=>$user_info['credit']['cert_no'],
         ];
-        $id =$this->user->insertGetId($user_data);
+        $id =$this->user->create($order_data);
         if(!$id){
             return ApiStatus::CODE_30005;
         }
