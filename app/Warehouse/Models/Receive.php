@@ -16,7 +16,7 @@ class Receive extends Warehouse
     protected $primaryKey = 'receive_no';
     public $timestamps = false;
 
-    const STATUS_NONE = 0;//已取消
+    const STATUS_CANCEL = 0;//已取消
     const STATUS_INIT = 1;//待收货
     const STATUS_RECEIVED = 2;//已收货
     const STATUS_FINISH = 3;//检测完成
@@ -39,7 +39,7 @@ class Receive extends Warehouse
     public static function status($status=null)
     {
         $st = [
-            self::STATUS_NONE => '已取消',
+            self::STATUS_CANCEL => '已取消',
             self::STATUS_INIT => '待收货',
             self::STATUS_RECEIVED => '已收货',
             self::STATUS_FINISH => '检测完成'

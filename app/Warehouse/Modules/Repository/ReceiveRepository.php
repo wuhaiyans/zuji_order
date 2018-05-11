@@ -11,6 +11,7 @@ namespace App\Warehouse\Modules\Repository;
 
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
+use App\Warehouse\Models\ReceiveGoodsImei;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
@@ -90,13 +91,14 @@ class ReceiveRepository
             DB::beginTransaction();
 
             $receiveNo = self::generateReceiveNo();
+            $time = time();
             $da = [
                 'receive_no' => $receiveNo,
                 'order_no'  => $data['order_no'],
                 'logistics_id' => isset($data['logistics_id']) ? $data['logistics_id'] : 0,
                 'logistics_no' => isset($data['logistics_no']) ? $data['logistics_no'] : 0,
                 'status'    => Receive::STATUS_INIT,
-                'create_time' => time(),
+                'create_time' => $time,
             ];
             $model = new Receive();
             $model->create($da);
@@ -107,16 +109,24 @@ class ReceiveRepository
                 throw new \Exception("缺少相关参数");
             }
 
-            foreach ($details as $detail) {
+            foreach ($details as $detail) {//存receiveGoods
+                $mdetail['receive_no'] = $receiveNo;
+                $mdetail['imei'] = isset($mdetail['imei']) ? $detail['imei'] : '';
+                $mdetail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
+                $mdetail['create_time'] = $time;
+
                 $gmodel = new ReceiveGoods();
-                $detail['receive_no'] = $receiveNo;
-                $gmodel->create($detail);
+                $gmodel->create($mdetail);
+
+                $mmodel = new ReceiveGoodsImei();
+                $mmodel->create($mdetail);
             }
 
             DB::commit();
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
             DB::rollBack();
+            return false;
         }
 
         return true;
@@ -133,39 +143,91 @@ class ReceiveRepository
             throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
         }
 
+        $model->status = Receive::STATUS_CANCEL;
+        return $model->update();
+
     }
 
     /**
      * 签收
      */
-    public static function received()
+    public static function received($receive_no)
+    {
+        $model = Receive::find($receive_no);
+
+        if (!$model) {
+            throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
+        }
+        $model->status = Receive::STATUS_RECEIVED;
+        return $model->update();
+    }
+
+//    /**
+//     * 取消签收
+//     */
+//    public static function cancelReceive($receive_no)
+//    {
+//        $model = Receive::where('delivery_no', $receive_no)->first();
+//        if (!$model) {
+//            throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
+//        }
+//        $model->status = Receive::STATUS_CANCEL;
+//        return $model->update();
+//    }
+
+
+    /**
+     * 验收 针对设备 针对imei
+     */
+    public static function check($receive_no, $imei, $data)
     {
 
+        try {
+            DB::beginTransaction();
+
+            $mini = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
+
+            if (!$mini) {
+                throw new NotFoundResourceException('设备未找到，imei:' . $imei);
+            }
+
+            if (!$data['check_result']) {
+                throw new \Exception('请选择检测结果');
+            }
+
+            if ($data['check_result'] == ReceiveGoodsImei::RESULT_NOT && !$data['check_description']) {
+                throw new \Exception('请选择检测不合格原因');
+            }
+
+            $mini->check_result = $data['check_result'];
+            $mini->check_time = time();
+            $mini->check_description = isset($data['check_description']) ? $data['check_description'] : '';
+            $mini->status = ReceiveGoodsImei::STATUS_CHECK_OVER;//检测完成
+            $mini->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * 取消签收
+     * 取消检测 针对设备
+     * todo 为啥需要取消验收呢
      */
-    public static function cancelReceive()
+    public static function cancelCheck($receive_no, $imei)
     {
+        $mini = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
 
-    }
+        if (!$mini) {
+            throw new NotFoundResourceException('设备未找到，imei:' . $imei);
+        }
 
-
-    /**
-     * 验收 针对设备
-     */
-    public static function check()
-    {
-
-    }
-
-    /**
-     * 取消验收 针对设备
-     */
-    public static function cancelCheck()
-    {
-
+        $mini->status = ReceiveGoodsImei::STATUS_WAIT_CHECK;
+        return $mini->update();
     }
 
     /**

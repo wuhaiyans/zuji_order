@@ -22,22 +22,6 @@ class ReceiveController extends Controller
         $this->receive = $service;
     }
 
-
-//    public function receiveList()
-//    {
-////        DB::connection('foo');
-//        echo "收货表列表接口";
-//    }
-//
-//    /**
-//     * 创建收货单
-//     */
-//    public function receiveCreate()
-//    {
-//
-//    }
-
-
     /**
      * 列表
      */
