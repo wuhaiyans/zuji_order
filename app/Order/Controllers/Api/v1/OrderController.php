@@ -46,7 +46,7 @@ class OrderController extends Controller
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
-        //var_dump($res);die;
+        var_dump($res);die;
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }

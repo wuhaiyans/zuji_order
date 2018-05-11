@@ -64,6 +64,8 @@ class OrderRepository
         $order_amount =0;
         $goods_amount =0;
         $goods_yajin =0;
+        $order_yajin =0;
+        $order_insurance =0;
         $coupon_amount =0;
         $coupon =[];
         $reduce_data=[];
@@ -73,10 +75,7 @@ class OrderRepository
             $reduce_data[$k]['spu_id']=$v['sku']['spu_id'];
             $reduce_data[$k]['num']=$v['sku']['sku_num'];
             for ($i=0;$i<$v['sku']['sku_num'];$i++){
-                $order_amount +=$v['sku']['amount'];
-                $goods_amount +=$v['sku']['all_amount'];
-                $goods_yajin  +=$v['sku']['yajin'];
-                $coupon_amount+=$v['sku']['discount_amount'];
+
                 if(isset($v['coupon']['coupon_no'])){
                     $coupon[]=$v['coupon']['coupon_no'];
                 }
@@ -101,15 +100,24 @@ class OrderRepository
                     'order_no'=>$data['order_no'],
                     'chengse'=>$v['sku']['chengse'],
                     'discount_amount'=>$v['sku']['discount_amount'],
-                    'amount_after_discount'=>$v['sku']['amount'],
+                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount'],
                     'edition'=>$v['sku']['edition'],
                     'market_price'=>$v['sku']['market_price'],
-                    'price'=>$v['sku']['amount'],
+                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
                     'specs'=>json_encode($v['sku']['specs']),
                     'insurance'=>$v['sku']['yiwaixian'],
                     'buyout_price'=>$v['sku']['buyout_price'],
                     'weight'=>$v['sku']['weight'],
                 ];
+                $order_amount +=$goods_data['amount_after_discount'];
+                $goods_amount +=$goods_data['amount_after_discount'];
+                $goods_yajin  +=$goods_data['goods_yajin'];
+                $order_yajin  +=$goods_data['yajin'];
+                $order_insurance+=$goods_data['insurance'];
+
+                $coupon_amount+=$goods_data['discount_amount'];
+
+
                 $goods_id = $this->goods->insertGetId($goods_data);
                 if(!$goods_id){
                     return ApiStatus::CODE_30005;
@@ -133,11 +141,13 @@ class OrderRepository
             'user_id'=>$data['user_id'],
             'pay_type'=>$data['pay_type'],
             'goods_amount'=>$goods_amount,
-            'order_amount'=>$order_amount,
+            'order_amount'=>$order_amount,// 注意：如果有现金券 再减去现金券金额
             'credit'=>$user_info['credit']['credit'],
             'goods_yajin'=>$goods_yajin,
-            'order_yajin'=>$goods_yajin,
+            'order_yajin'=>$order_yajin,
+            'order_insurance'=>$order_insurance,
             'coupon_amount'=>$coupon_amount,
+            'cash_amount'=>0.00,
             'appid'=>$data['appid'],
         ];
         $order_id =$this->order->insertGetId($order_data);
@@ -207,11 +217,15 @@ class OrderRepository
      *
      */
 
-    public static function getInfoById($orderNo){
+    public static function getInfoById($orderNo,$userId=''){
             if (empty($orderNo)) return false;
-            $order =  Order::query()->where([
-                ['order_no', '=', $orderNo],
-            ])->first();
+            $whereArray = array();
+            $whereArray[] = ['order_no', '=', $orderNo];
+            if (!empty($userId)) {
+
+                $whereArray[] = ['user_id', '=', $userId];
+            }
+            $order =  Order::query()->where($whereArray)->first();
             if (!$order) return false;
             return $order->toArray();
     }

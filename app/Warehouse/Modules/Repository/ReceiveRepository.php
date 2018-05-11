@@ -10,6 +10,7 @@ namespace App\Warehouse\Modules\Repository;
 
 
 use App\Warehouse\Models\Receive;
+use App\Warehouse\Models\ReceiveGoods;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
@@ -89,7 +90,7 @@ class ReceiveRepository
             DB::beginTransaction();
 
             $receiveNo = self::generateReceiveNo();
-            $data = [
+            $da = [
                 'receive_no' => $receiveNo,
                 'order_no'  => $data['order_no'],
                 'logistics_id' => isset($data['logistics_id']) ? $data['logistics_id'] : 0,
@@ -98,7 +99,19 @@ class ReceiveRepository
                 'create_time' => time(),
             ];
             $model = new Receive();
-            return $model->create($data);
+            $model->create($da);
+
+            $details = $data['receive_detail'];
+
+            if (!is_array($details)) {
+                throw new \Exception("缺少相关参数");
+            }
+
+            foreach ($details as $detail) {
+                $gmodel = new ReceiveGoods();
+                $detail['receive_no'] = $receiveNo;
+                $gmodel->create($detail);
+            }
 
             DB::commit();
         } catch (\Exception $e) {
