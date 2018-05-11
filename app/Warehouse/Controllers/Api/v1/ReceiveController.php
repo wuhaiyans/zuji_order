@@ -22,22 +22,6 @@ class ReceiveController extends Controller
         $this->receive = $service;
     }
 
-
-//    public function receiveList()
-//    {
-////        DB::connection('foo');
-//        echo "收货表列表接口";
-//    }
-//
-//    /**
-//     * 创建收货单
-//     */
-//    public function receiveCreate()
-//    {
-//
-//    }
-
-
     /**
      * 列表
      */
@@ -87,7 +71,18 @@ class ReceiveController extends Controller
      */
     public function cancel()
     {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        try {
+            $this->receive->cancel($params['receive_no']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
@@ -95,7 +90,18 @@ class ReceiveController extends Controller
      */
     public function received()
     {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        try {
+            $this->receive->received($params['receive_no']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
@@ -112,7 +118,23 @@ class ReceiveController extends Controller
      */
     public function check()
     {
+        $rules = [
+            'receive_no' => 'required',
+            'imei'       => 'required',
+            'check_result'       => 'required',
+            'check_description'  => 'required',
+            'check_price'        => 'required',
+        ];
 
+        $params = $this->_dealParams($rules);
+
+        try {
+            $this->receive->check($params['receive_no'], $params['imei'], $params);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
@@ -125,10 +147,29 @@ class ReceiveController extends Controller
 
     /**
      * 完成签收 针对收货单
+     * 1.状态修改
+     * 2.通知订单
      */
     public function finishCheck()
     {
+        $rules = [
+            'receive_no' => 'required'
+        ];
 
+        $params = $this->_dealParams($rules);
+
+        try {
+            $receive = $this->receive->finishCheck($params['receive_no']);
+
+            $imeis = $receive->imeis;
+
+            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
+
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
