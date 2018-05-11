@@ -83,6 +83,7 @@ class OrderInstalment
 
 
         $user = filter_array($user, [
+            'user_id'        => 'required',
             'withholding_no' => 'required',
         ]);
         if(count($user) < 1){
@@ -179,7 +180,7 @@ class OrderInstalment
      * 查询分期数据
      * @return array
      */
-    public static function queryList($params = []){
+    public static function queryList($params = [],$additional = []){
         if (!is_array($params)) {
             return ApiStatus::CODE_20001;
         }
@@ -187,20 +188,24 @@ class OrderInstalment
         $params = filter_array($params, [
             'goods_no'  =>'required',
             'order_no'  =>'required',
-            'page'      => 'required',
-            'limit'     => 'required',
+            'status'    => 'required',
+            'mobile'    => 'required',
+            'term'      => 'required',
         ]);
-        $where = [
-            'goods_no'  => $params['goods_no'],
-            'order_no'  => $params['order_no'],
-        ];
-        $additional = [
-            'page'  => $params['page'],
-            'limit' => $params['limit'],
-        ];
 
-        $result =  OrderInstalmentRepository::queryList($where, $additional);
+        $additional = filter_array($additional, [
+            'page'  =>'required',
+            'limit'  =>'required',
+        ]);
+
+        $total = OrderInstalmentRepository::queryCount($params);
+        if($total == 0){
+            return [];
+        }
+
+        $result =  OrderInstalmentRepository::queryList($params, $additional);
         $result = array_group_by($result,'goods_no');
+        $result['total'] = $total;
 
         return $result;
     }
