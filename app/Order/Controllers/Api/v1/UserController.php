@@ -51,6 +51,7 @@ class UserController extends Controller
     public function me()
     {
         return $this->response->item($this->user(), new UserTransformer());
+//        return response()->json($this->guard()->user());
         //return Auth::guard('api')->user();
     }
     /**
