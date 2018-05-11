@@ -22,14 +22,6 @@ class ReceiveRepository
     {
         return date('YmdHis') . rand(1000, 9999);
     }
-    /**
-     * @param $params
-     * @param $limit
-     * @param null $page
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     *
-     * 列表
-     */
 
     /**
      * @param $params
