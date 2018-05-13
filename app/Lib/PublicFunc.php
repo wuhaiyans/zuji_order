@@ -229,20 +229,22 @@ function v($data, $exit = '')
 
 /**
  * heaven
+ * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+毫秒（5位）+随机数（1位）</p>
  * @param $noType :1,分期交易号; 2,退货编号3.支付交易
- *  生成退款单号
+ * 
  */
 function createNo($noType=1){
     $npreNoType = array(
         //分期交易号
         1 => 'f',
         2 => 't',
-        3=> 'P',
+        3 => 'P',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
         return false;
     }
+	// 年差值标记符，大写字母集[A-Z]
     for($i=65;$i<91;$i++){
         $year[]= strtoupper(chr($i));
     }
