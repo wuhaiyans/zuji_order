@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\OldInc;
 use App\Lib\PayInc;
+use App\Lib\Payment\WithholdingApi;
 use App\Lib\PublicInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
@@ -32,8 +33,8 @@ class OrderCreateVerify
         }
 
         //判断是否需要签约代扣协议
-        if($data['pay_type'] == PayInc::WithhodingPay){
-            $Withhold =$this->UserWithholding($user_info['withholding_no'],$user_info['id']);
+        if($data['pay_type'] == PayInc::WithhodingPay ){
+            $Withhold =$this->UserWithholding($data['appid'],$user_info);
             if(!$Withhold){
                 $this->flag =false;
             }
@@ -57,17 +58,15 @@ class OrderCreateVerify
             $this->flag =false;
         }
         //验证优惠券信息
-//        if($data['coupon_no'] !=""){
-//            $coupon = $this->CouponVerify($data['coupon_no'],$data['user_id']);
-//            if(!$coupon){
-//                $this->flag =false;
-//            }
-//        }
+        $coupon = $this->CouponVerify($data['coupon'],$data['user_id']);
+        if(!$coupon){
+            $this->flag =false;
+        }
 
         //分期单信息
-//        if($data['pay_type']!=PayInc::WithhodingPay){
-//            $instalment =$this->InstalmentVerify();
-//        }
+        if($data['pay_type']!=PayInc::WithhodingPay || $data['zuqi_type'] ==2){
+            $instalment =$this->InstalmentVerify();
+        }
         return $this->flag;
 
     }
@@ -117,30 +116,27 @@ class OrderCreateVerify
 
     }
 
-    private function CouponVerify($coupon_no,$user_id){
+    private function CouponVerify($coupons,$user_id){
         $arr = $this->GetSchema();
-        $coupon = $this->third->GetCoupon($coupon_no,$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
-        //var_dump($coupon);die;
-        if(is_array($coupon)){
-            $this->discount_amount = $coupon['discount_amount'];
-            $this->coupon_no = $coupon['coupon_no'];
-            $this->coupon_id = $coupon['coupon_id'];
-            $this->coupon_type = $coupon['coupon_type'];
-            $this->coupon_name = $coupon['coupon_name'];
+        $arr['coupon']=[];
 
-            $arr =[
-                'coupon' => [
-                    'coupon_no' => $this->coupon_no,
-                    'coupon_name' => $this->coupon_name,
-                    'coupon_type' => $this->coupon_type,
-                    'discount_amount' => $this->discount_amount,
-                ]
+        for($i=0;$i<count($coupons);$i++){
+            $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
+            if(!is_array($coupon)){
+                $this->set_error($coupon);
+                $this->flag =false;
+                continue;
+            }
+            $arr['coupon'][$i]=[
+                'coupon_no' => $coupon['coupon_no'],
+                'coupon_name' => $coupon['coupon_name'],
+                'coupon_type' => $coupon['coupon_type'],
+                'discount_amount' => $coupon['discount_amount'],
             ];
-            $this->SetSchema($arr);
-            return true;
         }
-        $this->set_error($coupon);
-        return false;
+        $this->SetSchema($arr);
+        return $this->flag;
+
     }
     private function InstalmentVerify(){
         $data =array_merge($this->GetSchema(),$this->GetUserSchema());
@@ -291,13 +287,7 @@ class OrderCreateVerify
      *  下单商品信息过滤
      */
     private function GoodsVerify($sku_info,$spu_info,$data){
-        $this->sku_num =1;
-        foreach ($data['sku'] as $k=>$v){
-            if(intval($sku_info['sku_id']) ==$v['sku_id']){
-                $this->sku_num =$v['sku_num'];
-                continue;
-            }
-        }
+        $this->sku_num =intval($sku_info['sku_num']);
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
         $this->zujin = $sku_info['shop_price']*100;
@@ -403,7 +393,7 @@ class OrderCreateVerify
                 'specs' => $this->specs,
                 'thumb' => $this->thumb,
                 'yiwaixian' => priceFormat($this->yiwaixian/100),
-                'yiwaixian_cost' => $this->yiwaixian_cost,
+                'yiwaixian_cost' => priceFormat($this->yiwaixian_cost/100),
                 'zujin' => priceFormat($this->zujin/100),
                 'yajin' => priceFormat($this->yajin/100),
                 'zuqi' => $this->zuqi,
@@ -428,46 +418,21 @@ class OrderCreateVerify
     /**
      *  验证代扣
      */
-    private function UserWithholding($withholding_no,$user_id){
-        if( $withholding_no!="" ){
+    private function UserWithholding($appid,$user_info){
+        if( $user_info['withholding_no']!="" ){
           //  调用支付系统的方法 如下：Y/N
+//            $res =WithholdingApi::withholdingstatus($appid,[
+//                'alipay_user_id' => $user_info['alipay_user_id'],
+//                'user_id' => $user_info['id'], //租机平台用户id
+//                'agreement_no' => $user_info['withholding_no'], //签约协议号
+//
+//            ]);
             $status ="Y";
             if( $status!='Y' ){
                 //用户已经解约代扣协议
                 $this->set_error(ApiStatus::CODE_30001);
                 $this->flag =false;
             }
-//            // 更新用户签约协议状态
-//            $withholding_table = \hd_load::getInstance()->table('payment/withholding_alipay');
-//
-//            // 一个合作者ID下同一个支付宝用户只允许签约一次
-//            $where = [
-//                'user_id' => $this->user_id,
-//                'agreement_no' => $this->withholding_no,
-//            ];
-//            $withholding_info = $withholding_table->field(['id','user_id','partner_id','alipay_user_id','agreement_no','status'])->where( $where )->limit(1)->find();
-//            if( !$withholding_info ){// 查询失败
-//                \zuji\debug\Debug::error(\zuji\debug\Location::L_Withholding, '[创建订单]查询用户代扣协议失败', $where);
-//                throw new ComponnetException('下单查询用户代扣协议信息失败');
-//            }
-//            // 支付宝用户号
-//            $this->alipay_user_id = $withholding_info['alipay_user_id'];
-            //--网络查询支付宝接口，获取代扣协议状态----------------------------------
-//            try {
-//                $withholding = new \alipay\Withholding();
-//                $status = $withholding->query( $this->alipay_user_id );
-//                if( $status=='Y' ){
-//                    $this->flag = true;
-//                }else{
-//                    $this->get_order_creater()->set_error('[下单][代扣组件]用户已经解约代扣协议');
-//                    $this->flag = false;
-//                    $this->withholding_no = '';// 用户已解约，清空代扣协议号
-//                }
-//            } catch (\Exception $exc) {
-//                \zuji\debug\Debug::error(\zuji\debug\Location::L_Withholding, '[下单][代扣组件]支付宝接口查询用户代扣协议出现异常', $exc->getMessage());
-//                $this->get_order_creater()->set_error('[下单][代扣组件]支付宝接口查询用户代扣协议出现异常');
-//                $this->flag = false;
-//            }
         }else{
             //未签约代扣协议
             $this->set_error(ApiStatus::CODE_30000);

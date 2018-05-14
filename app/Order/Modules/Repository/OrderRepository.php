@@ -59,11 +59,13 @@ class OrderRepository
         ];
         $id =$this->user->insertGetId($user_data);
         if(!$id){
-            return ApiStatus::CODE_30005;
+            return false;
         }
         $order_amount =0;
         $goods_amount =0;
         $goods_yajin =0;
+        $order_yajin =0;
+        $order_insurance =0;
         $coupon_amount =0;
         $coupon =[];
         $reduce_data=[];
@@ -72,18 +74,16 @@ class OrderRepository
             $reduce_data[$k]['sku_id']=$v['sku']['sku_id'];
             $reduce_data[$k]['spu_id']=$v['sku']['spu_id'];
             $reduce_data[$k]['num']=$v['sku']['sku_num'];
-            for ($i=0;$i<$v['sku']['sku_num'];$i++){
-                $order_amount +=$v['sku']['amount'];
-                $goods_amount +=$v['sku']['all_amount'];
-                $goods_yajin  +=$v['sku']['yajin'];
-                $coupon_amount+=$v['sku']['discount_amount'];
-                $coupon[]=$v['coupon']['coupon_no'];
+            for($i=0;$i<$v['sku']['sku_num'];$i++){
+                if(isset($v['coupon']['coupon_no'])){
+                    $coupon[]=$v['coupon']['coupon_no'];
+                }
                 $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
                     'goods_name'=>$v['sku']['spu_name'],
                     'goods_id'=>$v['sku']['sku_id'],
-                    'goods_no'=>$v['sku']['sku_no']."-".++$i,
+                    'goods_no'=>$v['sku']['sku_no']."-".$id."-".($i+1),
                     'prod_id'=>$v['sku']['spu_id'],
                     'prod_no'=>$v['sku']['spu_no'],
                     'brand_id'=>$v['sku']['brand_id'],
@@ -98,32 +98,39 @@ class OrderRepository
                     'order_no'=>$data['order_no'],
                     'chengse'=>$v['sku']['chengse'],
                     'discount_amount'=>$v['sku']['discount_amount'],
-                    'amount_after_discount'=>$v['sku']['amount'],
+                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount'],
                     'edition'=>$v['sku']['edition'],
                     'market_price'=>$v['sku']['market_price'],
-                    'price'=>$v['sku']['amount'],
+                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
                     'specs'=>json_encode($v['sku']['specs']),
                     'insurance'=>$v['sku']['yiwaixian'],
                     'buyout_price'=>$v['sku']['buyout_price'],
                     'weight'=>$v['sku']['weight'],
                 ];
+                $order_amount +=$goods_data['amount_after_discount'];
+                $goods_amount +=$goods_data['amount_after_discount'];
+                $goods_yajin  +=$goods_data['goods_yajin'];
+                $order_yajin  +=$goods_data['yajin'];
+                $order_insurance+=$goods_data['insurance'];
+
+                $coupon_amount+=$goods_data['discount_amount'];
                 $goods_id = $this->goods->insertGetId($goods_data);
                 if(!$goods_id){
-                    return ApiStatus::CODE_30005;
+                    return false;
                 }
-//                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
-//                // 生成分期
-//                $instalment_data =array_merge($v,['order'=>$data],$user_info);
-//                //var_dump($instalment_data);die;
-//                $instalment = $this->instalment->create($instalment_data);
-//                //var_dump($instalment);die;
-//                if(!$instalment){
-//                    return ApiStatus::CODE_30005;
-//                }
+                if($data['zuqi_type'] ==2){
+                    $v['sku']['goods_no']=$goods_data['goods_no'];
+                    // 生成分期
+                    $instalment_data =array_merge($v,['order'=>$data],$user_info);
+                    //var_dump($instalment_data);die;
+                    $instalment = $this->instalment->create($instalment_data);
+                    if(!$instalment){
+                        return false;
+                    }
+                }
 
             }
         }
-
         // 创建订单
         $order_data = [
             'order_status' => OrderStatus::OrderWaitPaying,
@@ -131,12 +138,15 @@ class OrderRepository
             'user_id'=>$data['user_id'],
             'pay_type'=>$data['pay_type'],
             'goods_amount'=>$goods_amount,
-            'order_amount'=>$order_amount,
+            'order_amount'=>$order_amount,// 注意：如果有现金券 再减去现金券金额
             'credit'=>$user_info['credit']['credit'],
             'goods_yajin'=>$goods_yajin,
-            'order_yajin'=>$goods_yajin,
+            'order_yajin'=>$order_yajin,
+            'order_insurance'=>$order_insurance,
             'coupon_amount'=>$coupon_amount,
+            'cash_amount'=>0.00,
             'appid'=>$data['appid'],
+            'zuqi_type'=>$data['zuqi_type'],
         ];
         $order_id =$this->order->insertGetId($order_data);
         if(!$order_id){
@@ -160,7 +170,7 @@ class OrderRepository
 
         // 下单减少库存
 
-        $b =$this->third->ReduceStock($reduce_data);
+       // $b =$this->third->ReduceStock($reduce_data);
 
         //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
@@ -171,16 +181,49 @@ class OrderRepository
 }
 
     /**
+     *  保存支付交易号
+     */
+    public static function updateTrade($orderNo, $trade_no,$userId=''){
+
+        if (empty($orderNo)) {
+            return false;
+        }
+        if (empty($trade_no)) {
+            return false;
+        }
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        if (!empty($userId)) {
+
+            $whereArray[] = ['user_id', '=', $userId];
+        }
+        $order =  Order::where($whereArray)->first();
+        //return $order->toArray();
+        if (!$order) return false;
+        $order->trade_no = $trade_no;
+        if ($order->save()) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
      *
      * 根据订单id查询信息
      *
      */
 
-    public static function getInfoById($orderNo){
+    public static function getInfoById($orderNo,$userId=''){
             if (empty($orderNo)) return false;
-            $order =  Order::query()->where([
-                ['order_no', '=', $orderNo],
-            ])->first();
+            $whereArray = array();
+            $whereArray[] = ['order_no', '=', $orderNo];
+            if (!empty($userId)) {
+
+                $whereArray[] = ['user_id', '=', $userId];
+            }
+            $order =  Order::query()->where($whereArray)->first();
             if (!$order) return false;
             return $order->toArray();
     }
@@ -215,6 +258,29 @@ class OrderRepository
         ])->get();
         if (!$orderGoodExtendData) return false;
         return $orderGoodExtendData->toArray();
+    }
+    /**
+     *
+     * 查询订单是否可以支付
+     *
+     */
+    public static function isPay($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderData = Order::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->first()->toArray();
+        if(empty($orderData)){
+            return false;
+        }
+        if($orderData['order_status']!= OrderStatus::OrderWaitPaying || $orderData['pay_time'] >0){
+            return false;
+        }
+        if(($orderData['order_amount']+$orderData['order_yajin'])<=0){
+            return false;
+        }
+        return $orderData;
+
     }
 
     /**
@@ -277,7 +343,7 @@ class OrderRepository
 //
 //
 //    }
-    //获取订单信息
+//获取订单信息
     public function get_order_info($where){
         $orderNo=$where['order_no'];
         $order =  Order::where([
@@ -313,7 +379,7 @@ class OrderRepository
         }
 
     }
-    //更新订单状态
+    //更新订单状态-申请退货
     public static function order_update($order_no){
         $data['freeze_type']='1';
         if(Order::where('order_no', '=', $order_no)->update($data)){
@@ -322,7 +388,7 @@ class OrderRepository
             return false;
         }
     }
-    //更新订单状态
+    //更新订单状态-审核拒绝
     public static function deny_update($order_no){
         $data['freeze_type']='0';
         if(Order::where('order_no', '=', $order_no)->update($data)){
@@ -330,5 +396,76 @@ class OrderRepository
         }else{
             return false;
         }
+    }
+
+
+
+    /**
+     *  获取订单列表
+     *  heaven
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+        columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+        pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+        page:表示查询第几页及查询页码
+     * @param array $param  获取订单列表参数
+     */
+    public static function getOrderList($param = array(), $pagesize=2)
+    {
+        $whereArray = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['order_info.user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_info.order_no', '=', $param['order_no']];
+        }
+
+        //根据手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+        }
+
+        //支付类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
+        }
+
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
+            $whereArray[] = ['order_info.create_time', '<=', $param['end_time']];
+        }
+
+        if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
+            $whereArray[] = ['order_info_extend.visit_id', '<>', 0];
+        }
+        
+        $orderList = DB::table('order_info')
+            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')
+            ->where($whereArray)
+            ->select('order_info.*','order_userinfo.*')
+            ->paginate($pagesize,$columns = ['*'], $pageName = '', $param['page']);
+        return $orderList;
+
     }
 }

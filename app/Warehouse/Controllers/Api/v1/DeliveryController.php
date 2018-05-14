@@ -1,15 +1,12 @@
 <?php
 
 namespace App\Warehouse\Controllers\Api\v1;
-use App\Lib\ApiResponse;
 use App\Lib\ApiStatus;
-use App\Warehouse\Models\Delivery;
-use App\Warehouse\Models\DeliveryGoodsImei;
+use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
@@ -19,10 +16,12 @@ class DeliveryController extends Controller
 
     const SESSION_ERR_KEY = 'delivery.error';
     protected $DeliveryCreate;
+    protected $delivery;
 
-    public function __construct(DeliveryCreater $DeliveryCreate)
+    public function __construct(DeliveryCreater $DeliveryCreate, DeliveryService $delivery)
     {
         $this->DeliveryCreate = $DeliveryCreate;
+        $this->delivery = $delivery;
     }
 
 
@@ -30,6 +29,8 @@ class DeliveryController extends Controller
 //        DB::connection('foo');
         echo "收货表列表接口";
     }
+
+
 
     /**
      * 创建发货单
@@ -41,20 +42,25 @@ class DeliveryController extends Controller
         $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
         $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
 
-        $this->DeliveryCreate->confirmation($delivery_row);
+
+        try {
+            $this->DeliveryCreate->confirmation($delivery_row);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+
     }
 
 
     /**
      * 取消发货
+     * 订单系统过来的请求
      */
     public function cancel()
     {
-
-        dd('abc');
-        $rules = [
-            'order_no' => 'required'
-        ];
+        $rules = ['order_no' => 'required'];
         $params = $this->_dealParams($rules);
 
         if (!$params) {
@@ -62,9 +68,30 @@ class DeliveryController extends Controller
         }
 
         try {
+            $this->delivery->cancel($params['order_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
 
-            DeliveryService::cancel($params['order_no']);
+        return \apiResponse([]);
+    }
 
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * 客服取消发货
+     */
+    public function cancelDelivery()
+    {
+        $rules = ['delivery_no' => 'required'];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->cancelDelivery($params['delivery_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -80,7 +107,7 @@ class DeliveryController extends Controller
     {
 
         $rules = [
-            'delivery_id' => 'required'
+            'delivery_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -91,7 +118,7 @@ class DeliveryController extends Controller
         $auto = isset($params['auto']) ? $params['auto'] : false;
 
         try {
-            Delivery::receive($params['delivery_id'], $auto);
+            $this->delivery->receive($params['delivery_no'], $auto);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -114,11 +141,14 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $result = Delivery::detail($params['delivery_no']);
+        try {
+            $result = $this->delivery->detail($params['delivery_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
 
         return \apiResponse($result);
     }
-
 
 
 
@@ -128,7 +158,7 @@ class DeliveryController extends Controller
     public function imeis()
     {
         $rules = [
-            'delivery_id' => 'required'
+            'delivery_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -137,7 +167,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $list = Delivery::imeis($params['delivery_id']);
+            $list = $this->delivery->imeis($params['delivery_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -152,7 +182,7 @@ class DeliveryController extends Controller
     public function send()
     {
         $rules = [
-            'order_no' => 'required',
+            'delivery_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
 
@@ -161,10 +191,9 @@ class DeliveryController extends Controller
         }
 
         try {
-            Delivery::send($params['order_no']);
-
-            \App\Lib\Warehouse\Delivery::delivery($params['order_no']);
-
+            $this->delivery->send($params['delivery_no']);
+            $order_no = $this->delivery->getOrderNoByDeliveryNo($params['delivery_no']);
+            \App\Lib\Warehouse\Delivery::delivery($order_no);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
@@ -180,7 +209,7 @@ class DeliveryController extends Controller
     public function logistics()
     {
         $rules = [
-            'delivery_no' => 'required',
+            'delivery_no'  => 'required',
             'logistics_id' => 'required',//物流渠道
             'logistics_no' => 'required'
         ];
@@ -191,7 +220,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            Delivery::logistics($params['delivery_no'], $params['logistics_id'], $params['logistics_no']);
+            $this->delivery->logistics($params['delivery_no'], $params['logistics_id'], $params['logistics_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
@@ -213,9 +242,8 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
         }
 
-
         try {
-            Delivery::cancelMatch($params['delivery_no']);
+            $this->delivery->cancelMatch($params['delivery_no']);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
@@ -228,11 +256,11 @@ class DeliveryController extends Controller
     /**
      * 取消关联imei
      */
-    public function delImei()
+    public function delImei(DeliveryImeiService $server)
     {
 
         $rules = [
-            'delivery_id' => 'required',
+            'delivery_no' => 'required',
             'imei'  => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -242,9 +270,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            if (!DeliveryGoodsImei::del($params['delivery_id'], $params['imei'])) {
-                return \apiResponse([], ApiStatus::CODE_60002, '删除imei失败');
-            }
+            $server->del($params['delivery_no'], $params['imei']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -255,11 +281,12 @@ class DeliveryController extends Controller
     /**
      * 添加关联imei
      */
-    public function addImei()
+    public function addImei(DeliveryImeiService $server)
     {
         $rules = [
-            'delivery_id' => 'required',
-            'imei'  => 'required'
+            'delivery_no' => 'required',
+            'imei'     => 'required',
+            'serial_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -268,53 +295,23 @@ class DeliveryController extends Controller
         }
 
         try {
-            if (!DeliveryGoodsImei::add($params['delivery_id'], $params['imei'])) {
-                return \apiResponse([], ApiStatus::CODE_60002, '添加imei失败');
-            }
+            $server->add($params['delivery_no'], $params['imei'], $params['serial_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
     }
-
-
     /**
      * 列表查询
      */
     public function list()
     {
         $params = $this->_dealParams([]);
-
-        $limit = 20;
-        if (isset($params['limit']) && $params['limit']) {
-            $limit = $params['limit'];
-        }
-
-        $whereParams = [];
-
-        if (isset($params['order_no']) && $params['order_no']) {
-            $whereParams['order_no'] = $params['order_no'];
-        }
-
-        if (isset($params['delivery_no']) && $params['delivery_no']) {
-            $whereParams['delivery_no'] = $params['delivery_no'];
-        }
-
-        $list = Delivery::where($whereParams)->paginate($limit);
-
-        $d = $list->toArray();
-        $result = [
-            'data' => $d['data'],
-            'current_page' => $d['current_page'],
-            'last_page' => $d['last_page'],
-            'per_page' => $d['per_page'],
-            'total' => $d['total']
-        ];
-
-        return \apiResponse($result);
-
+        $list = $this->delivery->list($params);
+        return \apiResponse($list);
     }
+
 
 
     /**
@@ -323,6 +320,10 @@ class DeliveryController extends Controller
     private function _dealParams($rules)
     {
         $params = request()->input();
+
+        if (!isset($params['params'])) {
+            return [];
+        }
 
         if (is_string($params['params'])) {
             $params = json_decode($params['params'], true);

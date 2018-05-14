@@ -14,6 +14,7 @@
  *
  */
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\DB;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
     if (empty($errmsg)) {
@@ -228,23 +229,100 @@ function v($data, $exit = '')
 
 /**
  * heaven
+ * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+毫秒（5位）+随机数（1位）</p>
  * @param $noType :1,分期交易号; 2,退货编号3.支付交易
- *  生成退款单号
+ * 
  */
 function createNo($noType=1){
     $npreNoType = array(
         //分期交易号
         1 => 'f',
         2 => 't',
-        3=> 'p',
+        3 => 'P',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
         return false;
     }
+	// 年差值标记符，大写字母集[A-Z]
     for($i=65;$i<91;$i++){
         $year[]= strtoupper(chr($i));
     }
     $orderSn = $npreNoType[$noType].$year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
     return $orderSn;
+}
+
+/**
+ * 根据key 二维数组分组
+ * @param $arr 数组
+ * @param $key 按照分组的key
+ */
+function array_group_by($arr, $key)
+{
+    $grouped = [];
+    foreach ($arr as $value) {
+        $grouped[$value[$key]][] = $value;
+    }
+    // Recursively build a nested grouping if more parameters are supplied
+    // Each grouped array value is grouped according to the next sequential key
+    if (func_num_args() > 2) {
+        $args = func_get_args();
+        foreach ($grouped as $key => $value) {
+            $parms = array_merge([$value], array_slice($args, 2, func_num_args()));
+            $grouped[$key] = call_user_func_array('array_group_by', $parms);
+        }
+    }
+    return $grouped;
+}
+
+/**
+ * sql调试
+ */
+function sql_profiler()
+{
+    //sql调试
+        DB::listen(function ($sql) {
+            foreach ($sql->bindings as $i => $binding) {
+                if ($binding instanceof \DateTime) {
+                    $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+                } else {
+                    if (is_string($binding)) {
+                        $sql->bindings[$i] = "'$binding'";
+                    }
+                }
+            }
+            $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
+            $query = vsprintf($query, $sql->bindings);
+            print_r($query);
+            echo '<br />';
+        });
+
+}
+
+
+/*
+  *
+  * 对象转换为数组
+  * @param $d object
+  * @author heavenwu
+  * $@param type=1 多维对象 find  2一维对象 比如findfrist
+  * return array
+  */
+function objectToArray($d, $type=1)
+{
+    //数据处理
+    $result = array();
+    if ($type == 1) {
+        foreach ($d as $values) {
+            if (!empty($values)) {
+                $result[] = (array)($values['rows']);
+            }
+        }
+    } else {
+
+        foreach ($d as $keys=>$dValues) {
+            $result[$keys] = $dValues;
+        }
+    }
+    return $result;
 }

@@ -11,7 +11,18 @@ return [
 
     'api.order.orderdetail'=>'OrderController@orderInfo',
 
-    'api.order.pay'=>'OrderController@pay',//订单支付
+    'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
+
+    'api.union.bankCardlist'=>'UnionController@bankCardlist',//银联已开通银行卡列表查询接口
+
+    'api.union.openBankCard'=>'UnionController@openBankCard',//银联开通银行卡接口
+
+    'api.union.consume'=>'UnionController@consume',//银联支付消费接口(限已开通银联用户)
+
+    'api.union.getunionstatus'=>'UnionController@getUnionStatus',//银联查询开通结果接口
+
+    'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
+
 
     'api.order.orderlist'=>'OrderController@orderList',
 
@@ -33,6 +44,8 @@ return [
     'api.Instalment.create'             => 'InstalmentController@create',
     // 扣款接口
     'api.Instalment.createpay'          => 'InstalmentController@createpay',
+    // 多项扣款接口
+    'api.Instalment.multi_createpay'    => 'InstalmentController@multi_createpay',
 
     //分期相关
     // 代扣协议查询
@@ -52,7 +65,8 @@ return [
     'api.Return.returnDeliverNo'    => 'ReturnController@returnDeliverNo',
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
-
+    // 取消退货接口
+    'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
     // test
     'api.Test.test'       => 'TestController@test',
 

@@ -7,9 +7,7 @@
 
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DeliveryGoodsImei extends Model
+class DeliveryGoodsImei extends Warehouse
 {
     protected $table = 'zuji_delivery_goods_imei';
 
@@ -42,29 +40,6 @@ class DeliveryGoodsImei extends Model
     public static function del($delivery_id, $imei)
     {
 
-    }
-
-
-    /**
-     * @param $delivery_id
-     * @param $imei
-     * 添加
-     */
-    public static function add($delivery_id, $imei)
-    {
-        $model = self::where(['delivery_id'=>$delivery_id, 'imei'=>$imei]);
-        $time = time();
-
-        if (!$model) {
-            $model = new self();
-            $model->delivery_id = $delivery_id;
-            $model->imei = $imei;
-            $model->create_time = $time;
-        }
-        $model->status_time = $time;
-        $model->status = self::STATUS_YES;
-
-        return $model->save();
     }
 
     public static function listByDelivery($delivery_id)

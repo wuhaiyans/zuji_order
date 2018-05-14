@@ -38,7 +38,6 @@ class OrderOperate
 
             //关闭订单状态
             $orderData =  OrderRepository::closeOrder($orderNo,$userId);
-            dd($orderData);
             if (!$orderData) {
                 DB::rollBack();
                return ApiStatus::CODE_31002;
@@ -120,6 +119,23 @@ class OrderOperate
 //        return $orderData;
 
     }
+
+    /**
+     * 订单列表
+     * @param array $param
+     * @return array
+     */
+    public static function getOrderList($param = array())
+    {
+        //根据用户id查找订单列表
+
+        $orderList = OrderRepository::getOrderList($param);
+        return apiResponseArray(ApiStatus::CODE_0,$orderList);
+
+
+    }
+
+
 
 
 }

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ *
+ *  订单清算数据
+ *
+ */
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
@@ -25,12 +29,9 @@ class OrderController extends Controller
         $appid =$orders['appid'];
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $sku =$orders['params']['sku_info'];
-        $coupon = $orders['params']['coupon'];
+        $coupon_no = $orders['params']['coupon_no'];
 
         //判断参数是否设置
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
-        }
         if(empty($pay_type)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
@@ -40,12 +41,13 @@ class OrderController extends Controller
 
         $data =[
             'appid'=>1,
-            'pay_type'=>1,
+            'pay_type'=>2,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918",],
+            'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
+        //var_dump($res);die;
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -60,14 +62,11 @@ class OrderController extends Controller
         $pay_type =$orders['params']['pay_type'];//支付方式ID
         $address_id=$orders['params']['address_id'];//收货地址ID
         $sku =$orders['params']['sku_info'];
-        $coupon = $orders['params']['coupon'];
+        $coupon_no = $orders['params']['coupon_no'];
 
         //判断参数是否设置
         if(empty($pay_type)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
-        }
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
         if(empty($address_id)){
             return apiResponse([],ApiStatus::CODE_20001,"收货地址不能为空");
@@ -78,10 +77,10 @@ class OrderController extends Controller
 
         $data =[
             'appid'=>1,
-            'pay_type'=>1,
+            'pay_type'=>2,
             'address_id'=>$address_id,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918"],
+            'coupon_no'=>"b997c91a2cec7918",
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
@@ -96,6 +95,17 @@ class OrderController extends Controller
 //        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
     }
+//订单支付
+    public function pay(Request $request){
+        $params =$request->all();
+        $params =$params['params'];
+        $return_url =$params['return_url'];
+        $order_no =$params['order_no'];
+        $trade_no =createNo(3);
+        echo $trade_no;die;
+
+    }
+
 
     /**
      * 订单列表接口

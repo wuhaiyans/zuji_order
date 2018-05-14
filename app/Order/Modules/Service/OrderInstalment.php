@@ -43,10 +43,13 @@ class OrderInstalment
     ];
      */
     public static function create($params){
+        //var_dump($params);die;
         $order    = $params['order'];
         $sku      = $params['sku'];
-        $coupon   = !isset($params['coupon']) ? $params['coupon'] : "";
+        $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
+
+
 
         $order = filter_array($order, [
             'order_no' => 'required',
@@ -67,6 +70,7 @@ class OrderInstalment
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
+
         if(count($sku) < 8){
 
             return false;
@@ -79,6 +83,7 @@ class OrderInstalment
 
 
         $user = filter_array($user, [
+            'user_id'        => 'required',
             'withholding_no' => 'required',
         ]);
         if(count($user) < 1){
@@ -175,17 +180,32 @@ class OrderInstalment
      * 查询分期数据
      * @return array
      */
-    public static function queryList($params = []){
+    public static function queryList($params = [],$additional = []){
         if (!is_array($params)) {
             return ApiStatus::CODE_20001;
         }
+
         $params = filter_array($params, [
-            'goods_no'=>'required',
-            'order_no'=>'required',
+            'goods_no'  =>'required',
+            'order_no'  =>'required',
+            'status'    => 'required',
+            'mobile'    => 'required',
+            'term'      => 'required',
         ]);
 
-        $result =  OrderInstalmentRepository::queryList($params);
+        $additional = filter_array($additional, [
+            'page'  =>'required',
+            'limit'  =>'required',
+        ]);
+
+        $total = OrderInstalmentRepository::queryCount($params);
+        if($total == 0){
+            return [];
+        }
+
+        $result =  OrderInstalmentRepository::queryList($params, $additional);
         $result = array_group_by($result,'goods_no');
+        $result['total'] = $total;
 
         return $result;
     }

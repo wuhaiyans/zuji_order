@@ -2,11 +2,8 @@
 
 namespace App\Warehouse\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Illuminate\Support\Facades\DB;
 
-class Delivery extends Model
+class Delivery extends Warehouse
 {
 
     const STATUS_NONE = 0;
@@ -27,6 +24,11 @@ class Delivery extends Model
     protected $table = 'zuji_delivery';
 
     protected $primaryKey='delivery_no';
+
+    protected $fillable = ['delivery_no', 'order_no', 'logistics_id','status_time',
+        'logistics_no', 'status', 'create_time', 'delivery_time', 'status_remark'];
+
+
     /**
      * 默认使用时间戳戳功能
      *
@@ -62,54 +64,6 @@ class Delivery extends Model
     {
         return $this->hasMany(DeliveryGoodsImei::class, 'delivery_no');
     }
-
-
-//
-//    /**
-//     * 生成单号
-//     */
-//    public static function generateSerial()
-//    {
-//        return date('YmdHis').uniqid();
-//    }
-//
-//
-//    /**
-//     * 收货
-//     */
-//    public static function receive($delivery_id, $auto=false)
-//    {
-//        $model = self::findOrFail($delivery_id);
-//        $model->status = self::STATUS_RECEIVED;
-//
-//        return $model->update();
-//    }
-//
-//    /**
-//     * @param $order_no
-//     * 取消发货
-//     */
-//    public static function cancel($order_no)
-//    {
-//        $model = self::where('order_no', $order_no)->first();
-//        $model->status = self::STATUS_CANCEL;
-//
-//        return$model->update();
-//    }
-//
-//    /**
-//     * @param $delivery_id
-//     * 获取imeis列表
-//     */
-//    public static function imeis($delivery_id)
-//    {
-//        return DeliveryGoodsImei::listByDelivery($delivery_id);
-//    }
-//
-//
-
-
-
 
 
 

@@ -46,8 +46,18 @@ class OrderCreater
             if (!is_array($goods)) {
                 return $goods;
             }
-            foreach ($goods as $k =>$v){
+            for($i=0;$i<count($data['sku']);$i++){
+                $goods[$data['sku'][$i]['sku_id']]['sku_info']['sku_num'] = $data['sku'][$i]['sku_num'] ;
+            }
+            // var_dump($goods);
+            $arr2 = array_column($goods, 'sku_info');
+            for ($i =0;$i<count($arr2);$i++){
+                if($arr2[$i]['zuqi_type'] ==2 && (count($arr2) >1 || $arr2[$i]['sku_num'] >1)){
+                    return ApiStatus::CODE_40003;
+                }
+            }
 
+            foreach ($goods as $k =>$v){
                 $goods_info =$v;
                 $data['channel_id'] = $goods_info['spu_info']['channel_id'];
                 //下单验证
@@ -104,7 +114,6 @@ class OrderCreater
         $data['order_no'] = OrderOperate::createOrderNo(1);
         $order_flag =true;
         DB::beginTransaction();
-
         try {
             //获取用户信息
             $user_info = $this->third->GetUser($data['user_id']);
@@ -122,7 +131,21 @@ class OrderCreater
             if (!is_array($goods)) {
                 return $goods;
             }
-           // var_dump($goods);die;
+
+            for($i=0;$i<count($data['sku']);$i++){
+                $goods[$data['sku'][$i]['sku_id']]['sku_info']['sku_num'] = $data['sku'][$i]['sku_num'] ;
+            }
+
+            $data['zuqi_type'] =1;
+            $arr2 = array_column($goods, 'sku_info');
+            for ($i =0;$i<count($arr2);$i++){
+                if($arr2[$i]['zuqi_type'] ==2 && (count($arr2) >1 || $arr2[$i]['sku_num'] >1)){
+                    return ApiStatus::CODE_40003;
+                }
+                if($arr2[$i]['zuqi_type'] ==2){
+                    $data['zuqi_type'] =2;
+                }
+            }
             foreach ($goods as $k =>$v){
                 $goods_info =$v;
                 $data['channel_id'] = $goods_info['spu_info']['channel_id'];
@@ -171,7 +194,6 @@ class OrderCreater
                 DB::rollBack();
                 return ApiStatus::CODE_30005;
             }
-
            DB::commit();
             return $result;
         } catch (\Exception $exc) {
@@ -216,4 +238,11 @@ class OrderCreater
     public function order_update($order_no){
         return $this->orderRepository->order_update($order_no);
     }
+    public function get_order_detail($where=[]){
+        return $this->orderRepository->getOrderInfo($where);
+
+
+
+    }
+
 }
