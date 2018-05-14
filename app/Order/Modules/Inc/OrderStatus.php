@@ -58,18 +58,11 @@ class OrderStatus{
     const OrderChanged= 10;
 
 
-
-
-
-
-    //--------------------------------------------------------------------------------------------
-    //--+ 订单状态 end ----------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------
     /**
-     * 订单状态列表
-     * @return array    订单状态列表
+     * 订单冻结类型
+     * @return array
      */
-    public static function getStatusList(){
+    public static function getStatusType(){
         return [
             self::OrderWaitPaying => '待支付',
             self::OrderPayed => '已支付',

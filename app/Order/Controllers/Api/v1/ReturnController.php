@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\PublicFunc;
 use App\Lib\Warehouse\Receive;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Http\Request;
@@ -17,20 +18,24 @@ class ReturnController extends Controller
         $this->OrderCreate = $OrderCreate;
         $this->OrderReturnCreater = $OrderReturnCreater;
     }
-
+    /*
+     * 用户收到货退货时调用
+     *
+     */
     // 申请退货接口
     public function return_apply(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
-        if(empty($params['order_no'])) {
-            return apiResponse([],ApiStatus::CODE_20001,"订单编号不能为空");
-        }
-        if(empty($params['goods_no']) ){
-            return apiResponse([],ApiStatus::CODE_20001,"商品编号不能为空");
-        }
-        if(empty($params['user_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"用户id不能为空");
+        $data= filter_array($params,[
+            'order_no'=>'required',
+            'goods_no'=>'required',
+            'user_id'=>'required',
+            'business_key'=>'required',
+            'loss_type'=>'required',
+        ]);
+        if(count($data) < 5){
+            return false;
         }
         if($params['reason_id']){
             $params['reason_text'] = "";
@@ -38,41 +43,52 @@ class ReturnController extends Controller
         if (empty($params['reason_id']) && empty($params['reason_text'])){
             return apiResponse([],ApiStatus::CODE_20001,"退货原因不能为空");
         }
-        if (empty($params['business_key'])) {
-            return apiResponse([],ApiStatus::CODE_20001,"业务类型不能为空");
-        }
         //验证是全新未拆封还是已拆封已使用
         if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
             return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
         }
-
-        $where['order_no'] = $params['order_no'];
-        $where['goos_no'] = $params['goods_no'];
-        $res = $this->OrderCreate->get_order_info($where);//获取订单信息
+        $res = $this->OrderCreate->get_order_info($params);//获取订单信息
         if(empty($res)){
             return apiResponse([],ApiStatus::CODE_20001,"没有找到该订单");
         }
         $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
         if($return_info){
-           if($return_info[0]['status'] =='1') {
+           if($return_info['status'] ==ReturnStatus::ReturnCreated) {
               return apiResponse([],ApiStatus::CODE_20001,"已提交退货申请,请等待审核");
            }
         }
-
         $goods_info= $this->OrderReturnCreater->get_goods_info($params['goods_no']);//获取商品信息
 
         if($goods_info){
            $params['pay_amount']=$goods_info['price'];//实际支付金额
-            $params['refund_amount']=$goods_info['price']-$goods_info['insurance'];//应退还金额
+            $params['refund_amount']=$goods_info['price']-$goods_info['insurance'];//应退还金额=实际支付金额-意外险金额
         }
 
         $return = $this->OrderReturnCreater->add($params);
         if($return){
             $return_order = $this->OrderCreate->order_update($params['order_no']);
             if($return_order){
-                return apiResponse([$return],ApiStatus::CODE_0,"success");
+                $return_goods = $this->OrderReturnCreater->goods_update($params);//修改商品状态
+                return apiResponse([$return_goods],ApiStatus::CODE_0,"success");
             }
         }
+
+    }
+    /*
+     *
+     *
+     * 用户已付款，备货中时使用
+     */
+    //申请退款
+    public function returnmoney(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $data= filter_array($params,[
+            'order_no'=>'required',
+            'user_id'=>'required',
+        ]);
+        $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
+        return apiResponse([],$return);
 
     }
 
@@ -173,21 +189,9 @@ class ReturnController extends Controller
     {
         $orders = $request->all();
         $params = $orders['params'];
-        if(empty($params['order_no'])){
-            return apiResponse([],ApiStatus::CODE_33001,"success");
-        }
-        $return = $this->OrderReturnCreater->cancel_apply($params);
-        if($return=='0'){
-            return apiResponse([$return],ApiStatus::CODE_0,"success");
-        }elseif($return=='33007'){
-            return apiResponse([],ApiStatus::CODE_33007,"success");
-        }elseif($return=='33008'){
-            return apiResponse([],ApiStatus::CODE_33008,"success");
-        }elseif($return=='33009'){
-            return apiResponse([],ApiStatus::CODE_33009,"success");
-        }else{
-            return apiResponse([],ApiStatus::CODE_34001,"success");
-        }
+        $ret = $this->OrderReturnCreater->cancel_apply($params);
+        return apiResponse($ret);
+
 
     }
 
