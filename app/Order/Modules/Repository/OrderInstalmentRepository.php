@@ -6,7 +6,6 @@ use App\Order\Models\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Tests\Profiler\ProfilerTest;
 use Symfony\Component\HttpKernel\Profiler;
 
 class OrderInstalmentRepository
@@ -43,6 +42,8 @@ class OrderInstalmentRepository
     private $fenqi_amount = 0;
     //支付方式
     private $payment_type_id = 0;
+    //用户id
+    private $user_id = 0;
 
     public function __construct($componnet) {
         $this->OrderInstalment = new OrderInstalment();
@@ -55,6 +56,7 @@ class OrderInstalmentRepository
         $this->goods_no         = !empty($this->componnet['sku']['goods_no']) ? $this->componnet['sku']['goods_no'] : "";
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zuqi_type        = $this->componnet['sku']['zuqi_type'];
+        $this->user_id          = $this->componnet['user']['user_id'];
         $this->withholding_no   = $this->componnet['user']['withholding_no'];
         $this->all_amount       = $this->componnet['sku']['all_amount'];
         $this->amount           = $this->componnet['sku']['amount'];
@@ -101,7 +103,7 @@ class OrderInstalmentRepository
             $this->first_amount = $first >= 0 ? $first + $this->yiwaixian : $this->yiwaixian;
         }
         //不同支付方式呈现不同分期金额
-        if($this->payment_type_id == PayInc::FlowerStagePay or $this->payment_type_id == PayInc::UnionPay){
+        if($this->payment_type_id == PayInc::FlowerStagePay || $this->payment_type_id == PayInc::UnionPay){
             $this->fenqi_amount = $this->amount / $this->zuqi;
         }
     }
@@ -141,20 +143,89 @@ class OrderInstalmentRepository
     }
 
     /**
-     * 根据goods_no查询分期信息
+     * 查询总数
      */
-    public static function queryList($params = [], $additional = []){
-        if (empty($params)) return false;
+    public static function queryCount($param = []){
+        $whereArray = [];
+        //根据goods_no
+        if (isset($param['goods_no']) && !empty($param['goods_no'])) {
+            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+        }
+
+        //根据订单号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+        }
+
+        //根据分期状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+        }
+
+        //根据分期日期
+        if (isset($param['term']) && !empty($param['term'])) {
+            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+        }
+
+        //根据用户mobile
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+        }
+        $result = OrderInstalment::query()->where($whereArray)
+            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
+            ->select('order_userinfo.user_id','order_instalment.*')
+            ->distinct()
+            ->get();
+        return count($result);
+    }
+    /**
+     * 查询列表
+     */
+    public static function queryList($param = [], $additional = []){
         $page       = isset($additional['page']) ? $additional['page'] : 1;
         $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
+        $offset     = ($page - 1) * $pageSize;
 
-        $offset = ($page - 1) * $pageSize;
+        $whereArray = [];
+        //根据goods_no
+        if (isset($param['goods_no']) && !empty($param['goods_no'])) {
+            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+        }
 
-        $result =  OrderInstalment::query()->where($params)->offset($offset)->limit($pageSize)->get();
+        //根据订单号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+        }
+
+        //根据分期状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+        }
+
+        //根据分期日期
+        if (isset($param['term']) && !empty($param['term'])) {
+            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+        }
+
+        //根据用户mobile
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+        }
+
+        $result =  OrderInstalment::query()
+            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
+            ->where($whereArray)
+            ->select('order_userinfo.user_id','order_instalment.*','order_userinfo.mobile')
+            ->offset($offset)
+            ->limit($pageSize)
+            ->distinct()
+            ->get();
 
         if (!$result) return false;
         return $result->toArray();
     }
+
+
 
     /**
      * 关闭分期
@@ -181,7 +252,7 @@ class OrderInstalmentRepository
     }
 
     /**
-     * 关闭分期
+     * 设置TradeNo
      */
     public static function setTradeNo($id, $trade_no){
 
@@ -230,6 +301,9 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //用户id
+            $_data['user_id']         = $this->user_id;
+            //商品编号
             $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;
@@ -270,7 +344,9 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
-
+            //用户id
+            $_data['user_id']         = $this->user_id;
+            //商品编号
             $_data['goods_no']        = $this->goods_no;
             //订单ID
             $_data['order_no']        = $this->order_no;

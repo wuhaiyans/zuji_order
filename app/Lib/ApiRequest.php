@@ -91,7 +91,7 @@ class ApiRequest {
 		} elseif ($method == self::METHOD_GET) {
 			$jsonStr = Curl::get($this->url, $this->toString());
 		}
-		echo $this->toString();exit;
+//		echo $this->toString();exit;
 		echo $jsonStr;exit;
 		$Response = new ApiResponse($jsonStr);
 		return $Response;

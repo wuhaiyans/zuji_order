@@ -83,25 +83,22 @@ class InstalmentController extends Controller
     //分期列表接口
     public function instalment_list(Request $request){
         $request            = $request->all()['params'];
-        $request['page']    = isset($request['page']) ? $request['page'] : 1;
-        $request['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+        $additional['page']    = isset($request['page']) ? $request['page'] : 1;
+        $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
 
-        $request = filter_array($request, [
+        $params         = filter_array($request, [
             'goods_no'  => 'required',
             'order_no'  => 'required',
-            'page'      => 'required',
-            'limit'     => 'required',
+            'status'    => 'required',
+            'mobile'    => 'required',
+            'term'      => 'required',
         ]);
 
-        if(empty($request['order_no'])){
-            return apiResponse([],ApiStatus::CODE_20001,"order_no参数错误");
-        }
-
         $code = new OrderInstalment();
-        $list = $code->queryList($request);
+        $list = $code->queryList($params,$additional);
 
         if(!is_array($list)){
-            return apiResponse([], $list, ApiStatus::$errCodes[$list]);
+            return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
         return apiResponse($list,ApiStatus::CODE_0,"success");
 
