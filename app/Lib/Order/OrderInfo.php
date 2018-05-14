@@ -7,14 +7,7 @@
 use App\Lib\ApiStatus;
 
     class OrderInfo {
-
-     protected $orderUrl;
-     public function __construct()
-     {
-         $this->orderUrl = config("tripartite.API_INNER_URL");
-
-     }
-
+        
         /**
          * @param array 数组    ['order_no'] = A511125156960043
          * 获取订单详情
@@ -30,7 +23,8 @@ use App\Lib\ApiStatus;
                 $data['params'] = [
                     'user_id'=>$param['order_no'],
                 ];
-                $info = Curl::post($this->orderUrl, json_encode($data));
+                $baseUrl = config("tripartite.API_INNER_URL");
+                $info = Curl::post($baseUrl, json_encode($data));
 
                 return $info;
 
@@ -38,6 +32,7 @@ use App\Lib\ApiStatus;
             return apiResponse([],ApiStatus::CODE_10104);
 
      }
+
 
 
 
