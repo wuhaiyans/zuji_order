@@ -55,6 +55,29 @@ class DeliveryController extends Controller
 
 
     /**
+     * 配货完成
+     */
+    public function match()
+    {
+        $rules = ['deliover_no' => 'required'];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->match($params['deliover_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+
+    }
+
+
+    /**
      * 取消发货
      * 订单系统过来的请求
      */

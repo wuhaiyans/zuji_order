@@ -40,6 +40,14 @@ class DeliveryService
     }
 
 
+    public function match($deliver_no)
+    {
+        if (!DeliveryRepository::match($deliver_no)) {
+            throw new \Exception('配货操作失败');
+        }
+    }
+
+
     /**
      * @param $delivery_no
      * @param bool $auto

@@ -108,6 +108,21 @@ class DeliveryRepository
 
 
 
+    public static function match($delivery_no)
+    {
+        $model = Delivery::find($delivery_no);
+
+        if (!$model) {
+            throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
+        }
+
+        $model->status = Delivery::STATUS_WAIT_SEND;
+
+        return $model->update();
+    }
+
+
+
     /**
      * 收货
      */
