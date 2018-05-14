@@ -2,6 +2,13 @@
 //路由映射 之收发货
 return [
 
+    //imei导入
+    'warehouse.imei.import' => 'ImeiController@import', //导入imei
+    'warehouse.imei.list' => 'ImeiController@list', //列表
+    'warehouse.imei.out' => 'ImeiController@out', //出仓
+    'warehouse.imei.in' => 'ImeiController@in',//入仓
+
+
     //发货
     'warehouse.delivery.deliveryCreate' => 'DeliveryController@deliveryCreate', //创建
     'warehouse.delivery.cancel' => 'DeliveryController@cancel', //取消发货
@@ -16,7 +23,6 @@ return [
     'warehouse.delivery.delImei' => 'DeliveryController@delImei', //删除imei
     'warehouse.delivery.list' => 'DeliveryController@list', //列表
     'warehouse.delivery.refuse' => 'DeliveryController@refuse', //拒签   待完成
-
 
 
     //收货 待完成

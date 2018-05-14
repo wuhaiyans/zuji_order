@@ -7,7 +7,45 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Modules\Repository\ImeiRepository;
+
 class ImeiService
 {
+    /**
+     * 导入数据
+     */
+    public function import($data)
+    {
+        if (!ImeiRepository::import($data)) {
+            throw new \Exception('导入imei数据失败');
+        }
+    }
 
+
+    public function list($params)
+    {
+        $limit = 20;
+
+        if (isset($params['limit']) && $params['limit']) {
+            $limit = $params['limit'];
+        }
+        $whereParams = [];
+
+        if (isset($params['imei']) && $params['imei']) {
+            $whereParams['imei'] = $params['imei'];
+        }
+
+        $page = isset($params['page']) ? $params['page'] : null;
+
+
+        $collect = ImeiRepository::list($whereParams, $limit, $page);
+        $items = $collect->items();
+
+        if (!$items) {
+            return [];
+        }
+
+        return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+
+    }
 }
