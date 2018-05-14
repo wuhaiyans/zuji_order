@@ -8,6 +8,7 @@ use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
 
@@ -59,7 +60,7 @@ class OrderRepository
         ];
         $id =$this->user->insertGetId($user_data);
         if(!$id){
-            return false;
+            return ApiStatus::CODE_30005;
         }
         $order_amount =0;
         $goods_amount =0;
@@ -74,16 +75,18 @@ class OrderRepository
             $reduce_data[$k]['sku_id']=$v['sku']['sku_id'];
             $reduce_data[$k]['spu_id']=$v['sku']['spu_id'];
             $reduce_data[$k]['num']=$v['sku']['sku_num'];
-            for($i=0;$i<$v['sku']['sku_num'];$i++){
+            for ($i=0;$i<$v['sku']['sku_num'];$i++){
+
                 if(isset($v['coupon']['coupon_no'])){
                     $coupon[]=$v['coupon']['coupon_no'];
                 }
+
                 $goods_name .=$v['sku']['spu_name']." ";
                 // 保存 商品信息
                 $goods_data = [
                     'goods_name'=>$v['sku']['spu_name'],
                     'goods_id'=>$v['sku']['sku_id'],
-                    'goods_no'=>$v['sku']['sku_no']."-".$id."-".($i+1),
+                    'goods_no'=>$v['sku']['sku_no']."-".++$i,
                     'prod_id'=>$v['sku']['spu_id'],
                     'prod_no'=>$v['sku']['spu_no'],
                     'brand_id'=>$v['sku']['brand_id'],
@@ -114,23 +117,24 @@ class OrderRepository
                 $order_insurance+=$goods_data['insurance'];
 
                 $coupon_amount+=$goods_data['discount_amount'];
+
+
                 $goods_id = $this->goods->insertGetId($goods_data);
                 if(!$goods_id){
-                    return false;
+                    return ApiStatus::CODE_30005;
                 }
-                if($data['zuqi_type'] ==2){
-                    $v['sku']['goods_no']=$goods_data['goods_no'];
-                    // 生成分期
-                    $instalment_data =array_merge($v,['order'=>$data],$user_info);
-                    //var_dump($instalment_data);die;
-                    $instalment = $this->instalment->create($instalment_data);
-                    if(!$instalment){
-                        return false;
-                    }
+                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
+                // 生成分期
+                $instalment_data =array_merge($v,['order'=>$data],$user_info);
+                //var_dump($instalment_data);die;
+                $instalment = $this->instalment->create($instalment_data);
+                if(!$instalment){
+                    return ApiStatus::CODE_30005;
                 }
 
             }
         }
+
         // 创建订单
         $order_data = [
             'order_status' => OrderStatus::OrderWaitPaying,
@@ -146,7 +150,6 @@ class OrderRepository
             'coupon_amount'=>$coupon_amount,
             'cash_amount'=>0.00,
             'appid'=>$data['appid'],
-            'zuqi_type'=>$data['zuqi_type'],
         ];
         $order_id =$this->order->insertGetId($order_data);
         if(!$order_id){
@@ -381,7 +384,7 @@ class OrderRepository
     }
     //更新订单状态-申请退货
     public static function order_update($order_no){
-        $data['freeze_type']='1';
+        $data['freeze_type']=OrderFreezeStatus::Refund;
         if(Order::where('order_no', '=', $order_no)->update($data)){
             return true;
         }else{
@@ -390,7 +393,7 @@ class OrderRepository
     }
     //更新订单状态-审核拒绝
     public static function deny_update($order_no){
-        $data['freeze_type']='0';
+        $data['freeze_type']=OrderFreezeStatus::Non;
         if(Order::where('order_no', '=', $order_no)->update($data)){
             return true;
         }else{
