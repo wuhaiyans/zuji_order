@@ -91,6 +91,7 @@ class ReceiveRepository
                 'logistics_no' => isset($data['logistics_no']) ? $data['logistics_no'] : 0,
                 'status'    => Receive::STATUS_INIT,
                 'create_time' => $time,
+                'app_id' => $data['app_id']
             ];
             $model = new Receive();
             $model->create($da);

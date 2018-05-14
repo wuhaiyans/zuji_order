@@ -25,18 +25,19 @@ class Controller extends BaseController
         }
 
         if (is_string($params['params'])) {
-            $params = json_decode($params['params'], true);
+            $param = json_decode($params['params'], true);
         } else if (is_array($params['params'])) {
-            $params = $params['params'];
+            $param = $params['params'];
         }
 
-        $validator = app('validator')->make($params, $rules);
+        $validator = app('validator')->make($param, $rules);
 
         if ($validator->fails()) {
             session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
             return false;
         }
 
-        return $params;
+        $param['app_id'] = $params['appid'];
+        return $param;
     }
 }

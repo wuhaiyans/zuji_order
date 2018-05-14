@@ -38,6 +38,7 @@ class DeliveryRepository
         $delivery_row['order_no'] = $data['order_no'];
         $delivery_row['status'] = DeliveryStatus::DeliveryStatus1;
         $delivery_row['create_time'] = time();
+        $delivery_row['app_id'] = $data['app_id'];
 
         DB::beginTransaction();
         try {

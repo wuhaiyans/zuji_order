@@ -30,7 +30,7 @@ class Receive extends Warehouse
 
 
     protected $fillable = ['receive_no', 'order_no', 'logistics_id',
-        'logistics_no', 'status', 'status_time', 'create_time',
+        'logistics_no', 'status', 'status_time', 'create_time','app_id',
         'receive_time','check_time','check_result','check_description'];
 
 

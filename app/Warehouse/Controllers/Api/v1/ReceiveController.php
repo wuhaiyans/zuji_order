@@ -196,32 +196,32 @@ class ReceiveController extends Controller
     }
 
 
-    /**
-     * 处理传过来的参数
-     */
-    private function _dealParams($rules)
-    {
-        $params = request()->input();
-
-        if (!isset($params['params'])) {
-            return [];
-        }
-
-        if (is_string($params['params'])) {
-            $params = json_decode($params['params'], true);
-        } else if (is_array($params['params'])) {
-            $params = $params['params'];
-        }
-
-        $validator = app('validator')->make($params, $rules);
-
-        if ($validator->fails()) {
-            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
-            return false;
-        }
-
-        return $params;
-    }
+//    /**
+//     * 处理传过来的参数
+//     */
+//    private function _dealParams($rules)
+//    {
+//        $params = request()->input();
+//
+//        if (!isset($params['params'])) {
+//            return [];
+//        }
+//
+//        if (is_string($params['params'])) {
+//            $params = json_decode($params['params'], true);
+//        } else if (is_array($params['params'])) {
+//            $params = $params['params'];
+//        }
+//
+//        $validator = app('validator')->make($params, $rules);
+//
+//        if ($validator->fails()) {
+//            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
+//            return false;
+//        }
+//
+//        return $params;
+//    }
 
 }
 

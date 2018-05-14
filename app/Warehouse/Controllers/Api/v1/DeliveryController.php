@@ -39,6 +39,7 @@ class DeliveryController extends Controller
         $request =$request->all();
 
         $appid =$request['appid'];//获取appid
+        $delivery_row['app_id'] = $appid;
         $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
         $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
 
