@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib;
+namespace App\Order\Modules\Inc;
 
 class PayInc{
     /**

@@ -3,8 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Lib\ApiStatus;
 use App\Lib\Certification;
-use App\Lib\OldInc;
-use App\Lib\PayInc;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Repository\ThirdInterface;
@@ -76,21 +75,13 @@ class OrderCreater
                     $need_to_sign_withholding = 'Y';
                 }
             }
-            if( $data['appid'] == OldInc::Jdxbxy_App_id ) {
-                $need_to_credit_certificate="N";
-            }else{
-                $need_to_credit_certificate="Y";
-            }
-
             $result = [
                 'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
                 'certified'			=> $user_data['credit']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($user_data['credit']['certified_platform']),
-                'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N'&&$need_to_credit_certificate=='N'?'Y':'N',  // 是否免押金
+                'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N',  // 是否免押金
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $need_to_credit_certificate,
                 'user_info' => $user_data,
                 'sku_info'=>$goods_data,
                 '$b' => $order_flag,
@@ -167,22 +158,14 @@ class OrderCreater
                     $need_to_sign_withholding = 'Y';
                 }
             }
-            if( $data['appid'] == OldInc::Jdxbxy_App_id ) {
-                $need_to_credit_certificate="N";
-            }else{
-                $need_to_credit_certificate="Y";
-            }
-
 
             $result = [
                 'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
                 'certified'			=> $user_data['credit']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($user_data['credit']['certified_platform']),
-                'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N'&&$need_to_credit_certificate=='N'?'Y':'N',  // 是否免押金
+                'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N',  // 是否免押金
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $need_to_credit_certificate,
                 'user_info' => $user_data,
                 'sku_info'=>$goods_data,
                 'order_no'=>$data['order_no'],
