@@ -9,7 +9,6 @@
 namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Modules\Repository\DeliveryRepository;
-use function Couchbase\defaultDecoder;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryService
