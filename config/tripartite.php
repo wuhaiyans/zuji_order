@@ -20,5 +20,13 @@ return [
         'appid'=>1,
         'version'=>'1.0',
     ],
+    //订单内部接口地址
     'API_INNER_URL'=>"http://dev-order.com/api",
+    'Interior_Order_Request_data'=>[
+        'appid'=>1,
+        'sign_type'=>'MD5',
+        'sign'=>'',
+        'timestamp'=>date("Y-m-d H:i:s"),
+        'version'=>'1.0',
+    ],
 ];

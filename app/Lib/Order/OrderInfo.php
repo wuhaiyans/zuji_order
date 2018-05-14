@@ -1,0 +1,51 @@
+<?php
+/**
+ * author: heaven
+ * 订单供第三方的接口
+ * 2018-05-14
+ */
+use App\Lib\ApiStatus;
+
+    class OrderInfo {
+
+     protected $orderUrl;
+     public function __construct()
+     {
+         $this->orderUrl = config("tripartite.API_INNER_URL");
+
+     }
+
+        /**
+         * @param array 数组    ['order_no'] = A511125156960043
+         * 获取订单详情
+         */
+     public function getOrderInfo($param)
+     {
+
+            if (!empty($param)) return apiResponse([],ApiStatus::CODE_10104);
+            if (isset($param['order_no']) && !empty($param['order_no']))
+            {
+                $data = config('tripartite.Interior_Order_Request_data');
+                $data['method'] ='api.order.orderdetail';
+                $data['params'] = [
+                    'user_id'=>$param['order_no'],
+                ];
+                $info = Curl::post($this->orderUrl, json_encode($data));
+
+                return $info;
+
+            }
+            return apiResponse([],ApiStatus::CODE_10104);
+
+     }
+
+
+
+
+    }
+
+
+
+
+
+
