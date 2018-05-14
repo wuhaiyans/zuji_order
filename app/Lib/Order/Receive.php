@@ -31,14 +31,16 @@ class Receive
                 'imei' => 'abcde',
                 'check_result' => 'success',//是否合格 fasle/success
                 'check_description' => '原因',
-                'check_price' => 200//金额
+                'check_price' => 200,//金额
+                'check_time' => '1526030858'
             ],
             [
                 'sku_no' => '123',
                 'imei' => 'abcde',
                 'check_result' => 'success',//是否合格 fasle/success
                 'check_description' => '原因',
-                'check_price' => 200//金额
+                'check_price' => 200,//金额
+                'check_time' => '1526030858'//检测时间
             ]
         ];
 

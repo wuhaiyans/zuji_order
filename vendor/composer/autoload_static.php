@@ -412,7 +412,7 @@ class ComposerStaticInitb486767c87a8c131b090ec9d225464d2
         'App\\Lib\\Common\\SmsApi' => __DIR__ . '/../..' . '/app/Lib/Common/SmsApi.php',
         'App\\Lib\\Curl' => __DIR__ . '/../..' . '/app/Lib/Curl.php',
         'App\\Lib\\OldInc' => __DIR__ . '/../..' . '/app/Lib/OldInc.php',
-        'App\\Lib\\PayInc' => __DIR__ . '/../..' . '/app/Lib/PayInc.php',
+        'App\\Lib\\PayInc' => __DIR__ . '/../..',
         'App\\Lib\\Payment\\AlipayApi' => __DIR__ . '/../..' . '/app/Lib/Payment/AlipayApi.php',
         'App\\Lib\\Payment\\UnionpayApi' => __DIR__ . '/../..' . '/app/Lib/Payment/UnionpayApi.php',
         'App\\Lib\\PublicInc' => __DIR__ . '/../..' . '/app/Lib/PublicInc.php',

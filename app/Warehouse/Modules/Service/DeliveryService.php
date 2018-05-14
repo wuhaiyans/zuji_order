@@ -123,10 +123,13 @@ class DeliveryService
         }
     }
 
-
-
-
-
+    /**
+     * @param $params
+     * @return array
+     * @throws \Exception
+     *
+     * 列表
+     */
     public function list($params)
     {
         $limit = 20;

@@ -43,7 +43,22 @@ class ReceiveController extends Controller
      */
     public function show()
     {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $result = $this->receive->show($params['receive_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse($result);
     }
 
     /**

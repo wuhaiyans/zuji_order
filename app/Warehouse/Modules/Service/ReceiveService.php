@@ -166,9 +166,22 @@ class ReceiveService
         }
         return $receive;
     }
-    public function show()
-    {
 
+    /**
+     * @param $receive_no
+     * @return array
+     * @throws \Exception
+     * 清单
+     */
+    public function show($receive_no)
+    {
+        $detail = ReceiveRepository::show($receive_no);
+
+        if (!$detail) {
+            throw new \Exception('收货单' . $receive_no . '不存在');
+        }
+
+        return $detail;
     }
 
     public function note()

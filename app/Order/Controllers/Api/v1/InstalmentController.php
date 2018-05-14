@@ -3,7 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\Payment\WithholdingApi;
-use App\Lib\PayInc;
+use App\Order\Modules\Inc\PayInc;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderInstalment;
