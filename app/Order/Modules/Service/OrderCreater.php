@@ -76,7 +76,7 @@ class OrderCreater
                 }
             }
             $result = [
-                'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
+                'coupon'         => $data['coupon'],
                 'certified'			=> $user_data['credit']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($user_data['credit']['certified_platform']),
                 'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N',  // 是否免押金
@@ -160,7 +160,7 @@ class OrderCreater
             }
 
             $result = [
-                'coupon_no'         => $data['coupon_no']?$data['coupon_no']:"",
+                'coupon'         => $data['coupon'],
                 'certified'			=> $user_data['credit']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($user_data['credit']['certified_platform']),
                 'credit_status'		=> $order_flag &&$need_to_sign_withholding=='N',  // 是否免押金
