@@ -15,8 +15,13 @@ class DeliveryGoods extends Warehouse
 
     public $timestamps = false;
 
-    protected $fillable = ['delivery_no', 'order_no', 'sku_no','quantity',
-        'quantity_delivered', 'status', 'status_time'];
+
+    //状态：0：未配货；1：部分配货完成；2：全部配货完成
+    const STATUS_INIT = 0; //未配
+    const STATUS_PART = 1; //配货部分
+    const STATUS_ALL = 2; //配货完成
+
+    protected $fillable = ['delivery_no', 'serial_no', 'order_no','quantity', 'quantity_delivered', 'status', 'status_time'];
 
     /**
      * @param $data

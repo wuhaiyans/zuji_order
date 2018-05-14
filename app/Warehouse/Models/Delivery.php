@@ -8,7 +8,7 @@ class Delivery extends Warehouse
 
     const STATUS_NONE = 0;
     const STATUS_INIT = 1;//待配货
-    const STATUS_WAIT_SEND  = 2;//待发货
+    const STATUS_WAIT_SEND  = 2;//已配货 待发货
     const STATUS_SEND       = 3;//已发货 待签收
     const STATUS_RECEIVED   = 4;//签收完成
     const STATUS_REFUSE     = 5;//拒签

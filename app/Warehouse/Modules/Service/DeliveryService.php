@@ -9,7 +9,6 @@
 namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Modules\Repository\DeliveryRepository;
-use function Couchbase\defaultDecoder;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryService
@@ -36,6 +35,27 @@ class DeliveryService
     {
         if (!DeliveryRepository::cancelDelivery($delivery_no)) {
             throw new \Exception('取消发货失败');
+        }
+    }
+
+
+    public function match($deliver_no)
+    {
+        if (!DeliveryRepository::match($deliver_no)) {
+            throw new \Exception('配货操作失败');
+        }
+    }
+
+
+    /**
+     * @param $params
+     * 配货
+     * $params devivery_no, serial_no, quantity, imeis(imeis为数组格式，可能一设备对应多imei)
+     */
+    public function matchGoods($params)
+    {
+        if (!DeliveryRepository::matchGoods($params)) {
+            throw new \Exception('配货失败,请重新操作');
         }
     }
 
