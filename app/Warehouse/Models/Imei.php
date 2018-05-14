@@ -26,6 +26,4 @@ class Imei extends Warehouse
     const STATUS_OUT    = 2;//出库
 
     protected $fillable = ['imei', 'price', 'status'];
-
-
 }
