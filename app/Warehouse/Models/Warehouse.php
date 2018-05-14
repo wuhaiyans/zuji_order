@@ -27,11 +27,11 @@ class Warehouse extends Model
 //    and table_name = 'zuji_delivery_goods' ; #你要查的表
 
 
-        $a = Schema::getConnection()->getSchemaBuilder()->getColumnListing('admin');
-
-        $a = DB::select('show columns from user');
-
-        dd($a);die;
+//        $a = Schema::getConnection()->getSchemaBuilder()->getColumnListing('admin');
+//
+//        $a = DB::select('show columns from user');
+//
+//        dd($a);die;
 
         DB::listen(function ($sql) {
             foreach ($sql->bindings as $i => $binding) {
