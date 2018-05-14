@@ -1,7 +1,6 @@
 <?php
 namespace App\Order\Modules\Repository;
 
-use App\Lib\PayInc;
 use App\Order\Models\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;

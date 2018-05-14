@@ -1,10 +1,8 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
-use App\Lib\OldInc;
-use App\Lib\PayInc;
+use App\Order\Modules\Inc\PayInc;
 use App\Lib\Payment\WithholdingApi;
-use App\Lib\PublicInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 
@@ -215,7 +213,7 @@ class OrderCreateVerify
 //            ];
 //        }
         $score['score']=99;
-        if($score['score'] <PublicInc::OrderScore){
+        if($score['score'] <env("ORDER_SCORE")){
             $this->set_error(ApiStatus::CODE_30006);
             $this->flag =false;
         }
@@ -352,22 +350,8 @@ class OrderCreateVerify
                 $this->flag =false;
             }
         }
-        // sku 必须有 月租金, 且不可低于系统设置的最低月租金
-        $zujin_min_price = OldInc::ZUJIN_MIN_PRICE;// 最低月租金
-        if( $this->zujin < ($zujin_min_price*100) ){
-            $this->set_error(ApiStatus::CODE_40000);
-            $this->flag =false;
-        }
         // 押金必须
         if( $this->yajin < 1 && $this->payment_type_id != PayInc::MiniAlipay){
-            $this->set_error(ApiStatus::CODE_40000);
-            $this->flag =false;
-        }
-        // 规格
-        $must_spec_id_list = OldInc::getMustSpecIdList();
-        $spec_ids = array_column($this->specs, 'id');
-        $spec_id_diff = array_diff($must_spec_id_list, $spec_ids);
-        if( count($spec_id_diff)>0 ){
             $this->set_error(ApiStatus::CODE_40000);
             $this->flag =false;
         }

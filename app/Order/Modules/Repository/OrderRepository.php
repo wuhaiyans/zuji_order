@@ -168,12 +168,12 @@ class OrderRepository
         }
 
 
-        // 如果有优惠券 使用优惠券接口 失败回滚
+        // 如果有优惠券 使用优惠券接口 失败回滚 需要支持多个商品
         // $this->third->UseCoupon();
 
-        // 下单减少库存
+        // 下单减少库存 需要支持多个商品
 
-       // $b =$this->third->ReduceStock($reduce_data);
+        $b =$this->third->ReduceStock($reduce_data);
 
         //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[

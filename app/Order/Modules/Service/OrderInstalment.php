@@ -1,7 +1,6 @@
 <?php
 namespace App\Order\Modules\Service;
 
-use App\Lib\PublicInc;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
@@ -314,7 +313,7 @@ class OrderInstalment
             'orderNo'       => $data_sms['orderNo'],
             'goodsName'     => $data_sms['goodsName'],
             'zuJin'         => $data_sms['zuJin'],
-            'serviceTel'    => PublicInc::Customer_Service_Phone,
+            'serviceTel'    =>env("CUSTOMER_SERVICE_PHONE"),
         ]);
 
         $fail_num = intval($fail_num) + 1;
