@@ -48,6 +48,19 @@ class DeliveryService
 
 
     /**
+     * @param $params
+     * 配货
+     * $params devivery_no, serial_no, quantity, imeis(imeis为数组格式，可能一设备对应多imei)
+     */
+    public function matchGoods($params)
+    {
+        if (!DeliveryRepository::matchGoods($params)) {
+            throw new \Exception('配货失败,请重新操作');
+        }
+    }
+
+
+    /**
      * @param $delivery_no
      * @param bool $auto
      * @throws \Exception

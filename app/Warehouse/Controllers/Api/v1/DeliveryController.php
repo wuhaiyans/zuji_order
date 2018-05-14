@@ -15,7 +15,9 @@ class DeliveryController extends Controller
     use ValidatesRequests;
 
     const SESSION_ERR_KEY = 'delivery.error';
+
     protected $DeliveryCreate;
+
     protected $delivery;
 
     public function __construct(DeliveryCreater $DeliveryCreate, DeliveryService $delivery)
@@ -30,10 +32,8 @@ class DeliveryController extends Controller
         echo "收货表列表接口";
     }
 
-
-
     /**
-     * 创建发货单
+     * 发货单 -- 创建
      */
     public function deliveryCreate(Request $request){
         $request =$request->all();
@@ -41,7 +41,6 @@ class DeliveryController extends Controller
         $appid =$request['appid'];//获取appid
         $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
         $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
-
 
         try {
             $this->DeliveryCreate->confirmation($delivery_row);
@@ -51,6 +50,32 @@ class DeliveryController extends Controller
 
         return \apiResponse([]);
 
+    }
+
+
+    /**
+     * 配货
+     */
+    public function matchGoods()
+    {
+        $rules = [
+            'delivery_no' => 'required', //单号
+            'serial_no'   => 'required', //序号
+            'quantity'    => 'required', //数量
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->matchGoods($params);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
     }
 
 

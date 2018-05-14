@@ -48,9 +48,8 @@ class DeliveryRepository
                 $row = [
                     'delivery_no'   =>  $delivery_row['delivery_no'],
                     'serial_no'     =>  $val['serial_no'],
-                    'sku_no'        =>  $val['sku_no'],
                     'quantity'      =>  $val['quantity'],
-                    'status'        =>  DeliveryStatus::DeliveryGoodsStatus0,
+                    'status'        =>  DeliveryStatus::DeliveryGoodsStatus1,
                     'status_time'   =>  time()
                 ];
 
@@ -58,7 +57,6 @@ class DeliveryRepository
                 $goodsModel->create($row);
 
             }
-
             //发货单日志
             $log_row = [
                 'delivery_no'   =>  $delivery_row['delivery_no'],
@@ -69,12 +67,13 @@ class DeliveryRepository
 
             $logModel = new DeliveryLog();
             $logModel->create($log_row);
-
+            DB::commit();
         } catch (\Exception $exc) {
             DB::rollBack();
+            throw new \Exception($exc->getMessage());
             return false;
         }
-        DB::commit();
+        return true;
     }
 
     /**
@@ -119,6 +118,65 @@ class DeliveryRepository
         $model->status = Delivery::STATUS_WAIT_SEND;
 
         return $model->update();
+    }
+
+    /**
+     * @param $params
+     * @return bool
+     * @throws \Exception
+     * 单商品配货
+     */
+    public static function matchGoods($params)
+    {
+        try {
+            DB::beginTransaction();
+
+            $delivery_no = $params['delivery_no'];
+            $serial_no   = $params['serial_no'];
+
+
+            $time = time();
+            $imei_data = [
+                'delivery_no' => $delivery_no,
+                'serial_no'   => $serial_no,
+                'status'      => DeliveryGoodsImei::STATUS_YES,
+                'create_time' => $time,
+            ];
+
+            #1修改delivery_imei表
+            if (isset($params['imeis']) && $params['imeis']) {
+                $imeis = $params['imeis'];
+                foreach ($imeis as $imei) {
+                    $imei_data['imei'] = $imei;
+                    $model = new DeliveryGoodsImei();
+                    $model->save($imei_data);
+                }
+            }
+
+            #2修改 goods
+            $goods_model = DeliveryGoods::where(['delivery_no'=>$params['delivery_no'], 'serial_no'=>$params['serial_no']])
+                ->first();
+
+            $goods_status = DeliveryGoods::STATUS_ALL;
+            if ($goods_model->quantity > $params['quantity']) {
+                $goods_status = DeliveryGoods::STATUS_PART;
+            }
+            $goods_data = [
+                'quantity_delivered' => $params['quantity'],
+                'status'             => $goods_status,
+                'status_time'        => $time
+            ];
+
+            $goods_model->save($goods_data);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw new \Exception($e->getMessage());
+        }
+
+        return true;
     }
 
 
