@@ -39,9 +39,9 @@ class DeliveryService
     }
 
 
-    public function match($deliver_no)
+    public function match($delivery_no)
     {
-        if (!DeliveryRepository::match($deliver_no)) {
+        if (!DeliveryRepository::match($delivery_no)) {
             throw new \Exception('配货操作失败');
         }
     }

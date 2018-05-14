@@ -12,6 +12,7 @@ use App\Warehouse\Models\DeliveryGoodsImei;
 use App\Warehouse\Models\DeliveryLog;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Inc\DeliveryStatus;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
@@ -115,8 +116,15 @@ class DeliveryRepository
             throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
 
-        $model->status = Delivery::STATUS_WAIT_SEND;
+        $goods = $model->goods;
 
+        foreach ($goods as $g){
+            if ($g->status != DeliveryGoods::STATUS_ALL) {
+                throw new \Exception('商品尚未全部配货完成');
+            }
+        }
+
+        $model->status = Delivery::STATUS_WAIT_SEND;
         return $model->update();
     }
 
@@ -135,40 +143,65 @@ class DeliveryRepository
             $serial_no   = $params['serial_no'];
 
 
+            $delivery = Delivery::find($delivery_no);
+
+            if (!$delivery) {
+                throw new NotFoundResourceException('发货单不存在');
+            }
+
+
             $time = time();
             $imei_data = [
                 'delivery_no' => $delivery_no,
                 'serial_no'   => $serial_no,
                 'status'      => DeliveryGoodsImei::STATUS_YES,
-                'create_time' => $time,
+                'create_time' => $time
             ];
 
             #1修改delivery_imei表
             if (isset($params['imeis']) && $params['imeis']) {
                 $imeis = $params['imeis'];
                 foreach ($imeis as $imei) {
+                    if (!$imei) continue;
+                    $goods_imei_model = DeliveryGoodsImei::where([
+                        'delivery_no'=>$delivery_no,
+                        'serial_no'=>$serial_no,
+                        'imei'=>$imei
+                    ])->first();
+
+                    if ($goods_imei_model) continue;
+
+                    #goods_imei表添加
                     $imei_data['imei'] = $imei;
                     $model = new DeliveryGoodsImei();
-                    $model->save($imei_data);
+                    $model->create($imei_data);
+
+                    #imei总表修改状态
+                    $imei_model = Imei::find($imei);
+                    $imei_model->status = Imei::STATUS_OUT;
+                    $imei_model->update_time = $time;
+                    $imei_model->update();
                 }
             }
 
-            #2修改 goods
-            $goods_model = DeliveryGoods::where(['delivery_no'=>$params['delivery_no'], 'serial_no'=>$params['serial_no']])
+            #2修改 goods 状态
+            $goods_model = DeliveryGoods::where([
+                'delivery_no'=>$params['delivery_no'],
+                'serial_no'=>$params['serial_no'
+                ]])
                 ->first();
 
             $goods_status = DeliveryGoods::STATUS_ALL;
             if ($goods_model->quantity > $params['quantity']) {
                 $goods_status = DeliveryGoods::STATUS_PART;
             }
+
             $goods_data = [
                 'quantity_delivered' => $params['quantity'],
                 'status'             => $goods_status,
                 'status_time'        => $time
             ];
-
-            $goods_model->save($goods_data);
-
+            $goods_model->update($goods_data);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -192,6 +225,7 @@ class DeliveryRepository
             throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
         $model->status = Delivery::STATUS_RECEIVED;
+        $model->status_time = time();
         return $model->update();
     }
 
@@ -253,7 +287,7 @@ class DeliveryRepository
         }
 
         $model->status = Delivery::STATUS_SEND;
-        $model->delivery_time = time();
+        $model->delivery_time = $model->status_time = time();
 
         return $model->save();
     }

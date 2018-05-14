@@ -84,7 +84,7 @@ class DeliveryController extends Controller
      */
     public function match()
     {
-        $rules = ['deliover_no' => 'required'];
+        $rules = ['delivery_no' => 'required'];
         $params = $this->_dealParams($rules);
 
         if (!$params) {
@@ -92,7 +92,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $this->delivery->match($params['deliover_no']);
+            $this->delivery->match($params['delivery_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

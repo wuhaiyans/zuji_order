@@ -17,19 +17,20 @@ class DeliveryGoodsImei extends Warehouse
     const STATUS_YES = 1; //有效
 
 
+    protected $fillable = ['delivery_no', 'serial_no', 'imei', 'status', 'create_time', 'status_time'];
 
     /**
      * @param $data
      * 存储
      */
-    public static function store($data)
-    {
-        $model = new self();
-
-        $model->create($data);
-
-        return $model;
-    }
+//    public static function store($data)
+//    {
+//        $model = new self();
+//
+//        $model->create($data);
+//
+//        return $model;
+//    }
 
 
     /**

@@ -19,7 +19,11 @@ class Imei extends Warehouse
 {
     public $incrementing = false;
 
+    public $timestamps = false;
+
     protected $table = 'zuji_imei';
+
+    protected $primaryKey='imei';
 
     const STATUS_CNACEN = 0;//取消
     const STATUS_IN     = 1;//仓库中
