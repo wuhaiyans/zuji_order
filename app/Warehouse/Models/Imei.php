@@ -12,9 +12,6 @@ namespace App\Warehouse\Models;
  * @package App\Warehouse\Models
  *
  */
-
-
-
 class Imei extends Warehouse
 {
     public $incrementing = false;

@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 
 class ImeiService
@@ -37,6 +38,7 @@ class ImeiService
 
         $page = isset($params['page']) ? $params['page'] : null;
 
+        $whereParams['status'] = [Imei::STATUS_OUT, Imei::STATUS_IN];
 
         $collect = ImeiRepository::list($whereParams, $limit, $page);
         $items = $collect->items();
@@ -46,6 +48,5 @@ class ImeiService
         }
 
         return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
-
     }
 }
