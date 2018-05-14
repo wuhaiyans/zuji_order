@@ -56,9 +56,11 @@ class OrderCreateVerify
             $this->flag =false;
         }
         //验证优惠券信息
-        $coupon = $this->CouponVerify($data['coupon'],$data['user_id']);
-        if(!$coupon){
-            $this->flag =false;
+        if(count($data['coupon']) >0){
+            $coupon = $this->CouponVerify($data);
+            if(!$coupon){
+                $this->flag =false;
+            }
         }
 
         //分期单信息
@@ -117,6 +119,25 @@ class OrderCreateVerify
     private function CouponVerify($coupons,$user_id){
         $arr = $this->GetSchema();
         $arr['coupon']=[];
+
+        $data =$this->schema;
+        var_dump($data);die;
+        var_dump($data);die;
+        //获取优惠券类型
+
+        //首月 0租金
+        //现金券
+
+        //判断租期类型
+        if($zuqi_type ==1){//日租
+
+        }else{//月租
+            //首月 0 租金
+
+            //现金券
+
+
+        }
 
         for($i=0;$i<count($coupons);$i++){
             $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);

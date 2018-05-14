@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository;
 use App\Order\Models\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
+use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
 

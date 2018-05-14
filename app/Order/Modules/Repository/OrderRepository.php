@@ -173,7 +173,7 @@ class OrderRepository
 
         // 下单减少库存 需要支持多个商品
 
-        $b =$this->third->ReduceStock($reduce_data);
+        //$b =$this->third->ReduceStock($reduce_data);
 
         //创建订单后 发送支付短信。;
 //            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
