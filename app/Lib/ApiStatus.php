@@ -5,6 +5,11 @@ namespace App\Lib;
 /**
  * api 状态码
  * Class ApiStatus
+ * 1xxxx： 公用
+ * 2xxxx： 无用
+ * 3xxxx： 订单
+ * 4xxxx： 收发货
+ * 5xxxx： 支付
  */
 class ApiStatus {
 
