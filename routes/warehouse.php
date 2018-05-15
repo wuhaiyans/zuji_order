@@ -21,6 +21,8 @@ $api->version('v1', [
     $apiMap = config('apimapwarehouse');
 
     $data = apiData();
+
+//    dd($data);
     $method = $data['method'];
 
     if (isset($apiMap[$method])) {

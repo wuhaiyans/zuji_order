@@ -299,18 +299,17 @@ function sql_profiler()
 
 }
 
-
-
+/**
+ * @return array|bool|mixed|string
+ * 兼容 application/x-www-form-urlencoded、application/json、multipart/form-data等
+ */
 function apiData()
 {
     $data = request()->input();
     if (!$data || empty($data) || count($data) == 0) {
         $data = file_get_contents("php://input");
-        $data = json_decode($data, true);
+        return json_decode($data, true);
     }
-
-
-
     return $data;
 }
 
