@@ -9,10 +9,13 @@
 namespace App\Warehouse\Modules\Repository;
 
 
+use App\Warehouse\Config;
+use App\Warehouse\Models\CheckItems;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
 use Illuminate\Support\Facades\DB;
+use Monolog\Handler\IFTTTHandler;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 
@@ -164,6 +167,37 @@ class ReceiveRepository
 
 
     /**
+     * @param $params
+     * @return bool
+     *
+     * 收货单商品明细更新
+     */
+    public static function receiveDetail($params)
+    {
+        $model = ReceiveGoods::where([
+            'receive_no'=>$params['receive_no'],
+            'serial_no'=>$params['serial_no']
+        ])->first();
+
+        if (!$model) {
+            throw new NotFoundResourceException('收货单商品序号' . $params['serial_no'] . '未找到');
+        }
+
+        $model->quantity_received = $params['quantity'];
+
+        if ($model->quantity > $params['quantity']) {
+            $model->status = ReceiveGoods::STATUS_PART_RECEIVE;
+        } else {
+            $model->status = ReceiveGoods::STATUS_ALL_RECEIVE;
+        }
+
+        $model->status_time = time();
+
+        return $model->update();
+    }
+
+
+    /**
      * 签收
      */
 //    public static function received1($receive_no, $imei)
@@ -310,18 +344,23 @@ class ReceiveRepository
 
     /**
      * 取消检测 针对设备
-     * todo 为啥需要取消验收呢
      */
-    public static function cancelCheck($receive_no, $imei)
+    public static function cancelCheck($params)
     {
-        $mini = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
+        $goods_model = ReceiveGoods::where([
+            'receive_no'=>$params['receive_no'],
+            'serial_no'=>$params['serial_no']
+        ])->first();
 
-        if (!$mini) {
-            throw new NotFoundResourceException('设备未找到，imei:' . $imei);
+
+        if (!$goods_model) {
+            throw new NotFoundResourceException('设备未找到，serial_no:' . $params['serial_no']);
         }
 
-        $mini->status = ReceiveGoodsImei::STATUS_WAIT_CHECK;
-        return $mini->update();
+        $goods_model->status = ReceiveGoods::STATUS_ALL_RECEIVE;
+        $goods_model->status_time = time();
+
+        return $goods_model->update();
     }
 
     /**
@@ -339,14 +378,24 @@ class ReceiveRepository
         if ($receive->save()){
             return $receive;
         }
+
         return false;
     }
 
     /**
      * 录入检测项
      */
-    public static function note()
+    public static function checkItems($params)
     {
+        $check_item = $params['check_item'];
+        $items = Config::$check_items;
+        $params['check_name'] = isset($items[$check_item]) ? $items[$check_item] : '';
 
+        $params['create_time'] = time();
+        $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
+
+        $model = new CheckItems();
+        return $model->create($params);
     }
+
 }

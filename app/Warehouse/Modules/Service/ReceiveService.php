@@ -126,6 +126,13 @@ class ReceiveService
         }
     }
 
+    public function receiveDetail($params)
+    {
+        if (!ReceiveRepository::receiveDetail($params)) {
+            throw new \Exception($params['receive_no'] . '号收货单商品签收失败');
+        }
+    }
+
     /**
      * @param $receive_no
      * 取消签收
@@ -150,9 +157,11 @@ class ReceiveService
     /**
      * 取消检测
      */
-    public function cancelCheck()
+    public function cancelCheck($params)
     {
-
+        if (!ReceiveRepository::cancelCheck($params)) {
+            throw new \Exception($params['receive_no'] . '设备:'.$params['serial_no'].'取消签收失败');
+        }
     }
 
     /**
@@ -184,8 +193,15 @@ class ReceiveService
         return $detail;
     }
 
-    public function note()
-    {
 
+    /**
+     * @param $params
+     * 检测项
+     */
+    public function checkItems($params)
+    {
+        if (!ReceiveRepository::checkItems($params)) {
+            throw new \Exception($params['receive_no'] . '设备:'.$params['serial_no'].'添加检测项失败');
+        }
     }
 }

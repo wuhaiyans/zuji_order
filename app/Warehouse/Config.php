@@ -5,6 +5,9 @@
  * Time: 10:20
  */
 
+
+namespace App\Warehouse;
+
 class Config
 {
     static $check_items = [

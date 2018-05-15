@@ -30,11 +30,12 @@ return [
 
     //收货 待完成
 
-
+    'warehouse.receive.checkItems'=> 'ReceiveController@checkItems', //取消收货
     'warehouse.receive.cancelReceive'=> 'ReceiveController@cancelReceive', //取消收货
     'warehouse.receive.list'=> 'ReceiveController@list', //列表
     'warehouse.receive.create'=> 'ReceiveController@create', //创建
     'warehouse.receive.cancel'=> 'ReceiveController@cancel', //取消
+    'warehouse.receive.receiveDetail'=> 'ReceiveController@receiveDetail', //收货
     'warehouse.receive.received'=> 'ReceiveController@received', //收货
     'warehouse.receive.calcelReceive'=> 'ReceiveController@calcelReceive', //改变收货状态为未收货
     'warehouse.receive.check'=> 'ReceiveController@check',//验收，针对设备
