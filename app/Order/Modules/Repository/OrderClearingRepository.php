@@ -53,6 +53,32 @@ class OrderClearingRepository
 
     /**
      *
+     *  获取订单清算详情数据
+     *
+     */
+    public static function getOrderCleanInfo($param)
+    {
+
+        if (empty($param)) {
+            return false;
+        }
+        $whereArray = array();
+        if (isset($param['order_no'])){
+
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+
+        }
+
+
+        $orderData =  OrderClearing::where($whereArray)->first();
+        if (!$orderData) return false;
+
+
+    }
+
+
+    /**
+     *
      *  退款结算数据列表
      */
     /**
@@ -89,7 +115,7 @@ class OrderClearingRepository
      *
      */
 
-    public static function upOrderCleanById($orderNo){
+    public static function upOrderCleanById($param){
         if (empty($param)) {
             return false;
         }

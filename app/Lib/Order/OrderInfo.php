@@ -7,7 +7,7 @@
 use App\Lib\ApiStatus;
 
     class OrderInfo {
-        
+
         /**
          * @param array 数组    ['order_no'] = A511125156960043
          * 获取订单详情
