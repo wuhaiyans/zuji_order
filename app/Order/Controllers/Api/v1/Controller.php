@@ -12,12 +12,11 @@ class Controller extends BaseController
 
 
 
-    protected function  validateParams($rules)
+    protected function  validateParams($rules, $params)
     {
-        $params = request()->all();
 
         if (!isset($params['params'])) {
-            return [];
+            return apiResponseArray(ApiStatus::CODE_10101,[]);
         }
 
         if (is_string($params['params'])) {
@@ -29,10 +28,9 @@ class Controller extends BaseController
         $validator = app('validator')->make($params, $rules);
 
         if ($validator->fails()) {
-            return apiResponse([], ApiStatus::CODE_10101,$validator->errors()->first());
-            return false;
+            return apiResponseArray(ApiStatus::CODE_10101,[], $validator->errors()->first());
         }
 
-        return $params;
+        return apiResponseArray(ApiStatus::CODE_0, []);
     }
 }

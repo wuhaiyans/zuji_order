@@ -236,8 +236,8 @@ function v($data, $exit = '')
 function createNo($noType=1){
     $npreNoType = array(
         //分期交易号
-        1 => 'f',
-        2 => 't',
+        1 => 'F',
+        2 => 'T',
         3 => 'P',
     );
     $year = array();

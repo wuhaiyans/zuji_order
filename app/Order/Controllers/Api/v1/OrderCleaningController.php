@@ -7,19 +7,19 @@
  */
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Support\Facades\Log;
 
-class OrderController extends Controller
+class OrderCleaningController extends Controller
 {
-
 
     //订单结算数据列表查询
     public function list(Request $request){
 
-
         $params = $request->input('params');
         $res = OrderCleaning::getOrderCleaningList($params);
+
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -30,15 +30,23 @@ class OrderController extends Controller
 
     //订单结算详情查询
     public function detail(Request $request){
-        $rules =  [
-            'orderNo' => 'required',
-            'body' => 'required',
-        ];
-        $$this->validateParams($rules);
 
-        if(!is_array($res)){
-            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        $params = $request->all();
+
+        $rules = [
+            'business_type'  => 'required',
+            'business_no'  => 'required'
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (!$validateParams['code'] || empty($validateParams)) {
+
+            return apiResponse([],$validateParams['code']);
         }
+
+        $res = OrderCleaning::getOrderCleanInfo($params);
+
+
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
@@ -54,13 +62,6 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
-
-
-
-
-
-
-
 
 
 }

@@ -63,16 +63,15 @@ class OrderClearingRepository
             return false;
         }
         $whereArray = array();
-        if (isset($param['order_no'])){
+        if (isset($param['business_type']) &&  isset($param['business_no'])){
 
-            $whereArray[] = ['order_no', '=', $param['order_no']];
+            $whereArray[] = ['business_type', '=', $param['business_type']];
+            $whereArray[] = ['business_no', '=', $param['business_no']];
 
         }
 
-
-        $orderData =  OrderClearing::where($whereArray)->first();
-        if (!$orderData) return false;
-
+        $orderData =  OrderClearing::where($whereArray)->first()->toArray();
+        return $orderData;
 
     }
 
@@ -88,25 +87,47 @@ class OrderClearingRepository
      * @return array
 
      */
-    public static function getOrderCleanList($param, $limit, $page=null)
+    public static function getOrderCleanList($param, $limit=2)
     {
 
         $whereArray = array();
-        //根据用户id
-        if (isset($param['user_id']) && !empty($param['user_id'])) {
+        //出账状态
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
 
-            $whereArray[] = ['user_id', '=', $param['user_id']];
+            $whereArray[] = ['order_no', '=', $param['order_no']];
         }
+
+        //应用来源ID
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+            $whereArray[] = ['app_id', '=', $param['app_id']];
+        }
+
+        //出账方式
+        if (isset($param['out_account']) && !empty($param['out_account'])) {
+            $whereArray[] = ['out_account', '=', $param['out_account']];
+        }
+
+        //出账状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['status', '=', $param['status']];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', $param['begin_time']];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', $param['begin_time']];
+            $whereArray[] = ['create_time', '<=', $param['end_time']];
+        }
+        sql_profiler();
         $query = OrderClearing::where($whereArray);
 
-
         return $query->paginate($limit,
-            [
-                'receive_no','order_no', 'logistics_id','logistics_no',
-                'status', 'create_time', 'receive_time','check_description',
-                'status_time','check_time','check_result'
-            ],
-            'page', $page);
+            ['*'], 'page', $param['page'])->toArray();
     }
 
     /**
