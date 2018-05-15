@@ -300,6 +300,20 @@ function sql_profiler()
 }
 
 
+
+function apiData()
+{
+    $data = request()->input();
+    if (!$data || empty($data) || count($data) == 0) {
+        $data = file_get_contents("php://input");
+        $data = json_decode($data, true);
+    }
+
+
+
+    return $data;
+}
+
 /*
   *
   * 对象转换为数组

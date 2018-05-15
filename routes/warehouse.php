@@ -11,6 +11,7 @@
  |
  */
 
+dd(request()->input());
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
     'namespace' => 'App\Warehouse\Controllers\Api\v1',
@@ -19,7 +20,9 @@ $api->version('v1', [
 ], function($api) {
 
     $apiMap = config('apimapwarehouse');
-    $method = request()->input('method');
+
+    $data = apiData();
+    $method = $data['method'];
 
     if (isset($apiMap[$method])) {
         $api->any('/',  $apiMap[$method]);
