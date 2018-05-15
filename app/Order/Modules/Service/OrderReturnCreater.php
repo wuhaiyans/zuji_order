@@ -537,6 +537,12 @@ public function _parse_order_where($where=[]){
         if(!$result){
             return ApiStatus::CODE_33008;//修改退货单信息失败
         }
+        //更新订单冻结状态
+        $freeze_type=OrderFreezeStatus::Non;
+        $freeze = $this->orderReturnRepository->update_freeze($param, $freeze_type);
+        if (!$freeze){
+            return ApiStatus::CODE_33007;//修改订单状态失败
+        }
         //修改商品状态
         $goods_result = $this->orderReturnRepository->updategoods($where, $data['status']);
         if (!$goods_result){

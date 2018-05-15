@@ -347,11 +347,11 @@ class OrderReturnRepository
         if(empty($params['order_no'])){
             return false;
         }
-        if(empty($params['user_id'])){
+      /*  if(empty($params['user_id'])){
             return false;
-        }
+        }*/
         $where[]=['order_no','=',$params['order_no']];
-        $where[]=['user_id','=',$params['user_id']];
+     //   $where[]=['user_id','=',$params['user_id']];
         $orderData=Order::where($where)->update(['freeze_type'=>$freeze_type]);
         if($orderData){
             return true;
@@ -421,6 +421,5 @@ class OrderReturnRepository
             return false;
         }
     }
-
 
 }
