@@ -23,19 +23,16 @@ class Delivery
      */
     public static function apply($order_no)
     {
-        $base_api = config('api.warehouse_api_uri') . '/apply';
+        $base_api = config('tripartite.warehouse_api_uri');
 
         $info = self::getOrderDetail($order_no);
 
-        $response = Curl::post($base_api, [
+        return Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.delivery.send',//模拟
-            'data' => json_encode($info)
+            'params' => json_encode($info)
         ]);
-
-
-        return $response;
     }
 
     /**
@@ -44,16 +41,14 @@ class Delivery
      */
     public static function cancel($order_no)
     {
-        $base_api = config('api.warehouse_api_uri').'/apply';
+        $base_api = config('api.warehouse_api_uri');
 
-        $response = Curl::post($base_api, [
+        return Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.delivery.cancel',//模拟
-            'data' => json_encode(['order_no'=>$order_no])
+            'params' => json_encode(['order_no'=>$order_no])
         ]);
-
-        return $response;
     }
 
 

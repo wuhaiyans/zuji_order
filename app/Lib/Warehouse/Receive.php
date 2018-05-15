@@ -15,8 +15,6 @@ use App\Lib\Curl;
  */
 class Receive
 {
-
-
     /**
      * 创建待收货
      * type 类型:退 换 还 ...
@@ -35,8 +33,6 @@ class Receive
      */
     public static function create($order_no, $type, $data)
     {
-
-
         $receive_detail = [];
         if (is_array($data)) {
             foreach ($data as $d) {
@@ -54,27 +50,16 @@ class Receive
             'receive_detail' => $receive_detail
         ];
 
-        $base_api = config('api.warehouse_api_uri');
+        $base_api = config('tripartite.warehouse_api_uri');
 
-        $response = Curl::post($base_api, [
+        return Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
 
-
-        $response = json_decode($response, true);
-
-        if ($response['code'] == 0) {
-            return true;
-        }
-
-        return false;
-
     }
-
-
 
 
 }
