@@ -11,7 +11,6 @@
  |
  */
 
-dd(request()->input());
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
     'namespace' => 'App\Warehouse\Controllers\Api\v1',
