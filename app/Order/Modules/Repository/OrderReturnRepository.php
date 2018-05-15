@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Order\Models\OrderReturn;
 use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderGoodExtend;
 use App\Order\Models\Order;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Support\Facades\DB;
@@ -12,14 +13,12 @@ class OrderReturnRepository
     private $orderReturn;
     private $order;
     private $ordergoods;
-    //商品状态
-    private $goods_reply = 1;
-    private $goods_agree = 2;
-    private $goods_Denied = 3;
-    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods)
+    private $ordergoodextend;
+    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend)
     {
         $this->orderReturn = $orderReturn;
         $this->ordergoods = $ordergoods;
+        $this->ordergoodextend = $ordergoodextend;
         $this->order = $order;
     }
     public static function get_return_info($params){
@@ -32,10 +31,13 @@ class OrderReturnRepository
         if(empty($params['goods_no'])){
             return false;
         }
-        $where[]=['order_no','=',$params['order_no']];
-        $where[]=['user_id','=',$params['user_id']];
-        $where[]=['goods_no','=',$params['goods_no']];
-        $return_info=orderReturn::where($where)->first();
+        $goods_no=explode(',',$params['goods_no']);
+        foreach($goods_no as $k=>$v){
+            $where[$k][]=['goods_no','=',$v];
+            $where[$k][]=['order_no','=',$params['order_no']];
+            $where[$k][]=['user_id','=',$params['user_id']];
+            $return_info[]=orderReturn::where($where[$k])->first();
+        }
         if($return_info){
             return $return_info;
         }else{
@@ -79,7 +81,7 @@ class OrderReturnRepository
         $data['check_time']=time();
         $data['update_time']=time();
         if(OrderReturn::where($where)->update($data)){
-            return true;
+           return  OrderReturn::where($where)->first()->toArray();
         }else{
             return false;
         }
@@ -87,15 +89,24 @@ class OrderReturnRepository
     }
     //更新商品状态-申请退货|申请退款
     public static function goods_update_status($params){
-        if(isset($params['goods_no'])){
-            $where[]=['goods_no','=',$params['goods_no']];
-        }
         if(empty($params['order_no'])){
             return false;
         }
-        $where[]=['order_no','=',$params['order_no']];
-        $data['goods_status']=ReturnStatus::ReturnCreated;
-        if(ordergoods::where($where)->update($data)){
+        if(isset($params['goods_no'])){
+            $goods_no=explode(',',$params['goods_no']);
+            foreach($goods_no as $k=>$v){
+                $where[$k][]=['goods_no','=',$v];
+                $where[$k][]=['order_no','=',$params['order_no']];
+                $data['goods_status']=ReturnStatus::ReturnCreated;
+                $update_result=ordergoods::where($where[$k])->update($data);
+            }
+
+        }else{
+            $where[]=['order_no','=',$params['order_no']];
+            $data['goods_status']=ReturnStatus::ReturnCreated;
+            $update_result=ordergoods::where($where)->update($data);
+        }
+        if($update_result){
             return true;
         }else{
             return false;
@@ -118,6 +129,41 @@ class OrderReturnRepository
             return false;
         }
     }
+    //更新商品状态-退款-审核同意
+    public static function goodsupdate($params){
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no','=',$params['goods_no']];
+        }
+        if(empty($params['order_no'])){
+            return false;
+        }
+
+        $where[]=['order_no','=',$params['order_no']];
+        $data['goods_status']=ReturnStatus::ReturnTui;
+        if(ordergoods::where($where)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    //
+    //更新商品状态-退货-审核拒绝
+    public static function deny_goods_update($params){
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no','=',$params['goods_no']];
+        }
+        if(empty($params['order_no'])){
+            return false;
+        }
+        $where[]=['order_no','=',$params['order_no']];
+        $data['goods_status']=ReturnStatus::ReturnDenied;
+        if(ordergoods::where($where)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     //用户取消退货更新商品状态
     public static function cancel_goods_update($params){
         if(isset($params['goods_no'])){
@@ -194,7 +240,7 @@ class OrderReturnRepository
         }
         $where[]=['order_goods.order_no','=',$params['order_no']];
         $return_info=DB::table('order_goods')
-            ->leftJoin('order_good_extend', function ($join) {
+            ->leftJoin('order_good_extend', function ($join){
                 $join->on([['order_goods.order_no','=','order_good_extend.order_no'],['order_goods.goods_no','=','order_good_extend.good_no']]);
             })
             ->where($where)
@@ -263,21 +309,10 @@ class OrderReturnRepository
              return false;
          }
     }
-    //检测合格-修改退货状态
-    public static function is_qualified($params){
-        if(empty($params['order_no'])){
-            return false;
-        }
-        if(empty($params['goods_no'])){
-            return false;
-        }
-        if(empty($params['status'])){
-            return false;
-        }
-        $result=OrderReturn::where(['order_no'=>$params['order_no'],'goods_no'=>$params['goods_no']])->update(['status'=>$params['status']]);
-        if($result){
-            $orderData=OrderGoods::where('goods_no','=',$params['goods_no'])->first();
-            return $orderData->toArray();
+    //检测合格与否-修改退货状态
+    public static function is_qualified($where,$data){
+        if(OrderReturn::where($where)->update($data)){
+          return true;
         }else{
             return false;
         }
@@ -312,11 +347,11 @@ class OrderReturnRepository
         if(empty($params['order_no'])){
             return false;
         }
-        if(empty($params['user_id'])){
+      /*  if(empty($params['user_id'])){
             return false;
-        }
+        }*/
         $where[]=['order_no','=',$params['order_no']];
-        $where[]=['user_id','=',$params['user_id']];
+     //   $where[]=['user_id','=',$params['user_id']];
         $orderData=Order::where($where)->update(['freeze_type'=>$freeze_type]);
         if($orderData){
             return true;
@@ -337,6 +372,51 @@ class OrderReturnRepository
         $orderData=Order::where($where)->first()->toArray();
         if($orderData){
             return $orderData;
+        }else{
+            return false;
+        }
+    }
+    //检测合格与不合格-》修改商品状态
+    public static function updategoods($where,$params){
+       $goods_res= ordergoods::where($where)->update($params);
+        if(!$goods_res){
+            return false;
+        }
+        $goods_extend_res= ordergoodextend::where($where)->update(['status'=>'1']);//修改商品扩展表商品状态为无效
+        if(!$goods_extend_res){
+            return false;
+        }
+        return true;
+    }
+    //查询退货单类型
+   /* public static function get_type($where){
+        $res=OrderReturn::where($where)->first()->toArray();
+        if($res){
+            return $res;
+        }else{
+            return false;
+        }
+    }*/
+    //获取订单信息
+    public static function order_info($order_no){
+        if(empty($order_no)){
+            return false;
+        }
+        $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
+        if($orderData){
+            return $orderData;
+        }else{
+            return false;
+        }
+    }
+    //创建换货单记录
+    public static function createchange($params){
+        if (isset($param['order_no']) && isset($param['good_info']) &&  isset($param['good_info']['ime'])){
+            return false;//参数错误
+        }
+        $create_result=ordergoodextend::query()->insert($params);
+        if($create_result){
+            return true;
         }else{
             return false;
         }
