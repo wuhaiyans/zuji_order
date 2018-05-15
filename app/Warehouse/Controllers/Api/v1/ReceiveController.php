@@ -106,7 +106,7 @@ class ReceiveController extends Controller
     public function received()
     {
         $rules = [
-            'receive_no' => 'required',
+            'receive_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 

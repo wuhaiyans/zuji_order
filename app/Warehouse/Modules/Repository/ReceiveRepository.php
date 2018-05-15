@@ -222,22 +222,18 @@ class ReceiveRepository
 
 
 
-    public static function check($receive_no, $data)
+    public static function check($receive_no,$serial_no, $data)
     {
 
         try {
             DB::beginTransaction();
 
+            $goods_model = ReceiveGoods::where(['receive_no'=>$receive_no, 'serial_no'=>$serial_no])->first();
 
 
 
-
-
-
-            $mini = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
-
-            if (!$mini) {
-                throw new NotFoundResourceException('设备未找到，imei:' . $imei);
+            if (!$goods_model) {
+                throw new NotFoundResourceException('设备未找到，serial_no:' . $serial_no);
             }
 
             if (!$data['check_result']) {
@@ -248,14 +244,16 @@ class ReceiveRepository
                 throw new \Exception('请选择检测不合格原因');
             }
 
-            $mini->check_result = $data['check_result'];
-            $mini->check_time = time();
-            $mini->check_description = isset($data['check_description']) ? $data['check_description'] : '';
-            $mini->check_price = isset($data['check_price']) ? $data['check_price'] : 0.00;
-            $mini->status = ReceiveGoodsImei::STATUS_CHECK_OVER;//检测完成
-            $mini->save();
+            $goods_model->check_result = $data['check_result'];
+            $goods_model->check_time = time();
+            $goods_model->check_description = isset($data['check_description']) ? $data['check_description'] : '';
+            $goods_model->check_price = isset($data['check_price']) ? $data['check_price'] : 0.00;
+            $goods_model->status = ReceiveGoods::STATUS_ALL_CHECK;//检测完成
+            $goods_model->save();
 
-            $receiver = $mini->receive;
+
+
+            $receiver = $goods_model->receive;
             $receiver->updateCheck();
             DB::commit();
         } catch (\Exception $e) {

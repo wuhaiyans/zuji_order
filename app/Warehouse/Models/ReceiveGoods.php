@@ -91,4 +91,14 @@ class ReceiveGoods extends Warehouse
     {
         return self::status($this->status);
     }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * 获取receive
+     */
+    public function receive()
+    {
+        return $this->belongsTo(\App\Warehouse\Models\Receive::class, 'receive_no');
+    }
 }
