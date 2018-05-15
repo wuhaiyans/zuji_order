@@ -111,6 +111,7 @@ class ReceiveRepository
                 $gmodel = new ReceiveGoods();
                 $gmodel->create($detail);
 
+                if (!$detail['imei']) continue;
                 $mmodel = new ReceiveGoodsImei();
                 $mmodel->create($detail);
             }
@@ -119,7 +120,6 @@ class ReceiveRepository
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
             DB::rollBack();
-            return false;
         }
 
         return true;
@@ -137,6 +137,7 @@ class ReceiveRepository
         }
 
         $model->status = Receive::STATUS_CANCEL;
+        $model->status_time = time();
         return $model->update();
 
     }
@@ -151,6 +152,11 @@ class ReceiveRepository
         if (!$model) {
             throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
         }
+
+        if ($model->status != Receive::STATUS_INIT) {
+            throw new Exception('收货单' . $receive_no . '非待收货状态，收货失败');
+        }
+
         $model->status = Receive::STATUS_RECEIVED;
         $model->receive_time = time();
         return $model->update();
@@ -194,24 +200,79 @@ class ReceiveRepository
 //        return true;
 //    }
 
-//    /**
-//     * 取消签收
-//     */
-//    public static function cancelReceive($receive_no)
-//    {
-//        $model = Receive::where('delivery_no', $receive_no)->first();
-//        if (!$model) {
-//            throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
-//        }
-//        $model->status = Receive::STATUS_CANCEL;
-//        return $model->update();
-//    }
+    /**
+     * 取消签收
+     */
+    public static function cancelReceive($receive_no)
+    {
+
+        $model = Receive::find($receive_no);
+
+        if (!$model) {
+            throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
+        }
+
+        if ($model->status != Receive::STATUS_RECEIVED) {
+            throw new \Exception('收货单' . $receive_no . '非已收货状态，取消收货失败');
+        }
+
+        $model->status = Receive::STATUS_CANCEL;
+        return $model->update();
+    }
+
+
+
+    public static function check($receive_no, $data)
+    {
+
+        try {
+            DB::beginTransaction();
+
+
+
+
+
+
+
+            $mini = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
+
+            if (!$mini) {
+                throw new NotFoundResourceException('设备未找到，imei:' . $imei);
+            }
+
+            if (!$data['check_result']) {
+                throw new \Exception('请选择检测结果');
+            }
+
+            if ($data['check_result'] == ReceiveGoodsImei::RESULT_NOT && !$data['check_description']) {
+                throw new \Exception('请选择检测不合格原因');
+            }
+
+            $mini->check_result = $data['check_result'];
+            $mini->check_time = time();
+            $mini->check_description = isset($data['check_description']) ? $data['check_description'] : '';
+            $mini->check_price = isset($data['check_price']) ? $data['check_price'] : 0.00;
+            $mini->status = ReceiveGoodsImei::STATUS_CHECK_OVER;//检测完成
+            $mini->save();
+
+            $receiver = $mini->receive;
+            $receiver->updateCheck();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
+
+        return true;
+    }
+
+
 
 
     /**
      * 验收 针对设备 针对imei
      */
-    public static function check($receive_no, $imei, $data)
+    public static function checkOld($receive_no, $imei, $data)
     {
 
         try {

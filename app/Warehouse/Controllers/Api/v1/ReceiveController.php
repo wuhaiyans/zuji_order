@@ -122,9 +122,20 @@ class ReceiveController extends Controller
     /**
      * 取消签收
      */
-    public function calcelReceive()
+    public function cancelReceive()
     {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        try {
+            $this->receive->cancelReceive($params['receive_no']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
 
@@ -135,16 +146,15 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',
+            'serial_no'  => 'required',
             'imei'       => 'required',
             'check_result'       => 'required',
-            'check_description'  => 'required',
-            'check_price'        => 'required',
         ];
 
         $params = $this->_dealParams($rules);
 
         try {
-            $this->receive->check($params['receive_no'], $params['imei'], $params);
+            $this->receive->check($params['receive_no'],$params['serial_no'], $params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

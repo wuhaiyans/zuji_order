@@ -130,7 +130,7 @@ class ReceiveService
      * @param $receive_no
      * 取消签收
      */
-    public function calcelReceive($receive_no)
+    public function cancelReceive($receive_no)
     {
         if (!ReceiveRepository::cancelReceive($receive_no)) {
             throw new \Exception($receive_no . '取消签收失败');
@@ -140,10 +140,10 @@ class ReceiveService
     /**
      * 检测
      */
-    public function check($receive_no, $imei, $data)
+    public function check($receive_no, $serial_no, $data)
     {
-        if (!ReceiveRepository::check($receive_no, $imei, $data)) {
-            throw new \Exception($receive_no . ' imei:'.$imei.'验签失败');
+        if (!ReceiveRepository::check($receive_no, $serial_no, $data)) {
+            throw new \Exception($receive_no . '设备:'.$serial_no.'验签失败');
         }
     }
 
