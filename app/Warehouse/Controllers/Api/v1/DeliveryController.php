@@ -36,12 +36,20 @@ class DeliveryController extends Controller
      * 发货单 -- 创建
      */
     public function deliveryCreate(Request $request){
-        $request =$request->all();
 
-        $appid =$request['appid'];//获取appid
-        $delivery_row['app_id'] = $appid;
-        $delivery_row['order_no'] =$request['params']['order_no'];//订单编号
-        $delivery_row['delivery_detail'] =$request['params']['delivery_detail'];//发货清单
+        $rules = [
+            'order_no' => 'required', //单号
+            'delivery_detail'   => 'required', //序号
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        $delivery_row['app_id'] = $params['app_id'];
+        $delivery_row['order_no'] =$params['order_no'];//订单编号
+        $delivery_row['delivery_detail'] =$params['delivery_detail'];//发货清单
 
         try {
             $this->DeliveryCreate->confirmation($delivery_row);
@@ -361,36 +369,6 @@ class DeliveryController extends Controller
         $list = $this->delivery->list($params);
         return \apiResponse($list);
     }
-
-
-
-//    /**
-//     * 处理传过来的参数
-//     */
-//    private function _dealParams($rules)
-//    {
-//        $params = request()->input();
-//
-//        if (!isset($params['params'])) {
-//            return [];
-//        }
-//
-//        if (is_string($params['params'])) {
-//            $params = json_decode($params['params'], true);
-//        } else if (is_array($params['params'])) {
-//            $params = $params['params'];
-//        }
-//
-//        $validator = app('validator')->make($params, $rules);
-//
-//        if ($validator->fails()) {
-//            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
-//            return false;
-//        }
-//
-//        return $params;
-//    }
-
 
 }
 

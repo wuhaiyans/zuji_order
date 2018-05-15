@@ -15,88 +15,53 @@ use App\Lib\Curl;
  */
 class Receive
 {
-
-//    /**
-//     * 客户点退货
-//     * 收货申请
-//     */
-//    public static function apply($order_no, $logistic_id, $logistic_no)
-//    {
-//        return true;
-////        $base_api = config('api.warehouse_api_uri');
-////
-////        $response = Curl::post($base_api, [
-////            'appid'=> 1,
-////            'version' => 1.0,
-////            'method'=> 'warehouse.delivery.send',//模拟
-////            'data' => json_encode(['order_no'=>$order_no])
-////        ]);
-////
-////        return $response;
-//    }
-
-
     /**
      * 创建待收货
      * type 类型:退 换 还 ...
+     *
+     * $data = [
+     *  logistics_id,
+     *  logistics_no
+     *  receive_detail = [
+     *      serial_no
+     *      quantity
+     *      imei  可以没有
+     *  ]
+     * ]
+     *
+     *
      */
-    public static function create($order_no,$type, $data)
+    public static function create($order_no, $type, $data)
     {
+        $receive_detail = [];
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                if (!$d['serial_no'] || !$d['quantity']) continue;
+                
+                $receive_detail[] = [
+                    'serial_no' => $d['serial_no'],
+                    'quantity'  => $d['quantity'],
+                    'imei'      => isset($d['imei']) ? $d['imei'] : ''
+                ];
+            }
+        }
 
-
-
-
-        $reqData = [
+        $result = [
             'order_no' => $order_no,
-            'type'     => $type,
-            'data'     => $data
+            'receive_detail' => $receive_detail,
+            'type' => $type
         ];
 
+        $base_api = config('tripartite.warehouse_api_uri');
 
-
-
-
-        $data = [
-            [
-                'sku_no' => 123, //goods_no
-                'imei' => 'abcde',
-            ],
-            [
-                'sku_no' => 1235, //goods_no
-                'imei' => 'abcdef',
-            ]
-        ];
-
-
-        $base_api = config('api.warehouse_api_uri');
-
-        $response = Curl::post($base_api, [
+        return Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'warehouse.delivery.send',//模拟
-            'data' => json_encode(['order_no'=>$order_no])
+            'method'=> 'warehouse.receive.create',//模拟
+            'params' => json_encode($result)
         ]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-        return json_encode([
-            'code' => 0,
-            'msg'=> '',
-            'data' => []
-        ]);
     }
-
-
 
 
 }

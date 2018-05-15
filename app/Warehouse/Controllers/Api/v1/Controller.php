@@ -18,7 +18,9 @@ class Controller extends BaseController
      */
     protected function _dealParams($rules)
     {
-        $params = request()->input();
+//        $params = request()->input();
+
+        $params = apiData();
 
         if (!isset($params['params'])) {
             return [];
@@ -38,6 +40,7 @@ class Controller extends BaseController
         }
 
         $param['app_id'] = $params['appid'];
+
         return $param;
     }
 }

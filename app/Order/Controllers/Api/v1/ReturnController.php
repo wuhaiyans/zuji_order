@@ -34,7 +34,7 @@ class ReturnController extends Controller
             'business_key'=>'required',
             'loss_type'=>'required',
         ]);
-        if(count($data) < 5){
+        if(count($data)< 5){
             return false;
         }
         if($params['reason_id']){
@@ -53,7 +53,7 @@ class ReturnController extends Controller
         }
         $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
         if($return_info){
-           if($return_info['status'] ==ReturnStatus::ReturnCreated) {
+           if($return_info[0]['status'] ==ReturnStatus::ReturnCreated) {
               return apiResponse([],ApiStatus::CODE_20001,"已提交退货申请,请等待审核");
            }
         }
@@ -61,17 +61,9 @@ class ReturnController extends Controller
 
         if($goods_info){
            $params['pay_amount']=$goods_info['price'];//实际支付金额
-            $params['refund_amount']=$goods_info['price']-$goods_info['insurance'];//应退还金额=实际支付金额-意外险金额
         }
-
         $return = $this->OrderReturnCreater->add($params);
-        if($return){
-            $return_order = $this->OrderCreate->order_update($params['order_no']);
-            if($return_order){
-                $return_goods = $this->OrderReturnCreater->goods_update($params);//修改商品状态
-                return apiResponse([$return_goods],ApiStatus::CODE_0,"success");
-            }
-        }
+        return apiResponse([],$return,"success");
 
     }
     /*
@@ -87,8 +79,11 @@ class ReturnController extends Controller
             'order_no'=>'required',
             'user_id'=>'required',
         ]);
+        if(count($data)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
-        return apiResponse([],$return);
+        return apiResponse([],$return,"success");
 
     }
 
@@ -114,17 +109,9 @@ class ReturnController extends Controller
             'logistics_no'          =>'required',
             'user_id'          =>'required',
         ]);
-
-        if(empty($params['order_no'])){
-            return apiResponse([], ApiStatus::CODE_33003,'订单编号不能为空' );
+        if(count($params)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(empty($params['wuliu_channel_id'])){
-            return apiResponse( [], ApiStatus::CODE_33003,'物流渠道不能为空' );
-        }
-        if(empty($params['logistics_no'])){
-            return apiResponse( [], ApiStatus::CODE_33003,'物流编号不能为空' );
-        }
-
         //获取订单详情
         $where['orderNo'] = $params['order_no'];
         $order_info = $this->OrderCreate->get_order_detail($where);
@@ -195,6 +182,31 @@ class ReturnController extends Controller
 
     }
 
+    /**
+     * 换货用户收货通知
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateorder(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $res=$this->OrderReturnCreater->updateorder($params);
+        return apiResponse([],$res);
+    }
+    //客户发货后通知
+    public function user_receive(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $res=$this->OrderReturnCreater->user_receive($params);
+        return apiResponse([],$res);
+    }
+    //创建换货记录
+    public function createchange(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $res=$this->OrderReturnCreater->createchange($params);
+        return apiResponse([],$res);
+    }
 
 
 }
