@@ -29,10 +29,13 @@ class Receive extends Warehouse
     const CHECK_RESULT_PART = 2;//有不合格
 
 
-    protected $fillable = ['receive_no', 'order_no', 'logistics_id',
+    const TYPE_BACK = 1;//还
+    const TYPE_RETURN = 2;//退
+    const TYPE_EXCHANGE = 3;
+
+    protected $fillable = ['receive_no', 'order_no', 'logistics_id','type',
         'logistics_no', 'status', 'status_time', 'create_time','app_id',
         'receive_time','check_time','check_result','check_description'];
-
 
     /**
      * @param null $status

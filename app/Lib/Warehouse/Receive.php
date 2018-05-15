@@ -48,7 +48,8 @@ class Receive
 
         $result = [
             'order_no' => $order_no,
-            'receive_detail' => $receive_detail
+            'receive_detail' => $receive_detail,
+            'type' => $type
         ];
 
         $base_api = config('tripartite.warehouse_api_uri');

@@ -17,7 +17,7 @@ class TestController extends Controller
     {
 
 
-        $a = Delivery::apply(124);
+        $a = Delivery::cancel(578);
         dd($a);
 
 
