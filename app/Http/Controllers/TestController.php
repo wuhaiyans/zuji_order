@@ -6,6 +6,7 @@ use App\Lib\Common\EmailApi;
 use App\Lib\Common\SmsApi;
 use App\Lib\Common\JobQueueApi;
 
+use App\Lib\Warehouse\Delivery;
 use App\Lib\Warehouse\Receive;
 
 
@@ -14,22 +15,29 @@ class TestController extends Controller
 
     public function test()
     {
-        $a = Receive::create(1, 1, [
-                [
-                    'serial_no' => 1,
-                    'quantity'  => 1,
-                    'imei'      => 1234
-                ],
-            [
-                'serial_no' => 1,
-                'quantity'  => 1,
-                'imei'      => 1234
-            ],
-
-            ]);
 
 
+        $a = Delivery::apply(124);
         dd($a);
+
+
+
+//        $a = Receive::create(1, 1, [
+//                [
+//                    'serial_no' => 1,
+//                    'quantity'  => 1,
+//                    'imei'      => 1234
+//                ],
+//            [
+//                'serial_no' => 1,
+//                'quantity'  => 1,
+//                'imei'      => 1234
+//            ],
+//
+//            ]);
+//
+//
+//        dd($a);
     }
 
 

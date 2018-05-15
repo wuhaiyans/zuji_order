@@ -8,6 +8,7 @@
 
 namespace App\Lib\Warehouse;
 use App\Lib\Curl;
+use App\Lib\Order\OrderInfo;
 
 /**
  * Class Delivery
@@ -24,8 +25,8 @@ class Delivery
     public static function apply($order_no)
     {
         $base_api = config('tripartite.warehouse_api_uri');
-
-        $info = self::getOrderDetail($order_no);
+        $model = new OrderInfo();
+        $info = $model->getOrderInfo(['order_no'=>$order_no]);
 
         return Curl::post($base_api, [
             'appid'=> 1,
