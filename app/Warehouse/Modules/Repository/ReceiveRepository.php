@@ -198,43 +198,6 @@ class ReceiveRepository
 
 
     /**
-     * 签收
-     */
-//    public static function received1($receive_no, $imei)
-//    {
-//
-//        try {
-//            DB::beginTransaction();
-//
-//            //imei部分更新
-//            $imeiModel = ReceiveGoodsImei::where(['receive_no'=>$receive_no, 'imei'=>$imei])->first();
-//            if (!$imeiModel) {
-//                throw new NotFoundResourceException('imei' . $imei . '未找到');
-//            }
-//            $imeiModel->status = ReceiveGoodsImei::STATUS_RECEIVED;
-//            $imeiModel->save();
-//
-//
-//            //收货单更新
-//            $model = Receive::find($receive_no);
-//            if (!$model) {
-//                throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
-//            }
-//            $model->status = Receive::STATUS_RECEIVED;
-//            $model->receive_time = time();
-//            $model->update();
-//
-//            DB::commit();
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//            DB::rollBack();
-//            return false;
-//        }
-//
-//        return true;
-//    }
-
-    /**
      * 取消签收
      */
     public static function cancelReceive($receive_no)
@@ -255,7 +218,15 @@ class ReceiveRepository
     }
 
 
-
+    /**
+     * @param $receive_no
+     * @param $serial_no
+     * @param $data
+     * @return bool
+     * @throws \Exception
+     *
+     * 检测
+     */
     public static function check($receive_no,$serial_no, $data)
     {
 
@@ -263,8 +234,6 @@ class ReceiveRepository
             DB::beginTransaction();
 
             $goods_model = ReceiveGoods::where(['receive_no'=>$receive_no, 'serial_no'=>$serial_no])->first();
-
-
 
             if (!$goods_model) {
                 throw new NotFoundResourceException('设备未找到，serial_no:' . $serial_no);
@@ -284,8 +253,6 @@ class ReceiveRepository
             $goods_model->check_price = isset($data['check_price']) ? $data['check_price'] : 0.00;
             $goods_model->status = ReceiveGoods::STATUS_ALL_CHECK;//检测完成
             $goods_model->save();
-
-
 
             $receiver = $goods_model->receive;
             $receiver->updateCheck();

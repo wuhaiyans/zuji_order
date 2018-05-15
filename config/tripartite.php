@@ -29,4 +29,7 @@ return [
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
     ],
+
+    //收发货
+    'warehouse_api_uri' => env('WAREHOUSE_API_URI', 'http://laravel.order/api'),
 ];
