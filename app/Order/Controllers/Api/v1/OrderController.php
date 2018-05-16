@@ -42,7 +42,7 @@ class OrderController extends Controller
             'appid'=>1,
             'pay_type'=>1,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918",],
+            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
@@ -81,7 +81,7 @@ class OrderController extends Controller
             'pay_type'=>1,
             'address_id'=>$address_id,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918"],
+            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
