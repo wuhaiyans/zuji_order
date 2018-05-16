@@ -315,8 +315,11 @@ class OrderReturnCreater
         // 查询退货申请单
         $additional['page'] = $page;
         $additional['limit'] = $size;
+
         $where = $this->_parse_order_where($where);
+       
         $data = $this->orderReturnRepository->get_list($where, $additional);
+
         return $data;
     }
 

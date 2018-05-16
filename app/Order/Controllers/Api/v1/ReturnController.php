@@ -23,7 +23,7 @@ class ReturnController extends Controller
      *
      */
     // 申请退货接口
-    public function return_apply(Request $request)
+    public function returnApply(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
@@ -72,7 +72,7 @@ class ReturnController extends Controller
      * 用户已付款，备货中时使用
      */
     //申请退款
-    public function returnmoney(Request $request){
+    public function returnMoney(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $data= filter_array($params,[
@@ -172,7 +172,7 @@ class ReturnController extends Controller
 
     }
     //取消退货申请
-    public function cancel_apply(Request $request)
+    public function cancelApply(Request $request)
     {
         $orders = $request->all();
         $params = $orders['params'];
@@ -193,21 +193,21 @@ class ReturnController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateorder(Request $request){
+    public function updateOrder(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $res=$this->OrderReturnCreater->updateorder($params);
         return apiResponse([],$res);
     }
     //客户发货后通知
-    public function user_receive(Request $request){
+    public function userReceive(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $res=$this->OrderReturnCreater->user_receive($params);
         return apiResponse([],$res);
     }
     //创建换货记录
-    public function createchange(Request $request){
+    public function createChange(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $res=$this->OrderReturnCreater->createchange($params);
@@ -221,7 +221,7 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     //审核
-    public function return_reply(Request $request){
+    public function returnReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         if(empty($params['status'])){

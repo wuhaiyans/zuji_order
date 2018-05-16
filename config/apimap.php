@@ -24,7 +24,7 @@ return [
     'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
 
 
-    'api.order.orderlist'=>'OrderController@orderList',
+    'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
 
 
     //结算清单列表接口
@@ -80,7 +80,7 @@ return [
 
    //退货接口
     // 申请退货接口
-    'api.Return.return_apply'        => 'ReturnController@return_apply',
+    'api.Return.returnApply'        => 'ReturnController@returnApply',
     // 退货记录列表接口
     'api.Return.returnList'         => 'ReturnController@returnList',
     // 退货物流单号上传接口
@@ -88,19 +88,11 @@ return [
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
-    'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
+    'api.Return.cancelApply'       => 'ReturnController@cancelApply',
     //申请退款
-    'api.Return.returnmoney'       => 'ReturnController@returnmoney',
-    //换货用户收货通知
-    'api.Return.updateorder'       => 'ReturnController@updateorder',
-    //客户发货后通知
-    'api.Return.user_receive'       => 'ReturnController@user_receive',
-    //创建换货记录
-    'api.Return.createchange'       => 'ReturnController@createchange',
-    //创建换货记录
-    'api.Return.updateStatus'       => 'ReturnController@updateStatus',
+    'api.Return.returnMoney'       => 'ReturnController@returnMoney',
     //审核
-    'api.Return.return_reply'       => 'ReturnController@return_reply',
+    'api.Return.returnReply'       => 'ReturnController@returnReply',
 
     // test
     'api.Test.test'       => 'TestController@test',
