@@ -49,7 +49,7 @@ class WithholdController extends Controller
             return apiResponse([], $instalment_info, ApiStatus::$errCodes[$instalment_info]);
         }
 
-        $allow = OrderInstalment::allow_withhold($instalment_id);
+        $allow = OrderInstalment::allowWithhold($instalment_id);
 
         if(!$allow){
             DB::rollBack();
@@ -268,7 +268,7 @@ class WithholdController extends Controller
                 continue;
             }
 
-            $allow = OrderInstalment::allow_withhold($instalment_id);
+            $allow = OrderInstalment::allowWithhold($instalment_id);
             if (!$allow) {
                 Log::error("不允许扣款");
                 continue;
