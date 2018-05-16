@@ -55,13 +55,27 @@ return [
     // 多项扣款接口
     'api.Withhold.multi_createpay'    => 'WithholdController@multi_createpay',
 
-    //分期相关
     // 代扣协议查询
     'api.Withholding.query'             => 'WithholdingController@query',
     // 代扣签约接口
     'api.Withholding.sign'              => 'WithholdingController@sign',
+    // 代扣签约回调接口
+    'api.Withholding.signNotify'        => 'WithholdingController@signNotify',
     // 代扣解约接口
     'api.Withholding.unsign'            => 'WithholdingController@unsign',
+    // 代扣解约接口回调接口
+    'api.Withholding.unsignNotify'      => 'WithholdingController@unsignNotify',
+
+
+    //  预授权相关
+    // 资金预授权接口
+    'api.Fundauth.initialize'           => 'FundauthController@initialize',
+    // 资金预授权回调
+    'api.Fundauth.initializeNotify'     => 'WithholdingController@initializeNotify',
+    // 预授权解约接口
+    'api.Fundauth.unsign'               => 'WithholdingController@unsign',
+    // 预授权解决接口
+    'api.Fundauth.unsignNotify'         => 'WithholdingController@unsignNotify',
 
 
    //退货接口
