@@ -69,15 +69,19 @@ return [
 
     //  预授权相关
     // 资金预授权接口
-    'api.Fundauth.initialize'           => 'FundauthController@initialize',
+    'api.Fundauth.fundauth'             => 'FundauthController@fundauth',
     // 资金预授权回调
-    'api.Fundauth.initializeNotify'     => 'FundauthController@initializeNotify',
+    'api.Fundauth.fundauth_notify'      => 'FundauthController@fundauth_notify',
     // 预授权查询接口
-    'api.Fundauth.fundauthQuery'        => 'FundauthController@fundauthQuery',
-    // 预授权解约接口
-    'api.Fundauth.unsign'               => 'FundauthController@unsign',
-    // 预授权解决接口
-    'api.Fundauth.unsignNotify'         => 'FundauthController@unsignNotify',
+    'api.Fundauth.fundauth_query'       => 'FundauthController@fundauthQuery',
+    // 预授权解冻接口
+    'api.Fundauth.fundauth_unfreeze'    => 'FundauthController@fundauth_unfreeze',
+    // 预授权解冻回调接口
+    'api.Fundauth.fundauth_unfreeze_notify' => 'FundauthController@fundauth_unfreeze_notify',
+    // 预授权转支付接口
+    'api.Fundauth.fundauth_to_pay'      => 'FundauthController@fundauth_to_pay',
+    // 预授权转支付回调接口
+    'api.Fundauth.fundauth_to_pay_notify'   => 'FundauthController@fundauth_to_pay_notify',
 
 
    //退货接口
