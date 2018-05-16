@@ -55,14 +55,6 @@ class OrderCreateVerify
         if(!$deposit){
             $this->flag =false;
         }
-        //验证优惠券信息
-        if(count($data['coupon']) >0){
-            $coupon = $this->CouponVerify($data);
-            if(!$coupon){
-                $this->flag =false;
-            }
-        }
-
         //分期单信息
         if($data['pay_type']!=PayInc::WithhodingPay || $data['zuqi_type'] ==2){
             $instalment =$this->InstalmentVerify();
@@ -116,49 +108,80 @@ class OrderCreateVerify
 
     }
 
-    private function CouponVerify($coupons,$user_id){
-        $arr = $this->GetSchema();
-        $arr['coupon']=[];
+    public function couponVerify($data,$goods){
+        //商品总金额
+        $total_amount =0;
+        foreach ($goods as $k=>$v){
 
-        $data =$this->schema;
-        var_dump($data);die;
-        var_dump($data);die;
+            $total_amount +=($v['sku_info']['zuqi']*$v['sku_info']['shop_price']-$v['sku_info']['buyout_price'])*$v['sku_info']['sku_num'];
+        }
+        $data['total_amount'] =$total_amount;
         //获取优惠券类型
+        $xianjin_coupon =200;
+        $first_coupon="Y";//首月0租金
 
-        //首月 0租金
-        //现金券
-
-        //判断租期类型
-        if($zuqi_type ==1){//日租
-
-        }else{//月租
-            //首月 0 租金
-
-            //现金券
-
-
-        }
-
-        for($i=0;$i<count($coupons);$i++){
-            $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
-            if(!is_array($coupon)){
-                $this->set_error($coupon);
-                $this->flag =false;
-                continue;
+        for($i =0;$i<count($data['coupon']);$i++) {
+            $data['new_coupon'][$i]['coupon_no'] = $data['coupon'][$i];
+            if($i ==0){
+                $data['new_coupon'][$i]['coupon_type'] = 2;//1现金券 2 首月0租金
+            }else{
+                $data['new_coupon'][$i]['coupon_type'] = 1;//1现金券 2 首月0租金
             }
-            $arr['coupon'][$i]=[
-                'coupon_no' => $coupon['coupon_no'],
-                'coupon_name' => $coupon['coupon_name'],
-                'coupon_type' => $coupon['coupon_type'],
-                'discount_amount' => $coupon['discount_amount'],
-            ];
+
+            $data['new_coupon'][$i]['discount_amount'] = 200;
+            $data['new_coupon'][$i]['is_use'] = 0;//是否使用
         }
-        $this->SetSchema($arr);
-        return $this->flag;
+        $zongyouhui=0;
+        foreach ($goods as $k => $v) {
+            //var_dump($v['sku_info']);
+            $youhui =0;
+            for ($i = 0; $i < count($data['new_coupon']); $i++) {
+                //var_dump($data['new_coupon']);
+                if ($data['new_coupon'][$i]['coupon_type'] == 2 && $data['zuqi_type'] == 2) {//首月0租金
+                    $zongzujin = ($v['sku_info']['zuqi'] -1 ) * $v['sku_info']['shop_price'];
+                    $youhui+= $v['sku_info']['shop_price'];
+                    $data['sku_youhui'][$v['sku_info']['sku_id']] =$youhui;
+                    $data['new_coupon'][$i]['is_use'] = 1;
+                }
+                if ($data['new_coupon'][$i]['coupon_type'] == 1) {//现金券
+                    $zongzujin = $v['sku_info']['zuqi'] * $v['sku_info']['shop_price'] - $v['sku_info']['buyout_price'];
+                    $data['sku_youhui'][$v['sku_info']['sku_id']] = round($data['new_coupon'][$i]['discount_amount'] / $data['total_amount'] * $zongzujin, 2);
+
+                    if($data['zuqi_type']==2){
+                        $data['sku_youhui'][$v['sku_info']['sku_id']]=$data['sku_youhui'][$v['sku_info']['sku_id']]+$youhui;
+                    }else{
+                        $zongyouhui += $data['sku_youhui'][$v['sku_info']['sku_id']];
+                        if ($k == count($goods) - 1) {
+                            $data['sku_youhui'][$v['sku_info']['sku_id']] = $data['new_coupon'][$i]['discount_amount'] - $zongyouhui;
+                        }
+                    }
+
+                    $data['new_coupon'][$i]['is_use'] = 1;
+                }
+            }
+        }
+        $this->SetUserSchema($data);
+//        for($i=0;$i<count($coupons);$i++){
+//            $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
+//            if(!is_array($coupon)){
+//                $this->set_error($coupon);
+//                $this->flag =false;
+//                continue;
+//            }
+//            $arr['coupon'][$i]=[
+//                'coupon_no' => $coupon['coupon_no'],
+//                'coupon_name' => $coupon['coupon_name'],
+//                'coupon_type' => $coupon['coupon_type'],
+//                'discount_amount' => $coupon['discount_amount'],
+//            ];
+//        }
+//        $this->SetSchema($arr);
+        return $data;
 
     }
     private function InstalmentVerify(){
         $data =array_merge($this->GetSchema(),$this->GetUserSchema());
+        var_dump($data);die;
         $instalment =$this->instalment->get_data_schema($data);
         $arr['instalment'] =$instalment['instalment'];
         $this->SetSchema($arr);
@@ -337,6 +360,7 @@ class OrderCreateVerify
         $this->yiwaixian = $spu_info['yiwaixian']*100;
         $this->yiwaixian_cost = $spu_info['yiwaixian_cost']*100;
         $this->contract_id =$spu_info['contract_id'];
+        $this->discount_amount =$sku_info['buyout_price'];
         // 计算金额
         $this->amount = $this->all_amount = (($this->zujin * $this->zuqi) + $this->yiwaixian );
         if( $this->amount<0 ){
@@ -382,6 +406,7 @@ class OrderCreateVerify
         elseif($this->zuqi_type==2){
             $zuqi_type_name = "month";
         }
+
         $arr =[
             'sku' => [
                 'sku_id' => $this->sku_id,
@@ -412,7 +437,7 @@ class OrderCreateVerify
                 'contract_id'=>$this->contract_id,
                 'stock' => $this->stock,
                 'pay_type'=>$data['pay_type'],
-                'discount_amount' => 0.00,
+                'discount_amount' =>$this->discount_amount,
                 'mianyajin' => 0.00,
             ]
         ];
@@ -531,9 +556,6 @@ class OrderCreateVerify
         if(!empty($data['deposit'])){
             $data=$this->discrease_yajin();
         }
-        if(!empty($data['coupon'])){
-            $data=$this->discount();
-        }
         return $data;
     }
     /**
@@ -553,26 +575,6 @@ class OrderCreateVerify
         $data['sku']['mianyajin'] += $data['deposit']['jianmian'];// 更新免押金额
         return $data;
     }
-    /**
-     * 优惠金额 -启用优惠券后金额
-     * <p>如果优惠金额 大于 订单金额时，优惠金额值取总订单额进行优惠</p>
-     * @param int $amount  金额值，单位：分；必须>=0
-     */
-    public function discount(){
-        // 优惠
-        $data =$this->schema;
-        $amount =$data['coupon']['discount_amount'];
-        if( $amount<0 ){
-            return $data;
-        }
-        $price = $data['sku']['amount']-$data['sku']['yiwaixian'];
-        // 优惠金额最多等于总金额
-        if( $amount >= $price ){
-            $amount = $price;
-        }
-        $data['sku']['amount'] -= $amount;// 更新总金额
-        $data['sku']['discount_amount'] += $amount;// 更新优惠金额
-        return $data;
-    }
+
 
 }

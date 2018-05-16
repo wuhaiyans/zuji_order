@@ -49,12 +49,26 @@ class OrderCreater
                 $goods[$data['sku'][$i]['sku_id']]['sku_info']['sku_num'] = $data['sku'][$i]['sku_num'] ;
             }
             // var_dump($goods);
+            $data['zuqi_type'] =1;
             $arr2 = array_column($goods, 'sku_info');
             for ($i =0;$i<count($arr2);$i++){
                 if($arr2[$i]['zuqi_type'] ==2 && (count($arr2) >1 || $arr2[$i]['sku_num'] >1)){
                     return ApiStatus::CODE_40003;
                 }
+                if($arr2[$i]['zuqi_type'] ==2){
+                    $data['zuqi_type'] =2;
+                }
             }
+            //验证优惠券信息
+            if(count($data['coupon']) >0){
+                $data = $this->verify->couponVerify($data,$goods);
+                if(!is_array($data)){
+                    $order_flag =false;
+                    $error =$this->verify->get_error();
+                    return $error;
+                }
+            }
+
 
             foreach ($goods as $k =>$v){
                 $goods_info =$v;
@@ -65,8 +79,9 @@ class OrderCreater
                     $order_flag =false;
                     $error =$this->verify->get_error();
                 }
-                $goods_data[] =$this->verify->GetSchema();
+                $goods_data[] =$this->verify->filter();
             }
+
             $user_data =$this->verify->GetUserSchema();
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
@@ -89,6 +104,7 @@ class OrderCreater
                 // 支付方式
                 'pay_type'	 => ''.$data['pay_type'],
             ];
+
             return $result;
         } catch (\Exception $exc) {
             echo $exc->getMessage();
@@ -137,6 +153,16 @@ class OrderCreater
                     $data['zuqi_type'] =2;
                 }
             }
+
+            if(count($data['coupon']) >0){
+                $data = $this->verify->couponVerify($data,$goods);
+                if(!is_array($data)){
+                    $order_flag =false;
+                    $error =$this->verify->get_error();
+                    return $error;
+                }
+            }
+
             foreach ($goods as $k =>$v){
                 $goods_info =$v;
                 $data['channel_id'] = $goods_info['spu_info']['channel_id'];
@@ -147,8 +173,9 @@ class OrderCreater
                     $error =$this->verify->get_error();
                     return $error;
                 }
-                $goods_data[] =$this->verify->GetSchema();
+                $goods_data[] =$this->verify->filter();
             }
+
 
             $user_data =$this->verify->GetUserSchema();
             // 是否需要签署代扣协议
@@ -172,6 +199,7 @@ class OrderCreater
                 // 支付方式
                 'pay_type'	 =>$data['pay_type'],
             ];
+            var_dump($goods_data);die;
             $b =$this->orderRepository->create($data,$result);
             if(!$b){
                 DB::rollBack();
