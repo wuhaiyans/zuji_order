@@ -85,6 +85,9 @@ return [
     'api.Return.createchange'       => 'ReturnController@createchange',
     //创建换货记录
     'api.Return.updateStatus'       => 'ReturnController@updateStatus',
+    //审核
+    'api.Return.return_reply'       => 'ReturnController@return_reply',
+
     // test
     'api.Test.test'       => 'TestController@test',
 

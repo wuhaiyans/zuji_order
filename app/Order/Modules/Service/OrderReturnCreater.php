@@ -283,9 +283,10 @@ class OrderReturnCreater
             $where['end_time'] = strtotime($params['end_time']);
          }
 
-        if (isset($params['business_key']) > 0) {
+        if(isset($params['business_key']) > 0) {
             $where['business_key'] = intval($params['business_key']);
         }
+
         if (isset($params['keywords']) != '') {
             if (isset($params['kw_type']) == 'goods_name') {
                 $where['goods_name'] = $params['keywords'];

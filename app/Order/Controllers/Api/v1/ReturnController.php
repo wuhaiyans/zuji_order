@@ -220,6 +220,20 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->updateStatus($params);
         return apiResponse([],$res);
     }
+    //审核
+    public function return_reply(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        if(empty($params['status'])){
+            return apiResponse([],ApiStatus::CODE_20001);//参数错误
+        }
+        if($params['status']=='1'){
+            $res=$this->OrderReturnCreater->agree_return($params);//审核同意
+        }else{
+            $res=$this->OrderReturnCreater->deny_return($params);
+        }
+        return apiResponse([],$res);
+    }
 
 
 }

@@ -60,14 +60,24 @@ class OrderReturnRepository
     //查询退货列表
     public static function get_list($where,$additional){
         $additional['page'] = ($additional['page'] - 1) * $additional['limit'];
-        $parcels=DB::table('order_return')
-            ->leftJoin('order_goods', function ($join) {
-                $join->on('order_return.order_no', '=', 'order_goods.order_no');
+        $parcels = DB::table('order_return')
+            ->leftJoin('order_userinfo', 'order_return.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
+            ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+            ->where($where)
+            ->select('order_return.create_time as c_time','order_return.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
+            ->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['page']);
+
+
+
+       /* $parcels=DB::table('order_return')
+            ->leftJoin('order_goods', function ($join){
+                $join->on([['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']]);
             })
             ->where($where)
             ->offset($additional['page'])->limit($additional['limit'])
-            ->select('order_return.*','order_goods.*')
-            ->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['page']);
+            ->select('order_return.order_no,order_return.business_key,','order_goods.*')
+            ->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['page']);*/
         if($parcels){
             return $parcels;
         }
