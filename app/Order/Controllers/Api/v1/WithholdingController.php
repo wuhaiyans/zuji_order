@@ -114,11 +114,23 @@ class WithholdingController extends Controller
                 'back_url'          => '', //后台通知地址
             ];
             $url = WithholdingApi::withholding( $appid, $data);
-
+            p($url);
             return apiResponse(['url'=>$url],ApiStatus::CODE_0,"success");
         } catch (\Exception $exc) {
             return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
         }
+
+    }
+
+    /**
+     * 签约代扣回调接口
+     */
+    public function signNotify(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+
+        p($params);
 
     }
 
@@ -205,6 +217,17 @@ class WithholdingController extends Controller
     }
 
 
+    /**
+     * 签约代扣回调接口
+     */
+    public function unsignNotify(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+
+        p($params);
+
+    }
 
 
 
