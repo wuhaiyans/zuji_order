@@ -50,7 +50,7 @@ class ReceiveController extends Controller
         $params = $this->_dealParams($rules);
 
         if (!$params) {
-            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
         try {
