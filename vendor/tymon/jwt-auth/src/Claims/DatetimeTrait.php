@@ -19,13 +19,6 @@ use Tymon\JWTAuth\Exceptions\InvalidClaimException;
 trait DatetimeTrait
 {
     /**
-     * Time leeway in seconds.
-     *
-     * @var int
-     */
-    protected $leeway = 0;
-
-    /**
      * Set the claim value, and call a validate method.
      *
      * @param  mixed  $value
@@ -68,7 +61,7 @@ trait DatetimeTrait
      */
     protected function isFuture($value)
     {
-        return Utils::isFuture($value, $this->leeway);
+        return Utils::isFuture($value);
     }
 
     /**
@@ -80,20 +73,6 @@ trait DatetimeTrait
      */
     protected function isPast($value)
     {
-        return Utils::isPast($value, $this->leeway);
-    }
-
-    /**
-     * Set the leeway in seconds.
-     *
-     * @param  int  $leeway
-     *
-     * @return $this
-     */
-    public function setLeeway($leeway)
-    {
-        $this->leeway = $leeway;
-
-        return $this;
+        return Utils::isPast($value);
     }
 }

@@ -5,6 +5,7 @@
  *    date : 2018-05-04
  */
 namespace App\Order\Modules\Service;
+use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
@@ -130,7 +131,24 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderList = OrderRepository::getOrderList($param);
-        return apiResponseArray(ApiStatus::CODE_0,$orderList);
+        $orderListArray = objectToArray($orderList);
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = 'H5';
+                //设备名称
+                $orderListArray['data'][$keys]['goodsInfo'] = OrderRepository::getGoodsListByOrderId($values['order_no']);
+
+            }
+
+        }
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
 
     }

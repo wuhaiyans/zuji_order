@@ -321,21 +321,8 @@ function apiData()
   * $@param type=1 多维对象 find  2一维对象 比如findfrist
   * return array
   */
-function objectToArray($d, $type=1)
+function objectToArray($object)
 {
     //数据处理
-    $result = array();
-    if ($type == 1) {
-        foreach ($d as $values) {
-            if (!empty($values)) {
-                $result[] = (array)($values['rows']);
-            }
-        }
-    } else {
-
-        foreach ($d as $keys=>$dValues) {
-            $result[$keys] = $dValues;
-        }
-    }
-    return $result;
+    return json_decode(json_encode($object), true);
 }

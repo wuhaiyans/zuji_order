@@ -74,7 +74,7 @@ class JWTGuard implements Guard
 
         if ($this->jwt->setRequest($this->request)->getToken() &&
             ($payload = $this->jwt->check(true)) &&
-            $this->validateSubject()
+            $this->jwt->checkProvider($this->provider->getModel())
         ) {
             return $this->user = $this->provider->retrieveById($payload['sub']);
         }
@@ -136,10 +136,9 @@ class JWTGuard implements Guard
      */
     public function login(JWTSubject $user)
     {
-        $token = $this->jwt->fromUser($user);
-        $this->setToken($token)->setUser($user);
+        $this->setUser($user);
 
-        return $token;
+        return $this->jwt->fromUser($user);
     }
 
     /**
@@ -343,7 +342,7 @@ class JWTGuard implements Guard
     /**
      * Get the current request instance.
      *
-     * @return \Illuminate\Http\Request
+     * @return \Symfony\Component\HttpFoundation\Request
      */
     public function getRequest()
     {
@@ -385,22 +384,6 @@ class JWTGuard implements Guard
     protected function hasValidCredentials($user, $credentials)
     {
         return $user !== null && $this->provider->validateCredentials($user, $credentials);
-    }
-
-    /**
-     * Ensure the JWTSubject matches what is in the token.
-     *
-     * @return  bool
-     */
-    protected function validateSubject()
-    {
-        // If the provider doesn't have the necessary method
-        // to get the underlying model name then allow.
-        if (! method_exists($this->provider, 'getModel')) {
-            return true;
-        }
-
-        return $this->jwt->checkSubjectModel($this->provider->getModel());
     }
 
     /**
