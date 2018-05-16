@@ -49,10 +49,11 @@ return [
     'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
-    // 扣款接口
-    'api.Instalment.createpay'          => 'InstalmentController@createpay',
+
+    // 代扣相关
+    'api.Withhold.createpay'          => 'WithholdController@createpay',
     // 多项扣款接口
-    'api.Instalment.multi_createpay'    => 'InstalmentController@multi_createpay',
+    'api.Withhold.multi_createpay'    => 'WithholdController@multi_createpay',
 
     //分期相关
     // 代扣协议查询
