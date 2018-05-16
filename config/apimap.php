@@ -64,7 +64,7 @@ return [
     'api.Withholding.unsign'            => 'WithholdingController@unsign',
 
 
-    //退货接口
+   //退货接口
     // 申请退货接口
     'api.Return.return_apply'        => 'ReturnController@return_apply',
     // 退货记录列表接口
@@ -75,6 +75,16 @@ return [
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
     'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
+    //申请退款
+    'api.Return.returnmoney'       => 'ReturnController@returnmoney',
+    //换货用户收货通知
+    'api.Return.updateorder'       => 'ReturnController@updateorder',
+    //客户发货后通知
+    'api.Return.user_receive'       => 'ReturnController@user_receive',
+    //创建换货记录
+    'api.Return.createchange'       => 'ReturnController@createchange',
+    //创建换货记录
+    'api.Return.updateStatus'       => 'ReturnController@updateStatus',
     // test
     'api.Test.test'       => 'TestController@test',
 
