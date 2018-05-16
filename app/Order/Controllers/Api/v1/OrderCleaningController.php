@@ -20,6 +20,8 @@ class OrderCleaningController extends Controller
         $params = $request->input('params');
         $res = OrderCleaning::getOrderCleaningList($params);
 
+
+
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -31,6 +33,7 @@ class OrderCleaningController extends Controller
     //订单结算详情查询
     public function detail(Request $request){
 
+
         $params = $request->all();
 
         $rules = [
@@ -39,12 +42,14 @@ class OrderCleaningController extends Controller
         ];
         $validateParams = $this->validateParams($rules,$params);
 
-        if (!$validateParams['code'] || empty($validateParams)) {
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
         }
 
-        $res = OrderCleaning::getOrderCleanInfo($params);
+
+        $res = OrderCleaning::getOrderCleanInfo($params['params']);
 
 
         return apiResponse($res,ApiStatus::CODE_0,"success");
@@ -52,13 +57,25 @@ class OrderCleaningController extends Controller
     }
 
 
-    //订单结算操作
+    //订单清算取消操作
     public function operate(Request $request){
         $orders =$request->all();
 
-        if(!is_array($res)){
-            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+        $params = $request->all();
+
+        $rules = [
+            'business_type'  => 'required',
+            'business_no'  => 'required'
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
         }
+
+        $res = OrderCleaning::getOrderCleanInfo($params['params']);
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }

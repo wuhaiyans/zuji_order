@@ -24,7 +24,7 @@ return [
     'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
 
 
-    'api.order.orderlist'=>'OrderController@orderList',
+    'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
 
 
     //结算清单列表接口
@@ -55,18 +55,34 @@ return [
     // 多项扣款接口
     'api.Withhold.multi_createpay'    => 'WithholdController@multi_createpay',
 
-    //分期相关
     // 代扣协议查询
     'api.Withholding.query'             => 'WithholdingController@query',
     // 代扣签约接口
     'api.Withholding.sign'              => 'WithholdingController@sign',
+    // 代扣签约回调接口
+    'api.Withholding.signNotify'        => 'WithholdingController@signNotify',
     // 代扣解约接口
     'api.Withholding.unsign'            => 'WithholdingController@unsign',
+    // 代扣解约接口回调接口
+    'api.Withholding.unsignNotify'      => 'WithholdingController@unsignNotify',
+
+
+    //  预授权相关
+    // 资金预授权接口
+    'api.Fundauth.initialize'           => 'FundauthController@initialize',
+    // 资金预授权回调
+    'api.Fundauth.initializeNotify'     => 'FundauthController@initializeNotify',
+    // 预授权查询接口
+    'api.Fundauth.fundauthQuery'        => 'FundauthController@fundauthQuery',
+    // 预授权解约接口
+    'api.Fundauth.unsign'               => 'FundauthController@unsign',
+    // 预授权解决接口
+    'api.Fundauth.unsignNotify'         => 'FundauthController@unsignNotify',
 
 
    //退货接口
     // 申请退货接口
-    'api.Return.return_apply'        => 'ReturnController@return_apply',
+    'api.Return.returnApply'        => 'ReturnController@returnApply',
     // 退货记录列表接口
     'api.Return.returnList'         => 'ReturnController@returnList',
     // 退货物流单号上传接口
@@ -74,17 +90,12 @@ return [
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
-    'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
+    'api.Return.cancelApply'       => 'ReturnController@cancelApply',
     //申请退款
-    'api.Return.returnmoney'       => 'ReturnController@returnmoney',
-    //换货用户收货通知
-    'api.Return.updateorder'       => 'ReturnController@updateorder',
-    //客户发货后通知
-    'api.Return.user_receive'       => 'ReturnController@user_receive',
-    //创建换货记录
-    'api.Return.createchange'       => 'ReturnController@createchange',
-    //创建换货记录
-    'api.Return.updateStatus'       => 'ReturnController@updateStatus',
+    'api.Return.returnMoney'       => 'ReturnController@returnMoney',
+    //审核
+    'api.Return.returnReply'       => 'ReturnController@returnReply',
+
     // test
     'api.Test.test'       => 'TestController@test',
 

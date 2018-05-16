@@ -2,16 +2,9 @@
 
 namespace App\Order\Controllers\Api\v1;
 
-use App\Lib\Payment\WithholdingApi;
-use App\Order\Modules\Inc\PayInc;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderInstalment;
-use App\Order\Modules\Inc\OrderInstalmentStatus;
-use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\OrderInstalmentRepository;
-use App\Order\Modules\Repository\ThirdInterface;
-use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -51,13 +44,14 @@ class InstalmentController extends Controller
         }
 
         filter_array($coupon, [
-            'discount_amount'   => 'required',    //【必须】int；订单号
-            'coupon_type'       => 'required',    //【必须】int；订单号
+            'discount_amount'   => 'required',    //fool；优惠金额
+            'coupon_type'       => 'required',    //int；优惠券类型
         ]);
 
 
         $user = filter_array($user, [
-            'withholding_no' => 'required',    //【必须】int；订单号
+            'withholding_no' => 'required',    //【必须】string；代扣协议号
+            
         ]);
         if(empty($user)){
             return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");

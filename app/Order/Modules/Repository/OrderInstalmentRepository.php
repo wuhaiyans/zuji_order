@@ -67,6 +67,7 @@ class OrderInstalmentRepository
         $this->fenqi_amount     = $this->componnet['sku']['zujin'];
         $this->first_amount     = $this->zujin + $this->yiwaixian;
         $this->payment_type_id  = $this->componnet['sku']['pay_type'];
+        $this->buyout_price     = $this->componnet['sku']['buyout_price'];
 
 
         // 如果租期类型是：天，不论几天，统一按一个分期（只生成一个分期）
@@ -96,8 +97,9 @@ class OrderInstalmentRepository
             $first = $this->fenqi_amount + $this->yiwaixian;
             $this->first_amount = $first;
         }
-        //递减优惠券
-        elseif($this->coupon_type == CouponStatus::CouponTypeDecline){
+
+        //商品递减优惠金额
+        if($this->buyout_price > 0){
             $this->fenqi_amount = $this->zujin;
             $first = $this->fenqi_amount - $this->discount_amount;
             $this->first_amount = $first >= 0 ? $first + $this->yiwaixian : $this->yiwaixian;

@@ -33,18 +33,18 @@ class Namshi extends Provider implements JWT
     /**
      * Constructor.
      *
-     * @param  \Namshi\JOSE\JWS  $jws
      * @param  string  $secret
      * @param  string  $algo
      * @param  array  $keys
+     * @param  string|null  $driver
      *
      * @return void
      */
-    public function __construct(JWS $jws, $secret, $algo, array $keys)
+    public function __construct($secret, $algo, array $keys = [], $driver = null)
     {
-        parent::__construct($secret, $algo, $keys);
+        parent::__construct($secret, $keys, $algo);
 
-        $this->jws = $jws;
+        $this->jws = $driver ?: new JWS(['typ' => 'JWT', 'alg' => $algo]);
     }
 
     /**
@@ -93,7 +93,12 @@ class Namshi extends Provider implements JWT
     }
 
     /**
-     * {@inheritdoc}
+     * Determine if the algorithm is asymmetric, and thus
+     * requires a public/private key combo.
+     *
+     * @throws \Tymon\JWTAuth\Exceptions\JWTException
+     *
+     * @return bool
      */
     protected function isAsymmetric()
     {
@@ -102,5 +107,25 @@ class Namshi extends Provider implements JWT
         } catch (ReflectionException $e) {
             throw new JWTException('The given algorithm could not be found', $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Get the key used to sign the tokens.
+     *
+     * @return resource|string
+     */
+    protected function getSigningKey()
+    {
+        return $this->isAsymmetric() ? $this->getPrivateKey() : $this->getSecret();
+    }
+
+    /**
+     * Get the key used to verify the tokens.
+     *
+     * @return resource|string
+     */
+    protected function getVerificationKey()
+    {
+        return $this->isAsymmetric() ? $this->getPublicKey() : $this->getSecret();
     }
 }

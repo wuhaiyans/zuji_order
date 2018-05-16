@@ -64,10 +64,8 @@ class OrderClearingRepository
         }
         $whereArray = array();
         if (isset($param['business_type']) &&  isset($param['business_no'])){
-
             $whereArray[] = ['business_type', '=', $param['business_type']];
             $whereArray[] = ['business_no', '=', $param['business_no']];
-
         }
 
         $orderData =  OrderClearing::where($whereArray)->first()->toArray();
@@ -89,7 +87,6 @@ class OrderClearingRepository
      */
     public static function getOrderCleanList($param, $limit=2)
     {
-
         $whereArray = array();
         //出账状态
         //根据订单编号
