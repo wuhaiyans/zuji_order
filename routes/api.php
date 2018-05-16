@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 Log::error('前端api');
 
-Log::error($request->input());
+Log::error(request()->input());
 
 Log::error(apiData());
 $api = app('Dingo\Api\Routing\Router');
