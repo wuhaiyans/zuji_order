@@ -55,8 +55,9 @@ class OrderCreateVerify
         if(!$deposit){
             $this->flag =false;
         }
+
         //分期单信息
-        if($data['pay_type']!=PayInc::WithhodingPay || $data['zuqi_type'] ==2){
+       if($data['pay_type']!=PayInc::FlowerStagePay && $data['zuqi_type'] ==2){
             $instalment =$this->InstalmentVerify();
         }
         return $this->flag;
@@ -180,11 +181,11 @@ class OrderCreateVerify
 
     }
     private function InstalmentVerify(){
-        $data =array_merge($this->GetSchema(),$this->GetUserSchema());
+        $data =array_merge($this->GetUserSchema(),$this->GetSchema());
         var_dump($data);die;
-        $instalment =$this->instalment->get_data_schema($data);
-        $arr['instalment'] =$instalment['instalment'];
-        $this->SetSchema($arr);
+       // $instalment =$this->instalment->get_data_schema($data);
+       // $arr['instalment'] =$instalment['instalment'];
+       // $this->SetSchema($arr);
         return true;
     }
 
@@ -301,7 +302,7 @@ class OrderCreateVerify
      */
 
     private function DepositVerify($data){
-        $arr =array_merge($this->GetSchema(),$this->GetUserSchema());
+        $arr =array_merge($this->GetUserSchema(),$this->GetSchema());
         $deposit =$this->third->GetDeposit([
                     'spu_id'=>$arr['sku']['spu_id'],
                     'pay_type'=>$data['pay_type'],
@@ -329,6 +330,7 @@ class OrderCreateVerify
      *  下单商品信息过滤
      */
     private function GoodsVerify($sku_info,$spu_info,$data){
+        //var_dump($data);die;
         $this->sku_num =intval($sku_info['sku_num']);
         $this->sku_id = intval($sku_info['sku_id']);
         $this->spu_id = intval($sku_info['spu_id']);
@@ -361,6 +363,7 @@ class OrderCreateVerify
         $this->yiwaixian_cost = $spu_info['yiwaixian_cost']*100;
         $this->contract_id =$spu_info['contract_id'];
         $this->discount_amount =$sku_info['buyout_price'];
+        $this->coupon_amount =$data['sku_youhui'][$this->sku_id];
         // 计算金额
         $this->amount = $this->all_amount = (($this->zujin * $this->zuqi) + $this->yiwaixian );
         if( $this->amount<0 ){
@@ -438,6 +441,7 @@ class OrderCreateVerify
                 'stock' => $this->stock,
                 'pay_type'=>$data['pay_type'],
                 'discount_amount' =>$this->discount_amount,
+                'coupon_amount' =>$this->coupon_amount,
                 'mianyajin' => 0.00,
             ]
         ];
