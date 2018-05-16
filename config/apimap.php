@@ -71,11 +71,13 @@ return [
     // 资金预授权接口
     'api.Fundauth.initialize'           => 'FundauthController@initialize',
     // 资金预授权回调
-    'api.Fundauth.initializeNotify'     => 'WithholdingController@initializeNotify',
+    'api.Fundauth.initializeNotify'     => 'FundauthController@initializeNotify',
+    // 预授权查询接口
+    'api.Fundauth.fundauthQuery'        => 'FundauthController@fundauthQuery',
     // 预授权解约接口
-    'api.Fundauth.unsign'               => 'WithholdingController@unsign',
+    'api.Fundauth.unsign'               => 'FundauthController@unsign',
     // 预授权解决接口
-    'api.Fundauth.unsignNotify'         => 'WithholdingController@unsignNotify',
+    'api.Fundauth.unsignNotify'         => 'FundauthController@unsignNotify',
 
 
    //退货接口
