@@ -181,7 +181,13 @@ class ReturnController extends Controller
 
 
     }
-
+    //退换货检测结果
+    public function is_qualified(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data'][0]);
+        return apiResponse([],$res);
+    }
     /**
      * 换货用户收货通知
      * @param Request $request
@@ -205,6 +211,13 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $res=$this->OrderReturnCreater->createchange($params);
+        return apiResponse([],$res);
+    }
+    //退款成功更新退款状态
+    public function updateStatus(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $res=$this->OrderReturnCreater->updateStatus($params);
         return apiResponse([],$res);
     }
 

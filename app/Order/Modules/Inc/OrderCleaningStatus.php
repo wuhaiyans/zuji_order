@@ -7,7 +7,7 @@
  */
 namespace App\Order\Modules\Inc;
 
-class OrderStatus{
+class OrderCleaningStatus{
 
     /******************* start  businessType 业务类型 1.退货，2，退款，3，还机 ，4，买断，5续租，6换货 ****************************************************/
 
