@@ -2,6 +2,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
@@ -106,7 +107,7 @@ class ReceiveController extends Controller
     public function received()
     {
         $rules = [
-            'receive_no' => 'required',
+            'receive_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -119,12 +120,45 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+
+    /**
+     * 收货单明细收货
+     */
+    public function receiveDetail()
+    {
+        $rules = [
+            'receive_no' => 'required',
+            'serial_no'  => 'required',
+            'quantity'   => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        try {
+            $this->receive->receiveDetail($params);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
+    }
+
     /**
      * 取消签收
      */
-    public function calcelReceive()
+    public function cancelReceive()
     {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        try {
+            $this->receive->cancelReceive($params['receive_no']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
 
@@ -135,16 +169,15 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',
+            'serial_no'  => 'required',
             'imei'       => 'required',
             'check_result'       => 'required',
-            'check_description'  => 'required',
-            'check_price'        => 'required',
         ];
 
         $params = $this->_dealParams($rules);
 
         try {
-            $this->receive->check($params['receive_no'], $params['imei'], $params);
+            $this->receive->check($params['receive_no'],$params['serial_no'], $params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -157,7 +190,20 @@ class ReceiveController extends Controller
      */
     public function cancelCheck()
     {
+        $rules = [
+            'receive_no' => 'required',
+            'serial_no'  => 'required'
+        ];
 
+        $params = $this->_dealParams($rules);
+
+        try {
+            $this->receive->cancelCheck($params);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
     /**
@@ -178,6 +224,12 @@ class ReceiveController extends Controller
 
             $imeis = $receive->imeis;
 
+            foreach ($imeis as $imei) {
+                $imodel = Imei::find($imei->imei);
+                $imodel->status = Imei::STATUS_IN;
+                $imodel->update();
+            }
+
             \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
 
         } catch (\Exception $e) {
@@ -187,12 +239,27 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+
     /**
      * 录入检测项
      */
-    public function note()
+    public function checkItems()
     {
+        $rules = [
+            'receive_no' => 'required',
+            'serial_no'  => 'required',
+            'check_item' => 'required'
+        ];
 
+        $params = $this->_dealParams($rules);
+
+        try {
+            $this->receive->checkItems($params);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
     }
 
 

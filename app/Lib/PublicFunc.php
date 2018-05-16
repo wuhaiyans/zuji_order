@@ -236,8 +236,8 @@ function v($data, $exit = '')
 function createNo($noType=1){
     $npreNoType = array(
         //分期交易号
-        1 => 'f',
-        2 => 't',
+        1 => 'F',
+        2 => 'T',
         3 => 'P',
     );
     $year = array();
@@ -299,6 +299,19 @@ function sql_profiler()
 
 }
 
+/**
+ * @return array|bool|mixed|string
+ * 兼容 application/x-www-form-urlencoded、application/json、multipart/form-data等
+ */
+function apiData()
+{
+    $data = request()->input();
+    if (!$data || empty($data) || count($data) == 0) {
+        $data = file_get_contents("php://input");
+        return json_decode($data, true);
+    }
+    return $data;
+}
 
 /*
   *

@@ -126,11 +126,18 @@ class ReceiveService
         }
     }
 
+    public function receiveDetail($params)
+    {
+        if (!ReceiveRepository::receiveDetail($params)) {
+            throw new \Exception($params['receive_no'] . '号收货单商品签收失败');
+        }
+    }
+
     /**
      * @param $receive_no
      * 取消签收
      */
-    public function calcelReceive($receive_no)
+    public function cancelReceive($receive_no)
     {
         if (!ReceiveRepository::cancelReceive($receive_no)) {
             throw new \Exception($receive_no . '取消签收失败');
@@ -140,19 +147,21 @@ class ReceiveService
     /**
      * 检测
      */
-    public function check($receive_no, $imei, $data)
+    public function check($receive_no, $serial_no, $data)
     {
-        if (!ReceiveRepository::check($receive_no, $imei, $data)) {
-            throw new \Exception($receive_no . ' imei:'.$imei.'验签失败');
+        if (!ReceiveRepository::check($receive_no, $serial_no, $data)) {
+            throw new \Exception($receive_no . '设备:'.$serial_no.'验签失败');
         }
     }
 
     /**
      * 取消检测
      */
-    public function cancelCheck()
+    public function cancelCheck($params)
     {
-
+        if (!ReceiveRepository::cancelCheck($params)) {
+            throw new \Exception($params['receive_no'] . '设备:'.$params['serial_no'].'取消签收失败');
+        }
     }
 
     /**
@@ -184,8 +193,15 @@ class ReceiveService
         return $detail;
     }
 
-    public function note()
-    {
 
+    /**
+     * @param $params
+     * 检测项
+     */
+    public function checkItems($params)
+    {
+        if (!ReceiveRepository::checkItems($params)) {
+            throw new \Exception($params['receive_no'] . '设备:'.$params['serial_no'].'添加检测项失败');
+        }
     }
 }

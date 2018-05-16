@@ -27,7 +27,7 @@ class ReceiveGoods extends Warehouse
     const CHECK_RESULT_FALSE    = 2;//不合格
 
 
-    protected $fillable = ['receive_no', 'serial_no', 'sku_no','quantity',
+    protected $fillable = ['receive_no', 'serial_no','quantity',
         'quantity_delivered', 'status', 'status_time', 'check_time', 'check_result',
         'check_result','check_description','check_price'
     ];
@@ -90,5 +90,15 @@ class ReceiveGoods extends Warehouse
     public function getStatus()
     {
         return self::status($this->status);
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * 获取receive
+     */
+    public function receive()
+    {
+        return $this->belongsTo(\App\Warehouse\Models\Receive::class, 'receive_no');
     }
 }

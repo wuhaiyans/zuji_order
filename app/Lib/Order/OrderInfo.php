@@ -4,10 +4,13 @@
  * 订单供第三方的接口
  * 2018-05-14
  */
+
+namespace App\Lib\Order;
+
 use App\Lib\ApiStatus;
 
     class OrderInfo {
-        
+
         /**
          * @param array 数组    ['order_no'] = A511125156960043
          * 获取订单详情
@@ -15,7 +18,7 @@ use App\Lib\ApiStatus;
      public function getOrderInfo($param)
      {
 
-            if (!empty($param)) return apiResponse([],ApiStatus::CODE_10104);
+            if (empty($param)) return apiResponse([],ApiStatus::CODE_10104);
             if (isset($param['order_no']) && !empty($param['order_no']))
             {
                 $data = config('tripartite.Interior_Order_Request_data');

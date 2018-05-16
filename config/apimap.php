@@ -7,9 +7,9 @@ return [
 
     'api.order.confirmation' => 'OrderController@confirmation',//下单确认查询接口
 
-    'api.order.cancel' => 'OrderController@cancelOrder',
+    'api.order.cancel' => 'OrderController@cancelOrder', //取消订单接口
 
-    'api.order.orderdetail'=>'OrderController@orderInfo',
+    'api.order.orderdetail'=>'OrderController@orderInfo',//订单详情接口
 
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
 
@@ -26,6 +26,13 @@ return [
 
     'api.order.orderlist'=>'OrderController@orderList',
 
+
+    //结算清单列表接口
+    'api.orderClean.list'=>'OrderCleaningController@list',
+    //结算清单详情接口
+    'api.orderClean.detail'=>'OrderCleaningController@detail',
+    //结算清单操作接口
+    'api.orderClean.operate'=>'OrderCleaningController@operate',
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
