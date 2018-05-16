@@ -4,6 +4,7 @@ use App\Order\Models\OrderReturn;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodExtend;
 use App\Order\Models\Order;
+use App\Order\Models\OrderUserInfo;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +16,13 @@ class OrderReturnRepository
     private $order;
     private $ordergoods;
     private $ordergoodextend;
-    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend)
+    private $OrderUserInfo;
+    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend,OrderUserInfo $OrderUserInfo)
     {
         $this->orderReturn = $orderReturn;
         $this->ordergoods = $ordergoods;
         $this->ordergoodextend = $ordergoodextend;
+        $this->OrderUserInfo = $OrderUserInfo;
         $this->order = $order;
     }
     public static function get_return_info($params){
@@ -485,6 +488,18 @@ class OrderReturnRepository
         $orderData=OrderReturn::where($where)->first()->toArray();
         if($orderData){
             return $orderData;
+        }else{
+            return false;
+        }
+    }
+    //获取下单用户的user_id
+    public static function get_user_info($mobile){
+        if(empty($mobile)){
+            return false;
+        }
+        $userData=OrderUserInfo::where('user_mobile','=',$mobile)->first()->toArray();
+        if($userData){
+            return $userData;
         }else{
             return false;
         }

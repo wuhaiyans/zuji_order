@@ -291,8 +291,10 @@ class OrderReturnCreater
                 $where['goods_name'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'order_no') {
                 $where['order_no'] = $params['keywords'];
-            } elseif (isset($params['kw_type']) == 'user_id') {
-                $user_info = ThirdInterface::GetUser($params['keywords']);
+            } elseif (isset($params['kw_type']) == 'mobile'){
+               //获取下单用户的user_id
+                $user_info = $this->orderReturnRepository->get_user_info($params['keywords']);
+               // $user_info = ThirdInterface::GetUser($params['keywords']);
                 if (empty($user_info)) {
                     // 如果没有用户  直接返回空
                     return apiResponse([], ApiStatus::CODE_0, 'success');
