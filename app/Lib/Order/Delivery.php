@@ -28,7 +28,7 @@ class Delivery
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.updateorder',//模拟
+            'method'=> 'api.Return.updateOrder',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 
@@ -44,7 +44,7 @@ class Delivery
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.user_receive',//模拟
+            'method'=> 'api.Return.userReceive',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 
@@ -72,7 +72,7 @@ class Delivery
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.createchange',//模拟
+            'method'=> 'api.Return.createChange',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 
