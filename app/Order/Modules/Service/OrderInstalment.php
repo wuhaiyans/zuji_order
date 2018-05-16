@@ -47,36 +47,33 @@ class OrderInstalment
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
-
-
         $order = filter_array($order, [
             'order_no' => 'required',
         ]);
-
         if(!$order['order_no']){
             return false;
         }
 
         //获取sku
         $sku = filter_array($sku, [
-            'goods_no'=>'required',
-            'zuqi'=>'required',
-            'zuqi_type'=>'required',
-            'all_amount'=>'required',
-            'amount'=>'required',
-            'yiwaixian'=>'required',
-            'zujin'=>'required',
-            'pay_type'=>'required',
+            'goods_no'      => 'required',
+            'zuqi'          => 'required',
+            'zuqi_type'     => 'required',
+            'all_amount'    => 'required',
+            'amount'        => 'required',
+            'yiwaixian'     => 'required',
+            'zujin'         => 'required',
+            'pay_type'      => 'required',
+            'buyout_price'  => 'required',
         ]);
 
         if(count($sku) < 8){
-
             return false;
         }
 
         filter_array($coupon, [
-            'discount_amount' => 'required',
-            'coupon_type' => 'required',
+            'discount_amount'   => 'required',
+            'coupon_type'       => 'required',
         ]);
 
 
@@ -227,7 +224,7 @@ class OrderInstalment
      * @param  int  $instalment_id 订单分期付款id
      * @return bool true false
      */
-    public static function allow_withhold($instalment_id){
+    public static function allowWithhold($instalment_id){
         if(empty($instalment_id)){
             return false;
         }
