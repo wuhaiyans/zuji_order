@@ -11,6 +11,13 @@ use Illuminate\Http\Request;
  | is assigned the "api" middleware group. Enjoy building your API!
  |
  */
+
+
+Log::error('前端api');
+
+Log::error($request->input());
+
+Log::error(apiData());
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
     'namespace' => 'App\Order\Controllers\Api\v1',
