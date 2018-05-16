@@ -24,7 +24,7 @@ return [
     'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
 
 
-    'api.order.orderlist'=>'OrderController@orderList',
+    'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
 
 
     //结算清单列表接口

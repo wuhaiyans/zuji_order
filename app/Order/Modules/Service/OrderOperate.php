@@ -109,13 +109,15 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['order_info'] = $orderData;
         //订单商品列表相关的数据
-        $goodsData =  OrderRepository::getGoodsListByOrderId(array('orderNo'=>$orderNo));
+        $goodsData =  OrderRepository::getGoodsListByOrderId($orderNo);
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
-        $goodsExtendData =  OrderRepository::getGoodsExtendInfo(array('orderNo'=>$orderNo));
-        if (empty($goodsExtendData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
         $order['goods_extend_info'] = $goodsExtendData;
+        //分期数据表
+        $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
+        $order['instalment_info'] = $goodsExtendData;
         return apiResponseArray(ApiStatus::CODE_0,$order);
 //        return $orderData;
 
