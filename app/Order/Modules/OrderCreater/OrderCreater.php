@@ -15,7 +15,7 @@ interface OrderCreater
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater;
+    public function getOrderCreater():OrderComponnet;
     /**
      * 过滤
      * <p>注意：</p>

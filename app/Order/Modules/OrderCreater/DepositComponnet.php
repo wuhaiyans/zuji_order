@@ -13,7 +13,7 @@ class DepositComponnet implements OrderCreater
 {
     //组件
     private $componnet;
-    public function __construct(OrderCreater $componnet,int $payType)
+    public function __construct(OrderCreater $componnet,int $payType,$certified_flag=true)
     {
         $this->componnet = $componnet;
     }
@@ -21,7 +21,7 @@ class DepositComponnet implements OrderCreater
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater
+    public function getOrderCreater():OrderComponnet
     {
         return $this->componnet->getOrderCreater();
     }
