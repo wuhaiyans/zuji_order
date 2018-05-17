@@ -57,5 +57,14 @@ class OrderCleaning
 
     }
 
+    public static function createOrderClean($param)
+    {
+
+        $success= OrderClearingRepository::createOrderClean($param);
+        return $success;
+
+
+    }
+
 
 }
