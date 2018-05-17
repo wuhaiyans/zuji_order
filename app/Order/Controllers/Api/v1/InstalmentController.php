@@ -10,7 +10,7 @@ use App\Order\Modules\Service\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-use App\Order\Modules\Repository\ThirdInterface;
+use App\Lib\User\User;
 use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -171,8 +171,7 @@ class InstalmentController extends Controller
         }
 
         // 查询用户协议
-        $third = new ThirdInterface();
-        $user_info = $third->GetUser($order_info['user_id']);
+        $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$order_info['user_id']);
 
         if( !is_array($user_info )){
             DB::rollBack();
@@ -394,8 +393,7 @@ class InstalmentController extends Controller
             }
 
             // 查询用户协议
-            $third = new ThirdInterface();
-            $user_info = $third->GetUser($order_info['user_id']);
+            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$order_info['user_id']);
 
             if (!is_array($user_info)) {
                 DB::rollBack();

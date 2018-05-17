@@ -1,7 +1,6 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
-use App\Lib\OldInc;
 use App\Lib\Warehouse\Receive;
 use \App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +10,7 @@ use \App\Order\Modules\Inc\OrderStatus;
 use \App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\ThirdInterface;
+use App\Lib\User\User;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\orderClearingRepository;
 use App\Lib\Warehouse\Delivery;
@@ -292,7 +291,7 @@ class OrderReturnCreater
             } elseif (isset($params['kw_type']) == 'order_no') {
                 $where['order_no'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'user_id') {
-                $user_info = ThirdInterface::GetUser($params['keywords']);
+                $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$params['keywords']);
                 if (empty($user_info)) {
                     // 如果没有用户  直接返回空
                     return apiResponse([], ApiStatus::CODE_0, 'success');
