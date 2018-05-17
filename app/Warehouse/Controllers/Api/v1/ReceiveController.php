@@ -4,16 +4,9 @@ namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ReceiveController extends Controller
 {
-
-    use ValidatesRequests;
-
     const SESSION_ERR_KEY = 'delivery.error';
 
     protected $DeliveryCreate;
@@ -24,7 +17,8 @@ class ReceiveController extends Controller
     }
 
     /**
-     * 列表
+     * 收货单列表
+     *
      */
     public function list()
     {
@@ -40,7 +34,7 @@ class ReceiveController extends Controller
     }
 
     /**
-     * 清单查询
+     * 收货单清单查询
      */
     public function show()
     {
@@ -63,7 +57,7 @@ class ReceiveController extends Controller
     }
 
     /**
-     * 创建
+     * 收货单创建
      */
     public function create()
     {
@@ -72,6 +66,10 @@ class ReceiveController extends Controller
             'receive_detail' => 'required'
         ];
         $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
 
         try {
             $this->receive->create($params);
@@ -92,6 +90,10 @@ class ReceiveController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
         try {
             $this->receive->cancel($params['receive_no']);
         } catch (\Exception $e) {
@@ -111,6 +113,10 @@ class ReceiveController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
         try {
             $this->receive->received($params['receive_no']);
         } catch (\Exception $e) {
@@ -126,12 +132,21 @@ class ReceiveController extends Controller
      */
     public function receiveDetail()
     {
+        /**
+         * receive_no 收货单号
+         * serial_no 设备序号
+         * quantity 设备数量
+         */
         $rules = [
             'receive_no' => 'required',
             'serial_no'  => 'required',
             'quantity'   => 'required'
         ];
         $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
 
         try {
             $this->receive->receiveDetail($params);
@@ -152,6 +167,10 @@ class ReceiveController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
         try {
             $this->receive->cancelReceive($params['receive_no']);
         } catch (\Exception $e) {
@@ -167,14 +186,19 @@ class ReceiveController extends Controller
      */
     public function check()
     {
+
         $rules = [
             'receive_no' => 'required',
             'serial_no'  => 'required',
             'imei'       => 'required',
-            'check_result'       => 'required',
+            'check_result'  => 'required', //针对设备的检测结果
         ];
 
         $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
 
         try {
             $this->receive->check($params['receive_no'],$params['serial_no'], $params);
@@ -186,16 +210,20 @@ class ReceiveController extends Controller
     }
 
     /**
-     * 取消验收 针对设备
+     * 已验收的设备 取消验收 针对设备
      */
     public function cancelCheck()
     {
         $rules = [
-            'receive_no' => 'required',
-            'serial_no'  => 'required'
+            'receive_no' => 'required',//收货单编号
+            'serial_no'  => 'required' //设备序号
         ];
 
         $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
 
         try {
             $this->receive->cancelCheck($params);
@@ -218,6 +246,10 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
 
         try {
             $receive = $this->receive->finishCheck($params['receive_no']);
@@ -253,6 +285,10 @@ class ReceiveController extends Controller
 
         $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
         try {
             $this->receive->checkItems($params);
         } catch (\Exception $e) {
@@ -261,34 +297,6 @@ class ReceiveController extends Controller
 
         return apiResponse([]);
     }
-
-
-//    /**
-//     * 处理传过来的参数
-//     */
-//    private function _dealParams($rules)
-//    {
-//        $params = request()->input();
-//
-//        if (!isset($params['params'])) {
-//            return [];
-//        }
-//
-//        if (is_string($params['params'])) {
-//            $params = json_decode($params['params'], true);
-//        } else if (is_array($params['params'])) {
-//            $params = $params['params'];
-//        }
-//
-//        $validator = app('validator')->make($params, $rules);
-//
-//        if ($validator->fails()) {
-//            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
-//            return false;
-//        }
-//
-//        return $params;
-//    }
 
 }
 
