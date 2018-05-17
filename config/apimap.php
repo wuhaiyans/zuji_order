@@ -59,9 +59,9 @@ return [
 
     // 代扣相关
     // 代扣协议查询
-    'api.Withholding.query'             => 'WithholdController@query',
+    'api.Withhold.query'                => 'WithholdController@query',
     // 代扣签约接口
-    'api.Withholding.sign'              => 'WithholdController@sign',
+    'api.Withhold.sign'                 => 'WithholdController@sign',
     // 代扣签约回调接口
     'api.Withhold.sign_notify'          => 'WithholdController@sign_notify',
     // 代扣解约接口

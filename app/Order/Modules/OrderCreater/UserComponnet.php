@@ -18,6 +18,8 @@ class UserComponnet implements OrderCreater
 
     //组件
     private $componnet;
+    private $flag = true;
+
     //用户ID
     private $userId;
     //手机号
@@ -68,11 +70,19 @@ class UserComponnet implements OrderCreater
         $this->age = intval(($now-$age)/10000);
         $this->risk = $userInfo['risk']?1:0;
     }
+
+    /**
+     * 获取 用户ID
+     * @return int
+     */
+    public function getUserId(){
+        return $this->userId;
+    }
     /**
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater
+    public function getOrderCreater():OrderComponnet
     {
         return $this->componnet->getOrderCreater();
     }
@@ -86,8 +96,16 @@ class UserComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        var_dump("用户组件 -filter");
-        return true;
+        if( $this->islock ){
+            $this->getOrderCreater()->setError('账号锁定');
+            $this->flag = false;
+        }
+        if( $this->block ){
+            $this->getOrderCreater()->setError('由于您的退款次数过多，账户暂时无法下单，请联系客服人员！');
+            $this->flag = false;
+        }
+
+        return $this->flag;
     }
 
     /**
@@ -96,8 +114,25 @@ class UserComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("用户组件 -get_data_schema");
-        return [];
+        return [
+            'user' => [
+                'user_id' => $this->userId,
+                'user_mobile' => $this->mobile,
+                'withholding_no'=> $this->withholdingNo,
+                'is_lock'=>$this->islock,
+                'block'=>$this->block,
+                'credit_time'=>$this->creditTime,
+                'certified'=>$this->certified,
+                'certified_platform'=>$this->certifiedPlatform,
+                'realname'=>$this->realname,
+                'cert_no'=>$this->certNo,
+                'credit'=>$this->credit,
+                'face'=>$this->face,
+                'age'=>$this->age,
+                'risk'=>$this->risk,
+            ]
+        ];
+
     }
 
     /**
@@ -107,6 +142,19 @@ class UserComponnet implements OrderCreater
     public function create(): bool
     {
         var_dump("用户组件 -create");
+//        $order_id = $this->componnet->get_order_creater()->get_order_id();
+//
+//        // 写入用户信息
+//        $data = [
+//            'user_id' => $this->user_id,
+//            'mobile' => $this->mobile,
+//        ];
+//        $order_table = \hd_load::getInstance()->table('order2/order2');
+//        $b = $order_table->where(['order_id'=>$order_id])->save($data);
+//        if( !$b ){
+//            $this->get_order_creater()->set_error('保存订单用户信息失败');
+//            return false;
+//        }
         return true;
     }
 

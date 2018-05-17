@@ -9,19 +9,44 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Fengkong\Fengkong;
+
 class YidunComponnet implements OrderCreater
 {
     //组件
     private $componnet;
+    private $userInfo;
+
+    //蚁盾数据
+    private $yidun;
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
+        $schema =$componnet->getDataSchema();
+        $this->userInfo =$schema['user'];
+
+        //获取蚁盾信息
+//        $yidun =Fengkong::getYidun(config('tripartite.Interior_Fengkong_Request_data'),[
+//            'user_id'=>$schema['user']['user_id'],
+//            'user_name'=>$schema['user']['realname'],
+//            'cert_no'=>$schema['user']['cert_no'],
+//            'mobile'=>$schema['user']['user_mobile'],
+//        ]);
+
+        $yidun_data =[
+            'yidun'=>[
+                'decision' => "0",
+                'score' => "0",
+                'strategies' =>"111",
+            ]
+        ];
+        $this->yidun =$yidun_data;
     }
     /**
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater
+    public function getOrderCreater():OrderComponnet
     {
         return $this->componnet->getOrderCreater();
     }
@@ -35,7 +60,6 @@ class YidunComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        var_dump("yidun组件 -filter");
         return $this->componnet->filter();
     }
 
@@ -45,8 +69,8 @@ class YidunComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("yidun组件 -get_data_schema");
-        return [];
+       $schema = $this->componnet->getDataSchema();
+       return array_merge($schema,$this->yidun);
     }
 
     /**
