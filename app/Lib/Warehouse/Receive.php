@@ -20,12 +20,12 @@ class Receive
      * type 类型:退 换 还 ...
      *
      * $data = [
-     *  logistics_id,
-     *  logistics_no
+     *  logistics_id, 【必须】
+     *  logistics_no, 【必须】
      *  receive_detail = [
-     *      serial_no
-     *      quantity
-     *      imei  可以没有
+     *      serial_no 【必须】
+     *      quantity 【必须】
+     *      imei  【可以没有】
      *  ]
      * ]
      *
