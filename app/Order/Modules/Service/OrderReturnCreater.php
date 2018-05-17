@@ -286,14 +286,12 @@ class OrderReturnCreater
         if(isset($params['business_key']) > 0) {
             $where['business_key'] = intval($params['business_key']);
         }
-
         if (isset($params['keywords']) != '') {
             if (isset($params['kw_type']) == 'goods_name') {
                 $where['goods_name'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'order_no') {
                 $where['order_no'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'mobile'){
-
                 $user_info = $this->orderReturnRepository->get_user_info($params['keywords']);
                 if (empty($user_info)) {
                     // 如果没有用户  直接返回空
@@ -310,6 +308,12 @@ class OrderReturnCreater
         }
         if (isset($params['user_id'])!='') {
             $where['user_id'] = $params['user_id'];
+        }
+        if (isset($params['order_status'])!='') {
+            $where['order_status'] = $params['order_status'];
+        }
+        if (isset($params['appid'])!='') {
+            $where['appid'] = $params['appid'];
         }
         // 查询退货申请单
         $additional['page'] = $page;
@@ -337,12 +341,6 @@ public function _parse_order_where($where=[]){
 
       $where = filter_array($where, [
           'business_key' => 'required|is_id',
-          'goods_name' => 'required',
-          'order_no' => 'required|is_string',
-          'status' => 'required|is_int',
-          'begin_time'  => 'required',
-          'end_time'    => 'required',
-          'user_id' => 'required|is_id',
       ]);
       // 结束时间（可选），默认为为当前时间
       if( !isset($where['end_time']) ){
@@ -373,6 +371,12 @@ public function _parse_order_where($where=[]){
     }
     if( isset($where['status']) ){
         $where1[] = ['order_return.status', '=', $where['status']];
+    }
+    if( isset($where['order_status']) ){
+        $where1[] = ['order_info.status', '=', $where['order_status']];
+    }
+    if( isset($where['appid']) ){
+        $where1[] = ['order_info.appid', '=', $where['appid']];
     }
     if( isset($where['business_key']) ){
         $where1[] = ['order_return.business_key', '=', $where['business_key']];
