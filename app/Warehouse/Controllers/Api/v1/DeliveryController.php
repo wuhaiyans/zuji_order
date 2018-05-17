@@ -5,17 +5,10 @@ use App\Lib\ApiStatus;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
-
-    use ValidatesRequests;
-
-    const SESSION_ERR_KEY = 'delivery.error';
-
     protected $DeliveryCreate;
 
     protected $delivery;
@@ -26,16 +19,13 @@ class DeliveryController extends Controller
         $this->delivery = $delivery;
     }
 
-
-    public function deliveryList(){
-//        DB::connection('foo');
-        echo "收货表列表接口";
-    }
-
     /**
      * 发货单 -- 创建
+     *
+     * order_no 订单号
+     * delivery_detail 设备明细
      */
-    public function deliveryCreate(Request $request){
+    public function deliveryCreate(){
 
         $rules = [
             'order_no' => 'required', //单号
@@ -64,9 +54,17 @@ class DeliveryController extends Controller
 
     /**
      * 配货
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function matchGoods()
     {
+        /**
+         * $params 数组中需要包含以下字段
+         * delivery_no 发货单号
+         * serial_no 设备序号
+         * quantity  设备数量
+         */
         $rules = [
             'delivery_no' => 'required', //单号
             'serial_no'   => 'required', //序号
@@ -90,9 +88,11 @@ class DeliveryController extends Controller
 
     /**
      * 配货完成
+     *
      */
     public function match()
     {
+        //delivery_no 发货单号
         $rules = ['delivery_no' => 'required'];
         $params = $this->_dealParams($rules);
 
@@ -112,8 +112,9 @@ class DeliveryController extends Controller
 
 
     /**
-     * 取消发货
-     * 订单系统过来的请求
+     * 取消发货 订单系统过来的请求
+     *
+     * order_no 订单号
      */
     public function cancel()
     {
@@ -140,7 +141,7 @@ class DeliveryController extends Controller
      */
     public function cancelDelivery()
     {
-        $rules = ['delivery_no' => 'required'];
+        $rules = ['delivery_no' => 'required'];//delivery_no 发货单号
         $params = $this->_dealParams($rules);
 
         if (!$params) {
@@ -189,7 +190,7 @@ class DeliveryController extends Controller
      */
     public function show()
     {
-        $rules = [
+        $rules = [//delivery_no 发货单号
             'delivery_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
@@ -214,7 +215,7 @@ class DeliveryController extends Controller
      */
     public function imeis()
     {
-        $rules = [
+        $rules = [//delivery_no 发货单号
             'delivery_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -238,7 +239,7 @@ class DeliveryController extends Controller
      */
     public function send()
     {
-        $rules = [
+        $rules = [//delivery_no 发货单号
             'delivery_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
@@ -265,6 +266,11 @@ class DeliveryController extends Controller
      */
     public function logistics()
     {
+        /**
+         * delivery_no 发货单号
+         * logistics_id 物流渠道
+         * logistics_no 物流编号
+         */
         $rules = [
             'delivery_no'  => 'required',
             'logistics_id' => 'required',//物流渠道
@@ -290,7 +296,7 @@ class DeliveryController extends Controller
      */
     public function cancelMatch()
     {
-        $rules = [
+        $rules = [ //delivery_no 发货单号
             'delivery_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
@@ -316,6 +322,10 @@ class DeliveryController extends Controller
     public function delImei(DeliveryImeiService $server)
     {
 
+        /**
+         * delivery_no 发货单号
+         * imei 设备imei
+         */
         $rules = [
             'delivery_no' => 'required',
             'imei'  => 'required'
@@ -341,9 +351,14 @@ class DeliveryController extends Controller
      */
     public function addImei(DeliveryImeiService $server)
     {
+        /**
+         * delivery_no 发货单号
+         * imei 设备imei
+         * serial_no 设备序号
+         */
         $rules = [
             'delivery_no' => 'required',
-            'imei'     => 'required',
+            'imei'      => 'required',
             'serial_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -362,6 +377,8 @@ class DeliveryController extends Controller
     }
     /**
      * 列表查询
+     *
+     * 可按创建时间，发货时间，订单号等状态查询
      */
     public function list()
     {
