@@ -102,6 +102,7 @@ class OrderReturnCreater
         //获取用户订单信息
         $params_where['orderNo']=$params['order_no'];
         $order_info=$this->orderRepository->getOrderInfo($params_where);
+        return $order_info;
         $where[]=['order_no','=',$params['order_no']];
         if(isset($params['goods_no'])){
             $where[]=['goods_no','=',$params['goods_no']];
@@ -109,15 +110,15 @@ class OrderReturnCreater
        if($res['business_key']==ReturnStatus::OrderTuiKuan){
            //创建退款清单
            $create_data['order_no']=$params['order_no'];
-           $create_data['out_account']=$order_info['pay_type'];//出账方式
+           $create_data['out_account']=$order_info[0]->pay_type;//出账方式
            $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;
            $create_data['business_no']=ReturnStatus::OrderTuiKuan;
            $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
-           $create_data['deposit_unfreeze_amount']=$order_info['goods_yajin'];//退还押金金额
+           $create_data['deposit_unfreeze_amount']=$order_info[0]->goods_yajin;//退还押金金额
            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
-           $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
+           $create_data['refund_amount']=$order_info[0]->order_amount;//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
-          $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
+           $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
           if(!$create_clear){
               return ApiStatus::CODE_34008;//创建退款清单失败
           }
@@ -151,10 +152,10 @@ class OrderReturnCreater
           return ApiStatus::CODE_40000;//商品信息错误
        }
        $return_info= $this->orderReturnRepository->get_type($where);//获取业务类型
-       $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$goods_info);//创建待收货单
-      //  if(!$create_receive){
-         //   return false;
-     //   }
+      // $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$goods_info);//创建待收货单
+       // if(!$create_receive){
+       //    return false;
+      //  }
             //申请退货同意发送短信
           /*  $b =SmsApi::sendMessage($order_info[0]->mobile,'SMS_113455999',[
                 'realName' =>$order_info[0]->realName,
@@ -322,7 +323,6 @@ class OrderReturnCreater
         $where = $this->_parse_order_where($where);
        
         $data = $this->orderReturnRepository->get_list($where, $additional);
-
         return $data;
     }
 
