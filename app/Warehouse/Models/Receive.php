@@ -33,7 +33,8 @@ class Receive extends Warehouse
     const TYPE_RETURN = 2;//退
     const TYPE_EXCHANGE = 3;
 
-    protected $fillable = ['receive_no', 'order_no', 'logistics_id','type',
+    protected $fillable = ['receive_no', 'order_no', 'logistics_id','type','customer',
+        'customer_mobile','customer_address',
         'logistics_no', 'status', 'status_time', 'create_time','app_id',
         'receive_time','check_time','check_result','check_description'];
 

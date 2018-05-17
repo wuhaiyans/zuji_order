@@ -102,7 +102,6 @@ class OrderReturnCreater
         //获取用户订单信息
         $params_where['orderNo']=$params['order_no'];
         $order_info=$this->orderRepository->getOrderInfo($params_where);
-        return $order_info;
         $where[]=['order_no','=',$params['order_no']];
         if(isset($params['goods_no'])){
             $where[]=['goods_no','=',$params['goods_no']];
@@ -300,9 +299,7 @@ class OrderReturnCreater
                 } else {
                     $where['user_id'] = $user_info['user_id'];
                 }
-
             }
-
         }
         if (isset($params['return_status']) && $params['return_status'] > 0) {
             $where['status'] = intval($params['return_status']);
@@ -323,6 +320,42 @@ class OrderReturnCreater
         $where = $this->_parse_order_where($where);
        
         $data = $this->orderReturnRepository->get_list($where, $additional);
+        foreach($data['data'] as $k=>$v){
+            //业务类型
+            if($data['data'][$k]->business_key==ReturnStatus::OrderTuiKuan){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderTuiKuan);
+            }elseif($data['data'][$k]->business_key==ReturnStatus::OrderTuiHuo){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderTuiHuo);
+            }elseif($data['data'][$k]->business_key==ReturnStatus::OrderHuanHuo){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderHuanHuo);
+            }
+            //订单状态
+            if($data['data'][$k]->order_status==OrderStatus::OrderWaitPaying){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderWaitPaying);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderPayed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPayed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInStock);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderDeliveryed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderDeliveryed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInService){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInService);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderClosed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderRefunded){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderRefunded);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderGivebacked){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderGivebacked);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderBuyouted){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderBuyouted);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderChanged){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderChanged);
+            }
+            $data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
+            $data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
+            $data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
+            $data['data'][$k]->wuliu_channel_name="顺丰快递";
+        }
         return $data;
     }
 

@@ -68,7 +68,7 @@ class OrderReturnRepository
             ->select('order_return.create_time as c_time','order_return.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
             ->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['page']);
         if($parcels){
-            return $parcels;
+            return $parcels->toArray();
         }
         return [];
     }
