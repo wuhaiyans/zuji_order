@@ -34,6 +34,11 @@ use App\Order\Models\OrderPayFundauthModel;
 class Pay extends \App\Lib\Configurable 
 {
 	
+	/**
+	 * 主键
+	 * @var string
+	 */
+	protected $id = 0;
 	//-+------------------------------------------------------------------------
 	// | 
 	//-+------------------------------------------------------------------------
@@ -192,8 +197,73 @@ class Pay extends \App\Lib\Configurable
 			LogApi::debug('[支付阶段]取消操作重复');
 			throw new \Exception('支付取消失败：重复操作');
 		}
+		
+		// 更新 支付阶段 表
+		$payModel = new OrderPayModel();
+		$b = $payModel->limit(1)->where([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		])->update([
+			'status' => PayStatus::CLOSED,
+		]);
+		if( !$b ){
+			LogApi::error('[支付阶段]取消状态保存失败');
+			throw new \Exception( '取消失败' );
+		}
+		
 		LogApi::debug('[支付阶段]取消成功');
 		$this->status = PayStatus::CLOSED;
+		return true;
+	}
+	
+	/**
+	 * 恢复
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public function resume(){
+		LogApi::debug('[支付阶段]恢复');
+		if( $this->status != PayStatus::CLOSED ){
+			LogApi::error('[支付阶段]状态错误');
+			throw new \Exception('恢复失败');
+		}
+		
+		// 支付判断
+		if( $this->needPayment() )
+		{ // 
+			$status = PayStatus::WAIT_PAYMENT;
+		}
+		// 代扣判断
+		elseif( $this->needWithhold() )
+		{ // 
+			$status = PayStatus::WAIT_WHITHHOLD;
+		}
+		// 预授权判断
+		elseif( $this->needFundauth() )
+		{
+			$status = PayStatus::WAIT_FUNDAUTH;
+		}else{
+			LogApi::error('[支付阶段]状态错误');
+			throw new \Exception('恢复失败');
+		}
+		
+		// 更新 支付阶段 表
+		$payModel = new OrderPayModel();
+		$b = $payModel->limit(1)->where([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		])->update([
+			'status' => $status,
+		]);
+		if( !$b ){
+			LogApi::error('[支付阶段]恢复状态保存失败');
+			throw new \Exception( '恢复失败' );
+		}
+		
+		LogApi::debug('[支付阶段]恢复成功');
+		$this->status = $status;
 		return true;
 	}
 	
@@ -209,7 +279,7 @@ class Pay extends \App\Lib\Configurable
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public function paymentSuccess( array $params )
+	public function paymentSuccess( array $params ):bool
 	{
 		LogApi::debug('[支付阶段]支付环节支付处理');
 		// 只有待支付状态时才允许操作
@@ -268,7 +338,7 @@ class Pay extends \App\Lib\Configurable
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public function withholdSuccess( array $params )
+	public function withholdSuccess( array $params ):bool
 	{
 		LogApi::debug('[支付阶段]代扣签约环节处理');
 		// 待签约时才允许
@@ -334,7 +404,7 @@ class Pay extends \App\Lib\Configurable
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public function fundauthSuccess( array $params )
+	public function fundauthSuccess( array $params ):bool
 	{
 		if( $this->status != PayStatus::WAIT_FUNDAUTH 
 				|| $this->fundauthStatus != FundauthStatus::WAIT_FUNDAUTH ){

@@ -15,6 +15,60 @@ class PayTest extends TestCase
 //     * 测试 payment 支付
 //     * @return void
 //     */
+//    public function testPaymentNotify()
+//    {
+//		
+//		try {
+//			$pay_info = \App\Order\Models\OrderPayModel::find(5);
+//			$this->assertTrue( !!$pay_info );
+//			
+//			$pay_info = $pay_info->toArray();
+//			
+//			// 创建支付
+//			// 只有支付环节，没有其他环节
+//			$pay = new \App\Order\Modules\Repository\Pay\Pay($pay_info);
+//			
+//			// 支付阶段状态
+//			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+//			
+//			
+//			// 支付状态
+//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
+//					'支付环节状态初始化错误' );
+//			
+//			// 代扣签约状态
+//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
+//					'代扣签约状态初始化错误' );
+//			
+//			// 资金预授权状态
+//			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
+//					'资金预授权状态初始化错误' );
+//			
+//			// 取消
+//			$pay->cancel();
+//			// 恢复
+//			$pay->resume();
+//			// 取消
+//			$pay->cancel();
+//			// 恢复
+//			$pay->resume();
+//			
+//			// 支付成功操作
+//			$pay->paymentSuccess([
+//				'out_payment_no' => createNo(1),
+//				'payment_time' => time(),
+//			]);
+//			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
+//			
+//		} catch (\Exception $ex) {
+//			echo $ex->getMessage();
+//		}
+//	}
+//	
+//    /**
+//     * 测试 payment 支付
+//     * @return void
+//     */
 //    public function testPayment()
 //    {
 //		try {
@@ -28,7 +82,7 @@ class PayTest extends TestCase
 //				'paymentNo' => \createNo(1),
 //				'paymentAmount' => '0.01',
 //				'paymentChannel'=> Channel::Alipay,
-//				'paymentFenqi'	=> 0,
+//				'paymentFenqi'	=> 3,
 //			]);
 //			
 //			// 支付阶段状态
@@ -37,7 +91,7 @@ class PayTest extends TestCase
 //			
 //			// 支付状态
 //			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-//					'支付阶段状态初始化错误' );
+//					'支付环节状态初始化错误' );
 //			
 //			// 代扣签约状态
 //			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
@@ -86,7 +140,7 @@ class PayTest extends TestCase
 //			
 //			// 支付状态
 //			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::NO_PAYMENT,
-//					'支付阶段状态初始化错误' );
+//					'支付环节状态初始化错误' );
 //			
 //			// 代扣签约状态
 //			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
@@ -134,7 +188,7 @@ class PayTest extends TestCase
 //			
 //			// 支付状态
 //			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::NO_PAYMENT,
-//					'支付阶段状态初始化错误' );
+//					'支付环节状态初始化错误' );
 //			
 //			// 代扣签约状态
 //			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
@@ -191,7 +245,7 @@ class PayTest extends TestCase
 //			
 //			// 支付状态
 //			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-//					'支付阶段状态初始化错误' );
+//					'支付环节状态初始化错误' );
 //			
 //			// 代扣签约状态
 //			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
@@ -223,6 +277,8 @@ class PayTest extends TestCase
 //		}
 //    }
 //	
+	
+	
     /**
      * 测试 payment + withhold + fundauth
      * @return void
@@ -255,7 +311,7 @@ class PayTest extends TestCase
 			
 			// 支付状态
 			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-					'支付阶段状态初始化错误' );
+					'支付环节状态初始化错误' );
 			
 			// 代扣签约状态
 			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
@@ -265,6 +321,16 @@ class PayTest extends TestCase
 			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
 					'资金预授权状态初始化错误' );
 			
+			
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			
 			// 支付成功操作
 			$pay->paymentSuccess([
 				'out_payment_no' => createNo(1),
@@ -272,12 +338,32 @@ class PayTest extends TestCase
 			]);
 			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
 			
+			
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			
+			
 			// 代扣签约操作
 			$pay->withholdSuccess([
 				'out_withhold_no' => \createNo(1),
 				'uid' => 5,
 			]);
 			$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
+			
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
 			
 			// 预授权成功操作
 			$pay->fundauthSuccess([

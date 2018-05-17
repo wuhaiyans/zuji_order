@@ -71,9 +71,13 @@ class Configurable {
      * @throws PropertyException
      */
     public function setProperty( $property, $value, &$throwException=true ){
-        // 确认属性是否存在
-        if( !$this->_ensure_property($property, $throwException) ){
-            return false;
+        // 确认属性是否存在（双重判断，第一层捕获异常）
+        if( !$this->_ensure_property($property, $exception) ){
+			// 转换属性格式：下划线去掉，后一个字母大写
+			$property = lcfirst( str_replace('_','',ucwords($property, '_') ) );
+			if( !$this->_ensure_property($property, $throwException) ){
+				return false;
+			}
         }
         // 属性赋值
         $this->$property = $value;

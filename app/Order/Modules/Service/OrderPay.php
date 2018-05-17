@@ -37,10 +37,4 @@ class OrderPay
     {
     }
 	
-    /**
-     * 查询支付
-     */
-    public static function cancel( array $data )
-    {
-    }
 }
