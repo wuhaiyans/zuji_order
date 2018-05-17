@@ -10,7 +10,7 @@ use App\Order\Modules\Repository\Pay\FundauthStatus;
 
 class PayTest extends TestCase
 {
-	
+//	
 //    /**
 //     * 测试 payment 支付
 //     * @return void
@@ -233,7 +233,7 @@ class PayTest extends TestCase
 			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
 			
 			// 创建支付
-			$pay = $creater->createWithholdFundauth([
+			$pay = $creater->createPaymentWithholdFundauth([
 				'businessType' => '1',
 				'businessNo' => \createNo(1),
 				
@@ -254,7 +254,7 @@ class PayTest extends TestCase
 			
 			
 			// 支付状态
-			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::NO_PAYMENT,
+			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
 					'支付阶段状态初始化错误' );
 			
 			// 代扣签约状态
@@ -264,6 +264,13 @@ class PayTest extends TestCase
 			// 资金预授权状态
 			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
 					'资金预授权状态初始化错误' );
+			
+			// 支付成功操作
+			$pay->paymentSuccess([
+				'out_payment_no' => createNo(1),
+				'payment_time' => time(),
+			]);
+			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
 			
 			// 代扣签约操作
 			$pay->withholdSuccess([

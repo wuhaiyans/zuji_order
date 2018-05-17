@@ -17,7 +17,17 @@ use App\Order\Models\OrderPayFundauthModel;
 
 /**
  * 支付 类
- * 定义 订单系统 支付阶段接口
+ * <p>标准化支付整体流程，定义支付环节和接口</p>
+ * <p>支付阶段分为3个环节，执行顺序依次是：</p>
+ * <ul>
+ * <li>支付</li>
+ * <li>代扣签约</li>
+ * <li>资金预授权</li>
+ * </ul>
+ * <p>注：每个环节都是可选的，但至少存在一个环节（支付阶段才有意义）</p>
+ * @method bool paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
+ * @method bool withholdSuccess(array $params) 用于代扣签约完成时调用，进入下一个状态
+ * @method bool fundauthSuccess(array $params) 用于资金预授权完成时调用，进入下一个状态
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -177,9 +187,12 @@ class Pay extends \App\Lib\Configurable
 	 * @throws \Exception
 	 */
 	public function cancel(){
+		LogApi::debug('[支付阶段]取消');
 		if( $this->status == PayStatus::CLOSED ){
+			LogApi::debug('[支付阶段]取消操作重复');
 			throw new \Exception('支付取消失败：重复操作');
 		}
+		LogApi::debug('[支付阶段]取消成功');
 		$this->status = PayStatus::CLOSED;
 		return true;
 	}
