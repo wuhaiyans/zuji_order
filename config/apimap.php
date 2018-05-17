@@ -74,6 +74,17 @@ return [
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
     'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
+	
+	//-+------------------------------------------------------------------------
+	// | 还机相关接口
+	//-+------------------------------------------------------------------------
+	//还机申请页面接口
+    'api.giveback.applying.viewdata'       => 'GivebackController@get_applying_viewdata',
+	//还机申请提交接口
+    'api.giveback.create'       => 'GivebackController@create',
+	//还机更新状态为待检测【确认收货】
+    'api.giveback.notify.evaluation'       => 'GivebackController@create',
+	
     // test
     'api.Test.test'       => 'TestController@test',
 
