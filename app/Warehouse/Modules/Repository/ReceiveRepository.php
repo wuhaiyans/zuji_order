@@ -45,8 +45,8 @@ class ReceiveRepository
         }
         return $query->paginate($limit,
             [
-                'receive_no','order_no', 'logistics_id','logistics_no',
-                'status', 'create_time', 'receive_time','check_description',
+                'receive_no','order_no', 'logistics_id','logistics_no','customer','customer_mobile',
+                'customer_address', 'status', 'create_time', 'receive_time','check_description',
                 'status_time','check_time','check_result'
             ],
             'page', $page);

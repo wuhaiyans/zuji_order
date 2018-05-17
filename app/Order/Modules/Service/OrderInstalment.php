@@ -67,7 +67,7 @@ class OrderInstalment
             'buyout_price'  => 'required',
         ]);
 
-        if(count($sku) < 8){
+        if(count($sku) < 9){
             return false;
         }
 

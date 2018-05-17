@@ -107,4 +107,11 @@ class ReturnStatus {
         }
         return '';
     }
+    public static function getBusinessName($status){
+        $list = self::business_key();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
 }

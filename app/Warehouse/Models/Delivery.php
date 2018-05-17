@@ -25,8 +25,8 @@ class Delivery extends Warehouse
 
     protected $primaryKey='delivery_no';
 
-    protected $fillable = ['delivery_no', 'order_no', 'logistics_id','status_time','app_id',
-        'logistics_no', 'status', 'create_time', 'delivery_time', 'status_remark'];
+    protected $fillable = ['delivery_no', 'order_no', 'logistics_id','status_time','app_id','customer',
+        'customer_mobile','customer_address','logistics_no', 'status', 'create_time', 'delivery_time', 'status_remark'];
 
 
     /**

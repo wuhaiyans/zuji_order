@@ -17,7 +17,7 @@ class OrderClearingRepository
      * @param $param
      * @return bool|string
      */
-    public function createOrderClean($param){
+    public static function createOrderClean($param){
 
         if (empty($param)) {
             return false;
@@ -44,8 +44,10 @@ class OrderClearingRepository
             'status'=>  isset($param['status'])?$param['status']:0 ,
             'create_time'=>time(),
             'update_time'=>time(),
+            'app_id' => 1,
+            'out_account'=>2,
         ];
-        $success =$orderClearData->create($order_data);
+        $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
         }

@@ -57,6 +57,15 @@ class OrderStatus{
      */
     const OrderChanged= 10;
 
+    //未联系
+    const visitUnContact = 0;
+    //无法联系
+    const visitNoContact = 1;
+    //已联系
+    const visitContacted = 2;
+    //已回访
+    const visited = 3;
+
 
     /**
      * 订单冻结类型
@@ -84,6 +93,34 @@ class OrderStatus{
      */
     public static function getStatusName($status){
         $list = self::getStatusType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+
+
+
+    /**
+     * 回访类型
+     * @return array
+     */
+    public static function getVisitType(){
+        return [
+            self::visitUnContact => '未联系',
+            self::visitNoContact => '无法联系',
+            self::visitContacted => '已联系',
+            self::visited => '已回访',
+        ];
+    }
+
+    /**
+     * 回访值 转换成 回访名称
+     * @param int $status   回访值
+     * @return string 回访名称
+     */
+    public static function getVisitName($status){
+        $list = self::getVisitType();
         if( isset($list[$status]) ){
             return $list[$status];
         }

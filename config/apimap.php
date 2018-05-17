@@ -36,7 +36,8 @@ return [
     'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
     //更新清算状态
     'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
-
+    //创建订单清算单
+    'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
 
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',

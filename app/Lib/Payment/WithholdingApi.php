@@ -9,6 +9,35 @@ use App\Lib\ApiRequest;
 class WithholdingApi extends \App\Lib\BaseApi {
 
     /**
+     * 代扣 签约（获取签约地址）
+     * @param string $appid		应用ID
+     * @param array $params
+     * [
+     *		'user_id' => '', //租机平台用户ID
+     *		'out_agreement_no' => '', //业务平台签约协议号
+     *		'front_url' => '', //前端回跳地址
+     *		'back_url' => '', //后台通知地址
+     * ]
+     * @return mixed false：失败；array：成功
+     * [
+     *		'withholding_url' => '',//签约跳转url地址
+     * ]
+     */
+    public static function withholdingUrl( $appid,array $params ){
+        $ApiRequest = new ApiRequest();
+        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
+        $ApiRequest->setAppid( $appid );	// 业务应用ID
+        $ApiRequest->setMethod('pay.alipay.withholdingurl');
+        $ApiRequest->setParams($params);
+        $Response = $ApiRequest->send();
+        if( !$Response->isSuccessed() ){
+            self::$error = '支付宝代扣 获取url地址接口';
+            return false;
+        }
+        return $Response->getData();
+    }
+
+    /**
      * 代扣 扣款接口
      * @param string $appid		应用ID
      * @param array $params
@@ -92,34 +121,6 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
             self::$error = '支付宝代扣签约查询失败';
-            return false;
-        }
-        return $Response->getData();
-    }
-    /**
-     * 代扣 签约（获取签约地址）
-     * @param string $appid		应用ID
-     * @param array $params
-     * [
-     *		'user_id' => '', //租机平台用户ID
-     *		'alipay_user_id' => '', //用户支付宝id（2088开头）
-     *		'front_url' => '', //前端回跳地址
-     *		'back_url' => '', //后台通知地址
-     * ]
-     * @return mixed false：失败；array：成功
-     * [
-     *		'withholding_url' => '',//签约跳转url地址
-     * ]
-     */
-    public static function withholding( $appid,array $params ){
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholding');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '支付宝代扣 获取url地址接口';
             return false;
         }
         return $Response->getData();
