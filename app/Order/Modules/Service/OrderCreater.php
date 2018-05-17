@@ -3,26 +3,66 @@ namespace App\Order\Modules\Service;
 
 use App\Lib\ApiStatus;
 use App\Lib\Certification;
+use App\Lib\Goods\Goods;
+use App\Lib\User\User;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
-use App\Order\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
 
 class OrderCreater
 {
-
-    protected $third;
     protected $verify;
     protected $orderRepository;
-    protected $orderUserInfoRepository;
 
-    public function __construct(ThirdInterface $third,OrderCreateVerify $orderCreateVerify,OrderRepository $orderRepository,orderUserInfoRepository $orderUserInfoRepository)
+    public function __construct(OrderCreateVerify $orderCreateVerify,OrderRepository $orderRepository)
     {
-        $this->third = $third;
         $this->verify =$orderCreateVerify;
         $this->orderRepository = $orderRepository;
-        $this->orderUserInfoRepository = $orderUserInfoRepository;
+    }
+
+    /**
+     * 改版下单
+     * @param $data
+     */
+
+    public function creater($data){
+
+        $orderCreaterComponnet = new \oms\OrderCreater( $business_key,$order_no );
+
+        // 用户
+        $UserComponnet = new \oms\order_creater\UserComponnet($orderCreaterComponnet,$user_id);
+        $orderCreaterComponnet->set_user_componnet($UserComponnet);
+
+        // 商品
+        $SkuComponnet = new \oms\order_creater\SkuComponnet($orderCreaterComponnet,$sku_id,$params['payment_type_id']);
+        $orderCreaterComponnet->set_sku_componnet($SkuComponnet);
+
+        // 装饰者 信用
+        $orderCreaterComponnet = new \oms\order_creater\CreditComponnet($orderCreaterComponnet,true,$app_id);
+
+        if( $app_id != \zuji\Config::Jdxbxy_App_id ) {
+            // 装饰者 风险
+            $orderCreaterComponnet = new \oms\order_creater\YidunComponnet($orderCreaterComponnet);
+        }
+        // 装饰着 押金
+        $orderCreaterComponnet = new \oms\order_creater\DepositComponnet($orderCreaterComponnet,$params['payment_type_id']);
+
+        // 装饰着 代扣
+        $orderCreaterComponnet = new \oms\order_creater\UserWithholding($orderCreaterComponnet);
+
+        // 装饰者 收货地址
+        $orderCreaterComponnet = new \oms\order_creater\AddressComponnet($orderCreaterComponnet,$address_id);
+
+        // 装饰者 渠道
+        $orderCreaterComponnet = new \oms\order_creater\ChannelComponnet($orderCreaterComponnet, $app_id);
+
+        //装饰者 优惠券
+        $orderCreaterComponnet = new \oms\order_creater\CouponComponnet($orderCreaterComponnet, $params['coupon_no']);
+
+        // 装饰者 分期单
+        $orderCreaterComponnet = new \oms\order_creater\InstalmentComponnet($orderCreaterComponnet);
+
 
     }
     /**
@@ -35,13 +75,13 @@ class OrderCreater
         $order_flag =true;
         try {
             //获取用户信息
-            $user_info = $this->third->GetUser($data['user_id']);
+            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$data['user_id']);
             if (!is_array($user_info)) {
                 return $user_info;
             }
             //var_dump($user_info);die;
             //获取商品详情
-            $goods = $this->third->GetSku($data['sku']);
+            $goods = Goods::getSku(config('tripartite.Interior_Goods_Request_data'),$data['sku']);
             if (!is_array($goods)) {
                 return $goods;
             }
@@ -74,7 +114,7 @@ class OrderCreater
                 $goods_info =$v;
                 $data['channel_id'] = $goods_info['spu_info']['channel_id'];
                 //下单验证
-                $res = $this->verify->Verify($data, $user_info, $goods_info);
+                $res = $this->verify->verify($data, $user_info, $goods_info);
                 if(!$res){
                     $order_flag =false;
                     $error =$this->verify->get_error();
@@ -123,7 +163,7 @@ class OrderCreater
         DB::beginTransaction();
         try {
             //获取用户信息
-            $user_info = $this->third->GetUser($data['user_id']);
+            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$data['user_id'],$data['address_id']);
             if (!is_array($user_info)) {
                 return $user_info;
             }
@@ -134,7 +174,7 @@ class OrderCreater
             }
 
             //获取商品详情
-            $goods = $this->third->GetSku($data['sku']);
+            $goods = Goods::getSku(config('tripartite.Interior_Goods_Request_data'),$data['sku']);
             if (!is_array($goods)) {
                 return $goods;
             }
@@ -199,12 +239,13 @@ class OrderCreater
                 // 支付方式
                 'pay_type'	 =>$data['pay_type'],
             ];
-            var_dump($goods_data);die;
+
             $b =$this->orderRepository->create($data,$result);
             if(!$b){
                 DB::rollBack();
                 return ApiStatus::CODE_30005;
             }
+            var_dump($goods_data);die;
            DB::commit();
             return $result;
         } catch (\Exception $exc) {
