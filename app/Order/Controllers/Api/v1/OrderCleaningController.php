@@ -14,7 +14,20 @@ use Illuminate\Support\Facades\Log;
 class OrderCleaningController extends Controller
 {
 
-    //订单结算数据列表查询
+    /**
+     * 订单清算列表查询
+     * @param Request $request
+    params": - {
+        "page":"1",                //类型：String  必有字段  备注：页码
+        "status":"mock",                //类型：String    备注：出账状态
+        "begin_time":1,                //类型：Number   备注：开始时间
+        "end_time":1,                //类型：Number    备注：结束时间
+        "app_id":1,                //类型：Number    备注：入账来源
+        "out_account":"mock",                //类型：String    备注：出账方式
+        "order_no":"mock"                //类型：String    备注：订单号
+    }
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function list(Request $request){
 
         $params = $request->input('params');
@@ -29,8 +42,16 @@ class OrderCleaningController extends Controller
 
     }
 
+    /***
+     * 订单结算详情查询
+     * @param Request $request
+     * params": - {
+        "business_type":"mock",    //类型：String  必有字段  备注：业务类型
+        "business_no":"mock"       //类型：String  必有字段  备注：业务编号
+        }
+     * @return \Illuminate\Http\JsonResponse
+     */
 
-    //订单结算详情查询
     public function detail(Request $request){
 
 
@@ -57,10 +78,18 @@ class OrderCleaningController extends Controller
     }
 
 
-    //订单清算取消操作
-    public function operate(Request $request){
-        $orders =$request->all();
+    /**
+     * 订单清算取消接口
+     * @param Request $request
+     * params": - {
+        "business_type":"mock",    //类型：String  必有字段  备注：业务类型
+        "business_no":"mock"       //类型：String  必有字段  备注：业务编号
+            }
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelOrderClean(Request $request){
 
+        echo 2344;exit;
         $params = $request->all();
 
         $rules = [
@@ -75,7 +104,7 @@ class OrderCleaningController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
-        $res = OrderCleaning::getOrderCleanInfo($params['params']);
+        $res = OrderCleaning::cancelOrderClean($params['params']);
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }

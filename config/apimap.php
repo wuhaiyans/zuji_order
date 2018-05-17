@@ -31,8 +31,8 @@ return [
     'api.orderClean.list'=>'OrderCleaningController@list',
     //结算清单详情接口
     'api.orderClean.detail'=>'OrderCleaningController@detail',
-    //结算清单操作接口
-    'api.orderClean.operate'=>'OrderCleaningController@operate',
+    //结算清单取消接口
+    'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
