@@ -102,7 +102,6 @@ class OrderReturnCreater
         //获取用户订单信息
         $params_where['orderNo']=$params['order_no'];
         $order_info=$this->orderRepository->getOrderInfo($params_where);
-        return $order_info;
         $where[]=['order_no','=',$params['order_no']];
         if(isset($params['goods_no'])){
             $where[]=['goods_no','=',$params['goods_no']];
