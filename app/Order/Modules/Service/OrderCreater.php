@@ -6,6 +6,17 @@ use App\Lib\Certification;
 use App\Lib\Goods\Goods;
 use App\Lib\User\User;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\OrderCreater\AddressComponnet;
+use App\Order\Modules\OrderCreater\ChannelComponnet;
+use App\Order\Modules\OrderCreater\CouponComponnet;
+use App\Order\Modules\OrderCreater\CreditComponnet;
+use App\Order\Modules\OrderCreater\DepositComponnet;
+use App\Order\Modules\OrderCreater\InstalmentComponnet;
+use App\Order\Modules\OrderCreater\OrderComponnet;
+use App\Order\Modules\OrderCreater\SkuComponnet;
+use App\Order\Modules\OrderCreater\UserComponnet;
+use App\Order\Modules\OrderCreater\WithholdingComponnet;
+use App\Order\Modules\OrderCreater\YidunComponnet;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use Illuminate\Support\Facades\DB;
@@ -24,45 +35,61 @@ class OrderCreater
     /**
      * 改版下单
      * @param $data
+     * [
+     *'appid'=>1, //appid
+     *'pay_type'=>1, //支付方式
+     *'address_id'=>$address_id, //收货地址
+     *'sku'=>[0=>['sku_id'=>1,'sku_num'=>2]], //商品数组
+     *'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"], //优惠券组信息
+     *'user_id'=>18,  //增加用户ID
+     *];
      */
 
     public function creater($data){
 
-        $orderCreaterComponnet = new \oms\OrderCreater( $business_key,$order_no );
+        $order_no = OrderOperate::createOrderNo(1);
+        //订单创建构造器
+        $orderCreater = new OrderComponnet($order_no);
 
         // 用户
-        $UserComponnet = new \oms\order_creater\UserComponnet($orderCreaterComponnet,$user_id);
-        $orderCreaterComponnet->set_user_componnet($UserComponnet);
+        $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
+        $orderCreater->setUserComponnet($userComponnet);
 
         // 商品
-        $SkuComponnet = new \oms\order_creater\SkuComponnet($orderCreaterComponnet,$sku_id,$params['payment_type_id']);
-        $orderCreaterComponnet->set_sku_componnet($SkuComponnet);
+        $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+        $orderCreater->setSkuComponnet($skuComponnet);
 
-        // 装饰者 信用
-        $orderCreaterComponnet = new \oms\order_creater\CreditComponnet($orderCreaterComponnet,true,$app_id);
+        // 信用
+        $orderCreater = new CreditComponnet($orderCreater,$data['appid']);
 
-        if( $app_id != \zuji\Config::Jdxbxy_App_id ) {
-            // 装饰者 风险
-            $orderCreaterComponnet = new \oms\order_creater\YidunComponnet($orderCreaterComponnet);
-        }
-        // 装饰着 押金
-        $orderCreaterComponnet = new \oms\order_creater\DepositComponnet($orderCreaterComponnet,$params['payment_type_id']);
+        //蚁盾数据
+        $orderCreater = new YidunComponnet($orderCreater);
 
-        // 装饰着 代扣
-        $orderCreaterComponnet = new \oms\order_creater\UserWithholding($orderCreaterComponnet);
+        //押金
+        $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
-        // 装饰者 收货地址
-        $orderCreaterComponnet = new \oms\order_creater\AddressComponnet($orderCreaterComponnet,$address_id);
+        //代扣
+        $orderCreater = new WithholdingComponnet($orderCreater);
 
-        // 装饰者 渠道
-        $orderCreaterComponnet = new \oms\order_creater\ChannelComponnet($orderCreaterComponnet, $app_id);
+        //收货地址
+        $orderCreater = new AddressComponnet($orderCreater);
 
-        //装饰者 优惠券
-        $orderCreaterComponnet = new \oms\order_creater\CouponComponnet($orderCreaterComponnet, $params['coupon_no']);
+        //渠道
+        $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-        // 装饰者 分期单
-        $orderCreaterComponnet = new \oms\order_creater\InstalmentComponnet($orderCreaterComponnet);
+        //优惠券
+        $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
+        //分期
+        $orderCreater = new InstalmentComponnet($orderCreater);
+
+        $b = $orderCreater->filter();
+
+        $schemaData = $orderCreater->getDataSchema();
+
+        $b = $orderCreater->create();
+
+        die;
 
     }
     /**
@@ -75,7 +102,7 @@ class OrderCreater
         $order_flag =true;
         try {
             //获取用户信息
-            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$data['user_id']);
+            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$data['user_id'],$data['address_id']);
             if (!is_array($user_info)) {
                 return $user_info;
             }

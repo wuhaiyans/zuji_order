@@ -12,7 +12,7 @@ use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\User\User;
 use App\Order\Modules\Repository\OrderGoodsRepository;
-use App\Order\Modules\Repository\orderClearingRepository;
+use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\Warehouse\Delivery;
 class OrderReturnCreater
 {
@@ -20,12 +20,12 @@ class OrderReturnCreater
     protected $orderReturnRepository;
     protected $orderRepository;
     protected $orderGoodsRepository;
-    protected $orderClearingRepository;
-    public function __construct(orderReturnRepository $orderReturnRepository,orderRepository $orderRepository,orderGoodsRepository $orderGoodsRepository,orderClearingRepository $orderClearingRepository)
+    protected $OrderClearingRepository;
+    public function __construct(orderReturnRepository $orderReturnRepository,orderRepository $orderRepository,orderGoodsRepository $orderGoodsRepository,OrderClearingRepository $OrderClearingRepository)
     {
 
         $this->orderReturnRepository = $orderReturnRepository;
-        $this->orderClearingRepository = $orderClearingRepository;
+        $this->OrderClearingRepository = $OrderClearingRepository;
         $this->orderRepository = $orderRepository;
         $this->orderGoodsRepository =$orderGoodsRepository;
     }
@@ -109,15 +109,15 @@ class OrderReturnCreater
        if($res['business_key']==ReturnStatus::OrderTuiKuan){
            //创建退款清单
            $create_data['order_no']=$params['order_no'];
-           $create_data['out_account']=$order_info['pay_type'];//出账方式
+           $create_data['out_account']=$order_info[0]->pay_type;//出账方式
            $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;
            $create_data['business_no']=ReturnStatus::OrderTuiKuan;
            $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
-           $create_data['deposit_unfreeze_amount']=$order_info['goods_yajin'];//退还押金金额
+           $create_data['deposit_unfreeze_amount']=$order_info[0]->goods_yajin;//退还押金金额
            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
-           $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
+           $create_data['refund_amount']=$order_info[0]->order_amount;//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
-          $create_clear= $this->orderClearingRepository->createOrderClean($create_data);//创建退款清单
+           $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
           if(!$create_clear){
               return ApiStatus::CODE_34008;//创建退款清单失败
           }
@@ -151,10 +151,10 @@ class OrderReturnCreater
           return ApiStatus::CODE_40000;//商品信息错误
        }
        $return_info= $this->orderReturnRepository->get_type($where);//获取业务类型
-       $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$goods_info);//创建待收货单
-      //  if(!$create_receive){
-         //   return false;
-     //   }
+      // $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$goods_info);//创建待收货单
+       // if(!$create_receive){
+       //    return false;
+      //  }
             //申请退货同意发送短信
           /*  $b =SmsApi::sendMessage($order_info[0]->mobile,'SMS_113455999',[
                 'realName' =>$order_info[0]->realName,
@@ -286,14 +286,12 @@ class OrderReturnCreater
         if(isset($params['business_key']) > 0) {
             $where['business_key'] = intval($params['business_key']);
         }
-
         if (isset($params['keywords']) != '') {
             if (isset($params['kw_type']) == 'goods_name') {
                 $where['goods_name'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'order_no') {
                 $where['order_no'] = $params['keywords'];
             } elseif (isset($params['kw_type']) == 'mobile'){
-
                 $user_info = $this->orderReturnRepository->get_user_info($params['keywords']);
                 if (empty($user_info)) {
                     // 如果没有用户  直接返回空
@@ -301,15 +299,19 @@ class OrderReturnCreater
                 } else {
                     $where['user_id'] = $user_info['user_id'];
                 }
-
             }
-
         }
         if (isset($params['return_status']) && $params['return_status'] > 0) {
             $where['status'] = intval($params['return_status']);
         }
         if (isset($params['user_id'])!='') {
             $where['user_id'] = $params['user_id'];
+        }
+        if (isset($params['order_status'])!='') {
+            $where['order_status'] = $params['order_status'];
+        }
+        if (isset($params['appid'])!='') {
+            $where['appid'] = $params['appid'];
         }
         // 查询退货申请单
         $additional['page'] = $page;
@@ -318,7 +320,42 @@ class OrderReturnCreater
         $where = $this->_parse_order_where($where);
        
         $data = $this->orderReturnRepository->get_list($where, $additional);
-
+        foreach($data['data'] as $k=>$v){
+            //业务类型
+            if($data['data'][$k]->business_key==ReturnStatus::OrderTuiKuan){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderTuiKuan);
+            }elseif($data['data'][$k]->business_key==ReturnStatus::OrderTuiHuo){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderTuiHuo);
+            }elseif($data['data'][$k]->business_key==ReturnStatus::OrderHuanHuo){
+                $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderHuanHuo);
+            }
+            //订单状态
+            if($data['data'][$k]->order_status==OrderStatus::OrderWaitPaying){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderWaitPaying);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderPayed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPayed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInStock);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderDeliveryed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderDeliveryed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInService){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInService);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderClosed){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosed);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderRefunded){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderRefunded);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderGivebacked){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderGivebacked);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderBuyouted){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderBuyouted);
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderChanged){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderChanged);
+            }
+            $data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
+            $data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
+            $data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
+            $data['data'][$k]->wuliu_channel_name="顺丰快递";
+        }
         return $data;
     }
 
@@ -337,12 +374,6 @@ public function _parse_order_where($where=[]){
 
       $where = filter_array($where, [
           'business_key' => 'required|is_id',
-          'goods_name' => 'required',
-          'order_no' => 'required|is_string',
-          'status' => 'required|is_int',
-          'begin_time'  => 'required',
-          'end_time'    => 'required',
-          'user_id' => 'required|is_id',
       ]);
       // 结束时间（可选），默认为为当前时间
       if( !isset($where['end_time']) ){
@@ -373,6 +404,12 @@ public function _parse_order_where($where=[]){
     }
     if( isset($where['status']) ){
         $where1[] = ['order_return.status', '=', $where['status']];
+    }
+    if( isset($where['order_status']) ){
+        $where1[] = ['order_info.status', '=', $where['order_status']];
+    }
+    if( isset($where['appid']) ){
+        $where1[] = ['order_info.appid', '=', $where['appid']];
     }
     if( isset($where['business_key']) ){
         $where1[] = ['order_return.business_key', '=', $where['business_key']];
@@ -460,7 +497,7 @@ public function _parse_order_where($where=[]){
                 $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
                 $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
                 //信息待定
-                $create_clear= $this->orderClearingRepository->createOrderClean($create_data);//创建退款清单
+                $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
                     return ApiStatus::CODE_34008;//创建退款清单失败
                 }

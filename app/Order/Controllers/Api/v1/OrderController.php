@@ -101,7 +101,7 @@ class OrderController extends Controller
             'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
             'user_id'=>18,  //增加用户ID
         ];
-        $res = $this->OrderCreate->create($data);
+        $res = $this->OrderCreate->creater($data);
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
