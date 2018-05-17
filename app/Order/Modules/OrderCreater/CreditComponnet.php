@@ -11,13 +11,19 @@ namespace App\Order\Modules\OrderCreater;
 
 class CreditComponnet implements OrderCreater
 {
+    //组件
+    private $componnet;
+    public function __construct(OrderCreater $componnet, int $appid)
+    {
+        $this->componnet = $componnet;
+    }
     /**
      * 获取订单创建器
      * @return OrderCreater
      */
     public function getOrderCreater():OrderCreater
     {
-        var_dump("credit组件 -get_order_creater");
+        return $this->componnet->getOrderCreater();
     }
     /**
      * 过滤
@@ -30,7 +36,7 @@ class CreditComponnet implements OrderCreater
     public function filter(): bool
     {
         var_dump("credit组件 -filter");
-        return true;
+        return $this->componnet->filter();
     }
 
     /**
@@ -49,6 +55,7 @@ class CreditComponnet implements OrderCreater
      */
     public function create(): bool
     {
+        $this->componnet->create();
         var_dump("credit组件 -create");
         return true;
     }
