@@ -15,7 +15,7 @@ class Logistics
      * @param int $id 物流id
      *
      */
-    public function info($id)
+    public static function info($id)
     {
         return [
             'name' => '顺风'
@@ -27,7 +27,7 @@ class Logistics
      * 根据物流单号取物流信息
      *
      */
-    public function detail($no)
+    public static function detail($no)
     {
 
     }
