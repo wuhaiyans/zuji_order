@@ -140,13 +140,12 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
-        $whereArray[] = ['create_time', '>=', $param['begin_time']];
-        $whereArray[] = ['create_time', '<=', $param['end_time']];
+        $whereArray[] = ['business_type', '=', $param['business_type']];
+        $whereArray[] = ['business_no', '=', $param['business_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
-       $orderData->status  = OrderCleaningStatus::orderCleaningCancel;
+        $orderData->status  = OrderCleaningStatus::orderCleaningCancel;
         $orderData->update_time = time();
-
         $success =$orderData->save();
         if(!$success){
             return false;
@@ -160,23 +159,17 @@ class OrderClearingRepository
      *
      */
 
-    public static function upOrderCleanById($param){
+    public static function upOrderCleanStatus($param){
         if (empty($param)) {
             return false;
         }
-        $whereArray = array();
-        foreach($param as $keys=>$values) {
-
-            $whereArray[] = [$keys, '=', $values];
-        }
-
+        $whereArray[] = ['business_type', '=', $param['business_type']];
+        $whereArray[] = ['business_no', '=', $param['business_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
-
-
-
-
-        $success =$orderData->save($order_data);
+        $orderData->status  = $param['status'];
+        $orderData->update_time = time();
+        $success =$orderData->save();
         if(!$success){
             return false;
         }

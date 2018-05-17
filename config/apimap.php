@@ -33,6 +33,10 @@ return [
     'api.orderClean.detail'=>'OrderCleaningController@detail',
     //结算清单取消接口
     'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
+    //更新清算状态
+    'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
+
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
