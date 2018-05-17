@@ -117,6 +117,7 @@ class OrderCleaningController extends Controller
      * @param Request $request
      * return json
      */
+
     public function upOrderCleanStatus(Request $request){
 
         $params = $request->all();
