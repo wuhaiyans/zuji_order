@@ -5,7 +5,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\Payment\WithholdingApi;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
-use App\Order\Modules\Repository\ThirdInterface;
+use App\Lib\User\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
@@ -31,9 +31,7 @@ class WithholdingController extends Controller
         }
 
         // 查询用户协议
-        $third = new ThirdInterface();
-        $user_info = $third->GetUser($user_id);
-
+        $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$user_id);
         if( !$user_info ){
             Log::error("[代扣解约]lock查询用户信息失败");
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
@@ -89,8 +87,8 @@ class WithholdingController extends Controller
 
         $user_id    = $params['user_id'];
         // 查询用户协议
-        $third = new ThirdInterface();
-        $user_info = $third->GetUser($user_id);
+        $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$user_id);
+
         if( !$user_info ){
             Log::error("[代扣解约]lock查询用户信息失败");
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
@@ -135,8 +133,7 @@ class WithholdingController extends Controller
         DB::beginTransaction();
 
         // 查询用户协议
-        $third = new ThirdInterface();
-        $user_info = $third->GetUser($user_id);
+        $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$user_id);
 
         if( !$user_info ){
             DB::rollBack();

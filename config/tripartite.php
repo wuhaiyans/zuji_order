@@ -5,6 +5,8 @@
  * Date: 2018/5/2
  * Time: 17:43
  */
+
+//只有订单内部接收的接口appid =1;
 return [
 
     'Interior_Goods_Url' =>env("API_TRIPARTITE_URL","http://admin-zuji.huishoubao.com/api.php"),
@@ -29,7 +31,6 @@ return [
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
     ],
-
     //收发货
     'warehouse_api_uri' => env('WAREHOUSE_API_URI', 'http://laravel.order/api'),
 ];

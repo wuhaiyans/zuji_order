@@ -19,65 +19,61 @@ class OrderInstalment
      * 创建订单分期
      * @return array
      *  $array = [
-    'order'=>[
-    'order_no'=>1,
-    ],
-    'sku'=>[
-    'zuqi'=>1,
-    'zuqi_type'=>1,
-    'all_amount'=>1,
-    'amount'=>1,
-    'yiwaixian'=>1,
-    'zujin'=>1,
-    'yiwaixian'=>1,
-    'payment_type_id'=>1,
-    ],
-    'coupon'=>[
-    'discount_amount'=>1,
-    'coupon_type'=>1,
-    ],
-    'user'=>[
-    'withholding_no'=>1,
-    ],
-    ];
+            'order'=>[
+                'order_no'=>1,
+            ],
+            'sku'=>[
+                'zuqi'=>1,
+                'zuqi_type'=>1,
+                'all_amount'=>1,
+                'amount'=>1,
+                'yiwaixian'=>1,
+                'zujin'=>1,
+                'yiwaixian'=>1,
+                'payment_type_id'=>1,
+            ],
+            'coupon'=>[
+                'discount_amount'=>1,
+                'coupon_type'=>1,
+            ],
+            'user'=>[
+                'withholding_no'=>1,
+            ],
+        ];
      */
     public static function create($params){
-        //var_dump($params);die;
         $order    = $params['order'];
         $sku      = $params['sku'];
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
-
-
         $order = filter_array($order, [
             'order_no' => 'required',
         ]);
-
         if(!$order['order_no']){
             return false;
         }
 
         //获取sku
         $sku = filter_array($sku, [
-            'goods_no'=>'required',
-            'zuqi'=>'required',
-            'zuqi_type'=>'required',
-            'all_amount'=>'required',
-            'amount'=>'required',
-            'yiwaixian'=>'required',
-            'zujin'=>'required',
-            'pay_type'=>'required',
+            'goods_no'      => 'required',
+            'zuqi'          => 'required',
+            'zuqi_type'     => 'required',
+            'all_amount'    => 'required',
+            'amount'        => 'required',
+            'yiwaixian'     => 'required',
+            'zujin'         => 'required',
+            'pay_type'      => 'required',
+            'buyout_price'  => 'required',
         ]);
 
         if(count($sku) < 8){
-
             return false;
         }
 
         filter_array($coupon, [
-            'discount_amount' => 'required',
-            'coupon_type' => 'required',
+            'discount_amount'   => 'required',
+            'coupon_type'       => 'required',
         ]);
 
 
@@ -96,30 +92,30 @@ class OrderInstalment
 
 
     /**
-     * 获取分期数据
+     * 创建订单分期
      * @return array
      *  $array = [
-    'order'=>[
-    'order_no'=>1,
-    ],
-    'sku'=>[
-    'zuqi'=>1,
-    'zuqi_type'=>1,
-    'all_amount'=>1,
-    'amount'=>1,
-    'yiwaixian'=>1,
-    'zujin'=>1,
-    'yiwaixian'=>1,
-    'payment_type_id'=>1,
-    ],
-    'coupon'=>[
-    'discount_amount'=>1,
-    'coupon_type'=>1,
-    ],
-    'user'=>[
-    'withholding_no'=>1,
-    ],
-    ];
+            'order'=>[
+                'order_no'=>1,
+            ],
+            'sku'=>[
+                'zuqi'=>1,
+                'zuqi_type'=>1,
+                'all_amount'=>1,
+                'amount'=>1,
+                'yiwaixian'=>1,
+                'zujin'=>1,
+                'yiwaixian'=>1,
+                'payment_type_id'=>1,
+            ],
+            'coupon'=>[
+                'discount_amount'=>1,
+                'coupon_type'=>1,
+            ],
+            'user'=>[
+                'withholding_no'=>1,
+            ],
+        ];
      */
     public static function get_data_schema($params){
         $sku      = $params['sku'];
@@ -228,7 +224,7 @@ class OrderInstalment
      * @param  int  $instalment_id 订单分期付款id
      * @return bool true false
      */
-    public static function allow_withhold($instalment_id){
+    public static function allowWithhold($instalment_id){
         if(empty($instalment_id)){
             return false;
         }

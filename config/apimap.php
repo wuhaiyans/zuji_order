@@ -24,15 +24,15 @@ return [
     'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
 
 
-    'api.order.orderlist'=>'OrderController@orderList',
+    'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
 
 
     //结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@list',
     //结算清单详情接口
     'api.orderClean.detail'=>'OrderCleaningController@detail',
-    //结算清单操作接口
-    'api.orderClean.operate'=>'OrderCleaningController@operate',
+    //结算清单取消接口
+    'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
@@ -49,23 +49,44 @@ return [
     'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
-    // 扣款接口
-    'api.Instalment.createpay'          => 'InstalmentController@createpay',
-    // 多项扣款接口
-    'api.Instalment.multi_createpay'    => 'InstalmentController@multi_createpay',
 
-    //分期相关
+
+    // 代扣相关
     // 代扣协议查询
-    'api.Withholding.query'             => 'WithholdingController@query',
+    'api.Withholding.query'             => 'WithholdController@query',
     // 代扣签约接口
-    'api.Withholding.sign'              => 'WithholdingController@sign',
+    'api.Withholding.sign'              => 'WithholdController@sign',
+    // 代扣签约回调接口
+    'api.Withhold.sign_notify'          => 'WithholdController@sign_notify',
     // 代扣解约接口
-    'api.Withholding.unsign'            => 'WithholdingController@unsign',
+    'api.Withhold.unsign'               => 'WithholdController@unsign',
+    // 代扣解约接口回调接口
+    'api.Withhold.unsign_notify'        => 'WithholdController@unsign_notify',
+    // 代扣扣款接口
+    'api.Withhold.createpay'            => 'WithholdController@createpay',
+    // 多项扣款接口
+    'api.Withhold.multi_createpay'      => 'WithholdController@multi_createpay',
+
+    //  预授权相关
+    // 资金预授权接口
+    'api.Fundauth.fundauth'             => 'FundauthController@fundauth',
+    // 资金预授权回调
+    'api.Fundauth.fundauth_notify'      => 'FundauthController@fundauth_notify',
+    // 预授权查询接口
+    'api.Fundauth.fundauth_query'       => 'FundauthController@fundauthQuery',
+    // 预授权解冻接口
+    'api.Fundauth.fundauth_unfreeze'    => 'FundauthController@fundauth_unfreeze',
+    // 预授权解冻回调接口
+    'api.Fundauth.fundauth_unfreeze_notify' => 'FundauthController@fundauth_unfreeze_notify',
+    // 预授权转支付接口
+    'api.Fundauth.fundauth_to_pay'      => 'FundauthController@fundauth_to_pay',
+    // 预授权转支付回调接口
+    'api.Fundauth.fundauth_to_pay_notify'   => 'FundauthController@fundauth_to_pay_notify',
 
 
-    //退货接口
+   //退货接口
     // 申请退货接口
-    'api.Return.return_apply'        => 'ReturnController@return_apply',
+    'api.Return.returnApply'        => 'ReturnController@returnApply',
     // 退货记录列表接口
     'api.Return.returnList'         => 'ReturnController@returnList',
     // 退货物流单号上传接口
@@ -73,7 +94,11 @@ return [
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
-    'api.Return.cancel_apply'       => 'ReturnController@cancel_apply',
+    'api.Return.cancelApply'       => 'ReturnController@cancelApply',
+    //申请退款
+    'api.Return.returnMoney'       => 'ReturnController@returnMoney',
+    //审核
+    'api.Return.returnReply'       => 'ReturnController@returnReply',
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
@@ -83,8 +108,8 @@ return [
 	//还机申请提交接口
     'api.giveback.create'       => 'GivebackController@create',
 	//还机更新状态为待检测【确认收货】
-    'api.giveback.notify.evaluation'       => 'GivebackController@create',
-	
+    'api.giveback.notify.evaluation'       => 'GivebackController@notify_evaluation',
+
     // test
     'api.Test.test'       => 'TestController@test',
 
