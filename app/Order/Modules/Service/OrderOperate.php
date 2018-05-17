@@ -11,7 +11,7 @@ use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
-use App\lib\Order\OrderInfo;
+use App\Lib\Order\OrderInfo;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Lib\ApiStatus;
 
