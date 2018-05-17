@@ -32,6 +32,7 @@ class OrderGiveback
 			return false;
 		}
 		$data['status'] = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
+		$data['create_time'] = $data['update_time'] = time();
         return $this->order_giveback_repository->create( $data );
     }
 }

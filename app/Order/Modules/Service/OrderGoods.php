@@ -1,32 +1,20 @@
 <?php
-namespace App\Order\Modules\Repository;
-use App\Order\Models\Order;
-use App\Order\Models\OrderGoods;
+namespace App\Order\Modules\Service;
 
-class OrderGoodsRepository
+use App\Order\Modules\Repository\OrderGoodsRepository;
+
+class OrderGoods
 {
-
-    private $orderGoods;
-
-    public function __construct(OrderGoods $orderGoods)
-    {
-        $this->orderGoods = $orderGoods;
-    }
-    public function create(){
-
-        var_dump('创建商品信息');
-    }
-    //获取商品信息
-    public static function getgoodsList($goods_no){
-        if (empty($goods_no)) return false;
-        $result =  orderGoods::query()->where([
-            ['goods_no', '=', $goods_no],
-        ])->first();
-        if (!$result) return false;
-        return $result->toArray();
-    }
 	/**
-	 * 根据商品编号获取单条商品信息
+	 * 订单商品数据处理仓库
+	 * @var obj
+	 */
+	protected $orderGoodsRepository;
+	public function __construct(  ) {
+		$this->orderGoodsRepository = new OrderGoodsRepository(new \App\Order\Models\OrderGoods());
+	}
+	/**
+	 * 获取一条商品信息
 	 * @param string $goodsNo 商品编号
 	 * @return array $goodsInfo 商品基础信息|空<br/>
 	 * $goodsInfo = [<br/>
@@ -68,15 +56,10 @@ class OrderGoodsRepository
 	 * ]
 	 */
 	public function getGoodsInfo( $goodsNo ) {
-        $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
-        if (!$result) {
+		//判断参数
+		if( empty( $goodsNo ) ) {
 			return [];
 		}
-        $goodsInfo = $result->toArray();
-		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
-		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
-		$goodsInfo['begin_time'] = date('Y-m-d H:i:s',$goodsInfo['begin_time']);
-		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
-		return $goodsInfo;
+		return $this->orderGoodsRepository->getGoodsInfo( $goodsNo );
 	}
 }
