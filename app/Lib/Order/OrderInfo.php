@@ -15,7 +15,7 @@ use App\Lib\ApiStatus;
          * @param array 数组    ['order_no'] = A511125156960043
          * 获取订单详情
          */
-     public function getOrderInfo($param)
+     public static function getOrderInfo($param)
      {
 
             if (empty($param)) return apiResponse([],ApiStatus::CODE_10104);
@@ -24,7 +24,7 @@ use App\Lib\ApiStatus;
                 $data = config('tripartite.Interior_Order_Request_data');
                 $data['method'] ='api.order.orderdetail';
                 $data['params'] = [
-                    'user_id'=>$param['order_no'],
+                    'order_no'=>$param['order_no'],
                 ];
                 $baseUrl = config("tripartite.API_INNER_URL");
                 $info = Curl::post($baseUrl, json_encode($data));
@@ -55,6 +55,31 @@ use App\Lib\ApiStatus;
         }
 
 
+        /**
+         * 根据应用来源获取应用名称
+         * @param int   $appId
+         * return json
+         */
+        public static function getAppidInfo($appId)
+        {
+
+            if (empty($appId)) return apiResponse([],ApiStatus::CODE_10104);
+            if (isset($param['order_no']) && !empty($param['order_no']))
+            {
+                $data = config('tripartite.Interior_Goods_Request_data');
+                $data['method'] ='zuji.channel.appid.get';
+                $data['params'] = [
+                    'appid'=>$param['appid'],
+                ];
+                $baseUrl = config("tripartite.Interior_Goods_Url");
+                $info = Curl::post($baseUrl, json_encode($data));
+
+                return $info;
+
+            }
+            return apiResponse([],ApiStatus::CODE_10104);
+
+        }
 
 
 

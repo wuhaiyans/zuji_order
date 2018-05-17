@@ -11,6 +11,7 @@ use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
+use App\lib\Order\OrderInfo;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Lib\ApiStatus;
 
@@ -144,7 +145,7 @@ class OrderOperate
                 //支付方式名称
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
-                $orderListArray['data'][$keys]['appid_name'] = 'H5';
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
                 //设备名称
                 $orderListArray['data'][$keys]['goodsInfo'] = OrderRepository::getGoodsListByOrderId($values['order_no']);
 

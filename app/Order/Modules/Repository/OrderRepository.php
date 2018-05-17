@@ -464,7 +464,7 @@ class OrderRepository
             ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')
             ->where($whereArray)
             ->select('order_info.*','order_userinfo.*')
-            ->paginate($pagesize,$columns = ['*'], $pageName = '', $param['page']);
+            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 
     }
