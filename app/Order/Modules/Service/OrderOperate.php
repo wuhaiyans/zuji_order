@@ -5,9 +5,11 @@
  *    date : 2018-05-04
  */
 namespace App\Order\Modules\Service;
+
+use App\Lib\Coupon\Coupon;
+use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\ThirdInterface;
 use Illuminate\Support\Facades\DB;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Lib\ApiStatus;
@@ -15,11 +17,10 @@ use App\Lib\ApiStatus;
 
 class OrderOperate
 {
-    protected $third;
     protected $orderInstal;
-    public function __construct(ThirdInterface $third, OrderInstalment $orderInstal)
+    public function __construct( OrderInstalment $orderInstal)
     {
-        $this->third = $third;
+
         $this->orderInstal = $orderInstal;
     }
 
@@ -57,7 +58,7 @@ class OrderOperate
                     $goodsId = $orderGoodsValues['good_id'];
                     $prod_id = $orderGoodsValues['prod_id'];
                 }
-                $success =$this->third->AddStock($prod_id, $goodsId);
+                $success =Goods::addStock(config('tripartite.Interior_Goods_Request_data'),$prod_id, $goodsId);
 
             }
 
@@ -66,7 +67,7 @@ class OrderOperate
                 return ApiStatus::CODE_31003;
             }
             //优惠券归还
-           $success =  $this->third->setCoupon(['user_id'=>$userId ,'coupon_id'=>$orderNo]);
+           $success =  Coupon::setCoupon(config('tripartite.Interior_Goods_Request_data'),['user_id'=>$userId ,'coupon_id'=>$orderNo]);
             if (!$success) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;

@@ -1,10 +1,12 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
+use App\Lib\Channel\Channel;
+use App\Lib\Deposit\Deposit;
+use App\Lib\Fengkong\Fengkong;
 use App\Order\Modules\Inc\PayInc;
 use App\Lib\Payment\WithholdingApi;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\ThirdInterface;
 
 /**
  * 下单验证类
@@ -12,18 +14,15 @@ use App\Order\Modules\Repository\ThirdInterface;
 class OrderCreateVerify
 {
     protected $third;
-    protected $instalment;
     protected $error;
     protected $schema=[];
     protected $Userschema=[];
     protected $flag =true;
 
-    public function __construct(ThirdInterface $third,OrderInstalment $instalment)
+    public function __construct()
     {
-        $this->third = $third;
-        $this->instalment =$instalment;
     }
-    public function Verify($data,$user_info,$goods_info){
+    public function verify($data,$user_info,$goods_info){
         //验证用户信息
         $users = $this->UserVerify($user_info);
         if(!$users){
@@ -162,21 +161,6 @@ class OrderCreateVerify
             }
         }
         $this->SetUserSchema($data);
-//        for($i=0;$i<count($coupons);$i++){
-//            $coupon = $this->third->GetCoupon($coupons[$i],$user_id,$arr['sku']['all_amount'],$arr['sku']['spu_id'],$arr['sku']['sku_id']);
-//            if(!is_array($coupon)){
-//                $this->set_error($coupon);
-//                $this->flag =false;
-//                continue;
-//            }
-//            $arr['coupon'][$i]=[
-//                'coupon_no' => $coupon['coupon_no'],
-//                'coupon_name' => $coupon['coupon_name'],
-//                'coupon_type' => $coupon['coupon_type'],
-//                'discount_amount' => $coupon['discount_amount'],
-//            ];
-//        }
-//        $this->SetSchema($arr);
         return $data;
 
     }
@@ -227,11 +211,11 @@ class OrderCreateVerify
         /**
          * 增加信用分判断 是否允许下单
          */
-//        $score = $this->third->GetCredit(['user_id'=>$this->user_id]);
-//        if(!is_array($score)){
-//            $this->set_error($score);
-//            $this->flag =false;
-//        }
+        $score = Fengkong::getCredit(config('tripartite.Interior_Fengkong_Request_data'),['user_id'=>$this->user_id]);
+        if(!is_array($score)){
+            $this->set_error($score);
+            $this->flag =false;
+        }
 
         $yidun_data =[
             'yidun'=>[
@@ -241,12 +225,12 @@ class OrderCreateVerify
             ]
         ];
         //获取风控信息
-//        $yidun =$this->third->GetYidun([
-//            'user_id'=>$this->user_id,
-//            'user_name'=>$this->realname,
-//            'cert_no'=>$this->cert_no,
-//            'mobile'=>$this->mobile,
-//        ]);
+        $yidun =Fengkong::getYidun(config('tripartite.Interior_Fengkong_Request_data'),[
+            'user_id'=>$this->user_id,
+            'user_name'=>$this->realname,
+            'cert_no'=>$this->cert_no,
+            'mobile'=>$this->mobile,
+        ]);
 
 //        if(is_array($yidun)){
 //            $yidun_data =[
@@ -303,7 +287,7 @@ class OrderCreateVerify
 
     private function DepositVerify($data){
         $arr =array_merge($this->GetUserSchema(),$this->GetSchema());
-        $deposit =$this->third->GetDeposit([
+        $deposit =Deposit::getDeposit(config('tripartite.Interior_Goods_Request_data'),[
                     'spu_id'=>$arr['sku']['spu_id'],
                     'pay_type'=>$data['pay_type'],
                     'credit'=>$arr['credit']['credit']?$arr['credit']['credit']:0,
@@ -479,7 +463,7 @@ class OrderCreateVerify
      *  验证渠道
      */
     private function ChannelVerify($appid,$channel_id){
-            $info = $this->third->GetChannel($appid);
+            $info = Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
             if (!is_array($info)) {
                 $this->set_error($info);
                 return false;

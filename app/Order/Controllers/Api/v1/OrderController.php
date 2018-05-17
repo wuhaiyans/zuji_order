@@ -52,7 +52,24 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
-//下单接口
+    /**
+     * 下单接口
+     * 1.用户验证
+     * 2.地址验证
+     * 3.商品验证
+     * 4.数据组装
+     *      1：用户信息：蚁盾数据，风控数据，代扣数据
+     *      2：地址信息：收货信息
+     *      3：商品信息：租期类型，
+     *      4：优惠券信息：
+     *·
+     * @param Request $request
+     * $params[
+     *      'pay_type'=>'',//支付方式ID
+     *      'address_id'=>'',//收货地址ID
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function create(Request $request){
         $orders =$request->all();
         //获取appid
