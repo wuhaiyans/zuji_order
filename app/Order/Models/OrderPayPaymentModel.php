@@ -16,17 +16,26 @@ use Illuminate\Database\Eloquent\Model;
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
-class OrderPayPaymentModel extends Model
+class OrderPayPaymentModel extends OrderBaseModel
 {
-
-    const CREATED_AT = 'create_time';
-    const UPDATED_AT = 'update_time';
+	
+	// 没有更新时间字段时，必须赋值为null，否则会报错
+    const UPDATED_AT = null;
 	
     protected $table = 'order_pay_payment';
 
     protected $primaryKey = 'payment_no';
-
 	
+
+
+
+	public function __construct(array $attributes = array()) {
+		parent::__construct($attributes);
+		
+	}
+	
+
+
 	/**
 	 * 创建支付环节记录
      * @access public
@@ -42,5 +51,6 @@ class OrderPayPaymentModel extends Model
 	public function create( array $data ){
 		return parent::insert( $data );
 	}
+	
 	
 }

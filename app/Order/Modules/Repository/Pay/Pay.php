@@ -26,9 +26,9 @@ use App\Order\Models\OrderPayFundauthModel;
  * </ul>
  * <p>注：每个环节都是可选的，但至少存在一个环节（支付阶段才有意义）</p>
  * <p>注：每个环节在处理完成后，禁止再做任何数据修改了</p>
- * @method bool paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
- * @method bool withholdSuccess(array $params) 用于代扣签约完成时调用，进入下一个状态
- * @method bool fundauthSuccess(array $params) 用于资金预授权完成时调用，进入下一个状态
+ * paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
+ * withholdSuccess(array $params) 用于代扣签约完成时调用，进入下一个状态
+ * fundauthSuccess(array $params) 用于资金预授权完成时调用，进入下一个状态
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -306,17 +306,22 @@ class Pay extends \App\Lib\Configurable
 			LogApi::error('[支付阶段]支付环节支付保存失败');
 			throw new \Exception( '支付完成保存失败' );
 		}
+		
 		// 更新 支付环节 表
-		$paymentModel = new OrderPayPaymentModel();
-		$b = $paymentModel->insert([
+		$payment = new Payment([
 			'payment_no' => $this->paymentNo,
 			'out_payment_no' => $params['out_payment_no'],
-			'create_time' => time(),
 		]);
-		if( !$b ){
-			LogApi::error('[支付阶段]支付环节支付保存失败');
-			throw new \Exception( '支付失败' );
-		}
+//		$paymentModel = new OrderPayPaymentModel();
+//		$b = $paymentModel->insert([
+//			'payment_no' => $this->paymentNo,
+//			'out_payment_no' => $params['out_payment_no'],
+//			'create_time' => time(),
+//		]);
+//		if( !$b ){
+//			LogApi::error('[支付阶段]支付环节支付保存失败');
+//			throw new \Exception( '支付失败' );
+//		}
 		
 		$this->status = $status;
 		$this->paymentStatus = PaymentStatus::PAYMENT_SUCCESS;
