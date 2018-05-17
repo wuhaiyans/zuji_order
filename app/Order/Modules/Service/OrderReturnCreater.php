@@ -12,7 +12,7 @@ use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\User\User;
 use App\Order\Modules\Repository\OrderGoodsRepository;
-use App\Order\Modules\Repository\orderClearingRepository;
+use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\Warehouse\Delivery;
 class OrderReturnCreater
 {
@@ -20,11 +20,12 @@ class OrderReturnCreater
     protected $orderReturnRepository;
     protected $orderRepository;
     protected $orderGoodsRepository;
-    public function __construct(orderReturnRepository $orderReturnRepository,orderRepository $orderRepository,orderGoodsRepository $orderGoodsRepository,orderClearingRepository $orderClearingRepository)
+    protected $OrderClearingRepository;
+    public function __construct(orderReturnRepository $orderReturnRepository,orderRepository $orderRepository,orderGoodsRepository $orderGoodsRepository,OrderClearingRepository $OrderClearingRepository)
     {
 
         $this->orderReturnRepository = $orderReturnRepository;
-        $this->orderClearingRepository = $orderClearingRepository;
+        $this->OrderClearingRepository = $OrderClearingRepository;
         $this->orderRepository = $orderRepository;
         $this->orderGoodsRepository =$orderGoodsRepository;
     }
@@ -116,7 +117,7 @@ class OrderReturnCreater
            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
            $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
-          $create_clear= $this->orderClearingRepository->createOrderClean($create_data);//创建退款清单
+          $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
           if(!$create_clear){
               return ApiStatus::CODE_34008;//创建退款清单失败
           }
@@ -459,7 +460,7 @@ public function _parse_order_where($where=[]){
                 $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
                 $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
                 //信息待定
-                $create_clear= $this->orderClearingRepository->createOrderClean($create_data);//创建退款清单
+                $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
                     return ApiStatus::CODE_34008;//创建退款清单失败
                 }

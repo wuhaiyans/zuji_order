@@ -33,6 +33,10 @@ return [
     'api.orderClean.detail'=>'OrderCleaningController@detail',
     //结算清单取消接口
     'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
+    //更新清算状态
+    'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
+
+
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
     // 订单发货修改物流单号
@@ -99,6 +103,16 @@ return [
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
     //审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
+	
+	//-+------------------------------------------------------------------------
+	// | 还机相关接口
+	//-+------------------------------------------------------------------------
+	//还机申请页面接口
+    'api.giveback.applying.viewdata'       => 'GivebackController@get_applying_viewdata',
+	//还机申请提交接口
+    'api.giveback.create'       => 'GivebackController@create',
+	//还机更新状态为待检测【确认收货】
+    'api.giveback.notify.evaluation'       => 'GivebackController@notify_evaluation',
 
     // test
     'api.Test.test'       => 'TestController@test',

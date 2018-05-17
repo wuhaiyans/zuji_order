@@ -150,7 +150,6 @@ class DeliveryRepository
                 throw new NotFoundResourceException('发货单不存在');
             }
 
-
             $time = time();
             $imei_data = [
                 'delivery_no' => $delivery_no,

@@ -89,7 +89,6 @@ class OrderCleaningController extends Controller
      */
     public function cancelOrderClean(Request $request){
 
-        echo 2344;exit;
         $params = $request->all();
 
         $rules = [
@@ -99,7 +98,7 @@ class OrderCleaningController extends Controller
         $validateParams = $this->validateParams($rules,$params);
 
 
-        if (empty($validateParams) || $validateParams['code']!=0) {
+        if ($validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
         }
@@ -108,6 +107,39 @@ class OrderCleaningController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
+
+    /**
+     * 订单清算更新状态
+     * params": - {
+            "business_type":"mock",    //类型：String  必有字段  备注：业务类型
+            "business_no":"mock"       //类型：String  必有字段  备注：业务编号
+            }
+     * @param Request $request
+     * return json
+     */
+    public function upOrderCleanStatus(Request $request){
+
+        $params = $request->all();
+
+        $rules = [
+            'business_type'  => 'required',
+            'business_no'  => 'required'
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $res = OrderCleaning::upOrderCleanStatus($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
+
+
 
 
 }

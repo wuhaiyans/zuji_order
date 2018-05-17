@@ -19,14 +19,15 @@ class Delivery
 
 
     /**
-     * 订单请求
-     * 发货申请
+     * 订单请求 发货申请
+     *
+     * @param string $order_no 订单号
      */
     public static function apply($order_no)
     {
         $base_api = config('tripartite.warehouse_api_uri');
-        $model = new OrderInfo();
-        $info = $model->getOrderInfo(['order_no'=>$order_no]);
+
+        $info = self::getOrderDetail($order_no);
 
         return Curl::post($base_api, [
             'appid'=> 1,
@@ -37,8 +38,9 @@ class Delivery
     }
 
     /**
-     * 订单请求
-     * 取消发货
+     * 订单请求 取消发货
+     *
+     * @param string $order_no 订单号
      */
     public static function cancel($order_no)
     {
@@ -56,8 +58,9 @@ class Delivery
     /**
      * 客户签收后操作请求 或者自动签收
      * 接收反馈
-     * 当auto=true时，为系统到期自己修改为签收
+     *
      * @param string $order_no
+     * @param bool $auto 是否是自动收货 当auto=true时，为系统到期自己修改为签收
      */
     public static function receive($order_no, $auto=false)
     {
@@ -68,7 +71,7 @@ class Delivery
     /**
      * Delivery constructor.
      * 发货反馈
-     * @param array $order_no
+     * @param array $order_no 订单号
      * [
      *      '' => '', //【必须】 string
      * ]
@@ -82,14 +85,15 @@ class Delivery
     /**
      * 根据order_no取发货详细内容
      * 直接调用订单那边提供的方法
+     *
+     * @param array $order_no 订单号
      */
     public static function getOrderDetail($order_no)
     {
-        return [
-            ['name'=>'张三', 'num'=>12],
-            ['name'=>'李四', 'num'=>10],
-        ];
-    }
+        $model = new OrderInfo();
+        $info = $model->getOrderInfo(['order_no'=>$order_no]);
 
+        return $info;
+    }
 
 }
