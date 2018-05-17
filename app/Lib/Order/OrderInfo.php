@@ -6,7 +6,7 @@
  */
 
 namespace App\Lib\Order;
-
+use App\Lib\Curl;
 use App\Lib\ApiStatus;
 
     class OrderInfo {
@@ -64,20 +64,21 @@ use App\Lib\ApiStatus;
         {
 
             if (empty($appId)) return apiResponse([],ApiStatus::CODE_10104);
-            if (isset($param['order_no']) && !empty($param['order_no']))
-            {
                 $data = config('tripartite.Interior_Goods_Request_data');
                 $data['method'] ='zuji.channel.appid.get';
                 $data['params'] = [
-                    'appid'=>$param['appid'],
+                    'appid'=>$appId,
                 ];
                 $baseUrl = config("tripartite.Interior_Goods_Url");
                 $info = Curl::post($baseUrl, json_encode($data));
+                if (!empty($info)) {
 
-                return $info;
+                    $appInfo = json_decode($info, true);
 
-            }
-            return apiResponse([],ApiStatus::CODE_10104);
+                    return isset($appInfo['data']['appid']['name'])?$appInfo['data']['appid']['name']:'';
+
+                }
+                return false;
 
         }
 

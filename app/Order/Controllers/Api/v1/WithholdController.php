@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\Payment\WithholdingApi;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Inc\OrderPayWithholdStatus;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderInstalment;
@@ -93,9 +94,7 @@ class WithholdController extends Controller
      * 代扣协议查询
      * @$request array $request
      * [
-     *      'alipay_user_id' => '', //支付宝用户id（2088开头）
      *		'user_id' => '',        //租机平台用户id
-     *		'agreement_no' => '',   //签约协议号
      * ]
      */
     public function query(Request $request){
@@ -107,47 +106,22 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
-        if(!$user_id){
+        $userId = $params['user_id'];
+        if(!$userId){
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
-        // 查询用户协议
-        $third = new ThirdInterface();
-        $user_info = $third->GetUser($user_id);
-
-        if( !$user_info ){
-            Log::error("[代扣解约]lock查询用户信息失败");
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        $withholdInfo = OrderPayWithhold::find($userId);
+        if(!is_array($withholdInfo)){
+            return apiResponse([],ApiStatus::CODE_20001, "参数错误");
         }
 
-        if( !$user_info['withholding_no'] ){
-            Log::error("用户未签约该协议");
-            return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
-        }
-        if( !$user_info['alipay_user_id'] ){
-            Log::error("获取用户支付宝id失败");
-            return apiResponse( [], ApiStatus::CODE_71004, '获取用户支付宝id失败');
+        if(empty($withholdInfo) || $withholdInfo['withhold_status'] == OrderPayWithholdStatus::UNSIGN){
+            return apiResponse(["status"=>"N"],ApiStatus::CODE_0);
         }
 
-        $data = [
-            'alipay_user_id'    => $user_info['alipay_user_id'], //支付宝用户id（2088开头）
-            'user_id'           => $user_id, //租机平台用户id
-            'agreement_no'      => $user_info['withholding_no'], //签约协议号
-        ];
-        //--网络查询支付宝接口，获取代扣协议状态----------------------------------
-        try {
-            $status = WithholdingApi::withholdingstatus($appid, $data);
-            if( $status=='Y' ){
-                $withholding_status = 'Y';
-            }else{
-                $withholding_status = 'N';
-            }
-        } catch (\Exception $exc) {
-            Log::error('[代扣协议]查询用户代扣协议出现异常');
-            $withholding_status = 'N';
-        }
+        return apiResponse(["status"=>"Y"],ApiStatus::CODE_0);
 
-        return apiResponse(['withholding'=>$withholding_status],ApiStatus::CODE_0,"success");
     }
 
 
@@ -422,7 +396,7 @@ class WithholdController extends Controller
             if (!$withholding_b) {
                 DB::rollBack();
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    OrderInstalment::instalment_failed($instalment_info['fail_num'], $instalment_id, $instalment_info['term'], $data_sms);
+                    OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $data_sms);
                     return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
                 } else {
                     return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
