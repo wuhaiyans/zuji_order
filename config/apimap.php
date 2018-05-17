@@ -50,22 +50,22 @@ return [
     // 创建分期接口
     'api.Instalment.create'             => 'InstalmentController@create',
 
-    // 代扣相关
-    'api.Withhold.createpay'          => 'WithholdController@createpay',
-    // 多项扣款接口
-    'api.Withhold.multi_createpay'    => 'WithholdController@multi_createpay',
 
+    // 代扣相关
     // 代扣协议查询
     'api.Withholding.query'             => 'WithholdingController@query',
     // 代扣签约接口
     'api.Withholding.sign'              => 'WithholdingController@sign',
     // 代扣签约回调接口
-    'api.Withholding.signNotify'        => 'WithholdingController@signNotify',
+    'api.Withhold.sign_notify'          => 'WithholdingController@sign_notify',
     // 代扣解约接口
-    'api.Withholding.unsign'            => 'WithholdingController@unsign',
+    'api.Withhold.unsign'               => 'WithholdingController@unsign',
     // 代扣解约接口回调接口
-    'api.Withholding.unsignNotify'      => 'WithholdingController@unsignNotify',
-
+    'api.Withhold.unsign_notify'        => 'WithholdingController@unsign_notify',
+    // 代扣扣款接口
+    'api.Withhold.createpay'            => 'WithholdController@createpay',
+    // 多项扣款接口
+    'api.Withhold.multi_createpay'      => 'WithholdController@multi_createpay',
 
     //  预授权相关
     // 资金预授权接口
