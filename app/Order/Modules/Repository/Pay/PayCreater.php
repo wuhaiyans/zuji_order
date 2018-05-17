@@ -34,7 +34,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createPayment( array $params ): Pay{
+	public static function createPayment( array $params ): Pay{
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 		
@@ -69,7 +69,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createWithhold( $params ): Pay{
+	public static function createWithhold( $params ): Pay{
 		$params['status'] = PayStatus::WAIT_WHITHHOLD;
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
 		
@@ -104,7 +104,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createFundauth( array $params ): Pay{
+	public static function createFundauth( array $params ): Pay{
 		
 		$params['status'] = PayStatus::WAIT_FUNDAUTH;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
@@ -143,7 +143,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createWithholdFundauth( array $params ): Pay
+	public static function createWithholdFundauth( array $params ): Pay
 	{
 		$params['status'] = PayStatus::WAIT_WHITHHOLD;
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
@@ -195,7 +195,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createPaymentFundauth( array $params ): Pay
+	public static function createPaymentFundauth( array $params ): Pay
 	{
 		
 		$params['status'] = PayStatus::WAIT_PAYMENT;
@@ -252,7 +252,7 @@ class PayCreater {
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
-	public function createPaymentWithholdFundauth( array $params ): Pay
+	public static function createPaymentWithholdFundauth( array $params ): Pay
 	{
 		// 状态
 		$params['status'] = PayStatus::WAIT_PAYMENT;

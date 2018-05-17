@@ -3,6 +3,8 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
+
+use App\Order\Modules\Repository\Pay\PayCreater;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
 use App\Order\Modules\Repository\Pay\WithholdStatus;
@@ -76,7 +78,7 @@ class PayTest extends TestCase
 //			
 //			// 创建支付
 //			// 只有支付环节，没有其他环节
-//			$pay = $creater->createPayment([
+//			$pay = PayCreater::createPayment([
 //				'businessType' => '1',
 //				'businessNo' => \createNo(1),
 //				'paymentNo' => \createNo(1),
@@ -127,7 +129,7 @@ class PayTest extends TestCase
 //			
 //			// 创建支付
 //			// 只有代扣环节，没有其他环节
-//			$pay = $creater->createWithhold([
+//			$pay = PayCreater::createWithhold([
 //				'businessType' => '1',
 //				'businessNo' => \createNo(1),
 //				'withholdNo' => \createNo(1),
@@ -175,7 +177,7 @@ class PayTest extends TestCase
 //			
 //			// 创建支付
 //			// 只有预授权环节，没有其他环节
-//			$pay = $creater->createFundauth([
+//			$pay = PayCreater::createFundauth([
 //				'businessType' => '1',
 //				'businessNo' => \createNo(1),
 //				'fundauthNo' => \createNo(1),
@@ -223,7 +225,7 @@ class PayTest extends TestCase
 //			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
 //			
 //			// 创建支付
-//			$pay = $creater->createPaymentFundauth([
+//			$pay = PayCreater::createPaymentFundauth([
 //				'businessType' => '1',
 //				'businessNo' => \createNo(1),
 //				
@@ -289,7 +291,7 @@ class PayTest extends TestCase
 			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
 			
 			// 创建支付
-			$pay = $creater->createPaymentWithholdFundauth([
+			$pay = PayCreater::createPaymentWithholdFundauth([
 				'businessType' => '1',
 				'businessNo' => \createNo(1),
 				
