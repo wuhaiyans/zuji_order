@@ -9,14 +9,17 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
 class OrderComponnet implements OrderCreater
 {
     //订单ID
-    private $order_id = null;
+    private $orderId = null;
     //订单编号
     private $orderNo = null;
+    //用户ID
+    private $userId=0;
     //用户组件
     private $userComponnet =null;
     //sku组件
@@ -27,10 +30,11 @@ class OrderComponnet implements OrderCreater
     private $errno = 0;
     //免押金状态 0：不免押金；1：全免押金
 
-    private $mianya_status = 0;
+    private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ) {
+    public function __construct( $orderNo=null ,int $userId) {
         $this->orderNo = $orderNo;
+        $this->userId =$userId;
     }
 
     /**
@@ -71,16 +75,17 @@ class OrderComponnet implements OrderCreater
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater
+    public function getOrderCreater():OrderComponnet
     {
-        return $this->componnet->getOrderCreater();
+        return $this;
     }
     /**
      * 设置 错误提示
      * @param string $error  错误提示信息
      * @return OrderComponnet
      */
-    public function set_error( string $error ): OrderComponnet {
+    public function setError( string $error ): OrderComponnet
+    {
         $this->error = $error;
         return $this;
     }
@@ -88,7 +93,8 @@ class OrderComponnet implements OrderCreater
      * 获取 错误提示
      * @return string
      */
-    public function get_error(): string{
+    public function getError(): string
+    {
         return $this->error;
     }
 
@@ -97,7 +103,8 @@ class OrderComponnet implements OrderCreater
      * @param int $errno	错误码
      * @return OrderComponnet
      */
-    public function set_errno( $errno ): OrderComponnet {
+    public function setErrno( $errno ): OrderComponnet
+    {
         $this->errno = $errno;
         return $this;
     }
@@ -105,7 +112,8 @@ class OrderComponnet implements OrderCreater
      * 获取 错误码
      * @return int
      */
-    public function get_errno(): int{
+    public function getErrno(): int
+    {
         return $this->errno;
     }
 
@@ -114,35 +122,39 @@ class OrderComponnet implements OrderCreater
      * @param int $status
      * @return OrderComponnet
      */
-    public function set_mianya_status( int $status ): OrderComponnet{
+    public function setMianyaStatus( int $status ): OrderComponnet
+    {
         if( !in_array($status, [0,1]) ){
             throw new Exception('免押状态值设置异常');
         }
-        $this->mianya_status = $status;
+        $this->mianyaStatus = $status;
         return $this;
     }
     /**
      * 获取免押状态
      * @return int
      */
-    public function get_mianya_status(): int{
-        return $this->mianya_status;
+    public function getMianyaStatus(): int
+    {
+        return $this->mianyaStatus;
     }
 
     /**
      * 获取 订单编号
      * @return string
      */
-    public function get_order_no(): string {
-        return $this->order_no;
+    public function getOrderNo(): string
+    {
+        return $this->orderNo;
     }
 
     /**
      * 获取订单ID
      * @return int
      */
-    public function get_order_id(): int {
-        return $this->order_id;
+    public function getOrderId(): int
+    {
+        return $this->orderId;
     }
 
     /**
@@ -155,6 +167,13 @@ class OrderComponnet implements OrderCreater
      */
     public function filter(): bool
     {
+        //判断是否有其他活跃 未完成订单
+        $b =OrderRepository::unCompledOrder($this->userId);
+        if($b) {
+            $this->getOrderCreater()->setError('有未完成订单');
+            return false;
+        }
+
         $b = $this->userComponnet->filter();
         if( !$b ){
             return false;
@@ -172,14 +191,12 @@ class OrderComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("订单组件 -get_data_schema");
-//        $user_schema = $this->user_componnet->get_data_schema();
-//        $sku_schema = $this->sku_componnet->get_data_schema();
-//        return array_merge(['order'=>[
-//            'business_key' => $this->business_key,
-//            'order_no'=>$this->order_no
-//        ]],$user_schema,$sku_schema);
-        return [];
+        $userSchema = $this->userComponnet->getDataSchema();
+        $skuSchema =$this->skuComponnet->getDataSchema();
+        return array_merge(['order'=>[
+            'order_no'=>$this->orderNo
+        ]],$userSchema,$skuSchema);
+
     }
 
     /**
