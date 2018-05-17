@@ -53,15 +53,15 @@ return [
 
     // 代扣相关
     // 代扣协议查询
-    'api.Withholding.query'             => 'WithholdingController@query',
+    'api.Withholding.query'             => 'WithholdController@query',
     // 代扣签约接口
-    'api.Withholding.sign'              => 'WithholdingController@sign',
+    'api.Withholding.sign'              => 'WithholdController@sign',
     // 代扣签约回调接口
-    'api.Withhold.sign_notify'          => 'WithholdingController@sign_notify',
+    'api.Withhold.sign_notify'          => 'WithholdController@sign_notify',
     // 代扣解约接口
-    'api.Withhold.unsign'               => 'WithholdingController@unsign',
+    'api.Withhold.unsign'               => 'WithholdController@unsign',
     // 代扣解约接口回调接口
-    'api.Withhold.unsign_notify'        => 'WithholdingController@unsign_notify',
+    'api.Withhold.unsign_notify'        => 'WithholdController@unsign_notify',
     // 代扣扣款接口
     'api.Withhold.createpay'            => 'WithholdController@createpay',
     // 多项扣款接口
