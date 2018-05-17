@@ -38,15 +38,15 @@ class OrderCleaning
 
 
     /**
-     * 订单清算列表
+     * 订单操作表
      * @param array $param
      * @return array
      */
-    public static function getOrderCleaningList($param = array())
+    public static function cancelOrderClean($param = array())
     {
         //根据用户id查找订单列表
-        $orderCleanList = OrderClearingRepository::getOrderCleanList($param);
-        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
+        $success= OrderClearingRepository::cancelOrderClean($param);
+        return $success;
 
     }
 

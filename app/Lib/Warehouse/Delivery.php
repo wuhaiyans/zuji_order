@@ -57,6 +57,7 @@ class Delivery
      * 客户签收后操作请求 或者自动签收
      * 接收反馈
      * 当auto=true时，为系统到期自己修改为签收
+     * @param string $order_no
      */
     public static function receive($order_no, $auto=false)
     {
@@ -67,6 +68,10 @@ class Delivery
     /**
      * Delivery constructor.
      * 发货反馈
+     * @param array $order_no
+     * [
+     *      '' => '', //【必须】 string
+     * ]
      */
     public static function delivery($order_no)
     {
