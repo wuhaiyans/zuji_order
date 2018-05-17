@@ -9,6 +9,7 @@
 
 namespace App\Order\Modules\Repository\Pay;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayModel;
 use App\Order\Models\OrderPayPaymentModel;
 use App\Order\Models\OrderPayWithholdModel;
@@ -197,9 +198,11 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function paymentSuccess( array $params )
 	{
+		LogApi::debug('[支付阶段]支付环节支付处理');
 		// 只有待支付状态时才允许操作
 		if( $this->status != PayStatus::WAIT_PAYMENT 
 				|| $this->paymentStatus != PaymentStatus::WAIT_PAYMENT ){
+			LogApi::error('[支付阶段]状态错误');
 			throw new \Exception('支付环节支付失败：状态错误');
 		}
 		
@@ -216,6 +219,7 @@ class Pay extends \App\Lib\Configurable
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
 		]);
 		if( !$b ){
+			LogApi::error('[支付阶段]支付环节支付保存失败');
 			throw new \Exception( '支付完成保存失败' );
 		}
 		// 更新 支付环节 表
@@ -226,14 +230,16 @@ class Pay extends \App\Lib\Configurable
 			'create_time' => time(),
 		]);
 		if( !$b ){
-			throw new \Exception( '支付环节保存失败' );
+			LogApi::error('[支付阶段]支付环节支付保存失败');
+			throw new \Exception( '支付失败' );
 		}
 		
 		$this->status = $status;
 		$this->paymentStatus = PaymentStatus::PAYMENT_SUCCESS;
 		
+		LogApi::debug('[支付阶段]支付环节支付处理成功');
 		// 状态回调
-		$this->_getStatusCallback( 'payment' );
+		$this->_statusCallback( 'payment' );
 		return true;
 	}
 	
@@ -251,9 +257,12 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function withholdSuccess( array $params )
 	{
+		LogApi::debug('[支付阶段]代扣签约环节处理');
 		// 待签约时才允许
 		if( $this->status != PayStatus::WAIT_WHITHHOLD
-				|| $this->withholdStatus != WithholdStatus::WAIT_WITHHOLD ){
+				|| $this->withholdStatus != WithholdStatus::WAIT_WITHHOLD )
+		{
+			LogApi::error('[支付阶段]代扣签约环节状态错误');
 			throw new \Exception('代扣签约环节签约失败：状态错误');
 		}
 		
@@ -270,6 +279,7 @@ class Pay extends \App\Lib\Configurable
 			'withhold_status' => WithholdStatus::SIGNED,// 已签约
 		]);
 		if( !$b ){
+			LogApi::error('[支付阶段]代扣签约环节处理保存失败1');
 			throw new \Exception( '代扣签约环节完成保存失败' );
 		}
 		// 更新 代扣签约环节 表
@@ -283,14 +293,17 @@ class Pay extends \App\Lib\Configurable
 			'counter' => 1, // 计数
 		]);
 		if( !$b ){
+			LogApi::error('[支付阶段]代扣签约环节处理保存失败2');
 			throw new \Exception( '代扣签约环节完成保存失败' );
 		}
 		
 		$this->status = $status;
 		$this->withholdStatus = WithholdStatus::SIGNED;// 已签约
 		
+		LogApi::debug('[支付阶段]代扣签约环节处理完成');
+		
 		// 状态回调
-		$this->_getStatusCallback( 'withhold' );
+		$this->_statusCallback( 'withhold' );
 		
 		return true;
 	}
@@ -347,7 +360,7 @@ class Pay extends \App\Lib\Configurable
 		$this->status = $status;
 		$this->fundauthStatus = FundauthStatus::SUCCESS;
 		// 状态回调
-		$this->_getStatusCallback( 'fundauth' );
+		$this->_statusCallback( 'fundauth' );
 		return true;
 	}
 	
@@ -406,67 +419,79 @@ class Pay extends \App\Lib\Configurable
 	 */
 	private function _getNextStatus()
 	{
-		
+		LogApi::debug('[支付阶段]查找下一个阶段状态');
+		$status = 0;
 		// 当前环节 支付 
 		if( $this->status == PayStatus::WAIT_PAYMENT )
 		{
 			// 代扣判断
 			if( $this->needWithhold() )
 			{ // 
-				return PayStatus::WAIT_WHITHHOLD;
+				$status = PayStatus::WAIT_WHITHHOLD;
 			}
 			
 			// 预授权判断
-			if( $this->needFundauth() )
+			elseif( $this->needFundauth() )
 			{
-				return PayStatus::WAIT_FUNDAUTH;
+				$status = PayStatus::WAIT_FUNDAUTH;
 			}
 			// 支付完成
-			return PayStatus::SUCCESS;
+			else{
+				$status = PayStatus::SUCCESS;
+			}
 		}
 		// 当前环节 代扣签约 
-		if( $this->status == PayStatus::WAIT_WHITHHOLD )
+		elseif( $this->status == PayStatus::WAIT_WHITHHOLD )
 		{
 			// 预授权判断
 			if( $this->needFundauth() )
 			{
-				return PayStatus::WAIT_FUNDAUTH;
+				$status = PayStatus::WAIT_FUNDAUTH;
 			}
 			// 支付完成
-			return PayStatus::SUCCESS;
+			else{
+				$status = PayStatus::SUCCESS;
+			}
 		}
 		
 		// 当前环节 预授权
-		if( $this->status == PayStatus::WAIT_FUNDAUTH )
+		elseif( $this->status == PayStatus::WAIT_FUNDAUTH )
 		{
 			// 支付完成
-			return PayStatus::SUCCESS;
+			$status = PayStatus::SUCCESS;
 		}
-		throw new \Exception( '获取支付阶段next状态错误' );
+		// 未找到
+		if( $status == 0 ){
+			LogApi::error('[支付阶段]查询下一个阶段状态异常');
+			throw new \Exception( '获取支付阶段next状态错误' );
+		}
+		LogApi::debug('[支付阶段]下一个阶段状态为:'.$status);
+		return $status;
 	}
 	
 	/**
-	 * 回到业务支付状态
+	 * 回调业务支付状态
 	 * @throws \Exception
 	 */
-	private function _getStatusCallback( $step )
+	private function _statusCallback( $step )
 	{
-		
 		// 支付环节完成，但支付阶段还有后续操作时，也回调业务通知
 		if( $this->status != PayStatus::SUCCESS
 				&& $step == 'payment' )
 		{
-			var_dump( '支付环节完成完成，回调业务通知' );
+			LogApi::debug('[支付阶段]回调业务通知(支付环节完成)');
 		}
 		// 支付阶段完成时，回调业务通知
 		elseif( $this->status == PayStatus::SUCCESS )
 		{
-			var_dump( '支付阶段完成，回调业务通知' );
+			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 		}
 		// 支付阶段关闭时，回调业务通知
 		elseif( $this->status == PayStatus::CLOSED )
 		{
-			var_dump( '支付阶段关闭，回调业务通知' );
+			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
+		}else{
+			LogApi::debug('[支付阶段]跳过业务通知');
 		}
 	}
 }
