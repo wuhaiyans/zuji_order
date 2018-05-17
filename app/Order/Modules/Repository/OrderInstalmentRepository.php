@@ -246,7 +246,7 @@ class OrderInstalmentRepository
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
-        $result =  OrderInstalment::where($where)->save($status);
+        $result =  OrderInstalment::where($where)->update($status);
         if (!$result) return false;
 
         return true;
