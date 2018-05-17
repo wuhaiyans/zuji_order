@@ -20,11 +20,12 @@ use App\Order\Models\OrderPayFundauthModel;
  * <p>标准化支付整体流程，定义支付环节和接口</p>
  * <p>支付阶段分为3个环节，执行顺序依次是：</p>
  * <ul>
- * <li>支付</li>
+ * <li>直接支付</li>
  * <li>代扣签约</li>
  * <li>资金预授权</li>
  * </ul>
  * <p>注：每个环节都是可选的，但至少存在一个环节（支付阶段才有意义）</p>
+ * <p>注：每个环节在处理完成后，禁止再做任何数据修改了</p>
  * @method bool paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
  * @method bool withholdSuccess(array $params) 用于代扣签约完成时调用，进入下一个状态
  * @method bool fundauthSuccess(array $params) 用于资金预授权完成时调用，进入下一个状态
@@ -562,19 +563,43 @@ class Pay extends \App\Lib\Configurable
 		if( $this->status != PayStatus::SUCCESS
 				&& $step == 'payment' )
 		{
+			$call = $this->_getBusinessCallback();
+			$call( [
+				'business_type' => $this->businessType,
+				'business_no' => $this->businessNo,
+				'status' => 'processing',
+			] );
 			LogApi::debug('[支付阶段]回调业务通知(支付环节完成)');
 		}
 		// 支付阶段完成时，回调业务通知
 		elseif( $this->status == PayStatus::SUCCESS )
 		{
+			$call = $this->_getBusinessCallback();
+			$call( [
+				'business_type' => $this->businessType,
+				'business_no' => $this->businessNo,
+				'status' => 'success',
+			] );
 			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 		}
 		// 支付阶段关闭时，回调业务通知
 		elseif( $this->status == PayStatus::CLOSED )
 		{
-			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
+			LogApi::debug('[支付阶段]回调业务通知(支付阶段关闭)');
 		}else{
 			LogApi::debug('[支付阶段]跳过业务通知');
 		}
+	}
+	
+	/**
+	 * 
+	 */
+	public function _getBusinessCallback()
+	{
+		$callbacks = config('pay_callback');
+		if( isset($callbacks[$this->businessType]) && $callbacks[$this->businessType] ){
+			return $callbacks[$this->businessType];
+		}
+		LogApi::error('[支付阶段]业务未设置回调通知');
 	}
 }
