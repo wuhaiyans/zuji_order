@@ -16,7 +16,7 @@ class Controller extends BaseController
     {
 
         if (!isset($params['params'])) {
-            return apiResponseArray(ApiStatus::CODE_10101,[]);
+            return apiResponseArray(ApiStatus::CODE_10102,[]);
         }
 
         if (is_string($params['params'])) {
@@ -28,7 +28,7 @@ class Controller extends BaseController
         $validator = app('validator')->make($params, $rules);
 
         if ($validator->fails()) {
-            return apiResponseArray(ApiStatus::CODE_10101,[], $validator->errors()->first());
+            return apiResponseArray(ApiStatus::CODE_10102,[], $validator->errors()->first());
         }
 
         return apiResponseArray(ApiStatus::CODE_0, []);

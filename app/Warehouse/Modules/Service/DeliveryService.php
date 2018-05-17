@@ -170,9 +170,6 @@ class DeliveryService
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
-
-        Log::error($params);
-
         $logic_params = [];
         if ($time_type != 'none') {
             if (!isset($params['time_begin']) || !$params['time_begin']) {

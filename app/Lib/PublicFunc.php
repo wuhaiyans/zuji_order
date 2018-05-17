@@ -230,8 +230,8 @@ function v($data, $exit = '')
 /**
  * heaven
  * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+毫秒（5位）+随机数（1位）</p>
- * @param $noType :1,分期交易号; 2,退货编号3.支付交易
- * 
+ * @param $noType :1分期交易号, 2退货编号, 3支付交易, 4预授权
+ *
  */
 function createNo($noType=1){
     $npreNoType = array(
@@ -239,12 +239,13 @@ function createNo($noType=1){
         1 => 'F',
         2 => 'T',
         3 => 'P',
+        4 => 'Y',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
         return false;
     }
-	// 年差值标记符，大写字母集[A-Z]
+    // 年差值标记符，大写字母集[A-Z]
     for($i=65;$i<91;$i++){
         $year[]= strtoupper(chr($i));
     }
@@ -321,21 +322,8 @@ function apiData()
   * $@param type=1 多维对象 find  2一维对象 比如findfrist
   * return array
   */
-function objectToArray($d, $type=1)
+function objectToArray($object)
 {
     //数据处理
-    $result = array();
-    if ($type == 1) {
-        foreach ($d as $values) {
-            if (!empty($values)) {
-                $result[] = (array)($values['rows']);
-            }
-        }
-    } else {
-
-        foreach ($d as $keys=>$dValues) {
-            $result[$keys] = $dValues;
-        }
-    }
-    return $result;
+    return json_decode(json_encode($object), true);
 }

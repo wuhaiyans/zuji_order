@@ -2,111 +2,237 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Payment\WithholdingApi;
+use App\Order\Modules\Inc\PayInc;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderInstalment;
-
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-use App\Lib\User\User;
+use App\Order\Modules\Repository\ThirdInterface;
 use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class InstalmentController extends Controller
+class WithholdController extends Controller
 {
 
-
-    // 创建订单分期
-    public function create(Request $request){
+    // 代扣协议查询
+    public function query(Request $request){
         $request    = $request->all();
-
-        $order      = $request['params']['order'];
-        $sku        = $request['params']['sku'];
-        $coupon     = !empty($request['params']['coupon']) ? $request['params']['coupon'] : "";
-        $user       = $request['params']['user'];
-        //获取goods_no
-        $order = filter_array($order, [
-            'order_no'=>'required',
-        ]);
-        if(count($order) < 1){
-            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+        $user_id    = $params['user_id'];
+        if(!$appid){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
-        //获取sku
-        $sku = filter_array($sku, [
-            'goods_no'      => 'required',
-            'zuqi'          => 'required',
-            'zuqi_type'     => 'required',
-            'all_amount'    => 'required',
-            'amount'        => 'required',
-            'yiwaixian'     => 'required',
-            'zujin'         => 'required',
-            'pay_type'      => 'required',
-        ]);
-        if(count($sku) < 8){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
+        if(!$user_id){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
-        filter_array($coupon, [
-            'discount_amount'   => 'required',    //fool；优惠金额
-            'coupon_type'       => 'required',    //int；优惠券类型
-        ]);
+        // 查询用户协议
+        $third = new ThirdInterface();
+        $user_info = $third->GetUser($user_id);
 
-
-        $user = filter_array($user, [
-            'withholding_no' => 'required',    //【必须】string；代扣协议号
-            
-        ]);
-        if(empty($user)){
-            return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");
+        if( !$user_info ){
+            Log::error("[代扣解约]lock查询用户信息失败");
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
-        $params = [
-            'order'     => $order,
-            'sku'       => $sku,
-            'coupon'    => $coupon,
-            'user'      => $user,
+        if( !$user_info['withholding_no'] ){
+            Log::error("用户未签约该协议");
+            return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
+        }
+        if( !$user_info['alipay_user_id'] ){
+            Log::error("获取用户支付宝id失败");
+            return apiResponse( [], ApiStatus::CODE_71004, '获取用户支付宝id失败');
+        }
+
+        $data = [
+            'alipay_user_id'    => $user_info['alipay_user_id'], //支付宝用户id（2088开头）
+            'user_id'           => $user_id, //租机平台用户id
+            'agreement_no'      => $user_info['withholding_no'], //签约协议号
         ];
-
-        $res = OrderInstalment::create($params);
-
-        if(!$res){
-            return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");
+        //--网络查询支付宝接口，获取代扣协议状态----------------------------------
+        try {
+            $status = WithholdingApi::withholdingstatus($appid, $data);
+            if( $status=='Y' ){
+                $withholding_status = 'Y';
+            }else{
+                $withholding_status = 'N';
+            }
+        } catch (\Exception $exc) {
+            Log::error('[代扣协议]查询用户代扣协议出现异常');
+            $withholding_status = 'N';
         }
 
-        return apiResponse([],ApiStatus::CODE_0,"success");
+        return apiResponse(['withholding'=>$withholding_status],ApiStatus::CODE_0,"success");
+    }
+
+    //签约代扣
+    public function sign(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+
+        if(!$appid){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        }
+
+        $params = filter_array($params, [
+            'user_id' => 'required',
+            'return_url' => 'required',
+        ]);
+        if(count($params) < 2){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        }
+
+        $user_id    = $params['user_id'];
+        // 查询用户协议
+        $third = new ThirdInterface();
+        $user_info = $third->GetUser($user_id);
+        if( !$user_info ){
+            Log::error("[代扣解约]lock查询用户信息失败");
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        }
+
+        if( !$user_info['withholding_no'] ){
+            Log::error("用户未签约该协议");
+            return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
+        }
+
+        if( !$user_info['alipay_user_id'] ){
+            Log::error("获取用户支付宝id失败");
+            return apiResponse( [], ApiStatus::CODE_71004, '获取用户支付宝id失败');
+        }
+
+        try {
+            $data = [
+                'user_id'           => $params['user_id'], //租机平台用户ID
+                'alipay_user_id'    => $user_info['alipay_user_id'], //用户支付宝id（2088开头）
+                'front_url'         => $params['return_url'], //前端回跳地址
+                'back_url'          => '', //后台通知地址
+            ];
+            $url = WithholdingApi::withholding( $appid, $data);
+            p($url);
+            return apiResponse(['url'=>$url],ApiStatus::CODE_0,"success");
+        } catch (\Exception $exc) {
+            return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
+        }
 
     }
 
-    //分期列表接口
-    public function instalment_list(Request $request){
-        $request               = $request->all()['params'];
-        $additional['page']    = isset($request['page']) ? $request['page'] : 1;
-        $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+    /**
+     * 签约代扣回调接口
+     */
+    public function sign_notify(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
 
-        $params         = filter_array($request, [
-            'goods_no'  => 'required',
-            'order_no'  => 'required',
-            'status'    => 'required',
-            'mobile'    => 'required',
-            'term'      => 'required',
-        ]);
+        p($params);
 
-        $code = new OrderInstalment();
-        $list = $code->queryList($params,$additional);
+    }
 
-        if(!is_array($list)){
-            return apiResponse([], ApiStatus::CODE_50000, "程序异常");
+    //解约代扣
+    public function unsign(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+        $user_id    = $params['user_id'];
+        if(!$appid){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
-        return apiResponse($list,ApiStatus::CODE_0,"success");
+        //开启事务
+        DB::beginTransaction();
+
+        // 查询用户协议
+        $third = new ThirdInterface();
+        $user_info = $third->GetUser($user_id);
+
+        if( !$user_info ){
+            DB::rollBack();
+            Log::error("[代扣解约]lock查询用户信息失败");
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        }
+
+        if( !$user_info['withholding_no'] ){
+            DB::rollBack();
+            Log::error("用户未签约该协议");
+            return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
+        }
+        if( !$user_info['alipay_user_id'] ){
+            DB::rollBack();
+            Log::error("获取用户支付宝id失败");
+            return apiResponse( [], ApiStatus::CODE_71004, '获取用户支付宝id失败');
+        }
+        // 查看用户是否有未扣款的分期
+        /* 如果有未扣款的分期信息，则不允许解约 */
+        $n = OrderInstalment::query()->where([
+            'agreement_no'=> $user_info['withholding_no']])
+            ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])->count();
+
+        if( $n > 0 ){
+            Log::error("[代扣解约]订单分期查询错误");
+            return apiResponse( [], ApiStatus::CODE_50000, '解约失败，有未完成分期');
+        }
+        try {
+            $data = [
+                'user_id'           => $user_id, //租机平台用户ID
+                'alipay_user_id'    => $user_info['alipay_user_id'], //用户支付宝id（2088开头）
+                'agreement_no'      => $user_info['agreement_no'], //签约协议号
+            ];
+            $b = WithholdingApi::rescind($appid, $data);
+            if( !$b ){
+                DB::rollBack();
+                Log::error("[代扣解约]调用支付宝解约接口失败");
+                return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+            }
+
+            // 更新数据
+            // 1) 用户表协议码 清除
+//            $n = $member_table->where( $user_where )->limit(1)->save(['withholding_no'=>'']);
+//            if( $n===false ){
+//                $member_table->rollback();
+//                //\zuji\debug\Debug::error(zuji\debug\Location::L_Withholding, '[代扣解约]清除用户表协议码失败', $data);
+//                api_resopnse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+//                return;
+//            }
+//            // 2) 用户代扣协议 状态改为 解约(status=2)
+//            $withholding_table->where( ['id'=>$withholding_info['id']] )->limit(1)->save(['status'=>2]);
+//            if( $n===false ){
+//                $member_table->rollback();
+//                //\zuji\debug\Debug::error(zuji\debug\Location::L_Withholding, '[代扣解约]更新代扣协议状态失败', $data);
+//                api_resopnse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+//                return;
+//            }
+
+            // 成功
+            DB::commit();
+            return apiResponse([],ApiStatus::CODE_0,"success");
+        } catch (\Exception $exc) {
+            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+
+        }
+    }
+
+
+    /**
+     * 签约代扣回调接口
+     */
+    public function unsign_notify(Request $request){
+        $request    = $request->all();
+        $appid      = $request['appid'];
+        $params     = $request['params'];
+
+        p($params);
 
     }
 
     //代扣 扣款接口
     public function createpay(Request $request){
-        $request = $request->all();
         $request    = $request->all();
         $appid      = $request['appid'];
         $params     = $request['params'];
@@ -135,7 +261,7 @@ class InstalmentController extends Controller
             return apiResponse([], $instalment_info, ApiStatus::$errCodes[$instalment_info]);
         }
 
-        $allow = OrderInstalment::allow_withhold($instalment_id);
+        $allow = OrderInstalment::allowWithhold($instalment_id);
 
         if(!$allow){
             DB::rollBack();
@@ -171,7 +297,8 @@ class InstalmentController extends Controller
         }
 
         // 查询用户协议
-        $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$order_info['user_id']);
+        $third = new ThirdInterface();
+        $user_info = $third->GetUser($order_info['user_id']);
 
         if( !is_array($user_info )){
             DB::rollBack();
@@ -353,7 +480,7 @@ class InstalmentController extends Controller
                 continue;
             }
 
-            $allow = OrderInstalment::allow_withhold($instalment_id);
+            $allow = OrderInstalment::allowWithhold($instalment_id);
             if (!$allow) {
                 Log::error("不允许扣款");
                 continue;
@@ -393,7 +520,8 @@ class InstalmentController extends Controller
             }
 
             // 查询用户协议
-            $user_info =User::getUser(config('tripartite.Interior_Goods_Request_data'),$order_info['user_id']);
+            $third = new ThirdInterface();
+            $user_info = $third->GetUser($order_info['user_id']);
 
             if (!is_array($user_info)) {
                 DB::rollBack();
@@ -537,5 +665,6 @@ class InstalmentController extends Controller
         return apiResponse([], ApiStatus::CODE_0, "success");
 
     }
+
 
 }

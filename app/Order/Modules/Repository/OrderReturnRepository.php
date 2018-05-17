@@ -4,6 +4,8 @@ use App\Order\Models\OrderReturn;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodExtend;
 use App\Order\Models\Order;
+use App\Order\Models\OrderUserInfo;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Support\Facades\DB;
 
@@ -14,11 +16,13 @@ class OrderReturnRepository
     private $order;
     private $ordergoods;
     private $ordergoodextend;
-    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend)
+    private $OrderUserInfo;
+    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend,OrderUserInfo $OrderUserInfo)
     {
         $this->orderReturn = $orderReturn;
         $this->ordergoods = $ordergoods;
         $this->ordergoodextend = $ordergoodextend;
+        $this->OrderUserInfo = $OrderUserInfo;
         $this->order = $order;
     }
     public static function get_return_info($params){
@@ -56,13 +60,12 @@ class OrderReturnRepository
     //查询退货列表
     public static function get_list($where,$additional){
         $additional['page'] = ($additional['page'] - 1) * $additional['limit'];
-        $parcels=DB::table('order_return')
-            ->leftJoin('order_goods', function ($join) {
-                $join->on('order_return.order_no', '=', 'order_goods.order_no');
-            })
+        $parcels = DB::table('order_return')
+            ->leftJoin('order_userinfo', 'order_return.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
+            ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
             ->where($where)
-            ->offset($additional['page'])->limit($additional['limit'])
-            ->select('order_return.*','order_goods.*')
+            ->select('order_return.create_time as c_time','order_return.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
             ->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['page']);
         if($parcels){
             return $parcels;
@@ -146,7 +149,6 @@ class OrderReturnRepository
             return false;
         }
     }
-    //
     //更新商品状态-退货-审核拒绝
     public static function deny_goods_update($params){
         if(isset($params['goods_no'])){
@@ -318,6 +320,14 @@ class OrderReturnRepository
         }
     }
 
+    public static function is_tui_qualified($where,$data){
+        if(OrderReturn::where($where)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     public static function update_return_info($order_no){
         if(OrderGoods::where('order_no','=',$order_no)->update(['goods_status'=>'1'])){
            return true;
@@ -378,14 +388,15 @@ class OrderReturnRepository
     }
     //检测合格与不合格-》修改商品状态
     public static function updategoods($where,$params){
-       $goods_res= ordergoods::where($where)->update($params);
+       $goods_res= OrderGoods::where($where)->update($params);
         if(!$goods_res){
             return false;
         }
-        $goods_extend_res= ordergoodextend::where($where)->update(['status'=>'1']);//修改商品扩展表商品状态为无效
+
+        /*$goods_extend_res= ordergoodextend::where($extend_where)->update(['status'=>'1']);//修改商品扩展表商品状态为无效
         if(!$goods_extend_res){
             return false;
-        }
+        }*/
         return true;
     }
     //查询退货单类型
@@ -411,7 +422,7 @@ class OrderReturnRepository
     }
     //创建换货单记录
     public static function createchange($params){
-        if (isset($param['order_no']) && isset($param['good_info']) &&  isset($param['good_info']['ime'])){
+        if (isset($param['order_no']) && isset($param['good_id']) &&  isset($param['good_no']) &&  isset($param['serial_number'])){
             return false;//参数错误
         }
         $create_result=ordergoodextend::query()->insert($params);
@@ -421,5 +432,75 @@ class OrderReturnRepository
             return false;
         }
     }
-
+    //退款成功更新退款状态
+    public static function updateStatus($params){
+        if(empty($params['order_no'])){
+            return false;
+        }
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no','=',$params['goods_no']];
+        }
+        $where[]=['order_no','=',$params['order_no']];
+        //更新退款单状态
+        $data['status']=ReturnStatus::ReturnTuiKuan;
+        $return_result= OrderReturn::where($where)->update($data);
+        if(!$return_result){
+            return false;
+        }
+        return true;
+    }
+    //退款成功更新商品状态
+    public static function updategoodsStatus($params){
+        if(empty($params['order_no'])){
+            return false;
+        }
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no','=',$params['goods_no']];
+        }
+        $where[]=['order_no','=',$params['order_no']];
+        $data['goods_status']=ReturnStatus::ReturnTuiKuan;
+        $goods_result= OrderGoods::where($where)->update($data);
+        if(!$goods_result){
+            return false;
+        }
+        return true;
+    }
+    //退款成功更新订单状态
+    public static function updateorderStatus($params){
+        if(empty($params['order_no'])){
+            return false;
+        }
+        $where[]=['order_no','=',$params['order_no']];
+        //更新退款单状态
+        $data['order_status']=OrderStatus::OrderRefunded;
+        $order_result= Order::where($where)->update($data);//修改商品扩展表商品状态为无效
+        if(!$order_result){
+            return false;
+        }
+        return true;
+    }
+    //获取退货单信息
+    public static function get_type($where){
+        if(empty($where)){
+            return false;
+        }
+        $orderData=OrderReturn::where($where)->first()->toArray();
+        if($orderData){
+            return $orderData;
+        }else{
+            return false;
+        }
+    }
+    //获取下单用户的user_id
+    public static function get_user_info($mobile){
+        if(empty($mobile)){
+            return false;
+        }
+        $userData=OrderUserInfo::where('user_mobile','=',$mobile)->first()->toArray();
+        if($userData){
+            return $userData;
+        }else{
+            return false;
+        }
+    }
 }

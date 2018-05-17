@@ -16,7 +16,7 @@ $api->version('v1', [
     'namespace' => 'App\Order\Controllers\Api\v1',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
-    'middleware' => 'api'
+    //'middleware' => 'api'
 ], function($api) {
     $api->post('token', 'UserController@token');    //获取token
     $api->post('refresh-token', 'UserController@refershToken'); //刷新token
@@ -26,7 +26,9 @@ $api->version('v1', [
    // $api->group(['middleware' => ['auth:api']], function($api) {
 
         $apiMap = config('apimap');
+
         $method = request()->input('method');
+
         if (isset($apiMap[$method])) {
             $api->post('/',  $apiMap[$method]);
         }

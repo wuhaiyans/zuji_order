@@ -17,17 +17,19 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'amount' => '', //授权金额；单位：分
      *		'front_url' => '', //前端回跳地址
      *		'back_url' => '', //后台通知地址
+     *		'name' => '', //预授权名称
+     *		'user_id' => '', //用户ID
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'Authorization_url' => '',跳转预授权接口
      * ]
      */
-    public static function authorization( $appid,array $params ){
+    public static function fundauthUrl( $appid,array $params ){
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
         $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.authorization');
+        $ApiRequest->setMethod('pay.alipay.fundauth');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){

@@ -35,6 +35,24 @@ use App\Lib\ApiStatus;
             return apiResponse([],ApiStatus::CODE_10104);
 
      }
+        /**
+         * @param array 数组    array('order_no'=>'12312313','goods_no'=>"23123123")
+         * 整单退款时 array('order_no'=>'12312313','goods_no'=>"")
+         * 单个商品退款时array('order_no'=>'12312313','goods_no'=>"23123123")
+         * 退款成功更新状态
+         */
+        public function updateStatus($params){
+            $base_api = config('tripartitle.API_INNER_URL');
+
+            $response = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'api.Return.updateStatus',//模拟
+                'data' => json_encode(['params'=>$params])
+            ]);
+
+            return $response;
+        }
 
 
 

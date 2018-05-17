@@ -83,7 +83,7 @@ class OrderStatus{
      * @return string 订单状态名称
      */
     public static function getStatusName($status){
-        $list = self::getStatusList();
+        $list = self::getStatusType();
         if( isset($list[$status]) ){
             return $list[$status];
         }

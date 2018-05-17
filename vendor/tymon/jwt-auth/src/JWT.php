@@ -44,13 +44,6 @@ class JWT
     protected $token;
 
     /**
-     * Lock the subject.
-     *
-     * @var bool
-     */
-    protected $lockSubject = true;
-
-    /**
      * JWT constructor.
      *
      * @param  \Tymon\JWTAuth\Manager  $manager
@@ -157,15 +150,15 @@ class JWT
     /**
      * Get the token.
      *
-     * @return \Tymon\JWTAuth\Token|null
+     * @return \Tymon\JWTAuth\Token|false
      */
     public function getToken()
     {
-        if ($this->token === null) {
+        if (! $this->token) {
             try {
                 $this->parseToken();
             } catch (JWTException $e) {
-                $this->token = null;
+                return false;
             }
         }
 
@@ -259,37 +252,38 @@ class JWT
      */
     protected function getClaimsForSubject(JWTSubject $subject)
     {
-        return array_merge([
+        return [
             'sub' => $subject->getJWTIdentifier(),
-        ], $this->lockSubject ? ['prv' => $this->hashSubjectModel($subject)] : []);
+            'prv' => $this->hashProvider($subject),
+        ];
     }
 
     /**
-     * Hash the subject model and return it.
+     * Hash the provider and return it.
      *
-     * @param  string|object  $model
+     * @param  string|object  $provider
      *
      * @return string
      */
-    protected function hashSubjectModel($model)
+    protected function hashProvider($provider)
     {
-        return sha1(is_object($model) ? get_class($model) : $model);
+        return sha1(is_object($provider) ? get_class($provider) : $provider);
     }
 
     /**
-     * Check if the subject model matches the one saved in the token.
+     * Check if the provider matches the one saved in the token.
      *
-     * @param  string|object  $model
+     * @param  string|object  $provider
      *
      * @return bool
      */
-    public function checkSubjectModel($model)
+    public function checkProvider($provider)
     {
         if (($prv = $this->payload()->get('prv')) === null) {
             return true;
         }
 
-        return $this->hashSubjectModel($model) === $prv;
+        return $this->hashProvider($provider) === $prv;
     }
 
     /**
@@ -342,20 +336,6 @@ class JWT
     public function setRequest(Request $request)
     {
         $this->parser->setRequest($request);
-
-        return $this;
-    }
-
-    /**
-     * Set whether the subject should be "locked".
-     *
-     * @param  bool  $lock
-     *
-     * @return $this
-     */
-    public function lockSubject($lock)
-    {
-        $this->lockSubject = $lock;
 
         return $this;
     }
