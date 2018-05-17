@@ -5,6 +5,9 @@ use Illuminate\Http\Request;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Service\OrderGiveback;
 use App\Order\Modules\Inc\OrderGivebackStatus;
+use App\Order\Modules\Service\OrderGoods;
+use App\Order\Modules\Service\OrderInstalment;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 
 class GivebackController extends Controller
 {
@@ -36,19 +39,66 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function get_applying_viewdata( Request $request ) {
-		$data = [
-			'goods_no' => '12333',
-			'goods_name' => 'iPhone X 256G',
-			'goods_picture' => 'https://paimgcdn.baidu.com/8C2FB68662B72E38?src=https://ss2.bdstatic.com/8_V1bjqh_Q23odCf/dsp-image/152249391.jpg&rz=urar_2_968_600&v=0',
-			'status' => OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_APPLYING),
-			'zuqi_type' => '2',
-			'zuqi' => '12',
-			'zuqi_begin_date' => '2018-05-16 18:30:56',
-			'zuqi_end_date' => '2019-05-16 18:30:56',
-			'zujin_already_pay' => '3563',
-			'zujin_need_pay' => '721',
-			'order_no' => '123444',
-		];
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+		if( empty($paramsArr['goods_no']) ) {
+            return apiResponse([],ApiStatus::CODE_10104,'参数错误：商品编号为空!');
+		}
+		$goodsNo = $paramsArr['goods_no'];//提取商品编号
+		//-+--------------------------------------------------------------------
+		// | 通过商品编号获取需要展示的数据
+		//-+--------------------------------------------------------------------
+		
+		//初始化最终返回数据数组
+		$data = [];
+		
+		//获取商品基础数据
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([],ApiStatus::CODE_60001,'数据获取失败');
+		}
+		//组合最终返回商品基础数据
+		$data['goods_no'] = $orderGoodsInfo['goods_no'];
+		$data['goods_name'] = $orderGoodsInfo['goods_name'];
+		$data['goods_thumb'] = $orderGoodsInfo['goods_thumb'];
+		$data['status'] = OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_APPLYING);
+		$data['zuqi'] = $orderGoodsInfo['zuqi'];
+		$data['zuqi_type'] = $orderGoodsInfo['zuqi_type'];
+		$data['zuqi_begin_date'] = $orderGoodsInfo['begin_time'];
+		$data['zuqi_end_date'] = $orderGoodsInfo['end_time'];
+		$data['order_no'] = $orderGoodsInfo['order_no'];
+		
+		//默认不需要展示已支付和待支付租金价格字段
+		$data['zujin_view_flag'] = 0;
+		//判断商品租期类型【长租代扣支付需要获取分期】
+		if( $orderGoodsInfo['zuqi_type'] == 1 ){
+			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+		}
+		//获取当前商品是否存在分期列表
+		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+		if( empty($instalmentList[$goodsNo]) ){
+			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+		}
+		
+		//长租代扣分期，展示已支付租金和待支付租金
+		$data['zujin_view_flag'] = 1;
+		$zujinAlreadyPay = $zujinNeedPay = 0;
+		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
+				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+			}
+			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+				$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+			}
+		}
+		//组合最终返回价格基础数据
+		$data['zujin_already_pay'] = $zujinAlreadyPay;
+		$data['zujin_need_pay'] = $zujinNeedPay;
 		return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
 	}
 	/**
