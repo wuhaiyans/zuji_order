@@ -72,7 +72,7 @@ class OrderCreater
         $orderCreater = new WithholdingComponnet($orderCreater);
 
         //收货地址
-        $orderCreater = new AddressComponnet($orderCreater,$data['address_id']);
+        $orderCreater = new AddressComponnet($orderCreater);
 
         //渠道
         $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);

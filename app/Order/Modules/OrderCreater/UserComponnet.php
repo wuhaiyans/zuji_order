@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\User\User;
+use Mockery\Exception;
 
 class UserComponnet implements OrderCreater
 {
@@ -49,10 +50,8 @@ class UserComponnet implements OrderCreater
         //获取用户信息
         $userInfo =User::getUser(config('tripartite.Interior_Goods_Request_data'), $this->userId,$addressId);
         if (!is_array($userInfo)) {
-            throw new ComponnetException("获取用户接口失败");
+            throw new Exception("获取用户接口失败");
         }
-        $mobile =$userInfo['username'];
-
         $this->mobile = $userInfo['username'];
         $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;
@@ -64,11 +63,10 @@ class UserComponnet implements OrderCreater
         $this->certNo = $userInfo['cert_no'];
         $this->credit = intval($userInfo['credit']);
         $this->face = $userInfo['face']?1:0;
-        $age =substr($this->cert_no,6,8);
+        $age =substr($this->certNo,6,8);
         $now = date("Ymd");
         $this->age = intval(($now-$age)/10000);
         $this->risk = $userInfo['risk']?1:0;
-        p($userInfo);die;
     }
     /**
      * 获取订单创建器
@@ -76,7 +74,7 @@ class UserComponnet implements OrderCreater
      */
     public function getOrderCreater():OrderCreater
     {
-        var_dump("用户组件 -get_order_creater");
+        return $this->componnet->getOrderCreater();
     }
     /**
      * 过滤

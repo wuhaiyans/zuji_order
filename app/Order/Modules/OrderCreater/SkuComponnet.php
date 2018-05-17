@@ -11,13 +11,19 @@ namespace App\Order\Modules\OrderCreater;
 
 class SkuComponnet implements OrderCreater
 {
+    //组件
+    private $componnet;
+    public function __construct(OrderCreater $componnet, array $sku,int $payType)
+    {
+        $this->componnet = $componnet;
+    }
     /**
      * 获取订单创建器
      * @return OrderCreater
      */
     public function getOrderCreater():OrderCreater
     {
-        var_dump("sku组件 -get_order_creater");
+        return $this->componnet->getOrderCreater();
     }
     /**
      * 过滤
