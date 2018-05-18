@@ -59,9 +59,8 @@ class Coupon{
             'coupon_id'=>$arr['coupon_id'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        //var_dump($data);die;
         $info =json_decode($info,true);
-        //var_dump($info);
+        dd($info);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

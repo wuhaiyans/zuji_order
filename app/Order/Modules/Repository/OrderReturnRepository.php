@@ -35,12 +35,11 @@ class OrderReturnRepository
         if(empty($params['goods_no'])){
             return false;
         }
-        $goods_no=explode(',',$params['goods_no']);
-        foreach($goods_no as $k=>$v){
+        foreach($params['goods_no'] as $k=>$v){
             $where[$k][]=['goods_no','=',$v];
             $where[$k][]=['order_no','=',$params['order_no']];
             $where[$k][]=['user_id','=',$params['user_id']];
-            $return_info[]=orderReturn::where($where[$k])->first();
+            $return_info=orderReturn::where($where[$k])->get()->toArray();
         }
         if($return_info){
             return $return_info;
@@ -96,8 +95,7 @@ class OrderReturnRepository
             return false;
         }
         if(isset($params['goods_no'])){
-            $goods_no=explode(',',$params['goods_no']);
-            foreach($goods_no as $k=>$v){
+            foreach($params['goods_no'] as $k=>$v){
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$params['order_no']];
                 $data['goods_status']=ReturnStatus::ReturnCreated;
@@ -222,11 +220,19 @@ class OrderReturnRepository
         if(empty($params['user_id'])){
             return false;
         }
-        $where[]=['order_no','=',$params['order_no']];
-        $where[]=['user_id','=',$params['user_id']];
-        $return_info=orderReturn::where($where)->first()->toArray();
-        if($return_info){
-            return $return_info;
+        foreach($params['goods_no'] as $k=>$v){
+            $where[]=['order_return.order_no','=',$params['order_no']];
+            $where[]=['order_return.user_id','=',$params['user_id']];
+            $where[]=['order_return.goods_no','=',$params['goods_no'][$k]];
+            $parcels = DB::table('order_return')
+                ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+                ->leftJoin('order_good_extend',[['order_return.order_no', '=', 'order_good_extend.order_no'],['order_return.goods_no', '=', 'order_good_extend.good_no']])
+                ->where($where)
+                ->select('order_return.user_id','order_return.business_key','order_return.status','order_return.wuliu_channel_id','order_return.logistics_no','order_goods.quantity','order_good_extend.serial_number','order_good_extend.imei1','order_good_extend.imei2','order_good_extend.imei3')
+                ->get()->toArray();
+        }
+        if($parcels){
+            return $parcels;
         }else{
             return false;
         }
@@ -247,7 +253,7 @@ class OrderReturnRepository
             })
             ->where($where)
             ->select('order_good_extend.*','order_goods.*')
-            ->get();;
+            ->get();
         if($return_info){
             return $return_info;
         }else{
@@ -265,9 +271,22 @@ class OrderReturnRepository
         if(empty($data['wuliu_channel_id'])){
             return false;
         }
-        $params['wuliu_channel_id']=$data['wuliu_channel_id'];
-        $params['logistics_no']=$data['logistics_no'];
-        if(OrderReturn::where('order_no','=',$data['order_no'])->update($params)){
+        if(isset($data['goods_no'])){
+            foreach($data['goods_no'] as $k=>$v){
+                $where[$k][]=['goods_no','=',$v];
+                $where[$k][]=['order_no','=',$data['order_no']];
+                $params['wuliu_channel_id']=$data['wuliu_channel_id'];
+                $params['logistics_no']=$data['logistics_no'];
+                $update_result=OrderReturn::where($where[$k])->update($params);
+            }
+
+        }else{
+            $where[]=['order_no','=',$data['order_no']];
+            $params['wuliu_channel_id']=$data['wuliu_channel_id'];
+            $params['logistics_no']=$data['logistics_no'];
+            $update_result=OrderReturn::where($where)->update($params);
+        }
+        if($update_result){
             $res=OrderReturn::where('order_no','=',$data['order_no'])->first()->toArray();
             return $res;
         }else{
@@ -491,7 +510,7 @@ class OrderReturnRepository
             return false;
         }
     }
-    //获取下单用户的user_id
+    //获取下单用户的信息
     public static function get_user_info($mobile){
         if(empty($mobile)){
             return false;
@@ -501,6 +520,21 @@ class OrderReturnRepository
             return $userData;
         }else{
             return false;
+        }
+    }
+    //申请退货-》获取商品信息
+    public static function getGoodsList($goods_no,$order_no){
+        if(empty($goods_no)){
+            return false;//商品编号不能为空
+        }
+        if(empty($order_no)){
+            return false;//订单编号不能为空
+        }
+        $userData=OrderGoods::where([['order_no','=',$order_no],['goods_no','=',$goods_no]])->first();
+        if($userData){
+            return $userData->toArray();
+        }else{
+            return [];
         }
     }
 }

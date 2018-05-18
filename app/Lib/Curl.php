@@ -89,7 +89,10 @@ class Curl {
 		if(is_array($params) ){
 			$params = http_build_query( $params );
 		}
+
+//		dd($params);
         $output = self::_send($url, $params, $header);
+//        dd($output);
         return $output;
     }
     
@@ -123,10 +126,10 @@ class Curl {
 		// curl_setopt($ch, CURLOPT_HEADER, true);
 		// 发送请求
         $output = self::_curl_exec($ch);
-		//	$curl_info = curl_getinfo($ch);
-		//	if( 1 ){
-		//	    var_dump($curl_info);
-		//	}
+//		$curl_info = curl_getinfo($ch);
+//		if( 1 ){
+//			var_dump($curl_info);
+//		}
         curl_close($ch);
         return $output;
     }

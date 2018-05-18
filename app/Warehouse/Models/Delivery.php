@@ -15,7 +15,7 @@ class Delivery extends Warehouse
     const STATUS_CANCEL     = 6;//已取消
 
 
-
+    public $incrementing = false;
     const CREATED_AT = 'create_time';
 //    const UPDATED_AT = 'update_time';
 
@@ -63,6 +63,34 @@ class Delivery extends Warehouse
     public function imeis()
     {
         return $this->hasMany(DeliveryGoodsImei::class, 'delivery_no');
+    }
+
+
+    public static function sta($status=null)
+    {
+        $st = [
+            self::STATUS_NONE   => '已删除',
+            self::STATUS_INIT   => '待配货',
+            self::STATUS_WAIT_SEND  => '已配货 待发货',
+            self::STATUS_SEND       => '已发货 待签收',
+            self::STATUS_RECEIVED   => '签收完成',
+            self::STATUS_REFUSE     => '拒签',
+            self::STATUS_CANCEL     => '已取消'
+        ];
+
+        if ($status === null) return $st;
+
+        return isset($st[$status]) ? $st[$status] : '';
+    }
+
+
+    /**
+     * @return array|mixed|string
+     * 取收货状态
+     */
+    public function getStatus()
+    {
+        return self::sta($this->status);
     }
 
 

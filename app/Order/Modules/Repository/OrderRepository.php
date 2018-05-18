@@ -316,7 +316,6 @@ class OrderRepository
             $whereArray[] = ['user_id', '=', $userId];
         }
         $order =  Order::where($whereArray)->first();
-        return $order->toArray();
         if (!$order) return false;
         $order->order_status = OrderStatus::OrderClosed;
         if ($order->save()) {
@@ -348,7 +347,7 @@ class OrderRepository
         $orderNo=$where['order_no'];
         $order =  Order::where([
             ['order_no', '=', $orderNo],
-        ])->first();
+        ])->first()->toArray();
         if (!$order){
             return false;
         }else{
@@ -362,14 +361,11 @@ class OrderRepository
      */
     public static function getOrderInfo($param = array())
     {
-
         if (empty($param)) {
             return false;
         }
-
         if (isset($param['order_no']) && !empty($param['order_no']))
         {
-
             $orderData = DB::table('order_info')
                 ->leftJoin('order_userinfo', function ($join) {
                     $join->on('order_info.order_no', '=', 'order_userinfo.order_no');

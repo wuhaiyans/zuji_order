@@ -349,7 +349,7 @@ class DeliveryRepository
     {
         $query = Delivery::where($params);
 
-        if (is_array($logic_params)) {
+        if (is_array($logic_params) && count($logic_params)>0) {
             foreach ($logic_params as $logic) {
                 $query->where($logic[0], $logic[1] ,$logic[2]);
             }

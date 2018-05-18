@@ -8,6 +8,8 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Models\Delivery;
+use App\Warehouse\Models\DeliveryGoods;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -181,17 +183,16 @@ class DeliveryService
 //        if (isset($params['order_no']) && $params['order_no']) {
 //            $whereParams['order_no'] = $params['order_no'];
 //        }
-//        if (isset($params['delivery_no']) && $params['delivery_no']) {
-//            $whereParams['delivery_no'] = $params['delivery_no'];
-//        }
+        if (isset($params['delivery_no']) && $params['delivery_no']) {
+            $whereParams['delivery_no'] = $params['delivery_no'];
+        }
 
         $search = $this->paramsSearch($params);
-
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
         }
 
-        $page = isset($params['page']) ? $params['page'] : null;
+        $page = isset($params['page']) ? $params['page'] : 1;
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
@@ -219,7 +220,6 @@ class DeliveryService
         }
 
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
-
         $items = $collect->items();
 
         if (!$items) {
@@ -235,6 +235,8 @@ class DeliveryService
         $result = [];
         foreach ($items as $item) {
             $it = $item->toArray();
+            $it['logistics_name'] = $this->getLogisticsName($it['logistics_id']);
+            $it['status_mark'] = $item->getStatus();
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $item->goods->toArray();
             array_push($result, $it);
@@ -242,6 +244,16 @@ class DeliveryService
 
         return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
 
+    }
+
+    /**
+     * @param $id
+     * @param $no
+     * 取物流名
+     */
+    public function getLogisticsName($id)
+    {
+        return '顺风';
     }
 
     /**
