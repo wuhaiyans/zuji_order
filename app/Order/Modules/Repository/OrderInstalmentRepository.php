@@ -233,16 +233,15 @@ class OrderInstalmentRepository
      * 关闭分期
      */
     public static function closeInstalment($data){
-
         if (!is_array($data) || $data == [] ) {
             return false;
         }
         $where = [];
         if(isset($data['order_no'])){
-            $where .= ['order_no', '=', $data['order_no']];
+            $where[] = ['order_no', '=', $data['order_no']];
         }
         if(isset($data['id'])){
-            $where .= ['id', '=', $data['id']];
+            $where[] = ['id', '=', $data['id']];
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
