@@ -36,11 +36,13 @@ class ApiRequest {
 	}
 
 	public function setAppid(string $appid) {
-		return $this->appid = $appid;
+		$this->appid = $appid;
+		return $this;
 	}
 
 	public function setMethod(string $method) {
-		return $this->method = $method;
+		$this->method = $method;
+		return $this;
 	}
 
 	/**
@@ -58,6 +60,7 @@ class ApiRequest {
 	 */
 	public function setUrl($url) {
 		$this->url = $url;
+		return $this;
 	}
 
 	/**
@@ -73,6 +76,7 @@ class ApiRequest {
 			$params = json_decode($params, true);
 		}
 		$this->params = $params;
+		return $this;
 	}
 
 	/**
@@ -85,11 +89,14 @@ class ApiRequest {
 		if ($this->url == '') {
 			throw new \Exception('ApiRequest illegal state');
 		}
+		$heders = [
+			'Content-Type: application/json',
+		];
 		$jsonStr = '';
 		if ($method == self::METHOD_POST) {
-			$jsonStr = Curl::post($this->url, $this->toString());
+			$jsonStr = Curl::post($this->url, $this->toString(),$heders);
 		} elseif ($method == self::METHOD_GET) {
-			$jsonStr = Curl::get($this->url, $this->toString());
+			$jsonStr = Curl::get($this->url, $this->toString(),$heders);
 		}
 		$Response = new ApiResponse($jsonStr);
 		return $Response;

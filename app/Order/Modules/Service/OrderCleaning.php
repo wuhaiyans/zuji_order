@@ -90,6 +90,7 @@ class OrderCleaning
         //查询清算表
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
         if (empty($orderCleanData)) return false;
+        dd($orderCleanData);
 
 
         //发起清算 解押金，退租金

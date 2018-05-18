@@ -9,37 +9,6 @@ use App\Lib\ApiRequest;
 class FundAuthApi extends \App\Lib\BaseApi {
 
     /**
-     * 预授权获取URL接口
-     * @param string $appid		应用ID
-     * @param array $params
-     * [
-     *		'out_auth_no' => '', //订单系统授权码
-     *		'amount' => '', //授权金额；单位：分
-     *		'front_url' => '', //前端回跳地址
-     *		'back_url' => '', //后台通知地址
-     *		'name' => '', //预授权名称
-     *		'user_id' => '', //用户ID
-     * ]
-     * @return mixed false：失败；array：成功
-     * [
-     *		'Authorization_url' => '',跳转预授权接口
-     * ]
-     */
-    public static function fundauthUrl( $appid,array $params ){
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.fundauth');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '获取预授权链接地址失败';
-            return false;
-        }
-        return $Response->getData();
-    }
-
-    /**
      * 预授权状态查询接口
      * @param string $appid		应用ID
      * @param array $params
@@ -57,11 +26,11 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'auth_time' => '',//授权完成时间
      * ]
      */
-    public static function authorizationStatus( $appid,array $params ){
+    public static function fundAuthStatus( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.authorizationstatus');
+        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+        $ApiRequest->setMethod('pay.api.fundauthstatus');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -80,19 +49,21 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //解冻金额 单位：分
      *		'back_url' => '', //后台通知地址
+     *		'user_id' => '', //用户id
+     *		'remark' => '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'out_trade_no' => '',//支付系统交易码
      *		'trade_no' => '',//业务系统交易码
-     *		'amount' => '',//解冻金额 单位：分
+     *		'out_auth_no' => '',//支付系统授权码
      * ]
      */
-    public static function thaw( $appid,array $params ){
+    public static function unfreeze( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.thaw');
+        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+        $ApiRequest->setMethod('pay.api.unfreeze');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -111,20 +82,21 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //交易金额；单位：分
      *		'back_url' => '', //后台通知地址
+     *		'user_id' => '', //用户id
+     *		'remark' => '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'out_trade_no' => '',//支付系统交易码
      *		'trade_no' => '',//业务系统交易码
-     *		'amount' => '',//交易金额；单位：分
-     *		'create_time' => '',//创建时间戳
+     *		'out_auth_no' => '',//支付系统授权码
      * ]
      */
-    public static function thawPay( $appid,array $params ){
+    public static function unfreezeAndPay( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.thawpay');
+        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+        $ApiRequest->setMethod('pay.api.unfreezeandpay');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){

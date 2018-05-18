@@ -73,6 +73,12 @@ class Pay extends \App\Lib\Configurable
 	 */
 	protected $updateTime = 0;
 	
+	/**
+	 * 用于支付系统交易名称
+	 * @var 交易名称
+	 */
+	protected $name = '';
+	
 	//-+------------------------------------------------------------------------
 	// | 支付相关
 	//-+------------------------------------------------------------------------
@@ -99,6 +105,19 @@ class Pay extends \App\Lib\Configurable
 	
 	public function __construct(array $data=[]) {
 		parent::__construct($data);
+	}
+	
+	public function getPaymentNo(){
+		return $this->paymentNo;
+	}
+	public function getPaymentAmount(){
+		return $this->paymentAmount;
+	}
+	public function getPaymentFenqi(){
+		return $this->paymentFenqi;
+	}
+	public function getPaymentChannel(){
+		return $this->paymentChannel;
 	}
 	
 	/**
