@@ -118,6 +118,8 @@ return [
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
 	//-+------------------------------------------------------------------------
+	//还机-设备列表信息
+    'api.giveback.goods.list'       => 'GivebackController@goodsList',
 	//还机申请页面接口
     'api.giveback.applying.viewdata'       => 'GivebackController@getApplyingViewdata',
 	//还机申请提交接口
