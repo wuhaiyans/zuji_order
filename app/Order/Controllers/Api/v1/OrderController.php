@@ -167,7 +167,7 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
         }
 
-        $code = Service\OrderOperate::cancelOrder($params['order_no']);
+        $code = Service\OrderOperate::cancelOrder($params['order_no'], $params['user_id']=18);
 
         return apiResponse([],ApiStatus::CODE_0,"success");
 

@@ -89,7 +89,10 @@ class Curl {
 		if(is_array($params) ){
 			$params = http_build_query( $params );
 		}
+
+//		dd($params);
         $output = self::_send($url, $params, $header);
+//        dd($output);
         return $output;
     }
     

@@ -214,7 +214,6 @@ class OrderInstalment
         if (!is_array($data) || $data == [] ) {
             return false;
         }
-
         $result =  OrderInstalmentRepository::closeInstalment($data);
         return $result;
     }
