@@ -35,12 +35,12 @@ class PayCreater {
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
 	public static function createPayment( array $params ): Pay{
+		LogApi::debug('[支付阶段]P创建');
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 		
 		$payModel = new OrderPayModel();
-		//sql_profiler();
-		$b = $payModel->insert([
+		$data = [
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -50,10 +50,14 @@ class PayCreater {
 			'payment_channel'	=> $params['paymentChannel'],
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
-		]);
+		];
+		//sql_profiler();
+		$b = $payModel->insert( $data );
 		if( !$b ){
+			LogApi::error('[支付阶段]P创建失败',$data);
 			throw new \Exception( '创建支付记录失败' );
 		}
+		LogApi::debug('[支付阶段]P创建成功');
 		return new Pay($params);
 	}
 	
@@ -70,12 +74,12 @@ class PayCreater {
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
 	public static function createWithhold( $params ): Pay{
+		LogApi::debug('[支付阶段]W创建');
 		$params['status'] = PayStatus::WAIT_WHITHHOLD;
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
 		
 		$payModel = new OrderPayModel();
-		//sql_profiler();
-		$b = $payModel->insert([
+		$data = [
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -84,10 +88,14 @@ class PayCreater {
 			'withhold_no'	=> $params['withholdNo'],
 			'withhold_status'	=> $params['withholdStatus'],
 			'withhold_channel'	=> $params['withholdChannel'],
-		]);
+		];
+		//sql_profiler()
+		$b = $payModel->insert( $data );
 		if( !$b ){
+			LogApi::error('[支付阶段]W创建失败',$data);
 			throw new \Exception( '创建支付记录失败' );
 		}
+		LogApi::debug('[支付阶段]W创建成功');
 		return new Pay($params);
 	}
 	
@@ -106,12 +114,12 @@ class PayCreater {
 	 */
 	public static function createFundauth( array $params ): Pay{
 		
+		LogApi::debug('[支付阶段]F创建');
 		$params['status'] = PayStatus::WAIT_FUNDAUTH;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
 		
 		$payModel = new OrderPayModel();
-		//sql_profiler();
-		$b = $payModel->insert([
+		$data = [
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -119,10 +127,14 @@ class PayCreater {
 			'fundauth_no'	=> $params['fundauthNo'],
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_channel'	=> $params['fundauthChannel'],
-		]);
+		];
+		//sql_profiler();
+		$b = $payModel->insert( $data );
 		if( !$b ){
+			LogApi::error('[支付阶段]F创建失败',$data);
 			throw new \Exception( '创建资金预授权记录失败' );
 		}
+		LogApi::debug('[支付阶段]F创建成功');
 		return new Pay( $params );
 	}
 	
@@ -149,7 +161,7 @@ class PayCreater {
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
 		
-		LogApi::debug('[支付阶段]WF创建',$data);
+		LogApi::debug('[支付阶段]WF创建');
 		$payModel = new OrderPayModel();
 		$data = [
 			'business_type'	=> $params['businessType'],
