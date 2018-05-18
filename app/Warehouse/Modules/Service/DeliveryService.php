@@ -191,7 +191,7 @@ class DeliveryService
             $whereParams = array_merge($whereParams, $search);
         }
 
-        $page = isset($params['current_page']) ? $params['current_page'] : null;
+        $page = isset($params['page']) ? $params['page'] : null;
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
@@ -223,13 +223,13 @@ class DeliveryService
         $items = $collect->items();
 
         if (!$items) {
-            return ['list'=>[], 'limit'=>$limit, 'total'=>0, 'currentPage'=>0];
+            return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'currentPage'=>0];
         }
 
         $show_detail = isset($params['detail']) ? $params['detail'] : false;
 
         if (!$show_detail) {
-            return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+            return ['data'=>$items, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
         }
 
         $result = [];
