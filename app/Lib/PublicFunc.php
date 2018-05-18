@@ -229,8 +229,8 @@ function v($data, $exit = '')
 
 /**
  * heaven
- * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+毫秒（5位）+随机数（1位）</p>
- * @param $noType :1分期交易号, 2退货编号, 3支付交易, 4预授权
+ * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）</p>
+ * @param $noType :1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码
  *
  */
 function createNo($noType=1){
@@ -240,6 +240,7 @@ function createNo($noType=1){
         2 => 'T',
         3 => 'P',
         4 => 'Y',
+        5 => 'C',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
@@ -277,6 +278,7 @@ function array_group_by($arr, $key)
 }
 
 /**
+ * heavenwu
  * sql调试
  */
 function sql_profiler()

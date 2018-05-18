@@ -7,6 +7,7 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Models\OrderClearing;
+use App\Order\Modules\Repository\OrderRepository;
 
 class OrderClearingRepository
 {
@@ -17,15 +18,21 @@ class OrderClearingRepository
      * @param $param
      * @return bool|string
      */
-    public function createOrderClean($param){
+    public static function createOrderClean($param){
 
-        if (empty($param)) {
+
+        if (empty($param) || empty($param['order_no'])) {
             return false;
         }
         $orderClearData = new OrderClearing();
+        //根据订单号查询订单信息
+
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+        if (empty($orderInfo)) return false;
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
+            'out_refund_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
             'claim_name'=>  isset($param['claim_name'])?$param['claim_name']:0 ,
@@ -44,8 +51,10 @@ class OrderClearingRepository
             'status'=>  isset($param['status'])?$param['status']:0 ,
             'create_time'=>time(),
             'update_time'=>time(),
+            'app_id' => $orderInfo['appid'],
+            'out_account'=>$orderInfo['pay_type'],
         ];
-        $success =$orderClearData->create($order_data);
+        $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
         }
@@ -67,10 +76,10 @@ class OrderClearingRepository
         if (isset($param['business_type']) &&  isset($param['business_no'])){
             $whereArray[] = ['business_type', '=', $param['business_type']];
             $whereArray[] = ['business_no', '=', $param['business_no']];
+            $orderData =  OrderClearing::where($whereArray)->first()->toArray();
+            return $orderData;
         }
-
-        $orderData =  OrderClearing::where($whereArray)->first()->toArray();
-        return $orderData;
+        return false;
 
     }
 

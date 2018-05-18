@@ -8,20 +8,12 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderPayWithhold extends Model
+class OrderPayWithholdModel extends Model
 {
 
     protected $table = 'order_pay_withhold';
 
     protected $primaryKey='withhold_no';
-
-
-    /**
-     * 默认使用时间戳戳功能
-     *
-     * @var bool
-     */
-    public $timestamps = false;
 
 
     // 可以被批量赋值的属性。

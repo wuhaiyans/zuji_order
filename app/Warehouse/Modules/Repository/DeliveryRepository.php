@@ -349,15 +349,15 @@ class DeliveryRepository
     {
         $query = Delivery::where($params);
 
-        if (is_array($logic_params)) {
+        if (is_array($logic_params) && count($logic_params)>0) {
             foreach ($logic_params as $logic) {
                 $query->where($logic[0], $logic[1] ,$logic[2]);
             }
         }
         return $query->paginate($limit,
             [
-                'delivery_no','order_no', 'logistics_id','logistics_no',
-                'status', 'create_time', 'delivery_time', 'status_remark'
+                'delivery_no','order_no', 'logistics_id','logistics_no','customer','customer_mobile',
+                'customer_address','status', 'create_time', 'delivery_time', 'status_remark'
             ],
             'page', $page);
     }

@@ -139,6 +139,63 @@ class OrderCleaningController extends Controller
 
     }
 
+    /**
+     * 创建订单清单
+    params": - {
+    "business_type":"mock",    //类型：String  必有字段  备注：业务类型
+    "business_no":"mock"       //类型：String  必有字段  备注：业务编号
+     }
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createOrderClean(Request $request)
+    {
+
+        $params = $request->all();
+
+        $rules = [
+            'business_type'  => 'required',
+            'business_no'  => 'required'
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $res = OrderCleaning::createOrderClean($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
+
+
+
+    /**
+     * 订单清算出帐
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderCleanOperate(Request $request)
+    {
+
+        $params = $request->all();
+
+        $rules = [
+            'business_type'  => 'required',
+            'business_no'  => 'required'
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $res = OrderCleaning::orderCleanOperate($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+    }
+
 
 
 

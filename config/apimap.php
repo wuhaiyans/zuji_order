@@ -36,7 +36,8 @@ return [
     'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
     //更新清算状态
     'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
-
+    //创建订单清算单
+    'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
 
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
@@ -58,9 +59,9 @@ return [
 
     // 代扣相关
     // 代扣协议查询
-    'api.Withholding.query'             => 'WithholdController@query',
+    'api.Withhold.query'                => 'WithholdController@query',
     // 代扣签约接口
-    'api.Withholding.sign'              => 'WithholdController@sign',
+    'api.Withhold.sign'                 => 'WithholdController@sign',
     // 代扣签约回调接口
     'api.Withhold.sign_notify'          => 'WithholdController@sign_notify',
     // 代扣解约接口
@@ -109,11 +110,13 @@ return [
 	// | 还机相关接口
 	//-+------------------------------------------------------------------------
 	//还机申请页面接口
-    'api.giveback.applying.viewdata'       => 'GivebackController@get_applying_viewdata',
+    'api.giveback.applying.viewdata'       => 'GivebackController@getApplyingViewdata',
 	//还机申请提交接口
     'api.giveback.create'       => 'GivebackController@create',
 	//还机更新状态为待检测【确认收货】
-    'api.giveback.notify.evaluation'       => 'GivebackController@notify_evaluation',
+    'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
+	//还机更新状态【接收确认检测结果】
+    'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
 
     // test
     'api.Test.test'       => 'TestController@test',
