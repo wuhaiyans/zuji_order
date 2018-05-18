@@ -31,7 +31,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdingpay');
+        $ApiRequest->setMethod('pay.api.withholdingpay');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -61,7 +61,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdquery');
+        $ApiRequest->setMethod('pay.api.withholdquery');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -90,7 +90,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdingstatus');
+        $ApiRequest->setMethod('pay.api.withholdingstatus');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -121,7 +121,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.unsign');
+        $ApiRequest->setMethod('pay.api.unsign');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
