@@ -12,18 +12,17 @@ class AlipayApi extends \App\Lib\BaseApi {
 	 * @param string $appid		应用ID
 	 * @param array $params
 	 * [
-	 *		'out_no' => '',
-	 *		'amount' => '',
-	 *		'name' => '',
-	 *		'back_url' => '',
-	 *		'front_url' => '',
-	 *		'fenqi' => '',
-	 *		'user_id' => '',
+	 *		'out_no' => '', //业务平台支付码
+	 *		'amount' => '', //支付金额 分
+	 *		'name' => '', //支付名称
+	 *		'back_url' => '', //后端回调地址
+	 *		'front_url' => '', //前端回调地址
+	 *		'fenqi' => '', //分期期数
+	 *		'user_id' => '', //用户id
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'url' => '',
-	 *		'params' => '',
+	 *		'payment_url' => '',//支付链接
 	 * ]
 	 */
 	public static function getUrl( array $params ){
@@ -83,7 +82,7 @@ class AlipayApi extends \App\Lib\BaseApi {
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'Authorization_url' => '',跳转预授权接口
+	 *		'fundauth_url' => '',跳转预授权接口
 	 * ]
 	 */
 	public static function fundAuthUrl( array $params ){
