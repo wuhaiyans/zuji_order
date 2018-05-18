@@ -32,7 +32,7 @@ class OrderGoodsRepository
 	 * $goodsInfo = [<br/>
 	 *		'id' => '',//订单商品自增id<br/>
 	 *		'goods_name' => '',//订单商品自增id<br/>
-	 *		'goods_id' => '',//商品id<br/>
+	 *		'zuji_goods_id' => '',//以前商品id<br/>
 	 *		'goods_no' => '',//商品sn<br/>
 	 *		'goods_thumb' => '',//缩略图<br/>
 	 *		'prod_id' => '',//产品id<br/>

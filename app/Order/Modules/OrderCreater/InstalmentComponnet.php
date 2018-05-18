@@ -9,13 +9,22 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Controllers\Api\v1\InstalmentController;
+use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Service\OrderInstalment;
+
 class InstalmentComponnet implements OrderCreater
 {
     //组件
     private $componnet;
-    public function __construct(OrderCreater $componnet)
+    private $flag = true;
+    private $payType;
+
+
+    public function __construct(OrderCreater $componnet,int $payType)
     {
         $this->componnet = $componnet;
+        $this->payType =$payType;
     }
     /**
      * 获取订单创建器
@@ -35,8 +44,9 @@ class InstalmentComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        var_dump("分期组件 -filter");
-        return $this->componnet->filter();
+        //统一过滤
+        $filter =  $this->componnet->filter();
+        return $this->flag && $filter;
     }
 
     /**
@@ -45,7 +55,14 @@ class InstalmentComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("分期组件 -get_data_schema");
+        $schema =$this->componnet->getDataSchema();
+        var_dump($schema);
+        //分期单信息
+        if($this->payType!=PayInc::FlowerStagePay && $schema['order']['zuqi_type'] ==2){
+            $instalment =OrderInstalment::get_data_schema($schema);
+            var_dump($instalment);die;
+        }
+
         return [];
     }
 

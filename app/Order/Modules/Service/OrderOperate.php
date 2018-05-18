@@ -12,18 +12,11 @@ use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
-use App\Order\Modules\Service\OrderInstalment;
 use App\Lib\ApiStatus;
 
 
 class OrderOperate
 {
-    protected $orderInstal;
-    public function __construct( OrderInstalment $orderInstal)
-    {
-
-        $this->orderInstal = $orderInstal;
-    }
 
     /**
      * @param string $orderNo 订单编号
@@ -51,30 +44,32 @@ class OrderOperate
             if ($orderGoods) {
                 foreach ($orderGoods as $orderGoodsValues){
                     //暂时一对一
-//                    $stockDelta[] = [
-//                        'goodsId'=>$orderGoodsValues['good_id'],
-//                        'prod_id'=>$orderGoodsValues['prod_id'],
-//                        'quantity'=>$orderGoodsValues['quantity'],
-//                    ];
-                    $goodsId = $orderGoodsValues['good_id'];
-                    $prod_id = $orderGoodsValues['prod_id'];
+                    $goods_arr[] = [
+                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
+                        'spu_id'=>$orderGoodsValues['prod_id'],
+                        'num'=>$orderGoodsValues['quantity']
+                    ];
                 }
-                $success =Goods::addStock(config('tripartite.Interior_Goods_Request_data'),$prod_id, $goodsId);
+                $success =Goods::addStock(config('tripartite.Interior_Goods_Request_data'),$goods_arr);
+
 
             }
 
-            if (!$success || empty($orderGoods)) {
+            if ($success || empty($orderGoods)) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
             //优惠券归还
+
            $success =  Coupon::setCoupon(config('tripartite.Interior_Goods_Request_data'),['user_id'=>$userId ,'coupon_id'=>$orderNo]);
-            if (!$success) {
+
+            if ($success) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
+
             //分期关闭
-           $success =  $this->orderInstal->close(['order_no'=>$orderNo]);
+            $success =  OrderInstalment::close(['order_no'=>$orderNo]);
              if (!$success) {
                  DB::rollBack();
                  return ApiStatus::CODE_31004;
@@ -150,6 +145,7 @@ class OrderOperate
                 $orderListArray['data'][$keys]['goodsInfo'] = OrderRepository::getGoodsListByOrderId($values['order_no']);
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+
 
             }
 

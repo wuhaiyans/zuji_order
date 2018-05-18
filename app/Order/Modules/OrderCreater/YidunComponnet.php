@@ -13,6 +13,18 @@ use App\Lib\Fengkong\Fengkong;
 
 class YidunComponnet implements OrderCreater
 {
+    /**
+     * 风险类型：可接受的风险，无风险
+     */
+    const RISK_ACCEPT = 'accept';
+    /**
+     * 风险类型：不可接受的风险，高风险
+     */
+    const RISK_REJECT = 'reject';
+    /**
+     * 风险类型：用户根据自己业务模型进行验证，中风险
+     */
+    const RISK_VALIDATE = 'validate';
     //组件
     private $componnet;
     private $userInfo;

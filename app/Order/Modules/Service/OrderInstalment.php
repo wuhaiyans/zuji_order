@@ -42,6 +42,7 @@ class OrderInstalment
         ];
      */
     public static function create($params){
+        $params['sku']=$params['sku'][0];
         $order    = $params['order'];
         $sku      = $params['sku'];
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
@@ -118,10 +119,10 @@ class OrderInstalment
         ];
      */
     public static function get_data_schema($params){
+        $params['sku']=$params['sku'][0];
         $sku      = $params['sku'];
         $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
-
 
         $sku = filter_array($sku, [
             'zuqi'=>'required',
@@ -132,6 +133,7 @@ class OrderInstalment
             'zujin'=>'required',
             'pay_type'=>'required',
         ]);
+
         if(count($sku) < 7){
             return false;
         }
@@ -214,7 +216,6 @@ class OrderInstalment
         if (!is_array($data) || $data == [] ) {
             return false;
         }
-
         $result =  OrderInstalmentRepository::closeInstalment($data);
         return $result;
     }

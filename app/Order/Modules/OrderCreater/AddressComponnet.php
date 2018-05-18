@@ -13,9 +13,16 @@ class AddressComponnet implements OrderCreater
 {
     //组件
     private $componnet;
+    private $flag = true;
+
+    //收货地址
+    private $address;
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
+        //获取用户信息
+        $schema =$this->componnet->getDataSchema();
+        $this->address =$schema['address'];
     }
 
     /**
@@ -36,8 +43,14 @@ class AddressComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        var_dump("AddressComponnet -filter");
-        return $this->componnet->filter();
+        $filter =$this->componnet->filter();
+
+        if(empty($this->address)){
+            $this->getOrderCreater()->setError('收货地址不允许为空');
+            $this->flag = false;
+        }
+
+        return $this->flag && $filter;
     }
 
     /**
@@ -46,8 +59,7 @@ class AddressComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("AddressComponnet -get_data_schema");
-        return [];
+        return $this->componnet->getDataSchema();
     }
 
     /**
@@ -58,6 +70,48 @@ class AddressComponnet implements OrderCreater
     {
         $this->componnet->create();
         var_dump("AddressComponnet -create");
+//        if( !$this->flag ){
+//            return false;
+//        }
+//        $b = $this->componnet->create();
+//        if( !$b ){
+//            return false;
+//        }
+//
+//        //var_dump( '---------------------------保存收货地址信息...' );
+//
+//        // 保存收货地址
+//        $order_id = $this->componnet->get_order_creater()->get_order_id();
+//        $data = [
+//            'order_id' => $order_id,
+//            'user_id' => $this->user_id,
+//            'name' => $this->name,
+//            'mobile' => $this->mobile,
+//            'address' => $this->address,
+//            'province_id' => $this->province_id,
+//            'city_id' => $this->city_id,
+//            'country_id' => $this->country_id,
+//        ];
+//        $order2_address_table = \hd_load::getInstance()->table('order2/order2_address');
+//        $address_id = $order2_address_table->add($data);
+//        if( $address_id<1 ){
+//            $this->get_order_creater()->set_error('保存收货地址信息失败');
+//            return false;
+//        }
+//
+//        // address_id 写入订单表
+//        $data = [
+//            'address_id' => $address_id,
+//        ];
+//        $order_table = \hd_load::getInstance()->table('order2/order2');
+//        $b = $order_table->where(['order_id'=>$order_id])->save($data);
+//        if( !$b ){
+//            $this->get_order_creater()->set_error('保存收货地址ID失败');
+//            return false;
+//        }
+//
+//        return true;
+//    }
         return true;
     }
 }

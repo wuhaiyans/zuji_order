@@ -20,10 +20,12 @@ class SkuComponnet implements OrderCreater
     private $flag = true;
     //租期类型
     private $zuqiType=1;
+    private $zuqiTypeName;
 
     private $goodsArr;
     //支付方式
     private $payType;
+
 
     public function __construct(OrderCreater $componnet, array $sku,int $payType)
     {
@@ -32,14 +34,22 @@ class SkuComponnet implements OrderCreater
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
+
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
+            $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
+            if ($this->zuqiType == 1) {
+                $this->zuqiTypeName = "day";
+            } elseif ($this->zuqiType == 2) {
+                $this->zuqiTypeName = "month";
+            }
         }
         $this->goodsArr =$goodsArr;
         $this->payType=$payType;
+
     }
     /**
      * 获取订单创建器
@@ -61,13 +71,11 @@ class SkuComponnet implements OrderCreater
     {
         //判断租期类型
         $skuInfo = array_column($this->goodsArr,'sku_info');
-        //var_dump($skuInfo);die;
         for ($i=0;$i<count($skuInfo);$i++){
-            if($skuInfo[$i]['zuqi_type'] ==2 && (count($skuInfo) >1 || $skuInfo[$i]['sku_num'] >1)){
+            if($this->zuqiType ==2 && (count($skuInfo) >1 || $skuInfo[$i]['sku_num'] >1)){
                 $this->getOrderCreater()->setError('不支持多商品添加');
                 $this->flag = false;
             }
-            $this->zuqiType = $skuInfo[$i]['zuqi_type'];
         }
         $arr =[];
         foreach ($this->goodsArr as $k=>$v){
@@ -134,6 +142,13 @@ class SkuComponnet implements OrderCreater
         return $this->flag;
     }
 
+    public function getZuqiType(){
+        return $this->zuqiType;
+    }
+    public function getZuqiTypeName(){
+        return $this->zuqiTypeName;
+    }
+
     /**
      * 获取数据结构
      * @return array
@@ -143,13 +158,7 @@ class SkuComponnet implements OrderCreater
         foreach ($this->goodsArr as $k=>$v) {
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
-            if ($this->zuqiType == 1) {
-                $zuqiTypeName = "day";
-            } elseif ($this->zuqiType == 2) {
-                $zuqiTypeName = "month";
-            }
-            $arr[] = [
-                'sku' => [
+            $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
                     'sku_name' => $skuInfo['sku_name'],
@@ -169,7 +178,7 @@ class SkuComponnet implements OrderCreater
                     'yajin' => $skuInfo['yajin'],
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
-                    'zuqi_type_name' => $zuqiTypeName,
+                    'zuqi_type_name' => $this->zuqiTypeName,
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
                     'chengse' => intval($skuInfo['chengse']),
@@ -177,11 +186,13 @@ class SkuComponnet implements OrderCreater
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
-                    'discount_amount' => 0.00,
+                    'discount_amount' => $skuInfo['buyout_price'],
+                    'amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
+                    'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
                     'coupon_amount' => 0.00,
                     'mianyajin' => 0.00,
-                ]
             ];
+
         }
         return $arr;
     }
@@ -298,69 +309,5 @@ class SkuComponnet implements OrderCreater
         return true;
     }
 
-    /**
-     *
-     * 增加订单金额
-     * @param int $amount
-     * @return \oms\order_creater\SkuComponnet
-     */
-    public function increase_amount(int $amount): SkuComponnet{
-        if( $amount<0 ){
-            return $this;
-        }
 
-        $this->amount += $amount;
-        // 最终金额>=0
-        if( $this->amount<0 ){
-            $this->amount = 0;
-        }
-        return $this;
-    }
-
-    /**
-     * 优惠金额
-     * <p>如果优惠金额 大于 订单金额时，优惠金额值取总订单额进行优惠</p>
-     * @param int $amount  金额值，单位：分；必须>=0
-     * @return \oms\order_creater\SkuComponnet
-     */
-    public function discount(int $amount): SkuComponnet{
-        if( $amount<0 ){
-            return $this;
-        }
-        $price = $this->amount-$this->yiwaixian;
-        // 优惠金额最多等于总金额
-        if( $amount >= $price ){
-            $amount = $price;
-        }
-        $this->amount -= $amount;// 更新总金额
-        $this->discount_amount += $amount;// 更新优惠金额
-        return $this;
-    }
-
-    /**
-     * 免押
-     * @param int $amount
-     * @return \oms\order_creater\SkuComponnet
-     */
-    public function discrease_yajin(int $amount): SkuComponnet{
-        if( $amount<0 ){
-            return $this;
-        }
-        // 优惠金额 大于 总金额 时，总金额设置为0.01
-        if( $amount >= $this->yajin ){
-            $amount = $this->yajin;
-        }
-        $this->yajin -= $amount;// 更新押金
-        $this->mianyajin += $amount;// 更新免押金额
-        return $this;
-    }
-    /**
-     * 全部免押
-     * @return \oms\order_creater\SkuComponnet
-     */
-    public function mianyajin(): SkuComponnet{
-        $this->mianyajin += $this->yajin;// 更新免押金额(一定要兼顾已经免押的金额，所以是 +=)
-        $this->yajin = 0;// 更新押金
-        return $this;
-    }
 }
