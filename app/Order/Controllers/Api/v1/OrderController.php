@@ -49,7 +49,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        return apiResponse($res,ApiStatus::CODE_0);
 
     }
     /**
@@ -78,6 +78,7 @@ class OrderController extends Controller
         $address_id=$orders['params']['address_id'];//收货地址ID
         $sku =$orders['params']['sku_info'];
         $coupon = $orders['params']['coupon'];
+        $user_id =18;
 
         //判断参数是否设置
         if(empty($pay_type)){
@@ -103,14 +104,16 @@ class OrderController extends Controller
         ];
         $res = $this->OrderCreate->create($data);
         if(!is_array($res)){
-            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+            return apiResponse([],ApiStatus::CODE_30005,$res);
         }
         //发送取消订单队列
-//        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
-//            'method' => 'api.inner.cancelOrder',
-//            'time' => date('Y-m-d H:i:s'),
-//        ],time()+7200,"");
-//        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
+        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
+            'method' => 'api.inner.cancelOrder',
+            'order_no'=>$res['order_no'],
+            'user_id'=>$user_id,
+            'time' => date('Y-m-d H:i:s'),
+        ],time()+7200,"");
+        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
         return apiResponse($res,ApiStatus::CODE_0);
     }
 

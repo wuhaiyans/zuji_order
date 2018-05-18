@@ -20,6 +20,8 @@ class OrderComponnet implements OrderCreater
     private $orderNo = null;
     //用户ID
     private $userId=0;
+    //支付方式
+    private $payType;
     //用户组件
     private $userComponnet =null;
     //sku组件
@@ -32,9 +34,10 @@ class OrderComponnet implements OrderCreater
 
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ,int $userId) {
+    public function __construct( $orderNo=null ,int $userId,int $payType) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
+        $this->payType=$payType;
     }
 
     /**
@@ -199,6 +202,7 @@ class OrderComponnet implements OrderCreater
             'order_no'=>$this->orderNo,
             'zuqi_type'=>$zuqiType,
             'zuqi_type_name'=>$zuqiTypeName,
+            'pay_type'=>$this->payType,
         ]],$userSchema,$skuSchema);
 
     }
