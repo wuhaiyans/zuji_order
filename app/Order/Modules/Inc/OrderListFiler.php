@@ -7,6 +7,7 @@
  * Time: 下午 2:38
  */
 namespace App\Order\Modules\Inc;
+use App\Lib\Channel\Channel;
 use App\Order\Modules\Inc;
 class OrderListFiler
 {
@@ -14,7 +15,9 @@ class OrderListFiler
     //获取订单筛选项
     private static function getOrderState()
     {
+//        Channel::getChannel(config('tripartite.Interior_Goods_Request_data'), )
         return array(
+
                     'order_state'=>Inc\OrderStatus::getStatusType(),
                     'kw_type'=>array(
                             '1' => '订单编号',

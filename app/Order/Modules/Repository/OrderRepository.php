@@ -401,6 +401,36 @@ class OrderRepository
 
 
     /**
+     *
+     * 更新订单冻结状态
+     * heaven
+     * @param $orderNo 订单编号
+     * @param $freezeStatus 冻结状态
+     * @return bool
+     */
+
+    public static function orderFreezeUpdate($orderNo, $freezeStatus){
+
+        if (empty($orderNo) || empty($freezeStatus)) {
+            return false;
+        }
+
+        if (!in_array($freezeStatus, array_keys(OrderFreezeStatus::getStatusList()))) {
+            return false;
+        }
+        $data['freeze_type']    =   $freezeStatus;
+
+        if(Order::where('order_no', '=', $orderNo)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+
+
+
+    /**
      *  获取订单列表
      *  heaven
      * ->paginate: 参数
