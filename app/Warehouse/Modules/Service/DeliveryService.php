@@ -181,17 +181,16 @@ class DeliveryService
 //        if (isset($params['order_no']) && $params['order_no']) {
 //            $whereParams['order_no'] = $params['order_no'];
 //        }
-//        if (isset($params['delivery_no']) && $params['delivery_no']) {
-//            $whereParams['delivery_no'] = $params['delivery_no'];
-//        }
+        if (isset($params['delivery_no']) && $params['delivery_no']) {
+            $whereParams['delivery_no'] = $params['delivery_no'];
+        }
 
         $search = $this->paramsSearch($params);
-
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
         }
 
-        $page = isset($params['page']) ? $params['page'] : null;
+        $page = isset($params['page']) ? $params['page'] : 1;
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
@@ -219,7 +218,6 @@ class DeliveryService
         }
 
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
-
         $items = $collect->items();
 
         if (!$items) {

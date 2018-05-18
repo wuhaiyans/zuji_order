@@ -15,7 +15,7 @@ class Delivery extends Warehouse
     const STATUS_CANCEL     = 6;//已取消
 
 
-
+    public $incrementing = false;
     const CREATED_AT = 'create_time';
 //    const UPDATED_AT = 'update_time';
 
