@@ -12,7 +12,7 @@ class InnerServiceController extends Controller
 {
 
     /**
-     * 对列处理成功，返回该函数
+     * 队列处理成功，返回该函数
      * @param int $type
      * @return string
      */
@@ -52,7 +52,7 @@ class InnerServiceController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
-        $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($params['params']['order_no'], $params['params']['user_id']);
+        $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($params['order_no'], $params['user_id']);
         if ($success) {
 
                 return $this->innerErrMsg();
