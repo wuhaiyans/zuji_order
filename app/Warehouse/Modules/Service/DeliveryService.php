@@ -18,6 +18,13 @@ class DeliveryService
     const TIME_TYPE_DELIVERY = 'delivery'; //发货时间
     const TIME_TYPE_NONE = 'none'; //不限时间
 
+
+
+    //查找类型
+    const SEARCH_TYPE = 'mobile';//手机
+    const SEARCH_ORDER_NO = 'order_no';//订单号
+    const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
+
     /**
      * @param $order_no
      * @throws \Exception
@@ -153,23 +160,31 @@ class DeliveryService
     public function list($params)
     {
         $limit = 20;
-        if (isset($params['limit']) && $params['limit']) {
-            $limit = $params['limit'];
+        if (isset($params['size']) && $params['size']) {
+            $limit = $params['size'];
         }
         $whereParams = [];
 
-        if (isset($params['order_no']) && $params['order_no']) {
-            $whereParams['order_no'] = $params['order_no'];
-        }
+
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
         if (isset($params['status']) && $params['status']) {
             $whereParams['status'] = $params['status'];
         }
 
-        if (isset($params['delivery_no']) && $params['delivery_no']) {
-            $whereParams['delivery_no'] = $params['delivery_no'];
+//        if (isset($params['order_no']) && $params['order_no']) {
+//            $whereParams['order_no'] = $params['order_no'];
+//        }
+//        if (isset($params['delivery_no']) && $params['delivery_no']) {
+//            $whereParams['delivery_no'] = $params['delivery_no'];
+//        }
+
+        $search = $this->paramsSearch($params);
+
+        if ($search) {
+            $whereParams = array_merge($whereParams, $search);
         }
-        $page = isset($params['page']) ? $params['page'] : null;
+
+        $page = isset($params['current_page']) ? $params['current_page'] : null;
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
@@ -220,6 +235,22 @@ class DeliveryService
 
         return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
 
+    }
+
+    /**
+     * 查找类型
+     */
+    public function paramsSearch($params)
+    {
+        if (!isset($params['kw_type']) || !$params['kw_type']) {
+            return false;
+        }
+
+        if (!isset($params['keywords']) || !$params['keywords']) {
+            return false;
+        }
+
+        return [$params['kw_type'] => $params['keywords']];
     }
 
 
