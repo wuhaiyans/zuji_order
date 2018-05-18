@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrderGoodExtend extends Model
 {
 
-    protected $table = 'order_good_extend';
+    protected $table = 'order_goods_extend';
 
     protected $primaryKey='id';
 
