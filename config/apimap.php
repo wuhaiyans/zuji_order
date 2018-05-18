@@ -112,11 +112,13 @@ return [
 	// | 还机相关接口
 	//-+------------------------------------------------------------------------
 	//还机申请页面接口
-    'api.giveback.applying.viewdata'       => 'GivebackController@get_applying_viewdata',
+    'api.giveback.applying.viewdata'       => 'GivebackController@getApplyingViewdata',
 	//还机申请提交接口
     'api.giveback.create'       => 'GivebackController@create',
 	//还机更新状态为待检测【确认收货】
-    'api.giveback.notify.evaluation'       => 'GivebackController@notify_evaluation',
+    'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
+	//还机更新状态【接收确认检测结果】
+    'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
 
     // test
     'api.Test.test'       => 'TestController@test',

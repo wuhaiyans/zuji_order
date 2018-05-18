@@ -90,9 +90,7 @@ class Delivery
      */
     public static function getOrderDetail($order_no)
     {
-        $model = new OrderInfo();
-        $info = $model->getOrderInfo(['order_no'=>$order_no]);
-
+        $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
         return $info;
     }
 

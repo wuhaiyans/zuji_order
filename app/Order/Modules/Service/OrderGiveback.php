@@ -35,4 +35,43 @@ class OrderGiveback
 		$data['create_time'] = $data['update_time'] = time();
         return $this->order_giveback_repository->create( $data );
     }
+    /**
+     * 根据商品编号获取一条还机单数据
+	 * @param string $goodsNo 商品编号
+	 * @return array 
+	 */
+	public function getInfoByGoodsNo( $goodsNo ) {
+		if( empty($goodsNo) ) {
+			return [];
+		}
+		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
+	}
+	
+    /**
+     * 根据条件更新数据
+	 * @param array $where 更新条件【至少含有一项条件】
+	 * $where = [<br/>
+	 *		'goods_no' => '',//商品编号<br/>
+	 * ]<br/>
+	 * @param array $data 需要更新的数据 【至少含有一项数据】
+	 * $data = [<br/>
+	 *		'status'=>'',//还机状态<br/>
+	 * ]
+	 */
+	public function update( $where, $data ) {
+		$where = filter_array($where, [
+			'goods_no' => 'required',
+		]);
+		$data = filter_array($data, [
+			'status' => 'required',
+		]);
+		if( count( $where ) < 1 ){
+			return false;
+		}
+		if( count( $data ) < 1 ){
+			return false;
+		}
+		$data['update_time'] = time();
+		return $this->order_giveback_repository->update( $where, $data );
+	}
 }

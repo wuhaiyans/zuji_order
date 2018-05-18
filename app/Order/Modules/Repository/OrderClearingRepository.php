@@ -32,6 +32,7 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
+            'out_refund_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
             'claim_name'=>  isset($param['claim_name'])?$param['claim_name']:0 ,
@@ -75,10 +76,10 @@ class OrderClearingRepository
         if (isset($param['business_type']) &&  isset($param['business_no'])){
             $whereArray[] = ['business_type', '=', $param['business_type']];
             $whereArray[] = ['business_no', '=', $param['business_no']];
+            $orderData =  OrderClearing::where($whereArray)->first()->toArray();
+            return $orderData;
         }
-
-        $orderData =  OrderClearing::where($whereArray)->first()->toArray();
-        return $orderData;
+        return false;
 
     }
 
