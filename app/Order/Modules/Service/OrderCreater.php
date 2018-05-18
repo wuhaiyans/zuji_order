@@ -318,8 +318,17 @@ class OrderCreater
     public function order_update($order_no){
         return $this->orderRepository->order_update($order_no);
     }
-    public function get_order_detail($where=[]){
-        return $this->orderRepository->getOrderInfo($where);
+    public function get_order_detail($params){
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'wuliu_channel_id'  => 'required',
+            'logistics_no'       =>'required',
+            'user_id'             =>'required',
+        ]);
+        if(count($param)<4){
+            return  ApiStatus::CODE_20001;
+        }
+        return $this->orderRepository->getOrderInfo($params);
 
 
 
