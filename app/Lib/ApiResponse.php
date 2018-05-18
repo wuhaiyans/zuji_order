@@ -30,7 +30,6 @@ class ApiResponse {
 	 */
 
 	public function __construct($jsonStr = '') {
-
 		$status = new ApiStatus();
 		$status->success(); // 默认为成功状态
 		$this->status = $status;
@@ -45,6 +44,7 @@ class ApiResponse {
 			return;
 		}
 		$data = json_decode($jsonStr, true);
+		Common\LogApi::debug('ApiResponse初始化', $data);
 		if (!is_array($data)) {
 			$status->setCode(ApiStatus::CODE_10101)->setMsg('非json格式');
 			return;
@@ -71,7 +71,7 @@ class ApiResponse {
 		}
 
 		if ($data['code'] != 0) {
-			$status->setCode(ApiStatus::CODE_10101)->setMsg('code参数错误');
+			$status->setCode( $data['code'] )->setMsg( $data['msg'] );
 			return;
 		}
 
