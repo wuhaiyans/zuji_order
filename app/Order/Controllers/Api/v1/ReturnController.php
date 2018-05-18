@@ -93,6 +93,7 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
+
         $return_list = $this->OrderReturnCreater->get_list($params);
          return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
@@ -224,8 +225,13 @@ class ReturnController extends Controller
     public function returnReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        if(empty($params['status'])){
-            return apiResponse([],ApiStatus::CODE_20001);//参数错误
+        $params = filter_array($params,[
+            'order_no'=> 'required',
+            'status'  => 'required',
+            'remark'  =>'required',
+        ]);
+        if(count($params)<3){
+            return  apiResponse([],ApiStatus::CODE_20001,'参数错误');
         }
         if($params['status']=='1'){
             $res=$this->OrderReturnCreater->agree_return($params);//审核同意
