@@ -49,6 +49,11 @@ class OrderCleaning
 
     }
 
+    /**
+     * 更新订单清算状态
+     * @param $param
+     * @return bool
+     */
     public static function upOrderCleanStatus($param)
     {
 
@@ -57,10 +62,38 @@ class OrderCleaning
 
     }
 
+
+    /**
+     * 插入订单清算
+     * @param $param
+     * @return bool|string
+     */
     public static function createOrderClean($param)
     {
 
         $success= OrderClearingRepository::createOrderClean($param);
+        return $success;
+
+
+    }
+
+
+
+    /**
+     * 订单清算操作
+     * @param $param
+     * @return bool|string
+     */
+    public static function orderCleanOperate($param)
+    {
+
+        //查询清算表
+        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+        if (empty($orderCleanData)) return false;
+
+
+        //发起清算 解押金，退租金
+        $success= OrderClearingRepository::orderCleanOperate($param);
         return $success;
 
 

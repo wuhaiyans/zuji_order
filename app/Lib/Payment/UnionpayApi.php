@@ -25,10 +25,10 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 *		'params' => '',
 	 * ]
 	 */
-	public static function openBankCard( $appid ,array $params ){
+	public static function openBankCard( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-        $ApiRequest->setAppid( $appid );	// 业务应用ID
+        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
         $ApiRequest->setMethod('pay.unionpay.open');
 		$ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
@@ -61,10 +61,10 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 * ],
 	 * ]
 	 */
-	public static function BankCardList($appid, array $params ){
+	public static function BankCardList( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.bankcardlist');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -86,10 +86,10 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 * ]
 	 * @return mixed false：失败；true：成功
 	 */
-	public static function backPolling( $appid ,array $params ){
+	public static function backPolling( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.polling');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -118,10 +118,10 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 * 		'status'=>'', //0发送成功 1发送失败
 	 * ]
 	 */
-	public static function sendSms( $appid ,array $params ){
+	public static function sendSms( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.smsconsume');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -149,10 +149,10 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 * 		'payment_no'=>'', //支付系统支付码
 	 * ]
 	 */
-	public static function consume( $appid ,array $params ){
+	public static function consume( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.consume');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -163,37 +163,5 @@ class UnionpayApi extends \App\Lib\BaseApi {
 		}
 		return true;
 	}
-
-	/**
-	 * 银联退款接口
-	 * @param string $appid		应用ID
-	 * @param array $params
-	 * [
-	 *		'out_refund_no' => '', //订单系统退款码
-	 *		'payment_no' => '', //支付系统支付码
-	 *		'amount' => '', //支付金额
-	 *		'refund_back_url' => '', //退款回调URL
-	 * ]
-	 * @return mixed false：失败；array：成功
-	 * [
-	 * 		'out_refund_no'=>'', //订单系统退款码
-	 * 		'refund_no'=>'', //支付系统退款码
-	 * ]
-	 */
-	public static function refund( $appid ,array $params ){
-		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_TERRACE_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
-		$ApiRequest->setMethod('pay.unionpay.refund');
-		$ApiRequest->setParams($params);
-		$Response = $ApiRequest->send();
-
-		if( !$Response->isSuccessed() ){
-			self::$error = '发送验证码失败';
-			return false;
-		}
-		return true;
-	}
-
 
 }
