@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderReturnCreater;
 use App\Order\Modules\Service\OrderCreater;
 use App\Order\Modules\Repository\ThirdInterface;
+use Illuminate\Support\Facades\DB;
 class ReturnController extends Controller
 {
     protected $OrderCreate;
@@ -20,7 +21,13 @@ class ReturnController extends Controller
     }
     /*
      * 用户收到货退货时调用
-     *
+     *order_no订单编号   必选
+     * user_id用户id     必选
+     * business_key业务类型  必选
+     * loss_type商品损耗    必选
+     * reason_id退货原因id   必选
+     * reason_text退货原因   可选
+     * goods_no=array('12312300','23123123')商品编号 必选
      */
     // 申请退货接口
     public function returnApply(Request $request)
@@ -29,13 +36,15 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $data= filter_array($params,[
             'order_no'=>'required',
-            'goods_no'=>'required',
             'user_id'=>'required',
             'business_key'=>'required',
             'loss_type'=>'required',
         ]);
-        if(count($data)< 5){
-            return false;
+        if(count($data)< 4){
+            return ApiStatus::CODE_20001;
+        }
+        if(empty($params['goods_no'])){
+            return ApiStatus::CODE_20001;
         }
         if($params['reason_id']){
             $params['reason_text'] = "";
@@ -57,11 +66,6 @@ class ReturnController extends Controller
               return apiResponse([],ApiStatus::CODE_20001,"已提交退货申请,请等待审核");
            }
         }
-        $goods_info= $this->OrderReturnCreater->get_goods_info($params['goods_no']);//获取商品信息
-
-        if($goods_info){
-           $params['pay_amount']=$goods_info['price'];//实际支付金额
-        }
         $return = $this->OrderReturnCreater->add($params);
         return apiResponse([],$return,"success");
 
@@ -70,6 +74,9 @@ class ReturnController extends Controller
      *
      *
      * 用户已付款，备货中时使用
+     * order_no订单编号  必选
+     * user_id用户id      必选
+     *
      */
     //申请退款
     public function returnMoney(Request $request){
@@ -93,57 +100,77 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
-
+        $param = filter_array($params,[
+            'business_key'=> 'required',
+        ]);
+        if(count($param)<1){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $return_list = $this->OrderReturnCreater->get_list($params);
-         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
+        return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
     }
 
     // 退货物流单号上传接口
+    /*
+     * order_no订单编号  必选
+     * wuliu_channel_id物流渠道 必选
+     * logistics_no 物流编号  必选
+     * user_id  用户id  必选
+     * goods_no=array('sdada','adasdas')订单编号  可选
+     *
+     */
     public function returnDeliverNo(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
-        $params = filter_array($params,[
-            'order_no'          => 'required',
+        $param = filter_array($params,[
+            'order_no'           => 'required',
             'wuliu_channel_id'  => 'required',
-            'logistics_no'          =>'required',
-            'user_id'          =>'required',
+            'logistics_no'       =>'required',
+            'user_id'             =>'required',
         ]);
-        if(count($params)<4){
+        if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        if(empty($params['goods_no'])){
+            return ApiStatus::CODE_20001;
+        }
         //获取订单详情
-        $where['orderNo'] = $params['order_no'];
-        $order_info = $this->OrderCreate->get_order_detail($where);
-        //获取退货单信息
-        $return_info = $this->OrderReturnCreater->get_info_by_order_no($params['order_no']);
+        $order_info = $this->OrderCreate->get_order_detail($params);
         if(!$order_info){
             return apiResponse([], ApiStatus::CODE_20001,'未找到该订单');
         }
+        //获取退货单信息
+        $return_info = $this->OrderReturnCreater->get_info_by_order_no($params);
         if(!$return_info){
             return apiResponse([], ApiStatus::CODE_34002,'无退货单信息');
         }
-        if($return_info['user_id']!=$params['user_id']){
+        if($return_info[0]->user_id!=$params['user_id']){
            return apiResponse([], ApiStatus::CODE_20001,'非当前用户');
         }
-        if($return_info[0]['status'] != '2'){
+        if($return_info[0]->status != ReturnStatus::ReturnAgreed){
             return apiResponse([], ApiStatus::CODE_20001,'该订单未通过审核,不能上传物流单号');
         }
-        if($return_info[0]['logistics_no']){
+        if($return_info[0]->logistics_no){
             return apiResponse([], ApiStatus::CODE_20001,'已上传物流单号');
         }
         //更新物流单号
         DB::beginTransaction();
-
         $ret = $this->OrderReturnCreater->upload_wuliu($params);
-        if(!$ret) {
+        if(!$ret){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_33008, '上传物流失败');
         }
-
         //创建收货单
-        $create_res= Receive::apply($ret['order_no'],$ret['wuliu_channel_id'],$ret['logistics_no']);
+        $data['logistics_id']=$return_info[0]->wuliu_channel_id;
+        $data['logistics_no']=$return_info[0]->logistics_no;
+        $data['receive_detail']['serial_no']=$return_info[0]->serial_number;
+        $data['receive_detail']['quantity']=$return_info[0]->quantity;
+        $data['receive_detail']['imei1']=$return_info[0]->imei1;
+        $data['receive_detail']['imei2']=$return_info[0]->imei2;
+        $data['receive_detail']['imei3']=$return_info[0]->imei3;
+        $create_res= Receive::create($ret['order_no'],$return_info[0]->business_key,$data);
         if(!$create_res){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_34003, '创建收货单失败');
@@ -225,12 +252,12 @@ class ReturnController extends Controller
     public function returnReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        $params = filter_array($params,[
+        $param = filter_array($params,[
             'order_no'=> 'required',
             'status'  => 'required',
             'remark'  =>'required',
         ]);
-        if(count($params)<3){
+        if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001,'参数错误');
         }
         if($params['status']=='1'){

@@ -272,5 +272,15 @@ class OrderController extends Controller
     }
 
 
+    public function orderListFilter()
+    {
+
+        $res = \App\Order\Modules\Inc\OrderListFiler::orderInc();
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+
+    }
+
+
 
 }
