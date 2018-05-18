@@ -21,7 +21,7 @@ class WithholdingComponnet implements OrderCreater
      * 获取订单创建器
      * @return OrderCreater
      */
-    public function getOrderCreater():OrderCreater
+    public function getOrderCreater():OrderComponnet
     {
         return $this->componnet->getOrderCreater();
     }

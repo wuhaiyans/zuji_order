@@ -356,8 +356,8 @@ class DeliveryRepository
         }
         return $query->paginate($limit,
             [
-                'delivery_no','order_no', 'logistics_id','logistics_no',
-                'status', 'create_time', 'delivery_time', 'status_remark'
+                'delivery_no','order_no', 'logistics_id','logistics_no','customer','customer_mobile',
+                'customer_address','status', 'create_time', 'delivery_time', 'status_remark'
             ],
             'page', $page);
     }

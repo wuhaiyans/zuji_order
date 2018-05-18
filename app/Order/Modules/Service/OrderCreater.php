@@ -49,7 +49,7 @@ class OrderCreater
 
         $order_no = OrderOperate::createOrderNo(1);
         //订单创建构造器
-        $orderCreater = new OrderComponnet($order_no);
+        $orderCreater = new OrderComponnet($order_no,$data['user_id']);
 
         // 用户
         $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -64,29 +64,30 @@ class OrderCreater
 
         //蚁盾数据
         $orderCreater = new YidunComponnet($orderCreater);
-
-        //押金
-        $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-        //代扣
-        $orderCreater = new WithholdingComponnet($orderCreater);
-
-        //收货地址
-        $orderCreater = new AddressComponnet($orderCreater);
-
-        //渠道
-        $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-
-        //优惠券
-        $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
-
-        //分期
-        $orderCreater = new InstalmentComponnet($orderCreater);
+//
+//        //押金
+//        $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+//
+//        //代扣
+//        $orderCreater = new WithholdingComponnet($orderCreater);
+//
+//        //收货地址
+//        $orderCreater = new AddressComponnet($orderCreater);
+//
+//        //渠道
+//        $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+//
+//        //优惠券
+//        $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+//
+//        //分期
+//        $orderCreater = new InstalmentComponnet($orderCreater);
 
         $b = $orderCreater->filter();
+        var_dump($b);
 
         $schemaData = $orderCreater->getDataSchema();
-
+        var_dump($schemaData);
         $b = $orderCreater->create();
 
         die;

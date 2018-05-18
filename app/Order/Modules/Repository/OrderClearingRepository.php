@@ -7,6 +7,7 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Models\OrderClearing;
+use App\Order\Modules\Repository\OrderRepository;
 
 class OrderClearingRepository
 {
@@ -17,12 +18,17 @@ class OrderClearingRepository
      * @param $param
      * @return bool|string
      */
-    public function createOrderClean($param){
+    public static function createOrderClean($param){
 
-        if (empty($param)) {
+
+        if (empty($param) || empty($param['order_no'])) {
             return false;
         }
         $orderClearData = new OrderClearing();
+        //根据订单号查询订单信息
+
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+        if (empty($orderInfo)) return false;
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
@@ -44,8 +50,10 @@ class OrderClearingRepository
             'status'=>  isset($param['status'])?$param['status']:0 ,
             'create_time'=>time(),
             'update_time'=>time(),
+            'app_id' => $orderInfo['appid'],
+            'out_account'=>$orderInfo['pay_type'],
         ];
-        $success =$orderClearData->create($order_data);
+        $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
         }
