@@ -2,7 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Order\Models\OrderReturn;
 use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderGoodExtend;
+use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\Order;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Modules\Inc\OrderStatus;
@@ -15,13 +15,13 @@ class OrderReturnRepository
     private $orderReturn;
     private $order;
     private $ordergoods;
-    private $ordergoodextend;
+    private $OrderGoodsExtend;
     private $OrderUserInfo;
-    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,ordergoodextend $ordergoodextend,OrderUserInfo $OrderUserInfo)
+    public function __construct(orderReturn $orderReturn,order $order,ordergoods $ordergoods,OrderGoodsExtend $OrderGoodsExtend,OrderUserInfo $OrderUserInfo)
     {
         $this->orderReturn = $orderReturn;
         $this->ordergoods = $ordergoods;
-        $this->ordergoodextend = $ordergoodextend;
+        $this->OrderGoodsExtend = $OrderGoodsExtend;
         $this->OrderUserInfo = $OrderUserInfo;
         $this->order = $order;
     }
@@ -253,7 +253,7 @@ class OrderReturnRepository
             })
             ->where($where)
             ->select('order_good_extend.*','order_goods.*')
-            ->get();
+            ->get()->toArray();
         if($return_info){
             return $return_info;
         }else{
@@ -412,7 +412,7 @@ class OrderReturnRepository
             return false;
         }
 
-        /*$goods_extend_res= ordergoodextend::where($extend_where)->update(['status'=>'1']);//修改商品扩展表商品状态为无效
+        /*$goods_extend_res= OrderGoodsExtend::where($extend_where)->update(['status'=>'1']);//修改商品扩展表商品状态为无效
         if(!$goods_extend_res){
             return false;
         }*/
@@ -444,7 +444,7 @@ class OrderReturnRepository
         if (isset($param['order_no']) && isset($param['good_id']) &&  isset($param['good_no']) &&  isset($param['serial_number'])){
             return false;//参数错误
         }
-        $create_result=ordergoodextend::query()->insert($params);
+        $create_result=OrderGoodsExtend::query()->insert($params);
         if($create_result){
             return true;
         }else{
