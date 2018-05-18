@@ -21,9 +21,16 @@ class DeliveryService
 
 
     //查找类型
-    const SEARCH_TYPE = 'mobile';//手机
+    const SEARCH_MOBILE = 'mobile';//手机
     const SEARCH_ORDER_NO = 'order_no';//订单号
     const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
+
+
+    static $searchs = [
+        self::SEARCH_MOBILE => 'customer_mobile',
+        self::SEARCH_ORDER_NO => 'order_no',
+        self::SEARCH_DELIVERY_NO => 'delivery_no'
+    ];
 
     /**
      * @param $order_no
@@ -250,7 +257,7 @@ class DeliveryService
             return false;
         }
 
-        return [$params['kw_type'] => $params['keywords']];
+        return [self::$searchs[$params['kw_type']] => $params['keywords']];
     }
 
 
