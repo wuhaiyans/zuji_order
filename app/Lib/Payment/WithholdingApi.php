@@ -47,6 +47,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * @param array $params
      * [
      *		'trade_no' => '', //支付系统交易码
+     *		'user_id' => '', //用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
@@ -55,13 +56,15 @@ class WithholdingApi extends \App\Lib\BaseApi {
      *		'status' => '',//状态：0：已取消；1：交易处理中；2：交易成功；3：交易失败
      *		'amount' => '',//交易金额；单位：分
      *		'trade_time' => '',//交易时间戳
+     *		'user_id' => '',//用户id
+     *		'out_agreement_no' => '',//支付平台协议号
      * ]
      */
     public static function withholdingPayQuery( array $params ){
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.api.withholdquery');
+        $ApiRequest->setMethod('pay.api.withholdpayquery');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -80,7 +83,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'status' => '',//状态：0：已签约；1：未签约
+     *		'status' => '',//状态：0：已签约；1：已解约 2：未签约
      *		'out_agreement_no' => '',//支付平台协议号
      *		'user_id' => '',//用户id
      *		'sign_time' => '',//签署时间

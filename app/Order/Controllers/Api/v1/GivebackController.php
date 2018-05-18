@@ -12,6 +12,22 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 class GivebackController extends Controller
 {
 	/**
+	 * 获取还机设备列表信息
+	 * @param Request $request
+	 */
+	public function goodsList( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+		if( empty($paramsArr['order_no']) ) {
+            return apiResponse([],ApiStatus::CODE_10104,'参数错误：订单编号为空!');
+		}
+		$orderNo = $paramsArr['order_no'];//提取订单编号
+		
+	}
+	/**
 	 * 获取还机申请中页面数据
 	 * @param Request $request
 	 * @return type

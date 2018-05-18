@@ -28,7 +28,13 @@ class PayController extends Controller
 	 */
     public function getPaymentUrl(Request $request){
 
-		$payment_no = 'FA51821999792857';
+		$params = $request->all()['params'];
+		// 
+		if( empty($params['payment_no']) ){
+			return apiResponse( [],ApiStatus::CODE_30900,'参数错误[payment_no]');
+		}
+		$payment_no = $params['payment_no'];
+		
 		$payModel = \App\Order\Models\OrderPayModel::where('payment_no','=',$payment_no)->first();
 		if( !$payModel ){
 			return apiResponse( [],ApiStatus::CODE_30900,'支付单未识别');
@@ -42,15 +48,24 @@ class PayController extends Controller
 		}
 		
 		// 创建url地址
-		$data = \App\Lib\Payment\AlipayApi::getUrl([
+		$_params = [
 	 		'out_no' => $pay->getPaymentNo(),
-	 		'amount' => $pay->getPaymentAmount(),
+	 		'amount' => $pay->getPaymentAmount()*100, // 元转换成分
 	 		'fenqi' => $pay->getPaymentFenqi(),
-	 		'name' => '',
+	 		'name' => 'Xxxx',
 	 		'back_url' => 'https://abc.com',
 	 		'front_url' => 'https://abc.com',
-	 		'user_id' => '0',
-		]);
+	 		'user_id' => '5',
+		];
+		$data = \App\Lib\Payment\AlipayApi::getUrl( $_params );
+		
+		if( !$data ){
+			LogApi::error(ApiStatus::CODE_30901,[
+				'msg' => \App\Lib\Payment\AlipayApi::getError(),
+				'params' => $_params,
+			]);
+			return apiResponse( [], ApiStatus::CODE_30901,'服务器忙，稍候重试');
+		}
 		
         return apiResponse( $data,ApiStatus::CODE_0);
     }
