@@ -161,12 +161,15 @@ class DeliveryService
         if (isset($params['order_no']) && $params['order_no']) {
             $whereParams['order_no'] = $params['order_no'];
         }
+        //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
+        if (isset($params['status']) && $params['status']) {
+            $whereParams['status'] = $params['status'];
+        }
 
         if (isset($params['delivery_no']) && $params['delivery_no']) {
             $whereParams['delivery_no'] = $params['delivery_no'];
         }
         $page = isset($params['page']) ? $params['page'] : null;
-
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
@@ -194,10 +197,11 @@ class DeliveryService
         }
 
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
+
         $items = $collect->items();
 
         if (!$items) {
-            return [];
+            return ['list'=>[], 'limit'=>$limit, 'total'=>0, 'currentPage'=>0];
         }
 
         $show_detail = isset($params['detail']) ? $params['detail'] : false;
@@ -216,7 +220,7 @@ class DeliveryService
             array_push($result, $it);
         }
 
-        return ['data'=>$result, 'limit'=>$limit, 'page'=>$page];
+        return ['list'=>$result, 'limit'=>$limit, 'total'=>$collect->total(), 'page'=>$collect->currentPage()];
 
     }
 
