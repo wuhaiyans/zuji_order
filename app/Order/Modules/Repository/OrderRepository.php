@@ -362,21 +362,25 @@ class OrderRepository
      */
     public static function getOrderInfo($param = array())
     {
+
         if (empty($param)) {
             return false;
         }
-        if (isset($param['orderNo']) && !empty($param['orderNo']))
+
+        if (isset($param['order_no']) && !empty($param['order_no']))
         {
 
             $orderData = DB::table('order_info')
                 ->leftJoin('order_userinfo', function ($join) {
                     $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
                 })
-                ->where('order_info.order_no', '=', $param['orderNo'])
+                ->where('order_info.order_no', '=', $param['order_no'])
                 ->select('order_info.*','order_userinfo.*')
-                ->get();
-            return $orderData->toArray();
+                ->first();
+
+            return !empty($orderData)?objectToArray($orderData):false;
         }
+        return false;
 
     }
     //更新订单状态-申请退货

@@ -12,33 +12,11 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 class GivebackController extends Controller
 {
 	/**
-	 * 获取用户的风险分数
-	 * @param Request $Request
-	 */
-	public function get_risk_score( Request $request ) {
-		//获取参数并验证
-		$params = $request->input();
-		$params_arr = isset($params['params'])? $params['params'] :'';
-        $rules = [
-            'member_id'     => 'required',
-        ];
-        $validator = app('validator')->make($params_arr, $rules);
-        if ($validator->fails()) {
-            return apiResponse([],ApiStatus::CODE_20001,"退货原因不能为空");
-        }
-		$system_service = new SystemService();
-		$score = $system_service->get_risk_score($params_arr);
-		if( $score >= RuleService::RISK_MIN_SCORE && $score <= RuleService::RISK_MAX_SCORE ) {
-			return $this->respond(['score'=>$score]);
-		}
-		return $this->failed(ApiStatus::CODE_60001, get_error());
-	}
-	/**
 	 * 获取还机申请中页面数据
 	 * @param Request $request
 	 * @return type
 	 */
-	public function get_applying_viewdata( Request $request ) {
+	public function getApplyingViewdata( Request $request ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
@@ -107,27 +85,76 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function create( Request $request ) {
-		//获取参数并验证
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$params_arr = isset($params['params'])? $params['params'] :'';
+		$paramsArr = isset($params['params'])? $params['params'] :'';
         $rules = [
             'goods_no'     => 'required',//商品编号
             'order_no'     => 'required',//订单编号
             'user_id'     => 'required',//用户id
             'logistics_no'     => 'required',//物流单号
         ];
-        $validator = app('validator')->make($params_arr, $rules);
+        $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_10104,$validator->errors()->first());
         }
 		//-+--------------------------------------------------------------------
-		// | 生成还机单、冻结订单、推送到收发货系统
+		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
-		$order_giveback_service = new OrderGiveback();
-		$order_giveback_id = $order_giveback_service->create($params_arr);
-		if( $order_giveback_id ){
+		//冻结订单
+		//等待接口
+		
+		//生成还机单
+		$orderGivebackService = new OrderGiveback();
+		$orderGivebackIId = $orderGivebackService->create($paramsArr);
+		if( $orderGivebackIId ){
             return apiResponse([],ApiStatus::CODE_0,'归还设备申请提交成功');
 		}
 		return apiResponse([],ApiStatus::CODE_10103,'归还设备申请提交失败');
+		
+		//推送到收发货系统
+		//等待接口
+	}
+	/**
+	 * 还机确认收货
+	 * @param Request $request
+	 */
+	public function confirmDelivery( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'goods_no'     => 'required',//商品编号
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_10104,$validator->errors()->first());
+        }
+		$goodsNo = $paramsArr['goods_no'];
+		//-+--------------------------------------------------------------------
+		// | 业务处理：获取判断当前还机单状态、更新还机单状态
+		//-+--------------------------------------------------------------------
+		//获取还机单信息
+		$orderGivebackService = new OrderGiveback();//创建还机单服务层
+		$orderGoodsInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
+		//还机单状态必须为待收货
+		if( !$orderGoodsInfo ){
+            return apiResponse([],ApiStatus::CODE_60001,'还机单信息获取失败');
+		}
+		if( $orderGoodsInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
+            return apiResponse([],ApiStatus::CODE_0,'当前还机单已经收货');
+		}
+		if( $orderGoodsInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
+            return apiResponse([],ApiStatus::CODE_60001,'当前还机单不处于待收货状态，不能进行收货操作');
+		}
+		$result = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
+		if( !$result ){
+            return apiResponse([],ApiStatus::CODE_60001,'确认收货失败');
+		}
+		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
 	}
 }

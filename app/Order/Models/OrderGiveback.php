@@ -15,7 +15,7 @@ class OrderGiveback extends Model
     protected $primaryKey='id';
 
     // create()时可以被赋值的属性。
-    protected $fillable = [
+    public $fillable = [
 		'id', //主键id
 		'order_no', //订单编号
 		'goods_no', //商品编号
