@@ -82,6 +82,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * [
      *		'status' => '',//状态：0：已签约；1：未签约
      *		'out_agreement_no' => '',//支付平台协议号
+     *		'user_id' => '',//用户id
      *		'sign_time' => '',//签署时间
      * ]
      */
