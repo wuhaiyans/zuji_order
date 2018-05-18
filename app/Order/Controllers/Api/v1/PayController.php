@@ -49,15 +49,16 @@ class PayController extends Controller
 		
 		// 创建url地址
 		$_params = [
-	 		'out_no' => $pay->getPaymentNo(),
-	 		'amount' => $pay->getPaymentAmount()*100, // 元转换成分
+	 		'out_payment_no' => $pay->getPaymentNo(),
+			'payment_channel' => $pay->getPaymentChannel(),
+	 		'payment_amount' => $pay->getPaymentAmount()*100, // 元转换成分
 	 		'fenqi' => $pay->getPaymentFenqi(),
 	 		'name' => 'Xxxx',
 	 		'back_url' => 'https://abc.com',
 	 		'front_url' => 'https://abc.com',
 	 		'user_id' => '5',
 		];
-		$data = \App\Lib\Payment\AlipayApi::getUrl( $_params );
+		$data = \App\Lib\Payment\CommonPaymentApi::pageUrl( $_params );
 		
 		if( !$data ){
 			LogApi::error(ApiStatus::CODE_30901,[

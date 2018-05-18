@@ -63,7 +63,6 @@ class Payment
 	{
 		sql_profiler();
 		$b = $this->PaymentModel->save();
-		var_dump( $b );
 	}
 	
 }

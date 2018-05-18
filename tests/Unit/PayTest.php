@@ -13,67 +13,112 @@ use App\Order\Modules\Repository\Pay\FundauthStatus;
 class PayTest extends TestCase
 {
 	
-	
-    public function testPaymentUrl()
+    public function testRefundStatus()
     {
-		
-		try {
-			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
-			
-			// 创建支付
-			// 只有支付环节，没有其他环节
-			$pay = PayCreater::createPayment([
-				'businessType' => '1',
-				'businessNo' => \createNo(1),
-				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.01',
-				'paymentChannel'=> Channel::Alipay,
-				'paymentFenqi'	=> 3,
+			// 查询
+			echo '统一退款查询...';
+			$query_info = \App\Lib\Payment\CommonRefundApi::query([
+				'refund_no' => '201805050009',
+				'out_refund_no' => '123456',
 			]);
-			
-			// 支付阶段状态
-			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
-			
-			
-			// 支付状态
-			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-					'支付环节状态初始化错误' );
-			
-			// 代扣签约状态
-			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
-					'代扣签约状态初始化错误' );
-			
-			// 资金预授权状态
-			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
-					'资金预授权状态初始化错误' );
-
-			$ApiRequest = new \App\Lib\ApiRequest();
-			$ApiRequest->setUrl('http://dev-order.zuji.com/api');
-	//        $ApiRequest->setUrl('http://dev-order-zuji.huishoubao.com/api');
-			$ApiRequest->setAppid('1');	// 业务应用ID
-			$ApiRequest->setMethod('api.pay.payment.url');
-			$ApiRequest->setParams([
-				'payment_no' => $pay->getPaymentNo(),	// 模拟业务系统支付编号
-				'front_url' => 'https://alipay/Test/front',// 前端地址
-			]);
-			
-			$Response = $ApiRequest->send();
-
-			$this->assertTrue( $Response->isSuccessed(), '支付链接请求失败:['.$Response->getStatus()->getCode().']'.$Response->getStatus()->getMsg() );
-
-			//
-			$data = $Response->getData();
-			$this->stringStartsWith('https')->evaluate( $data['payment_url'], '支付链接错误' );
-
-			echo '获取支付URL地址... ok';
-			
-		} catch (\Exception $ex) {
-			echo $ex->getMessage();
-			$this->assertTrue(false);
-		}
+			$this->assertTrue( is_array($query_info), '统一支付查询失败' );
+			echo "ok\n";
+			echo "status:{$query_info['status']}\n";
 		
-		
-    }
+	}
+	
+	
+//    public function testPaymentUrl()
+//    {
+//		
+//		try {
+//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
+//			
+//			// 创建支付
+//			// 只有支付环节，没有其他环节
+//			$pay = PayCreater::createPayment([
+//				'businessType' => '1',
+//				'businessNo' => \createNo(1),
+//				'paymentNo' => \createNo(1),
+//				'paymentAmount' => '0.01',
+//				'paymentChannel'=> Channel::Alipay,
+//				'paymentFenqi'	=> 3,
+//			]);
+//			
+//			// 支付阶段状态
+//			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+//			
+//			
+//			// 支付状态
+//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
+//					'支付环节状态初始化错误' );
+//			
+//			// 代扣签约状态
+//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
+//					'代扣签约状态初始化错误' );
+//			
+//			// 资金预授权状态
+//			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
+//					'资金预授权状态初始化错误' );
+//
+//			$ApiRequest = new \App\Lib\ApiRequest();
+//			$ApiRequest->setUrl('http://dev-order.zuji.com/api');
+//			$ApiRequest->setAppid( '1' );	// 模拟客户端 入口ID
+//			$ApiRequest->setMethod('api.pay.payment.url');
+//			$ApiRequest->setParams([
+//				'payment_no' => $pay->getPaymentNo(),	// 模拟业务系统支付编号
+//				'front_url' => 'https://alipay/Test/front',// 前端地址
+//			]);
+//			
+//			$Response = $ApiRequest->send();
+//
+//			$this->assertTrue( $Response->isSuccessed(), '支付链接请求失败:['.$Response->getStatus()->getCode().']'.$Response->getStatus()->getMsg() );
+//
+//			//
+//			$data = $Response->getData();
+//			$this->stringStartsWith('https')->evaluate( $data['payment_url'], '支付链接错误' );
+//
+//			echo '获取支付URL地址... ok'."\n";
+//			
+//			// 支付平台支付单号
+//			$this->assertTrue( !empty($data['_data']['payment_no']), '支付系统编号错误' );
+//			
+//			// 查询
+//			echo '统一支付查询...';
+//			$query_info = \App\Lib\Payment\CommonPaymentApi::query([
+//				'payment_no' => $data['_data']['payment_no'],
+//				'out_payment_no' => $data['_data']['out_no'],
+//			]);
+//			$this->assertTrue( is_array($query_info), '统一支付查询失败' );
+//			echo "ok\n";
+//			echo "status:{$query_info['status']}\n";
+//			
+//			echo '支付... ';
+//			// 支付成功操作
+//			$pay->paymentSuccess([
+//				'out_payment_no' => $data['_data']['out_no'],
+//				'payment_time' => time(),
+//			]);
+//			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
+//			echo 'ok'."\n";
+//			
+//			// 查询
+//			echo '统一支付查询...';
+//			$query_info = \App\Lib\Payment\CommonPaymentApi::query([
+//				'payment_no' => $data['_data']['payment_no'],
+//				'out_payment_no' => $data['_data']['out_no'],
+//			]);
+//			$this->assertTrue( is_array($query_info), '统一支付查询失败' );
+//			echo "ok\n";
+//			echo "status:{$query_info['status']}\n";
+//			
+//			
+//		} catch (\Exception $ex) {
+//			echo $ex->getMessage();
+//			$this->assertTrue(false);
+//		}
+//		
+//    }
 	
 //	
 //    /**
