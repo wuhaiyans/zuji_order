@@ -34,26 +34,24 @@ class WithholdController extends Controller
      * ]
      */
     public function sign(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
 
-        if(!$appid){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
-        }
-
-        $params = filter_array($params, [
-            'user_id'           => 'required',
+        $rules = [
+            'user_id'           => 'required|int',
             'alipay_user_id'    => 'required',
             'front_url'         => 'required',
-        ]);
-        if(count($params) < 3){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
         }
+        $params = $params['params'];
+
 
         $params['back_url'] = env("API_INNER_URL") . "/signNotify";
 
-        $url = AlipayApi::withholdingUrl($appid, $params);
+        $url = AlipayApi::withholdingUrl($params);
+
         if(!$url){
             return apiResponse(['url'=>''], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
         }
