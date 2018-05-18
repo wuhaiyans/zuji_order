@@ -74,7 +74,9 @@ class CreditComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        return $this->componnet->getDataSchema();
+        $schema =$this->componnet->getDataSchema();
+        $schema['user']['score'] =$this->score;
+        return $schema;
     }
 
     /**

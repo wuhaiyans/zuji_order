@@ -8,7 +8,7 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderPayWithholdModel extends Model
+class OrderPayWithhold extends Model
 {
 
     protected $table = 'order_pay_withhold';

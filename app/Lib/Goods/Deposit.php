@@ -7,7 +7,7 @@
  * Time: 16:32
  */
 
-namespace App\Lib\Deposit;
+namespace App\Lib\Goods;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
@@ -25,7 +25,6 @@ class Deposit{
      * @return string or array
      */
     public static function getDeposit($data,$arr){
-        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.rule.get';
         $data['params'] = [
             'spu_id'=>$arr['spu_id'],

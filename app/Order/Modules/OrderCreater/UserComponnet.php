@@ -26,6 +26,8 @@ class UserComponnet implements OrderCreater
     private $mobile;
     //代扣协议号
     private $withholdingNo;
+    //地址
+    private $address=[];
 
     private $islock;
     private $block;
@@ -54,6 +56,7 @@ class UserComponnet implements OrderCreater
         if (!is_array($userInfo)) {
             throw new Exception("获取用户接口失败");
         }
+        $this->address=$userInfo['address'];
         $this->mobile = $userInfo['username'];
         $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;
@@ -78,6 +81,7 @@ class UserComponnet implements OrderCreater
     public function getUserId(){
         return $this->userId;
     }
+
     /**
      * 获取订单创建器
      * @return OrderCreater
@@ -130,7 +134,8 @@ class UserComponnet implements OrderCreater
                 'face'=>$this->face,
                 'age'=>$this->age,
                 'risk'=>$this->risk,
-            ]
+            ],
+            'address'=>$this->address,
         ];
 
     }
