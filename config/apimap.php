@@ -29,6 +29,10 @@ return [
 
     'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
 
+    'api.order.list.filter'=>'OrderController@orderListFilter',//订单列表筛选项接口
+
+
+
 
     //结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@list',
@@ -40,6 +44,9 @@ return [
     'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
     //创建订单清算单
     'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
+
+    //订单清算单操作退款
+    'api.orderClean.opereate'=>'OrderCleaningController@orderCleanOperate',
 
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
@@ -111,6 +118,8 @@ return [
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
 	//-+------------------------------------------------------------------------
+	//还机-设备列表信息
+    'api.giveback.goods.list'       => 'GivebackController@goodsList',
 	//还机申请页面接口
     'api.giveback.applying.viewdata'       => 'GivebackController@getApplyingViewdata',
 	//还机申请提交接口
