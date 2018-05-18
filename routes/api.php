@@ -43,6 +43,13 @@ $api->version('v1', [
             ->name('api.order.orderdetail');//订单列表接口
         $api->post('user', 'UserController@me') //获取用户信息接口
             ->name('api.user.show');
+
+        // 代扣签约回调
+        $api->post('signNotify', 'WithholdController@sign_notify');
+
+        // 代扣解约回调
+        $api->post('unSignNotify', 'WithholdController@unsign_notify');
+
 //    });
 });
    

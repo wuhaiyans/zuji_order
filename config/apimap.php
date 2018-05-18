@@ -13,6 +13,8 @@ return [
     'api.order.orderdetail'=>'OrderController@orderInfo',//订单详情接口
 
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
+	
+    'api.pay.payment.url'=>'PayController@getPaymentUrl',//通用支付URL地址接口，满足url跳转支付
 
     'api.union.bankCardlist'=>'UnionController@bankCardlist',//银联已开通银行卡列表查询接口
 

@@ -17,9 +17,9 @@ class LogApi {
 	/**
 	 * 业务数据日志
 	 * @param string	$msg
-	 * @param array		$data
+	 * @param mixed		$data
 	 */
-	public static function info( string $msg, array $data=[] )
+	public static function info( string $msg, $data=[] )
 	{
 		self::log('Info', $msg, $data);
 	}
@@ -27,9 +27,9 @@ class LogApi {
 	/**
 	 * 业务通知日志
 	 * @param string	$msg
-	 * @param array		$data
+	 * @param mixed		$data
 	 */
-	public static function notify( string $msg, array $data=[] )
+	public static function notify( string $msg, $data=[] )
 	{
 		self::log('Notify', $msg, $data);
 	}
@@ -37,9 +37,9 @@ class LogApi {
 	/**
 	 * 程序调试日志
 	 * @param string	$msg
-	 * @param array		$data
+	 * @param mixed		$data
 	 */
-	public static function debug( string $msg, array $data=[] )
+	public static function debug( string $msg, $data=[] )
 	{
 		self::log('Debug', $msg, $data);
 	}
@@ -47,9 +47,9 @@ class LogApi {
 	/**
 	 * 错误日志
 	 * @param string	$msg
-	 * @param array		$data
+	 * @param mixed		$data
 	 */
-	public static function error( string $msg, array $data=[] )
+	public static function error( string $msg, $data=[] )
 	{
 		self::log('Error', $msg, $data);
 	}
@@ -58,20 +58,29 @@ class LogApi {
 	 * 日志
 	 * @param string $level		日志级别
 	 * @param string $msg		日志内容
-	 * @param array		$data
+	 * @param mixed		$data
 	 */
-	private static function log( string $level, string $msg, array $data=[] )
+	private static function log( string $level, string $msg, $data=[] )
 	{
+		if( is_array( $data ) || is_object( $data ) )
+		{
+			$data = json_encode($data);
+		}
+		elseif( is_string( $data ) || is_numeric($data) ){
+			$data .= ''; 
+		}
+		else{
+			$data = json_encode($data);
+		}
 		$traces = debug_backtrace();
-//		var_dump( $traces[2] );
-		$str = sprintf("%s:(%d):%s\t[%s]:\t%s\n%s", 
+		$str = sprintf("%s:(%d):%s\t[%s]:\t%s\t%s\n", 
 				substr( $traces[1]['file'], strlen(app_path() ) ),
 				$traces[1]['line'],
 				$traces[2]['function'],
 				$level,
 				$msg,
-				count($data)?var_export($data,true)."\n":'');
-		echo $str;
+				trim($data));
+		dispatch(new \App\Jobs\LogJob($str));
 //		$_config = [
 //			'interface' => 'jobDisable',
 //			'auth' => self::$_auth,
