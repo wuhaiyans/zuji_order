@@ -17,9 +17,7 @@ class Logistics
      */
     public static function info($id)
     {
-        return [
-            'name' => '顺风'
-        ];
+        return '顺风';
     }
 
     /**

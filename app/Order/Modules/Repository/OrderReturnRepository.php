@@ -39,7 +39,7 @@ class OrderReturnRepository
             $where[$k][]=['goods_no','=',$v];
             $where[$k][]=['order_no','=',$params['order_no']];
             $where[$k][]=['user_id','=',$params['user_id']];
-            $return_info[]=orderReturn::where($where[$k])->first()->toArray();
+            $return_info=orderReturn::where($where[$k])->get()->toArray();
         }
         if($return_info){
             return $return_info;
@@ -525,10 +525,10 @@ class OrderReturnRepository
     //申请退货-》获取商品信息
     public static function getGoodsList($goods_no,$order_no){
         if(empty($goods_no)){
-            return ApiStatus::CODE_20001;//商品编号不能为空
+            return false;//商品编号不能为空
         }
         if(empty($order_no)){
-            return ApiStatus::CODE_20001;//订单编号不能为空
+            return false;//订单编号不能为空
         }
         $userData=OrderGoods::where([['order_no','=',$order_no],['goods_no','=',$goods_no]])->first();
         if($userData){
