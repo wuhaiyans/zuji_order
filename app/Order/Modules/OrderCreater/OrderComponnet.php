@@ -193,8 +193,12 @@ class OrderComponnet implements OrderCreater
     {
         $userSchema = $this->userComponnet->getDataSchema();
         $skuSchema =$this->skuComponnet->getDataSchema();
+        $zuqiType =$this->skuComponnet->getZuqiType();
+        $zuqiTypeName =$this->skuComponnet->getZuqiTypeName();
         return array_merge(['order'=>[
-            'order_no'=>$this->orderNo
+            'order_no'=>$this->orderNo,
+            'zuqi_type'=>$zuqiType,
+            'zuqi_type_name'=>$zuqiTypeName,
         ]],$userSchema,$skuSchema);
 
     }

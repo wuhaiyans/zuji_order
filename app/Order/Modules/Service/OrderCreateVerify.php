@@ -167,9 +167,9 @@ class OrderCreateVerify
     private function InstalmentVerify(){
         $data =array_merge($this->GetUserSchema(),$this->GetSchema());
         var_dump($data);die;
-       // $instalment =$this->instalment->get_data_schema($data);
-       // $arr['instalment'] =$instalment['instalment'];
-       // $this->SetSchema($arr);
+        $instalment =$this->instalment->get_data_schema($data);
+        $arr['instalment'] =$instalment['instalment'];
+        $this->SetSchema($arr);
         return true;
     }
 
@@ -211,11 +211,11 @@ class OrderCreateVerify
         /**
          * 增加信用分判断 是否允许下单
          */
-        $score = Fengkong::getCredit(config('tripartite.Interior_Fengkong_Request_data'),['user_id'=>$this->user_id]);
-        if(!is_array($score)){
-            $this->set_error($score);
-            $this->flag =false;
-        }
+//        $score = Fengkong::getCredit(config('tripartite.Interior_Fengkong_Request_data'),['user_id'=>$this->user_id]);
+//        if(!is_array($score)){
+//            $this->set_error($score);
+//            $this->flag =false;
+//        }
 
         $yidun_data =[
             'yidun'=>[
@@ -287,7 +287,7 @@ class OrderCreateVerify
 
     private function DepositVerify($data){
         $arr =array_merge($this->GetUserSchema(),$this->GetSchema());
-        $deposit =Deposit::getDeposit(config('tripartite.Interior_Goods_Request_data'),[
+        $deposit =\App\Lib\Goods\Deposit::getDeposit(config('tripartite.Interior_Goods_Request_data'),[
                     'spu_id'=>$arr['sku']['spu_id'],
                     'pay_type'=>$data['pay_type'],
                     'credit'=>$arr['credit']['credit']?$arr['credit']['credit']:0,
@@ -439,12 +439,12 @@ class OrderCreateVerify
     private function UserWithholding($appid,$user_info){
         if( $user_info['withholding_no']!="" ){
           //  调用支付系统的方法 如下：Y/N
-//            $res =WithholdingApi::withholdingstatus($appid,[
-//                'alipay_user_id' => $user_info['alipay_user_id'],
-//                'user_id' => $user_info['id'], //租机平台用户id
-//                'agreement_no' => $user_info['withholding_no'], //签约协议号
-//
-//            ]);
+            $res =WithholdingApi::withholdingstatus($appid,[
+                'alipay_user_id' => $user_info['alipay_user_id'],
+                'user_id' => $user_info['id'], //租机平台用户id
+                'agreement_no' => $user_info['withholding_no'], //签约协议号
+
+            ]);
             $status ="Y";
             if( $status!='Y' ){
                 //用户已经解约代扣协议

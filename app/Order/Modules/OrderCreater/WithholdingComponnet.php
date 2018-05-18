@@ -9,13 +9,32 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\OrderPayWithholdRepository;
+
 class WithholdingComponnet implements OrderCreater
 {
     //组件
     private $componnet;
-    public function __construct(OrderCreater $componnet)
+    private $flag = true;
+    private $payType;
+
+    /**
+     * 代扣签约信息
+     * @var int
+     */
+    private $withholdingInfo =[];
+    private $withhodldingNo="";
+
+    public function __construct(OrderCreater $componnet,int $payType,int $userId)
     {
         $this->componnet = $componnet;
+        $this->payType=$payType;
+        if($payType == PayInc::WithhodingPay){
+            //查询该用户代扣数据
+            $withhodingInfo = OrderPayWithholdRepository::find($userId);
+            $this->withholdingInfo =$withhodingInfo;
+        }
     }
     /**
      * 获取订单创建器
@@ -36,8 +55,24 @@ class WithholdingComponnet implements OrderCreater
     public function filter(): bool
     {
 
-         var_dump("代扣组件 -filter");
-         return $this->componnet->filter();
+        $filter =  $this->componnet->filter();
+
+        // 代扣支付方式时，进行判断
+        if($this->payType == PayInc::WithhodingPay){
+            //查询该用户代扣数据
+            if($this->withholdingInfo['withhold_no']==""){
+                $this->getOrderCreater()->setError('未签约代扣协议');
+                $this->flag = false;
+            }
+            if($this->withholdingInfo['withhold_status']==2){
+                $this->getOrderCreater()->setError('用户已经解约代扣协议');
+                $this->flag = false;
+            }
+            $this->withhodldingNo =$this->withholdingInfo['withhold_no'];
+
+        }
+
+        return $this->flag && $filter;
     }
 
     /**
@@ -46,8 +81,14 @@ class WithholdingComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        var_dump("代扣组件 -get_data_schema");
-        return [];
+        $schema = $this->componnet->getDataSchema();
+        $schema['user']['withholding_no'] =strlen($this->withhodldingNo)?$this->withhodldingNo:"";
+        return array_merge($schema,[
+            'withholding' => [
+                'withholding_no' => strlen($this->withhodldingNo)?true:false,
+                'withhold_status'=>$this->withholdingInfo['withhold_status'],
+            ]
+        ]);
     }
 
     /**
@@ -56,8 +97,13 @@ class WithholdingComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        $this->componnet->create();
-        var_dump("代扣组件 -create");
+        if( !$this->flag ){
+            return false;
+        }
+        $b = $this->componnet->create();
+        if( !$b ){
+            return false;
+        }
         return true;
     }
 }
