@@ -308,20 +308,20 @@ class Pay extends \App\Lib\Configurable
 		}
 		
 		// 更新 支付环节 表
-		$payment = new Payment([
-			'payment_no' => $this->paymentNo,
-			'out_payment_no' => $params['out_payment_no'],
-		]);
-//		$paymentModel = new OrderPayPaymentModel();
-//		$b = $paymentModel->insert([
+//		$payment = new Payment([
 //			'payment_no' => $this->paymentNo,
 //			'out_payment_no' => $params['out_payment_no'],
-//			'create_time' => time(),
 //		]);
-//		if( !$b ){
-//			LogApi::error('[支付阶段]支付环节支付保存失败');
-//			throw new \Exception( '支付失败' );
-//		}
+		$paymentModel = new OrderPayPaymentModel();
+		$b = $paymentModel->insert([
+			'payment_no' => $this->paymentNo,
+			'out_payment_no' => $params['out_payment_no'],
+			'create_time' => time(),
+		]);
+		if( !$b ){
+			LogApi::error('[支付阶段]支付环节支付保存失败');
+			throw new \Exception( '支付失败' );
+		}
 		
 		$this->status = $status;
 		$this->paymentStatus = PaymentStatus::PAYMENT_SUCCESS;
