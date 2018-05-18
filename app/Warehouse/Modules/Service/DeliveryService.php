@@ -212,15 +212,13 @@ class DeliveryService
 
         $result = [];
         foreach ($items as $item) {
-
             $it = $item->toArray();
-
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $item->goods->toArray();
             array_push($result, $it);
         }
 
-        return ['list'=>$result, 'limit'=>$limit, 'total'=>$collect->total(), 'page'=>$collect->currentPage()];
+        return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
 
     }
 
