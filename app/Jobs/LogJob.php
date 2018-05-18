@@ -33,6 +33,7 @@ class LogJob implements ShouldQueue
      */
     public function handle()
     {
-        file_put_contents('./jobtest.log', $this->str, FILE_APPEND);
+		\Illuminate\Support\Facades\Storage::append('logjob.log', $this->str);
+//        file_put_contents('./jobtest.log', $this->str, FILE_APPEND);
     }
 }

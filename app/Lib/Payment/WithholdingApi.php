@@ -57,6 +57,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
      *		'amount' => '',//交易金额；单位：分
      *		'trade_time' => '',//交易时间戳
      *		'user_id' => '',//用户id
+     *		'out_agreement_no' => '',//支付平台协议号
      * ]
      */
     public static function withholdingPayQuery( array $params ){
@@ -82,7 +83,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'status' => '',//状态：0：已签约；1：未签约
+     *		'status' => '',//状态：0：已签约；1：已解约 2：未签约
      *		'out_agreement_no' => '',//支付平台协议号
      *		'user_id' => '',//用户id
      *		'sign_time' => '',//签署时间
