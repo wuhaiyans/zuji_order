@@ -3,6 +3,8 @@ namespace App\Order\Modules\Service;
 
 use App\Lib\ApiStatus;
 
+use App\Lib\Certification;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
 use App\Order\Modules\OrderCreater\CouponComponnet;
@@ -40,13 +42,13 @@ class OrderCreater
      */
 
     public function create($data){
-        $data['order_no'] = OrderOperate::createOrderNo(1);
+        $orderNo = OrderOperate::createOrderNo(1);
         try{
             DB::beginTransaction();
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id']);
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type']);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -81,14 +83,44 @@ class OrderCreater
            // $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
             $b = $orderCreater->filter();
-            var_dump($b);
-            var_dump( $orderCreater->getOrderCreater()->getError());
-
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                $error =$orderCreater->getOrderCreater()->getError();
+                return $orderCreater->getOrderCreater()->getError();
+            }
             $schemaData = $orderCreater->getDataSchema();
             var_dump($schemaData);
             $b = $orderCreater->create();
-            die;
+            //创建成功组装数据返回结果
+            if(!$b){
+                DB::rollBack();
+                return $orderCreater->getOrderCreater()->getError();
+            }
+
             DB::commit();
+            // 是否需要签署代扣协议
+            $need_to_sign_withholding = 'N';
+            if( $data['pay_type']== PayInc::WithhodingPay){
+                if( !$schemaData['withholding']['withholding_no'] ){
+                    $need_to_sign_withholding = 'Y';
+                }
+            }
+            $result = [
+                'coupon'         => $data['coupon'],
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['score'],
+                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+                'sku'=>$schemaData['sku'],
+                // 是否需要 签收代扣协议
+                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                '_order_info' => $schemaData,
+                '_error' => $orderCreater->getOrderCreater()->getError(),
+                'order_no'=>$orderNo,
+            ];
+            return $result;
+
             } catch (\Exception $exc) {
                 DB::rollBack();
                 echo $exc->getMessage();
@@ -106,7 +138,7 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id']);
+            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type']);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],8);
@@ -149,66 +181,22 @@ class OrderCreater
 
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
-            if( $schema_data['sku']['payment_type_id']==\zuji\Config::WithhodingPay){
-                if( !$schema_data['withholding']['withholding_no'] ){
+            if( $data['pay_type']== PayInc::WithhodingPay){
+                if( !$schemaData['withholding']['withholding_no'] ){
                     $need_to_sign_withholding = 'Y';
                 }
-            }
-            //租期类型格式
-            $zuqi_type = "";
-            if($schema_data['sku']['zuqi_type']==1){
-                $zuqi_type = "day";
-            }
-            elseif($schema_data['sku']['zuqi_type']==2){
-                $zuqi_type = "month";
             }
 
             $result = [
                 'coupon'         => $data['coupon'],
-                'certified'			=> $schema_data['credit']['certified']?'Y':'N',
-                'certified_platform'=> zuji\certification\Certification::getPlatformName($schema_data['credit']['certified_platform']),
-                'credit'			=> ''.$schema_data['credit']['credit'],
-
-                'credit_type'			=> $credit_type,
-                'credit_status'		=> $b &&$need_to_sign_withholding=='N'&&$need_to_credit_certificate=='N'?'Y':'N',  // 是否免押金
-
-                // 订单金额
-                'amount'			=> Order::priceFormat($schema_data['sku']['amount']/100),
-                // 优惠类型
-                'coupon_type'	=> ''.$schema_data['coupon']['coupon_type'],
-                // 优惠金额
-                'discount_amount'	=> Order::priceFormat($schema_data['sku']['discount_amount']/100),
-                // 商品总金额
-                'all_amount'		=> Order::priceFormat($schema_data['sku']['all_amount']/100),
-                // 买断价
-                'buyout_price'	    => Order::priceFormat($schema_data['sku']['buyout_price']/100),
-                // 市场价
-                'market_price'	    => Order::priceFormat($schema_data['sku']['market_price']/100),
-                //押金
-                'yajin'				=> Order::priceFormat($schema_data['sku']['yajin']/100),
-                //免押金
-                'mianyajin'			=> Order::priceFormat($schema_data['sku']['mianyajin']/100),
-                //原始租金
-                'zujin'				=> Order::priceFormat($schema_data['sku']['zujin']/100),
-                //首期金额
-                'first_amount'				=> Order::priceFormat($schema_data['instalment']['first_amount']/100),
-                //每期金额
-                'fenqi_amount'				=> Order::priceFormat($schema_data['instalment']['fenqi_amount']/100),
-                //意外险
-                'yiwaixian'			=> Order::priceFormat($schema_data['sku']['yiwaixian']/100),
-                //租期
-                'zuqi'				=> ''.$schema_data['sku']['zuqi'],
-                //租期类型
-                'zuqi_type'			=> $zuqi_type,
-                'chengse'			=> ''.$schema_data['sku']['chengse'],
-                // 支付方式
-                'payment_type_id'	 => ''.$schema_data['sku']['payment_type_id'],
-                'contract_id'			 => ''.$schema_data['sku']['contract_id'],
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['score'],
+                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+                'sku'=>$schemaData['sku'],
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $need_to_credit_certificate,
-                '_order_info' => $schema_data,
+                '_order_info' => $schemaData,
                 '$b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
