@@ -75,7 +75,6 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'alipay_user_id' => '', //支付宝用户id（2088开头）
      *		'user_id' => '', //租机平台用户id
      *		'agreement_no' => '', //支付平台签约协议号
      * ]
