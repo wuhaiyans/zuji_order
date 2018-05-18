@@ -21,7 +21,8 @@ class DeliveryGoods extends Warehouse
     const STATUS_PART = 1; //配货部分
     const STATUS_ALL = 2; //配货完成
 
-    protected $fillable = ['delivery_no', 'serial_no', 'order_no','quantity', 'quantity_delivered', 'status', 'status_time'];
+    protected $fillable = ['delivery_no', 'serial_no', 'order_no','quantity','goods_name',
+        'quantity_delivered', 'status', 'status_time'];
 
     /**
      * @param $data

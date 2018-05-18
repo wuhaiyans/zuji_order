@@ -8,6 +8,8 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Models\Delivery;
+use App\Warehouse\Models\DeliveryGoods;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -233,6 +235,8 @@ class DeliveryService
         $result = [];
         foreach ($items as $item) {
             $it = $item->toArray();
+            $it['logistics_name'] = $this->getLogisticsName($it['logistics_id']);
+            $it['status_mark'] = $item->getStatus();
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $item->goods->toArray();
             array_push($result, $it);
@@ -240,6 +244,16 @@ class DeliveryService
 
         return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
 
+    }
+
+    /**
+     * @param $id
+     * @param $no
+     * 取物流名
+     */
+    public function getLogisticsName($id)
+    {
+        return '顺风';
     }
 
     /**

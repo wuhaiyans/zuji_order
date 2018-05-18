@@ -30,8 +30,17 @@ class AlipayApi extends \App\Lib\BaseApi {
 		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
 		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
         $ApiRequest->setMethod('pay.alipay.url');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
+//		$params = [
+//			'out_no' => time(),	// 业务系统支付编号
+//			'amount' => '1',	// 金额，单位：分
+//			'name' => '测试商品支付',// 支付名称
+//			'back_url' => 'https://alipay/Test/notify',
+//			'front_url' => 'https://alipay/Test/front',
+//			'fenqi' => 0,	// 分期数
+//			'user_id' => 5,// 用户ID
+//		];
+        $Response = $ApiRequest->setParams( $params )->send();
+		
         if( !$Response->isSuccessed() ){
 			self::$error = '获取支付链接错误';
             return false;
