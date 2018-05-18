@@ -30,7 +30,7 @@ class FundAuthApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.fundauthstatus');
+        $ApiRequest->setMethod('pay.api.fundauthstatus');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -49,12 +49,14 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //解冻金额 单位：分
      *		'back_url' => '', //后台通知地址
+     *		'user_id' => '', //用户id
+     *		'remark' => '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'out_trade_no' => '',//支付系统交易码
      *		'trade_no' => '',//业务系统交易码
-     *		'amount' => '',//解冻金额 单位：分
+     *		'out_auth_no' => '',//支付系统授权码
      * ]
      */
     public static function unfreeze( array $params ){
@@ -80,13 +82,14 @@ class FundAuthApi extends \App\Lib\BaseApi {
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //交易金额；单位：分
      *		'back_url' => '', //后台通知地址
+     *		'user_id' => '', //用户id
+     *		'remark' => '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'out_trade_no' => '',//支付系统交易码
      *		'trade_no' => '',//业务系统交易码
-     *		'amount' => '',//交易金额；单位：分
-     *		'create_time' => '',//创建时间戳
+     *		'out_auth_no' => '',//支付系统授权码
      * ]
      */
     public static function unfreezeAndPay( array $params ){

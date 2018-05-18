@@ -16,19 +16,22 @@ class WithholdingApi extends \App\Lib\BaseApi {
      *		'out_trade_no' => '', //业务系统授权码
      *		'amount' => '', //交易金额；单位：分
      *		'back_url' => '', //后台通知地址
+     *		'name' => '', //交易备注
+     *		'agreement_no' => '', //支付平台代扣协议号
+     *		'user_id' => '', //业务平台用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'out_trade_no' => '',//支付系统交易码
      *		'trade_no' => '',//业务系统交易码
-     *		'create_time' => '',//创建时间戳
+     *		'out_agreement_no' => '',//支付平台代扣协议号
      * ]
      */
     public static function withholdingPay( array $params ){
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdingpay');
+        $ApiRequest->setMethod('pay.api.withholdingpay');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -58,7 +61,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdquery');
+        $ApiRequest->setMethod('pay.api.withholdquery');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -72,14 +75,14 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'alipay_user_id' => '', //支付宝用户id（2088开头）
      *		'user_id' => '', //租机平台用户id
      *		'agreement_no' => '', //支付平台签约协议号
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'status' => '',//状态：0：已签约；1：未签约
-     *		'agreement_no' => '',//支付平台协议号
+     *		'out_agreement_no' => '',//支付平台协议号
+     *		'user_id' => '',//用户id
      *		'sign_time' => '',//签署时间
      * ]
      */
@@ -87,7 +90,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.withholdingstatus');
+        $ApiRequest->setMethod('pay.api.withholdingstatus');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
@@ -103,11 +106,13 @@ class WithholdingApi extends \App\Lib\BaseApi {
      * [
      *		'user_id' => '', //租机平台用户ID
      *		'alipay_user_id' => '', //用户支付宝id（2088开头）
-     *		'agreement_no' => '', //签约协议号
+     *		'agreement_no' => '', //支付平台签约协议号
+     *		'back_url' => '', //后端回调地址
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'user_id' => '',//用户id
+     *		'out_agreement_no' => '',//支付平台签约协议号
      *		'alipay_user_id' => '',//用户支付宝id（2088开头）
      *		'status' => '',//解约是否成功 0：成功1：失败
      * ]
@@ -116,7 +121,7 @@ class WithholdingApi extends \App\Lib\BaseApi {
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.unsign');
+        $ApiRequest->setMethod('pay.api.unsign');
         $ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){

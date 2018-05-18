@@ -12,30 +12,34 @@ class AlipayApi extends \App\Lib\BaseApi {
 	 * @param string $appid		应用ID
 	 * @param array $params
 	 * [
-	 *		'out_no' => '',
+	 *		'out_no' => '', //业务平台支付码
+	 *		'amount' => '', //支付金额 分
+	 *		'name' => '', //支付名称
+	 *		'back_url' => '', //后端回调地址
+	 *		'front_url' => '', //前端回调地址
+	 *		'fenqi' => '', //分期期数
+	 *		'user_id' => '', //用户id
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'url' => '',
-	 *		'params' => '',
+	 *		'payment_url' => '',//支付链接
 	 * ]
 	 */
 	public static function getUrl( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl('https://dev-pay-zuji.huishoubao.com/api');
-//        $ApiRequest->setUrl('https://localhost/zuji/dev-PayService/public/index.php/alipay/Test/getUrl');
-        $ApiRequest->setAppid('1');	// 业务应用ID
+		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
         $ApiRequest->setMethod('pay.alipay.url');
-        $ApiRequest->setParams([
-			'out_no' => time(),	// 业务系统支付编号
-			'amount' => '1',	// 金额，单位：分
-			'name' => '测试商品支付',// 支付名称
-			'back_url' => 'https://alipay/Test/notify',
-			'front_url' => 'https://alipay/Test/front',
-			'fenqi' => 0,	// 分期数
-			'user_id' => 5,// 用户ID
-		]);
-        $Response = $ApiRequest->send();
+//		$params = [
+//			'out_no' => time(),	// 业务系统支付编号
+//			'amount' => '1',	// 金额，单位：分
+//			'name' => '测试商品支付',// 支付名称
+//			'back_url' => 'https://alipay/Test/notify',
+//			'front_url' => 'https://alipay/Test/front',
+//			'fenqi' => 0,	// 分期数
+//			'user_id' => 5,// 用户ID
+//		];
+        $Response = $ApiRequest->setParams( $params )->send();
 		
         if( !$Response->isSuccessed() ){
 			self::$error = '获取支付链接错误';
@@ -59,10 +63,10 @@ class AlipayApi extends \App\Lib\BaseApi {
 	 *		'withholding_url' => '',//签约跳转url地址
 	 * ]
 	 */
-	public static function withholdingUrl( $appid,array $params ){
+	public static function withholdingUrl( array $params ){
 		$ApiRequest = new ApiRequest();
 		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-		$ApiRequest->setAppid( $appid );	// 业务应用ID
+		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.alipay.withholdingurl');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -87,7 +91,7 @@ class AlipayApi extends \App\Lib\BaseApi {
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'Authorization_url' => '',跳转预授权接口
+	 *		'fundauth_url' => '',跳转预授权接口
 	 * ]
 	 */
 	public static function fundAuthUrl( array $params ){
