@@ -1,7 +1,10 @@
 <?php
 /**
- *
- * 订单结算数据处理
+ *  订单清算数据处理
+ * Author: wutiantang
+ * Email :wutiantang@huishoubao.com.cn
+ * Date: 2018/5/14 0018
+ * Time: 下午 3:18
  */
 namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
@@ -13,10 +16,12 @@ class OrderClearingRepository
 {
 
 
+
     /**
      * 退款结算数据录入
+     * Author: heaven
      * @param $param
-     * @return bool|string
+     * @return bool
      */
     public static function createOrderClean($param){
 
@@ -62,9 +67,10 @@ class OrderClearingRepository
 }
 
     /**
-     *
-     *  获取订单清算详情数据
-     *
+     * 获取订单清算详情数据
+     * Author: heaven
+     * @param $param
+     * @return array|bool
      */
     public static function getOrderCleanInfo($param)
     {
@@ -84,16 +90,13 @@ class OrderClearingRepository
     }
 
 
-    /**
-     *
-     *  退款结算数据列表
-     */
-    /**
-     * @param $params
-     * @param $limit
-     * @param null $page
-     * @return array
 
+    /**
+     * 退款结算数据列表
+     * Author: heaven
+     * @param $param
+     * @param int $limit
+     * @return mixed
      */
     public static function getOrderCleanList($param, $limit=2)
     {
@@ -137,12 +140,13 @@ class OrderClearingRepository
     }
 
 
+
+
     /**
-     *
      * 订单清算取消接口
+     * Author: heaven
      * @param $param
-     *
-     *
+     * @return bool
      */
     public static function cancelOrderClean($param)
     {
@@ -162,12 +166,14 @@ class OrderClearingRepository
         return true;
 
     }
-    /**
-     *
-     * 更新结算退款单数据
-     *
-     */
 
+
+    /**
+     * 更新结算退款单数据
+     * Author: heaven
+     * @param $param
+     * @return bool
+     */
     public static function upOrderCleanStatus($param){
         if (empty($param)) {
             return false;

@@ -209,12 +209,15 @@ class OrderRepository
 
     }
 
+
     /**
      *
-     * 根据订单id查询信息
-     *
+     * 根据订单id订单信息
+     * heaven
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return array|bool
      */
-
     public static function getInfoById($orderNo,$userId=''){
             if (empty($orderNo)) return false;
             $whereArray = array();
@@ -229,9 +232,12 @@ class OrderRepository
     }
 
 
+
     /**
-     *
      * 根据订单id查询设备列表
+     * heaven
+     * @param $orderNo 订单编号
+     * @return array|bool
      *
      */
 
@@ -245,10 +251,12 @@ class OrderRepository
     }
 
 
+
     /**
-     *
      * 根据订单号查询设备号信息
-     *
+     * heaven
+     * @param $orderNo 订单编号
+     * @return bool
      */
 
     public static function getGoodsExtendInfo($orderNo){
@@ -283,10 +291,12 @@ class OrderRepository
 
     }
 
+
     /**
-     *
      * 查询未完成的订单
-     *
+     * heaven
+     * @param $userId 用户id
+     * @return bool
      */
     public static function unCompledOrder($userId)
     {
@@ -300,8 +310,12 @@ class OrderRepository
     }
 
 
+
     /**
-     * 更新订单
+     * heaven
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool
      */
     public static function closeOrder($orderNo, $userId=''){
 
@@ -327,21 +341,7 @@ class OrderRepository
 
     }
 
-    /**
-     *  获取订单列表
-     *
-     * @param array $param  获取订单列表参数
-     */
-//    public static function getOrderList($param = array())
-//    {
-//            if (isset($param['userId']) && !empty($param['userId'])) {
-//
-//                Order::
-//
-//            }
-//
-//
-//    }
+
 //获取订单信息
     public function get_order_info($where){
         $orderNo=$where['order_no'];
@@ -356,6 +356,8 @@ class OrderRepository
     }
 
     /**
+     * heaven
+     * 获取订单详情
      * @param array $param  orderNo 订单号
      * @return array|bool
      */
@@ -415,6 +417,7 @@ class OrderRepository
             return false;
         }
 
+        //查询传入的冻结状态是否在范围内
         if (!in_array($freezeStatus, array_keys(OrderFreezeStatus::getStatusList()))) {
             return false;
         }

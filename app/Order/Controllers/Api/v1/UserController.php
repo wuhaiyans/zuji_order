@@ -1,4 +1,11 @@
 <?php
+/**
+ *  用户认证处理接口
+ * Author: wutiantang
+ * Email :wutiantang@huishoubao.com.cn
+ * Date: 2018/5/2 0018
+ * Time: 下午 2:18
+ */
 
 namespace App\Order\Controllers\Api\v1;
 use App\User;
