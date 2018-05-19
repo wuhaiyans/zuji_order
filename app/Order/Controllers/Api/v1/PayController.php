@@ -104,4 +104,28 @@ class PayController extends Controller
     }
 
 
+    /**
+     * 订单清算 退款回调地址
+     * Author: heaven
+     * @param Request $request
+     */
+    public function refundClean(Request $request){
+
+       $param['params'] =  $request->input();
+       $rule = [
+
+         'out_refund_no'=>'required', //订单系统退款码
+         'refund_no'=>'required', //支付系统退款码
+
+       ];
+        $validateParams = $this->validateParams($rule,$param);
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+
+    }
+
+
 }
