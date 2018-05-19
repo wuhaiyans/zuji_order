@@ -95,9 +95,11 @@ class OrderCleaningStatus{
 
 
 
+
     /**
      * 业务类型列表
-     * @return array    业务类型列表
+     * Author: heaven
+     * @return array
      */
     public static function getBusinessTypeList(){
         return [
@@ -111,10 +113,12 @@ class OrderCleaningStatus{
     }
 
 
+
     /**
      * 业务类型值 转换成 状态名称
-     * @param int $status   业务类型值
-     * @return string 业务类型名称
+     * Author: heaven
+     * @param $status 业务类型值
+     * @return mixed|string  业务类型名称
      */
     public static function getBusinessTypeName($status){
         $list = self::getBusinessTypeList();
@@ -126,9 +130,12 @@ class OrderCleaningStatus{
 
 
 
+
     /**
      * 索赔状态列表
-     * @return array    索赔状态列表
+     * Author: heaven
+     * @return array 索赔状态列表
+     *
      */
     public static function getClaimStatusList(){
         return [
@@ -140,10 +147,12 @@ class OrderCleaningStatus{
     }
 
 
+
     /**
      * 索赔状态名称
-     * @param int $status   索赔状态值
-     * @return string 索赔状态名称
+     * Author: heaven
+     * @param $status
+     * @return mixed|string
      */
     public static function getClaimStatusName($status){
         $list = self::getClaimStatusList();
@@ -155,8 +164,10 @@ class OrderCleaningStatus{
 
 
 
+
     /**
      * 扣除押金状态列表
+     * Author: heaven
      * @return array    扣除押金状态列表
      */
     public static function getDepositDeductionStatusList(){
@@ -169,10 +180,12 @@ class OrderCleaningStatus{
     }
 
 
+
     /**
      * 扣除押金状态名称
-     * @param int $status   扣除押金状态值
-     * @return string 扣除押金状态名称
+     * Author: heaven
+     * @param $status   扣除押金状态值
+     * @return mixed|string 扣除押金状态名称
      */
     public static function getDepositDeductionStatusName($status){
         $list = self::getDepositDeductionStatusList();
@@ -185,8 +198,10 @@ class OrderCleaningStatus{
 
 
 
+
     /**
      * 退还押金状态列表
+     * Author: heaven
      * @return array    退还押金状态列表
      */
     public static function getDepositUnfreezeStatusList(){
@@ -201,6 +216,7 @@ class OrderCleaningStatus{
 
     /**
      * 退还押金状态名称
+     * Author: heaven
      * @param int $status   退还押金状态值
      * @return string 退还押金状态名称
      */
@@ -216,6 +232,7 @@ class OrderCleaningStatus{
 
     /**
      * 退款状态列表
+     * Author: heaven
      * @return array    退款状态列表
      */
 
@@ -231,6 +248,7 @@ class OrderCleaningStatus{
 
     /**
      * 退款状态名称
+     * Author: heaven
      * @param int $status   退款状态值
      * @return string 退款状态名称
      */
@@ -248,6 +266,7 @@ class OrderCleaningStatus{
 
     /**
      * 清算的状态列表
+     * Author: heaven
      * @return array    清算的状态列表
      */
     public static function getOrderCleaningList(){
@@ -264,6 +283,7 @@ class OrderCleaningStatus{
 
     /**
      * 清算的状态名称
+     * Author: heaven
      * @param int $status   清算的状态值
      * @return string 清算的状态名称
      */

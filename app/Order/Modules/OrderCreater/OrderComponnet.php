@@ -213,7 +213,7 @@ class OrderComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("订单组件 -create");
+
         //var_dump('创建订单...');
         // 创建订单
 /*        $order_data = [
@@ -251,6 +251,7 @@ class OrderComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+        var_dump("订单组件 -create");
 
         return true;
     }

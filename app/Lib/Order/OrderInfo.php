@@ -12,8 +12,10 @@ use App\Lib\ApiStatus;
     class OrderInfo {
 
         /**
-         * @param array 数组    ['order_no'] = A511125156960043
          * 获取订单详情
+         * Author: heaven
+         * @param $param  array 数组    ['order_no'] = A511125156960043
+         * @return \Illuminate\Http\JsonResponse
          */
      public static function getOrderInfo($param)
      {
@@ -55,10 +57,12 @@ use App\Lib\ApiStatus;
         }
 
 
+
         /**
          * 根据应用来源获取应用名称
-         * @param int   $appId
-         * return json
+         * Author: heaven
+         * @param $appId
+         * @return bool|\Illuminate\Http\JsonResponse|string
          */
         public static function getAppidInfo($appId)
         {
