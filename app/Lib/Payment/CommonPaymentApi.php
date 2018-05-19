@@ -28,7 +28,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.page.url', '1.0', $params);
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.url', '1.0', $params);
 	}
 
 	/**

@@ -125,6 +125,7 @@ class Pay extends \App\Lib\Configurable
 	public function getPaymentChannel(){
 		return $this->paymentChannel;
 	}
+	
 	public function getWithholdNo(){
 		return $this->withholdNo;
 	}
@@ -132,6 +133,15 @@ class Pay extends \App\Lib\Configurable
 		return $this->withholdChannel;
 	}
 	
+	public function getFundauthNo(){
+		return $this->fundauthNo;
+	}
+	public function getFundauthChannel(){
+		return $this->fundauthChannel;
+	}
+	public function getFundauthAmount(){
+		return $this->fundauthAmount;
+	}
 	/**
 	 * 当前状态
 	 * @access public

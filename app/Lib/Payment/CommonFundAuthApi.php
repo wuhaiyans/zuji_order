@@ -3,10 +3,43 @@ namespace App\Lib\Payment;
 use App\Lib\ApiRequest;
 /**
  *
- * 支付宝预授权接口
+ * 统一预授权接口
  * @author zjh
  */
-class FundAuthApi extends \App\Lib\BaseApi {
+class CommonFundAuthApi extends \App\Lib\BaseApi {
+
+    /**
+     * 预授权获取URL接口
+     * @param array $params
+     * [
+     *		'out_auth_no'	=> '', //业务系统授权码 
+     *		'amount'			=> '', //授权金额；单位：分
+     *		'channel_type'		=> '', //授权渠道
+     *		'front_url'			=> '', //前端回跳地址
+     *		'back_url'			=> '', //后台通知地址
+     *		'name'				=> '', //预授权名称
+     *		'user_id'			=> '', //用户ID
+     * ]
+     * @return array	预授权地址信息
+     * [
+     *		'url' => '',	// 预授权地址
+     *		'params' => '',	// 预授权地址
+     * ]
+     */
+    public static function fundAuthUrl( array $params ){
+		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.url', '1.0', $params);
+//        $ApiRequest = new ApiRequest();
+//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.alipay.fundauthurl');
+//        $ApiRequest->setParams($params);
+//        $Response = $ApiRequest->send();
+//        if( !$Response->isSuccessed() ){
+//            self::$error = '获取预授权链接地址失败';
+//            return false;
+//        }
+//        return $Response->getData();
+    }
 
     /**
      * 预授权状态查询接口
@@ -105,37 +138,6 @@ class FundAuthApi extends \App\Lib\BaseApi {
         $Response = $ApiRequest->send();
         if( !$Response->isSuccessed() ){
             self::$error = '解冻预授权金额失败';
-            return false;
-        }
-        return $Response->getData();
-    }
-
-    /**
-     * 预授权获取URL接口
-     * @param string $appid		应用ID
-     * @param array $params
-     * [
-     *		'out_auth_no' => '', //订单系统授权码
-     *		'amount' => '', //授权金额；单位：分
-     *		'front_url' => '', //前端回跳地址
-     *		'back_url' => '', //后台通知地址
-     *		'name' => '', //预授权名称
-     *		'user_id' => '', //用户ID
-     * ]
-     * @return mixed false：失败；array：成功
-     * [
-     *		'fundauth_url' => '',跳转预授权接口
-     * ]
-     */
-    public static function fundAuthUrl( array $params ){
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.alipay.fundauthurl');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '获取预授权链接地址失败';
             return false;
         }
         return $Response->getData();

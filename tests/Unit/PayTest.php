@@ -186,23 +186,24 @@ class PayTest extends TestCase
 			
 			
 			
-//			echo "获取预授权地址......";
-//			try {
-//				// 获取支付
-//				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
-//					'out_agreement_no'	=> $pay->getWithholdNo(),
-//					'channel_type'		=> $pay->getWithholdChannel(),			//【必选】int 支付渠道
-//					'name'			=> '测试代扣',					//【必选】string 名称
-//					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
-//					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-//					'user_id'		=> '0',							//【可选】int 业务平台yonghID
-//				]);
-//				//var_dump( $url_info );
-//				echo "ok\n";
-//			} catch (\Exception $exc) {
-//				echo "error: {$exc->getMessage()}\n";
-//				$this->assertTrue(false,$exc->getMessage());
-//			}
+			echo "获取预授权地址......";
+			try {
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
+					'out_auth_no'	=> $pay->getFundauthNo(),
+					'channel_type'		=> $pay->getFundauthChannel(),			//【必选】int 支付渠道
+					'amount'		=> $pay->getFundauthAmount()*100,			//【必选】int 预授权金额；单位：分
+					'name'			=> '测试预授权',					//【必选】string 名称
+					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
+					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+				]);
+				var_dump( $url_info );
+				echo "ok\n";
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
+			}
 			
 			
 //			// 预授权成功操作
