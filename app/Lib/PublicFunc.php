@@ -227,11 +227,12 @@ function v($data, $exit = '')
     }
 }
 
+
 /**
- * heaven
- * <p>规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）</p>
- * @param $noType :1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码
- *
+ * 规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）
+ * Author: heaven
+ * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码
+ * @return bool|string
  */
 function createNo($noType=1){
     $npreNoType = array(
@@ -278,8 +279,9 @@ function array_group_by($arr, $key)
 }
 
 /**
- * heavenwu
+ *
  * sql调试
+ * Author: heaven
  */
 function sql_profiler()
 {
@@ -316,14 +318,13 @@ function apiData()
     return $data;
 }
 
-/*
-  *
-  * 对象转换为数组
-  * @param $d object
-  * @author heavenwu
-  * $@param type=1 多维对象 find  2一维对象 比如findfrist
-  * return array
-  */
+
+/**
+ * 多维对象转换为数组
+ * Author: heaven
+ * @param $object
+ * @return mixed
+ */
 function objectToArray($object)
 {
     //数据处理

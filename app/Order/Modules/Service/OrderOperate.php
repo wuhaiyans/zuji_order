@@ -19,9 +19,11 @@ class OrderOperate
 {
 
     /**
-     * @param string $orderNo 订单编号
-     * @
      * 取消订单
+     * Author: heaven
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
      */
     public static function cancelOrder($orderNo,$userId='')
     {
@@ -83,9 +85,12 @@ class OrderOperate
 
     }
 
+
     /**
-     * @param $orderType :1,线上; 2,线下  3,小程序
-     *  生成订单号
+     * 生成订单号
+     * Author: heaven
+     * @param int $orderType
+     * @return string
      */
     public static function createOrderNo($orderType=1){
         $year = array();
@@ -96,7 +101,12 @@ class OrderOperate
         return $orderSn;
     }
 
-
+    /**
+     * 获取订单详情
+     * Author: heaven
+     * @param $orderNo
+     * @return array|\Illuminate\Http\JsonResponse
+     */
     public static function getOrderInfo($orderNo)
     {
         $order = array();
@@ -120,8 +130,10 @@ class OrderOperate
 
     }
 
+
     /**
-     * 订单列表
+     * 获取订单列表
+     * Author: heaven
      * @param array $param
      * @return array
      */

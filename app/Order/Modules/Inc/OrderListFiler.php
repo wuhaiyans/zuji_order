@@ -12,7 +12,11 @@ use App\Order\Modules\Inc;
 class OrderListFiler
 {
 
-    //获取订单筛选项
+    /**
+     * 获取订单筛选项
+     * Author: heaven
+     * @return array
+     */
     private static function getOrderState()
     {
 //        Channel::getChannel(config('tripartite.Interior_Goods_Request_data'), )
@@ -30,11 +34,13 @@ class OrderListFiler
     }
 
 
-    /*
+
+    /**
      * 订单相关的配置信息
-     * @param int $id 需要查找订单模块的key值
+     * Author: heaven
+     * @param string $id 需要查找订单模块的key值
      * @param string $incName 验证订单模块名称
-     * return string;
+     * @return array|bool|mixed
      */
     public static function orderInc($id='',$incName='') {
         //订单状态
