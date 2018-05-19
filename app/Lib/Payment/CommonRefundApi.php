@@ -12,8 +12,8 @@ class CommonRefundApi extends \App\Lib\BaseApi {
      * 退款申请接口
      * @param array $params
      * [
-     *		'out_refund_no' => '', //订单系统退款码
-     *		'payment_no'	=> '', //业务系统支付码
+     *		'out_refund_no' => '', //业务系统退款码
+     *		'payment_no'	=> '', //支付系统支付码
      *		'amount'		=> '', //支付金额
      *		'refund_back_url' => '', //退款回调URL
      * ]
