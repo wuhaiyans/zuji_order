@@ -58,7 +58,6 @@ class OrderCleaningController extends Controller
      */
     public function detail(Request $request){
 
-
         $params = $request->all();
 
         $rules = [
@@ -180,7 +179,7 @@ class OrderCleaningController extends Controller
     }
 
 
-    
+
     /**
      * 订单清算出帐
      * Author: heaven
