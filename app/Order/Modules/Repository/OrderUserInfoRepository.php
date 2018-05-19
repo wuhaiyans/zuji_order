@@ -14,10 +14,7 @@ class OrderUserInfoRepository
         $this->orderUserInfo = new OrderUserInfo();
     }
     public function add($data){
-
-        $id =$this->orderUserInfo->insertGetId($data);
-        return $id;
-
+        return $this->orderUserInfo->insertGetId($data);
     }
     //更新物流单号
     public function update($params){

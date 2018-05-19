@@ -111,6 +111,37 @@ class FundAuthApi extends \App\Lib\BaseApi {
     }
 
     /**
+     * 预授权获取URL接口
+     * @param string $appid		应用ID
+     * @param array $params
+     * [
+     *		'out_auth_no' => '', //订单系统授权码
+     *		'amount' => '', //授权金额；单位：分
+     *		'front_url' => '', //前端回跳地址
+     *		'back_url' => '', //后台通知地址
+     *		'name' => '', //预授权名称
+     *		'user_id' => '', //用户ID
+     * ]
+     * @return mixed false：失败；array：成功
+     * [
+     *		'fundauth_url' => '',跳转预授权接口
+     * ]
+     */
+    public static function fundAuthUrl( array $params ){
+        $ApiRequest = new ApiRequest();
+        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+        $ApiRequest->setMethod('pay.alipay.fundauthurl');
+        $ApiRequest->setParams($params);
+        $Response = $ApiRequest->send();
+        if( !$Response->isSuccessed() ){
+            self::$error = '获取预授权链接地址失败';
+            return false;
+        }
+        return $Response->getData();
+    }
+
+    /**
      * 预授权转支付接口
      * @param string $appid		应用ID
      * @param array $params
