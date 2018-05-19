@@ -13,20 +13,40 @@ use App\Order\Modules\Repository\Pay\FundauthStatus;
 class PayTest extends TestCase
 {
 	
-    public function testRefundStatus()
-    {
-			// 查询
-			echo '统一退款查询...';
-			$query_info = \App\Lib\Payment\CommonRefundApi::query([
-				'refund_no' => '201805050009',
-				'out_refund_no' => '123456',
-			]);
-			$this->assertTrue( is_array($query_info), '统一支付查询失败' );
-			echo "ok\n";
-			echo "status:{$query_info['status']}\n";
-		
-	}
-	
+//    public function testRefund()
+//    {
+//			// 退款
+//			echo '统一退款...';
+//			try {
+//				$info = \App\Lib\Payment\CommonRefundApi::apply([
+//					'out_refund_no' => '201805050009',
+//					'payment_no' => '2018050400036',
+//					'amount' => '1',
+//					'refund_back_url' => '123456',
+//				]);
+//				$this->assertTrue( is_array($info), '统一退款协议错误' );
+//			} catch (\Exception $exc) {
+//				echo $exc->getMessage()."\n";
+//			}
+//
+//			echo "统一退款...ok\n";
+//		
+//	}
+//	
+//    public function testRefundStatus()
+//    {
+//			// 查询
+//			echo '统一退款查询...';
+//			$query_info = \App\Lib\Payment\CommonRefundApi::query([
+//				'refund_no' => '11A51920483982018',
+//				'out_refund_no' => '201805050009',
+//			]);
+//			$this->assertTrue( is_array($query_info), '统一支付查询失败' );
+//			echo "ok\n";
+//			echo "status:{$query_info['status']}\n";
+//		
+//	}
+//	
 	
 //    public function testPaymentUrl()
 //    {
@@ -174,57 +194,55 @@ class PayTest extends TestCase
 //			echo $ex->getMessage();
 //		}
 //	}
-//	
-//    /**
-//     * 测试 payment 支付
-//     * @return void
-//     */
-//    public function testPayment()
-//    {
-//		try {
-//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
-//			
-//			// 创建支付
-//			// 只有支付环节，没有其他环节
-//			$pay = PayCreater::createPayment([
-//				'businessType' => '1',
-//				'businessNo' => \createNo(1),
-//				'paymentNo' => \createNo(1),
-//				'paymentAmount' => '0.01',
-//				'paymentChannel'=> Channel::Alipay,
-//				'paymentFenqi'	=> 3,
-//			]);
-//			
-//			// 支付阶段状态
-//			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
-//			
-//			
-//			// 支付状态
-//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-//					'支付环节状态初始化错误' );
-//			
-//			// 代扣签约状态
-//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
-//					'代扣签约状态初始化错误' );
-//			
-//			// 资金预授权状态
-//			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
-//					'资金预授权状态初始化错误' );
-//			
-//			// 支付成功操作
-//			$pay->paymentSuccess([
-//				'out_payment_no' => createNo(1),
-//				'payment_time' => time(),
-//			]);
-//			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
-//			
-//			
-//		} catch (\Exception $ex) {
-//			echo $ex->getMessage();
-//			$this->assertTrue(false);
-//		}
-//		
-//    }
+	
+    /**
+     * 测试 payment 支付
+     * @return void
+     */
+    public function testPayment()
+    {
+		try {
+			// 创建支付
+			// 只有支付环节，没有其他环节
+			$pay = PayCreater::createPayment([
+				'businessType' => '1',
+				'businessNo' => \createNo(1),
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> Channel::Alipay,
+				'paymentFenqi'	=> 0,
+			]);
+			
+			// 支付阶段状态
+			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+			
+			
+			// 支付状态
+			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
+					'支付环节状态初始化错误' );
+			
+			// 代扣签约状态
+			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
+					'代扣签约状态初始化错误' );
+			
+			// 资金预授权状态
+			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
+					'资金预授权状态初始化错误' );
+			
+			// 支付成功操作
+			$pay->paymentSuccess([
+				'out_payment_no' => createNo(1),
+				'payment_time' => time(),
+			]);
+			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
+			
+			
+		} catch (\Exception $ex) {
+			echo $ex->getMessage();
+			$this->assertTrue(false);
+		}
+		
+    }
 //	
 //    /**
 //     * 测试 withhold 代扣签约
@@ -387,7 +405,7 @@ class PayTest extends TestCase
 //		}
 //    }
 //	
-	
+//	
 //	
 //    /**
 //     * 测试 payment + withhold + fundauth
@@ -436,10 +454,6 @@ class PayTest extends TestCase
 //			$pay->cancel();
 //			// 恢复
 //			$pay->resume();
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
 //			
 //			// 支付成功操作
 //			$pay->paymentSuccess([
@@ -453,10 +467,6 @@ class PayTest extends TestCase
 //			$pay->cancel();
 //			// 恢复
 //			$pay->resume();
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
 //			
 //			
 //			// 代扣签约操作
@@ -466,10 +476,6 @@ class PayTest extends TestCase
 //			]);
 //			$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
 //			
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
 //			// 取消
 //			$pay->cancel();
 //			// 恢复
@@ -489,5 +495,5 @@ class PayTest extends TestCase
 //			$this->assertTrue(false);
 //		}
 //    }
-	
+//	
 }

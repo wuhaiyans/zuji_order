@@ -620,7 +620,7 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function _getBusinessCallback()
 	{
-		$callbacks = config('pay_callback');
+		$callbacks = config('pay_callback.payment');
 		if( isset($callbacks[$this->businessType]) && $callbacks[$this->businessType] ){
 			return $callbacks[$this->businessType];
 		}
