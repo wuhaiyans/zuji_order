@@ -13,7 +13,7 @@ class OrderGoodsRepository
         $this->orderGoods = new OrderGoods();
     }
     public function add($data){
-       return $this->orderGoods->insertGetId($data);
+        return $this->orderGoods->insertGetId($data);
     }
     //获取商品信息
     public static function getgoodsList($goods_no){

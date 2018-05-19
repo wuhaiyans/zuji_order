@@ -9,6 +9,8 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Repository\OrderCouponRepository;
+
 class CouponComponnet implements OrderCreater
 {
     //组件
@@ -19,6 +21,7 @@ class CouponComponnet implements OrderCreater
     private $couponInfo=[];
     private $sku;
 
+
     public function __construct(OrderCreater $componnet, array $coupon=[])
     {
         $this->componnet = $componnet;
@@ -26,15 +29,19 @@ class CouponComponnet implements OrderCreater
             //获取优惠券类型接口
             $couponInfo=[
                 0=>[
+                    'coupon_id'=>"1",
                     'coupon_no'=>"1111111111",
                     'coupon_type'=>1,// 1,现金券 2,首月0租金
                     'discount_amount'=>200,
+                    'coupon_name'=>"现金优惠券",
                     'is_use'=>0,//是否使用 0未使用
                 ],
                 1=>[
+                    'coupon_id'=>"2",
                     'coupon_no'=>"22222222",
                     'coupon_type'=>2,// 1,现金券 2,首月0租金
                     'discount_amount'=>200,
+                    'coupon_name'=>"首月0租金",
                     'is_use'=>0,//是否使用 0未使用
                 ]
             ];
@@ -67,44 +74,9 @@ class CouponComponnet implements OrderCreater
         }
         $schema =$this->componnet->getDataSchema();
         $sku =$schema['sku'];
-        //计算总租金
-        $totalAmount =0;
-        foreach ($sku as $k=>$v){
-            $totalAmount +=($v['zuqi']*$v['zujin']-$v['discount_amount'])*$v['sku_num'];
-        }
-        $zongyouhui=0;
-        foreach ($sku as $k => $v) {
-            for ($i =0;$i<$v['sku_num'];$i++){
-                $youhui =0;
-                foreach ($coupon as $key=>$val) {
-                    //首月0租金
-                    if ($val['coupon_type'] == 2 && $v['zuqi_type'] == 2) {
-                        $zongzujin = ($v['zuqi'] - 1) * $v['zujin'];
-                        $youhui+= $v['zujin'];
-                        $sku[$k]['coupon_amount'] =$youhui;
-                        $coupon[$key]['is_use'] = 1;
-                    }
-                    //现金券
-                    if ($val['coupon_type'] == 1) {
-                        $zongzujin = $v['zuqi'] * $v['zujin'] - $v['discount_amount'];
-                        $sku[$k]['coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
 
-                        if ($v['zuqi_type'] == 2) {
-                            $sku[$k]['coupon_amount'] = $sku[$k]['coupon_amount']+$youhui;
-                        } else {
-                            if ($k == count($sku) - 1 && $i ==$v['sku_num']-1) {
-                                $sku[$k]['coupon_amount'] = $val['discount_amount'] - $zongyouhui;
-                            }else{
-                                $zongyouhui += $sku[$k]['coupon_amount'];
-                            }
-                        }
-                        $coupon[$key]['is_use'] = 1;
-                    }
-                }
-            }
-      }
-        $this->couponInfo = $coupon;
-        $this->sku =$sku;
+        //计算优惠券信息
+        $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_coupon($sku,$coupon);
 
         return $this->flag && $filter;
     }
@@ -115,10 +87,7 @@ class CouponComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        $schema =$this->componnet->getDataSchema();
-        $schema['sku'] =$this->sku;
-        $schema['coupon'] =$this->couponInfo;
-        return $schema;
+        return $this->componnet->getDataSchema();
     }
 
     /**
@@ -127,44 +96,42 @@ class CouponComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        $this->componnet->create();
         var_dump("Coupon组件 -create");
+        $b = $this->componnet->create();
+        if( !$b ){
+            return false;
+        }
+        $data =$this->getOrderCreater()->getDataSchema();
+        //无优惠券
+        if(empty($data['coupon'])){
+            return true;
+        }
+        $coupon =new OrderCouponRepository();
+        foreach ($data['coupon'] as $k=>$v){
+            if($v['is_use'] ==1){
+                $couponData =[
+                    'order_no'=>$data['order']['order_no'],
+                    'coupon_no'=>$data['coupon']['coupon_no'],
+                    'coupon_id'=>$data['coupon']['coupon_id'],
+                    'discount_amount'=>$data['coupon']['discount_amount'],
+                    'coupon_type'=>$data['coupon']['coupon_type'],
+                    'coupon_name'=>$data['coupon']['coupon_name'],
+                ];
+                $couponId = $coupon->add($couponData);
+                if(!$couponId){
+                    $this->getOrderCreater()->setError("保存订单优惠券信息失败");
+                    return false;
+                }
+            }
+
+        }
+
+        /**
+         * 调用优惠券使用接口
+         */
+        var_dump("别忘了调用优惠券使用接口");
+
         return true;
-//        if( !$this->flag ){
-//            return false;
-//        }
-//        $b = $this->componnet->create();
-//        if( !$b ){
-//            return false;
-//        }
-//        //无优惠券
-//        if(!$this->coupon_no){
-//            return true;
-//        }
-//        // 订单ID
-//        $Creater = $this->get_order_creater();
-//        $order_id = $Creater->get_order_id();
-//
-//        $order2_coupon_table = \hd_load::getInstance()->table('order2/order2_coupon');
-//
-//        $data =[
-//            'order_id'=>$order_id,
-//            'coupon_no'=>$this->coupon_no,
-//            'coupon_id'=>$this->coupon_id,
-//            'discount_amount'=>$this->discount_amount,
-//            'coupon_type'=>$this->coupon_type,
-//            'coupon_name'=>$this->coupon_name,
-//        ];
-//        $coupon_id = $order2_coupon_table->add($data);
-//        if(!$coupon_id){
-//            $this->get_order_creater()->set_error('保存订单优惠券信息失败');
-//            return false;
-//        }
-//        $b = Coupon::set_coupon_status($this->coupon_id);
-//        if(!$b){
-//            $this->get_order_creater()->set_error('更新优惠券状态失败');
-//            return false;
-//        }
-//        return true;
+
     }
 }

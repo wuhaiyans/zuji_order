@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
@@ -31,13 +32,15 @@ class OrderComponnet implements OrderCreater
    //错误码
     private $errno = 0;
     //免押金状态 0：不免押金；1：全免押金
-
+    //appid
+    private $appid;
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ,int $userId,int $payType) {
+    public function __construct( $orderNo=null ,int $userId,int $payType,int $appid) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
         $this->payType=$payType;
+        $this->appid=$appid;
     }
 
     /**
@@ -160,6 +163,7 @@ class OrderComponnet implements OrderCreater
         return $this->orderId;
     }
 
+
     /**
      * 过滤
      * <p>注意：</p>
@@ -213,46 +217,56 @@ class OrderComponnet implements OrderCreater
      */
     public function create(): bool
     {
-
-        //var_dump('创建订单...');
-        // 创建订单
-/*        $order_data = [
-            'order_status' => \zuji\order\OrderStatus::OrderCreated, // 订单已创建
-            'business_key' => $this->business_key,        // 业务类型值
-            'order_no' => $this->order_no,  // 编号
-            'status' => \oms\state\State::OrderCreated,  // 状态
-            'create_time' => time(),
-        ];
-        $order2_table = \hd_load::getInstance()->table('order2/order2');
-        $order_id = $order2_table->add($order_data);
-        if( !$order_id ){
-            $this->set_error('保存订单失败');
-            return false;
-        }
-        $this->order_id = $order_id;
-
-        $follow_table = \hd_load::getInstance()->table('order2/order2_follow');
-        $follow_data =[
-            'order_id'=>$order_id,
-            'old_status'=>0,
-            'new_status'=>1,
-            'create_time'=>time(),
-        ];
-        $follow_table->add($follow_data);
-*/
+        $data = $this->getOrderCreater()->getDataSchema();
 
         // 执行 User组件
         $b = $this->userComponnet->create();
-        if( !$b ){
+        if (!$b) {
             return false;
         }
         // 执行 Sku组件
         $b = $this->skuComponnet->create();
-        if( !$b ){
+        if (!$b) {
             return false;
         }
-        var_dump("订单组件 -create");
+        var_dump('创建订单...');
+        $order_amount = 0;
+        $goods_yajin = 0;
+        $order_yajin = 0;
+        $order_insurance = 0;
+        $coupon_amount = 0;
+        $discount_amount = 0;
 
+        foreach ($data['sku'] as $k => $v) {
+            for ($i = 0; $i < $v['sku_num']; $i++) {
+                $order_amount += $v['amount_after_discount'];
+                $goods_yajin += $v['yajin'];
+                $order_yajin += $v['deposit_yajin'];
+                $order_insurance += $v['yiwaixian'];
+                $coupon_amount += $v['coupon_amount'];
+                $discount_amount += $v['discount_amount'];
+            }
+        }
+        $orderData = [
+            'order_status' => OrderStatus::OrderWaitPaying,
+            'order_no' => $this->orderNo,  // 编号
+            'user_id' => $this->userId,
+            'pay_type' => $this->payType,
+            'order_amount' => $order_amount,
+            'goods_yajin' => $goods_yajin,
+            'order_yajin' => $order_yajin,
+            'order_insurance' => $order_insurance,
+            'coupon_amount' => $coupon_amount,
+            'discount_amount' => $discount_amount,
+            'appid' =>$this->appid,
+        ];
+        $orderRepository = new OrderRepository();
+        $orderId = $orderRepository->add($orderData);
+        if (!$orderId) {
+            $this->getOrderCreater()->setError('保存订单数据失败');
+            return false;
+        }
         return true;
     }
+
 }

@@ -4,6 +4,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 
 use App\Lib\Certification;
+use App\Lib\Common\SmsApi;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
@@ -48,7 +49,7 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type']);
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type'],$data['appid']);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -59,7 +60,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             // 信用
-            $orderCreater = new CreditComponnet($orderCreater,$data['appid']);
+            $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
             $orderCreater = new YidunComponnet($orderCreater);
@@ -120,6 +121,10 @@ class OrderCreater
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 'order_no'=>$orderNo,
             ];
+            //创建订单后 发送支付短信。;
+            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
+                'goodsName' => $goods_name,    // 传递参数
+            ]);
             return $result;
 
             } catch (\Exception $exc) {
@@ -150,7 +155,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             // 信用
-            $orderCreater = new CreditComponnet($orderCreater,$data['appid']);
+            $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
             $orderCreater = new YidunComponnet($orderCreater);

@@ -146,14 +146,10 @@ class ChannelComponnet implements OrderCreater
      */
     public function create(): bool
     {
-//        if( !$this->flag ){
-//            return false;
-//        }
         $b = $this->componnet->create();
         if( !$b ){
             return false;
         }
-        var_dump("channel组件 -create");
         return true;
     }
 }
