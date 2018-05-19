@@ -305,7 +305,7 @@ class SkuComponnet implements OrderCreater
 
             }
 
-        }
+        
 
         return true;
     }

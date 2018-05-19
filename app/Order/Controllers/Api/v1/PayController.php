@@ -103,6 +103,164 @@ class PayController extends Controller
 
     }
 
+	/**
+	 * 签约代扣回调接口
+	 * [
+	 *      'reason'            => '' // 错误原因
+	 *      'status'            => '' // 回调状态 0成功 1失败
+	 *      'out_agreement_no'  => '' // 支付平台签约协议号
+	 *      'agreement_no'      => '' // 订单系统签约协议号
+	 *      'user_id'           => '' // 用户id
+	 * ]
+	 */
+	public function sign_notify(Request $request){
+		$request    = $request->all();
+		$params     = $request['params'];
+
+		$rules = [
+			'reason'            => 'required',
+			'status'            => 'required|int',
+			'out_agreement_no'  => 'required',
+			'agreement_no'      => 'required',
+			'user_id'           => 'required|int',
+		];
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+		$params = $params['params'];
+
+		//成功 则保存数据
+		if($params['status'] == ApiStatus::CODE_0){
+
+			$data  = [
+				'withhold_no'       => $params['agreement_no'],
+				'out_withhold_no'   => $params['out_agreement_no'],
+				'user_id'           => $params['user_id'],
+			];
+			$withhold = \App\Order\Modules\Service\OrderPayWithhold::create_withhold($data);
+			if(!$withhold){
+				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+			}
+			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+		}
+	}
+
+	/**
+	 * 解约代扣回调接口
+	 */
+	public function unsign_notify(Request $request){
+		$request    = $request->all();
+		$params     = $request['params'];
+
+		$rules = [
+			'reason'            => 'required',
+			'status'            => 'required|int',
+			'out_agreement_no'  => 'required',
+			'agreement_no'      => 'required',
+			'user_id'           => 'required|int',
+		];
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+		$params = $params['params'];
+		//成功 则保存数据
+		if($params['status'] == ApiStatus::CODE_0){
+
+			$userId     = $params['user_id'];
+			$withhold   = \App\Order\Modules\Service\OrderPayWithhold::unsign_withhold($userId);
+
+			if($withhold !== true){
+				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+			}
+
+			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+		}
+
+	}
+	/**
+	 * 代扣扣款回调
+	 * @$request array
+	 */
+	public function createpayNotify(Request $request){
+		$request    = $request->all();
+		$params     = $request['params'];
+
+		$rules = [
+			'reason'            => 'required',
+			'status'            => 'required|int',
+			'out_agreement_no'  => 'required',
+			'agreement_no'      => 'required',
+			'out_trade_no'      => 'required',
+			'trade_no'          => 'required',
+		];
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+		$params = $params['params'];
+		//成功 则保存数据
+		if($params['status'] == ApiStatus::CODE_0){
+
+			// 修改分期状态
+			$prepayment_data =[
+				'trade_no'      => $params['trade_no'],
+				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
+				'payment_time'  => time(),
+				'update_time'   => time(),
+			];
+			$b = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['trade_no']],$prepayment_data);
+			if(!$b){
+				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+			}
+			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+		}
+	}
+
+	/**
+	 * 提前还款异步回调
+	 * @param Request $request
+	 */
+	public function repaymentNotify(Request $request){
+		$request    = $request->all();
+		$params     = $request['params'];
+
+		$rules = [
+			'payment_no'    => 'required',
+			'out_no'        => 'required',
+			'status'        => 'required|int',
+			'reason'        => 'required',
+		];
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+		$params = $params['params'];
+		//成功 则保存数据
+		if($params['status'] == ApiStatus::CODE_0){
+
+			//修改支付单数据
+
+
+
+
+
+			// 修改分期状态
+//			$prepayment_data =[
+//				'trade_no'      => $params['trade_no'],
+//				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
+//				'payment_time'  => time(),
+//				'update_time'   => time(),
+//			];
+//			$b = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['trade_no']],$prepayment_data);
+//			if(!$b){
+//				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+//			}
+			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+		}
+	}
+
 
     /**
      * 订单清算 退款回调地址
