@@ -51,7 +51,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	
     /**
      * 代扣 扣款接口
-     * @param string $appid		应用ID
      * @param array $params
      * [
      *		'agreement_no'	=> '', //支付平台代扣协议号
@@ -76,16 +75,16 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 
     /**
      * 代扣 扣款交易查询
-     * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'trade_no' => '', //支付系统交易码
-     *		'user_id' => '', //用户id
+     *		'trade_no'		=> '', //支付系统交易码
+     *		'out_trade_no'	=> '', //支付系统交易码
+     *		'user_id'		=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'out_trade_no'	=> '',	//支付系统交易码
-     *		'trade_no'		=> '',	//业务系统交易码
+     *		'trade_no'	=> '',	//支付系统交易码
+     *		'out_trade_no'		=> '',	//业务系统交易码
      *		'status'		=> '',	//状态：processing：交易处理中；success：交易成功；failed：交易失败
      *		'amount'		=> '',	//交易金额；单位：分
      *		'trade_time'	=> '',	//交易时间戳
@@ -94,7 +93,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
      * ]
 	 * @throws \Exception			请求失败时抛出异常
      */
-    public static function withholdingPayQuery( array $params ){
+    public static function deductQuery( array $params ){
 		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.withhold.deduct.query', '1.0', $params);
     }
 
