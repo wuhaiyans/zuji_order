@@ -47,11 +47,16 @@ $api->version('v1', [
         // 代扣扣款回调
         $api->post('createpayNotify', 'PayController@createpayNotify');
 
+        // 提前还款回调
+        $api->post('repaymentNotify', 'PayController@repaymentNotify');
+
         // 代扣签约回调
         $api->post('signNotify', 'PayController@sign_notify');
 
         // 代扣解约回调
         $api->post('unSignNotify', 'PayController@unsign_notify');
+
+
 
 //    });
 });
