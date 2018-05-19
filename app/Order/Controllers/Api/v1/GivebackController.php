@@ -2,6 +2,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Service\OrderGiveback;
 use App\Order\Modules\Inc\OrderGivebackStatus;
@@ -11,22 +12,6 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 
 class GivebackController extends Controller
 {
-	/**
-	 * 获取还机设备列表信息
-	 * @param Request $request
-	 */
-	public function goodsList( Request $request ) {
-		//-+--------------------------------------------------------------------
-		// | 获取参数并验证
-		//-+--------------------------------------------------------------------
-		$params = $request->input();
-		$paramsArr = isset($params['params'])? $params['params'] :'';
-		if( empty($paramsArr['order_no']) ) {
-            return apiResponse([],ApiStatus::CODE_10104,'参数错误：订单编号为空!');
-		}
-		$orderNo = $paramsArr['order_no'];//提取订单编号
-		
-	}
 	/**
 	 * 获取还机申请中页面数据
 	 * @param Request $request
@@ -39,7 +24,7 @@ class GivebackController extends Controller
 		$params = $request->input();
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		if( empty($paramsArr['goods_no']) ) {
-            return apiResponse([],ApiStatus::CODE_10104,'参数错误：商品编号为空!');
+            return apiResponse([],ApiStatus::CODE_91000);
 		}
 		$goodsNo = $paramsArr['goods_no'];//提取商品编号
 		//-+--------------------------------------------------------------------
@@ -57,7 +42,7 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_60001,'数据获取失败');
 		}
 		//组合最终返回商品基础数据
-		$data['goods_no'] = $orderGoodsInfo['goods_no'];
+		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
 		$data['goods_name'] = $orderGoodsInfo['goods_name'];
 		$data['goods_thumb'] = $orderGoodsInfo['goods_thumb'];
 		$data['status'] = OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_APPLYING);
@@ -119,19 +104,29 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
-		//冻结订单
-		//等待接口
-		
-		//生成还机单
-		$orderGivebackService = new OrderGiveback();
-		$orderGivebackIId = $orderGivebackService->create($paramsArr);
-		if( $orderGivebackIId ){
-            return apiResponse([],ApiStatus::CODE_0,'归还设备申请提交成功');
+		//开启事务
+		DB::beginTransaction();
+		try{
+			//生成还机单
+			$orderGivebackService = new OrderGiveback();
+			$orderGivebackIId = $orderGivebackService->create($paramsArr);
+			if( !$orderGivebackIId ){
+				return apiResponse([],ApiStatus::CODE_10103,'归还单创建失败!');
+			}
+			//冻结订单
+			//等待接口
+
+
+			//推送到收发货系统
+			//等待接口
+		} catch (\Exception $ex) {
+			//事务回滚
+			DB::rollBack();
+			return apiResponse([],ApiStatus::CODE_10103,$ex->getMessage());
 		}
-		return apiResponse([],ApiStatus::CODE_10103,'归还设备申请提交失败');
-		
-		//推送到收发货系统
-		//等待接口
+		//提交事务
+		DB::commit();
+		return apiResponse([],ApiStatus::CODE_0,'归还设备申请提交成功');
 	}
 	/**
 	 * 还机确认收货

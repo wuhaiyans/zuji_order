@@ -44,6 +44,12 @@ class ApiRequest {
 		$this->method = $method;
 		return $this;
 	}
+	
+	public function setVersion(string $version) {
+		$this->version = $version;
+		return $this;
+	}
+
 
 	/**
 	 * 获取业务参数

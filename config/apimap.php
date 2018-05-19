@@ -76,6 +76,8 @@ return [
     // 代扣解约接口回调接口
     'api.Withhold.unsign_notify'        => 'WithholdController@unsign_notify',
     // 代扣扣款接口
+    'api.Withhold.repayment'            => 'WithholdController@repayment',
+    // 代扣扣款接口
     'api.Withhold.createpay'            => 'WithholdController@createpay',
     // 多项扣款接口
     'api.Withhold.multi_createpay'      => 'WithholdController@multi_createpay',

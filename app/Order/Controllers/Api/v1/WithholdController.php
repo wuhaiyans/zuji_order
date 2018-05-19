@@ -2,18 +2,20 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Payment\CommonPaymentApi;
 use App\Lib\Payment\WithholdingApi;
 use App\Lib\Payment\AlipayApi;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\OrderPayWithholdStatus;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Order\Modules\Service\OrderPayWithhold;
-use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\ThirdInterface;
+use App\Order\Modules\Service\OrderPay;
 use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -57,54 +59,6 @@ class WithholdController extends Controller
         }
 
         return apiResponse(['url'=>$url['withholding_url']],ApiStatus::CODE_0,"success");
-
-
-    }
-
-    /**
-     * 签约代扣回调接口
-     * [
-     *      'reason'            => '' // 错误原因
-     *      'status'            => '' // 回调状态 0成功 1失败
-     *      'out_agreement_no'  => '' // 支付平台签约协议号
-     *      'agreement_no'      => '' // 订单系统签约协议号
-     *      'user_id'           => '' // 用户id
-     * ]
-     */
-    public function sign_notify(Request $request){
-        $request    = $request->all();
-        $params     = $request['params'];
-
-        $rules = [
-            'reason'            => 'required',
-            'status'            => 'required|int',
-            'out_agreement_no'  => 'required',
-            'agreement_no'      => 'required',
-            'user_id'           => 'required|int',
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
-        }
-        $params = $params['params'];
-
-        //成功 则保存数据
-        if($params['status'] == ApiStatus::CODE_0){
-
-            $data  = [
-                'withhold_no'       => $params['agreement_no'],
-                'out_withhold_no'   => $params['out_agreement_no'],
-                'user_id'           => $params['user_id'],
-            ];
-            $withhold = OrderPayWithhold::create_withhold($data);
-            if(!$withhold){
-                return apiResponse([],ApiStatus::CODE_71001, "异常错误");
-            }
-
-            return apiResponse([],ApiStatus::CODE_0, "操作成功");
-
-        }
-
     }
 
     /*
@@ -219,42 +173,6 @@ class WithholdController extends Controller
         }
     }
 
-
-    /**
-     * 解约代扣回调接口
-     */
-    public function unsign_notify(Request $request){
-        $request    = $request->all();
-        $params     = $request['params'];
-
-        $rules = [
-            'reason'            => 'required',
-            'status'            => 'required|int',
-            'out_agreement_no'  => 'required',
-            'agreement_no'      => 'required',
-            'user_id'           => 'required|int',
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
-        }
-        $params = $params['params'];
-        //成功 则保存数据
-        if($params['status'] == ApiStatus::CODE_0){
-
-            $userId     = $params['user_id'];
-            $withhold   = OrderPayWithhold::unsign_withhold($userId);
-
-            if($withhold !== true){
-                return apiResponse([],ApiStatus::CODE_71001, "异常错误");
-            }
-
-            return apiResponse([],ApiStatus::CODE_0, "操作成功");
-        }
-
-    }
-
-
     /**
      * 代扣 扣款接口
      * @$request array
@@ -356,7 +274,7 @@ class WithholdController extends Controller
         $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
 
         // 价格
-        $amount = $instalmentInfo['amount']/100;
+        $amount = $instalmentInfo['amount'];
         if( $amount<0 ){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
@@ -426,14 +344,18 @@ class WithholdController extends Controller
             }
             // 代扣接口
             $withholding = new WithholdingApi();
-            // 扣款
+
+            $backUrl = env("API_INNER_URL") . "/createpayNotify";
+
             $withholding_data = [
-                'agreement_no'=>$agreementNo,
-                'trade_no'=>$tradeNo,
-                'subject'=>$subject,
-                'amount'=>$amount,
+                'out_trade_no'  => $agreementNo,         //业务系统授权码
+                'amount'        => $amount,              //交易金额；单位：分
+                'back_url'      => $backUrl,             //后台通知地址
+                'name'          => $subject,             //交易备注
+                'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
+                'user_id'       => $orderInfo['user_id'],//业务平台用户id
             ];
-            $withholding_b = $withholding->withhold($appid,$withholding_data);
+            $withholding_b = $withholding->withholdingPay($withholding_data);
             if (!$withholding_b) {
                 DB::rollBack();
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -590,7 +512,7 @@ class WithholdController extends Controller
             $subject = '订单-' . $instalmentInfo['order_no'] . '-' . $instalmentInfo['goods_no'] . '-第' . $instalmentInfo['times'] . '期扣款';
 
             // 价格
-            $amount = $instalmentInfo['amount'] / 100;
+            $amount = $instalmentInfo['amount'];
             if ($amount < 0) {
                 DB::rollBack();
                 Log::error("扣款金额不能小于1分");
@@ -666,13 +588,17 @@ class WithholdController extends Controller
                 // 代扣接口
                 $withholding = new WithholdingApi();
                 // 扣款
+                $backUrl = env("API_INNER_URL") . "/createpayNotify";
+
                 $withholdingData = [
-                    'agreement_no' => $agreementNo,
-                    'trade_no' => $tradeNo,
-                    'subject' => $subject,
-                    'amount' => $amount,
+                    'out_trade_no'  => $agreementNo,         //业务系统授权码
+                    'amount'        => $amount,              //交易金额；单位：分
+                    'back_url'      => $backUrl,             //后台通知地址
+                    'name'          => $subject,             //交易备注
+                    'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
+                    'user_id'       => $orderInfo['user_id'],//业务平台用户id
                 ];
-                $withholdingResult = $withholding->withhold($appid, $withholdingData);
+                $withholdingResult = $withholding->withholdingPay( $withholdingData);
                 if (!$withholdingResult) {
                     if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                         OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
@@ -712,6 +638,101 @@ class WithholdController extends Controller
         return apiResponse([], ApiStatus::CODE_0, "success");
 
     }
+
+
+    /**
+     * 主动还款
+     */
+    public function repayment(Request $request){
+        $params     = $request->all();
+
+        $rules = [
+            'order_no'          => 'required',
+            'return_url'        => 'required',
+            'instalment_id'     => 'required|int',
+        ];
+
+        // 参数过滤
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
+
+        // 订单详情
+        $orderInfo  = OrderRepository::getOrderInfo($params);
+        if(!$orderInfo){
+            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
+        }
+
+        // 查询分期
+        if(empty($params['nologin'])){
+            $instal_where = ['id'=>$params['instalment_id']];
+        }else{
+            $instal_where = [
+                'order_no'=>$params['order_no'],
+                'term'=>date('Ym'),
+            ];
+        }
+        $instalmentInfo  = OrderInstalmentRepository::getInfo($instal_where);
+        if(!$instalmentInfo){
+            return apiResponse([],ApiStatus::CODE_20001, "查询分期数据错误");
+        }
+
+        if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+            return apiResponse([],ApiStatus::CODE_71000, "分期不允许扣款");
+        }
+
+        $payData = [
+            'business_type'     =>'', // '业务类型',
+            'business_no'       =>'', // '业务编号',
+            'status'            =>'', // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
+            'create_time'       =>'', // '创建时间戳',
+            'payment_status'    =>'', // '支付-状态：0：无需支付；1：待支付；2：支付成功；3：支付失败',
+            'payment_channel'   =>'', // '支付-渠道',
+            'payment_amount'    =>'', // '支付-金额；单位：元',
+            'payment_fenqi'     =>'', // '支付-分期数；0：不分期；取值范围[0,3,6,12]',
+            'payment_no'        =>'', // '支付-编号',
+            'withhold_status'   =>'', // '代扣协议-状态：0：无需签约；1：待签约；2：签约成功；3：签约失败',
+            'withhold_channel'  =>'', // '代扣协议-渠道',
+            'withhold_no'       =>'', // '代扣协议-编号',
+        ];
+        // 创建支付单
+        $payB = OrderPay::create($payData);
+        if(!$payB){
+            return apiResponse([],ApiStatus::CODE_30900, "创建支付单失败");
+        }
+
+        try{
+            $subject = "订单" . $params['order_no'] . "-第" . $instalmentInfo['times'] . "期主动还款";
+            $backUrl = env("API_INNER_URL") . "/repaymentNotify";;
+            $data = [
+                'out_payment_no'	=> createNo(3),	            //【必选】string 业务支付唯一编号
+         		'payment_channel'	=> PayInc::FlowerDepositPay,	                    //【必选】int 支付渠道
+         		'payment_amount'	=> $instalmentInfo['amount'],	//【必选】int 交易金额；单位：分
+         		'payment_fenqi'		=> $instalmentInfo['term'],	//【必选】int 分期数
+         		'name'			    => $subject,	            //【必选】string 交易名称
+         		'back_url'		    => $backUrl,	            //【必选】string 后台通知地址
+         		'front_url'		    => $params['return_url'],	//【必选】string 前端回跳地址
+         		'user_id'		    => $orderInfo['user_id'],	//【可选】int 业务平台yonghID
+            ];
+
+            $url = CommonPaymentApi::pageUrl($data);
+            if(!$url){
+                return apiResponse([],ApiStatus::CODE_30901, "支付环节链接地址创建失败");
+            }
+
+            return apiResponse(['url'=>$url],ApiStatus::CODE_0, "操作成功");
+
+        } catch (\Exception $exc) {
+            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+
+        }
+
+    }
+
+
+
 
 
 }

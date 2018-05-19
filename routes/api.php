@@ -44,11 +44,19 @@ $api->version('v1', [
         $api->post('user', 'UserController@me') //获取用户信息接口
             ->name('api.user.show');
 
+        // 代扣扣款回调
+        $api->post('createpayNotify', 'PayController@createpayNotify');
+
+        // 提前还款回调
+        $api->post('repaymentNotify', 'PayController@repaymentNotify');
+
         // 代扣签约回调
-        $api->post('signNotify', 'WithholdController@sign_notify');
+        $api->post('signNotify', 'PayController@sign_notify');
 
         // 代扣解约回调
-        $api->post('unSignNotify', 'WithholdController@unsign_notify');
+        $api->post('unSignNotify', 'PayController@unsign_notify');
+
+
 
 //    });
 });
