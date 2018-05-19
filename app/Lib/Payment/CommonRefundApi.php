@@ -28,13 +28,12 @@ class CommonRefundApi extends \App\Lib\BaseApi {
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
         $ApiRequest->setMethod('pay.payment.refund');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
+        $Response = $ApiRequest->setParams($params)->send();
         if( !$Response->isSuccessed() ){
-            self::$error = '退款请求失败';
+			self::$error = $Response->getStatus()->getMsg();
             return false;
         }
-        return true;
+		return $Response->getData();
     }
 	
     /**
