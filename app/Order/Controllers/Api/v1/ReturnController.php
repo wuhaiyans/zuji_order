@@ -96,6 +96,10 @@ class ReturnController extends Controller
 
 
     // 退货记录列表接口
+    /*
+     * business_key 业务类型  必选
+     *
+     */
     public function returnList(Request $request)
     {
         $orders =$request->all();
@@ -181,6 +185,10 @@ class ReturnController extends Controller
     }
 
     // 退货结果查看接口
+    /*
+     * order_no  订单编号  必选
+     * goods_no 商品编号    必选
+     */
     public function returnResult(Request $request)
     {
         $orders =$request->all();
@@ -200,6 +208,7 @@ class ReturnController extends Controller
 
     }
     //取消退货申请
+
     public function cancelApply(Request $request)
     {
         $orders = $request->all();
@@ -210,9 +219,16 @@ class ReturnController extends Controller
 
     }
     //退换货检测结果
-    public function is_qualified(Request $request){
+    public function isQualified(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'business_key'             =>'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data'][0]);
         return apiResponse([],$res);
     }
@@ -224,6 +240,13 @@ class ReturnController extends Controller
     public function updateOrder(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'goods_no'             =>'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $res=$this->OrderReturnCreater->updateorder($params);
         return apiResponse([],$res);
     }
@@ -231,6 +254,13 @@ class ReturnController extends Controller
     public function userReceive(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'goods_no'             =>'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $res=$this->OrderReturnCreater->user_receive($params);
         return apiResponse([],$res);
     }
@@ -238,6 +268,15 @@ class ReturnController extends Controller
     public function createChange(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'good_no'           =>'required',
+            'serial_number'     =>'required',
+            'good_id'     =>'required',
+        ]);
+        if(count($param)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $res=$this->OrderReturnCreater->createchange($params);
         return apiResponse([],$res);
     }
@@ -245,6 +284,9 @@ class ReturnController extends Controller
     public function updateStatus(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
+        if(empty($params['order_no'])){
+            return  apiResponse([],ApiStatus::CODE_20001);//参数错误
+        }
         $res=$this->OrderReturnCreater->updateStatus($params);
         return apiResponse([],$res);
     }

@@ -247,13 +247,22 @@ class OrderReturnRepository
             return false;
         }
         $where[]=['order_goods.order_no','=',$params['order_no']];
-        $return_info=DB::table('order_goods')
-            ->leftJoin('order_goods_extend', function ($join){
-                $join->on([['order_goods.order_no','=','order_goods_extend.order_no'],['order_goods.goods_no','=','order_goods_extend.good_no']]);
-            })
-            ->where($where)
-            ->select('order_goods_extend.*','order_goods.*')
-            ->get()->toArray();
+        if($params['goods_no']){
+            $return_info= DB::table('order_return')
+                ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+                ->leftJoin('order_goods_extend',[['order_return.order_no', '=', 'order_goods_extend.order_no'],['order_return.goods_no', '=', 'order_goods_extend.good_no']])
+                ->where($where)
+                ->select('order_goods_extend.*','order_goods.*','order_return.*')
+                ->get()->toArray();
+        }else{
+            $return_info= DB::table('order_return')
+                ->leftJoin('order_goods', 'order_return.order_no', '=', 'order_goods.order_no')
+                ->leftJoin('order_goods_extend','order_return.order_no', '=', 'order_goods_extend.order_no')
+                ->where($where)
+                ->select('order_goods_extend.*','order_goods.*','order_return.*')
+                ->get()->toArray();
+        }
+
         if($return_info){
             return $return_info;
         }else{
