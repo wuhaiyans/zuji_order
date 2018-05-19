@@ -32,7 +32,8 @@ class OrderGoodsRepository
 	 *		'id' => '',//订单商品自增id<br/>
 	 *		'goods_name' => '',//订单商品自增id<br/>
 	 *		'zuji_goods_id' => '',//以前商品id<br/>
-	 *		'goods_no' => '',//商品sn<br/>
+	 *		'zuji_goods_sn' => '',//商品sn<br/>
+	 *		'goods_no' => '',//商品编号<br/>
 	 *		'goods_thumb' => '',//缩略图<br/>
 	 *		'prod_id' => '',//产品id<br/>
 	 *		'prod_no' => '',//产品sn<br/>

@@ -318,6 +318,7 @@ class SkuComponnet implements OrderCreater
                 }
             }
         }
+
         /**
          * 在这里要调用减少库存方法
          */

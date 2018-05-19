@@ -145,6 +145,16 @@ class OrderInstalmentRepository
     }
 
     /**
+     * 查询分期信息
+     */
+    public static function getInfo($params){
+        if (empty($params)) return false;
+        $result =  OrderInstalment::query()->where($params)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
+
+    /**
      * 查询总数
      */
     public static function queryCount($param = []){

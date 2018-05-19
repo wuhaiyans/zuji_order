@@ -24,13 +24,14 @@ function apiResponse($data=[], $errno=0, $errmsg='')
     return response()->json(['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg]);
 }
 
+
 /**
- * @param array $data
+ * 接口内部返回
+ * Author: heaven
  * @param int $errno
+ * @param array $data
  * @param string $errmsg
  * @return array
- * 接口内部返回
- *
  */
 function apiResponseArray($errno=0,$data=[], $errmsg='')
 {
@@ -231,7 +232,7 @@ function v($data, $exit = '')
 /**
  * 规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）
  * Author: heaven
- * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码6.goods_no生成方式
+ * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码6.goods_no生成方式,7.还机单编号
  * @return bool|string
 
  */
@@ -244,6 +245,7 @@ function createNo($noType=1){
         4 => 'Y',
         5 => 'C',
         6 => 'G',
+        7 => 'H',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
