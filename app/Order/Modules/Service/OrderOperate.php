@@ -124,10 +124,12 @@ class OrderOperate
 
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
-        
+
         $order['order_info'] = $orderData;
+
         //订单商品列表相关的数据
         $goodsData =  OrderRepository::getGoodsListByOrderId($orderNo);
+
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表

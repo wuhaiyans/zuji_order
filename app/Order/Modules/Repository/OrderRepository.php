@@ -4,7 +4,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
-use App\Order\Models\OrderGoodExtend;
+use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
@@ -261,7 +261,7 @@ class OrderRepository
 
     public static function getGoodsExtendInfo($orderNo){
         if (empty($orderNo)) return false;
-        $orderGoodExtendData =  OrderGoodExtend::query()->where([
+        $orderGoodExtendData =  OrderGoodsExtend::query()->where([
             ['order_no', '=', $orderNo],
         ])->get();
         if (!$orderGoodExtendData) return false;
