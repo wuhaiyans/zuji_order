@@ -80,23 +80,24 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
-           // $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+//           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
             $b = $orderCreater->filter();
-            if(!$b){
-                DB::rollBack();
-                //把无法下单的原因放入到用户表中
-                $error =$orderCreater->getOrderCreater()->getError();
-                return $orderCreater->getOrderCreater()->getError();
-            }
+//            if(!$b){
+//                DB::rollBack();
+//                //把无法下单的原因放入到用户表中
+//                $error =$orderCreater->getOrderCreater()->getError();
+//                return $orderCreater->getOrderCreater()->getError();
+//            }
             $schemaData = $orderCreater->getDataSchema();
-            var_dump($schemaData);
+          //  var_dump($schemaData);
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
                 return $orderCreater->getOrderCreater()->getError();
             }
+            die;
 
             DB::commit();
             // 是否需要签署代扣协议

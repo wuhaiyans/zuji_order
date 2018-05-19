@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\OrderGoodsRepository;
 use Mockery\Exception;
 
 class SkuComponnet implements OrderCreater
@@ -203,111 +204,110 @@ class SkuComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("sku组件 -create");
-//        if( !$this->flag ){
-//            return false;
-//        }
-//
-//        // 订单ID
-//        $order_id = $this->componnet->get_order_creater()->get_order_id();
-//        //业务类型
-//        $business_key = $this->componnet->get_order_creater()->get_business_key();
-//
-//        // 保存 商品信息
-//        $goods_data = [
-//            'order_id' => $order_id,
-//            'sku_id' => $this->sku_id,
-//            'spu_id' => $this->spu_id,
-//            'sku_name' => $this->sku_name,
-//            'brand_id' => $this->brand_id,
-//            'category_id' => $this->category_id,
-//            'specs' => \zuji\order\goods\Specifications::input_format($this->specs),
-//            'zujin' => $this->zujin,
-//            'yajin' => $this->yajin,
-//            'mianyajin' => $this->mianyajin,
-//            'yiwaixian' => $this->yiwaixian,
-//            'yiwaixian_cost' => $this->yiwaixian_cost,
-//            'zuqi' => $this->zuqi,
-//            'zuqi_type' => $this->zuqi_type,
-//            'chengse' => $this->chengse,
-//            'create_time' => time(),
-//        ];
-//        $order2_goods = \hd_load::getInstance()->table('order2/order2_goods');
-//        $goods_id = $order2_goods->add($goods_data);
-//        if( !$goods_id ){
-//            $this->get_order_creater()->set_error('[创建订单]商品保存失败');
-//            return false;
-//        }
-//        $this->goods_id =$goods_id;
-//        // 租机业务下单减少库存
-//        if($business_key == Business::BUSINESS_ZUJI){
-//            //sku库存 -1
-//            $sku_table =\hd_load::getInstance()->table('goods2/goods_sku');
-//            $spu_table=\hd_load::getInstance()->table('goods2/goods_spu');
-//
-//            $sku_data['sku_id'] =$this->sku_id;
-//            $sku_data['number'] = ['exp','number-1'];
-//            $add_sku =$sku_table->save($sku_data);
-//            if(!$add_sku){
-//                $this->get_order_creater()->set_error('[创建订单]商品库存减少失败');
-//                return false;
-//            }
-//            $spu_data['id'] =$this->spu_id;
-//            $spu_data['sku_total'] = ['exp','sku_total-1'];
-//            $add_spu =$spu_table->save($spu_data);
-//            if(!$add_spu){
-//                $this->get_order_creater()->set_error('[创建订单]商品库存减少失败');
-//                return false;
-//            }
-//        }
-//
-////		// 测试环境;
-////		if( $_SERVER['ENVIRONMENT'] == 'test' ){
-////			// 测试优惠价格 = 租期数
-////			if( $this->discount_amount>0 ){
-////				$this->discount_amount = $this->zuqi;
-////			}else{
-////				$this->discount_amount = 0;
-////			}
-////
-////			// 测试意外险 1
-////			$this->yiwaixian = 1;
-////
-////			// 测试 月租金 2分（支持每月优惠1分）
-////			$this->zujin = 2;
-////
-////			// 测试 总金额
-////			$this->all_amount = $this->zuqi*$this->zujin + $this->yiwaixian;
-////
-////			// 测试 待支付金额
-////			$this->amount = $this->all_amount - $this->discount_amount;
-////		}
-//
-//        // 保存订单商品信息
-//        $data = [
-//            'goods_id' => $goods_id,
-//            'goods_name' => $this->spu_name,
-//            'chengse' => $this->chengse,
-//            'zuqi' => $this->zuqi,
-//            'zuqi_type' => $this->zuqi_type,
-//            'zujin' => $this->zujin,
-//            'yajin' => $this->yajin,
-//            'mianyajin' => $this->mianyajin,
-//            'yiwaixian' => $this->yiwaixian,
-//            'amount' => $this->amount,
-//            'buyout_price' => $this->buyout_price,
-//            'discount_amount' => $this->discount_amount,
-//            'all_amount' => $this->all_amount,
-//            'payment_type_id'=>$this->payment_type_id
-//        ];
-//        $order_table = \hd_load::getInstance()->table('order2/order2');
-//        $b = $order_table->where(['order_id'=>$order_id])->save($data);
-//        if( !$b ){
-//            $this->get_order_creater()->set_error('[创建订单]更新订单商品信息失败');
-//            return false;
-//        }
+        if (!$this->flag) {
+            return false;
+        }
+        $data = $this->getDataSchema();
+        var_dump($data);
+        die;
+        $goodsRepository = new OrderGoodsRepository();
+        foreach ($data['sku'] as $k=>$v){
+            for($i=0;$i<$v['sku_num'];$i++){
+                $goodsData =[
+                    'goods_name'=>$v['sku']['spu_name'],
+                    'goods_id'=>$v['sku']['sku_id'],
+                    'goods_no'=>$v['sku']['sku_no']."-".($i+1),
+                    'prod_id'=>$v['sku']['spu_id'],
+                    'prod_no'=>$v['sku']['spu_no'],
+                    'brand_id'=>$v['sku']['brand_id'],
+                    'category_id'=>$v['sku']['category_id'],
+                    'user_id'=>$user_info['address']['user_id'],
+                    'quantity'=>1,
+                    'goods_yajin'=>$v['sku']['yajin'],
+                    'yajin'=>$v['deposit']['yajin'],
+                    'zuqi'=>$v['sku']['zuqi'],
+                    'zuqi_type'=>$v['sku']['zuqi_type'],
+                    'zujin'=>$v['sku']['zujin'],
+                    'order_no'=>$data['order_no'],
+                    'chengse'=>$v['sku']['chengse'],
+                    'discount_amount'=>$v['sku']['discount_amount'],
+                    'coupon_amount'=>$v['sku']['coupon_amount'],
+                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount']-$v['sku']['coupon_amount'],
+                    'edition'=>$v['sku']['edition'],
+                    'market_price'=>$v['sku']['market_price'],
+                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
+                    'specs'=>json_encode($v['sku']['specs']),
+                    'insurance'=>$v['sku']['yiwaixian'],
+                    'buyout_price'=>$v['sku']['buyout_price'],
+                    'weight'=>$v['sku']['weight'],
+                ];
+                $goodsId =$goodsRepository->add($goodsData);
+                if(!$goodsId){
+                    $this->getOrderCreater()->setError("保存商品信息失败");
+                    return false;
+                }
+            }
+        }
+        return true;
+
+        foreach ($sku_info as $k =>$v){
+
+                $goods_name .=$v['sku']['spu_name']." ";
+                // 保存 商品信息
+                $goods_data = [
+                    'goods_name'=>$v['sku']['spu_name'],
+                    'goods_id'=>$v['sku']['sku_id'],
+                    'goods_no'=>$v['sku']['sku_no']."-".($i+1),
+                    'prod_id'=>$v['sku']['spu_id'],
+                    'prod_no'=>$v['sku']['spu_no'],
+                    'brand_id'=>$v['sku']['brand_id'],
+                    'category_id'=>$v['sku']['category_id'],
+                    'user_id'=>$user_info['address']['user_id'],
+                    'quantity'=>1,
+                    'goods_yajin'=>$v['sku']['yajin'],
+                    'yajin'=>$v['deposit']['yajin'],
+                    'zuqi'=>$v['sku']['zuqi'],
+                    'zuqi_type'=>$v['sku']['zuqi_type'],
+                    'zujin'=>$v['sku']['zujin'],
+                    'order_no'=>$data['order_no'],
+                    'chengse'=>$v['sku']['chengse'],
+                    'discount_amount'=>$v['sku']['discount_amount'],
+                    'coupon_amount'=>$v['sku']['coupon_amount'],
+                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount']-$v['sku']['coupon_amount'],
+                    'edition'=>$v['sku']['edition'],
+                    'market_price'=>$v['sku']['market_price'],
+                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
+                    'specs'=>json_encode($v['sku']['specs']),
+                    'insurance'=>$v['sku']['yiwaixian'],
+                    'buyout_price'=>$v['sku']['buyout_price'],
+                    'weight'=>$v['sku']['weight'],
+                ];
+                $order_amount +=$goods_data['amount_after_discount'];
+                $goods_yajin  +=$goods_data['goods_yajin'];
+                $order_yajin  +=$goods_data['yajin'];
+                $order_insurance+=$goods_data['insurance'];
+                $coupon_amount+=$goods_data['coupon_amount'];
+                $discount_amount+=$goods_data['discount_amount'];
+
+
+                $goods_id = $this->goods->insertGetId($goods_data);
+                if(!$goods_id){
+                    return ApiStatus::CODE_30005;
+                }
+//                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
+                // 生成分期
+                $instalment_data =array_merge($v,['order'=>$data],$user_info);
+                //var_dump($instalment_data);die;
+//                $instalment = $this->instalment->create($instalment_data);
+//                if(!$instalment){
+//                    return ApiStatus::CODE_30005;
+//                }
+
+            }
+
+        }
+
         return true;
     }
-
 
 }

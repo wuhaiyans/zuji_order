@@ -8,13 +8,12 @@ class OrderGoodsRepository
 
     private $orderGoods;
 
-    public function __construct(OrderGoods $orderGoods)
+    public function __construct()
     {
-        $this->orderGoods = $orderGoods;
+        $this->orderGoods = new OrderGoods();
     }
-    public function create(){
-
-        var_dump('创建商品信息');
+    public function add($data){
+       return $this->orderGoods->insertGetId($data);
     }
     //获取商品信息
     public static function getgoodsList($goods_no){

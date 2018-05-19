@@ -9,12 +9,14 @@ class OrderUserInfoRepository
 
     private $orderUserInfo;
 
-    public function __construct(OrderUserInfo $orderUserInfo)
+    public function __construct()
     {
-        $this->orderUserInfo = $orderUserInfo;
+        $this->orderUserInfo = new OrderUserInfo();
     }
-    public function create(){
-        var_dump('创建用户信息');
+    public function add($data){
+
+        $id =$this->orderUserInfo->insertGetId($data);
+        return $id;
 
     }
     //更新物流单号

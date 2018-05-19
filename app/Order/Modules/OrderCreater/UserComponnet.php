@@ -11,6 +11,8 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\User\User;
+use App\Order\Models\OrderUserInfo;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use Mockery\Exception;
 
 class UserComponnet implements OrderCreater
@@ -146,20 +148,34 @@ class UserComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("用户组件 -create");
-//        $order_id = $this->componnet->get_order_creater()->get_order_id();
-//
-//        // 写入用户信息
-//        $data = [
-//            'user_id' => $this->user_id,
-//            'mobile' => $this->mobile,
-//        ];
-//        $order_table = \hd_load::getInstance()->table('order2/order2');
-//        $b = $order_table->where(['order_id'=>$order_id])->save($data);
-//        if( !$b ){
-//            $this->get_order_creater()->set_error('保存订单用户信息失败');
-//            return false;
-//        }
+        if( !$this->flag ){
+            return false;
+        }
+        $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
+        $data =$this->getDataSchema();
+        // 写入用户信息
+        $userData = [
+            'order_no'=>$orderNo,
+            'user_id' =>$data['user']['user_id'],
+            'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
+            'user_mobile' =>$data['user']['user_mobile'],
+            'name'=>$data['address']['name']?$data['address']['name']:"",
+            'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
+            'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
+            'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
+            'address_info'=>$data['address']['address']?$data['address']['address']:"",
+            'certified'=>$data['user']['certified'],
+            'cretified_platform'=>$data['user']['certified_platform'],
+            'credit'=>$data['user']['credit'],
+            'realname'=>$data['user']['realname'],
+            'cret_no'=>$data['user']['cert_no'],
+        ];
+        $userRepository = new OrderUserInfoRepository();
+        $user_id =$userRepository->add($userData);
+        if(!$user_id){
+            $this->getOrderCreater()->setError("保存用户信息失败");
+            return false;
+        }
         return true;
     }
 
