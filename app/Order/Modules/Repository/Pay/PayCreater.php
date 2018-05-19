@@ -247,6 +247,7 @@ class PayCreater {
 	 * <p>普通支付+代扣签约+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -276,6 +277,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		//sql_profiler();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],

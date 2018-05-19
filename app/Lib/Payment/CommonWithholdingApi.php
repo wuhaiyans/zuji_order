@@ -13,6 +13,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @param array $params
 	 * [
 	 *		'out_agreement_no' => '', //业务平台支付码
+	 *		'channel_type'	=> '', //渠道类型
 	 *		'name'			=> '', //签约名称
 	 *		'back_url'		=> '', //后端回调地址
 	 *		'front_url'		=> '', //前端回调地址
@@ -26,21 +27,28 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function getSignUrl( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.api.unsign', '1.0', $params);
-//        $ApiRequest = new ApiRequest();
-//		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
-//		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.alipay.url');
-//		
-//        $Response = $ApiRequest->setParams( $params )->send();
-//		
-//        if( !$Response->isSuccessed() ){
-//			self::$error = $Response->getStatus()->getMsg();
-//            return false;
-//        }
-//		return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.withhold.agreement.url', '1.0', $params);
 	}
 
+    /**
+     * 查询代扣协议
+	 * @param array $params
+	 * [
+	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
+	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
+	 * ]
+	 * @return array 
+	 * [
+	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
+	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
+	 *		'status'			=> '', //【必选】string 状态；init：初始化；signed：已签约；unsigned：已解约
+	 * ]
+	 * @throws \Exception			请求失败时抛出异常
+	 */
+	public static function queryAgreement( array $params ){
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.api.withholdingstatus', '1.0', $params);
+	}
+	
     /**
      * 代扣 扣款接口
      * @param string $appid		应用ID

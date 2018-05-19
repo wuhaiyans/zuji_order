@@ -43,6 +43,8 @@ class Pay extends \App\Lib\Configurable
 	//-+------------------------------------------------------------------------
 	// | 
 	//-+------------------------------------------------------------------------
+	
+	protected $user_id = 0;
 	/**
 	 * 业务类型
 	 * @var string
@@ -107,6 +109,10 @@ class Pay extends \App\Lib\Configurable
 		parent::__construct($data);
 	}
 	
+	public function getUserId(){
+		return $this->user_id;
+	}
+	
 	public function getPaymentNo(){
 		return $this->paymentNo;
 	}
@@ -118,6 +124,12 @@ class Pay extends \App\Lib\Configurable
 	}
 	public function getPaymentChannel(){
 		return $this->paymentChannel;
+	}
+	public function getWithholdNo(){
+		return $this->withholdNo;
+	}
+	public function getWithholdChannel(){
+		return $this->withholdChannel;
 	}
 	
 	/**
@@ -358,7 +370,7 @@ class Pay extends \App\Lib\Configurable
 	 * @param array		$params		签约成功参数
 	 * [
 	 *		'out_withhold_no'	=> '',	// 支付系统代扣码
-	 *		'uid'				=> '',	// 用户ID
+	 *		'user_id'				=> '',	// 用户ID
 	 * ]
 	 * @return bool
 	 * @throws \Exception
@@ -395,7 +407,7 @@ class Pay extends \App\Lib\Configurable
 		$b = $withholdModel->insert([
 			'withhold_no' => $this->withholdNo,
 			'out_withhold_no' => $params['out_withhold_no'],
-			'uid' => $params['uid'],
+			'user_id' => $params['user_id'],
 			'withhold_status' => WithholdStatus::SIGNED,// 已签约
 			'sign_time' => time(),
 			'counter' => 1, // 计数

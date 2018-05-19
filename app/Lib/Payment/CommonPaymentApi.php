@@ -13,9 +13,9 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @param array $params
 	 * [
 	 *		'out_payment_no'	=> '',	//【必选】string 业务支付唯一编号
-	 *		'payment_channel'	=> '',	//【必选】int 支付渠道
 	 *		'payment_amount'	=> '',	//【必选】int 交易金额；单位：分
 	 *		'payment_fenqi'		=> '',	//【必选】int 分期数
+	 *		'channel_type'	=> '',	//【必选】int 支付渠道
 	 *		'name'			=> '',	//【必选】string 交易名称
 	 *		'back_url'		=> '',	//【必选】string 后台通知地址
 	 *		'front_url'		=> '',	//【必选】string 前端回跳地址

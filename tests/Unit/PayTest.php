@@ -20,13 +20,13 @@ class PayTest extends TestCase
      */
     public function testPayALL()
     {
-		try {
 			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
 			
 			// 创建支付
 			$pay = PayCreater::createPaymentWithholdFundauth([
-				'businessType' => '1',
-				'businessNo' => \createNo(1),
+				'user_id'		=> '5',
+				'businessType'	=> '1',
+				'businessNo'	=> \createNo(1),
 				
 				'paymentNo' => \createNo(1),
 				'paymentAmount' => '0.01',
@@ -73,9 +73,9 @@ class PayTest extends TestCase
 				// 获取支付
 				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
 					'out_payment_no'	=> $pay->getPaymentNo(),	//【必选】string 业务支付唯一编号
-					'payment_channel'	=> Channel::Alipay,			//【必选】int 支付渠道
-					'payment_amount'	=> '1',						//【必选】int 交易金额；单位：分
-					'payment_fenqi'		=> '0',						//【必选】int 分期数
+					'payment_amount'	=> $pay->getPaymentAmount(),//【必选】int 交易金额；单位：分
+					'payment_fenqi'		=> $pay->getPaymentFenqi(),	//【必选】int 分期数
+					'channel_type'	=> $pay->getPaymentChannel(),	//【必选】int 支付渠道
 					'name'			=> '测试支付',					//【必选】string 交易名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
@@ -87,6 +87,7 @@ class PayTest extends TestCase
 				$payment_no = $url_info['_data']['out_payment_no'];
 			} catch (\Exception $exc) {
 				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
 			}
 
 			echo "支付状态查询......";
@@ -100,6 +101,7 @@ class PayTest extends TestCase
 				echo "支付状态：{$payment_query['status']}\n";
 			} catch (\Exception $ex) {
 				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
 			}
 			
 			
@@ -114,6 +116,7 @@ class PayTest extends TestCase
 				echo "ok\n";
 			} catch (\Exception $ex) {
 				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
 			}
 			
 			// 取消
@@ -122,58 +125,94 @@ class PayTest extends TestCase
 			$pay->resume();
 			
 			//-+----------------------------------------------------------------
-			// | 支付环节
+			// | 代扣签约
 			//-+----------------------------------------------------------------
+			$agreement_no = '';
 			
 			echo "获取代扣签约地址......";
 			try {
-				// 获取支付
+				// 获取代扣地址
 				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
-					'out_agreement_no' => $pay->getWithholdStatus(),
-					'name'			=> '测试支付',					//【必选】string 交易名称
+					'out_agreement_no'	=> $pay->getWithholdNo(),
+					'channel_type'		=> $pay->getWithholdChannel(),			//【必选】int 支付渠道
+					'name'			=> '测试代扣',					//【必选】string 名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+					'user_id'		=> $pay->getUserId(),			//【可选】int 业务用户ID
 				]);
 				//var_dump( $url_info );
 				echo "ok\n";
-				$out_payment_no = $url_info['_data']['payment_no'];
-				$payment_no = $url_info['_data']['out_payment_no'];
+				$agreement_no = $url_info['_data']['agreement_no'];
 			} catch (\Exception $exc) {
 				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
 			}
-			
 			
 			echo "代扣签约异步通知处理......";
 			try {
 				// 代扣签约操作
 				$pay->withholdSuccess([
-					'out_withhold_no' => \createNo(1),
-					'uid' => 5,
+					'withhold_no'		=> $agreement_no,			// 支付系统代扣协议编号
+					'out_withhold_no'	=> $pay->getWithholdNo(),	// 业务系统代扣协议编号
+					'user_id'			=> $pay->getUserId(),		//【可选】int 业务用户ID
 				]);
 				$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
-			
-			} catch (\Exception $ex) {
+				echo "ok\n";
+			} catch (\Exception $exc) {
 				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
 			}
+			
+			echo "代扣签约查询......";
+			try {
+				// 代扣签约查询
+				$agreement_info = \App\Lib\Payment\CommonWithholdingApi::queryAgreement([
+					'agreement_no'		=> $agreement_no,
+					'out_agreement_no'	=> $pay->getWithholdNo(),
+					'user_id'			=> $pay->getUserId(),			//【可选】int 业务用户ID
+				]);
+				//var_dump( $agreement_info );
+				echo "ok\n";
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
+			}
+			
+			
 			// 取消
 			$pay->cancel();
 			// 恢复
 			$pay->resume();
 			
-			// 预授权成功操作
-			$pay->fundauthSuccess([
-				'out_fundauth_no' => \createNo(1),
-				'uid' => 5,
-				'total_amount' => '1.00',
-			]);
-			$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
 			
-		} catch (\Exception $ex) {
-			echo $ex->getMessage();
-			echo $ex->getTraceAsString();
-			$this->assertTrue(false);
-		}
+			
+//			echo "获取预授权地址......";
+//			try {
+//				// 获取支付
+//				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
+//					'out_agreement_no'	=> $pay->getWithholdNo(),
+//					'channel_type'		=> $pay->getWithholdChannel(),			//【必选】int 支付渠道
+//					'name'			=> '测试代扣',					//【必选】string 名称
+//					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+//					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
+//					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+//				]);
+//				//var_dump( $url_info );
+//				echo "ok\n";
+//			} catch (\Exception $exc) {
+//				echo "error: {$exc->getMessage()}\n";
+//				$this->assertTrue(false,$exc->getMessage());
+//			}
+			
+			
+//			// 预授权成功操作
+//			$pay->fundauthSuccess([
+//				'out_fundauth_no' => \createNo(1),
+//				'uid' => 5,
+//				'total_amount' => '1.00',
+//			]);
+//			$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
+			
     }
 //	
 //    /**

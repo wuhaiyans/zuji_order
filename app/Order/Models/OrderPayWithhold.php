@@ -23,5 +23,5 @@ class OrderPayWithhold extends Model
     public $timestamps = false;
 
     // 可以被批量赋值的属性。
-    protected $fillable = ['withhold_no','out_withhold_no','withhold_status','uid','sign_time','unsign_time','counter'];
+    protected $fillable = ['withhold_no','out_withhold_no','withhold_status','user_id','sign_time','unsign_time','counter'];
 }
