@@ -6,7 +6,40 @@ use App\Lib\ApiRequest;
  * 代扣接口
  * @author zjh
  */
-class WithholdingApi extends \App\Lib\BaseApi {
+class CommonWithholdingApi extends \App\Lib\BaseApi {
+
+    /**
+     * 签署代扣协议
+	 * @param array $params
+	 * [
+	 *		'out_agreement_no' => '', //业务平台支付码
+	 *		'name'			=> '', //签约名称
+	 *		'back_url'		=> '', //后端回调地址
+	 *		'front_url'		=> '', //前端回调地址
+	 *		'user_id'		=> '', //用户id
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	//	url地址
+	 *		'params'	=> '',	//	参数
+	 * ]
+	 * @throws \Exception			请求失败时抛出异常
+	 */
+	public static function getSignUrl( array $params ){
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.api.unsign', '1.0', $params);
+//        $ApiRequest = new ApiRequest();
+//		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
+//		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.alipay.url');
+//		
+//        $Response = $ApiRequest->setParams( $params )->send();
+//		
+//        if( !$Response->isSuccessed() ){
+//			self::$error = $Response->getStatus()->getMsg();
+//            return false;
+//        }
+//		return $Response->getData();
+	}
 
     /**
      * 代扣 扣款接口

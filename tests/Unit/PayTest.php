@@ -12,7 +12,221 @@ use App\Order\Modules\Repository\Pay\FundauthStatus;
 
 class PayTest extends TestCase
 {
+
 	
+    /**
+     * 测试 payment + withhold + fundauth
+     * @return void
+     */
+    public function testPayALL()
+    {
+		try {
+			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
+			
+			// 创建支付
+			$pay = PayCreater::createPaymentWithholdFundauth([
+				'businessType' => '1',
+				'businessNo' => \createNo(1),
+				
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> Channel::Alipay,
+				'paymentFenqi'	=> 0,
+				
+				'withholdNo' => \createNo(1),
+				'withholdChannel'=> Channel::Alipay,
+				
+				'fundauthNo' => \createNo(1),
+				'fundauthAmount' => '1.00',
+				'fundauthChannel'=> Channel::Alipay,
+			]);
+			// 支付阶段状态
+			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+			
+			
+			// 支付状态
+			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
+					'支付环节状态初始化错误' );
+			
+			// 代扣签约状态
+			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
+					'代扣签约状态初始化错误' );
+			
+			// 资金预授权状态
+			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
+					'资金预授权状态初始化错误' );
+			
+			
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			
+			//-+----------------------------------------------------------------
+			// | 支付环节
+			//-+----------------------------------------------------------------
+			
+			echo '获取支付url地址......';
+			$payment_no = '';		// 业务系统支付编号
+			$out_payment_no = '';	// 支付系统支付编号
+			try {
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
+					'out_payment_no'	=> $pay->getPaymentNo(),	//【必选】string 业务支付唯一编号
+					'payment_channel'	=> Channel::Alipay,			//【必选】int 支付渠道
+					'payment_amount'	=> '1',						//【必选】int 交易金额；单位：分
+					'payment_fenqi'		=> '0',						//【必选】int 分期数
+					'name'			=> '测试支付',					//【必选】string 交易名称
+					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
+					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+				]);
+				//var_dump( $url_info );
+				echo "ok\n";
+				$out_payment_no = $url_info['_data']['payment_no'];
+				$payment_no = $url_info['_data']['out_payment_no'];
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+			}
+
+			echo "支付状态查询......";
+			try {
+				$payment_query = \App\Lib\Payment\CommonPaymentApi::query([
+					'payment_no' => $out_payment_no,
+					'out_payment_no' => $payment_no,
+				]);
+				//var_dump( $payment_query );
+				echo "ok\n";
+				echo "支付状态：{$payment_query['status']}\n";
+			} catch (\Exception $ex) {
+				echo "error: {$exc->getMessage()}\n";
+			}
+			
+			
+			echo "支付异步通知处理......";
+			try {
+				// 模拟支付成功操作
+				$pay->paymentSuccess([
+					'out_payment_no' => $out_payment_no,
+					'payment_time' => time(),
+				]);
+				$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
+				echo "ok\n";
+			} catch (\Exception $ex) {
+				echo "error: {$exc->getMessage()}\n";
+			}
+			
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			
+			//-+----------------------------------------------------------------
+			// | 支付环节
+			//-+----------------------------------------------------------------
+			
+			echo "获取代扣签约地址......";
+			try {
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
+					'out_agreement_no' => $pay->getWithholdStatus(),
+					'name'			=> '测试支付',					//【必选】string 交易名称
+					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
+					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+				]);
+				//var_dump( $url_info );
+				echo "ok\n";
+				$out_payment_no = $url_info['_data']['payment_no'];
+				$payment_no = $url_info['_data']['out_payment_no'];
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+			}
+			
+			
+			echo "代扣签约异步通知处理......";
+			try {
+				// 代扣签约操作
+				$pay->withholdSuccess([
+					'out_withhold_no' => \createNo(1),
+					'uid' => 5,
+				]);
+				$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
+			
+			} catch (\Exception $ex) {
+				echo "error: {$exc->getMessage()}\n";
+			}
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+			
+			// 预授权成功操作
+			$pay->fundauthSuccess([
+				'out_fundauth_no' => \createNo(1),
+				'uid' => 5,
+				'total_amount' => '1.00',
+			]);
+			$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
+			
+		} catch (\Exception $ex) {
+			echo $ex->getMessage();
+			echo $ex->getTraceAsString();
+			$this->assertTrue(false);
+		}
+    }
+//	
+//    /**
+//     * 测试 withhold 代扣签约
+//     * @return void
+//     */
+//    public function testWithhold()
+//    {
+//		try {
+//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
+//			
+//			// 创建支付
+//			// 只有代扣环节，没有其他环节
+//			$pay = PayCreater::createWithhold([
+//				'businessType' => '1',
+//				'businessNo' => \createNo(1),
+//				'withholdNo' => \createNo(1),
+//				'withholdChannel'=> Channel::Alipay,
+//			]);
+//			
+//			// 支付阶段状态
+//			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+//			
+//			
+//			// 支付状态
+//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::NO_PAYMENT,
+//					'支付环节状态初始化错误' );
+//			
+//			// 代扣签约状态
+//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
+//					'代扣签约状态初始化错误' );
+//			
+//			// 资金预授权状态
+//			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
+//					'资金预授权状态初始化错误' );
+//			
+//			// 获取
+//			
+//			// 操作
+//			$pay->withholdSuccess([
+//				'out_withhold_no' => \createNo(1),
+//				'uid' => 5,
+//			]);
+//			$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
+//			
+//		} catch (\Exception $ex) {
+//			echo $ex->getMessage();
+//			$this->assertTrue(false);
+//		}
+//		
+//    }
+//	
+//	
 //    public function testRefund()
 //    {
 //			// 退款
@@ -47,13 +261,11 @@ class PayTest extends TestCase
 //		
 //	}
 //	
-	
+//	
 //    public function testPaymentUrl()
 //    {
 //		
 //		try {
-//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
-//			
 //			// 创建支付
 //			// 只有支付环节，没有其他环节
 //			$pay = PayCreater::createPayment([
@@ -81,6 +293,7 @@ class PayTest extends TestCase
 //			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
 //					'资金预授权状态初始化错误' );
 //
+//			// 
 //			$ApiRequest = new \App\Lib\ApiRequest();
 //			$ApiRequest->setUrl('http://dev-order.zuji.com/api');
 //			$ApiRequest->setAppid( '1' );	// 模拟客户端 入口ID
@@ -139,7 +352,7 @@ class PayTest extends TestCase
 //		}
 //		
 //    }
-	
+//	
 //	
 //    /**
 //     * 测试 payment 支付
@@ -194,72 +407,23 @@ class PayTest extends TestCase
 //			echo $ex->getMessage();
 //		}
 //	}
-	
-    /**
-     * 测试 payment 支付
-     * @return void
-     */
-    public function testPayment()
-    {
-		try {
-			// 创建支付
-			// 只有支付环节，没有其他环节
-			$pay = PayCreater::createPayment([
-				'businessType' => '1',
-				'businessNo' => \createNo(1),
-				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.01',
-				'paymentChannel'=> Channel::Alipay,
-				'paymentFenqi'	=> 0,
-			]);
-			
-			// 支付阶段状态
-			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
-			
-			
-			// 支付状态
-			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-					'支付环节状态初始化错误' );
-			
-			// 代扣签约状态
-			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
-					'代扣签约状态初始化错误' );
-			
-			// 资金预授权状态
-			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
-					'资金预授权状态初始化错误' );
-			
-			// 支付成功操作
-			$pay->paymentSuccess([
-				'out_payment_no' => createNo(1),
-				'payment_time' => time(),
-			]);
-			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
-			
-			
-		} catch (\Exception $ex) {
-			echo $ex->getMessage();
-			$this->assertTrue(false);
-		}
-		
-    }
 //	
 //    /**
-//     * 测试 withhold 代扣签约
+//     * 测试 payment 支付
 //     * @return void
 //     */
-//    public function testWithhold()
+//    public function testPayment()
 //    {
 //		try {
-//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
-//			
 //			// 创建支付
-//			// 只有代扣环节，没有其他环节
-//			$pay = PayCreater::createWithhold([
+//			// 只有支付环节，没有其他环节
+//			$pay = PayCreater::createPayment([
 //				'businessType' => '1',
 //				'businessNo' => \createNo(1),
-//				'withholdNo' => \createNo(1),
-//				'withholdChannel'=> Channel::Alipay,
+//				'paymentNo' => \createNo(1),
+//				'paymentAmount' => '0.01',
+//				'paymentChannel'=> Channel::Alipay,
+//				'paymentFenqi'	=> 0,
 //			]);
 //			
 //			// 支付阶段状态
@@ -267,23 +431,24 @@ class PayTest extends TestCase
 //			
 //			
 //			// 支付状态
-//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::NO_PAYMENT,
+//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
 //					'支付环节状态初始化错误' );
 //			
 //			// 代扣签约状态
-//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
+//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::NO_WITHHOLD,
 //					'代扣签约状态初始化错误' );
 //			
 //			// 资金预授权状态
 //			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::NO_FUNDAUTH,
 //					'资金预授权状态初始化错误' );
 //			
-//			// 操作
-//			$pay->withholdSuccess([
-//				'out_withhold_no' => \createNo(1),
-//				'uid' => 5,
+//			// 支付成功操作
+//			$pay->paymentSuccess([
+//				'out_payment_no' => createNo(1),
+//				'payment_time' => time(),
 //			]);
-//			$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
+//			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
+//			
 //			
 //		} catch (\Exception $ex) {
 //			echo $ex->getMessage();
@@ -291,6 +456,7 @@ class PayTest extends TestCase
 //		}
 //		
 //    }
+//	
 //	
 //    /**
 //     * 测试 fundauth 资金预授权
@@ -406,94 +572,5 @@ class PayTest extends TestCase
 //    }
 //	
 //	
-//	
-//    /**
-//     * 测试 payment + withhold + fundauth
-//     * @return void
-//     */
-//    public function testPayALL()
-//    {
-//		try {
-//			$creater = new \App\Order\Modules\Repository\Pay\PayCreater();
-//			
-//			// 创建支付
-//			$pay = PayCreater::createPaymentWithholdFundauth([
-//				'businessType' => '1',
-//				'businessNo' => \createNo(1),
-//				
-//				'paymentNo' => \createNo(1),
-//				'paymentAmount' => '0.01',
-//				'paymentChannel'=> Channel::Alipay,
-//				'paymentFenqi'	=> 0,
-//				
-//				'withholdNo' => \createNo(1),
-//				'withholdChannel'=> Channel::Alipay,
-//				
-//				'fundauthNo' => \createNo(1),
-//				'fundauthAmount' => '1.00',
-//				'fundauthChannel'=> Channel::Alipay,
-//			]);
-//			// 支付阶段状态
-//			$this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
-//			
-//			
-//			// 支付状态
-//			$this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
-//					'支付环节状态初始化错误' );
-//			
-//			// 代扣签约状态
-//			$this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
-//					'代扣签约状态初始化错误' );
-//			
-//			// 资金预授权状态
-//			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
-//					'资金预授权状态初始化错误' );
-//			
-//			
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
-//			
-//			// 支付成功操作
-//			$pay->paymentSuccess([
-//				'out_payment_no' => createNo(1),
-//				'payment_time' => time(),
-//			]);
-//			$this->assertTrue( $pay->paymentIsSuccess(), '支付环节支付异常' );
-//			
-//			
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
-//			
-//			
-//			// 代扣签约操作
-//			$pay->withholdSuccess([
-//				'out_withhold_no' => \createNo(1),
-//				'uid' => 5,
-//			]);
-//			$this->assertTrue( $pay->withholdIsSuccess(), '代扣环节状态异常' );
-//			
-//			// 取消
-//			$pay->cancel();
-//			// 恢复
-//			$pay->resume();
-//			
-//			// 预授权成功操作
-//			$pay->fundauthSuccess([
-//				'out_fundauth_no' => \createNo(1),
-//				'uid' => 5,
-//				'total_amount' => '1.00',
-//			]);
-//			$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
-//			
-//		} catch (\Exception $ex) {
-//			echo $ex->getMessage();
-//			echo $ex->getTraceAsString();
-//			$this->assertTrue(false);
-//		}
-//    }
-//	
+	
 }

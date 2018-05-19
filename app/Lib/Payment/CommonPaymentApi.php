@@ -25,49 +25,29 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * [
 	 *		'payment_url' => '',//支付链接
 	 * ]
+	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
-        $ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.payment.page.url');
-		
-        $Response = $ApiRequest->setParams( $params )->send();
-		
-        if( !$Response->isSuccessed() ){
-			self::$error = $Response->getStatus()->getMsg();
-            return false;
-        }
-		return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.page.url', '1.0', $params);
 	}
 
 	/**
 	 * 统一支付查询接口
 	 * @param array $params
 	 * [
-	 *		'refund_no'		=> '',	//【必选】string 支付系统退款编号
-	 *		'out_refund_no'	=> '',	//【必选】string 业务系统退款编号
+	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
+	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
 	 * ]
 	 * @return mixed false：接口请求失败；array：支付信息
 	 * [
-	 *		'refund_no'		=> '',	//【必选】string 支付系统退款编号
-	 *		'out_refund_no'	=> '',	//【必选】string 业务系统退款编号
+	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
+	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
 	 *		'status'			=> '',	//【必选】string success：支付成功；其他值为未完成支付
 	 * ]
+	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function query( array $params ){
-        $ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.payment.query');
-		
-        $Response = $ApiRequest->setParams( $params )->send();
-		
-        if( !$Response->isSuccessed() ){
-			self::$error = $Response->getStatus()->getMsg();
-            return false;
-        }
-		return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.query', '1.0', $params);
 	}
 
 }
