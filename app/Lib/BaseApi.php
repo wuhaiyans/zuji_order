@@ -6,36 +6,30 @@ namespace App\Lib;
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
-abstract class BaseApi {
+class BaseApi {
 	
 	/**
-	 * 获取API url地址
-	 * @return string
-	 */
-	abstract protected static function getUrl():string;
-
-		/**
      * 订单接口请求
      * @access public
      * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+     * @param	string	$appid		业务APPID
+     * @param	string	$url		接口地址
      * @param	string	$method		接口名称
+     * @param	string	$version	接口版本
      * @param	array	$params		业务请求参数（具体业务查阅具体接口协议）
      * @return	array				业务返回参数（具体业务查阅具体接口协议）
 	 * @throws \Exception			请求失败时抛出异常
      */
-    public static function request(  string $method, array $params ){
-		if( empty(self::$url) ){
-			Common\LogApi::error('未指定接口地址');
-			throw new \Exception('接口地址错误');
-		}
+    public static function request( int $appid, string $url, string $method, string $version, array $params ){
+		
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------
 		$request = new \App\Lib\ApiRequest();
-		$request->setUrl( self::$url );	// 接口地址
-		$request->setAppid( 1 );		// 系统Appid
+		$request->setAppid( $appid );		// 系统Appid
+		$request->setUrl( $url );	// 接口地址
 		$request->setMethod( $method );	// 接口名称
-		$request->setVersion( 1.0 );
+		$request->setVersion( $version );
 		$request->setParams( $params );	// 业务参数
 		//-+--------------------------------------------------------------------
 		// | 发送请求
