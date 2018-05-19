@@ -20,7 +20,7 @@ class UserController extends Controller
 
     /**
      * 获取token
-     *
+     * Author: heaven
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -42,7 +42,11 @@ class UserController extends Controller
         }
         return response()->json(compact('token'));
     }
+
+
     /**
+     * 刷新token
+     * Author: heaven
      * @return mixed
      */
     public function refershToken()
@@ -50,10 +54,11 @@ class UserController extends Controller
         $token = Auth::guard($this->guard)->refresh();
         return $this->response->array(compact('token'));
     }
+
     /**
-     * 个人信息
-     *
-     * @return User|null
+     * 获取个人信息
+     * Author: heaven
+     * @return mixed
      */
     public function me()
     {
@@ -61,9 +66,11 @@ class UserController extends Controller
 //        return response()->json($this->guard()->user());
         //return Auth::guard('api')->user();
     }
+
+
     /**
      * 退出
-     *
+     * Author: heaven
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout()
