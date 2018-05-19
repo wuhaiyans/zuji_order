@@ -160,6 +160,22 @@ class OrderInstalment
      * 根据goods_no查询分期数据
      * @return array
      */
+    public static function queryInfo($params){
+        if (empty($params)) {
+            return ApiStatus::CODE_20001;
+        }
+
+        $result =  OrderInstalmentRepository::getInfo($params);
+        if(!$result){
+            return ApiStatus::CODE_71001;
+        }
+        return $result;
+    }
+
+    /**
+     * 根据goods_no查询分期数据
+     * @return array
+     */
     public static function queryByInstalmentId($id){
         if (empty($id)) {
             return ApiStatus::CODE_20001;
@@ -322,4 +338,17 @@ class OrderInstalment
     }
 
 
+    /**
+     * 修改方法
+     * @param string $params 条件
+     * @param string $data	 参数数组
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function save($params, $data){
+        if (!is_array($params) || $data == [] ) {
+            return false;
+        }
+        $result =  OrderInstalmentRepository::save($params, $data);
+        return $result;
+    }
 }
