@@ -28,17 +28,6 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      */
     public static function fundAuthUrl( array $params ){
 		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.url', '1.0', $params);
-//        $ApiRequest = new ApiRequest();
-//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.alipay.fundauthurl');
-//        $ApiRequest->setParams($params);
-//        $Response = $ApiRequest->send();
-//        if( !$Response->isSuccessed() ){
-//            self::$error = '获取预授权链接地址失败';
-//            return false;
-//        }
-//        return $Response->getData();
     }
 
     /**
@@ -46,13 +35,14 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'auth_no' => '', //支付系统授权码
-     *		'user_id' => '',//用户id
+     *		'auth_no'		=> '', //支付系统授权码
+     *		'out_auth_no'	=> '', //业务系统授权码
+     *		'user_id'		=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'out_auth_no' => '',//支付系统授权码
-     *		'auth_no' => '',//订单系统授权码
+     *		'auth_no'			=> '',//支付系统授权码
+     *		'out_auth_no'		=> '',//业务系统授权码
      *		'total_freeze_amount' => '',//累计授权金额；单位：分
      *		'total_unfreeze_amount' => '',//累计解冻金额；单位：分
      *		'total_pay_amount' => '',//累计转支付金额；单位：分
@@ -61,18 +51,19 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'auth_time' => '',//授权完成时间
      * ]
      */
-    public static function fundAuthStatus( array $params ){
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.api.fundauthstatus');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '查询预授权状态失败';
-            return false;
-        }
-        return $Response->getData();
+    public static function queryFundAuthStatus( array $params ){
+		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.query', '1.0', $params);
+//        $ApiRequest = new ApiRequest();
+//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.api.fundauthstatus');
+//        $ApiRequest->setParams($params);
+//        $Response = $ApiRequest->send();
+//        if( !$Response->isSuccessed() ){
+//            self::$error = '查询预授权状态失败';
+//            return false;
+//        }
+//        return $Response->getData();
     }
 
     /**

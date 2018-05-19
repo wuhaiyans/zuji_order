@@ -185,10 +185,10 @@ class PayTest extends TestCase
 			$pay->resume();
 			
 			
-			
+			$fundauth_no = '';// 支付系统资金授权编号
 			echo "获取预授权地址......";
 			try {
-				// 获取支付
+				// 获取url
 				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
 					'out_auth_no'	=> $pay->getFundauthNo(),
 					'channel_type'		=> $pay->getFundauthChannel(),			//【必选】int 支付渠道
@@ -196,23 +196,45 @@ class PayTest extends TestCase
 					'name'			=> '测试预授权',					//【必选】string 名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-					'user_id'		=> '0',							//【可选】int 业务平台yonghID
+					'user_id'		=> $pay->getUserId(),			//【可选】int 业务平台yonghID
 				]);
-				var_dump( $url_info );
+				//var_dump( $url_info );
+				echo "ok\n";
+			$fundauth_no = $url_info['_data']['auth_no'];
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
+			}
+			
+			echo "预授权异步通知处理......";
+			try {
+				// 预授权成功操作
+				$pay->fundauthSuccess([
+					'out_fundauth_no' => $fundauth_no,
+					'total_amount' => $pay->getFundauthAmount(),
+				]);
+				$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
 				echo "ok\n";
 			} catch (\Exception $exc) {
 				echo "error: {$exc->getMessage()}\n";
 				$this->assertTrue(false,$exc->getMessage());
 			}
 			
+			echo "预授权状态查询......";
+			try {
+				
+				$auth_info = \App\Lib\Payment\CommonFundAuthApi::queryFundAuthStatus([
+					'auth_no'			=> $fundauth_no,			// 支付系统预授权编号
+					'out_auth_no'		=> $pay->getFundauthNo(),	// 业务系统预授权编号
+					'user_id'			=> $pay->getUserId(),			//【可选】int 业务用户ID
+				]);
+				var_dump( $auth_info );
+				echo "ok\n";
+			} catch (\Exception $exc) {
+				echo "error: {$exc->getMessage()}\n";
+				$this->assertTrue(false,$exc->getMessage());
+			}
 			
-//			// 预授权成功操作
-//			$pay->fundauthSuccess([
-//				'out_fundauth_no' => \createNo(1),
-//				'uid' => 5,
-//				'total_amount' => '1.00',
-//			]);
-//			$this->assertTrue( $pay->fundauthIsSuccess(), '预授权环节状态异常' );
 			
     }
 //	

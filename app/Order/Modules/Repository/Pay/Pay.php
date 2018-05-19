@@ -445,7 +445,6 @@ class Pay extends \App\Lib\Configurable
 	 * @param array		$params		支付成功参数
 	 * [
 	 *		'out_fundauth_no'	=> '',	// 支付系统授权码
-	 *		'uid'				=> '',	// 用户ID
 	 *		'total_amount'		=> '',	// 预授权金额；单位：元
 	 * ]
 	 * @return bool
@@ -456,6 +455,10 @@ class Pay extends \App\Lib\Configurable
 		if( $this->status != PayStatus::WAIT_FUNDAUTH 
 				|| $this->fundauthStatus != FundauthStatus::WAIT_FUNDAUTH ){
 			throw new \Exception('资金预授权环节状态错误');
+		}
+		
+		if( $params['total_amount'] != $this->fundauthAmount ){
+			throw new \Exception('资金预授权金额错误');
 		}
 		
 		// 下一个状态
@@ -478,7 +481,7 @@ class Pay extends \App\Lib\Configurable
 		$b = $fundauthModel->insert([
 			'fundauth_no' => $this->fundauthNo,
 			'out_fundauth_no' => $params['out_fundauth_no'],
-			'uid' => $params['uid'],
+			'user_id' => $this->user_id,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
 			'freeze_time' => time(),
 			'total_amount' => $this->fundauthAmount,
