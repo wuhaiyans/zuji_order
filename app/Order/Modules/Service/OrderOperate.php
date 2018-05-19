@@ -110,13 +110,26 @@ class OrderOperate
     public static function getOrderInfo($orderNo)
     {
         $order = array();
+
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
         //查询订单和用户发货的数据
-        $orderData =  OrderRepository::getOrderInfo(array('orderNo'=>$orderNo));
+        $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
+
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        //订单状态名称
+        $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);
+
+        //支付方式名称
+        $orderData['pay_type_name'] = Inc\PayInc::getPayName($orderData['pay_type']);
+
+        //应用来源
+        $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+
         $order['order_info'] = $orderData;
+
         //订单商品列表相关的数据
         $goodsData =  OrderRepository::getGoodsListByOrderId($orderNo);
+
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表

@@ -24,13 +24,14 @@ function apiResponse($data=[], $errno=0, $errmsg='')
     return response()->json(['data'=>$data, 'code'=>$errno, 'msg'=>$errmsg]);
 }
 
+
 /**
- * @param array $data
+ * 接口内部返回
+ * Author: heaven
  * @param int $errno
+ * @param array $data
  * @param string $errmsg
  * @return array
- * 接口内部返回
- *
  */
 function apiResponseArray($errno=0,$data=[], $errmsg='')
 {
