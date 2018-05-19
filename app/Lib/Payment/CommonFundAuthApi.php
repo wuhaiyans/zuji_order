@@ -53,17 +53,6 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      */
     public static function queryFundAuthStatus( array $params ){
 		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.query', '1.0', $params);
-//        $ApiRequest = new ApiRequest();
-//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.api.fundauthstatus');
-//        $ApiRequest->setParams($params);
-//        $Response = $ApiRequest->send();
-//        if( !$Response->isSuccessed() ){
-//            self::$error = '查询预授权状态失败';
-//            return false;
-//        }
-//        return $Response->getData();
     }
 
     /**
