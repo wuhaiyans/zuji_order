@@ -24,7 +24,7 @@ class GivebackController extends Controller
 		$params = $request->input();
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		if( empty($paramsArr['goods_no']) ) {
-            return apiResponse([],ApiStatus::CODE_10104,'参数错误：商品编号为空!');
+            return apiResponse([],ApiStatus::CODE_91000);
 		}
 		$goodsNo = $paramsArr['goods_no'];//提取商品编号
 		//-+--------------------------------------------------------------------
@@ -107,14 +107,12 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
-			throw new \Exception('这绝对是一个异常');
 			//生成还机单
 			$orderGivebackService = new OrderGiveback();
 			$orderGivebackIId = $orderGivebackService->create($paramsArr);
-			if( $orderGivebackIId ){
-				return apiResponse([],ApiStatus::CODE_0,'归还设备申请提交成功');
+			if( !$orderGivebackIId ){
+				return apiResponse([],ApiStatus::CODE_10103,'归还单创建失败!');
 			}
-			return apiResponse([],ApiStatus::CODE_10103,'归还设备申请提交失败');
 			//冻结订单
 			//等待接口
 
@@ -128,6 +126,7 @@ class GivebackController extends Controller
 		}
 		//提交事务
 		DB::commit();
+		return apiResponse([],ApiStatus::CODE_0,'归还设备申请提交成功');
 	}
 	/**
 	 * 还机确认收货
