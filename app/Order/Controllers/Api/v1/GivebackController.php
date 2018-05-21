@@ -38,7 +38,7 @@ class GivebackController extends Controller
 		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
-			return apiResponse([],ApiStatus::CODE_92400);
+			return apiResponse([], get_code());
 		}
 		//组合最终返回商品基础数据
 		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
@@ -106,12 +106,17 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
+			//生成还机单编号
+			$paramsArr['giveback_no'] = $giveback_no = createNo(7);
+			//初始化还机单状态
+			$paramsArr['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
 			//生成还机单
 			$orderGivebackService = new OrderGiveback();
 			$orderGivebackIId = $orderGivebackService->create($paramsArr);
 			if( !$orderGivebackIId ){
 				return apiResponse([],ApiStatus::CODE_92201);
 			}
+			//修改商品表业务类型和还机编号等
 			//冻结订单
 			//等待接口
 			
@@ -153,7 +158,7 @@ class GivebackController extends Controller
 		$orderGoodsInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
 		//还机单状态必须为待收货
 		if( !$orderGoodsInfo ){
-            return apiResponse([],ApiStatus::CODE_92402);
+            return apiResponse([], get_code(), get_msg());
 		}
 		if( $orderGoodsInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
             return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
@@ -166,5 +171,9 @@ class GivebackController extends Controller
             return apiResponse([],ApiStatus::CODE_92701);
 		}
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
+	}
+	
+	public function confirmDetection( Request $request ) {
+		
 	}
 }

@@ -25,25 +25,26 @@ class OrderGiveback
 			'goods_no' => 'required',//商品编号
 			'user_id' => 'required',//用户id
 			'logistics_no' => 'required',//物流单号
+			'giveback_no' => 'required',//还机单编号
+			'status' => 'required',//订单状态
 		]);
 
-		if( count($data)!=4 ){
+		if( count($data)!=6 ){
 			set_error('订单还机单存储失败：参数缺失!');
 			return false;
 		}
-		$data['giveback_no'] = createNo(7);
-		$data['status'] = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
 		$data['create_time'] = $data['update_time'] = time();
         return $this->order_giveback_repository->create( $data );
     }
     /**
      * 根据商品编号获取一条还机单数据
 	 * @param string $goodsNo 商品编号
-	 * @return array 
+	 * @return array|false
 	 */
 	public function getInfoByGoodsNo( $goodsNo ) {
 		if( empty($goodsNo) ) {
-			return [];
+			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92300)->setMsg('获取还机单数据时订单编号参数为空!');
+			return false;
 		}
 		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
 	}

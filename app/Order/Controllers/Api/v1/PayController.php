@@ -18,6 +18,83 @@ class PayController extends Controller
     {
         $this->orderTrade = $orderTrade;
     }
+	
+	/**
+	 * 支付异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
+	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
+	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 * ]
+	 * 成功时，输出 success，其他输出都认为是失败，需要重复通知
+	 */
+	public function paymentNotify(){
+		$input = file_get_contents("php://input");
+		LogApi::info('支付异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+//		$params = [
+//			'payment_no'	=> '10A52191976549059',
+//			'out_payment_no'=> 'FA52191976252667',
+//			'status'		=> 'success',
+//			'amount'		=> '1',
+//		];
+		
+		try {
+			// 校验支付状态
+			$status_info = \App\Lib\Payment\CommonPaymentApi::query($params);
+			if( $status_info['status'] != 'success' ){// 支付成功
+				echo 'payment status not success';exit;
+			}
+			
+			// 查询本地支付单
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
+			
+			if( $pay->isSuccess() ){// 已经支付成功
+				echo 'payment notice repeated ';exit;
+			}
+			
+			// 判断是否需要支付
+			if( ! $pay->needPayment() ){
+				echo 'payment not need ';exit;
+			}
+			
+			// 支付处理
+			$pay->paymentSuccess([
+				'out_payment_no' => $_POST['payment_no'],
+				'payment_time' => time(),
+			]);
+			
+			echo 'success';exit;
+			
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();exit;
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();exit;
+		}
+
+		
+		
+//			'business_type' => '1',
+//			'business_no'	=> 'FA52191976207741',
+		
+//		if(){
+//			
+//		}
+		
+		
+	}
+	
 
     /**
 	 * 通用支付入口，获取支付链接地址
