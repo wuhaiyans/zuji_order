@@ -8,12 +8,7 @@ use App\Lib\Curl;
  * @author liuhongxing
  */
 class LogApi {
-	
-	private static $_url = 'http://job-api.hsbbj.com/api';
-	
-	private static $_auth = '7ZT%SC8HB4*Ad$bWyEaj2mBy%qd2G49A';
-	
-	
+		
 	/**
 	 * 业务数据日志
 	 * @param string	$msg
@@ -80,25 +75,48 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-//        file_put_contents('./jobtest.log', $str, FILE_APPEND);
+        file_put_contents('./jobtest.log', $str, FILE_APPEND);
 		dispatch(new \App\Jobs\LogJob($str));
-//		$_config = [
-//			'interface' => 'jobDisable',
-//			'auth' => self::$_auth,
-//			'name' => $key,
-//		];
-//		// 请求
-//		$res = Curl::post(self::$_url, json_encode($_config));
-//		if( !$res ){
-//			return false;
-//		}
-//		$res = json_decode($res,true);
-//		if( !$res ){
-//			return false;
-//		}
-//		if( $res['status']=='ok'){
-//			return true;
-//		}
-//		return true;
+		
+		$_config = [
+			'service' => gethostname(),					// 服务器名称
+			'source' => env('LOG_SOURCE'),				// 日志来源
+			'message' => $msg,
+			'host' => request()->server('HTTP_HOST'),	// 	Host名称
+			'data' => [
+				'level' => $level,						// 级别
+				'session_id' => session_id(),			// 回话
+				'user_id' => '',						// 用户ID
+				'serial_no' => self::_autoincrement(),	// 序号
+				'content' => $data,						// 内容
+			],
+		];
+		dispatch(new \App\Jobs\LogJob( json_encode($_config) ));
+		try {
+			// 请求
+			$res = Curl::post(env('LOG_API'), json_encode($_config));
+			if( !$res ){
+				return false;
+			}
+			$res = json_decode($res,true);
+			if( !$res ){
+				return false;
+			}
+			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
+				dispatch(new \App\Jobs\LogJob( $str ));
+			}
+			
+		} catch (\Exception $exc) {
+			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_config) ));
+		}
+
+		
+		return true;
+	}
+	
+	// 自增
+	private static $counter =0 ;
+	private static function _autoincrement() {
+		return ++self::$counter;
 	}
 }
