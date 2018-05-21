@@ -15,34 +15,40 @@ class AlipayController extends Controller
         $this->orderTrade = $orderTrade;
     }
 
-    //支付宝初始化接口
+    /**
+     * 支付宝初始化接口
+     * $params[
+     *      'return_url'=>'',//前端回调地址
+     *      'order_no'=>'', //订单编号
+     *      'type'=>'',//【必须】string；类型；ORDER，订单
+     *      'channel_code'=>'', //【必须】string；支付渠道；ALIPAY：支付宝
+     * ]
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|void
+     */
     public function alipayInitialize(Request $request){
-        var_dump("alipay 初始化接口");die;
+
         $params =$request->all();
         $params =$params['params'];
-        $return_url =$params['return_url'];
-        //$order_no =$params['order_no'];
-        $order_no ="A509150809460137";
-        //判断参数是否设置
-        if(empty($return_url)){
-            return apiResponse([],ApiStatus::CODE_20001,"回调地址不能为空");
-        }
-        if(empty($order_no)){
-            return apiResponse([],ApiStatus::CODE_20001,"订单编号不能为空");
-        }
-        $data =[
-            'order_no'=>$order_no,
-            'return_url'=>$return_url,
-        ];
 
-        $res= $this->orderTrade->alipayInitialize($data);
-        if(!is_array($res)){
+        $rules = [
+            'return_url'  => 'required',
+            'order_no'  => 'required',
+            'type'  => 'required',
+            'channel_code'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $res= $this->orderTrade->alipayInitialize($params);
+        if(!$res){
             return apiResponse([],ApiStatus::CODE_50004);
         }
         return apiResponse($res,ApiStatus::CODE_0);
         die;
-
-
     }
     //支付回调接口
     public function notify(Request $request){
