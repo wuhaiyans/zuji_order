@@ -65,8 +65,8 @@ class PayController extends Controller
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
-//			header( 'Location: '.$url_info['url'] );
-			var_dump( $url_info );
+			header( 'Location: '.$url_info['url'] );
+//			var_dump( $url_info );
 			
 		} catch (\Exception $exc) {
 			echo $exc->getMessage()."\n";
