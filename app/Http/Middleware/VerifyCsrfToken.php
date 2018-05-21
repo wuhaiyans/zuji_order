@@ -15,6 +15,7 @@ class VerifyCsrfToken extends Middleware
         //
 		'/order/pay/paymentNotify',
 		'/order/pay/refundNotify',
-		'/order/pay/withholdSignNotify'
+		'/order/pay/withholdSignNotify',
+		'/order/pay/fundauthNotify',
     ];
 }
