@@ -204,6 +204,58 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
+	 * 获取 当前环节
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @return string
+	 * @throws \Exception	发生错误时抛出异常
+	 */
+	public function getCurrentStep(){
+		if( $this->isSuccess() ){
+			throw new \Exception('支付单已完成');
+		}
+		if( $this->needPayment() ){
+			return 'payment';
+		}elseif( $this->needWithhold() ){
+			return 'withhold_sign';
+		}elseif( $this->needFundauth() ){
+			return 'fundauth';
+		}
+		throw new \Exception('支付单内部错误');
+	}
+	
+	/**
+	 * 获取 当前环节 跳转URL地址
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @param array				请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array			返回参数
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	发生错误时抛出异常
+	 */
+	public function getCurrentUrl( $params ){
+		if( $this->isSuccess() ){
+			throw new \Exception('支付单已完成');
+		}
+		if( $this->needPayment() ){
+			return $this->getPaymentUrl($params);
+		}elseif( $this->needWithhold() ){
+			return $this->getWithholdSignUrl($params);
+		}elseif( $this->needFundauth() ){
+			return $this->getFundauthUrl($params);
+		}
+		throw new \Exception('支付单内部错误');
+	}
+	
+	/**
 	 * 是否需要 支付环节
 	 * 还未支付状态
 	 * @return bool
@@ -643,7 +695,7 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	//-+------------------------------------------------------------------------
-	// | 
+	// | 私有方法
 	//-+------------------------------------------------------------------------
 	
 	/**

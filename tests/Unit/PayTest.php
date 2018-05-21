@@ -69,12 +69,14 @@ class PayTest extends TestCase
 			$payment_no = '';		// 业务系统支付编号
 			$out_payment_no = '';	// 支付系统支付编号
 			try {
-				$url_info = $pay->getPaymentUrl([
+				$_params = [
 					'name'			=> '测试支付',					//【必选】string 交易名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-				]);
-				//var_dump( $url_info );
+				];
+				//$url_info = $pay->getPaymentUrl( $_params );
+				$url_info = $pay->getCurrentUrl( $_params );
+				var_dump( $url_info );
 				echo "ok\n";
 				$out_payment_no = $url_info['_data']['payment_no'];
 				$payment_no = $url_info['_data']['out_payment_no'];
@@ -125,11 +127,13 @@ class PayTest extends TestCase
 			echo "获取代扣签约地址......";
 			try {
 				// 获取代扣地址
-				$url_info = $pay->getWithholdSignUrl([
-					'name'			=> '测试支付',					//【必选】string 交易名称
+				$_params = [
+					'name'			=> '测试代扣签约',					//【必选】string 交易名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-				]);
+				];
+				//$url_info = $pay->getWithholdSignUrl($_params);
+				$url_info = $pay->getCurrentUrl( $_params );
 //				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
 //					'out_agreement_no'	=> $pay->getWithholdNo(),
 //					'channel_type'		=> $pay->getWithholdChannel(),			//【必选】int 支付渠道
@@ -138,7 +142,7 @@ class PayTest extends TestCase
 //					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
 //					'user_id'		=> $pay->getUserId(),			//【可选】int 业务用户ID
 //				]);
-				//var_dump( $url_info );
+				var_dump( $url_info );
 				echo "ok\n";
 				$agreement_no = $url_info['_data']['agreement_no'];
 			} catch (\Exception $exc) {
@@ -187,11 +191,13 @@ class PayTest extends TestCase
 			echo "获取预授权地址......";
 			try {
 				// 获取url
-				$url_info = $pay->getFundauthUrl([
-					'name'			=> '测试支付',					//【必选】string 交易名称
+				$_params = [
+					'name'			=> '测试预授权',					//【必选】string 交易名称
 					'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
-				]);
+				];
+				//$url_info = $pay->getFundauthUrl($_params);
+				$url_info = $pay->getCurrentUrl( $_params );
 //				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
 //					'out_auth_no'	=> $pay->getFundauthNo(),
 //					'channel_type'		=> $pay->getFundauthChannel(),			//【必选】int 支付渠道
@@ -201,7 +207,7 @@ class PayTest extends TestCase
 //					'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
 //					'user_id'		=> $pay->getUserId(),			//【可选】int 业务平台yonghID
 //				]);
-				//var_dump( $url_info );
+				var_dump( $url_info );
 				echo "ok\n";
 			$fundauth_no = $url_info['_data']['auth_no'];
 			} catch (\Exception $exc) {
