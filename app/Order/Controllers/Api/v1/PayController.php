@@ -44,15 +44,15 @@ class PayController extends Controller
 				
 				'paymentNo' => \createNo(1),
 				'paymentAmount' => '0.01',
-				'paymentChannel'=> \App\Lib\Channel\Channel::Alipay,
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
 				'withholdNo' => \createNo(1),
-				'withholdChannel'=> \App\Lib\Channel\Channel::Alipay,
+				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				
 				'fundauthNo' => \createNo(1),
 				'fundauthAmount' => '1.00',
-				'fundauthChannel'=> \App\Lib\Channel\Channel::Alipay,
+				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 			]);
 		} catch (\Exception $exc) {
 			exit('error');
