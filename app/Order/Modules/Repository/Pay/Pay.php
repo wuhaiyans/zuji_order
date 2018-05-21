@@ -109,6 +109,10 @@ class Pay extends \App\Lib\Configurable
 		parent::__construct($data);
 	}
 	
+	
+	//-+------------------------------------------------------------------------
+	// | 属性相关 setter 和 getter
+	//-+------------------------------------------------------------------------
 	public function getUserId(){
 		return $this->user_id;
 	}
@@ -186,8 +190,11 @@ class Pay extends \App\Lib\Configurable
 		return $this->fundauthStatus;
 	}
 	
+	//-+------------------------------------------------------------------------
+	// | 业务相关
+	//-+------------------------------------------------------------------------
 	/**
-	 * 是否支付成功
+	 * 支付阶段 是否完成
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -197,7 +204,21 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否支付成功
+	 * 是否需要 支付环节
+	 * 还未支付状态
+	 * @return bool
+	 */
+	public function needPayment()
+	{
+		//
+		if( $this->paymentStatus == PaymentStatus::WAIT_PAYMENT ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 支付环节 是否付成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -207,7 +228,21 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否签约代扣成功
+	 * 是否需要 代扣签约环节
+	 * 还未代扣签约状态
+	 * @return bool
+	 */
+	public function needWithhold()
+	{
+		//
+		if( $this->withholdStatus == WithholdStatus::WAIT_WITHHOLD ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 代扣签约环节 是否成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -217,7 +252,21 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否资金预授权成功
+	 * 是否需要 资金预授权环节
+	 * 还未资金授权状态
+	 * @return bool
+	 */
+	public function needFundauth()
+	{
+		//
+		if( $this->fundauthStatus == FundauthStatus::WAIT_FUNDAUTH ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 资金预授权环节 是否成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -231,7 +280,7 @@ class Pay extends \App\Lib\Configurable
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function cancel(){
 		LogApi::debug('[支付阶段]取消');
@@ -263,7 +312,7 @@ class Pay extends \App\Lib\Configurable
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function resume(){
 		LogApi::debug('[支付阶段]恢复');
@@ -310,7 +359,7 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 支付成功
+	 * 支付环节 完成处理
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param array		$params		支付成功参数
@@ -319,7 +368,7 @@ class Pay extends \App\Lib\Configurable
 	 *		'payment_time'	=> '',	// 支付时间
 	 * ]
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function paymentSuccess( array $params ):bool
 	{
@@ -448,7 +497,7 @@ class Pay extends \App\Lib\Configurable
 	 *		'total_amount'		=> '',	// 预授权金额；单位：元
 	 * ]
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function fundauthSuccess( array $params ):bool
 	{
@@ -498,47 +547,7 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	
-	/**
-	 * 是否需要 payment
-	 * 还未支付状态
-	 * @return bool
-	 */
-	public function needPayment()
-	{
-		//
-		if( $this->paymentStatus == PaymentStatus::WAIT_PAYMENT ){
-			return true;
-		}
-		return false;
-	}
 	
-	/**
-	 * 是否需要 withholld
-	 * 还未代扣签约状态
-	 * @return bool
-	 */
-	public function needWithhold()
-	{
-		//
-		if( $this->withholdStatus == WithholdStatus::WAIT_WITHHOLD ){
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * 是否需要 fundauth
-	 * 还未资金授权状态
-	 * @return bool
-	 */
-	public function needFundauth()
-	{
-		//
-		if( $this->fundauthStatus == FundauthStatus::WAIT_FUNDAUTH ){
-			return true;
-		}
-		return false;
-	}
 	
 	//-+------------------------------------------------------------------------
 	// | 链接地址
