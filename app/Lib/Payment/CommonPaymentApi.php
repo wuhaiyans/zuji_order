@@ -1,14 +1,11 @@
 <?php
 namespace App\Lib\Payment;
-use App\Lib\ApiRequest;
 /**
  * 公共支付接口
  *
  * @author 
  */
 class CommonPaymentApi extends \App\Lib\BaseApi {
-
-	static $error;
 	/**
 	 * 统一支付页面URL接口
 	 * @param array $params
@@ -26,18 +23,10 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * [
 	 *		'payment_url' => '',//支付链接
 	 * ]
+	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
-        $ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.payment.page.url');
-        $Response = $ApiRequest->setParams( $params )->send();
-        if( !$Response->isSuccessed() ){
-			self::$error = $Response->getStatus()->getMsg();
-            return false;
-        }
-		return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.url', '1.0', $params);
 	}
 
 	/**
@@ -54,18 +43,10 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 *		'status'			=> '',	//【必选】string success：支付成功；init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
 	 *		'trade_time'			=> '',	//【必选】string 时间戳
 	 * ]
+	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function query( array $params ){
-        $ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_API'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.payment.query');
-        $Response = $ApiRequest->setParams( $params )->send();
-        if( !$Response->isSuccessed() ){
-			self::$error = $Response->getStatus()->getMsg();
-            return false;
-        }
-		return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.query', '1.0', $params);
 	}
 
 }

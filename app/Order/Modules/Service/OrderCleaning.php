@@ -6,8 +6,11 @@
  */
 namespace App\Order\Modules\Service;
 use App\Lib\Payment\CommonRefundApi;
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\OrderPayRepository;
+use Illuminate\Support\Facades\Log;
 
 
 class OrderCleaning
@@ -103,6 +106,7 @@ class OrderCleaning
     public static function orderCleanOperate($param)
     {
 
+
         //查询清算表
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
         if (empty($orderCleanData)) return false;
@@ -124,12 +128,55 @@ class OrderCleaning
          * ]
          */
         //
-        //发起清算 解押金，退租金
-        CommonRefundApi::apply();
-        $success= OrderClearingRepository::orderCleanOperate($param);
+
+
+
+
+        //需退款金额大于0，并且属于待退款状态，发起清算，退租金
+       if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed) {
+           //根据业务编号查找支付相关数据
+           $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
+           if (empty($orderPayInfo)) return false;
+           $params = [
+               'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
+               'payment_no'	=> $orderPayInfo['payment_no'], //业务系统支付码
+               'amount'		=> $orderCleanData['refund_amount'], //支付金额
+               'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
+           ];
+           CommonRefundApi::apple($params);
+
+       }
+
         return $success;
 
+        //发起清算 解押金
 
+
+    }
+
+
+
+
+    /**
+     *
+     * 订单清算回调业务接口
+     * Author: heaven
+     * @return mixed
+     */
+    public static function getBusinessCleanCallback($businessType, $businessNo, $result)
+    {
+        $callbacks = config('pay_callback.refund');
+        if( isset($callbacks[$businessType]) && $callbacks[$businessType] ){
+
+            $params = [
+                'business_type' => $businessType,
+                'business_no' => $businessNo,
+                'status' => $result
+            ];
+
+            return call_user_func_array($callbacks[$businessType],$params);
+        }
+        Log::error('[清算阶段]业务未设置回调通知');
     }
 
 

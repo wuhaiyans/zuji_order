@@ -54,15 +54,6 @@ class OrderController extends Controller
     }
     /**
      * 下单接口
-     * 1.用户验证
-     * 2.地址验证
-     * 3.商品验证
-     * 4.数据组装
-     *      1：用户信息：蚁盾数据，风控数据，代扣数据
-     *      2：地址信息：收货信息
-     *      3：商品信息：租期类型，
-     *      4：优惠券信息：
-     *·
      * @param Request $request
      * $params[
      *      'pay_type'=>'',//支付方式ID
@@ -103,20 +94,60 @@ class OrderController extends Controller
             'user_id'=>18,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
-        if(!is_array($res)){
-            return apiResponse([],ApiStatus::CODE_30005,$res);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
         }
-        //发送取消订单队列
-//        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$res['order_no'],config("tripartite.API_INNER_URL"), [
-//            'method' => 'api.inner.cancelOrder',
-//            'order_no'=>$res['order_no'],
-//            'user_id'=>$user_id,
-//            'time' => date('Y-m-d H:i:s'),
-//        ],time()+7200,"");
-//        Log::error($b?"Order :".$res['order_no']." IS OK":"IS error");
+
         return apiResponse($res,ApiStatus::CODE_0);
     }
+    /**
+     * 门店下单接口
+     * @param Request $request
+     * $params[
+     *      'pay_type'=>'',//支付方式ID
+     *      'address_id'=>'',//收货地址ID
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeCreate(Request $request){
+        $orders =$request->all();
+        //获取appid
+        $appid =$orders['appid'];
+        $pay_type =$orders['params']['pay_type'];//支付方式ID
+        $address_id=$orders['params']['address_id'];//收货地址ID
+        $sku =$orders['params']['sku_info'];
+        $coupon = $orders['params']['coupon'];
+        $user_id =18;
 
+        //判断参数是否设置
+        if(empty($pay_type)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($appid)){
+            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
+        }
+        if(empty($address_id)){
+            return apiResponse([],ApiStatus::CODE_20001,"收货地址不能为空");
+        }
+        if(count($sku)<1){
+            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+        }
+
+        $data =[
+            'appid'=>1,
+            'pay_type'=>1,
+            'address_id'=>8,
+            'sku'=>$sku,
+            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
+            'user_id'=>18,  //增加用户ID
+        ];
+        $res = $this->OrderCreate->storeCreate($data);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+        }
+
+        return apiResponse($res,ApiStatus::CODE_0);
+    }
 
     /**
      * 订单列表接口

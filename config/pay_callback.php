@@ -33,6 +33,6 @@ return [
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'1' => 'is_array'
+		'2' => '\App\Lib\Refund\Refund\refundUpdate'
 	],
 ];

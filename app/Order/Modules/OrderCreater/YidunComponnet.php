@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Fengkong\Fengkong;
+use App\Order\Modules\Repository\OrderYidunRepository;
 
 class YidunComponnet implements OrderCreater
 {
@@ -91,8 +92,25 @@ class YidunComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        $this->componnet->create();
         var_dump("yidun组件 -create");
+        $b = $this->componnet->create();
+        if( !$b ){
+            return false;
+        }
+        $data =$this->getDataSchema();
+        //存储蚁盾信息
+        $yidunData =[
+            'decision' => $data['yidun']['decision'],
+            'order_no'=>$data['order']['order_no'],  // 编号
+            'score' => $data['yidun']['score'],
+            'strategies' =>$data['yidun']['strategies'],
+        ];
+        $yidunReposit = new OrderYidunRepository();
+        $yidunId =$yidunReposit->add($yidunData);
+        if(!$yidunId){
+            $this->getOrderCreater()->setError('保存蚁盾数据失败');
+            return false;
+        }
         return true;
     }
 }

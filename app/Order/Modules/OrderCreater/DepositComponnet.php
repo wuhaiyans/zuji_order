@@ -39,27 +39,6 @@ class DepositComponnet implements OrderCreater
         $this->schema =$schema;
 
     }
-
-    /**
-     *  计算押金
-     * @param int $amount
-     */
-    public function discrease_yajin(int $jianmian,$yajin,$mianyajin): array{
-        $arr=['yajin'=>$yajin,'mianyajin'=>$mianyajin,'jianmian'=>$jianmian];
-        if( $jianmian<0 ){
-            return [];
-        }
-        // 优惠金额 大于 总金额 时，总金额设置为0.01
-        if( $jianmian >= $yajin ){
-            $jianmian = $yajin;
-        }
-
-        $arr['yajin'] -= $jianmian;// 更新押金
-        $arr['mianyajin'] += $jianmian;// 更新免押金额
-        $arr['jianmian'] = $jianmian;
-
-        return $arr;
-    }
     /**
      * 获取订单创建器
      * @return OrderCreater
@@ -124,10 +103,7 @@ class DepositComponnet implements OrderCreater
                     $this->flag = false;
                 }
                 $jianmian = priceFormat($deposit['jianmian']/100);
-                $arr =$this->discrease_yajin($jianmian,$v['yajin'],$v['mianyajin']);
-                $this->schema['sku'][$k]['jianmian'] =$arr['jianmian'];
-                $this->schema['sku'][$k]['yajin'] =$arr['yajin'];
-                $this->schema['sku'][$k]['mianyajin'] =$arr['mianyajin'];
+                $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian,$v['yajin'],$v['mianyajin'],$v['sku_id']);
             }
 
         }
@@ -149,12 +125,6 @@ class DepositComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        $b = $this->componnet->create();
-        var_dump("押金组件 -create");
-        return true;
-        if( !$this->flag ){
-            return false;
-        }
         $b = $this->componnet->create();
         if( !$b ){
             return false;

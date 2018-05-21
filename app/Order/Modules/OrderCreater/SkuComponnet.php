@@ -26,6 +26,9 @@ class SkuComponnet implements OrderCreater
     private $goodsArr;
     //支付方式
     private $payType;
+    private $deposit=[];
+    private $couponInfo=[];
+    private $sku=[];
 
 
     public function __construct(OrderCreater $componnet, array $sku,int $payType)
@@ -159,6 +162,7 @@ class SkuComponnet implements OrderCreater
         foreach ($this->goodsArr as $k=>$v) {
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
+            $coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['coupon_amount'])?$this->sku[$skuInfo['sku_id']]['coupon_amount']:0.00;
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
@@ -190,57 +194,124 @@ class SkuComponnet implements OrderCreater
                     'discount_amount' => $skuInfo['buyout_price'],
                     'amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
                     'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
-                    'coupon_amount' => 0.00,
-                    'mianyajin' => 0.00,
+                    'coupon_amount' => $coupon_amount,
+                    'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?$this->deposit[$skuInfo['sku_id']]['mianyajin']:0.00,
+                    'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
+                    'deposit_yajin' => !empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:0.00,
+                    'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$coupon_amount,
             ];
-
         }
+        $arr['coupon'] =$this->couponInfo;
         return $arr;
     }
+    /**
+     *  计算押金
+     * @param int $amount
+     */
+    public function discrease_yajin(int $jianmian,$yajin,$mianyajin,$sku_id): array{
+        if( $jianmian<0 ){
+            return [];
+        }
+        // 优惠金额 大于 总金额 时，总金额设置为0.01
+        if( $jianmian >= $yajin ){
+            $jianmian = $yajin;
+        }
+        $arr[$sku_id]['deposit_yajin'] = $yajin -$jianmian;// 更新押金
+        $arr[$sku_id]['mianyajin'] = $mianyajin +$jianmian;// 更新免押金额
+        $arr[$sku_id]['jianmian'] = $jianmian;
+        $this->deposit =$arr;
+        return $arr;
+    }
+    /**
+     * 计算优惠券信息
+     *
+     */
+    public function discrease_coupon($sku,$coupon){
+        //计算总租金
+        $totalAmount =0;
+        foreach ($sku as $k=>$v){
+            $totalAmount +=($v['zuqi']*$v['zujin']-$v['discount_amount'])*$v['sku_num'];
+        }
+        $zongyouhui=0;
+        foreach ($sku as $k => $v) {
+            for ($i =0;$i<$v['sku_num'];$i++){
+                $youhui =0;
+                foreach ($coupon as $key=>$val) {
+                    //首月0租金
+                    if ($val['coupon_type'] == 2 && $v['zuqi_type'] == 2) {
+                        $zongzujin = ($v['zuqi'] - 1) * $v['zujin'];
+                        $youhui+= $v['zujin'];
+                        $skuyouhui[$v['sku_id']]['coupon_amount'] =$youhui;
+                        $coupon[$key]['is_use'] = 1;
+                    }
+                    //现金券
+                    if ($val['coupon_type'] == 1) {
+                        $zongzujin = $v['zuqi'] * $v['zujin'] - $v['discount_amount'];
+                        $skuyouhui[$v['sku_id']]['coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
 
+                        if ($v['zuqi_type'] == 2) {
+                            $skuyouhui[$v['sku_id']]['coupon_amount'] = $skuyouhui[$v['sku_id']]['coupon_amount']+$youhui;
+                        } else {
+                            if ($k == count($sku) - 1 && $i ==$v['sku_num']-1) {
+                                $skuyouhui[$v['sku_id']]['coupon_amount'] = $val['discount_amount'] - $zongyouhui;
+                            }else{
+                                $zongyouhui += $skuyouhui[$v['sku_id']]['coupon_amount'];
+                            }
+                        }
+                        $coupon[$key]['is_use'] = 1;
+                    }
+                }
+            }
+        }
+        $this->couponInfo = $coupon;
+        $this->sku =$skuyouhui;
+    }
     /**
      * 创建数据
      * @return bool
      */
     public function create(): bool
     {
-        if (!$this->flag) {
-            return false;
-        }
-        $data = $this->getDataSchema();
-        var_dump($data);
-        die;
+        var_dump('创建goods...');
+        $data = $this->componnet->getDataSchema();
+        //var_dump($data);die;
+        $userId =$this->componnet->getOrderCreater()->getUserComponnet()->getUserId();
+        $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $goodsRepository = new OrderGoodsRepository();
         foreach ($data['sku'] as $k=>$v){
             for($i=0;$i<$v['sku_num'];$i++){
                 $goodsData =[
-                    'goods_name'=>$v['sku']['spu_name'],
-                    'goods_id'=>$v['sku']['sku_id'],
-                    'goods_no'=>$v['sku']['sku_no']."-".($i+1),
-                    'prod_id'=>$v['sku']['spu_id'],
-                    'prod_no'=>$v['sku']['spu_no'],
-                    'brand_id'=>$v['sku']['brand_id'],
-                    'category_id'=>$v['sku']['category_id'],
-                    'user_id'=>$user_info['address']['user_id'],
+                    'goods_name'=>$v['spu_name'],
+                    'zuji_goods_id'=>$v['sku_id'],
+                    'zuji_goods_sn'=>$v['sku_no'],
+                    'goods_thumb'=>$v['thumb'],
+                    'goods_no'=>createNo(6),
+                    'prod_id'=>$v['spu_id'],
+                    'prod_no'=>$v['spu_no'],
+                    'brand_id'=>$v['brand_id'],
+                    'category_id'=>$v['category_id'],
+                    'user_id'=>$userId,
                     'quantity'=>1,
-                    'goods_yajin'=>$v['sku']['yajin'],
-                    'yajin'=>$v['deposit']['yajin'],
-                    'zuqi'=>$v['sku']['zuqi'],
-                    'zuqi_type'=>$v['sku']['zuqi_type'],
-                    'zujin'=>$v['sku']['zujin'],
-                    'order_no'=>$data['order_no'],
-                    'chengse'=>$v['sku']['chengse'],
-                    'discount_amount'=>$v['sku']['discount_amount'],
-                    'coupon_amount'=>$v['sku']['coupon_amount'],
-                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount']-$v['sku']['coupon_amount'],
-                    'edition'=>$v['sku']['edition'],
-                    'market_price'=>$v['sku']['market_price'],
-                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
-                    'specs'=>json_encode($v['sku']['specs']),
-                    'insurance'=>$v['sku']['yiwaixian'],
-                    'buyout_price'=>$v['sku']['buyout_price'],
-                    'weight'=>$v['sku']['weight'],
+                    'goods_yajin'=>$v['yajin'],
+                    'yajin'=>$v['deposit_yajin'],
+                    'zuqi'=>$v['zuqi'],
+                    'zuqi_type'=>$v['zuqi_type'],
+                    'zujin'=>$v['zujin'],
+                    'order_no'=>$orderNo,
+                    'chengse'=>$v['chengse'],
+                    'discount_amount'=>$v['discount_amount'],
+                    'coupon_amount'=>$v['coupon_amount'],
+                    'amount_after_discount'=>$v['amount_after_discount'],
+                    'edition'=>$v['edition'],
+                    'market_price'=>$v['market_price'],
+                    'price'=>$v['amount_after_discount'] + $v['yiwaixian'],
+                    'specs'=>$v['specs'],
+                    'insurance'=>$v['yiwaixian'],
+                    'buyout_price'=>$v['buyout_price'],
+                    'weight'=>$v['weight'],
+                    'create_time'=>time(),
                 ];
+
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
                     $this->getOrderCreater()->setError("保存商品信息失败");
@@ -248,64 +319,11 @@ class SkuComponnet implements OrderCreater
                 }
             }
         }
-        return true;
 
-        foreach ($sku_info as $k =>$v){
-
-                $goods_name .=$v['sku']['spu_name']." ";
-                // 保存 商品信息
-                $goods_data = [
-                    'goods_name'=>$v['sku']['spu_name'],
-                    'goods_id'=>$v['sku']['sku_id'],
-                    'goods_no'=>$v['sku']['sku_no']."-".($i+1),
-                    'prod_id'=>$v['sku']['spu_id'],
-                    'prod_no'=>$v['sku']['spu_no'],
-                    'brand_id'=>$v['sku']['brand_id'],
-                    'category_id'=>$v['sku']['category_id'],
-                    'user_id'=>$user_info['address']['user_id'],
-                    'quantity'=>1,
-                    'goods_yajin'=>$v['sku']['yajin'],
-                    'yajin'=>$v['deposit']['yajin'],
-                    'zuqi'=>$v['sku']['zuqi'],
-                    'zuqi_type'=>$v['sku']['zuqi_type'],
-                    'zujin'=>$v['sku']['zujin'],
-                    'order_no'=>$data['order_no'],
-                    'chengse'=>$v['sku']['chengse'],
-                    'discount_amount'=>$v['sku']['discount_amount'],
-                    'coupon_amount'=>$v['sku']['coupon_amount'],
-                    'amount_after_discount'=>$v['sku']['zujin']*$v['sku']['zuqi']-$v['sku']['discount_amount']-$v['sku']['coupon_amount'],
-                    'edition'=>$v['sku']['edition'],
-                    'market_price'=>$v['sku']['market_price'],
-                    'price'=>$v['sku']['amount'] + $v['deposit']['yajin'],
-                    'specs'=>json_encode($v['sku']['specs']),
-                    'insurance'=>$v['sku']['yiwaixian'],
-                    'buyout_price'=>$v['sku']['buyout_price'],
-                    'weight'=>$v['sku']['weight'],
-                ];
-                $order_amount +=$goods_data['amount_after_discount'];
-                $goods_yajin  +=$goods_data['goods_yajin'];
-                $order_yajin  +=$goods_data['yajin'];
-                $order_insurance+=$goods_data['insurance'];
-                $coupon_amount+=$goods_data['coupon_amount'];
-                $discount_amount+=$goods_data['discount_amount'];
-
-
-                $goods_id = $this->goods->insertGetId($goods_data);
-                if(!$goods_id){
-                    return ApiStatus::CODE_30005;
-                }
-//                $v['sku']['goods_no']=$v['sku']['sku_no']."-".++$i;
-                // 生成分期
-                $instalment_data =array_merge($v,['order'=>$data],$user_info);
-                //var_dump($instalment_data);die;
-//                $instalment = $this->instalment->create($instalment_data);
-//                if(!$instalment){
-//                    return ApiStatus::CODE_30005;
-//                }
-
-            }
-
-        
+        /**
+         * 在这里要调用减少库存方法
+         */
+        var_dump("别忘了减少库存");
 
         return true;
     }

@@ -24,6 +24,8 @@ class UserComponnet implements OrderCreater
 
     //用户ID
     private $userId;
+    //风控系统分数
+    private $score=0;
     //手机号
     private $mobile;
     //代扣协议号
@@ -83,6 +85,13 @@ class UserComponnet implements OrderCreater
     public function getUserId(){
         return $this->userId;
     }
+    /**
+     * 设置风控系统分
+     *
+     */
+    public function setScore($score){
+        $this->score =$score;
+    }
 
     /**
      * 获取订单创建器
@@ -136,6 +145,7 @@ class UserComponnet implements OrderCreater
                 'face'=>$this->face,
                 'age'=>$this->age,
                 'risk'=>$this->risk,
+                'score'=>$this->score,
             ],
             'address'=>$this->address,
         ];
@@ -148,9 +158,7 @@ class UserComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        if( !$this->flag ){
-            return false;
-        }
+        var_dump('创建用户...');
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
         // 写入用户信息
@@ -169,7 +177,10 @@ class UserComponnet implements OrderCreater
             'credit'=>$data['user']['credit'],
             'realname'=>$data['user']['realname'],
             'cret_no'=>$data['user']['cert_no'],
+            'score'=>$this->score,
+            'create_time'=>time(),
         ];
+        //var_dump($userData);die;
         $userRepository = new OrderUserInfoRepository();
         $user_id =$userRepository->add($userData);
         if(!$user_id){
