@@ -372,3 +372,11 @@ function set_msg( $msg ){
 function get_msg( ){
 	return ''.get_instance()->getMsg();
 }
+/**
+ * 设置全局apiStatus的code和msg信息
+ * @param string $code code码
+ * @param string $msg Msg信息
+ */
+function set_apistatus( $code='', $msg='' ){
+	return get_instance()->setCode(strval($code))->setMsg(strval($msg));
+}

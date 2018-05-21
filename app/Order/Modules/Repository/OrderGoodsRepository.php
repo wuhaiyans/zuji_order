@@ -80,4 +80,13 @@ class OrderGoodsRepository
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;
 	}
+	/**
+	 * 根据条件更新数据
+	 * @param array $where
+	 * @param array $data
+	 * @return boolen
+	 */
+	public function update( $where, $data ) {
+		return $this->orderGoods->where($where)->update($data);
+	}
 }
