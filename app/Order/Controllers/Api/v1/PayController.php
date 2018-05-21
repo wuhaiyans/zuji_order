@@ -30,7 +30,7 @@ class PayController extends Controller
 			
 			$_params = [
 				'name'			=> '测试-'.$step,					//【必选】string 交易名称
-				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSingFront',	//【必选】string 前端回跳地址
+				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSignFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
 			var_dump( $url_info );exit;
