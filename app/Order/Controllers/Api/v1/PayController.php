@@ -89,6 +89,7 @@ class PayController extends Controller
 	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 *		'reason'		=> '',	//【必选】stirng 失败原因
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
@@ -97,14 +98,13 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('支付异步通知', $input);
 		
-		$input = json_decode($input);
-		if( is_null($input) ){
+		$params = json_decode($input);
+		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
-		if( !is_array($input['data']) ){
+		if( !is_array($params) ){
 			echo 'notice data not array ';exit;
 		}
-		$params = $input['data'];
 		
 //		$params = [
 //			'payment_no'	=> '10A52108092865700',
