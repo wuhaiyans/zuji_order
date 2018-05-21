@@ -12,7 +12,7 @@ namespace App\Order\Modules\Repository\Pay;
 use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayModel;
 use App\Order\Models\OrderPayPaymentModel;
-use App\Order\Models\OrderPayWithholdModel;
+use App\Order\Models\OrderPayWithhold;
 use App\Order\Models\OrderPayFundauthModel;
 
 /**

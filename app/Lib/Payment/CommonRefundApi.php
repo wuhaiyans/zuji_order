@@ -18,8 +18,9 @@ class CommonRefundApi extends \App\Lib\BaseApi {
      * ]
      * @return array		业务返回参数
      * [
-     * 		'out_refund_no'=>'', //订单系统退款码
-     * 		'refund_no'=>'', //支付系统退款码
+     * 		'out_refund_no'	=> '', //订单系统退款码
+     * 		'refund_no'		=> '', //支付系统退款码
+	 *		'status'		=> '',// 状态 success：支付成功；processing：处理中；其他值为未完成支付
      * ]
 	 * @throws \Exception			请求失败时抛出异常
      */

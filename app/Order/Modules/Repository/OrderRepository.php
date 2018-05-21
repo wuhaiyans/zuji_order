@@ -17,19 +17,14 @@ class OrderRepository
 {
 
     protected $order;
-    protected $orderGoods;
-    protected $orderUserInfo;
-    protected $instalment;
-    protected $yidun;
 
-    public function __construct(Order $order,OrderGoods $orderGoods,OrderUserInfo $orderUserInfo,OrderInstalment $instalment,OrderYidun $yidun)
+
+    public function __construct()
     {
-        $this->order = $order;
-        $this->goods =$orderGoods;
-        $this->user =$orderUserInfo;
-        $this->instalment =$instalment;
-        $this->yidun =$yidun;
-
+        $this->order = new Order();
+    }
+    public function add($data){
+        return $this->order->insertGetId($data);
     }
     public function create($data,$schema){
 
