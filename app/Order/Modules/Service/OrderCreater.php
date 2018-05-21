@@ -5,6 +5,8 @@ use App\Lib\ApiStatus;
 
 use App\Lib\Certification;
 use App\Lib\Common\SmsApi;
+use App\Order\Models\Order;
+use App\Order\Models\OrderLog;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
@@ -17,6 +19,7 @@ use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
 use App\Order\Modules\OrderCreater\YidunComponnet;
+use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -78,12 +81,12 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+ //           $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
 //           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
-            $b = $orderCreater->filter();
+           $b = $orderCreater->filter();
 //            if(!$b){
 //                DB::rollBack();
 //                //把无法下单的原因放入到用户表中
@@ -95,12 +98,15 @@ class OrderCreater
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
+                var_dump($orderCreater->getOrderCreater()->getError());die;
                 DB::rollBack();
                 return $orderCreater->getOrderCreater()->getError();
             }
-            die;
 
-            DB::commit();
+
+
+            //DB::commit();
+            var_dump($schemaData);die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){

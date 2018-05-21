@@ -177,7 +177,8 @@ class UserComponnet implements OrderCreater
             'credit'=>$data['user']['credit'],
             'realname'=>$data['user']['realname'],
             'cret_no'=>$data['user']['cert_no'],
-            'score'=>$this->score
+            'score'=>$this->score,
+            'create_time'=>time(),
         ];
         //var_dump($userData);die;
         $userRepository = new OrderUserInfoRepository();
