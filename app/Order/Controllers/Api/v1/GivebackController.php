@@ -33,7 +33,6 @@ class GivebackController extends Controller
 		
 		//初始化最终返回数据数组
 		$data = [];
-		
 		//获取商品基础数据
 		//创建商品服务层对象
 		$orderGoodsService = new OrderGoods();

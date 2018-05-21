@@ -188,6 +188,16 @@ class ApiStatus {
 	 * [还机][入库错误]还机单创建失败!
 	 */
     const CODE_92201 = '92201';
+	
+	/**
+	 * [还机][读库参数错误]读库参数错误!
+	 */
+    const CODE_92300 = '92300';
+	
+	/**
+	 * [还机][读库参数错误]获取商品信息：商品编号参数为空!
+	 */
+    const CODE_92301 = '92301';
 	/**
 	 * [还机][读库结果错误]读库结果错误!
 	 */
@@ -217,9 +227,7 @@ class ApiStatus {
 	 */
     const CODE_94000 = '94000';
 
-
-
-    public static $errCodes = [
+	public static $errCodes = [
         self::CODE_0     => 'success',
         self::CODE_10100 => '空请求',
         self::CODE_10102 => '请求格式错误',
@@ -319,6 +327,8 @@ class ApiStatus {
 		self::CODE_91001 => '[还机][参数错误]商品编号不能为空!',
 		self::CODE_92200 => '[还机][入库结果错误]入库结果错误!',
 		self::CODE_92201 => '[还机][入库结果错误]还机单创建失败!',
+		self::CODE_92300 => '[还机][读库参数错误]读库参数错误!',
+		self::CODE_92301 => '[还机][读库参数错误]获取商品信息：商品编号参数为空!',
 		self::CODE_92400 => '[还机][读库结果错误]读库结果错误!',
 		self::CODE_92401 => '[还机][读库结果错误]商品数据读取为空!',
 		self::CODE_92402 => '[还机][读库结果错误]还机单数据读取为空!',
@@ -337,8 +347,8 @@ class ApiStatus {
         $this->code = $code;
         $this->msg = $msg;
     }
-    
-    public function isSuccessed(){
+
+	public function isSuccessed(){
         return $this->code === self::CODE_0;
     }
 
