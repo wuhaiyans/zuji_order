@@ -119,7 +119,7 @@ class PayController extends Controller
 			if( $status_info['status'] != 'success' ){// 支付成功
 				echo 'payment status not success';exit;
 			}
-			var_dump( '接收异步通知结果', $params );
+			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
 			
@@ -131,14 +131,18 @@ class PayController extends Controller
 			if( ! $pay->needPayment() ){
 				echo 'payment not need ';exit;
 			}
-			DB::beginTransaction();	// 提交事务
+			
+			// 提交事务
+			DB::beginTransaction();
+			
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
 				'payment_time' => time(),
 			]);
 			
-            DB::commit();	// 提交事务
+			// 提交事务
+            DB::commit();	
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
