@@ -226,6 +226,7 @@ class DeliveryRepository
         }
         $model->status = Delivery::STATUS_RECEIVED;
         $model->status_time = time();
+        $model->is_auto = (int)$auto;
         return $model->update();
     }
 
@@ -296,16 +297,18 @@ class DeliveryRepository
     /**
      * 修改物流
      */
-    public static function logistics($delivery_no, $logistics_id, $logistics_no)
+    public static function logistics($params)
     {
-        $model = Delivery::find($delivery_no);
+
+        $model = Delivery::find($params['delivery_no']);
 
         if (!$model) {
-            throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
+            throw new NotFoundResourceException('发货单' . $params['delivery_no'] . '未找到');
         }
 
-        $model->logistics_id = $logistics_id;
-        $model->logistics_no = $logistics_no;
+        $model->logistics_id = $params['logistics_id'];
+        $model->logistics_no =  $params['logistics_no'];
+        $model->status_remark =  $model->status_remark .';物流备注'. $params['logistics_note'];
 
         return $model->save();
     }

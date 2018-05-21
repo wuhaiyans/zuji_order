@@ -19,6 +19,71 @@ class PayController extends Controller
         $this->orderTrade = $orderTrade;
     }
 	
+	//
+	public function test(){
+		
+		
+		$business_type = 1;
+		$business_no = \createNo(1);
+		$pay = null;
+		try {
+			// 查询
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+
+		} catch (\App\Lib\NotFoundException $exc) {
+
+			// 创建支付
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
+				'user_id'		=> '5',
+				'businessType'	=> $business_type,
+				'businessNo'	=> $business_no,
+				
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'paymentFenqi'	=> 0,
+				
+				'withholdNo' => \createNo(1),
+				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				
+				'fundauthNo' => \createNo(1),
+				'fundauthAmount' => '1.00',
+				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+			]);
+		} catch (\Exception $exc) {
+			exit('error');
+		}
+		
+		try {
+			$step = $pay->getCurrentStep();
+			// echo '当前阶段：'.$step."\n";
+			
+			$_params = [
+				'name'			=> '测试支付',					//【必选】string 交易名称
+				//'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+			];
+			$url_info = $pay->getCurrentUrl( $_params );
+//			header( 'Location: '.$url_info['url'] );
+			var_dump( $url_info );
+			
+		} catch (\Exception $exc) {
+			echo $exc->getMessage()."\n";
+			echo $exc->getTraceAsString();
+		}
+		
+	}
+	
+	public function testPaymentFront(){
+		LogApi::info('支付同步通知', $_GET);
+		var_dump( $_GET );exit;
+	}
+	
+	
 	/**
 	 * 支付异步通知处理
 	 * @param array $_POST
@@ -28,9 +93,10 @@ class PayController extends Controller
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
-	 * 成功时，输出 success，其他输出都认为是失败，需要重复通知
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function paymentNotify(){
+	public function paymentNotify()
+	{
 		$input = file_get_contents("php://input");
 		LogApi::info('支付异步通知', $input);
 		
@@ -82,249 +148,269 @@ class PayController extends Controller
 		} catch (\Exception $exc) {
 			echo $exc->getMessage();exit;
 		}
+		
+	}
+	
+	/**
+	 * 代扣签约异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'withhold_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_withhold_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function withholdSignNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣签约异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+		try {
+			
+		} catch (\Exception $exc) {
 
+		}
+	}
+	
+	
+	/**
+	 * 预授权冻结异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function fundauthNotify(){
 		
+		$input = file_get_contents("php://input");
+		LogApi::info('预授权冻结异步通知', $input);
 		
-//			'business_type' => '1',
-//			'business_no'	=> 'FA52191976207741',
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
 		
-//		if(){
-//			
+//		$params = [
+//			'payment_no'	=> '10A52191976549059',
+//			'out_payment_no'=> 'FA52191976252667',
+//			'status'		=> 'success',
+//			'amount'		=> '1',
+//		];
+		
+		try {
+			
+		} catch (\Exception $exc) {
+
+		}
+	}
+	
+	
+	//-+------------------------------------------------------------------------
+//
+//    /**
+//	 * 通用支付入口，获取支付链接地址
+//	 * @param Request $request
+//	 * [
+//	 *		'payment_no' => '',	// 支付码
+//	 * ]
+//	 * @return type
+//	 */
+//    public function getPaymentUrl(Request $request){
+//
+//		$params = $request->all()['params'];
+//		// 
+//		if( empty($params['payment_no']) ){
+//			return apiResponse( [],ApiStatus::CODE_30900,'参数错误[payment_no]');
 //		}
-		
-		
-	}
-	
-
-    /**
-	 * 通用支付入口，获取支付链接地址
-	 * @param Request $request
-	 * [
-	 *		'payment_no' => '',	// 支付码
-	 * ]
-	 * @return type
-	 */
-    public function getPaymentUrl(Request $request){
-
-		$params = $request->all()['params'];
-		// 
-		if( empty($params['payment_no']) ){
-			return apiResponse( [],ApiStatus::CODE_30900,'参数错误[payment_no]');
-		}
-		$payment_no = $params['payment_no'];
-		
-		$payModel = \App\Order\Models\OrderPayModel::where('payment_no','=',$payment_no)->first();
-		if( !$payModel ){
-			return apiResponse( [],ApiStatus::CODE_30900,'支付单未识别');
-		}
-		$pay = new \App\Order\Modules\Repository\Pay\Pay( $payModel->toArray() );
-		LogApi::debug('[直接支付环节]支付链接',$pay);
-		
-		// 是否可以支付
-		if( !$pay->needPayment() ){
-			return apiResponse( [],ApiStatus::CODE_30900,'禁止支付');
-		}
-		
-		// 创建url地址
-		$_params = [
-	 		'out_payment_no' => $pay->getPaymentNo(),
-			'payment_channel' => $pay->getPaymentChannel(),
-	 		'payment_amount' => $pay->getPaymentAmount()*100, // 元转换成分
-	 		'fenqi' => $pay->getPaymentFenqi(),
-	 		'name' => 'Xxxx',
-	 		'back_url' => 'https://abc.com',
-	 		'front_url' => 'https://abc.com',
-	 		'user_id' => '5',
-		];
-		$data = \App\Lib\Payment\CommonPaymentApi::pageUrl( $_params );
-		
-		if( !$data ){
-			LogApi::error(ApiStatus::CODE_30901,[
-				'msg' => \App\Lib\Payment\AlipayApi::getError(),
-				'params' => $_params,
-			]);
-			return apiResponse( [], ApiStatus::CODE_30901,'服务器忙，稍候重试');
-		}
-		
-        return apiResponse( $data,ApiStatus::CODE_0);
-    }
-	
-	
-	
-    //支付回调接口
-    public function notify(Request $request){
-        $params =$request->input();
-        $params=[
-            'gmt_create' => '2017-11-28 02:58:20',//支付时间
-            'trade_status' => 'TRADE_SUCCESS',//支付状态
-            'out_trade_no' => '2017112800014',//订单生成支付交易码
-            'trade_no' => '2017112821001004700573432203',//返回流水号
-        ];
-        var_dump("成功更新订单支付状态");die;
-        //发送短信
-        //发送支付宝推送消息
-        //发送邮件 -----begin
-//        $data =[
-//            'subject'=>'用户已付款',
-//            'body'=>'订单编号：'.$order_info['order_no']."联系方式：".$order_info['mobile']." 请联系用户确认租用意向。",
-//            'address'=>[
-//                ['address' => EmailConfig::Service_Username]
-//            ],
+//		$payment_no = $params['payment_no'];
+//		
+//		$payModel = \App\Order\Models\OrderPayModel::where('payment_no','=',$payment_no)->first();
+//		if( !$payModel ){
+//			return apiResponse( [],ApiStatus::CODE_30900,'支付单未识别');
+//		}
+//		$pay = new \App\Order\Modules\Repository\Pay\Pay( $payModel->toArray() );
+//		LogApi::debug('[直接支付环节]支付链接',$pay);
+//		
+//		// 是否可以支付
+//		if( !$pay->needPayment() ){
+//			return apiResponse( [],ApiStatus::CODE_30900,'禁止支付');
+//		}
+//		
+//		// 创建url地址
+//		$_params = [
+//	 		'out_payment_no' => $pay->getPaymentNo(),
+//			'payment_channel' => $pay->getPaymentChannel(),
+//	 		'payment_amount' => $pay->getPaymentAmount()*100, // 元转换成分
+//	 		'fenqi' => $pay->getPaymentFenqi(),
+//	 		'name' => 'Xxxx',
+//	 		'back_url' => 'https://abc.com',
+//	 		'front_url' => 'https://abc.com',
+//	 		'user_id' => '5',
+//		];
+//		$data = \App\Lib\Payment\CommonPaymentApi::pageUrl( $_params );
+//		
+//		if( !$data ){
+//			LogApi::error(ApiStatus::CODE_30901,[
+//				'msg' => \App\Lib\Payment\AlipayApi::getError(),
+//				'params' => $_params,
+//			]);
+//			return apiResponse( [], ApiStatus::CODE_30901,'服务器忙，稍候重试');
+//		}
+//		
+//        return apiResponse( $data,ApiStatus::CODE_0);
+//    }
+//	
+//	
+//	
+//    //支付回调接口
+//    public function notify(Request $request){
+//        $params =$request->input();
+//        $params=[
+//            'gmt_create' => '2017-11-28 02:58:20',//支付时间
+//            'trade_status' => 'TRADE_SUCCESS',//支付状态
+//            'out_trade_no' => '2017112800014',//订单生成支付交易码
+//            'trade_no' => '2017112821001004700573432203',//返回流水号
 //        ];
+//        var_dump("成功更新订单支付状态");die;
+//        //发送短信
+//        //发送支付宝推送消息
+//        //发送邮件 -----begin
+////        $data =[
+////            'subject'=>'用户已付款',
+////            'body'=>'订单编号：'.$order_info['order_no']."联系方式：".$order_info['mobile']." 请联系用户确认租用意向。",
+////            'address'=>[
+////                ['address' => EmailConfig::Service_Username]
+////            ],
+////        ];
+////
+////        $send =EmailConfig::system_send_email($data);
+////        if(!$send){
+////            Debug::error(Location::L_Trade, "发送邮件失败", $data);
+////        }
+////
+////        //发送邮件------end
 //
-//        $send =EmailConfig::system_send_email($data);
-//        if(!$send){
-//            Debug::error(Location::L_Trade, "发送邮件失败", $data);
-//        }
+//    }
 //
-//        //发送邮件------end
-
-    }
-
-	/**
-	 * 签约代扣回调接口
-	 * [
-	 *      'reason'            => '' // 错误原因
-	 *      'status'            => '' // 回调状态 0成功 1失败
-	 *      'out_agreement_no'  => '' // 支付平台签约协议号
-	 *      'agreement_no'      => '' // 订单系统签约协议号
-	 *      'user_id'           => '' // 用户id
-	 * ]
-	 */
-	public function sign_notify(Request $request){
-		$request    = $request->all();
-		$params     = $request['params'];
-
-		$rules = [
-			'reason'            => 'required',
-			'status'            => 'required|int',
-			'out_agreement_no'  => 'required',
-			'agreement_no'      => 'required',
-			'user_id'           => 'required|int',
-		];
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
-		}
-		$params = $params['params'];
-
-		//成功 则保存数据
-		if($params['status'] == ApiStatus::CODE_0){
-
-			$data  = [
-				'withhold_no'       => $params['agreement_no'],
-				'out_withhold_no'   => $params['out_agreement_no'],
-				'user_id'           => $params['user_id'],
-			];
-			$withhold = \App\Order\Modules\Service\OrderPayWithhold::create_withhold($data);
-			if(!$withhold){
-				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
-			}
-			return apiResponse([],ApiStatus::CODE_0, "操作成功");
-		}
-	}
-
-	/**
-	 * 解约代扣回调接口
-	 */
-	public function unsign_notify(Request $request){
-		$request    = $request->all();
-		$params     = $request['params'];
-
-		$rules = [
-			'reason'            => 'required',
-			'status'            => 'required|int',
-			'out_agreement_no'  => 'required',
-			'agreement_no'      => 'required',
-			'user_id'           => 'required|int',
-		];
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
-		}
-		$params = $params['params'];
-		//成功 则保存数据
-		if($params['status'] == ApiStatus::CODE_0){
-
-			$userId     = $params['user_id'];
-			$withhold   = \App\Order\Modules\Service\OrderPayWithhold::unsign_withhold($userId);
-
-			if($withhold !== true){
-				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
-			}
-
-			return apiResponse([],ApiStatus::CODE_0, "操作成功");
-		}
-
-	}
-	/**
-	 * 代扣扣款回调
-	 * @$request array
-	 */
-	public function createpayNotify(Request $request){
-		$request    = $request->all();
-		$params     = $request['params'];
-
-		$rules = [
-			'reason'            => 'required',
-			'status'            => 'required|int',
-			'out_agreement_no'  => 'required',
-			'agreement_no'      => 'required',
-			'out_trade_no'      => 'required',
-			'trade_no'          => 'required',
-		];
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
-		}
-		$params = $params['params'];
-		//成功 则保存数据
-		if($params['status'] == ApiStatus::CODE_0){
-
-			// 修改分期状态
-			$prepayment_data =[
-				'trade_no'      => $params['trade_no'],
-				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
-				'payment_time'  => time(),
-				'update_time'   => time(),
-			];
-			$b = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['trade_no']],$prepayment_data);
-			if(!$b){
-				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
-			}
-			return apiResponse([],ApiStatus::CODE_0, "操作成功");
-		}
-	}
-
-	/**
-	 * 提前还款异步回调
-	 * @param Request $request
-	 */
-	public function repaymentNotify(Request $request){
-		$request    = $request->all();
-		$params     = $request['params'];
-
-		$rules = [
-			'payment_no'    => 'required',
-			'out_no'        => 'required',
-			'status'        => 'required|int',
-			'reason'        => 'required',
-		];
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
-		}
-		$params = $params['params'];
-		//成功 则保存数据
-		if($params['status'] == ApiStatus::CODE_0){
-
-			//修改支付单数据
-
-
-
-
-
-			// 修改分期状态
+//	/**
+//	 * 签约代扣回调接口
+//	 * [
+//	 *      'reason'            => '' // 错误原因
+//	 *      'status'            => '' // 回调状态 0成功 1失败
+//	 *      'out_agreement_no'  => '' // 支付平台签约协议号
+//	 *      'agreement_no'      => '' // 订单系统签约协议号
+//	 *      'user_id'           => '' // 用户id
+//	 * ]
+//	 */
+//	public function sign_notify(Request $request){
+//		$request    = $request->all();
+//		$params     = $request['params'];
+//
+//		$rules = [
+//			'reason'            => 'required',
+//			'status'            => 'required|int',
+//			'out_agreement_no'  => 'required',
+//			'agreement_no'      => 'required',
+//			'user_id'           => 'required|int',
+//		];
+//		$validateParams = $this->validateParams($rules,$params);
+//		if ($validateParams['code'] != 0) {
+//			return apiResponse([],$validateParams['code']);
+//		}
+//		$params = $params['params'];
+//
+//		//成功 则保存数据
+//		if($params['status'] == ApiStatus::CODE_0){
+//
+//			$data  = [
+//				'withhold_no'       => $params['agreement_no'],
+//				'out_withhold_no'   => $params['out_agreement_no'],
+//				'user_id'           => $params['user_id'],
+//			];
+//			$withhold = \App\Order\Modules\Service\OrderPayWithhold::create_withhold($data);
+//			if(!$withhold){
+//				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+//			}
+//			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+//		}
+//	}
+//
+//	/**
+//	 * 解约代扣回调接口
+//	 */
+//	public function unsign_notify(Request $request){
+//		$request    = $request->all();
+//		$params     = $request['params'];
+//
+//		$rules = [
+//			'reason'            => 'required',
+//			'status'            => 'required|int',
+//			'out_agreement_no'  => 'required',
+//			'agreement_no'      => 'required',
+//			'user_id'           => 'required|int',
+//		];
+//		$validateParams = $this->validateParams($rules,$params);
+//		if ($validateParams['code'] != 0) {
+//			return apiResponse([],$validateParams['code']);
+//		}
+//		$params = $params['params'];
+//		//成功 则保存数据
+//		if($params['status'] == ApiStatus::CODE_0){
+//
+//			$userId     = $params['user_id'];
+//			$withhold   = \App\Order\Modules\Service\OrderPayWithhold::unsign_withhold($userId);
+//
+//			if($withhold !== true){
+//				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+//			}
+//
+//			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+//		}
+//
+//	}
+//	/**
+//	 * 代扣扣款回调
+//	 * @$request array
+//	 */
+//	public function createpayNotify(Request $request){
+//		$request    = $request->all();
+//		$params     = $request['params'];
+//
+//		$rules = [
+//			'reason'            => 'required',
+//			'status'            => 'required|int',
+//			'out_agreement_no'  => 'required',
+//			'agreement_no'      => 'required',
+//			'out_trade_no'      => 'required',
+//			'trade_no'          => 'required',
+//		];
+//		$validateParams = $this->validateParams($rules,$params);
+//		if ($validateParams['code'] != 0) {
+//			return apiResponse([],$validateParams['code']);
+//		}
+//		$params = $params['params'];
+//		//成功 则保存数据
+//		if($params['status'] == ApiStatus::CODE_0){
+//
+//			// 修改分期状态
 //			$prepayment_data =[
 //				'trade_no'      => $params['trade_no'],
 //				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
@@ -335,9 +421,9 @@ class PayController extends Controller
 //			if(!$b){
 //				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
 //			}
-			return apiResponse([],ApiStatus::CODE_0, "操作成功");
-		}
-	}
+//			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+//		}
+//	}
 
 
     /**
@@ -418,6 +504,103 @@ class PayController extends Controller
 
 
     }
+
+//			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+//		}
+//	}
+//
+//	/**
+//	 * 提前还款异步回调
+//	 * @param Request $request
+//	 */
+//	public function repaymentNotify(Request $request){
+//		$request    = $request->all();
+//		$params     = $request['params'];
+//
+//		$rules = [
+//			'payment_no'    => 'required',
+//			'out_no'        => 'required',
+//			'status'        => 'required|int',
+//			'reason'        => 'required',
+//		];
+//		$validateParams = $this->validateParams($rules,$params);
+//		if ($validateParams['code'] != 0) {
+//			return apiResponse([],$validateParams['code']);
+//		}
+//		$params = $params['params'];
+//		//成功 则保存数据
+//		if($params['status'] == ApiStatus::CODE_0){
+//
+//			//修改支付单数据
+//
+//
+//
+//
+//
+//			// 修改分期状态
+////			$prepayment_data =[
+////				'trade_no'      => $params['trade_no'],
+////				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
+////				'payment_time'  => time(),
+////				'update_time'   => time(),
+////			];
+////			$b = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['trade_no']],$prepayment_data);
+////			if(!$b){
+////				return apiResponse([],ApiStatus::CODE_71001, "异常错误");
+////			}
+//			return apiResponse([],ApiStatus::CODE_0, "操作成功");
+//		}
+//	}
+//
+//
+//    /**
+//     * 订单清算 退款回调地址
+//     * Author: heaven
+//     * @param Request $request
+//     */
+//    public function refundClean(Request $request){
+//
+//       $param['params'] =  $request->input();
+//       $rule = [
+//
+//         'out_refund_no'=>'required', //订单系统退款码
+//         'refund_no'=>'required', //支付系统退款码
+//         'status'=>'required'
+//
+//       ];
+//        $validateParams = $this->validateParams($rule,$param);
+//        if ($validateParams['code']!=0) {
+//
+//            return apiResponse([],$validateParams['code']);
+//        }
+//        //更新查看清算表的状态
+//        $orderCleanInfo = Service\OrderCleaning::getOrderCleanInfo($param['out_refund_no']=$param['params']['out_refund_no']);
+//        if ($orderCleanInfo) {
+//
+//            if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundPayd){
+//                \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+//             } else {
+//
+//                //更新订单清算退款状态
+//                $orderParam = [
+//                    'out_refund_no' => $param['params']['out_refund_no'],
+//                    'refund_status' => OrderCleaningStatus::refundPayd
+//                ];
+//                Service\OrderCleaning::upOrderCleanStatus($orderParam);
+//            }
+//
+//        } else {
+//            \Log::debug(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+//        }
+//
+//
+//        //两个都更新成功，更新业务放的状态
+//
+//
+//
+//
+//    }
+
 
 
 }

@@ -2,10 +2,12 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Support\Facades\Log;
+use App\Warehouse\Config;
 
 class DeliveryController extends Controller
 {
@@ -283,7 +285,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $this->delivery->logistics($params['delivery_no'], $params['logistics_id'], $params['logistics_no']);
+            $this->delivery->logistics($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
@@ -385,6 +387,39 @@ class DeliveryController extends Controller
         $params = $this->_dealParams([]);
         $list = $this->delivery->list($params);
         return \apiResponse($list);
+    }
+
+
+    /**
+     * @param null $logisticsId
+     * @return array|string
+     *
+     * 取快递名
+     */
+    public function logisticName()
+    {
+
+        $rules = [
+            'logistics_id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        $name = $this->delivery->getLogistics($params['logistics_id']);
+        return \apiResponse(['name'=>$name]);
+    }
+
+    /**
+     * @return mixed
+     * 取列表
+     */
+    public function logisticList()
+    {
+        $list = $this->delivery->getLogistics();
+        return apiResponse(['list'=>$list]);
     }
 
 }
