@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
 		'/order/pay/paymentNotify',
-		'/order/pay/refundNotify'
+		'/order/pay/refundNotify',
+		'/order/pay/withholdSignNotify'
     ];
 }
