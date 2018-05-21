@@ -21,7 +21,10 @@ Route::get('test/{action}', function(App\Http\Controllers\TestController $contro
 Route::get('order/{action}', function(App\Order\Controllers\Api\v1\OrderController $index, $action){
     return $index->$action();
 });
-Route::any('order/pay/{action}', function(App\Order\Controllers\Api\v1\PayController $index, $action){
+Route::get('order/pay/{action}', function(App\Order\Controllers\Api\v1\PayController $index, $action){
+    return $index->$action();
+});
+Route::post('order/pay/{action}', function(App\Order\Controllers\Api\v1\PayController $index, $action){
     return $index->$action();
 });
 
