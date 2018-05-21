@@ -32,19 +32,20 @@ return [
     'api.order.list.filter'=>'OrderController@orderListFilter',//订单列表筛选项接口
 
 
-    //结算清单列表接口
+    //订单结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@list',
-    //结算清单详情接口
+    //订单结算清单详情接口
     'api.orderClean.detail'=>'OrderCleaningController@detail',
-    //结算清单取消接口
+    //订单结算清单取消接口
     'api.orderClean.cancel'=>'OrderCleaningController@cancelOrderClean',
-    //更新清算状态
+    //更新订单清算状态
     'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
     //创建订单清算单
     'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
 
     //订单清算单操作退款
     'api.orderClean.opereate'=>'OrderCleaningController@orderCleanOperate',
+
 
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
