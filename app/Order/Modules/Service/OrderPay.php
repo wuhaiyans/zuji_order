@@ -24,9 +24,9 @@ class OrderPay
     }
 
     /**
-     * 创建支付
+     * 获取url地址
      */
-    public static function create( array $data )
+    public static function pageUrl( array $data )
     {
     }
 
