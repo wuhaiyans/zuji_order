@@ -241,7 +241,7 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('代扣签约异步通知', $input);
 		
-		$input = json_decode($input);
+		$input = json_decode($input,true);
 		if( is_null($input) ){
 			echo 'notice data is null ';exit;
 		}
@@ -274,7 +274,7 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('预授权冻结异步通知', $input);
 		
-		$input = json_decode($input);
+		$input = json_decode($input,true);
 		if( is_null($input) ){
 			echo 'notice data is null ';exit;
 		}
