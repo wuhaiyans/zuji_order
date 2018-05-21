@@ -98,7 +98,7 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('支付异步通知', $input);
 		
-		$params = json_decode($input);
+		$params = json_decode($input,true);
 		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
