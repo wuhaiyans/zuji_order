@@ -75,7 +75,6 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-        file_put_contents('./jobtest.log', $str, FILE_APPEND);
 		dispatch(new \App\Jobs\LogJob($str));
 		
 		$_config = [
@@ -92,23 +91,26 @@ class LogApi {
 			],
 		];
 		dispatch(new \App\Jobs\LogJob( json_encode($_config) ));
-		try {
-			// 请求
-			$res = Curl::post(env('LOG_API'), json_encode($_config));
-			if( !$res ){
-				return false;
-			}
-			$res = json_decode($res,true);
-			if( !$res ){
-				return false;
-			}
-			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
-				dispatch(new \App\Jobs\LogJob( $str ));
-			}
-			
-		} catch (\Exception $exc) {
-			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_config) ));
-		}
+		
+//		
+//		// 日志系统接口
+//		try {
+//			// 请求
+//			$res = Curl::post(env('LOG_API'), json_encode($_config));
+//			if( !$res ){
+//				return false;
+//			}
+//			$res = json_decode($res,true);
+//			if( !$res ){
+//				return false;
+//			}
+//			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
+//				dispatch(new \App\Jobs\LogJob( $str ));
+//			}
+//			
+//		} catch (\Exception $exc) {
+//			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_config) ));
+//		}
 
 		
 		return true;

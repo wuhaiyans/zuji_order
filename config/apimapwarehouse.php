@@ -7,9 +7,11 @@ return [
     'warehouse.imei.list' => 'ImeiController@list', //列表
 
 
+    //物流
+    'warehouse.delivery.logisticList' => 'DeliveryController@logisticList', //取物流列表
+    'warehouse.delivery.logisticName' => 'DeliveryController@logisticName', //取物流名称
+
     //发货
-
-
     'warehouse.delivery.deliveryCreate' => 'DeliveryController@deliveryCreate', //发货单 -- 创建
     'warehouse.delivery.matchGoods' => 'DeliveryController@matchGoods', //发货清单 -- 配货
 

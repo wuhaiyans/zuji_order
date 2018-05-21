@@ -19,6 +19,71 @@ class PayController extends Controller
         $this->orderTrade = $orderTrade;
     }
 	
+	//
+	public function test(){
+		
+		
+		$business_type = 1;
+		$business_no = \createNo(1);
+		$pay = null;
+		try {
+			// 查询
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+
+		} catch (\App\Lib\NotFoundException $exc) {
+
+			// 创建支付
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
+				'user_id'		=> '5',
+				'businessType'	=> $business_type,
+				'businessNo'	=> $business_no,
+				
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'paymentFenqi'	=> 0,
+				
+				'withholdNo' => \createNo(1),
+				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				
+				'fundauthNo' => \createNo(1),
+				'fundauthAmount' => '1.00',
+				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+			]);
+		} catch (\Exception $exc) {
+			exit('error');
+		}
+		
+		try {
+			$step = $pay->getCurrentStep();
+			// echo '当前阶段：'.$step."\n";
+			
+			$_params = [
+				'name'			=> '测试支付',					//【必选】string 交易名称
+				'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+			];
+			$url_info = $pay->getCurrentUrl( $_params );
+			header( 'Location: '.$url_info['url'] );
+			//var_dump( $url_info );
+			
+		} catch (\Exception $exc) {
+			echo $exc->getMessage()."\n";
+			echo $exc->getTraceAsString();
+		}
+		
+	}
+	
+	public function testPaymentFront(){
+		LogApi::info('支付同步通知', $_GET);
+		var_dump( $_GET );exit;
+	}
+	
+	
 	/**
 	 * 支付异步通知处理
 	 * @param array $_POST
@@ -28,9 +93,10 @@ class PayController extends Controller
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
-	 * 成功时，输出 success，其他输出都认为是失败，需要重复通知
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function paymentNotify(){
+	public function paymentNotify()
+	{
 		$input = file_get_contents("php://input");
 		LogApi::info('支付异步通知', $input);
 		
@@ -82,19 +148,82 @@ class PayController extends Controller
 		} catch (\Exception $exc) {
 			echo $exc->getMessage();exit;
 		}
-
-		
-		
-//			'business_type' => '1',
-//			'business_no'	=> 'FA52191976207741',
-		
-//		if(){
-//			
-//		}
-		
 		
 	}
 	
+	/**
+	 * 代扣签约异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'withhold_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_withhold_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function withholdSignNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣签约异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+		try {
+			
+		} catch (\Exception $exc) {
+
+		}
+	}
+	
+	
+	/**
+	 * 预授权冻结异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function fundauthNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('预授权冻结异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+//		$params = [
+//			'payment_no'	=> '10A52191976549059',
+//			'out_payment_no'=> 'FA52191976252667',
+//			'status'		=> 'success',
+//			'amount'		=> '1',
+//		];
+		
+		try {
+			
+		} catch (\Exception $exc) {
+
+		}
+	}
+	
+	
+	//-+------------------------------------------------------------------------
 
     /**
 	 * 通用支付入口，获取支付链接地址

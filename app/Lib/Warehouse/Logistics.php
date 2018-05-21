@@ -17,7 +17,15 @@ class Logistics
      */
     public static function info($id)
     {
-        return '顺风';
+
+        $base_api = config('tripartite.warehouse_api_uri');
+
+        return Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.send',//模拟
+            'params' => json_encode(['logistics_id'=>$id])
+        ]);
     }
 
     /**
