@@ -38,7 +38,7 @@ class GivebackController extends Controller
 		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
-			return apiResponse([], get_code());
+			return apiResponse([], get_code(), get_msg());
 		}
 		//组合最终返回商品基础数据
 		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
@@ -213,13 +213,20 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		
 		//-+--------------------------------------------------------------------
-		// | 判断是否需要支付【1有无未完成分期，2检测不合格的赔偿】
+		// | 业务处理：判断是否需要支付【1有无未完成分期，2检测不合格的赔偿】
 		//-+--------------------------------------------------------------------
+		//获取商品信息
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
 		
 		//获取当前商品是否存在分期列表
 		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
 		if( empty($instalmentList[$goodsNo]) ){
-			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+			return apiResponse([],ApiStatus::CODE_0,'数据获取成功');
 		}
 		//剩余分期需要支付的总金额、还机需要支付总金额
 		$zujinNeedPay = $givebackNeedPay = 0;
@@ -228,9 +235,15 @@ class GivebackController extends Controller
 				$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
 			}
 		}
-		$givebackNeedPay = $zujinNeedPay + $paramsArr['compensate_amount'];
+		//存在分期单，关闭分期单
 		
-		//判断是否存在押金
+		//总共需要支付金额
+		$givebackNeedPay = $zujinNeedPay + $paramsArr['compensate_amount'];
+		//押金金额
+		$yajin = $orderGoodsInfo['yajin'];
+		
+		//
+		
 		
 		
 	}
