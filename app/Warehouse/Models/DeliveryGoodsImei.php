@@ -17,7 +17,7 @@ class DeliveryGoodsImei extends Warehouse
     const STATUS_YES = 1; //有效
 
 
-    protected $fillable = ['delivery_no', 'serial_no', 'imei', 'status', 'create_time', 'status_time'];
+    protected $fillable = ['delivery_no', 'serial_no', 'imei', 'apple_serial', 'status', 'create_time', 'status_time'];
 
     /**
      * @param $data
@@ -31,17 +31,6 @@ class DeliveryGoodsImei extends Warehouse
 //
 //        return $model;
 //    }
-
-
-    /**
-     * @param $delivery_id
-     * @param $imei
-     * 删除
-     */
-    public static function del($delivery_id, $imei)
-    {
-
-    }
 
     public static function listByDelivery($delivery_id)
     {
