@@ -129,6 +129,7 @@ class OrderReturnCreater
            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
            $create_data['refund_amount']=$order_info[0]->order_amount;//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
+           $create_data['user_id']=$order_info[0]->user_id;
            $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
           if(!$create_clear){
               DB::rollBack();
@@ -570,6 +571,7 @@ public function _parse_order_where($where=[]){
                 $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
                 $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
                 $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
+                $create_data['user_id']=$order_info['user_id'];
                 //信息待定
                 $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
