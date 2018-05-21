@@ -16,6 +16,38 @@ class PayController extends Controller
     {
     }
 	
+	// 测试 代扣签约
+	public function testWithhold(){
+		
+		$business_type = 1; 
+		$business_no = 'FA52123851726694';
+		try {
+			// 查询
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+			
+			$step = $pay->getCurrentStep();
+			// echo '当前阶段：'.$step."\n";
+			
+			$_params = [
+				'name'			=> '测试-'.$step,					//【必选】string 交易名称
+				'front_url'		=> env('APP_URL').'/order/pay/testWithholdFront',	//【必选】string 前端回跳地址
+			];
+			$url_info = $pay->getCurrentUrl( $_params );
+			var_dump( $url_info );exit;
+			header( 'Location: '.$url_info['url'] );
+
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getTraceAsString();
+		}
+	}
+		// 测试 前端回跳
+	public function testWithholdFront(){
+		LogApi::info('代扣签约同步通知', $_GET);
+		var_dump( $_GET );exit;
+	}
+	
 	// 测试 退款
 	public function testRefund(){
 //		\App\Lib\Payment\CommonRefundApi::apply([
@@ -101,7 +133,6 @@ class PayController extends Controller
 			
 			$_params = [
 				'name'			=> '测试支付',					//【必选】string 交易名称
-				//'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
