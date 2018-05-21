@@ -33,7 +33,7 @@ class PayController extends Controller
 				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSignFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
-			var_dump( $_params, $url_info );exit;
+//			var_dump( $_params, $url_info );exit;
 			header( 'Location: '.$url_info['url'] );
 
 		} catch (\App\Lib\NotFoundException $exc) {
