@@ -24,7 +24,7 @@ class OrderPayWithholdRepository
         }
 
         $withholdInfo = OrderPayWithhold::query()
-            ->where(['uid'=>$userId])
+            ->where(['user_id'=>$userId])
             ->first();
         if(!$withholdInfo){
             return [];
@@ -57,7 +57,7 @@ class OrderPayWithholdRepository
             'withhold_no'       => $param['withhold_no'],       //代扣协议码
             'out_withhold_no'   => $param['out_withhold_no'],   //支付系统代扣协议码
             'withhold_status'   => OrderPayWithholdStatus::SIGN, //状态：1：已签约；2：已解约',
-            'uid'               => $param['user_id'],           //用户ID
+            'user_id'               => $param['user_id'],           //用户ID
             'sign_time'         => time(),                      //签约时间
         ];
 
@@ -84,7 +84,7 @@ class OrderPayWithholdRepository
             'withhold_status'   => OrderPayWithholdStatus::UNSIGN, //状态：1：已签约；2：已解约',
             'unsign_time'       => time(),                      //签约时间
         ];
-        $success = OrderPayWithhold::where(['uid'=>$userId])->update($data);
+        $success = OrderPayWithhold::where(['user_id'=>$userId])->update($data);
         if(!$success){
             return false;
         }
@@ -101,7 +101,7 @@ class OrderPayWithholdRepository
             return false;
         }
 
-        $num = OrderPayWithhold::where(['uid'=>$userId])
+        $num = OrderPayWithhold::where(['user_id'=>$userId])
             ->increment('counter');
         if(!$num){
             return false;
