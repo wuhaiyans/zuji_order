@@ -139,7 +139,7 @@ class PayController extends Controller
 			]);
 			
             DB::commit();	// 提交事务
-			echo 'success';exit;
+			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
 			echo $exc->getMessage();
