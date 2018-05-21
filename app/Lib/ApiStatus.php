@@ -357,6 +357,9 @@ class ApiStatus {
     }
 
     public function getMsg() {
+		if( $this->msg == '' && isset(self::$errCodes[$this->code]) ){
+			return self::$errCodes[$this->code];
+		}
         return $this->msg;
     }
 
