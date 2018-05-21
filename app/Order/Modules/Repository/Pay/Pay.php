@@ -109,6 +109,10 @@ class Pay extends \App\Lib\Configurable
 		parent::__construct($data);
 	}
 	
+	
+	//-+------------------------------------------------------------------------
+	// | 属性相关 setter 和 getter
+	//-+------------------------------------------------------------------------
 	public function getUserId(){
 		return $this->user_id;
 	}
@@ -186,8 +190,11 @@ class Pay extends \App\Lib\Configurable
 		return $this->fundauthStatus;
 	}
 	
+	//-+------------------------------------------------------------------------
+	// | 业务相关
+	//-+------------------------------------------------------------------------
 	/**
-	 * 是否支付成功
+	 * 支付阶段 是否完成
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -197,7 +204,73 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否支付成功
+	 * 获取 当前环节
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @return string
+	 * @throws \Exception	发生错误时抛出异常
+	 */
+	public function getCurrentStep(){
+		if( $this->isSuccess() ){
+			throw new \Exception('支付单已完成');
+		}
+		if( $this->needPayment() ){
+			return 'payment';
+		}elseif( $this->needWithhold() ){
+			return 'withhold_sign';
+		}elseif( $this->needFundauth() ){
+			return 'fundauth';
+		}
+		throw new \Exception('支付单内部错误');
+	}
+	
+	/**
+	 * 获取 当前环节 跳转URL地址
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @param array				请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array			返回参数
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	发生错误时抛出异常
+	 */
+	public function getCurrentUrl( $params ){
+		if( $this->isSuccess() ){
+			throw new \Exception('支付单已完成');
+		}
+		if( $this->needPayment() ){
+			return $this->getPaymentUrl($params);
+		}elseif( $this->needWithhold() ){
+			return $this->getWithholdSignUrl($params);
+		}elseif( $this->needFundauth() ){
+			return $this->getFundauthUrl($params);
+		}
+		throw new \Exception('支付单内部错误');
+	}
+	
+	/**
+	 * 是否需要 支付环节
+	 * 还未支付状态
+	 * @return bool
+	 */
+	public function needPayment()
+	{
+		//
+		if( $this->paymentStatus == PaymentStatus::WAIT_PAYMENT ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 支付环节 是否付成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -207,7 +280,21 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否签约代扣成功
+	 * 是否需要 代扣签约环节
+	 * 还未代扣签约状态
+	 * @return bool
+	 */
+	public function needWithhold()
+	{
+		//
+		if( $this->withholdStatus == WithholdStatus::WAIT_WITHHOLD ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 代扣签约环节 是否成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -217,7 +304,21 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 是否资金预授权成功
+	 * 是否需要 资金预授权环节
+	 * 还未资金授权状态
+	 * @return bool
+	 */
+	public function needFundauth()
+	{
+		//
+		if( $this->fundauthStatus == FundauthStatus::WAIT_FUNDAUTH ){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 资金预授权环节 是否成功
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
@@ -231,7 +332,7 @@ class Pay extends \App\Lib\Configurable
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function cancel(){
 		LogApi::debug('[支付阶段]取消');
@@ -263,7 +364,7 @@ class Pay extends \App\Lib\Configurable
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function resume(){
 		LogApi::debug('[支付阶段]恢复');
@@ -310,7 +411,7 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	/**
-	 * 支付成功
+	 * 支付环节 完成处理
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param array		$params		支付成功参数
@@ -319,7 +420,7 @@ class Pay extends \App\Lib\Configurable
 	 *		'payment_time'	=> '',	// 支付时间
 	 * ]
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function paymentSuccess( array $params ):bool
 	{
@@ -448,7 +549,7 @@ class Pay extends \App\Lib\Configurable
 	 *		'total_amount'		=> '',	// 预授权金额；单位：元
 	 * ]
 	 * @return bool
-	 * @throws \Exception
+	 * @throws \Exception 失败是抛出异常
 	 */
 	public function fundauthSuccess( array $params ):bool
 	{
@@ -498,47 +599,104 @@ class Pay extends \App\Lib\Configurable
 	}
 	
 	
+	
+	
+	//-+------------------------------------------------------------------------
+	// | 链接地址
+	//-+------------------------------------------------------------------------
+	
 	/**
-	 * 是否需要 payment
-	 * 还未支付状态
-	 * @return bool
+	 * 获取支付跳转地址和参数
+	 * @param array				支付请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
 	 */
-	public function needPayment()
-	{
-		//
-		if( $this->paymentStatus == PaymentStatus::WAIT_PAYMENT ){
-			return true;
-		}
-		return false;
+	public function getPaymentUrl( array $params ){
+		
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
+					'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
+					'payment_amount'	=> $this->getPaymentAmount(),//【必选】int 交易金额；单位：分
+					'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
+					'channel_type'	=> $this->getPaymentChannel(),	//【必选】int 支付渠道
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
 	}
 	
 	/**
-	 * 是否需要 withholld
-	 * 还未代扣签约状态
-	 * @return bool
+	 * 获取 预授权 跳转地址和参数
+	 * @param array				签约请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
 	 */
-	public function needWithhold()
-	{
-		//
-		if( $this->withholdStatus == WithholdStatus::WAIT_WITHHOLD ){
-			return true;
-		}
-		return false;
+	public function getFundauthUrl( array $params ){
+		
+				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
+					'out_auth_no'	=> $this->getFundauthNo(),
+					'channel_type'		=> $this->getFundauthChannel(),			//【必选】int 支付渠道
+					'amount'		=> $this->getFundauthAmount()*100,			//【必选】int 预授权金额；单位：分
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
 	}
 	
 	/**
-	 * 是否需要 fundauth
-	 * 还未资金授权状态
-	 * @return bool
+	 * 获取 代扣 签约跳转地址和参数
+	 * @param array				签约请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
 	 */
-	public function needFundauth()
-	{
-		//
-		if( $this->fundauthStatus == FundauthStatus::WAIT_FUNDAUTH ){
-			return true;
-		}
-		return false;
+	public function getWithholdSignUrl( array $params ){
+		
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
+					'out_agreement_no'	=> $this->getWithholdNo(),
+					'channel_type'		=> $this->getWithholdChannel(),			//【必选】int 支付渠道
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
 	}
+	
+	//-+------------------------------------------------------------------------
+	// | 私有方法
+	//-+------------------------------------------------------------------------
 	
 	/**
 	 * 获取下一个 status 状态
@@ -643,7 +801,7 @@ class Pay extends \App\Lib\Configurable
 	/**
 	 * 
 	 */
-	public function _getBusinessCallback()
+	private function _getBusinessCallback()
 	{
 		$callbacks = config('pay_callback.payment');
 		if( isset($callbacks[$this->businessType]) && $callbacks[$this->businessType] ){
