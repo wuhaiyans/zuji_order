@@ -9,36 +9,21 @@ namespace App\Order\Modules\Inc;
 
 class OrderCleaningStatus{
 
-    /******************* start  businessType 业务类型 1.退货，2，退款，3，还机 ，4，买断，5续租，6换货 ****************************************************/
+    /******************* start  businessType 业务类型  2，退货 3 退款，4，还机 ，5，买断 ****************************************************/
 
-    const businessTypeReturn = 1;
+    const businessTypeReturn = 2;
 
-    const businessTypeRefund = 2;
+    const businessTypeRefund = 3;
 
-    const businessTypeReturnGoods = 3;
+    const businessTypeReturnGoods = 4;
 
-    const businessTypeBuy  = 4;
-
-    const businessTypeRent = 5;
-
-    const businessTypeExchangeGoods = 6;
+    const businessTypeBuy  = 5;
 
 /**************************end ************************************************************************/
 
-/**************************************start claim_status  索赔状态 0：无效；1：待索赔支付；2：已索赔支付；3：无索赔支付*************************************************/
-
-    const claimStatus = 1;
-
-    const claimStatusUnPayd = 2;
-
-    const claimStatusPayd = 3;
-
-    const claimStatusNoPay = 4;
-
-/***************************************end  *****************************************************************************/
 
 
-/**************************************start 扣除押金状态；0：已取消；1：待扣押金；2：已扣押金；3：无需扣押金*************************************************/
+/**************************************start 扣除押金状态；1：已取消；2：待扣押金；3：已扣押金；4：无需扣押金*************************************************/
 
     const depositDeductionStatusCancel = 1;
 
@@ -51,7 +36,7 @@ class OrderCleaningStatus{
 /***************************************end  *****************************************************************************/
 
 
-/**************************************start 退还押金状态；0：已取消；1：待退还押金；2：已退还押金；3：无需退还*************************************************/
+/**************************************start 退还押金状态；1：已取消；2：待退还押金；3：已退还押金；4：无需退还*************************************************/
 
     const depositUnfreezeStatusCancel = 1;
 
@@ -64,7 +49,7 @@ class OrderCleaningStatus{
 /***************************************end  *****************************************************************************/
 
 
-    /**************************************start 退款状态 0：已取消；1：待退款；2：已退款；3：无需退款*************************************************/
+    /**************************************start 退款状态 1：已取消；2：待退款；3：已退款；4：无需退款*************************************************/
 
     const refundCancel = 1;
 
@@ -77,19 +62,17 @@ class OrderCleaningStatus{
     /***************************************end  *****************************************************************************/
 
 
-    /**************************************start 清算的状态 1：已取消；2：待索赔支付；3：待扣押金；4：待退还押金；5：待退款；6：清算已完成*************************************************/
+    /**************************************start 清算的状态 1：已取消；2：待扣押金；3：待退还押金；4：待退款；5：清算已完成*************************************************/
 
     const orderCleaningCancel = 1;
 
-    const orderCleaningUnpayed = 2;
+    const orderCleaningDeposit = 2;
 
-    const orderCleaningDeposit = 3;
+    const orderCleaningUnfreeze = 3;
 
-    const orderCleaningUnfreeze = 4;
+    const orderCleaningUnRefund = 4;
 
-    const orderCleaningUnRefund = 5;
-
-    const orderCleaningComplete= 6;
+    const orderCleaningComplete= 5;
 
     /***************************************end  *****************************************************************************/
 
@@ -101,14 +84,14 @@ class OrderCleaningStatus{
      * Author: heaven
      * @return array
      */
+    /******************* start  businessType 业务类型  2，退货 3 退款，4，还机 ，5，买断 ****************************************************/
+
     public static function getBusinessTypeList(){
         return [
             self::businessTypeReturn => '退货',
             self::businessTypeRefund => '退款',
             self::businessTypeReturnGoods => '还机',
             self::businessTypeBuy => '买断',
-            self::businessTypeRent => '续租',
-            self::businessTypeExchangeGoods => '6换货',
         ];
     }
 
@@ -272,7 +255,6 @@ class OrderCleaningStatus{
     public static function getOrderCleaningList(){
         return [
             self::orderCleaningCancel => '已取消',
-            self::orderCleaningUnpayed => '待索赔支付',
             self::orderCleaningDeposit => '待扣押金',
             self::orderCleaningUnfreeze => '待退还押金',
             self::orderCleaningUnRefund => '待退款',

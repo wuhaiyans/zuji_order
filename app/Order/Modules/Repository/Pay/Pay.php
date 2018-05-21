@@ -630,8 +630,10 @@ class Pay extends \App\Lib\Configurable
 					'channel_type'	=> $this->getPaymentChannel(),	//【必选】int 支付渠道
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
 					'name'			=> $params['name'],				//【必选】string 交易名称
-					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
 					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+					//【必选】string 后台通知地址
+//					'back_url'		=> $params['back_url'],			
+					'back_url'		=> env('APP_URL').'/order/pay/paymentNotify',
 				]);
 				return $url_info;
 	}
@@ -659,8 +661,10 @@ class Pay extends \App\Lib\Configurable
 					'amount'		=> $this->getFundauthAmount()*100,			//【必选】int 预授权金额；单位：分
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
 					'name'			=> $params['name'],				//【必选】string 交易名称
-					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
 					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+					//【必选】string 后台通知地址
+//					'back_url'		=> $params['back_url'],			
+					'back_url'		=> env('APP_URL').'/order/pay/fundauthNotify',
 				]);
 				return $url_info;
 	}
@@ -688,8 +692,10 @@ class Pay extends \App\Lib\Configurable
 					'channel_type'		=> $this->getWithholdChannel(),			//【必选】int 支付渠道
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
 					'name'			=> $params['name'],				//【必选】string 交易名称
-					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
 					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+					//【必选】string 后台通知地址
+//					'back_url'		=> $params['back_url'],			
+					'back_url'		=> env('APP_URL').'/order/pay/withholdSignNotify',
 				]);
 				return $url_info;
 	}

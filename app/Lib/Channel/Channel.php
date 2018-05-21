@@ -36,6 +36,37 @@ class Channel{
     }
 
 
+    /**
+     *
+     * 获取渠道列表
+     * Author: heaven
+     * @return mixed|string
+     */
+    public static function getChannelListName($data)
+    {
+
+        $data['method'] ='zuji.channel.list.get';
+        $data['params'] = [
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return false;
+        }
+        foreach($info['data'] as $keys=>$values) {
+
+            $channerName[] = $values['name'];
+        }
+        return $channerName;
+
+
+    }
+
+
 }
 
 

@@ -37,13 +37,10 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
+            'user_id' => $param['user_id'],
             'out_refund_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
-            'claim_name'=>  isset($param['claim_name'])?$param['claim_name']:0 ,
-            'claim_amount'=>    isset($param['claim_amount'])?$param['claim_amount']:0.00 ,
-            'claim_time'=>  isset($param['claim_time'])?$param['claim_time']:0 ,
-            'claim_status'=>    isset($param['claim_status'])?$param['claim_status']:0 ,
             'deposit_deduction_amount'=>    isset($param['deposit_deduction_amount'])?$param['deposit_deduction_amount']:0.00 ,
             'deposit_deduction_time'=>  isset($param['deposit_deduction_time'])?$param['deposit_deduction_time']:0 ,
             'deposit_deduction_status'=>    isset($param['deposit_deduction_status'])?$param['deposit_deduction_status']:0 ,
@@ -79,9 +76,8 @@ class OrderClearingRepository
             return false;
         }
         $whereArray = array();
-        if (isset($param['business_type']) &&  isset($param['business_no'])){
-            $whereArray[] = ['business_type', '=', $param['business_type']];
-            $whereArray[] = ['business_no', '=', $param['business_no']];
+        if (isset($param['out_refund_no'])){
+            $whereArray[] = ['out_refund_no', '=', $param['out_refund_no']];
             $orderData =  OrderClearing::where($whereArray)->first()->toArray();
             return $orderData;
         }
@@ -178,11 +174,49 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
-        $whereArray[] = ['business_type', '=', $param['business_type']];
-        $whereArray[] = ['business_no', '=', $param['business_no']];
+        $whereArray[] = ['out_refund_no', '=', $param['out_refund_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
-        $orderData->status  = $param['status'];
+
+
+        //更新清算状态
+        if (isset($param['status']) && !empty($param['status']) && in_array($param['status'],array_keys(OrderCleaningStatus::getOrderCleaningList()))) {
+
+            $orderData->status  = $param['status'];
+
+        }
+
+        //更新退款状态
+        if (isset($param['refund_status']) && !empty($param['refund_status']) && in_array($param['refund_status'],array_keys(OrderCleaningStatus::getRefundList()))) {
+
+            $orderData->refund_status  = $param['refund_status'];
+            if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
+
+                $orderData->refund_time  = time();
+            }
+        }
+
+        //更新退款押金状态
+        if (isset($param['deposit_unfreeze_status']) && !empty($param['deposit_unfreeze_status']) && in_array($param['deposit_unfreeze_status'],array_keys(OrderCleaningStatus::getDepositUnfreezeStatusList()))) {
+
+            $orderData->deposit_unfreeze_status  = $param['deposit_unfreeze_status'];
+            if ($param['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
+
+                $orderData->deposit_unfreeze_time  = time();
+            }
+        }
+
+
+        //更新扣除押金状态
+        if (isset($param['deposit_deduction_status']) && !empty($param['deposit_deduction_status']) && in_array($param['deposit_deduction_status'],array_keys(OrderCleaningStatus::getDepositDeductionStatusList()))) {
+
+            $orderData->deposit_deduction_status  = $param['deposit_deduction_status'];
+            if ($param['deposit_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
+
+                $orderData->deposit_deduction_time  = time();
+            }
+        }
+
         $orderData->update_time = time();
         $success =$orderData->save();
         if(!$success){

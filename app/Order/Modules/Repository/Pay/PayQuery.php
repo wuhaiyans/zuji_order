@@ -32,7 +32,24 @@ class PayQuery {
 			'business_no'	=> $business_no,
 		])->first();
 		if( $info ){
-			\App\Lib\Common\LogApi::debug( '支付单', $info );
+			\App\Lib\Common\LogApi::info( '支付单', $info );
+			return new Pay( $info->toArray() );
+		}
+		throw new \App\Lib\NotFoundException('支付单不存在');
+	}
+	
+	/**
+	 * 根据业务系统支付编号 获取支付单
+	 * @param string	$payment_no		支付编号
+	 * @return \App\Order\Modules\Repository\Pay\Pay
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getPayByPaymentNo( string $payment_no ){
+		$info = \App\Order\Models\OrderPayModel::where([
+			'payment_no'	=> $payment_no,
+		])->first();
+		if( $info ){
+			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');

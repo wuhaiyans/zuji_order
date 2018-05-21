@@ -58,8 +58,41 @@ class OrderGoods
 	public function getGoodsInfo( $goodsNo ) {
 		//判断参数
 		if( empty( $goodsNo ) ) {
+			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92300)->setMsg('获取商品信息时商品编号参数缺失');
 			return [];
 		}
 		return $this->orderGoodsRepository->getGoodsInfo( $goodsNo );
+	}
+    /**
+     * 根据条件更新数据
+	 * @param array $where 更新条件【至少含有一项条件】
+	 * $where = [<br/>
+	 *		'goods_no' => '',//商品编号<br/>
+	 * ]<br/>
+	 * @param array $data 需要更新的数据 【至少含有一项数据】
+	 * $data = [<br/>
+	 *		'bussiness_key'=>'',//业务key<br/>
+	 *		'bussiness_no'=>'',//业务唯一编号<br/>
+	 *		'goods_status'=>'',//业务key下的商品状态<br/>
+	 * ]
+	 */
+	public function update( $where, $data ) {
+		$where = filter_array($where, [
+			'goods_no' => 'required',
+		]);
+		$data = filter_array($data, [
+			'bussiness_key' => 'required',
+			'bussiness_no' => 'required',
+			'goods_status' => 'required',
+		]);
+		if( count( $where ) < 1 ){
+			set_apistatus('', '');
+			return false;
+		}
+		if( count( $data ) < 1 ){
+			return false;
+		}
+		$data['update_time'] = time();
+		return $this->orderGoodsRepository->update( $where, $data );
 	}
 }
