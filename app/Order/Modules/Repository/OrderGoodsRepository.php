@@ -13,7 +13,7 @@ class OrderGoodsRepository
         $this->orderGoods = new OrderGoods();
     }
     public function add($data){
-       return $this->orderGoods->insertGetId($data);
+        return $this->orderGoods->insertGetId($data);
     }
     //获取商品信息
     public static function getgoodsList($goods_no){
@@ -70,6 +70,7 @@ class OrderGoodsRepository
 	public function getGoodsInfo( $goodsNo ) {
         $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
         if (!$result) {
+			set_code(\App\Lib\ApiStatus::CODE_92401);
 			return [];
 		}
         $goodsInfo = $result->toArray();

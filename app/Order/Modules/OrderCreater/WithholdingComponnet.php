@@ -98,12 +98,6 @@ class WithholdingComponnet implements OrderCreater
     public function create(): bool
     {
         $b = $this->componnet->create();
-        var_dump("代扣组件 -create");
-        return true;
-        if( !$this->flag ){
-            return false;
-        }
-        $b = $this->componnet->create();
         if( !$b ){
             return false;
         }

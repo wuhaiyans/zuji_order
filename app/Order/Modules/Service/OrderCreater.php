@@ -4,6 +4,9 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 
 use App\Lib\Certification;
+use App\Lib\Common\SmsApi;
+use App\Order\Models\Order;
+use App\Order\Models\OrderLog;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
@@ -16,6 +19,7 @@ use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
 use App\Order\Modules\OrderCreater\YidunComponnet;
+use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -48,7 +52,7 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type']);
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type'],$data['appid']);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -59,7 +63,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             // 信用
-            $orderCreater = new CreditComponnet($orderCreater,$data['appid']);
+            $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
             $orderCreater = new YidunComponnet($orderCreater);
@@ -77,12 +81,12 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+ //           $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
 //           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
-            $b = $orderCreater->filter();
+           $b = $orderCreater->filter();
 //            if(!$b){
 //                DB::rollBack();
 //                //把无法下单的原因放入到用户表中
@@ -94,12 +98,15 @@ class OrderCreater
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
+                var_dump($orderCreater->getOrderCreater()->getError());die;
                 DB::rollBack();
                 return $orderCreater->getOrderCreater()->getError();
             }
-            die;
 
-            DB::commit();
+
+
+            //DB::commit();
+            var_dump($schemaData);die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
@@ -120,6 +127,10 @@ class OrderCreater
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 'order_no'=>$orderNo,
             ];
+            //创建订单后 发送支付短信。;
+            $b = SmsApi::sendMessage($user_info['user']['mobile'],'SMS_113450944',[
+                'goodsName' => $goods_name,    // 传递参数
+            ]);
             return $result;
 
             } catch (\Exception $exc) {
@@ -150,7 +161,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             // 信用
-            $orderCreater = new CreditComponnet($orderCreater,$data['appid']);
+            $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
             $orderCreater = new YidunComponnet($orderCreater);

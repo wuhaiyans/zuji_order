@@ -22,7 +22,7 @@ class CreditComponnet implements OrderCreater
     private $score;
 
 
-    public function __construct(OrderCreater $componnet, int $appid)
+    public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
         $schema =$componnet->getDataSchema();
@@ -33,6 +33,7 @@ class CreditComponnet implements OrderCreater
 //            $this->score =0;
 //        }
         $this->score=99;//$score['score'];
+        $this->componnet->getOrderCreater()->getUserComponnet()->setScore($this->score);
     }
     /**
      * 获取订单创建器
@@ -74,10 +75,10 @@ class CreditComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        $schema =$this->componnet->getDataSchema();
-        $schema['user']['score'] =$this->score;
-        return $schema;
+        return $this->componnet->getDataSchema();
+
     }
+
 
     /**
      * 创建数据
@@ -85,41 +86,11 @@ class CreditComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        $this->componnet->create();
-        var_dump("credit组件 -create");
-//        if( !$this->flag ){
-//            return false;
-//        }
-//        $b = $this->componnet->create();
-//        if( !$b ){
-//            return false;
-//        }
-//        //var_dump( '---------------------------保存信用...' );
-//        //var_dump('认证状态：'.$this->certified);
-//        //var_dump('认证平台：'.$this->certified_platform);
-//        //var_dump('真实姓名：'.$this->realname);
-//        //var_dump('身份证号：'.$this->cert_no);
-//        //var_dump('信用分值：'.$this->credit);
-//        //var_dump('人脸识别：'.$this->face);
-//
-//        // 订单ID
-//        $order_id = $this->componnet->get_order_creater()->get_order_id();
-//
-//        // 记录订单认证信息
-//        $data = [
-//            'certified' => $this->certified,
-//            'certified_platform' => $this->certified_platform,
-//            'realname' => $this->realname,
-//            'cert_no' => $this->cert_no,
-//            'credit' => $this->credit,
-//        ];
-//        $order_table = \hd_load::getInstance()->table('order2/order2');
-//        $b = $order_table->where(['order_id'=>$order_id])->save($data);
-//        if( !$b ){
-//            $this->get_order_creater()->set_error('保存订单认证信息失败');
-//            return false;
-//        }
-//        return true;
+        $b = $this->componnet->create();
+        if( !$b ){
+            return false;
+        }
         return true;
+
     }
 }

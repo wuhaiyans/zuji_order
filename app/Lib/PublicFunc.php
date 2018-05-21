@@ -334,3 +334,41 @@ function objectToArray($object)
     //数据处理
     return json_decode(json_encode($object), true);
 }
+
+/**
+ * 获取一个的类的单一实例
+ * @param type $class 类名【注意：区分大小写，默认为ApiStatus】
+ * @param type $namespace 命名空间【默认为当前Single所在空间'\App\Lib'】
+ * @return obj|false
+ */
+function get_instance( $class='ApiStatus',$namespace='\App\Lib' ){
+	return \App\Lib\Single::getInstance( $class,$namespace );
+}
+/**
+ * 设置全局apiStatus的Code码
+ * @param string $code code码
+ */
+function set_code( $code ){
+	return get_instance()->setCode(strval($code));
+}
+/**
+ * 获取被set_code设置的全局apiStatus的Code码
+ * @return string $code code码
+ */
+function get_code( ){
+	return ''.get_instance()->getCode();
+}
+/**
+ * 设置全局apiStatus的Msg信息
+ * @param string $msg Msg信息
+ */
+function set_msg( $msg ){
+	return get_instance()->setMsg(strval($msg));
+}
+/**
+ * 获取被set_msg设置的全局apiStatus的Msg信息
+ * @return string $msg 信息
+ */
+function get_msg( ){
+	return ''.get_instance()->getMsg();
+}

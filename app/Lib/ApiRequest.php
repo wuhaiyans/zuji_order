@@ -104,7 +104,7 @@ class ApiRequest {
 		} elseif ($method == self::METHOD_GET) {
 			$jsonStr = Curl::get($this->url, $this->toString(),$heders);
 		}
-		Common\LogApi::debug($this->url, $jsonStr);
+		Common\LogApi::debug($this->url, $this->toString());
 		$Response = new ApiResponse($jsonStr);
 		return $Response;
 	}
