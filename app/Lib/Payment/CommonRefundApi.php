@@ -41,6 +41,7 @@ class CommonRefundApi extends \App\Lib\BaseApi {
      *		'refund_no'		=> '', //支付系统退款码
      *		'out_refund_no' => '', //业务系统退款码
      *		'status'		=> '', //状态：success：交易成功；init：已初始化；processing：退款处理中
+     *		'trade_time'		=> '', //交易时间戳
      * ]
 	 * @throws \Exception			请求失败时抛出异常
      */

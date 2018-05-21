@@ -37,6 +37,7 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
+            'user_id' => $param['user_id'],
             'out_refund_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
