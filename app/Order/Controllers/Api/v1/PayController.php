@@ -17,7 +17,7 @@ class PayController extends Controller
     }
 	
 	// 测试 代扣签约
-	public function testWithhold(){
+	public function testWithholdSign(){
 		
 		$business_type = 1; 
 		$business_no = 'FA52123851726694';
@@ -30,7 +30,7 @@ class PayController extends Controller
 			
 			$_params = [
 				'name'			=> '测试-'.$step,					//【必选】string 交易名称
-				'front_url'		=> env('APP_URL').'/order/pay/testWithholdFront',	//【必选】string 前端回跳地址
+				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSingFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
 //			var_dump( $url_info );exit;
@@ -43,10 +43,21 @@ class PayController extends Controller
 		}
 	}
 		// 测试 前端回跳
-	public function testWithholdFront(){
+	public function testWithholdSignFront(){
 		LogApi::info('代扣签约同步通知', $_GET);
 		var_dump( $_GET );exit;
 	}
+	
+	// 测试 代扣解约
+	public function testWithholdUnsign(){
+		
+		\App\Lib\Payment\CommonWithholdingApi::unSign([
+    		'user_id'		=> '5', //租机平台用户ID
+    		'agreement_no'	=> '30A51306522705601', //支付平台签约协议号
+    		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
+		]);
+	}
+		
 	
 	// 测试 退款
 	public function testRefund(){
@@ -249,6 +260,22 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 	}
+	/**
+	 * 代扣解约 异步通知
+	 */
+	public function withholdUnsignNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣解约异步通知', $input);
+		
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($params) ){
+			echo 'notice data not array ';exit;
+		}
+	}
 	
 	
 	/**
@@ -275,18 +302,20 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
-//		$params = [
-//			'payment_no'	=> '10A52191976549059',
-//			'out_payment_no'=> 'FA52191976252667',
-//			'status'		=> 'success',
-//			'amount'		=> '1',
-//		];
+	}
+	public function fundautUnfreezeNotify(){
 		
-		try {
-			
-		} catch (\Exception $exc) {
-
+		$input = file_get_contents("php://input");
+		LogApi::info('预授权解冻异步通知', $input);
+		
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo 'notice data is null ';exit;
 		}
+		if( !is_array($params) ){
+			echo 'notice data not array ';exit;
+		}
+		
 	}
 	
 	
