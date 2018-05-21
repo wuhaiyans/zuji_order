@@ -28,9 +28,10 @@ class PayController extends Controller
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
-	 * 成功时，输出 success，其他输出都认为是失败，需要重复通知
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function paymentNotify(){
+	public function paymentNotify()
+	{
 		$input = file_get_contents("php://input");
 		LogApi::info('支付异步通知', $input);
 		
@@ -82,19 +83,82 @@ class PayController extends Controller
 		} catch (\Exception $exc) {
 			echo $exc->getMessage();exit;
 		}
-
-		
-		
-//			'business_type' => '1',
-//			'business_no'	=> 'FA52191976207741',
-		
-//		if(){
-//			
-//		}
-		
 		
 	}
 	
+	/**
+	 * 代扣签约异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'withhold_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_withhold_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function withholdSignNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣签约异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+		try {
+			
+		} catch (\Exception $exc) {
+
+		}
+	}
+	
+	
+	/**
+	 * 预授权冻结异步通知处理
+	 * @param array $_POST
+	 * [
+	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
+	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
+	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 * ]
+	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+	 */
+	public function fundauthNotify(){
+		
+		$input = file_get_contents("php://input");
+		LogApi::info('预授权冻结异步通知', $input);
+		
+		$input = json_decode($input);
+		if( is_null($input) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($input['data']) ){
+			echo 'notice data not array ';exit;
+		}
+		$params = $input['data'];
+		
+//		$params = [
+//			'payment_no'	=> '10A52191976549059',
+//			'out_payment_no'=> 'FA52191976252667',
+//			'status'		=> 'success',
+//			'amount'		=> '1',
+//		];
+		
+		try {
+			
+		} catch (\Exception $exc) {
+
+		}
+	}
+	
+	
+	//-+------------------------------------------------------------------------
 
     /**
 	 * 通用支付入口，获取支付链接地址

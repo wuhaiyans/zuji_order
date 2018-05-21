@@ -75,7 +75,6 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-        file_put_contents('./jobtest.log', $str, FILE_APPEND);
 		dispatch(new \App\Jobs\LogJob($str));
 		
 		$_config = [
