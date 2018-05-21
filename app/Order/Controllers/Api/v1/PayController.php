@@ -19,6 +19,70 @@ class PayController extends Controller
         $this->orderTrade = $orderTrade;
     }
 	
+	//
+	public function test(){
+		
+		
+		$business_type = 1;
+		$business_no = \createNo(1);
+		$pay = null;
+		try {
+			// 查询
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+
+		} catch (\App\Lib\NotFoundException $exc) {
+
+			// 创建支付
+			$pay = PayCreater::createPaymentWithholdFundauth([
+				'user_id'		=> '5',
+				'businessType'	=> $business_type,
+				'businessNo'	=> $business_no,
+				
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> Channel::Alipay,
+				'paymentFenqi'	=> 0,
+				
+				'withholdNo' => \createNo(1),
+				'withholdChannel'=> Channel::Alipay,
+				
+				'fundauthNo' => \createNo(1),
+				'fundauthAmount' => '1.00',
+				'fundauthChannel'=> Channel::Alipay,
+			]);
+		} catch (\Exception $exc) {
+			exit('error');
+		}
+		
+		try {
+			$step = $pay->getCurrentStep();
+			// echo '当前阶段：'.$step."\n";
+			
+			$_params = [
+				'name'			=> '测试支付',					//【必选】string 交易名称
+				'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+			];
+			$url_info = $pay->getCurrentUrl( $_params );
+			var_dump( $url_info );
+			
+		} catch (\Exception $exc) {
+			echo $exc->getMessage()."\n";
+			echo $exc->getTraceAsString();
+		}
+		
+	}
+	
+	public function testPaymentFront(){
+		LogApi::info('支付同步通知', $_GET);
+		var_dump( $_GET );exit;
+	}
+	
+	
 	/**
 	 * 支付异步通知处理
 	 * @param array $_POST
