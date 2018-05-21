@@ -64,12 +64,12 @@ class PayController extends Controller
 			
 			$_params = [
 				'name'			=> '测试支付',					//【必选】string 交易名称
-				'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+				//'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
-			header( 'Location: '.$url_info['url'] );
-			//var_dump( $url_info );
+//			header( 'Location: '.$url_info['url'] );
+			var_dump( $url_info );
 			
 		} catch (\Exception $exc) {
 			echo $exc->getMessage()."\n";

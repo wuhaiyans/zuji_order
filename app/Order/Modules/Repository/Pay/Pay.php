@@ -86,7 +86,7 @@ class Pay extends \App\Lib\Configurable
 	//-+------------------------------------------------------------------------
 	protected $paymentStatus = 0;
 	protected $paymentChannel = 0;
-	protected $paymentAmount = 0;
+	protected $paymentAmount = 0.00;
 	protected $paymentFenqi = 0;
 	protected $paymentNo = '';
 	
@@ -625,7 +625,7 @@ class Pay extends \App\Lib\Configurable
 				// 获取支付
 				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
 					'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-					'payment_amount'	=> $this->getPaymentAmount(),//【必选】int 交易金额；单位：分
+					'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
 					'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
 					'channel_type'	=> $this->getPaymentChannel(),	//【必选】int 支付渠道
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
