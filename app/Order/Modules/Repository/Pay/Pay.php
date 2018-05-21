@@ -540,6 +540,103 @@ class Pay extends \App\Lib\Configurable
 		return false;
 	}
 	
+	//-+------------------------------------------------------------------------
+	// | 链接地址
+	//-+------------------------------------------------------------------------
+	
+	/**
+	 * 获取支付跳转地址和参数
+	 * @param array				支付请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
+	 */
+	public function getPaymentUrl( array $params ){
+		
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
+					'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
+					'payment_amount'	=> $this->getPaymentAmount(),//【必选】int 交易金额；单位：分
+					'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
+					'channel_type'	=> $this->getPaymentChannel(),	//【必选】int 支付渠道
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
+	}
+	
+	/**
+	 * 获取 预授权 跳转地址和参数
+	 * @param array				签约请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
+	 */
+	public function getFundauthUrl( array $params ){
+		
+				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
+					'out_auth_no'	=> $this->getFundauthNo(),
+					'channel_type'		=> $this->getFundauthChannel(),			//【必选】int 支付渠道
+					'amount'		=> $this->getFundauthAmount()*100,			//【必选】int 预授权金额；单位：分
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
+	}
+	
+	/**
+	 * 获取 代扣 签约跳转地址和参数
+	 * @param array				签约请求参数
+	 * [
+	 *		'name'			=> '',	// 交易名称
+	 *		'back_url'		=> '',	// 后台通知地址
+	 *		'front_url'		=> '',	// 前端回跳地址
+	 * ]
+	 * @return array 
+	 * [
+	 *		'url'		=> '',	// 跳转地址
+	 *		'params'	=> '',	// 跳转附件参数
+	 * ]
+	 * @throws \Exception	失败时抛出异常
+	 */
+	public function getWithholdSignUrl( array $params ){
+		
+				// 获取支付
+				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
+					'out_agreement_no'	=> $this->getWithholdNo(),
+					'channel_type'		=> $this->getWithholdChannel(),			//【必选】int 支付渠道
+					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
+					'name'			=> $params['name'],				//【必选】string 交易名称
+					'back_url'		=> $params['back_url'],			//【必选】string 后台通知地址
+					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+				]);
+				return $url_info;
+	}
+	
+	//-+------------------------------------------------------------------------
+	// | 
+	//-+------------------------------------------------------------------------
+	
 	/**
 	 * 获取下一个 status 状态
 	 * 获取规则顺序：
@@ -643,7 +740,7 @@ class Pay extends \App\Lib\Configurable
 	/**
 	 * 
 	 */
-	public function _getBusinessCallback()
+	private function _getBusinessCallback()
 	{
 		$callbacks = config('pay_callback.payment');
 		if( isset($callbacks[$this->businessType]) && $callbacks[$this->businessType] ){
