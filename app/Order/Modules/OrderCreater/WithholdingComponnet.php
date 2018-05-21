@@ -82,11 +82,9 @@ class WithholdingComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema = $this->componnet->getDataSchema();
-        $schema['user']['withholding_no'] =strlen($this->withhodldingNo)?$this->withhodldingNo:"";
         return array_merge($schema,[
             'withholding' => [
-                'withholding_no' => strlen($this->withhodldingNo)?true:false,
-                'withhold_status'=>$this->withholdingInfo['withhold_status'],
+                'withholding_no' => strlen($this->withhodldingNo)?$this->withhodldingNo:"",
             ]
         ]);
     }

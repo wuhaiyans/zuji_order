@@ -51,9 +51,11 @@ class InstalmentController extends Controller
 
 
         $user = filter_array($user, [
+            'user_id' => 'required',            //【必须】用户ID
             'withholding_no' => 'required',    //【必须】string；代扣协议号
             
         ]);
+
         if(empty($user)){
             return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");
         }
@@ -68,7 +70,7 @@ class InstalmentController extends Controller
         $res = OrderInstalment::create($params);
 
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");
+            return apiResponse([],ApiStatus::CODE_20001, "创建分期失败");
         }
 
         return apiResponse([],ApiStatus::CODE_0,"success");

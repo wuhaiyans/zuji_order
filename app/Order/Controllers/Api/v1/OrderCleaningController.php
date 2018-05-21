@@ -193,8 +193,6 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required',
             'out_refund_no'=> 'required'
         ];
         $validateParams = $this->validateParams($rules,$params);

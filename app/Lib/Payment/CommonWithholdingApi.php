@@ -57,7 +57,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
      *		'out_trade_no'	=> '', //业务系统授权码
      *		'amount'		=> '', //交易金额；单位：分
      *		'back_url'		=> '', //后台通知地址
-     *		'name'			=> '', //交易备注
+     *		'name'			=> '', //交易名称
      *		'user_id'		=> '', //业务平台用户id
      * ]
      * @return array
