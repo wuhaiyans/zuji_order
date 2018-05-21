@@ -70,6 +70,7 @@ class OrderGoodsRepository
 	public function getGoodsInfo( $goodsNo ) {
         $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
         if (!$result) {
+			set_code(\App\Lib\ApiStatus::CODE_92401);
 			return [];
 		}
         $goodsInfo = $result->toArray();

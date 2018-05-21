@@ -58,6 +58,7 @@ class OrderGoods
 	public function getGoodsInfo( $goodsNo ) {
 		//判断参数
 		if( empty( $goodsNo ) ) {
+			set_code(\App\Lib\ApiStatus::CODE_92301);
 			return [];
 		}
 		return $this->orderGoodsRepository->getGoodsInfo( $goodsNo );
