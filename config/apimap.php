@@ -127,7 +127,7 @@ return [
 	//还机更新状态为待检测【确认收货】
     'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
 	//还机更新状态【接收确认检测结果】
-    'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
+    'api.giveback.confirm.detection'       => 'GivebackController@confirmDetection',
 
     // test
     'api.Test.test'       => 'TestController@test',

@@ -259,6 +259,7 @@ class OrderComponnet implements OrderCreater
             'coupon_amount' => $coupon_amount,
             'discount_amount' => $discount_amount,
             'appid' =>$this->appid,
+            'create_time'=>time(),
         ];
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);

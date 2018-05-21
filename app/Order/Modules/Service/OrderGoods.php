@@ -58,6 +58,7 @@ class OrderGoods
 	public function getGoodsInfo( $goodsNo ) {
 		//判断参数
 		if( empty( $goodsNo ) ) {
+			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92300)->setMsg('获取商品信息时商品编号参数缺失');
 			return [];
 		}
 		return $this->orderGoodsRepository->getGoodsInfo( $goodsNo );

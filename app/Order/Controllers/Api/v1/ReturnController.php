@@ -90,7 +90,7 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
-        return apiResponse([],$return,"success");
+        return apiResponse([],$return);
 
     }
 
@@ -281,13 +281,18 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     //退款成功更新退款状态
-    public function updateStatus(Request $request){
+    public function refundUpdate(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        if(empty($params['order_no'])){
-            return  apiResponse([],ApiStatus::CODE_20001);//参数错误
+        $param = filter_array($params,[
+            'business_type'           =>'required',
+            'business_no'     =>'required',
+            'status'     =>'required',
+        ]);
+        if(count($param)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->updateStatus($params);
+        $res=$this->OrderReturnCreater->refundUpdate($params);
         return apiResponse([],$res);
     }
     //审核

@@ -98,12 +98,20 @@ class OrderReturnRepository
             foreach($params['goods_no'] as $k=>$v){
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$params['order_no']];
+                //获取退货单信息
+                $order_return=OrderReturn::where($where)->first()->toArray();
+                $data['business_key']=$params['business_key'];
+                $data['business_no']=$order_return['refund_no'];
                 $data['goods_status']=ReturnStatus::ReturnCreated;
                 $update_result=ordergoods::where($where[$k])->update($data);
             }
 
         }else{
             $where[]=['order_no','=',$params['order_no']];
+            //获取退货单信息
+            $order_return=OrderReturn::where($where)->first()->toArray();
+            $data['business_key']=$params['business_key'];
+            $data['business_no']=$order_return['refund_no'];
             $data['goods_status']=ReturnStatus::ReturnCreated;
             $update_result=ordergoods::where($where)->update($data);
         }
@@ -461,7 +469,7 @@ class OrderReturnRepository
         }
     }
     //退款成功更新退款状态
-    public static function updateStatus($params){
+    public static function updateStatus($params,$data){
         if(empty($params['order_no'])){
             return false;
         }
@@ -470,7 +478,6 @@ class OrderReturnRepository
         }
         $where[]=['order_no','=',$params['order_no']];
         //更新退款单状态
-        $data['status']=ReturnStatus::ReturnTuiKuan;
         $return_result= OrderReturn::where($where)->update($data);
         if(!$return_result){
             return false;
@@ -478,7 +485,7 @@ class OrderReturnRepository
         return true;
     }
     //退款成功更新商品状态
-    public static function updategoodsStatus($params){
+    public static function updategoodsStatus($params,$data){
         if(empty($params['order_no'])){
             return false;
         }
@@ -486,7 +493,6 @@ class OrderReturnRepository
             $where[]=['goods_no','=',$params['goods_no']];
         }
         $where[]=['order_no','=',$params['order_no']];
-        $data['goods_status']=ReturnStatus::ReturnTuiKuan;
         $goods_result= OrderGoods::where($where)->update($data);
         if(!$goods_result){
             return false;
@@ -494,16 +500,17 @@ class OrderReturnRepository
         return true;
     }
     //退款成功更新订单状态
-    public static function updateorderStatus($params){
+    public static function updateorderStatus($params,$data){
         if(empty($params['order_no'])){
             return false;
         }
-        $where[]=['order_no','=',$params['order_no']];
-        //更新退款单状态
-        $data['order_status']=OrderStatus::OrderRefunded;
-        $order_result= Order::where($where)->update($data);//修改商品扩展表商品状态为无效
-        if(!$order_result){
-            return false;
+        if(isset($data)){
+            $where[]=['order_no','=',$params['order_no']];
+            //更新退款单状态
+            $order_result= Order::where($where)->update($data);
+            if(!$order_result){
+                return false;
+            }
         }
         return true;
     }

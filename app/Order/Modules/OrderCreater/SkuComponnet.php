@@ -309,6 +309,7 @@ class SkuComponnet implements OrderCreater
                     'insurance'=>$v['yiwaixian'],
                     'buyout_price'=>$v['buyout_price'],
                     'weight'=>$v['weight'],
+                    'create_time'=>time(),
                 ];
 
                 $goodsId =$goodsRepository->add($goodsData);

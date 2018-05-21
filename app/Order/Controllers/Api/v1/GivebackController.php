@@ -24,7 +24,7 @@ class GivebackController extends Controller
 		$params = $request->input();
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		if( empty($paramsArr['goods_no']) ) {
-            return apiResponse([],ApiStatus::CODE_91000);
+            return apiResponse([],ApiStatus::CODE_91001);
 		}
 		$goodsNo = $paramsArr['goods_no'];//提取商品编号
 		//-+--------------------------------------------------------------------
@@ -33,13 +33,12 @@ class GivebackController extends Controller
 		
 		//初始化最终返回数据数组
 		$data = [];
-		
 		//获取商品基础数据
 		//创建商品服务层对象
 		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
-			return apiResponse([],ApiStatus::CODE_60001,'数据获取失败');
+			return apiResponse([], get_code());
 		}
 		//组合最终返回商品基础数据
 		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
@@ -99,7 +98,7 @@ class GivebackController extends Controller
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
-            return apiResponse([],ApiStatus::CODE_10104,$validator->errors()->first());
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
@@ -107,22 +106,27 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
+			//生成还机单编号
+			$paramsArr['giveback_no'] = $giveback_no = createNo(7);
+			//初始化还机单状态
+			$paramsArr['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
 			//生成还机单
 			$orderGivebackService = new OrderGiveback();
 			$orderGivebackIId = $orderGivebackService->create($paramsArr);
 			if( !$orderGivebackIId ){
-				return apiResponse([],ApiStatus::CODE_10103,'归还单创建失败!');
+				return apiResponse([],ApiStatus::CODE_92201);
 			}
+			//修改商品表业务类型和还机编号等
 			//冻结订单
 			//等待接口
-
+			
 
 			//推送到收发货系统
 			//等待接口
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
-			return apiResponse([],ApiStatus::CODE_10103,$ex->getMessage());
+			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
 		}
 		//提交事务
 		DB::commit();
@@ -143,7 +147,7 @@ class GivebackController extends Controller
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
-            return apiResponse([],ApiStatus::CODE_10104,$validator->errors()->first());
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
 		$goodsNo = $paramsArr['goods_no'];
 		//-+--------------------------------------------------------------------
@@ -154,18 +158,22 @@ class GivebackController extends Controller
 		$orderGoodsInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
 		//还机单状态必须为待收货
 		if( !$orderGoodsInfo ){
-            return apiResponse([],ApiStatus::CODE_60001,'还机单信息获取失败');
+            return apiResponse([], get_code(), get_msg());
 		}
 		if( $orderGoodsInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
-            return apiResponse([],ApiStatus::CODE_0,'当前还机单已经收货');
+            return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
 		}
 		if( $orderGoodsInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
-            return apiResponse([],ApiStatus::CODE_60001,'当前还机单不处于待收货状态，不能进行收货操作');
+            return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
 		$result = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
 		if( !$result ){
-            return apiResponse([],ApiStatus::CODE_60001,'确认收货失败');
+            return apiResponse([],ApiStatus::CODE_92701);
 		}
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
+	}
+	
+	public function confirmDetection( Request $request ) {
+		
 	}
 }
