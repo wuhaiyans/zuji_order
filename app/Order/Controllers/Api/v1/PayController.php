@@ -119,7 +119,7 @@ class PayController extends Controller
 			if( $status_info['status'] != 'success' ){// 支付成功
 				echo 'payment status not success';exit;
 			}
-			
+			var_dump( '接收异步通知结果', $params );
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
 			
