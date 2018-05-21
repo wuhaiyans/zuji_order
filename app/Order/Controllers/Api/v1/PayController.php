@@ -241,19 +241,12 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('代扣签约异步通知', $input);
 		
-		$input = json_decode($input,true);
-		if( is_null($input) ){
+		$params = json_decode($input,true);
+		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
-		if( !is_array($input['data']) ){
+		if( !is_array($params) ){
 			echo 'notice data not array ';exit;
-		}
-		$params = $input['data'];
-		
-		try {
-			
-		} catch (\Exception $exc) {
-
 		}
 	}
 	
@@ -274,14 +267,13 @@ class PayController extends Controller
 		$input = file_get_contents("php://input");
 		LogApi::info('预授权冻结异步通知', $input);
 		
-		$input = json_decode($input,true);
-		if( is_null($input) ){
+		$params = json_decode($input,true);
+		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
-		if( !is_array($input['data']) ){
+		if( !is_array($params) ){
 			echo 'notice data not array ';exit;
 		}
-		$params = $input['data'];
 		
 //		$params = [
 //			'payment_no'	=> '10A52191976549059',
