@@ -450,10 +450,6 @@ class Pay extends \App\Lib\Configurable
 		}
 		
 		// 更新 支付环节 表
-//		$payment = new Payment([
-//			'payment_no' => $this->paymentNo,
-//			'out_payment_no' => $params['out_payment_no'],
-//		]);
 		$paymentModel = new OrderPayPaymentModel();
 		$b = $paymentModel->insert([
 			'payment_no' => $this->paymentNo,
@@ -788,7 +784,10 @@ class Pay extends \App\Lib\Configurable
 		elseif( $this->status == PayStatus::SUCCESS )
 		{
 			$call = $this->_getBusinessCallback();
-			$call( [
+			if( !is_callable( $call ) ){
+				throw new \Exception( '支付回调设置不可调用' );
+			}
+			$b = $call( [
 				'business_type' => $this->businessType,
 				'business_no' => $this->businessNo,
 				'status' => 'success',

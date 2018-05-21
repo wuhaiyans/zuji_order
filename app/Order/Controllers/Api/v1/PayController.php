@@ -2,9 +2,8 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
-use App\Order\Modules\Inc\OrderCleaningStatus;
-use App\Order\Modules\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Lib\Common\LogApi;
 
 /**
@@ -12,18 +11,16 @@ use App\Lib\Common\LogApi;
  */
 class PayController extends Controller
 {
-    protected $orderTrade;
 
-    public function __construct(Service\OrderTrade $orderTrade)
+    public function __construct()
     {
-        $this->orderTrade = $orderTrade;
     }
 	
 	//
 	public function test(){
 		
 		
-		$business_type = 1;
+		$business_type = 1; 
 		$business_no = \createNo(1);
 		$pay = null;
 		try {
@@ -110,8 +107,8 @@ class PayController extends Controller
 		$params = $input['data'];
 		
 //		$params = [
-//			'payment_no'	=> '10A52191976549059',
-//			'out_payment_no'=> 'FA52191976252667',
+//			'payment_no'	=> '10A52108092865700',
+//			'out_payment_no'=> 'FA52108092585030',
 //			'status'		=> 'success',
 //			'amount'		=> '1',
 //		];
@@ -134,21 +131,24 @@ class PayController extends Controller
 			if( ! $pay->needPayment() ){
 				echo 'payment not need ';exit;
 			}
-			
+			DB::beginTransaction();	// 提交事务
 			// 支付处理
 			$pay->paymentSuccess([
-				'out_payment_no' => $_POST['payment_no'],
+				'out_payment_no' => $params['payment_no'],
 				'payment_time' => time(),
 			]);
 			
+            DB::commit();	// 提交事务
 			echo 'success';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
-			echo $exc->getMessage();exit;
+			echo $exc->getMessage();
 		} catch (\Exception $exc) {
-			echo $exc->getMessage();exit;
+			echo $exc->getMessage();
 		}
 		
+		DB::rollBack();
+		exit;
 	}
 	
 	/**
