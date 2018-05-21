@@ -70,7 +70,7 @@ class OrderGoodsRepository
 	public function getGoodsInfo( $goodsNo ) {
         $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
         if (!$result) {
-			set_code(\App\Lib\ApiStatus::CODE_92401);
+			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92400)->setMsg('商品信息未获取成功!');
 			return [];
 		}
         $goodsInfo = $result->toArray();

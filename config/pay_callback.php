@@ -20,19 +20,19 @@ return [
 
 	'payment' => [
 		// 业务类型为1的支付回调通知
-		'1' => '\is_array',
+		'1' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		'2' => '\is_array',
+		'2' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		'3' => '\is_array',
+		'3' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		'4' => '\is_array',
+		'4' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		'5' => '\is_array',
+		'5' => 'var_dump',
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'1' => '\is_array'
+		'2' => '\App\Lib\Refund\Refund\refundUpdate'
 	],
 ];

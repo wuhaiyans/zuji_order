@@ -1,8 +1,6 @@
 <?php
 namespace App\Order\Modules\Service;
-
 use App\Lib\ApiStatus;
-
 use App\Lib\Certification;
 use App\Lib\Common\SmsApi;
 use App\Lib\User\User;
@@ -369,6 +367,15 @@ class OrderCreater
      * 更新物流单号
      */
     public function update($params){
+        if(empty($params['order_no'])){
+            return ApiStatus::CODE_30005;//订单编码不能为空
+        }
+        if(empty($params['delivery_sn'])){
+            return ApiStatus::CODE_30006;//物流单号不能为空
+        }
+        if(empty($params['delivery_type'])){
+            return ApiStatus::CODE_30007;//物流渠道不能为空
+        }
         return $this->orderUserInfoRepository->update($params);
     }
     //获取订单信息
