@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Lib\Common\LogApi;
@@ -351,6 +352,7 @@ class PayController extends Controller
 
          'out_refund_no'=>'required', //订单系统退款码
          'refund_no'=>'required', //支付系统退款码
+         'status'=>'required'
 
        ];
         $validateParams = $this->validateParams($rule,$param);
@@ -358,6 +360,30 @@ class PayController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        //更新查看清算表的状态
+        $orderCleanInfo = Service\OrderCleaning::getOrderCleanInfo($param['out_refund_no']=$param['params']['out_refund_no']);
+        if ($orderCleanInfo) {
+
+            if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundPayd){
+                \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+             } else {
+
+                //更新订单清算退款状态
+                $orderParam = [
+                    'out_refund_no' => $param['params']['out_refund_no'],
+                    'refund_status' => OrderCleaningStatus::refundPayd
+                ];
+                Service\OrderCleaning::upOrderCleanStatus($orderParam);
+            }
+
+        } else {
+            \Log::debug(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+        }
+
+
+        //两个都更新成功，更新业务放的状态
+
+
 
 
     }

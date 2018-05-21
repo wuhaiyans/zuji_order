@@ -42,9 +42,8 @@ class OrderInstalment
         ];
      */
     public static function create($params){
-        $params['sku']=$params['sku'][0];
         $order    = $params['order'];
-        $sku      = $params['sku'];
+        $sku      = $params['sku'][0];
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
@@ -68,7 +67,7 @@ class OrderInstalment
             'buyout_price'  => 'required',
         ]);
 
-        if(count($sku) < 9){
+        if(count($sku) < 8){
             return false;
         }
 
@@ -82,7 +81,7 @@ class OrderInstalment
             'user_id'        => 'required',
             'withholding_no' => 'required',
         ]);
-        if(count($user) < 1){
+        if(count($user) < 2){
             return false;
         }
 

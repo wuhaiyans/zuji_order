@@ -10,6 +10,7 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Repository\OrderPayRepository;
+use Illuminate\Support\Facades\Log;
 
 
 class OrderCleaning
@@ -151,6 +152,31 @@ class OrderCleaning
         //发起清算 解押金
 
 
+    }
+
+
+
+
+    /**
+     *
+     * 订单清算回调业务接口
+     * Author: heaven
+     * @return mixed
+     */
+    public static function getBusinessCleanCallback($businessType, $businessNo, $result)
+    {
+        $callbacks = config('pay_callback.refund');
+        if( isset($callbacks[$businessType]) && $callbacks[$businessType] ){
+
+            $params = [
+                'business_type' => $businessType,
+                'business_no' => $businessNo,
+                'status' => $result
+            ];
+
+            return call_user_func_array($callbacks[$businessType],$params);
+        }
+        Log::error('[清算阶段]业务未设置回调通知');
     }
 
 

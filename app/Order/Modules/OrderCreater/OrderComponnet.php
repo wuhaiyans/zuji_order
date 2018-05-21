@@ -19,6 +19,8 @@ class OrderComponnet implements OrderCreater
     private $orderId = null;
     //订单编号
     private $orderNo = null;
+    //订单类型
+    private $orderType;
     //用户ID
     private $userId=0;
     //支付方式
@@ -36,11 +38,12 @@ class OrderComponnet implements OrderCreater
     private $appid;
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ,int $userId,int $payType,int $appid) {
+    public function __construct( $orderNo=null ,int $userId,int $payType,int $appid,int $orderType) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
         $this->payType=$payType;
         $this->appid=$appid;
+        $this->orderType =$orderType;
     }
 
     /**
@@ -207,6 +210,7 @@ class OrderComponnet implements OrderCreater
             'zuqi_type'=>$zuqiType,
             'zuqi_type_name'=>$zuqiTypeName,
             'pay_type'=>$this->payType,
+            'order_type'=>$this->orderType,
         ]],$userSchema,$skuSchema);
 
     }
@@ -259,6 +263,8 @@ class OrderComponnet implements OrderCreater
             'coupon_amount' => $coupon_amount,
             'discount_amount' => $discount_amount,
             'appid' =>$this->appid,
+            'create_time'=>time(),
+            'order_type'=>$this->orderType,
         ];
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);

@@ -99,15 +99,20 @@ class OrderTrade
 
     }
      /**
-     * 支付宝支付初始化处理
+      * 支付宝支付初始化处理
+      * $data[
+      *      'return_url'=>'',//前端回调地址
+      *      'order_no'=>'', //订单编号
+      *      'type'=>'',//【必须】string；类型；ORDER，订单
+      *      'channel_code'=>'', //【必须】string；支付渠道；ALIPAY：支付宝
+      * ]
      * @return array
      */
-    public function openAndPay($data)
+    public function alipayInitialize($data)
     {
         $result = ['payment_url'=>'','payment_form'=>''];
         DB::beginTransaction();
         try {
-
             $order =$this->orderRepository->isPay($data['order_no']);
             if($order===false){
                 DB::rollBack();
@@ -122,6 +127,41 @@ class OrderTrade
                     return false;
                 }
                 $order['trade_no'] =$trade_no;
+            }
+
+            // 查询
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+
+            try {
+                // 查询
+                $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+                // 取消
+                $pay->cancel();
+                // 恢复
+                $pay->resume();
+
+            } catch (\App\Lib\NotFoundException $exc) {
+
+                // 创建支付
+                $pay = PayCreater::createPaymentWithholdFundauth([
+                    'user_id'		=> '5',
+                    'businessType'	=> $business_type,
+                    'businessNo'	=> $business_no,
+
+                    'paymentNo' => \createNo(1),
+                    'paymentAmount' => '0.01',
+                    'paymentChannel'=> Channel::Alipay,
+                    'paymentFenqi'	=> 0,
+
+                    'withholdNo' => \createNo(1),
+                    'withholdChannel'=> Channel::Alipay,
+
+                    'fundauthNo' => \createNo(1),
+                    'fundauthAmount' => '1.00',
+                    'fundauthChannel'=> Channel::Alipay,
+                ]);
+            } catch (\Exception $exc) {
+                exit('error');
             }
 
             $alipay_data =[
