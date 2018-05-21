@@ -20,12 +20,14 @@ class PayTest extends TestCase
      */
     public function testPayALL()
     {
-		
+			$business_type = 1;
+			$business_no = \createNo(1);
+			
 			// 创建支付
 			$pay = PayCreater::createPaymentWithholdFundauth([
 				'user_id'		=> '5',
-				'businessType'	=> '1',
-				'businessNo'	=> \createNo(1),
+				'businessType'	=> $business_type,
+				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
 				'paymentAmount' => '0.01',
@@ -55,11 +57,18 @@ class PayTest extends TestCase
 			$this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
 					'资金预授权状态初始化错误' );
 			
-			
-			// 取消
-			$pay->cancel();
-			// 恢复
-			$pay->resume();
+			try {
+				// 查询
+				$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+				// 取消
+				$pay->cancel();
+				// 恢复
+				$pay->resume();
+				
+			} catch (\Exception $exc) {
+				echo $exc->getTraceAsString();
+			}
+
 			
 			//-+----------------------------------------------------------------
 			// | 支付环节

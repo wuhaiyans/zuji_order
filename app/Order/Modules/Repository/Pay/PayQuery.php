@@ -26,12 +26,13 @@ class PayQuery {
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public function getPayByBusiness( int $business_type, string $business_no ){
+	public static function getPayByBusiness( int $business_type, string $business_no ){
 		$info = \App\Order\Models\OrderPayModel::where([
 			'business_type'	=> $business_type,
 			'business_no'	=> $business_no,
-		])->get();
+		])->first();
 		if( $info ){
+			\App\Lib\Common\LogApi::debug( '支付单', $info );
 			return new Pay( $info->toArray() );
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');
