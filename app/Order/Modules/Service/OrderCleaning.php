@@ -27,10 +27,9 @@ class OrderCleaning
      */
     public static function getOrderCleanInfo($param)
     {
-
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+       if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_10101,$orderCleanData);
         return apiResponseArray(ApiStatus::CODE_0,$orderCleanData);
-
 
     }
 
@@ -134,7 +133,7 @@ class OrderCleaning
             $params = [
                 'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
                 'payment_no'	=> $orderPayInfo['payment_no'], //业务系统支付码
-                'amount'		=> $orderCleanData['refund_amount'], //支付金额
+                'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
                 'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
             ];
             CommonRefundApi::apple($params);
@@ -148,12 +147,12 @@ class OrderCleaning
          * @param string $appid		应用ID
          * @param array $params
          * [
+         *		'name'		=> '', //交易名称
          *		'out_trade_no' => '', //业务系统授权码
          *		'auth_no' => '', //支付系统授权码
          *		'amount' => '', //交易金额；单位：分
          *		'back_url' => '', //后台通知地址
          *		'user_id' => '', //用户id
-         *		'remark' => '', //业务描述
          * ]
          * @return mixed false：失败；array：成功
          * [
@@ -167,10 +166,14 @@ class OrderCleaning
             $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $freezePayParams = [
-                'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
-                'payment_no'	=> $orderPayInfo['payment_no'], //业务系统支付码
-                'amount'		=> $orderCleanData['refund_amount'], //支付金额
-                'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
+
+                'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
+         		'out_trade_no' => $orderCleanData['out_refund_no'], //业务系统授权码
+         		'auth_no' => $orderPayInfo['fundauth_no'], //支付系统授权码
+         		'amount' => $orderCleanData['deposit_deduction_amount']*100, //交易金额；单位：分
+         		'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
+         		'user_id' => $orderCleanData['user_id'], //用户id
+
             ];
             CommonFundAuthApi::unfreezeAndPay($freezePayParams);
 
@@ -180,15 +183,14 @@ class OrderCleaning
         //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
         /**
          * 预授权解冻接口
-         * @param string $appid		应用ID
          * @param array $params
          * [
+         *		'name'		=> 解冻资金, //交易名称
          *		'out_trade_no' => '', //订单系统交易码
          *		'auth_no' => '', //支付系统授权码
          *		'amount' => '', //解冻金额 单位：分
          *		'back_url' => '', //后台通知地址
          *		'user_id' => '', //用户id
-         *		'remark' => '', //业务描述
          * ]
          * @return mixed false：失败；array：成功
          * [
@@ -202,16 +204,17 @@ class OrderCleaning
             $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $unFreezeParams = [
-                'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
-                'payment_no'	=> $orderPayInfo['payment_no'], //业务系统支付码
-                'amount'		=> $orderCleanData['refund_amount'], //支付金额
-                'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
+         		'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
+         		'out_trade_no' => $orderCleanData['out_refund_no'], //订单系统交易码
+         		'auth_no' => $orderPayInfo['fundauth_no'], //支付系统授权码
+         		'amount' => $orderCleanData['deposit_unfreeze_amount']*100, //解冻金额 单位：分
+         		'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
+         		'user_id' => $orderCleanData['user_id'],//用户id
             ];
             CommonFundAuthApi::unfreeze($unFreezeParams);
         }
 
-        return $success;
-
+        return true;
 
 
     }
