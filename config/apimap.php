@@ -4,32 +4,35 @@
 return [
     //订单相关
 
-    'api.order.create' => 'OrderController@create',//下单接口
+    //线上下单接口
+    'api.order.create' => 'OrderController@create',
+    //门店下单接口
+    'api.order.storeCreate' => 'OrderController@storeCreate',
+    //下单确认查询接口
+    'api.order.confirmation' => 'OrderController@confirmation',
+    //取消订单接口
+    'api.order.cancel' => 'OrderController@cancelOrder',
+    //订单详情接口
+    'api.order.orderdetail'=>'OrderController@orderInfo',
+    //支付宝初始化接口
+    'api.alipay.initialize'=>'AlipayController@alipayInitialize',
+    //通用支付URL地址接口，满足url跳转支付
+    'api.pay.payment.url'=>'PayController@getPaymentUrl',
+    //银联已开通银行卡列表查询接口
+    'api.union.bankCardlist'=>'UnionController@bankCardlist',
+    //银联开通银行卡接口
+    'api.union.openBankCard'=>'UnionController@openBankCard',
+    //银联支付消费接口(限已开通银联用户)
+    'api.union.consume'=>'UnionController@consume',
+    //银联查询开通结果接口
+    'api.union.getunionstatus'=>'UnionController@getUnionStatus',
+    //银联短信验证码发送接口
+    'api.union.sendsms'=>'UnionController@sendsms',
 
-    'api.order.confirmation' => 'OrderController@confirmation',//下单确认查询接口
-
-    'api.order.cancel' => 'OrderController@cancelOrder', //取消订单接口
-
-    'api.order.orderdetail'=>'OrderController@orderInfo',//订单详情接口
-
-    'api.alipay.initialize'=>'AlipayController@alipayInitialize',//支付宝初始化接口
-	
-    'api.pay.payment.url'=>'PayController@getPaymentUrl',//通用支付URL地址接口，满足url跳转支付
-
-    'api.union.bankCardlist'=>'UnionController@bankCardlist',//银联已开通银行卡列表查询接口
-
-    'api.union.openBankCard'=>'UnionController@openBankCard',//银联开通银行卡接口
-
-    'api.union.consume'=>'UnionController@consume',//银联支付消费接口(限已开通银联用户)
-
-    'api.union.getunionstatus'=>'UnionController@getUnionStatus',//银联查询开通结果接口
-
-    'api.union.sendsms'=>'UnionController@sendsms',//银联短信验证码发送接口
-
-
-    'api.order.orderlist'=>'OrderController@orderList',//订单列表接口
-
-    'api.order.list.filter'=>'OrderController@orderListFilter',//订单列表筛选项接口
+    //订单列表接口
+    'api.order.orderlist'=>'OrderController@orderList',
+    //订单列表筛选项接口
+    'api.order.list.filter'=>'OrderController@orderListFilter',
 
 
     //结算清单列表接口
