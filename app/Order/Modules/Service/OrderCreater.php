@@ -85,7 +85,7 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
-//           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
            $b = $orderCreater->filter();
             if(!$b){
@@ -191,9 +191,6 @@ class OrderCreater
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
-            //收货地址
-            $orderCreater = new AddressComponnet($orderCreater);
-
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
@@ -201,7 +198,7 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
-//           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
             $b = $orderCreater->filter();
             if(!$b){
@@ -212,7 +209,7 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
-            //  var_dump($schemaData);
+
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
@@ -274,7 +271,7 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type'],OrderStatus::orderOnlineService);
+            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type'],$data['appid'],OrderStatus::orderOnlineService);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],8);
@@ -294,7 +291,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+           // $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
 
             //渠道
@@ -304,15 +301,16 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
 
             //分期
-           // $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
-                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+              //  User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
-            var_dump($schemaData);
+            $b = $orderCreater->create();
+            var_dump($schemaData);die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
