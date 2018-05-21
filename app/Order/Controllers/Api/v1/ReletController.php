@@ -8,17 +8,46 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Request;
 
 class ReletController extends Controller
 {
+    /**
+     * 去创建续租页数据
+     */
+    public function toCreateRelet(Request $request){
+        //接收参数
+        $req = $request->all();
+
+        //整理参数
+        //判断参数是否设置
+        if(empty($req['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
+        }
+        if(empty($req['goods_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"goods_id不能为空");
+        }
+    }
 
     /**
      * 创建续租
      */
-    public function createRelet(){
+    public function createRelet(Request $request){
         //接收参数
+        $req = $request->all();
 
         //整理参数
+        //判断参数是否设置
+        if(empty($req['zuqi_type'])){
+            return apiResponse([],ApiStatus::CODE_20001,"zuqi_type不能为空");
+        }
+        if(empty($req['zuqi'])){
+            return apiResponse([],ApiStatus::CODE_20001,"zuqi不能为空");
+        }
+        if(empty($req['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
+        }
 
         //创建
 
@@ -70,10 +99,16 @@ class ReletController extends Controller
     /**
      * 续租列表
      */
-    public function listRelet(){
+    public function listRelet(Request $request){
         //接收参数
+        //接收参数
+        $req = $request->all();
 
         //拼接 页数 搜索参数 每页显示数
+        $pages = 1;
+        $select = '';
+        $num = 20;
+
 
         //查询
 
