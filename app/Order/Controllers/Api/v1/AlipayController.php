@@ -27,8 +27,6 @@ class AlipayController extends Controller
     public function alipayInitialize(Request $request){
 
         $params =$request->all();
-        $params =$params['params'];
-
         $rules = [
             'return_url'  => 'required',
             'order_no'  => 'required',
@@ -39,6 +37,7 @@ class AlipayController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        $params =$params['params'];
         $res= $this->orderTrade->alipayInitialize($params);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_50004);

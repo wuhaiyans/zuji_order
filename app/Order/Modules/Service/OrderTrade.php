@@ -108,7 +108,6 @@ class OrderTrade
       *     'user_id'=>'',//用户ID
       *      'return_url'=>'',//前端回调地址
       *      'order_no'=>'', //订单编号
-      *      'type'=>'',//【必须】string；类型；ORDER，订单
       * ]
      * @return array
      */
@@ -116,67 +115,65 @@ class OrderTrade
     {
         DB::beginTransaction();
         try {
-            $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
-            if($orderInfo===false){
-                DB::rollBack();
-                return false;
-            }
-            var_dump($orderInfo);die;
+
             $order =$this->orderRepository->isPay($data['order_no'],$data['user_id']);
             if($order===false){
                 DB::rollBack();
                 return false;
             }
+            $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
+            if($orderInfo===false){
+                DB::rollBack();
+                return false;
+            }
 
-            if($order['trade_no']==""){
+            if($orderInfo['trade_no']==""){
                 $trade_no =createNo(3);
                 $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
                 if(!$b){
                     DB::rollBack();
                     return false;
                 }
-                $order['trade_no'] =$trade_no;
+                $orderInfo['trade_no'] =$trade_no;
+            }
+            $amount =$orderInfo['order_amount']+$orderInfo['order_yajin']+$orderInfo['order_insurance'];
+            $fenqi =0;
+            if($orderInfo['zuqi_type']==2){
+                $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
+                $fenqi =$orderGoodsInfo[0]['zuqi'];
             }
             // 查询
-            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $order['trade_no']);
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderInfo['trade_no']);
             } catch (\App\Lib\NotFoundException $exc) {
+
                 // 创建支付
-                $pay = PayCreater::createPaymentWithholdFundauth([
+                $pay = PayCreater::createPayment([
                     'user_id'		=> $data['user_id'],
                     'businessType'	=> OrderStatus::BUSINESS_ZUJI,
-                    'businessNo'	=> $order['trade_no'],
+                    'businessNo'	=> $data['order_no'],
 
-                    'paymentNo' => $order['trade_no'],
-                    'paymentAmount' => '0.01',
+                    'paymentNo' => $orderInfo['trade_no'],
+                    'paymentAmount' => $amount,
                     'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                    'paymentFenqi'	=> 0,
+                    'paymentFenqi'	=> $fenqi,
                 ]);
-                $alipay=['payment_url'=>12,'payment_form'=>3];
+
+                $step = $pay->getCurrentStep();
+                //echo '当前阶段：'.$step."\n";
+
+                $_params = [
+                    'name'			=> '订单支付',					//【必选】string 交易名称
+                    'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+                ];
+                $urlInfo = $pay->getCurrentUrl( $_params );
+                //var_dump( $urlInfo );
+                $alipay=['payment_url'=>$urlInfo['url'],'payment_form'=>$urlInfo['_data']];
                 return $alipay;
             } catch (\Exception $exc) {
                 DB::rollBack();
                 echo $exc->getMessage();
                 die;
             }
-
-            $alipay_data =[
-                'out_no'=>$order['trade_no'],
-                'amount' => '1',	// 金额，单位：分
-                'name' => '测试商品支付',// 支付名称
-                'back_url' => 'https://alipay/Test/notify',
-                'front_url' => 'https://alipay/Test/front',
-                'fenqi' => 0,	// 分期数
-                'user_id' => 5,// 用户ID
-            ];
-//            $alipay = AlipayApi::getUrl($alipay_data);
-//            var_dump($alipay);die;
-//            if($alipay ===false){
-//                DB::rollBack();
-//                return false;
-//            }
-            $alipay=['payment_url'=>12,'payment_form'=>3];
-
-            return $alipay;
 
     }
 
