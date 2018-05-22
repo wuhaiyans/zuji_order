@@ -23,9 +23,11 @@ class Receive
      *  logistics_id, 【必须】
      *  logistics_no, 【必须】
      *  receive_detail = [
-     *      serial_no 【必须】
-     *      quantity 【必须】
-     *      imei  【可以没有】
+     *      [
+     *          serial_no 【必须】
+     *          quantity 【必须】
+     *          imei  【可以没有】
+     *      ]
      *  ]
      * ]
      *
@@ -34,7 +36,13 @@ class Receive
     public static function create($order_no, $type, $data)
     {
         $receive_detail = [];
-        if (is_array($data)) {
+
+        $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
+        $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
+
+        $detail = $data['receive_detail'];
+
+        if (is_array($detail)) {
             foreach ($data as $d) {
                 if (!$d['serial_no'] || !$d['quantity']) continue;
                 
@@ -49,6 +57,8 @@ class Receive
         $result = [
             'order_no' => $order_no,
             'receive_detail' => $receive_detail,
+            'logistics_id' => $logistics_id,
+            'logistics_no' => $logistics_no,
             'type' => $type
         ];
 
