@@ -268,16 +268,25 @@ class PayController extends Controller
 		}
 		
 		try {
+			
+			// 查询本地支付单
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
+			
+			if( $pay->getUserId() != $params['user_id'] ){
+				echo 'notice [user_id] not error';exit;
+			}
+			
 			// 校验状态
-			$status_info = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($params);
+			$status_info = \App\Lib\Payment\CommonWithholdingApi::queryAgreement([
+				'agreement_no' => $params['agreement_no'],
+				'out_agreement_no' => $params['out_agreement_no'],
+				'user_id' => $pay->getUserId(),
+			]);
 			// 签约状态
 			if( $status_info['status'] != 'signed' ){// 已签约
 				echo 'withhold status not signed';exit;
 			}
 			
-			// 查询本地支付单
-			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
-			var_dump( $status_info, $pay );
 			if( $pay->isSuccess() ){// 已经支付成功
 				echo 'withhold notice repeated ';exit;
 			}
@@ -290,10 +299,9 @@ class PayController extends Controller
 			// 提交事务
 			DB::beginTransaction();
 			
-			// 支付处理
-			$pay->paymentSuccess([
-				'out_payment_no' => $params['payment_no'],
-				'payment_time' => time(),
+			// 代扣签约处理
+			$pay->withholdSuccess([
+				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
 			]);
 			
 			// 提交事务

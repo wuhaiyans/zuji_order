@@ -476,7 +476,6 @@ class Pay extends \App\Lib\Configurable
 	 * @param array		$params		签约成功参数
 	 * [
 	 *		'out_withhold_no'	=> '',	// 支付系统代扣码
-	 *		'user_id'				=> '',	// 用户ID
 	 * ]
 	 * @return bool
 	 * @throws \Exception
@@ -511,12 +510,12 @@ class Pay extends \App\Lib\Configurable
 		// 更新 代扣签约环节 表
 		$withholdModel = new OrderPayWithhold();
 		$b = $withholdModel->insert([
-			'withhold_no' => $this->withholdNo,
-			'out_withhold_no' => $params['out_withhold_no'],
-			'user_id' => $params['user_id'],
-			'withhold_status' => WithholdStatus::SIGNED,// 已签约
-			'sign_time' => time(),
-			'counter' => 1, // 计数
+			'withhold_no'		=> $this->withholdNo,
+			'out_withhold_no'	=> $params['out_withhold_no'],
+			'user_id'			=> $this->user_id,
+			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
+			'sign_time'			=> time(),
+			'counter'			=> 1, // 计数
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]代扣签约环节处理保存失败2');
