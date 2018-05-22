@@ -66,7 +66,7 @@ class PayController extends Controller
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
     		'out_refund_no' => \createNo(1),		//业务系统退款码
-    		'payment_no'	=> '10A52223623034601', //支付系统支付码
+    		'payment_no'	=> '10A52108092865700', //支付系统支付码
     		'amount'		=> 1, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
