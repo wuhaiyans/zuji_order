@@ -193,6 +193,8 @@ class OrderClearingRepository
             if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
 
                 $orderData->refund_time  = time();
+                $orderData->refund_no   = $param['refund_no'];
+
             }
         }
 
@@ -203,6 +205,7 @@ class OrderClearingRepository
             if ($param['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
 
                 $orderData->deposit_unfreeze_time  = time();
+                $orderData->out_auth_no   = $param['out_auth_no'];
             }
         }
 
@@ -214,6 +217,7 @@ class OrderClearingRepository
             if ($param['deposit_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
 
                 $orderData->deposit_deduction_time  = time();
+                $orderData->out_trade_no   = $param['out_trade_no'];
             }
         }
 

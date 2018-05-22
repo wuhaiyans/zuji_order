@@ -86,7 +86,7 @@ class Pay extends \App\Lib\Configurable
 	//-+------------------------------------------------------------------------
 	protected $paymentStatus = 0;
 	protected $paymentChannel = 0;
-	protected $paymentAmount = 0;
+	protected $paymentAmount = 0.00;
 	protected $paymentFenqi = 0;
 	protected $paymentNo = '';
 	
@@ -231,7 +231,6 @@ class Pay extends \App\Lib\Configurable
 	 * @param array				请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
-	 *		'back_url'		=> '',	// 后台通知地址
 	 *		'front_url'		=> '',	// 前端回跳地址
 	 * ]
 	 * @return array			返回参数
@@ -450,10 +449,6 @@ class Pay extends \App\Lib\Configurable
 		}
 		
 		// 更新 支付环节 表
-//		$payment = new Payment([
-//			'payment_no' => $this->paymentNo,
-//			'out_payment_no' => $params['out_payment_no'],
-//		]);
 		$paymentModel = new OrderPayPaymentModel();
 		$b = $paymentModel->insert([
 			'payment_no' => $this->paymentNo,
@@ -625,7 +620,7 @@ class Pay extends \App\Lib\Configurable
 				// 获取支付
 				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
 					'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-					'payment_amount'	=> $this->getPaymentAmount(),//【必选】int 交易金额；单位：分
+					'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
 					'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
 					'channel_type'	=> $this->getPaymentChannel(),	//【必选】int 支付渠道
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
@@ -662,8 +657,7 @@ class Pay extends \App\Lib\Configurable
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
 					'name'			=> $params['name'],				//【必选】string 交易名称
 					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-					//【必选】string 后台通知地址
-//					'back_url'		=> $params['back_url'],			
+					//【必选】string 后台通知地址	
 					'back_url'		=> env('APP_URL').'/order/pay/fundauthNotify',
 				]);
 				return $url_info;
@@ -693,8 +687,7 @@ class Pay extends \App\Lib\Configurable
 					'user_id'		=> $this->getUserId(),		//【可选】int 业务平台yonghID
 					'name'			=> $params['name'],				//【必选】string 交易名称
 					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-					//【必选】string 后台通知地址
-//					'back_url'		=> $params['back_url'],			
+					//【必选】string 后台通知地址		
 					'back_url'		=> env('APP_URL').'/order/pay/withholdSignNotify',
 				]);
 				return $url_info;
@@ -788,7 +781,10 @@ class Pay extends \App\Lib\Configurable
 		elseif( $this->status == PayStatus::SUCCESS )
 		{
 			$call = $this->_getBusinessCallback();
-			$call( [
+			if( !is_callable( $call ) ){
+				throw new \Exception( '支付回调设置不可调用' );
+			}
+			$b = $call( [
 				'business_type' => $this->businessType,
 				'business_no' => $this->businessNo,
 				'status' => 'success',

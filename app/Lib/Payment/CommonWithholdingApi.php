@@ -104,13 +104,14 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
      * [
      *		'user_id'		=> '', //租机平台用户ID
      *		'agreement_no'	=> '', //支付平台签约协议号
+     *		'out_agreement_no'	=> '', //业务平台签约协议号
      *		'back_url'		=> '', //后端回调地址
      * ]
      * @return array
      * [
      *		'user_id'			=> '', //用户id
+     *		'agreement_no'	=> '', //支付平台签约协议号
      *		'out_agreement_no'	=> '', //支付平台签约协议号
-     *		'alipay_user_id'	=> '', //用户支付宝id（2088开头）
      *		'status'			=> '', //申请状态：processing：申请成功处理中；其它情况失败
      * ]
 	 * @throws \Exception			请求失败时抛出异常
