@@ -291,7 +291,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-           // $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
 
             //渠道
