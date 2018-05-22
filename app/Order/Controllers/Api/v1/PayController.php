@@ -342,7 +342,7 @@ class PayController extends Controller
 	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
 	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
-	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 *		'total_amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
@@ -359,7 +359,7 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
-		try {
+//		try {
 			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByFundauthNo( $params['out_fundauth_no'] );
@@ -370,37 +370,38 @@ class PayController extends Controller
 				'out_fundauth_no' => $params['out_fundauth_no'],
 				'user_id' => $pay->getUserId(),
 			]);
-			// 签约状态
-			if( $status_info['status'] != 'signed' ){// 已签约
-				echo 'withhold status not signed';exit;
+			// 状态
+			if( $status_info['status'] != 'success' ){// 未授权
+				echo 'fundauth status not success';exit;
 			}
 			
 			if( $pay->isSuccess() ){// 已经支付成功
-				echo 'withhold notice repeated ';exit;
+				echo 'fundauth notice repeated ';exit;
 			}
 			
 			// 判断是否需要支付
-			if( ! $pay->needWithhold() ){
-				echo 'withhold not need ';exit;
+			if( ! $pay->needFundauth() ){
+				echo 'fundauth not need ';exit;
 			}
 			
 			// 提交事务
 			DB::beginTransaction();
 			
 			// 代扣签约处理
-			$pay->withholdSuccess([
-				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
+			$pay->fundauthSuccess([
+				'out_fundauth_no' => $params['out_fundauth_no'],	// 支付系统资金预授权编码
+				'total_amount' => sprintf('%0.2f',$params['total_amount']/100),
 			]);
 			
 			// 提交事务
             DB::commit();	
 			echo '{"status":"ok"}';exit;
 			
-		} catch (\App\Lib\NotFoundException $exc) {
-			echo $exc->getMessage();
-		} catch (\Exception $exc) {
-			echo $exc->getMessage();
-		}
+//		} catch (\App\Lib\NotFoundException $exc) {
+//			echo $exc->getMessage();
+//		} catch (\Exception $exc) {
+//			echo $exc->getMessage();
+//		}
 		
 		DB::rollBack();
 		exit;
