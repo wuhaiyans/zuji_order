@@ -248,6 +248,7 @@ class PayController extends Controller
 	 * [
 	 *		'agreement_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_agreement_no'	=> '',	//【必选】string 业务系统编号
+	 *		'user_id'			=> '',	//【必选】string 业务系统用户ID
 	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知

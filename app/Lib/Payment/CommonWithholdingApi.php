@@ -36,6 +36,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * [
 	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
 	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
+	 *		'user_id'			=> '', //【必选】string 业务系统用户ID
 	 * ]
 	 * @return array 
 	 * [
@@ -46,7 +47,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function queryAgreement( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.api.withholdingstatus', '1.0', $params);
+		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.withhold.agreement.query', '1.0', $params);
 	}
 	
     /**
