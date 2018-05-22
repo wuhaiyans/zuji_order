@@ -82,7 +82,9 @@ class OrderStatus{
     const BUSINESS_RETURN=2;
     //换货业务
     const BUSINESS_BARTER =3;
-    //还机业务
+	/**
+	 * 还机业务
+	 */
     const BUSINESS_GIVEBACK=4;
     //买断业务
     const BUSINESS_BUYOUT=5;

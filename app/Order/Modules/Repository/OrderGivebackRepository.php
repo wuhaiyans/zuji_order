@@ -33,7 +33,7 @@ class OrderGivebackRepository
 		if( $result ) {
 			return $result->toArray();
 		}
-		get_instance()->setCode(\App\Lib\ApiStatus::CODE_92400)->setMsg('获取还机单数据为空!');
+		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
 		return false;
 	}
 	/**

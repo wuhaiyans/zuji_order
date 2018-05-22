@@ -351,4 +351,20 @@ class OrderInstalment
         $result =  OrderInstalmentRepository::save($params, $data);
         return $result;
     }
+
+    /**
+     * 冻结分期
+     * @param string $goods_no 商品单号
+     * @return bool
+     */
+    public static function instalment_unfreeze($goods_no){
+        if ( !$goods_no ) {
+            return false;
+        }
+        $where = [
+            'goods_no' => $goods_no,
+        ];
+        $result =  OrderInstalmentRepository::save($where, ['unfreeze_status'=>0,'status'=>OrderInstalmentStatus::CANCEL]);
+        return $result;
+    }
 }
