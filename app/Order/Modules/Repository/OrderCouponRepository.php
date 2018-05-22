@@ -8,14 +8,12 @@ use App\Order\Models\OrderYidun;
 
 class OrderCouponRepository
 {
-    private $coupon;
-
     public function __construct()
     {
-        $this->coupon = new OrderCoupon();
     }
-    public function add($data){
-        return $this->coupon->insertGetId($data);
+    public static function add($data){
+        $info =OrderCoupon::create($data);
+        return $info->getQueueableId();
     }
 
 

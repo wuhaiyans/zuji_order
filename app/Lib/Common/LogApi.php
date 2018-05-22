@@ -68,7 +68,8 @@ class LogApi {
 			$data = json_encode($data);
 		}
 		$traces = debug_backtrace();
-		$str = sprintf("%s:(%d):%s\t[%s]:\t%s\t%s\n", 
+		$str = sprintf("%s\t%s:(%d):%s\t[%s]:\t%s\t%s\n", 
+				date('Y-m-d H:i:s'),
 				substr( $traces[1]['file'], strlen(app_path() ) ),
 				$traces[1]['line'],
 				$traces[2]['function'],
