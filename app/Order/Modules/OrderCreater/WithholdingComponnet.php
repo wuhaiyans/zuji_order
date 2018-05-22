@@ -60,15 +60,15 @@ class WithholdingComponnet implements OrderCreater
         // 代扣支付方式时，进行判断
         if($this->payType == PayInc::WithhodingPay){
             //查询该用户代扣数据
-            if($this->withholdingInfo['withhold_no']==""){
+            if(empty($this->withholdingInfo['withhold_no']) ||$this->withholdingInfo['withhold_no']==""){
                 $this->getOrderCreater()->setError('未签约代扣协议');
                 $this->flag = false;
             }
-            if($this->withholdingInfo['withhold_status']==2){
+            if(empty($this->withholdingInfo['withhold_status']) ||$this->withholdingInfo['withhold_status']==2){
                 $this->getOrderCreater()->setError('用户已经解约代扣协议');
                 $this->flag = false;
             }
-            $this->withhodldingNo =$this->withholdingInfo['withhold_no'];
+            $this->withhodldingNo =!empty($this->withholdingInfo['withhold_no'])?$this->withholdingInfo['withhold_no']:"";
 
         }
 
