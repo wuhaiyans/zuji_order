@@ -55,4 +55,22 @@ class PayQuery {
 		throw new \App\Lib\NotFoundException('支付单不存在');
 	}
 	
+	/**
+	 * 根据业务系统 代扣协议编号 获取支付单
+	 * @param string	$withhold_no		代扣协议编号
+	 * @return \App\Order\Modules\Repository\Pay\Pay
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getPayByWithholdNo( string $withhold_no ){
+		sql_profiler();
+		$info = \App\Order\Models\OrderPayModel::where([
+			'withhold_no'	=> $withhold_no,
+		])->first();
+		var_dump( $info );
+		if( $info ){
+			\App\Lib\Common\LogApi::info( '支付单', $info );
+			return new Pay( $info->toArray() );
+		}
+		throw new \App\Lib\NotFoundException('支付单不存在');
+	}
 }
