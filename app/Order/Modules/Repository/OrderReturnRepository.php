@@ -531,9 +531,9 @@ class OrderReturnRepository
         if(empty($mobile)){
             return false;
         }
-        $userData=OrderUserInfo::where('user_mobile','=',$mobile)->first()->toArray();
+        $userData=OrderUserInfo::where('user_mobile','=',$mobile)->first();
         if($userData){
-            return $userData;
+            return $userData->toArray();
         }else{
             return false;
         }

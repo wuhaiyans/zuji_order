@@ -128,7 +128,7 @@ class OrderCleaning
         //需退款金额大于0，并且属于待退款状态，发起清算，退租金
         if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed) {
             //根据业务编号查找支付相关数据
-            $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
+            $orderPayInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($orderCleanData['business_type'], $orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $params = [
                 'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
@@ -163,7 +163,7 @@ class OrderCleaning
          */
         if ($orderCleanData['deposit_deduction_amount']>0 && $orderCleanData['deposit_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
             //根据业务编号查找支付相关数据
-            $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
+            $orderPayInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($orderCleanData['business_type'], $orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $freezePayParams = [
 
@@ -201,7 +201,7 @@ class OrderCleaning
          */
         if ($orderCleanData['deposit_unfreeze_amount']>0 && $orderCleanData['deposit_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
             //根据业务编号查找支付相关数据
-            $orderPayInfo = OrderPayRepository::getInfo($orderCleanData['business_no']);
+            $orderPayInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($orderCleanData['business_type'], $orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $unFreezeParams = [
          		'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
