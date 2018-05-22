@@ -20,8 +20,6 @@ class AlipayController extends Controller
      * $params[
      *      'return_url'=>'',//前端回调地址
      *      'order_no'=>'', //订单编号
-     *      'type'=>'',//【必须】string；类型；ORDER，订单
-     *      'channel_code'=>'', //【必须】string；支付渠道；ALIPAY：支付宝
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|void
@@ -34,8 +32,6 @@ class AlipayController extends Controller
         $rules = [
             'return_url'  => 'required',
             'order_no'  => 'required',
-            'type'  => 'required',
-            'channel_code'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
