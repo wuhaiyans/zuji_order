@@ -363,7 +363,7 @@ class OrderInstalment
         $where = [
             'goods_no' => $goods_no,
         ];
-        $result =  OrderInstalmentRepository::save($where, ['unfreeze_status'=>0]);
+        $result =  OrderInstalmentRepository::save($where, ['unfreeze_status'=>0,'status'=>OrderInstalmentStatus::CANCEL]);
         return $result;
     }
 }
