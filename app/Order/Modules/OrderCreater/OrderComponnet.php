@@ -40,7 +40,7 @@ class OrderComponnet implements OrderCreater
     private $appid;
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ,int $userId,int $payType,int $appid,int $orderType) {
+    public function __construct( $orderNo='' ,int $userId,int $payType,int $appid,int $orderType) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
         $this->payType=$payType;
