@@ -119,10 +119,11 @@ class OrderRepository
      * 查询订单是否可以支付
      *
      */
-    public static function isPay($orderNo)
+    public static function isPay($orderNo,$userId)
     {
         if (empty($orderNo)) return false;
         $orderData = Order::query()->where([
+            ['user_id', '=', $userId],
             ['order_no', '=', $orderNo],
         ])->first()->toArray();
         if(empty($orderData)){
