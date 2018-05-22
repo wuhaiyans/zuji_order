@@ -279,8 +279,15 @@ class GivebackController extends Controller
 			if( $givebackNeedPay == 0 && $yajin == 0 ) {
 				//解冻订单
 				//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-				
-				$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+				$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderGivevbackInfo['order_no']);
+				if( count($givebackUnfinshedList) == 1 ){
+					$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+					if( !$orderFreezeResult ){
+						//事务回滚
+						DB::rollBack();
+						return apiResponse([], ApiStatus::CODE_92700, '订单解冻失败!');
+					}
+				}
 				//修改还机单状态
 				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
