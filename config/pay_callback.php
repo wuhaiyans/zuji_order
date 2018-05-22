@@ -40,7 +40,7 @@ return [
 		// 业务类型为1的支付回调通知
 		'3' => '\_demo_callback',
 		// 业务类型为4还机的支付回调通知
-		'4' => 'App\Order\Controllers\Api\v1\callbackPayment',
+		'4' => '\App\Order\Controllers\Api\v1\callbackPayment',
 		// 业务类型为1的支付回调通知
 		'5' => '\_demo_callback',
 	],
@@ -49,6 +49,6 @@ return [
 		// 业务类型为1的支付回调通知
 		'2' => '\App\Lib\Refund\Refund\refundUpdate',
 		// 业务类型为4还机的清算回调通知
-		'4' => 'App\Order\Controllers\Api\v1\callbackClearing',
+		'4' => '\App\Order\Controllers\Api\v1\callbackClearing',
 	],
 ];
