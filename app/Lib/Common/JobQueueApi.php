@@ -9,12 +9,6 @@ use App\Lib\Curl;
  */
 class JobQueueApi {
 	
-//	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
-	private static $_url = 'http://job-api.hsbbj.com/api';
-	
-	private static $_auth = '7ZT%SC8HB4*Ad$bWyEaj2mBy%qd2G49A';
-	
-	
 	/**
 	 * 实时任务
 	 * @param string $key	任务唯一标识
@@ -95,7 +89,7 @@ class JobQueueApi {
 			'retries' => 3, // 错误重试次数
 		];
 		// 请求
-		$res = Curl::post(env('JOB_API'), json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}
