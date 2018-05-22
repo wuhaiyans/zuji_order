@@ -107,11 +107,11 @@ class JobQueueApi {
 	public static function disable( string $key):bool{
 		$_config = [
 			'interface' => 'jobDisable',
-			'auth' => self::$_auth,
+			'auth' => env('JOB_AUTH'),
 			'name' => $key,
 		];
 		// 请求
-		$res = Curl::post(self::$_url, json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}
