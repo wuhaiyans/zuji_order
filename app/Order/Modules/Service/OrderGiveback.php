@@ -52,6 +52,18 @@ class OrderGiveback
 		}
 		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
 	}
+    /**
+     * 获取当前订单下所有未完成的还机单
+	 * @param string $orderNo 订单编号
+	 * @return array|false
+	 */
+	public function getUnfinishedListByOrderNo( $orderNo ) {
+		if( empty($orderNo) ) {
+			set_apistatus(\App\Lib\ApiStatus::CODE_92300,'获取未完成的还机单列表：订单编号参数为空!');
+			return false;
+		}
+		return $this->order_giveback_repository->getUnfinishedListByOrderNo( $orderNo );
+	}
 	
     /**
      * 根据条件更新数据

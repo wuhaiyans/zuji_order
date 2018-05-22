@@ -100,43 +100,48 @@ class GivebackController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
+		$goodsNoArr = $paramsArr['goods_no'];
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
 		//开启事务
 		DB::beginTransaction();
 		try{
-			//生成还机单编号
-			$paramsArr['giveback_no'] = $giveback_no = createNo(7);
-			//初始化还机单状态
-			$paramsArr['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
-			//生成还机单
-			$orderGivebackService = new OrderGiveback();
-			$orderGivebackIId = $orderGivebackService->create($paramsArr);
-			if( !$orderGivebackIId ){
-				//事务回滚
-				DB::rollBack();
-				return apiResponse([], get_code(), get_msg());
-			}
-			//修改商品表业务类型、商品编号、还机状态
-			$orderGoodsService = new OrderGoods();
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
-				'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				'business_no' => $giveback_no,
-				'goods_status' => $status,
-			]);
-			if(!$orderGoodsResult){
-				//事务回滚
-				DB::rollBack();
-				return apiResponse([], get_code(), get_msg());
-			}
-			
-			//冻结订单
-			//等待接口
-			
+			foreach ($goodsNoArr as $goodsNo) {
+				//生成还机单编号
+				$paramsArr['giveback_no'] = $giveback_no = createNo(7);
+				//初始化还机单状态
+				$paramsArr['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
+				$paramsArr['goods_no'] = $goodsNo;
+				//生成还机单
+				$orderGivebackService = new OrderGiveback();
+				$orderGivebackIId = $orderGivebackService->create($paramsArr);
+				if( !$orderGivebackIId ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], get_code(), get_msg());
+				}
+				//修改商品表业务类型、商品编号、还机状态
+				$orderGoodsService = new OrderGoods();
+				$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
+					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'business_no' => $giveback_no,
+					'goods_status' => $status,
+				]);
+				if(!$orderGoodsResult){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], get_code(), get_msg());
+				}
 
-			//推送到收发货系统
-			//等待接口
+				//推送到收发货系统
+				//等待接口
+			}
+			//冻结订单
+			$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($paramsArr['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Reback);
+			if( !$orderFreezeResult ){
+				return apiResponse([],ApiStatus::CODE_92700,'订单冻结失败！');
+			}
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
@@ -272,12 +277,22 @@ class GivebackController extends Controller
 
 			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
 			if( $givebackNeedPay == 0 && $yajin == 0 ) {
+				//解冻订单
+				//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
+				$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderGivevbackInfo['order_no']);
+				if( count($givebackUnfinshedList) == 1 ){
+					$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+					if( !$orderFreezeResult ){
+						//事务回滚
+						DB::rollBack();
+						return apiResponse([], ApiStatus::CODE_92700, '订单解冻失败!');
+					}
+				}
+				//修改还机单状态
 				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
 				$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN;
 				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
-				//解冻订单
-				\App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 			}
 			//需要支付总金额小于等于押金金额：交由清算处理
 			elseif( $givebackNeedPay <= $yajin ){
@@ -308,6 +323,7 @@ class GivebackController extends Controller
 					'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
 					'businessNo' => $orderGivevbackInfo['giveback_no'],// 业务编号
 					'paymentAmount' => $givebackNeedPay,// Price 支付金额，单位：元
+					'paymentFenqi' => 0,//不分期
 				];
 				$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
 				if( !$payResult->isSuccess() ){
@@ -344,5 +360,43 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 		return apiResponse([], ApiStatus::CODE_0, '成功');
+	}
+	
+	/**
+	 * 还机单清算完成回调接口
+	 * @param Request $request
+	 */
+	public function callbackClearing( Request $request ) {
+		//清算成功
+		//-+--------------------------------------------------------------------
+		// | 更新订单状态（交易完成）
+		//-+--------------------------------------------------------------------
+		//清算失败
+		//-+--------------------------------------------------------------------
+		// | 更新订单状态（交易完成，清算失败）
+		//-+--------------------------------------------------------------------
+	}
+	
+	/**
+	 * 还机单支付完成回调接口
+	 * @param Request $request
+	 */
+	public function callbackPayment( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 判断是否支付成功
+		//-+--------------------------------------------------------------------
+		//支付成功
+		
+		//-+--------------------------------------------------------------------
+		// | 判断订单押金，是否生成清算单
+		//-+--------------------------------------------------------------------
+		//不生成
+		//-+--------------------------------------------------------------------
+		// | 更新订单状态（交易完成）
+		//-+--------------------------------------------------------------------
+		//生成
+		//-+--------------------------------------------------------------------
+		// | 更新订单状态（处理中，待清算）
+		//-+--------------------------------------------------------------------
 	}
 }
