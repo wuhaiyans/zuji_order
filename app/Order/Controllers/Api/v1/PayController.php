@@ -277,7 +277,7 @@ class PayController extends Controller
 			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
-			var_dump( $pay );
+			var_dump( $status_info, $pay );
 			if( $pay->isSuccess() ){// 已经支付成功
 				echo 'withhold notice repeated ';exit;
 			}
