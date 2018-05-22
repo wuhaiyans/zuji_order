@@ -309,8 +309,6 @@ class OrderCreater
                 User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
-            $b = $orderCreater->create();
-            var_dump($schemaData);die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){

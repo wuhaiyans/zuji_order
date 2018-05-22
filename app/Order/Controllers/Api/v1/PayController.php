@@ -109,7 +109,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = \createNo(1);
+		$business_no = 'FA52283402709380';
 		$pay = null;
 		try {
 			// 查询
@@ -152,7 +152,7 @@ class PayController extends Controller
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
-			header( 'Location: '.$url_info['url'] );
+			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			
 		} catch (\Exception $exc) {
@@ -679,7 +679,7 @@ class PayController extends Controller
             //更新订单退押金状态
             $orderParam = [
                 'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'refund_no'     => $param['params']['refund_no'],
+                'auth_no'     => $param['params']['refund_no'],
                 'deposit_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -750,7 +750,7 @@ class PayController extends Controller
             //更新订单清算退款状态
             $orderParam = [
                 'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'refund_no'     => $param['params']['refund_no'],
+                'trade_no'     => $param['params']['refund_no'],
                 'refund_status' => OrderCleaningStatus::refundPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);

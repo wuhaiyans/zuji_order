@@ -87,9 +87,11 @@ class ReletController extends Controller
             if(isset($params['id']) && !empty($params['id'])){
                 $par['id'] = $params['id'];
                 $par['status'] = 3;
-                $this->relet->setStatus($par);
-                return apiResponse([],ApiStatus::CODE_0);
-
+                if($this->relet->setStatus($par)){
+                    return apiResponse([],ApiStatus::CODE_0);
+                }else{
+                    return apiResponse([],ApiStatus::CODE_50000, get_msg());
+                }
             }else{
                 return apiResponse([],ApiStatus::CODE_50000, 'id不能为空');
 

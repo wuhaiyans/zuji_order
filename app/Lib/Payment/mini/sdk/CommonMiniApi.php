@@ -11,7 +11,7 @@ require_once __DIR__ . '/aop/request/ZhimaMerchantOrderCreditPayRequest.php';
  *
  * @author
  */
-class ZhimaWithholding extends BaseApi {
+class CommonMiniApi extends BaseApi {
 
 	public function __construct($appid) {
 		parent::__construct($appid);

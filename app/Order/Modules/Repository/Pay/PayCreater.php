@@ -126,6 +126,7 @@ class PayCreater {
 			'create_time'	=> time(),
 			'fundauth_no'	=> $params['fundauthNo'],
 			'fundauth_status'	=> $params['fundauthStatus'],
+			'fundauth_amount'	=> $params['fundauthAmount'],
 			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
@@ -175,6 +176,7 @@ class PayCreater {
 			
 			'fundauth_no'	=> $params['fundauthNo'],
 			'fundauth_status'	=> $params['fundauthStatus'],
+			'fundauth_amount'	=> $params['fundauthAmount'],
 			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
@@ -230,6 +232,7 @@ class PayCreater {
 			
 			'fundauth_no'	=> $params['fundauthNo'],
 			'fundauth_status'	=> $params['fundauthStatus'],
+			'fundauth_amount'	=> $params['fundauthAmount'],
 			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
@@ -295,6 +298,7 @@ class PayCreater {
 			
 			'fundauth_no'	=> $params['fundauthNo'],
 			'fundauth_status'	=> $params['fundauthStatus'],
+			'fundauth_amount'	=> $params['fundauthAmount'],
 			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		$b = $payModel->insert( $data );

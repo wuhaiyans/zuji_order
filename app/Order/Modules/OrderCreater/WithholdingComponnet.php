@@ -56,7 +56,6 @@ class WithholdingComponnet implements OrderCreater
     {
 
         $filter =  $this->componnet->filter();
-
         // 代扣支付方式时，进行判断
         if($this->payType == PayInc::WithhodingPay){
             //查询该用户代扣数据

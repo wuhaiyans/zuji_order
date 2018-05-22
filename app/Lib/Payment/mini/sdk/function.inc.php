@@ -1,7 +1,7 @@
 <?php
 namespace App\Lib\Payment\mini\sdk;
 
-use app\alipay\sdk\aop\AopClient;
+use App\Lib\Payment\mini\sdk\aop\AopClient;
 
 
 function writeLog($text) {

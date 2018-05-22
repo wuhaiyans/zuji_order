@@ -1,7 +1,7 @@
 <?php
 namespace App\Lib\Payment\mini\sdk;
 
-use app\alipay\sdk\aop\AopClient;
+use App\Lib\Payment\mini\sdk\aop\AopClient;
 
 /**
  * Description of BaseApi
@@ -21,7 +21,7 @@ class BaseApi {
 
 	/**
 	 *
-	 * @var \alipay\aop\AopClient
+	 * @var \App\Lib\Payment\mini\sdk\aop\AopClient
 	 */
 	protected $Aop = NULL;
 

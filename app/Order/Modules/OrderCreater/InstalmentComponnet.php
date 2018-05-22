@@ -56,6 +56,7 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
+        $instalment['instalment']="";
         //分期单信息
         if($this->payType!=PayInc::FlowerStagePay && $schema['order']['zuqi_type'] ==2){
             $instalment =OrderInstalment::get_data_schema($schema);
@@ -75,9 +76,11 @@ class InstalmentComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        $instalment = OrderInstalment::create($schema);
-        if(!$instalment){
-            return false;
+        if($this->payType!=PayInc::FlowerStagePay && $schema['order']['zuqi_type'] ==2) {
+            $instalment = OrderInstalment::create($schema);
+            if (!$instalment) {
+                return false;
+            }
         }
         return true;
     }
