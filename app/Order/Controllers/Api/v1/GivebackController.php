@@ -212,39 +212,56 @@ class GivebackController extends Controller
 		// | 业务处理
 		//-+--------------------------------------------------------------------
 		
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
 		//-+--------------------------------------------------------------------
 		// | 业务处理：判断是否需要支付【1有无未完成分期，2检测不合格的赔偿】
 		//-+--------------------------------------------------------------------
 		//获取商品信息
-		//创建商品服务层对象
-		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
 		
-		//获取当前商品是否存在分期列表
+		//获取当前商品未完成分期列表数据
 		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
-		if( empty($instalmentList[$goodsNo]) ){
-			return apiResponse([],ApiStatus::CODE_0,'数据获取成功');
-		}
 		//剩余分期需要支付的总金额、还机需要支付总金额
 		$zujinNeedPay = $givebackNeedPay = 0;
-		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-				$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+		//剩余分期数
+		$instalmentNum = 0;
+		if( !empty($instalmentList[$goodsNo]) ){
+			foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+				if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+					$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+					$instalmentNum++;
+				}
 			}
 		}
-		//存在分期单，关闭分期单
-		
 		//总共需要支付金额
 		$givebackNeedPay = $zujinNeedPay + $paramsArr['compensate_amount'];
 		//押金金额
 		$yajin = $orderGoodsInfo['yajin'];
 		
-		//
-		
-		
-		
+		//开启事务
+		DB::beginTransaction();
+		try{
+			//初始化订单
+			
+			//存在分期单，关闭分期单
+
+			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
+			if( $givebackNeedPay == 0 && $yajin == 0 ) {
+				
+			}
+			
+		} catch (Exception $ex) {
+			//回滚事务
+			DB::rollBack();
+			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
+		}
+		//提交事务
+		DB::commit();
+		return apiResponse([], ApiStatus::CODE_0, '成功');
 	}
 }
