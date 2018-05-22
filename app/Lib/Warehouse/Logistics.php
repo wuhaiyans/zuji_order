@@ -7,6 +7,7 @@
 
 
 namespace App\Lib\Warehouse;
+use App\Lib\Curl;
 
 class Logistics
 {

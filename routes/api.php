@@ -43,8 +43,14 @@ $api->version('v1', [
         // 代扣签约回调
         $api->post('signNotify', 'PayController@sign_notify');
 
-        // 代扣解约回调
-        $api->post('unSignNotify', 'PayController@unsign_notify');
+        // 预授权回调
+        $api->post('fundauthNotify', 'PayController@fundauth_notify');
+
+        // 预授权解冻回调
+        $api->post('fundauthUnfreezeNotify', 'PayController@fundauth_unfreeze_notify');
+
+        //预授权转支付回调
+        $api->post('unfreezeAndPayNotify', 'PayController@unfreeze_pay_notify');
 
         //订单清算押金转支付回调接口
         $api->post('unfreezeAndPayClean', 'PayController@unfreezeAndPayClean');

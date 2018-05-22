@@ -106,18 +106,18 @@ class CouponComponnet implements OrderCreater
         if(empty($data['coupon'])){
             return true;
         }
-        $coupon =new OrderCouponRepository();
+        $orderNo =$this->getOrderCreater()->getOrderNo();
         foreach ($data['coupon'] as $k=>$v){
             if($v['is_use'] ==1){
                 $couponData =[
-                    'order_no'=>$data['order']['order_no'],
-                    'coupon_no'=>$data['coupon']['coupon_no'],
-                    'coupon_id'=>$data['coupon']['coupon_id'],
-                    'discount_amount'=>$data['coupon']['discount_amount'],
-                    'coupon_type'=>$data['coupon']['coupon_type'],
-                    'coupon_name'=>$data['coupon']['coupon_name'],
+                    'order_no'=>$orderNo,
+                    'coupon_no'=>$v['coupon_no'],
+                    'coupon_id'=>$v['coupon_id'],
+                    'discount_amount'=>$v['discount_amount'],
+                    'coupon_type'=>$v['coupon_type'],
+                    'coupon_name'=>$v['coupon_name'],
                 ];
-                $couponId = $coupon->add($couponData);
+                $couponId = OrderCouponRepository::add($couponData);
                 if(!$couponId){
                     $this->getOrderCreater()->setError("保存订单优惠券信息失败");
                     return false;
