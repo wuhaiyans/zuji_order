@@ -250,7 +250,8 @@ class PayController extends Controller
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function withholdSignNotify(){
+	public function withholdSignNotify()
+	{
 		
 		$input = file_get_contents("php://input");
 		LogApi::info('代扣签约异步通知', $input);
