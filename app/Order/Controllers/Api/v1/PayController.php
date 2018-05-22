@@ -246,13 +246,14 @@ class PayController extends Controller
 	 * 代扣签约异步通知处理
 	 * @param array $_POST
 	 * [
-	 *		'withhold_no'		=> '',	//【必选】string 支付系统编号
-	 *		'out_withhold_no'	=> '',	//【必选】string 业务系统编号
+	 *		'agreement_no'		=> '',	//【必选】string 支付系统编号
+	 *		'out_agreement_no'	=> '',	//【必选】string 业务系统编号
 	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function withholdSignNotify(){
+	public function withholdSignNotify()
+	{
 		
 		$input = file_get_contents("php://input");
 		LogApi::info('代扣签约异步通知', $input);
@@ -264,6 +265,48 @@ class PayController extends Controller
 		if( !is_array($params) ){
 			echo 'notice data not array ';exit;
 		}
+		
+		try {
+			// 校验状态
+			$status_info = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($params);
+			var_dump( $status_info );
+			if( $status_info['status'] != 'success' ){// 支付成功
+				echo 'withhold status not success';exit;
+			}
+			
+			// 查询本地支付单
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
+			
+			if( $pay->isSuccess() ){// 已经支付成功
+				echo 'withhold notice repeated ';exit;
+			}
+			
+			// 判断是否需要支付
+			if( ! $pay->needWithhold() ){
+				echo 'withhold not need ';exit;
+			}
+			
+			// 提交事务
+			DB::beginTransaction();
+			
+			// 支付处理
+			$pay->paymentSuccess([
+				'out_payment_no' => $params['payment_no'],
+				'payment_time' => time(),
+			]);
+			
+			// 提交事务
+            DB::commit();	
+			echo '{"status":"ok"}';exit;
+			
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();
+		}
+		
+		DB::rollBack();
+		exit;
 	}
 	/**
 	 * 代扣解约 异步通知
