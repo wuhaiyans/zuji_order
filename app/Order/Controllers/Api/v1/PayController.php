@@ -359,6 +359,52 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
+		try {
+			
+			// 查询本地支付单
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByFundauthNo( $params['out_fundauth_no'] );
+						
+			// 校验状态
+			$status_info = \App\Lib\Payment\CommonFundAuthApi::queryFundAuthStatus([
+				'fundauth_no' => $params['fundauth_no'],
+				'out_fundauth_no' => $params['out_fundauth_no'],
+				'user_id' => $pay->getUserId(),
+			]);
+			// 签约状态
+			if( $status_info['status'] != 'signed' ){// 已签约
+				echo 'withhold status not signed';exit;
+			}
+			
+			if( $pay->isSuccess() ){// 已经支付成功
+				echo 'withhold notice repeated ';exit;
+			}
+			
+			// 判断是否需要支付
+			if( ! $pay->needWithhold() ){
+				echo 'withhold not need ';exit;
+			}
+			
+			// 提交事务
+			DB::beginTransaction();
+			
+			// 代扣签约处理
+			$pay->withholdSuccess([
+				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
+			]);
+			
+			// 提交事务
+            DB::commit();	
+			echo '{"status":"ok"}';exit;
+			
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();
+		}
+		
+		DB::rollBack();
+		exit;
+		
 	}
 	public function fundautUnfreezeNotify(){
 		

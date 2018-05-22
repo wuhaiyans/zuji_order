@@ -71,4 +71,21 @@ class PayQuery {
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');
 	}
+	
+	/**
+	 * 根据业务系统 资金授权编号 获取支付单
+	 * @param string	$fundauth_no		资金授权编号
+	 * @return \App\Order\Modules\Repository\Pay\Pay
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getPayByFundauthNo( string $fundauth_no ){
+		$info = \App\Order\Models\OrderPayModel::where([
+			'fundauth_no'	=> $fundauth_no,
+		])->first();
+		if( $info ){
+			\App\Lib\Common\LogApi::info( '支付单', $info );
+			return new Pay( $info->toArray() );
+		}
+		throw new \App\Lib\NotFoundException('支付单不存在');
+	}
 }
