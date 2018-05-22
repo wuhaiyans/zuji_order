@@ -83,7 +83,7 @@ class JobQueueApi {
 	private static function push( string $key, string $url, array $data, string $callback='', string $type='realTime', string $start='',string $cron='' ):bool{
 		$_config = [
 			'interface' => 'jobAddAsync',
-			'auth' => self::$_auth,
+			'auth' => env('JOB_AUTH'),
 			'name' => $key,
 			'desc' => '',
 			'type' => $type,
@@ -95,7 +95,7 @@ class JobQueueApi {
 			'retries' => 3, // 错误重试次数
 		];
 		// 请求
-		$res = Curl::post(self::$_url, json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config));
 		if( !$res ){
 			return false;
 		}
