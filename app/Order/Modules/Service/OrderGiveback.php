@@ -47,7 +47,7 @@ class OrderGiveback
 	 */
 	public function getInfoByGoodsNo( $goodsNo ) {
 		if( empty($goodsNo) ) {
-			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92300)->setMsg('获取还机单数据时订单编号参数为空!');
+			set_apistatus(\App\Lib\ApiStatus::CODE_92300,'获取还机单数据时订单编号参数为空!');
 			return false;
 		}
 		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
@@ -72,6 +72,7 @@ class OrderGiveback
 	 *		'evaluation_status'=>'',//检测结果<br/>
 	 *		'evaluation_remark'=>'',//检测备注<br/>
 	 *		'evaluation_time'=>'',//检测时间<br/>
+	 *		'yajin_status'=>'',//押金退还状态<br/>
 	 *		'compensate_amount'=>'',//赔偿金额<br/>
 	 *		'remark'=>'',//备注<br/>
 	 * ]

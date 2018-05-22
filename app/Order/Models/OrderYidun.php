@@ -14,8 +14,18 @@ class OrderYidun extends Model
     protected $table = 'order_yidun';
 
     protected $primaryKey='id';
+    /**
+     * 默认使用时间戳戳功能
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
-
-
+    /**
+     * 可以被批量赋值的属性.
+     *
+     * @var array
+     */
+    protected $fillable = ['decision','order_no','score','strategies'];
 
 }
