@@ -48,7 +48,7 @@ class Controller extends BaseController
      */
     protected function innerOkMsg(){
         $returnData = array('status'=>'ok');
-        return json_encode($returnData);
+        return response()->json($returnData);
 
     }
 
@@ -60,7 +60,7 @@ class Controller extends BaseController
      */
     protected function innerErrMsg(){
         $returnData = array('status'=>'error');
-        return json_encode($returnData);
+        return response()->json($returnData);
 
     }
 }

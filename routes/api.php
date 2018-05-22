@@ -47,13 +47,14 @@ $api->version('v1', [
         $api->post('unSignNotify', 'PayController@unsign_notify');
 
         //订单清算押金转支付回调接口
+        $api->post('unfreezeAndPayClean', 'PayController@unfreezeAndPayClean');
 
         //订单清算退款回调接口
+        $api->post('refundClean', 'PayController@refundClean');
 
-        //订单清算退押金接口
+        //订单清算退押金回调接口
+        $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
 
-
-//    });
 });
    
