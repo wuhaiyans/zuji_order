@@ -171,11 +171,14 @@ class OrderReturnCreater
         foreach($goods_info as $k=>$v){
             $receive_data['logistics_id']=$goods_info[$k]->wuliu_channel_id;
             $receive_data['logistics_no']=$goods_info[$k]->logistics_no;
-            $receive_data[$k]['serial_no']=$goods_info[$k]->serial_number;
-            $receive_data[$k]['quantity']=$goods_info[$k]->quantity;
-            $receive_data[$k]['imei1']=$goods_info[$k]->imei1;
-            $receive_data[$k]['imei2']=$goods_info[$k]->imei2;
-            $receive_data[$k]['imei3']=$goods_info[$k]->imei3;
+            $receive_data['receive_detail'][] =[
+                'serial_no' => $goods_info[$k]->serial_number,
+                'quantity' => $goods_info[$k]->quantity,
+                'imei1'     =>$goods_info[$k]->imei1,
+                'imei2'     =>$goods_info[$k]->imei2,
+                'imei3'     =>$goods_info[$k]->imei3,
+
+            ];
         }
        $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$receive_data);//创建待收货单
        if(!$create_receive){
