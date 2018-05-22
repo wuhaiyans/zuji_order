@@ -306,7 +306,7 @@ class OrderCreater
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
-              //  User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
             $b = $orderCreater->create();
