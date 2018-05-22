@@ -62,6 +62,18 @@ class OrderGiveback
 	 * @param array $data 需要更新的数据 【至少含有一项数据】
 	 * $data = [<br/>
 	 *		'status'=>'',//还机状态<br/>
+	 *		'trade_no'=>'',//交易流水号<br/>
+	 *		'out_trade_no'=>'',//返回的交易流水号<br/>
+	 *		'instalment_num'=>'',//剩余还款的分期数<br/>
+	 *		'instalment_amount'=>'',//剩余还款的分期总金额（分）<br/>
+	 *		'payment_status'=>'',//支付状态 0默认<br/>
+	 *		'payment_time'=>'',//支付时间<br/>
+	 *		'logistics_no'=>'',//物流编号<br/>
+	 *		'evaluation_status'=>'',//检测结果<br/>
+	 *		'evaluation_remark'=>'',//检测备注<br/>
+	 *		'evaluation_time'=>'',//检测时间<br/>
+	 *		'compensate_amount'=>'',//赔偿金额<br/>
+	 *		'remark'=>'',//备注<br/>
 	 * ]
 	 */
 	public function update( $where, $data ) {
@@ -70,6 +82,18 @@ class OrderGiveback
 		]);
 		$data = filter_array($data, [
 			'status' => 'required',
+			'trade_no' => 'required',
+			'out_trade_no' => 'required',
+			'instalment_num' => 'required',
+			'instalment_amount' => 'required',
+			'payment_status' => 'required',
+			'payment_time' => 'required',
+			'logistics_no' => 'required',
+			'evaluation_status' => 'required',
+			'evaluation_remark' => 'required',
+			'evaluation_time' => 'required',
+			'compensate_amount' => 'required',
+			'remark' => 'required',
 		]);
 		if( count( $where ) < 1 ){
 			set_apistatus(\App\Lib\ApiStatus::CODE_92600,'还机单修改：条件参数为空');
