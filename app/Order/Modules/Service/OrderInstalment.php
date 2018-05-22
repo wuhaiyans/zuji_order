@@ -43,7 +43,8 @@ class OrderInstalment
      */
     public static function create($params){
         $order    = $params['order'];
-        $sku      = $params['sku'][0];
+        $params['sku']      = $params['sku'][0];
+        $sku      = $params['sku'];
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 

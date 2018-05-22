@@ -117,7 +117,7 @@ class OrderRepository
     /**
      *
      * 查询订单是否可以支付
-     *
+     *return boolean
      */
     public static function isPay($orderNo,$userId)
     {
@@ -135,7 +135,7 @@ class OrderRepository
         if(($orderData['order_amount']+$orderData['order_yajin'])<=0){
             return false;
         }
-        return $orderData;
+        return true;
 
     }
 

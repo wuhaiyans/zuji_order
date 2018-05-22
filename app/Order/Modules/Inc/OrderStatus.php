@@ -21,33 +21,37 @@ class OrderStatus{
      */
     const OrderWaitPaying = 1;
     /**
+     * @var int 支付中
+     */
+    const OrderPaying =2;
+    /**
      * @var int 已支付
      */
-    const OrderPayed = 2;
+    const OrderPayed = 3;
     /**
      * @var int 备货中
      */
-    const OrderInStock  = 3;
+    const OrderInStock  = 4;
     /**
      * @var int 已发货
      */
-    const OrderDeliveryed = 4;
+    const OrderDeliveryed = 5;
     /**
      * @var int 租用中
      */
-    const OrderInService = 5;
+    const OrderInService = 6;
     /**
      * @var int 已取消完成(未支付)
      */
-    const OrderCancel = 6;
+    const OrderCancel = 7;
     /**
      * @var int 关闭（支付完成后退款）
      */
-    const OrderClosedRefunded = 7;
+    const OrderClosedRefunded = 8;
     /**
      * @var int 已完成（整个订单完成状态）
      */
-    const OrderCompleted= 8;
+    const OrderCompleted= 9;
 
     //未联系
     const visitUnContact = 0;
@@ -146,6 +150,7 @@ class OrderStatus{
     public static function getStatusType(){
         return [
             self::OrderWaitPaying => '待支付',
+            self::OrderPaying => '支付中',
             self::OrderPayed => '已支付',
             self::OrderInStock => '备货中',
             self::OrderDeliveryed => '已发货',
