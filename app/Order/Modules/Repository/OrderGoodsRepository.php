@@ -70,14 +70,24 @@ class OrderGoodsRepository
 	public function getGoodsInfo( $goodsNo ) {
         $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
         if (!$result) {
-			set_code(\App\Lib\ApiStatus::CODE_92401);
+			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92400)->setMsg('商品信息未获取成功!');
 			return [];
 		}
         $goodsInfo = $result->toArray();
-		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
-		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
+//		var_dump($goodsInfo);exit;
+//		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
+//		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
 		$goodsInfo['begin_time'] = date('Y-m-d H:i:s',$goodsInfo['begin_time']);
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;
+	}
+	/**
+	 * 根据条件更新数据
+	 * @param array $where
+	 * @param array $data
+	 * @return boolen
+	 */
+	public function update( $where, $data ) {
+		return $this->orderGoods->where($where)->update($data);
 	}
 }

@@ -38,7 +38,7 @@ class GivebackController extends Controller
 		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
-			return apiResponse([],ApiStatus::CODE_92400);
+			return apiResponse([], get_code(), get_msg());
 		}
 		//组合最终返回商品基础数据
 		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
@@ -106,12 +106,31 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
+			//生成还机单编号
+			$paramsArr['giveback_no'] = $giveback_no = createNo(7);
+			//初始化还机单状态
+			$paramsArr['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY;
 			//生成还机单
 			$orderGivebackService = new OrderGiveback();
 			$orderGivebackIId = $orderGivebackService->create($paramsArr);
 			if( !$orderGivebackIId ){
-				return apiResponse([],ApiStatus::CODE_92201);
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([], get_code(), get_msg());
 			}
+			//修改商品表业务类型、商品编号、还机状态
+			$orderGoodsService = new OrderGoods();
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
+				'business_key' => 1,
+				'business_no' => $giveback_no,
+				'goods_status' => $status,
+			]);
+			if(!$orderGoodsResult){
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([], get_code(), get_msg());
+			}
+			
 			//冻结订单
 			//等待接口
 			
@@ -153,7 +172,7 @@ class GivebackController extends Controller
 		$orderGoodsInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
 		//还机单状态必须为待收货
 		if( !$orderGoodsInfo ){
-            return apiResponse([],ApiStatus::CODE_92402);
+            return apiResponse([], get_code(), get_msg());
 		}
 		if( $orderGoodsInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
             return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
@@ -166,5 +185,83 @@ class GivebackController extends Controller
             return apiResponse([],ApiStatus::CODE_92701);
 		}
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
+	}
+	
+	public function confirmDetection( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'goods_no'     => 'required',//商品编号
+            'evaluation_status'     => 'required',//检测状态【1：合格；2：不合格】
+            'evaluation_time'     => 'required',//检测时间
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+        }
+		if( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && (empty($paramsArr['evaluation_remark']) || empty($paramsArr['compensate_amount'])) ){
+            return apiResponse([],ApiStatus::CODE_91000,'检测不合格时：检测备注和赔偿金额均不能为空!');
+		}
+		$paramsArr['compensate_amount'] = isset($paramsArr['compensate_amount'])?intval($paramsArr['compensate_amount']):0;
+		$goodsNo = $paramsArr['goods_no'];//商品编号提取
+		
+		//-+--------------------------------------------------------------------
+		// | 业务处理
+		//-+--------------------------------------------------------------------
+		
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//-+--------------------------------------------------------------------
+		// | 业务处理：判断是否需要支付【1有无未完成分期，2检测不合格的赔偿】
+		//-+--------------------------------------------------------------------
+		//获取商品信息
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		
+		//获取当前商品未完成分期列表数据
+		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+		//剩余分期需要支付的总金额、还机需要支付总金额
+		$zujinNeedPay = $givebackNeedPay = 0;
+		//剩余分期数
+		$instalmentNum = 0;
+		if( !empty($instalmentList[$goodsNo]) ){
+			foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+				if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+					$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+					$instalmentNum++;
+				}
+			}
+		}
+		//总共需要支付金额
+		$givebackNeedPay = $zujinNeedPay + $paramsArr['compensate_amount'];
+		//押金金额
+		$yajin = $orderGoodsInfo['yajin'];
+		
+		//开启事务
+		DB::beginTransaction();
+		try{
+			//初始化订单
+			
+			//存在分期单，关闭分期单
+
+			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
+			if( $givebackNeedPay == 0 && $yajin == 0 ) {
+				
+			}
+			
+		} catch (Exception $ex) {
+			//回滚事务
+			DB::rollBack();
+			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
+		}
+		//提交事务
+		DB::commit();
+		return apiResponse([], ApiStatus::CODE_0, '成功');
 	}
 }

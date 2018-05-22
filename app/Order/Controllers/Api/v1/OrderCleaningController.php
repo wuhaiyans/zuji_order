@@ -35,8 +35,6 @@ class OrderCleaningController extends Controller
         $params = $request->input('params');
         $res = OrderCleaning::getOrderCleaningList($params);
 
-
-
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }
@@ -61,8 +59,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required'
+            'out_refund_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -130,8 +127,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required'
+            'out_refund_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -197,8 +193,6 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required',
             'out_refund_no'=> 'required'
         ];
         $validateParams = $this->validateParams($rules,$params);

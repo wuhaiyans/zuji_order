@@ -2,9 +2,12 @@
 namespace App\Order\Modules\Service;
 
 use App\Lib\ApiStatus;
+use App\Lib\Channel\Channel;
 use App\Lib\Payment\AlipayApi;
 use App\Lib\Payment\UnionpayApi;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\Pay\PayCreater;
 use Illuminate\Support\Facades\DB;
 
 class OrderTrade
@@ -62,23 +65,24 @@ class OrderTrade
     {
         DB::beginTransaction();
         try {
-            $order =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
-            if($order===false){
+            $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
+            if($orderInfo===false){
                 DB::rollBack();
                 return false;
             }
-            if($order['trade_no']==""){
+            if($orderInfo['trade_no']==""){
                 $trade_no =createNo(3);
                 $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
                 if(!$b){
                     DB::rollBack();
                     return false;
                 }
-                $order['trade_no'] =$trade_no;
+                $orderInfo['trade_no'] =$trade_no;
             }
+            $orderInfo =
             $arr =[
                 'bankcard_id' => $data['bankcard_id'],
-                'out_no' => $order['trade_no'],
+                'out_no' => $orderInfo['trade_no'],
                 'amount'=>"",//需要支付的金额 和分期期数 （多个商品 等需求）
                 'user_id' =>$data['user_id'],
                 'back_url' => '', //后端回调地址
@@ -99,16 +103,26 @@ class OrderTrade
 
     }
      /**
-     * 支付宝支付初始化处理
+      * 支付宝支付初始化处理
+      * $data[
+      *     'user_id'=>'',//用户ID
+      *      'return_url'=>'',//前端回调地址
+      *      'order_no'=>'', //订单编号
+      *      'type'=>'',//【必须】string；类型；ORDER，订单
+      * ]
      * @return array
      */
-    public function openAndPay($data)
+    public function alipayInitialize($data)
     {
-        $result = ['payment_url'=>'','payment_form'=>''];
         DB::beginTransaction();
         try {
-
-            $order =$this->orderRepository->isPay($data['order_no']);
+            $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
+            if($orderInfo===false){
+                DB::rollBack();
+                return false;
+            }
+            var_dump($orderInfo);die;
+            $order =$this->orderRepository->isPay($data['order_no'],$data['user_id']);
             if($order===false){
                 DB::rollBack();
                 return false;
@@ -122,6 +136,27 @@ class OrderTrade
                     return false;
                 }
                 $order['trade_no'] =$trade_no;
+            }
+            // 查询
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $order['trade_no']);
+            } catch (\App\Lib\NotFoundException $exc) {
+                // 创建支付
+                $pay = PayCreater::createPaymentWithholdFundauth([
+                    'user_id'		=> $data['user_id'],
+                    'businessType'	=> OrderStatus::BUSINESS_ZUJI,
+                    'businessNo'	=> $order['trade_no'],
+
+                    'paymentNo' => $order['trade_no'],
+                    'paymentAmount' => '0.01',
+                    'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                    'paymentFenqi'	=> 0,
+                ]);
+                $alipay=['payment_url'=>12,'payment_form'=>3];
+                return $alipay;
+            } catch (\Exception $exc) {
+                DB::rollBack();
+                echo $exc->getMessage();
+                die;
             }
 
             $alipay_data =[
@@ -140,13 +175,8 @@ class OrderTrade
 //                return false;
 //            }
             $alipay=['payment_url'=>12,'payment_form'=>3];
-            DB::commit();
+
             return $alipay;
-        } catch (\Exception $exc) {
-            DB::rollBack();
-            echo $exc->getMessage();
-            die;
-        }
 
     }
 

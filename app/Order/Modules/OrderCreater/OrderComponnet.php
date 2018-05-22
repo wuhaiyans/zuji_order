@@ -19,10 +19,14 @@ class OrderComponnet implements OrderCreater
     private $orderId = null;
     //订单编号
     private $orderNo = null;
+    //订单类型
+    private $orderType;
     //用户ID
     private $userId=0;
     //支付方式
     private $payType;
+    //租期类型
+    private $zuqiType;
     //用户组件
     private $userComponnet =null;
     //sku组件
@@ -36,11 +40,12 @@ class OrderComponnet implements OrderCreater
     private $appid;
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo=null ,int $userId,int $payType,int $appid) {
+    public function __construct( $orderNo='' ,int $userId,int $payType,int $appid,int $orderType) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
         $this->payType=$payType;
         $this->appid=$appid;
+        $this->orderType =$orderType;
     }
 
     /**
@@ -200,13 +205,14 @@ class OrderComponnet implements OrderCreater
     {
         $userSchema = $this->userComponnet->getDataSchema();
         $skuSchema =$this->skuComponnet->getDataSchema();
-        $zuqiType =$this->skuComponnet->getZuqiType();
+        $this->zuqiType =$this->skuComponnet->getZuqiType();
         $zuqiTypeName =$this->skuComponnet->getZuqiTypeName();
         return array_merge(['order'=>[
             'order_no'=>$this->orderNo,
-            'zuqi_type'=>$zuqiType,
+            'zuqi_type'=>$this->zuqiType,
             'zuqi_type_name'=>$zuqiTypeName,
             'pay_type'=>$this->payType,
+            'order_type'=>$this->orderType,
         ]],$userSchema,$skuSchema);
 
     }
@@ -252,6 +258,7 @@ class OrderComponnet implements OrderCreater
             'order_no' => $this->orderNo,  // 编号
             'user_id' => $this->userId,
             'pay_type' => $this->payType,
+            'zuqi_type'=>$this->zuqiType,
             'order_amount' => $order_amount,
             'goods_yajin' => $goods_yajin,
             'order_yajin' => $order_yajin,
@@ -260,6 +267,7 @@ class OrderComponnet implements OrderCreater
             'discount_amount' => $discount_amount,
             'appid' =>$this->appid,
             'create_time'=>time(),
+            'order_type'=>$this->orderType,
         ];
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);

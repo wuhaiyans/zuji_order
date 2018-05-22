@@ -28,7 +28,7 @@ class Receive
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.is_qualified',//模拟
+            'method'=> 'api.Return.isQualified',//模拟
             'data' => json_encode(['order'=>$order_no,'business_key'=>$business_key,'data'=>$data])
         ]);
 

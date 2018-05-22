@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__.'/../app/Lib/PublicFunc.php';
 /*
 |--------------------------------------------------------------------------
 | Create The Application

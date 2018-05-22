@@ -37,25 +37,17 @@ class OrderStatus{
      */
     const OrderInService = 5;
     /**
-     * @var int 关闭:已取消完成
+     * @var int 已取消完成(未支付)
      */
-    const OrderClosed = 6;
+    const OrderCancel = 6;
     /**
-     * @var int 退货退款完成单
+     * @var int 关闭（支付完成后退款）
      */
-    const OrderRefunded = 7;
+    const OrderClosedRefunded = 7;
     /**
-     * @var int 还机完成单
+     * @var int 已完成（整个订单完成状态）
      */
-    const OrderGivebacked= 8;
-    /**
-     * @var int 买断完成单
-     */
-    const OrderBuyouted = 9;
-    /**
-     * @var int 换货完成单
-     */
-    const OrderChanged= 10;
+    const OrderCompleted= 8;
 
     //未联系
     const visitUnContact = 0;
@@ -66,6 +58,86 @@ class OrderStatus{
     //已回访
     const visited = 3;
 
+
+    //--------------------------------------------------------------------------------------------
+    //--+ 订单类型 --------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------
+    //线上订单
+    const orderOnlineService =1;
+    //门店订单
+    const orderStoreService =2;
+    //小程序订单
+    const orderMiniService=3;
+
+    //--------------------------------------------------------------------------------------------
+    //--+ 订单业务类型 --------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------
+    //租机业务
+    const BUSINESS_ZUJI =1;
+    //退货业务
+    const BUSINESS_RETURN=2;
+    //换货业务
+    const BUSINESS_BARTER =3;
+    //还机业务
+    const BUSINESS_GIVEBACK=4;
+    //买断业务
+    const BUSINESS_BUYOUT=5;
+    //续租业务
+    const BUSINESS_RELET =6;
+
+    /**
+     * 订单核心业务类型
+     * @return array
+     */
+    public static function getBusinessType(){
+        return [
+            self::BUSINESS_ZUJI => '租机业务',
+            self::BUSINESS_RETURN => '退货业务',
+            self::BUSINESS_BARTER => '换货业务',
+            self::BUSINESS_GIVEBACK => '还机业务',
+            self::BUSINESS_BUYOUT => '买断业务',
+            self::BUSINESS_RELET => '续租业务',
+        ];
+    }
+
+    /**
+     * 订单核心业务类型 转换成 类型名称
+     * @param int $status   订单类型值
+     * @return string 订单类型名称
+     */
+    public static function getBusinessName($status){
+        $list = self::getBusinessType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+
+
+    /**
+     * 订单类型
+     * @return array
+     */
+    public static function getOrderType(){
+        return [
+            self::orderOnlineService => '线上订单',
+            self::orderStoreService => '门店订单',
+            self::orderMiniService => '小程序订单',
+        ];
+    }
+
+    /**
+     * 订单类型值 转换成 类型名称
+     * @param int $status   订单类型值
+     * @return string 订单类型名称
+     */
+    public static function getTypeName($status){
+        $list = self::getOrderType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
 
     /**
      * 订单冻结类型
@@ -78,11 +150,10 @@ class OrderStatus{
             self::OrderInStock => '备货中',
             self::OrderDeliveryed => '已发货',
             self::OrderInService => '租用中',
-            self::OrderClosed => '关闭',
-            self::OrderRefunded => '退货退款完成单',
-            self::OrderGivebacked => '还机完成单',
-            self::OrderBuyouted => '买断完成单',
-            self::OrderChanged => '换货完成单',
+            self::OrderCancel => '已取消（未支付）',
+            self::OrderClosedRefunded => '已关闭（已退款）',
+            self::OrderCompleted => '已完成',
+
         ];
     }
 

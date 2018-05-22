@@ -8,6 +8,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Config;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
@@ -139,9 +140,9 @@ class DeliveryService
      * @throws \Exception
      * 修改物流
      */
-    public function logistics($delivery_no, $logistics_id, $logistics_no)
+    public function logistics($params)
     {
-        if (!DeliveryRepository::logistics($delivery_no, $logistics_id, $logistics_no)) {
+        if (!DeliveryRepository::logistics($params)) {
             throw new \Exception('修改物流失败');
         }
     }
@@ -157,6 +158,21 @@ class DeliveryService
         if (!DeliveryRepository::cancelMatch($delivery_no)) {
             throw new \Exception('取消配货失败');
         }
+    }
+
+
+    /**
+     * @param null $logisticsId
+     * @return string
+     *
+     * 获取快递名
+     */
+    public function getLogistics($logisticsId=null)
+    {
+        if ($logisticsId === null) {
+            return Config::$logistics;
+        }
+        return isset(Config::$logistics[$logisticsId]) ? Config::$logistics[$logisticsId] : '';
     }
 
     /**
@@ -237,8 +253,28 @@ class DeliveryService
             $it = $item->toArray();
             $it['logistics_name'] = $this->getLogisticsName($it['logistics_id']);
             $it['status_mark'] = $item->getStatus();
+            $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
+            $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
+
+            $goods_list = $item->goods->toArray();
+            $imei_list  = $item->imeis->toArray();
+
+            foreach ($goods_list as &$g) {
+                if (!is_array($imei_list)) continue;
+                foreach ($imei_list as $im) {
+                    if ($im['serial_no'] == $g['serial_no']) {
+                        $g['imeis'][] = $im['imei'];
+                    }
+                }
+            }unset($g);
+
             $it['imeis'] = $item->imeis->toArray();
-            $it['goods'] = $item->goods->toArray();
+            $it['goods'] = $goods_list;
+
+
+
+//            $it['imeis'] = $item->imeis->toArray();
+//            $it['goods'] = $item->goods->toArray();
             array_push($result, $it);
         }
 

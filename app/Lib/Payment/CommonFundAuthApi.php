@@ -60,9 +60,10 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'trade_no' => '', //支付系统授权码
-     *		'user_id' => '', //支付系统授权码
-     *		'type' => '', //支付系统授权码
+     *		'name'		=> '', //交易名称
+     *		'trade_no'	=> '', //支付系统授权码
+     *		'user_id'	=> '', //支付系统授权码
+     *		'type'		=> '', //支付系统授权码
      * ]
      * @return mixed false：失败；array：成功
      * [
@@ -92,15 +93,14 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 
     /**
      * 预授权解冻接口
-     * @param string $appid		应用ID
      * @param array $params
      * [
+     *		'name'		=> '', //交易名称
      *		'out_trade_no' => '', //订单系统交易码
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //解冻金额 单位：分
      *		'back_url' => '', //后台通知地址
      *		'user_id' => '', //用户id
-     *		'remark' => '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
@@ -125,9 +125,9 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 
     /**
      * 预授权转支付接口
-     * @param string $appid		应用ID
      * @param array $params
      * [
+     *		'name'		=> '', //交易名称
      *		'out_trade_no' => '', //业务系统授权码
      *		'auth_no' => '', //支付系统授权码
      *		'amount' => '', //交易金额；单位：分

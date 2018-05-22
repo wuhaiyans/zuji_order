@@ -7,14 +7,11 @@ use App\Order\Models\OrderYidun;
 
 class OrderYidunRepository
 {
-    private $yidun;
-
     public function __construct()
     {
-        $this->yidun = new OrderYidun();
     }
-    public function add($data){
-        return $this->yidun->insertGetId($data);
+    public static function add($data){
+        $info =OrderYidun::create($data);
+        return $info->getQueueableId();
     }
-
 }

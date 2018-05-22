@@ -19,7 +19,7 @@ class OrderListFiler
      */
     private static function getOrderState()
     {
-//        Channel::getChannel(config('tripartite.Interior_Goods_Request_data'), )
+       $channlistName =  Channel::getChannelListName(config('tripartite.Interior_Goods_Request_data'));
         return array(
 
                     'order_state'=>Inc\OrderStatus::getStatusType(),
@@ -30,6 +30,7 @@ class OrderListFiler
                         ),
                     'pay_type_list' =>Inc\PayInc::getPayList(),
                     'visit_type_list' =>Inc\OrderStatus::getVisitType(),
+                    'appid_list' => $channlistName
                 );
     }
 
