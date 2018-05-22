@@ -63,7 +63,7 @@ class PayController extends Controller
 	
 	// 测试 退款
 	public function testRefund(){
-//		\App\Lib\Payment\CommonRefundApi::apply([
+//		$info = \App\Lib\Payment\CommonRefundApi::apply([
 //    		'name'			=> '测试退款',			//交易名称
 //    		'out_refund_no' => \createNo(1),		//业务系统退款码
 //    		'payment_no'	=> '10A52223851791881', //支付系统支付码
