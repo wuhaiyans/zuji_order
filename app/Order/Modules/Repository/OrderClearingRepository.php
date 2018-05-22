@@ -37,6 +37,7 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
+            'user_id' => $param['user_id'],
             'out_refund_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
@@ -192,6 +193,8 @@ class OrderClearingRepository
             if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
 
                 $orderData->refund_time  = time();
+                $orderData->refund_no   = $param['refund_no'];
+
             }
         }
 
@@ -202,6 +205,7 @@ class OrderClearingRepository
             if ($param['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
 
                 $orderData->deposit_unfreeze_time  = time();
+                $orderData->out_auth_no   = $param['out_auth_no'];
             }
         }
 
@@ -213,6 +217,7 @@ class OrderClearingRepository
             if ($param['deposit_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
 
                 $orderData->deposit_deduction_time  = time();
+                $orderData->out_trade_no   = $param['out_trade_no'];
             }
         }
 

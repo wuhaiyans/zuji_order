@@ -15,4 +15,14 @@ class Config
         'battery'=> '电池',
         'system' => '系统'
     ];
+
+    /**
+     * @var array
+     * 快递公司
+     */
+    static $logistics = [
+        1 => '顺风',
+        2 => '中通',
+        3 => '圆通',
+    ];
 }

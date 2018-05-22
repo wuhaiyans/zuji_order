@@ -1,13 +1,11 @@
 <?php
 namespace App\Lib\Payment;
-use App\Lib\ApiRequest;
 /**
  * 公共支付接口
  *
  * @author 
  */
 class CommonPaymentApi extends \App\Lib\BaseApi {
-	
 	/**
 	 * 统一支付页面URL接口
 	 * @param array $params
@@ -47,7 +45,8 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * [
 	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
 	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
-	 *		'status'			=> '',	//【必选】string success：支付成功；其他值为未完成支付
+	 *		'status'			=> '',	//【必选】string success：支付成功；init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+	 *		'trade_time'			=> '',	//【必选】string 时间戳
 	 * ]
 	 * @throws \Exception			请求失败时抛出异常
 	 */

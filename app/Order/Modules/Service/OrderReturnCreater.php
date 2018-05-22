@@ -129,6 +129,7 @@ class OrderReturnCreater
            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
            $create_data['refund_amount']=$order_info[0]->order_amount;//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
+           $create_data['user_id']=$order_info[0]->user_id;
            $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
           if(!$create_clear){
               DB::rollBack();
@@ -170,11 +171,14 @@ class OrderReturnCreater
         foreach($goods_info as $k=>$v){
             $receive_data['logistics_id']=$goods_info[$k]->wuliu_channel_id;
             $receive_data['logistics_no']=$goods_info[$k]->logistics_no;
-            $receive_data[$k]['serial_no']=$goods_info[$k]->serial_number;
-            $receive_data[$k]['quantity']=$goods_info[$k]->quantity;
-            $receive_data[$k]['imei1']=$goods_info[$k]->imei1;
-            $receive_data[$k]['imei2']=$goods_info[$k]->imei2;
-            $receive_data[$k]['imei3']=$goods_info[$k]->imei3;
+            $receive_data['receive_detail'][] =[
+                'serial_no' => $goods_info[$k]->serial_number,
+                'quantity' => $goods_info[$k]->quantity,
+                'imei1'     =>$goods_info[$k]->imei1,
+                'imei2'     =>$goods_info[$k]->imei2,
+                'imei3'     =>$goods_info[$k]->imei3,
+
+            ];
         }
        $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$receive_data);//创建待收货单
        if(!$create_receive){
@@ -570,6 +574,7 @@ public function _parse_order_where($where=[]){
                 $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
                 $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
                 $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
+                $create_data['user_id']=$order_info['user_id'];
                 //信息待定
                 $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){

@@ -9,12 +9,6 @@ use App\Lib\Curl;
  */
 class JobQueueApi {
 	
-//	private static $_url = 'https://job-api-zuji.huishoubao.com/api';
-	private static $_url = 'http://job-api.hsbbj.com/api';
-	
-	private static $_auth = '7ZT%SC8HB4*Ad$bWyEaj2mBy%qd2G49A';
-	
-	
 	/**
 	 * 实时任务
 	 * @param string $key	任务唯一标识
@@ -83,7 +77,7 @@ class JobQueueApi {
 	private static function push( string $key, string $url, array $data, string $callback='', string $type='realTime', string $start='',string $cron='' ):bool{
 		$_config = [
 			'interface' => 'jobAddAsync',
-			'auth' => self::$_auth,
+			'auth' => env('JOB_AUTH'),
 			'name' => $key,
 			'desc' => '',
 			'type' => $type,
@@ -94,8 +88,9 @@ class JobQueueApi {
 			'cron' => $cron,
 			'retries' => 3, // 错误重试次数
 		];
+		LogApi::info('[任务]'.$key,$_config);
 		// 请求
-		$res = Curl::post(self::$_url, json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}
@@ -112,11 +107,11 @@ class JobQueueApi {
 	public static function disable( string $key):bool{
 		$_config = [
 			'interface' => 'jobDisable',
-			'auth' => self::$_auth,
+			'auth' => env('JOB_AUTH'),
 			'name' => $key,
 		];
 		// 请求
-		$res = Curl::post(self::$_url, json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}

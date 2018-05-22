@@ -30,11 +30,15 @@ class OrderGiveback
 		]);
 
 		if( count($data)!=6 ){
-			set_error('订单还机单存储失败：参数缺失!');
+			set_apistatus(\App\Lib\ApiStatus::CODE_92100, '还机单创建：必要参数缺失!');
 			return false;
 		}
 		$data['create_time'] = $data['update_time'] = time();
-        return $this->order_giveback_repository->create( $data );
+        $result = $this->order_giveback_repository->create( $data );
+		if( !$result ) {
+			set_code(\App\Lib\ApiStatus::CODE_92201);
+		}
+		return $result;
     }
     /**
      * 根据商品编号获取一条还机单数据
@@ -68,9 +72,11 @@ class OrderGiveback
 			'status' => 'required',
 		]);
 		if( count( $where ) < 1 ){
+			set_apistatus(\App\Lib\ApiStatus::CODE_92600,'还机单修改：条件参数为空');
 			return false;
 		}
 		if( count( $data ) < 1 ){
+			set_apistatus(\App\Lib\ApiStatus::CODE_92600,'还机单修改：数据参数为空');
 			return false;
 		}
 		$data['update_time'] = time();
