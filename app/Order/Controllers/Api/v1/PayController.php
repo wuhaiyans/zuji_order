@@ -270,14 +270,14 @@ class PayController extends Controller
 		try {
 			// 校验状态
 			$status_info = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($params);
-			var_dump( $status_info );
-			if( $status_info['status'] != 'success' ){// 支付成功
-				echo 'withhold status not success';exit;
+			// 签约状态
+			if( $status_info['status'] != 'signed' ){// 已签约
+				echo 'withhold status not signed';exit;
 			}
 			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
-			
+			var_dump( $pay );
 			if( $pay->isSuccess() ){// 已经支付成功
 				echo 'withhold notice repeated ';exit;
 			}

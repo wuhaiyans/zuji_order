@@ -43,6 +43,10 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
 	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
 	 *		'status'			=> '', //【必选】string 状态；init：初始化；signed：已签约；unsigned：已解约
+	 *		'create_time'		=> '', //【必选】int	创建时间
+	 *		'sign_time'			=> '', //【必选】int 签约时间
+	 *		'unsign_time'		=> '', //【必选】int 解约时间
+	 *		'user_id'			=> '', //【必选】int 用户ID
 	 * ]
 	 * @throws \Exception			请求失败时抛出异常
 	 */
