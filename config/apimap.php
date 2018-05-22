@@ -132,6 +132,10 @@ return [
     'api.giveback.confirm.delivery'       => 'GivebackController@confirmDelivery',
 	//还机更新状态【接收确认检测结果】
     'api.giveback.confirm.detection'       => 'GivebackController@confirmDetection',
+	//还机支付完成回调
+    'api.giveback.callback.payment'       => 'GivebackController@callbackPayment',
+	//还机清算完成回调
+    'api.giveback.callback.clearing'       => 'GivebackController@callbackClearing',
 
     // test
     'api.Test.test'       => 'TestController@test',

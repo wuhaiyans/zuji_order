@@ -725,7 +725,7 @@ class PayController extends Controller
             //更新订单退押金状态
             $orderParam = [
                 'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'refund_no'     => $param['params']['refund_no'],
+                'auth_no'     => $param['params']['refund_no'],
                 'deposit_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -796,7 +796,7 @@ class PayController extends Controller
             //更新订单清算退款状态
             $orderParam = [
                 'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'refund_no'     => $param['params']['refund_no'],
+                'trade_no'     => $param['params']['refund_no'],
                 'refund_status' => OrderCleaningStatus::refundPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
