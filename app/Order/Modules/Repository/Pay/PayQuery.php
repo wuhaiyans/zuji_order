@@ -66,6 +66,7 @@ class PayQuery {
 		$info = \App\Order\Models\OrderPayModel::where([
 			'withhold_no'	=> $withhold_no,
 		])->first();
+		var_dump( $info );
 		if( $info ){
 			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
