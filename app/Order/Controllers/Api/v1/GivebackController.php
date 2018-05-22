@@ -121,7 +121,7 @@ class GivebackController extends Controller
 			//修改商品表业务类型、商品编号、还机状态
 			$orderGoodsService = new OrderGoods();
 			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
-				'business_key' => 1,
+				'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				'business_no' => $giveback_no,
 				'goods_status' => $status,
 			]);
@@ -202,10 +202,14 @@ class GivebackController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
+		if( !in_array($paramsArr['evaluation_status'], [OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED,OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED])  ){
+            return apiResponse([],ApiStatus::CODE_91000,'检测状态参数值错误!');
+		}
 		if( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && (empty($paramsArr['evaluation_remark']) || empty($paramsArr['compensate_amount'])) ){
             return apiResponse([],ApiStatus::CODE_91000,'检测不合格时：检测备注和赔偿金额均不能为空!');
 		}
 		$paramsArr['compensate_amount'] = isset($paramsArr['compensate_amount'])?intval($paramsArr['compensate_amount']):0;
+		$paramsArr['evaluation_remark'] = isset($paramsArr['evaluation_remark'])?strval($paramsArr['evaluation_remark']):'';
 		$goodsNo = $paramsArr['goods_no'];//商品编号提取
 		
 		//-+--------------------------------------------------------------------
@@ -221,6 +225,11 @@ class GivebackController extends Controller
 		//获取商品信息
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		//获取还机单信息
+		$orderGivevbackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
+		if( !$orderGivevbackInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
 		
@@ -246,15 +255,87 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
-			//初始化订单
-			
-			//存在分期单，关闭分期单
+			//初始化还机单需要更新的数据
+			$data = [
+				'instalment_num' => $instalmentNum,
+				'instalment_amount' => $zujinNeedPay,
+				'evaluation_status' => $paramsArr['evaluation_status'],
+				'evaluation_remark' => $paramsArr['evaluation_remark'],
+				'evaluation_time' => $paramsArr['evaluation_time'],
+				'compensate_amount' => $paramsArr['compensate_amount'],
+			];
+			//存在未完成分期单，关闭分期单
+			if( $instalmentNum ){
+				
+				//分期关闭失败，回滚
+			}
 
 			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
 			if( $givebackNeedPay == 0 && $yajin == 0 ) {
-				
+				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
+				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+				$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN;
+				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
+				//解冻订单
+				\App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+			}
+			//需要支付总金额小于等于押金金额：交由清算处理
+			elseif( $givebackNeedPay <= $yajin ){
+				//清算处理
+				$clearData = [
+					'user_id' => $orderGivevbackInfo['user_id'],
+					'order_no' => $orderGivevbackInfo['order_no'],
+					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'bussiness_no' => $orderGivevbackInfo['giveback_no'],
+					'deposit_deduction_amount' => ''.$givebackNeedPay,//扣除押金金额
+					'deposit_unfreeze_amount' => ''.( $yajin - $givebackNeedPay ),//退还押金金额
+				];
+				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+				if( !$orderCleanResult ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_93200, '押金退还清算单创建失败!');
+				}
+				//更新还机单状态
+				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
+				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+				$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_ON_RETURN;
+				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
+			}
+			//需要支付总金额大于押金金额：交由支付处理，在支付回调验证押金进行清算处理
+			else{
+				$payData = [
+					'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
+					'businessNo' => $orderGivevbackInfo['giveback_no'],// 业务编号
+					'paymentAmount' => $givebackNeedPay,// Price 支付金额，单位：元
+				];
+				$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+				if( !$payResult->isSuccess() ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_93200, '支付单创建失败!');
+				}
+				//更新还机单状态
+				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
 			}
 			
+			//更新还机表状态失败回滚
+			if( !$orderGivebackResult ){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_0, '成功');
+			}
+			$goodsData = [
+				'goods_status' => $data['status'],
+			];
+			//更新商品表状态
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], $goodsData);
+			if( !$orderGoodsResult ){
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([], get_code(), get_msg());
+			}
 		} catch (Exception $ex) {
 			//回滚事务
 			DB::rollBack();

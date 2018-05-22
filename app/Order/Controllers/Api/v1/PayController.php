@@ -109,7 +109,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = \createNo(1);
+		$business_no = 'FA52283402709380';
 		$pay = null;
 		try {
 			// 查询
@@ -152,8 +152,8 @@ class PayController extends Controller
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			$url_info = $pay->getCurrentUrl( $_params );
-			header( 'Location: '.$url_info['url'] );
-//			var_dump( $url_info );
+//			header( 'Location: '.$url_info['url'] );
+			var_dump( $url_info );
 			
 		} catch (\Exception $exc) {
 			echo $exc->getMessage()."\n";

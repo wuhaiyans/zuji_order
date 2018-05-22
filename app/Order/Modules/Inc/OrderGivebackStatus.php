@@ -33,15 +33,20 @@ class OrderGivebackStatus{
      */
     const STATUS_DEAL_WAIT_PAY = 3;
     /**
-	 * 逾期违约|结束
+	 * 处理中【待清算】
      * @var int 4
      */
-    const STATUS_AGED_FAIL = 4;
+    const STATUS_DEAL_WAIT_RETURN_DEPOSTI = 4;
     /**
-	 * 交易完成
+	 * 逾期违约|结束
      * @var int 5
      */
-    const STATUS_DEAL_DONE = 5;
+    const STATUS_AGED_FAIL = 5;
+    /**
+	 * 交易完成
+     * @var int 6
+     */
+    const STATUS_DEAL_DONE = 6;
 
 
     /**
@@ -54,6 +59,7 @@ class OrderGivebackStatus{
             self::STATUS_DEAL_WAIT_DELIVERY => '处理中|待收货',
             self::STATUS_DEAL_WAIT_CHECK => '处理中|待检测',
             self::STATUS_DEAL_WAIT_PAY => '处理中|待支付',
+            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => '处理中|待清算',
             self::STATUS_AGED_FAIL => '逾期违约|关闭',
             self::STATUS_DEAL_DONE => '交易完成|关闭',
         ];
@@ -165,6 +171,59 @@ class OrderGivebackStatus{
      */
     public static function getEvaluationStatusName($status){
         $list = self::getEvaluationStatusList();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+	//-+------------------------------------------------------------------------
+	// | 还机单押金状态定义
+	//-+------------------------------------------------------------------------
+    /**
+	 * 初始化：无意义
+     * @var int 0
+     */
+    const YAJIN_STATUS_INIT = 0;
+    /**
+	 * 无需退还押金
+     * @var int 1
+     */
+    const YAJIN_STATUS_NO_NEED_RETURN = 1;
+    /**
+	 * 押金退还中
+     * @var int 2
+     */
+    const YAJIN_STATUS_ON_RETURN = 2;
+    /**
+	 * 押金退还完成
+     * @var int 3
+     */
+    const YAJIN_STATUS_RETURN_COMOLETION = 3;
+    /**
+	 * 押金退还失败
+     * @var int 4
+     */
+    const YAJIN_STATUS_RETURN_FAIL = 4;
+    /**
+     * 订单还机押金退还状态列表
+     * @return array
+     */
+    public static function getYajinStatusList(){
+        return [
+            self::YAJIN_STATUS_NO_NEED_RETURN => '无需退还押金',
+            self::YAJIN_STATUS_ON_RETURN => '退还押金中',
+            self::YAJIN_STATUS_RETURN_COMOLETION => '押金退还完成',
+            self::YAJIN_STATUS_RETURN_FAIL => '押金退还失败',
+        ];
+    }
+
+    /**
+     * 订单还机押金退还状态值 转换成 状态名称
+     * @param int $status   订单还机押金退还状态值
+     * @return string 订单还机押金退还状态名称
+     */
+    public static function getYajinStatusName($status){
+        $list = self::getYajinStatusList();
         if( isset($list[$status]) ){
             return $list[$status];
         }
