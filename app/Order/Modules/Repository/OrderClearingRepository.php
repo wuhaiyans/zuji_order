@@ -29,6 +29,7 @@ class OrderClearingRepository
         if (empty($param) || empty($param['order_no'])) {
             return false;
         }
+
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
 
@@ -37,8 +38,8 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
-            'user_id' => $param['user_id'],
-            'out_refund_no' => createNo(5),
+            'user_id' => $orderInfo['user_id'],
+            'clean_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
             'deposit_deduction_amount'=>    isset($param['deposit_deduction_amount'])?$param['deposit_deduction_amount']:0.00 ,
@@ -55,7 +56,12 @@ class OrderClearingRepository
             'update_time'=>time(),
             'app_id' => $orderInfo['appid'],
             'out_account'=>$orderInfo['pay_type'],
+
+            'out_refund_no'=>   $param['out_refund_no'] ??  '',
+            'out_trade_no'=> $param['out_trade_no'] ??  '',
+            'out_auth_no'=> $param['out_auth_no'] ??  '',
         ];
+//        sql_profiler();
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
