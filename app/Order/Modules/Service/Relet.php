@@ -51,7 +51,12 @@ class Relet
      * @return bool
      */
     public function setStatus($params){
-        return $this->reletRepository->setStatus($params);
+        $row = $this->reletRepository->getRowId($params['id']);
+        if($row['status'] == 1){
+            return $this->reletRepository->setStatus($params);
+        }else{
+            set_msg('只允许创建续租取消');
+        }
     }
 
     /**

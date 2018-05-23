@@ -36,6 +36,26 @@ class OrderGivebackRepository
 		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
 		return false;
 	}
+    /**
+     * 获取当前订单下所有未完成的还机单
+	 * @param string $orderNo 订单编号
+	 * @return array|false
+	 */
+	public function getUnfinishedListByOrderNo( $orderNo ) {
+		$where['order_no'] = $orderNo;
+		$where['status'] = [
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY,
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_PAY,
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI,
+		];
+		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->get();
+		if( $result ) {
+			return $result->toArray();
+		}
+		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
+		return false;
+	}
 	/**
 	 * 根据条件更新数据
 	 * @param array $where
