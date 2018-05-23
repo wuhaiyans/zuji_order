@@ -54,21 +54,26 @@ class MiniNotifyController extends Controller
      * 芝麻支付宝小程序 订单取消接口异步回调
      */
     private function OrderCancelNotify(){
-
+        $data = $this->data;
+        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder( $data['order_no'] );
+        echo '取消订单成功';
     }
 
     /*
      * 芝麻支付宝小程序 订单关闭接口异步回调
      */
     private function orderCloseNotify(){
-
+        $data = $this->data;
+        echo '取消订单成功';
     }
 
     /*
      * 芝麻支付宝小程序 订单扣款接口异步回调
      */
     private function  withholdingNotify(){
+        $data = $this->data;
 
+        echo '取消订单成功';
     }
 
     /**
@@ -76,6 +81,42 @@ class MiniNotifyController extends Controller
      *      订单创建成功异步通知
      */
     public function rentTransition(){
+        $orders = $this->data;
+        //获取appid
+        $appid =$orders['appid'];
+        $pay_type = \App\Order\Modules\PayInc::IncMiniAlipay;//支付方式ID
+        $address_id=$orders['params']['address_id'];//收货地址ID
+        $sku =$orders['params']['sku_info'];
+        $coupon = $orders['params']['coupon'];
+        $user_id = 18;
 
+        //判断参数是否设置
+        if(empty($pay_type)){
+            echo '支付方式不能为空';die;
+        }
+        if(empty($appid)){
+            echo 'appid不能为空';die;
+        }
+        if(empty($address_id)){
+            echo '收货地址不能为空';die;
+        }
+        if(count($sku)<1){
+            echo '商品ID不能为空';die;
+        }
+
+        $data =[
+            'appid'=>1,
+            'pay_type'=>1,
+            'address_id'=>8,
+            'sku'=>$sku,
+            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
+            'user_id'=>18,  //增加用户ID
+        ];
+        $OrderOperate = new \App\Order\Modules\Service\OrderCreater();
+        $res = $OrderOperate->create($data);
+        if(!$res){
+            echo '确认订单失败';die;
+        }
+        echo '确认订单成功';die;
     }
 }
