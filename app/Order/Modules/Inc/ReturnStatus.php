@@ -78,6 +78,35 @@ class ReturnStatus {
             self::ReturnTui =>'退款中',
         ];
     }
+    public static function getReturnList(){
+        return [
+            'refund'=>[
+                self::ReturnInvalid => '无效状态',
+                self::ReturnCreated => '提交申请',
+                self::ReturnAgreed => '审核通过',
+                self::ReturnDenied => '审核拒绝',
+                self::ReturnTuiKuan => '已退款',
+                self::ReturnTui =>'退款中',
+            ],//退款
+            'return'=>[
+                self::ReturnInvalid => '无效状态',
+                self::ReturnCreated => '提交申请',
+                self::ReturnAgreed => '审核通过',
+                self::ReturnDenied => '审核拒绝',
+                self::ReturnCanceled => '取消退货申请',
+                self::ReturnReceive =>'已收货',
+                self::ReturnTuiHuo => '已退货',
+            ],//退货
+            'barter'=>[
+                self::ReturnInvalid => '无效状态',
+                self::ReturnCreated => '提交申请',
+                self::ReturnAgreed => '审核通过',
+                self::ReturnDenied => '审核拒绝',
+                self::ReturnHuanHuo => '已换货',
+            ]//换货
+        ];
+
+    }
 
     public static function getStatusName($status){
         $list = self::getStatusList();

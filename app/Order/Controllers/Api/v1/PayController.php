@@ -798,7 +798,7 @@ class PayController extends Controller
             $orderParam = [
                 'out_refund_no' => $orderCleanInfo['out_refund_no'],
                 'trade_no'     => $param['params']['refund_no'],
-                'refund_status' => OrderCleaningStatus::refundPayd
+                'deposit_deduction_status' => OrderCleaningStatus::depositDeductionStatusPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
             if ($success) {
