@@ -225,8 +225,14 @@ class OrderInstalment
 
 
     /**
-     * 根据用户id和订单号，关闭用户的分期
-     * @return array
+     * 根据用户id和订单号、商品编号，关闭用户的分期
+     * @param data  array
+     * [
+     *      'id'       => '', 主键ID
+     *      'order_no' => '', 订单编号
+     *      'goods_no' => '', 商品编号
+     *      'user_id'  => ''  用户id
+     * ]
      */
     public static function close($data){
         if (!is_array($data) || $data == [] ) {

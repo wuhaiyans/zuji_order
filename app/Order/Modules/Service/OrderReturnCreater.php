@@ -150,11 +150,11 @@ class OrderReturnCreater
                DB::rollBack();
                return ApiStatus::CODE_33009;
            }
-           /*$b =SmsApi::sendMessage($order_info[0]->mobile,'SMS_113455999',[
-                'realName' =>,
-                'orderNo' => ,
+           /*$b =SmsApi::sendMessage($order_info[0]->user_mobile,'SMS_113455999',[
+                'realName' =>$order_info[0]->realname,
+                'orderNo' => $params['order_no'],
                 'goodsName' => ,
-                'shoujianrenName' => "test",
+                'shoujianrenName' =>$order_info[0]->name,
                 'returnAddress' => "test",
                 'serviceTel'=>OldInc::Customer_Service_Phone,
             ],);*/
@@ -189,14 +189,14 @@ class OrderReturnCreater
            return ApiStatus::CODE_34003;//创建待收货单失败
        }
             //申请退货同意发送短信
-          /*  $b =SmsApi::sendMessage($order_info[0]->mobile,'SMS_113455999',[
-                'realName' =>,
-                'orderNo' => ,
-                'goodsName' => ,
-                'shoujianrenName' => "test",
-                'returnAddress' => "test",
-                'serviceTel'=>OldInc::Customer_Service_Phone,
-            ],);*/
+        /*$b =SmsApi::sendMessage($order_info[0]->user_mobile,'SMS_113455999',[
+               'realName' =>$order_info[0]->realname,
+               'orderNo' => $params['order_no'],
+               'goodsName' => ,
+               'shoujianrenName' =>$order_info[0]->name,
+               'returnAddress' => "test",
+               'serviceTel'=>OldInc::Customer_Service_Phone,
+           ],$params['order_no']);*/
             return ApiStatus::CODE_0;//成功
 
     }
@@ -251,10 +251,10 @@ class OrderReturnCreater
         // SmsApi::sendMessage($user_info['mobile'],1,array());
        /* $b = SmsApi::sendMessage('13020059043','hsb_sms_d284d',[
             'realName' =>$order_info[0]->realname,
-            'orderNo' =>$order_info[0]->order_no,
+            'orderNo' =>$params['order_no'],
             'goodsName' => $goods_info[0]['good_name'],
             'serviceTel'=>OldInc::Customer_Service_Phone,
-        ],$order_info[0]->order_no);*/
+        ],$params['order_no']);*/
         return ApiStatus::CODE_0;//成功
     }
     //取消退货申请
