@@ -10,6 +10,7 @@
 
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Repository\OrderRepository;
 
 /**
  * 订单通知
@@ -64,6 +65,10 @@ class OrderNotice{
 		return $this;
 	}
 
+	/**
+	 * 异步通知
+	 * @return bool
+	 */
 	public function asynNotify():bool{
 		return \App\Lib\Common\JobQueueApi::addRealTime($this->scene.'-'.$this->order_no, env('APP_URL').'/order/notice/notify', [
 			'order_no' => $this->order_no,
@@ -80,24 +85,21 @@ class OrderNotice{
 	public function notify(){
 		
 		// 查询订单
-		$order_info = [
-			'order_no' => $this->order_no,
-			'user_id' => '5',
-			'realname' => '刘红星',
-			'mobile' => '15311371612',
-			'app_id' => '1',
-		];
+		$order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
+		if( !$order_info ){
+			return false;
+		}
 		
-		if( $this->channel & self::SM ){
-			$code = $this->getSMCode($this->scene, $order_info['app_id']);
+		if( $this->channel & self::SM && $order_info['mobile'] ){
+			$code = $this->getSMCode($this->scene, $order_info['appid']);
 			if( !$code ){
 				\App\Lib\Common\LogApi::error('订单短息模板不存在', [
 					'order_no' => $this->order_no,
 					'scene' => $this->scene,
-					'app_id' => $order_info['app_id'],
+					'appid' => $order_info['appid'],
 				]);
 			}
-			\App\Lib\Common\SmsApi::sendCode('15311371612');
+			\App\Lib\Common\SmsApi::sendCode( $order_info['mobile'] );
 			//\App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, $order_info);
 		} 
 		
