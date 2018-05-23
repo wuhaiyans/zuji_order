@@ -43,7 +43,8 @@ class OrderInstalment
      */
     public static function create($params){
         $order    = $params['order'];
-        $sku      = $params['sku'][0];
+        $params['sku']      = $params['sku'][0];
+        $sku      = $params['sku'];
         $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
         $user     = $params['user'];
 
@@ -348,6 +349,22 @@ class OrderInstalment
             return false;
         }
         $result =  OrderInstalmentRepository::save($params, $data);
+        return $result;
+    }
+
+    /**
+     * 冻结分期
+     * @param string $goods_no 商品单号
+     * @return bool
+     */
+    public static function instalment_unfreeze($goods_no){
+        if ( !$goods_no ) {
+            return false;
+        }
+        $where = [
+            'goods_no' => $goods_no,
+        ];
+        $result =  OrderInstalmentRepository::save($where, ['unfreeze_status'=>0,'status'=>OrderInstalmentStatus::CANCEL]);
         return $result;
     }
 }

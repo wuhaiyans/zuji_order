@@ -43,7 +43,7 @@ class Receive
         $detail = $data['receive_detail'];
 
         if (is_array($detail)) {
-            foreach ($data as $d) {
+            foreach ($detail as $d) {
                 if (!$d['serial_no'] || !$d['quantity']) continue;
                 
                 $receive_detail[] = [

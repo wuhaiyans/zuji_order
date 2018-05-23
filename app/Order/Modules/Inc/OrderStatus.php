@@ -21,41 +21,37 @@ class OrderStatus{
      */
     const OrderWaitPaying = 1;
     /**
+     * @var int 支付中
+     */
+    const OrderPaying =2;
+    /**
      * @var int 已支付
      */
-    const OrderPayed = 2;
+    const OrderPayed = 3;
     /**
      * @var int 备货中
      */
-    const OrderInStock  = 3;
+    const OrderInStock  = 4;
     /**
      * @var int 已发货
      */
-    const OrderDeliveryed = 4;
+    const OrderDeliveryed = 5;
     /**
      * @var int 租用中
      */
-    const OrderInService = 5;
+    const OrderInService = 6;
     /**
-     * @var int 关闭:已取消完成
+     * @var int 已取消完成(未支付)
      */
-    const OrderClosed = 6;
+    const OrderCancel = 7;
     /**
-     * @var int 退货退款完成单
+     * @var int 关闭（支付完成后退款）
      */
-    const OrderRefunded = 7;
+    const OrderClosedRefunded = 8;
     /**
-     * @var int 还机完成单
+     * @var int 已完成（整个订单完成状态）
      */
-    const OrderGivebacked= 8;
-    /**
-     * @var int 买断完成单
-     */
-    const OrderBuyouted = 9;
-    /**
-     * @var int 换货完成单
-     */
-    const OrderChanged= 10;
+    const OrderCompleted= 9;
 
     //未联系
     const visitUnContact = 0;
@@ -86,7 +82,9 @@ class OrderStatus{
     const BUSINESS_RETURN=2;
     //换货业务
     const BUSINESS_BARTER =3;
-    //还机业务
+	/**
+	 * 还机业务
+	 */
     const BUSINESS_GIVEBACK=4;
     //买断业务
     const BUSINESS_BUYOUT=5;
@@ -154,15 +152,15 @@ class OrderStatus{
     public static function getStatusType(){
         return [
             self::OrderWaitPaying => '待支付',
+            self::OrderPaying => '支付中',
             self::OrderPayed => '已支付',
             self::OrderInStock => '备货中',
             self::OrderDeliveryed => '已发货',
             self::OrderInService => '租用中',
-            self::OrderClosed => '关闭',
-            self::OrderRefunded => '退货退款完成单',
-            self::OrderGivebacked => '还机完成单',
-            self::OrderBuyouted => '买断完成单',
-            self::OrderChanged => '换货完成单',
+            self::OrderCancel => '已取消（未支付）',
+            self::OrderClosedRefunded => '已关闭（已退款）',
+            self::OrderCompleted => '已完成',
+
         ];
     }
 

@@ -291,7 +291,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-           // $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
 
             //渠道
@@ -306,11 +306,9 @@ class OrderCreater
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
-              //  User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
-            $b = $orderCreater->create();
-            var_dump($schemaData);die;
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){

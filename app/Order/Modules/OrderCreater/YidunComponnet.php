@@ -105,8 +105,7 @@ class YidunComponnet implements OrderCreater
             'score' => $data['yidun']['score'],
             'strategies' =>$data['yidun']['strategies'],
         ];
-        $yidunReposit = new OrderYidunRepository();
-        $yidunId =$yidunReposit->add($yidunData);
+        $yidunId =OrderYidunRepository::add($yidunData);
         if(!$yidunId){
             $this->getOrderCreater()->setError('保存蚁盾数据失败');
             return false;

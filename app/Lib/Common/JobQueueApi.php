@@ -111,7 +111,7 @@ class JobQueueApi {
 			'name' => $key,
 		];
 		// 请求
-		$res = Curl::post(env('JOB_API'), json_encode($_config));
+		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}

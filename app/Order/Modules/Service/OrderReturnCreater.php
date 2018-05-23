@@ -114,6 +114,9 @@ class OrderReturnCreater
         //获取用户订单信息
         $params_where['orderNo']=$params['order_no'];
         $order_info=$this->orderRepository->getOrderInfo($params_where);
+        if(!$order_info){
+            return ApiStatus::CODE_34005;//查无此订单
+        }
         $where[]=['order_no','=',$params['order_no']];
         if(isset($params['goods_no'])){
             $where[]=['goods_no','=',$params['goods_no']];
@@ -142,7 +145,7 @@ class OrderReturnCreater
                DB::rollBack();
                return ApiStatus::CODE_33008;
            }
-           $goodsresult=$this->orderReturnRepository->goodsupdate($params);//修改商品状态
+           $goodsresult=$this->orderReturnRepository->goodsupdate($params);//修改商品状 态
            if(!$goodsresult){
                DB::rollBack();
                return ApiStatus::CODE_33009;
@@ -171,11 +174,14 @@ class OrderReturnCreater
         foreach($goods_info as $k=>$v){
             $receive_data['logistics_id']=$goods_info[$k]->wuliu_channel_id;
             $receive_data['logistics_no']=$goods_info[$k]->logistics_no;
-            $receive_data[$k]['serial_no']=$goods_info[$k]->serial_number;
-            $receive_data[$k]['quantity']=$goods_info[$k]->quantity;
-            $receive_data[$k]['imei1']=$goods_info[$k]->imei1;
-            $receive_data[$k]['imei2']=$goods_info[$k]->imei2;
-            $receive_data[$k]['imei3']=$goods_info[$k]->imei3;
+            $receive_data['receive_detail'][] =[
+                'serial_no' => $goods_info[$k]->serial_number,
+                'quantity' => $goods_info[$k]->quantity,
+                'imei1'     =>$goods_info[$k]->imei1,
+                'imei2'     =>$goods_info[$k]->imei2,
+                'imei3'     =>$goods_info[$k]->imei3,
+
+            ];
         }
        $create_receive= Receive::create($params['order_no'],$return_info['business_key'],$receive_data);//创建待收货单
        if(!$create_receive){
@@ -337,39 +343,31 @@ class OrderReturnCreater
         if(isset($params['business_key']) > 0) {
             $where['business_key'] = intval($params['business_key']);
         }
-        if (isset($params['keywords']) != '') {
-            if (isset($params['kw_type']) == 'goods_name') {
+        if (isset($params['keywords'])!= '') {
+            if (isset($params['kw_type'])&&$params['kw_type']=='goods_name') {
                 $where['goods_name'] = $params['keywords'];
-            } elseif (isset($params['kw_type']) == 'order_no') {
+            }elseif(isset($params['kw_type'])&&$params['kw_type']=='order_no') {
                 $where['order_no'] = $params['keywords'];
-            } elseif (isset($params['kw_type']) == 'mobile'){
-                $user_info = $this->orderReturnRepository->get_user_info($params['keywords']);
-                if (empty($user_info)) {
-                    // 如果没有用户  直接返回空
-                    return apiResponse([], ApiStatus::CODE_0, 'success');
-                } else {
-                    $where['user_id'] = $user_info['user_id'];
-                }
+            }elseif(isset($params['kw_type'])&&$params['kw_type']=='mobile'){
+                $where['user_mobile'] = $params['keywords'];
             }
         }
         if (isset($params['return_status']) && $params['return_status'] > 0) {
             $where['status'] = intval($params['return_status']);
         }
-        if (isset($params['user_id'])!='') {
+        if (isset($params['user_id'])) {
             $where['user_id'] = $params['user_id'];
         }
-        if (isset($params['order_status'])!='') {
+        if (isset($params['order_status'])) {
             $where['order_status'] = $params['order_status'];
         }
-        if (isset($params['appid'])!='') {
+        if (isset($params['appid'])) {
             $where['appid'] = $params['appid'];
         }
         // 查询退货申请单
         $additional['page'] = $page;
         $additional['limit'] = $size;
-
-        $where = $this->_parse_order_where($where);
-       
+        $where= $this->_parse_order_where($where);
         $data = $this->orderReturnRepository->get_list($where, $additional);
         foreach($data['data'] as $k=>$v){
             //业务类型
@@ -442,10 +440,12 @@ class OrderReturnCreater
  * @return array	查询条件
  */
 public function _parse_order_where($where=[]){
-
-      $where = filter_array($where, [
+      $p_where = filter_array($where, [
           'business_key' => 'required|is_id',
       ]);
+    if(count($p_where)<1){
+        return  apiResponse([],ApiStatus::CODE_20001);
+    }
       // 结束时间（可选），默认为为当前时间
       if( !isset($where['end_time']) ){
           $where['end_time'] = time();
@@ -467,11 +467,14 @@ public function _parse_order_where($where=[]){
       unset($where['end_time']);
     // order_no 订单编号查询，使用前缀模糊查询
     if( isset($where['order_no']) ){
-        $where1[] = ['order_return.order_no', 'like', $where['order_no'].'%'];
+        $where1[] = ['order_return.order_no', 'like', '%'.$where['order_no'].'%'];
     }
     // order_no 订单编号查询，使用前缀模糊查询
     if( isset($where['goods_name'])){
-        $where1[] = ['order_goods.goods_name', 'like', $where['goods_name'].'%'];
+        $where1[] = ['order_goods.goods_name', 'like', '%'.$where['goods_name'].'%'];
+    }
+    if(isset($where['user_mobile'])){
+        $where1[] = ['order_userinfo.user_mobile', '=', $where['user_mobile']];
     }
     if( isset($where['status']) ){
         $where1[] = ['order_return.status', '=', $where['status']];
@@ -479,7 +482,9 @@ public function _parse_order_where($where=[]){
     if( isset($where['order_status']) ){
         $where1[] = ['order_info.status', '=', $where['order_status']];
     }
-    if( isset($where['appid']) ){
+
+    if(isset($where['appid']) ){
+
         $where1[] = ['order_info.appid', '=', $where['appid']];
     }
     if( isset($where['business_key']) ){

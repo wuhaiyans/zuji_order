@@ -41,8 +41,8 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'auth_no'			=> '',//支付系统授权码
-     *		'out_auth_no'		=> '',//业务系统授权码
+     *		'fundauth_no'			=> '',//支付系统授权码
+     *		'out_fundauth_no'		=> '',//业务系统授权码
      *		'total_freeze_amount' => '',//累计授权金额；单位：分
      *		'total_unfreeze_amount' => '',//累计解冻金额；单位：分
      *		'total_pay_amount' => '',//累计转支付金额；单位：分

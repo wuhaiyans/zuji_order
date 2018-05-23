@@ -74,8 +74,9 @@ class OrderGoodsRepository
 			return [];
 		}
         $goodsInfo = $result->toArray();
-		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
-		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
+//		var_dump($goodsInfo);exit;
+//		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
+//		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
 		$goodsInfo['begin_time'] = date('Y-m-d H:i:s',$goodsInfo['begin_time']);
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;

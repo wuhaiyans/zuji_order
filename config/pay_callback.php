@@ -16,23 +16,39 @@
 //		要求：如果这时要取消支付后，必须进行退款处理，然后才可以关闭业务。
 //	2）status 为 success
 // 格式： 键：业务类型；值：可调用的函数，类静态方法
+
+/**
+ * 
+ * @param array $params
+ * @return boolean
+ */
+function _demo_callback( array $params ){
+	\App\Lib\Common\LogApi::info( '支付内部回调', $params );
+	
+	// 状态更新
+	
+	return true;
+}
+
 return [
 
 	'payment' => [
 		// 业务类型为1的支付回调通知
-		'1' => 'var_dump',
+		'1' => '\_demo_callback',
 		// 业务类型为1的支付回调通知
-		'2' => 'var_dump',
+		'2' => '\_demo_callback',
 		// 业务类型为1的支付回调通知
-		'3' => 'var_dump',
+		'3' => '\_demo_callback',
+		// 业务类型为4还机的支付回调通知
+		'4' => '\App\Order\Controllers\Api\v1\callbackPayment',
 		// 业务类型为1的支付回调通知
-		'4' => 'var_dump',
-		// 业务类型为1的支付回调通知
-		'5' => 'var_dump',
+		'5' => '\_demo_callback',
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'2' => '\App\Lib\Refund\Refund\refundUpdate'
+		'2' => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为4还机的清算回调通知
+		'4' => '\App\Order\Controllers\Api\v1\callbackClearing',
 	],
 ];
