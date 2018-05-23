@@ -108,7 +108,7 @@ class OrderNotice{
 		
 		$arr = [
 			'1' => [
-				'order_created1' => '123456',
+				'order_created' => '123456',
 				'order_cancel' => '123456',
 			],
 			'91' => [
