@@ -58,7 +58,13 @@ class NoticeController extends Controller
 		// 发送通知
 		$b = $notice->notify();
 		
-		$b || $this->error($params, '通知失败');
+		if( !$b ){
+			$this->error($params, '通知失败');
+		}
+		
+		echo json_encode([
+			'status' => 'ok',
+		]);exit;
 	}
 	
 	/**
