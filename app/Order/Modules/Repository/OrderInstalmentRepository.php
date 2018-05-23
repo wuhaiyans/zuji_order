@@ -252,11 +252,18 @@ class OrderInstalmentRepository
             return false;
         }
         $where = [];
+        if(isset($data['id'])){
+            $where[] = ['id', '=', $data['id']];
+        }
+
         if(isset($data['order_no'])){
             $where[] = ['order_no', '=', $data['order_no']];
         }
-        if(isset($data['id'])){
-            $where[] = ['id', '=', $data['id']];
+        if(isset($data['goods_no'])){
+            $where[] = ['goods_no', '=', $data['goods_no']];
+        }
+        if(isset($data['user_id'])){
+            $where[] = ['user_id', '=', $data['user_id']];
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
