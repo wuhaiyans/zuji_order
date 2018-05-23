@@ -91,8 +91,6 @@ class LogApi {
 				'content' => $data,						// 内容
 			],
 		];
-		dispatch(new \App\Jobs\LogJob( json_encode($_config) ));
-		
 //		
 //		// 日志系统接口
 //		try {
