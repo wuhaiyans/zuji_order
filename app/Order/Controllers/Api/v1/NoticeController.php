@@ -66,7 +66,7 @@ class NoticeController extends Controller
 	 * @param array $params
 	 * @param string $error
 	 */
-	private function error(array $params, string $error){
+	private function error( $params, string $error){
 		
 		echo json_encode([
 			'error' => $error,
