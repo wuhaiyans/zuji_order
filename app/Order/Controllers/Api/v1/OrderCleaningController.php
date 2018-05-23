@@ -161,9 +161,12 @@ class OrderCleaningController extends Controller
 
         $rules = [
             'business_type'  => 'required',
-            'business_no'  => 'required'
+            'business_no'  => 'required',
+            'order_no'   => 'required'
         ];
+
         $validateParams = $this->validateParams($rules,$params);
+
         if ($validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
