@@ -5,6 +5,7 @@ return [
     //imei导入
     'warehouse.imei.import' => 'ImeiController@import', //导入imei
     'warehouse.imei.list' => 'ImeiController@list', //列表
+    'warehouse.imei.upload' => 'ImeiController@upload', //列表
 
 
     //物流
@@ -31,7 +32,6 @@ return [
 
 
     //收货 待完成
-
     'warehouse.receive.checkItems'=> 'ReceiveController@checkItems', //取消收货
     'warehouse.receive.cancelReceive'=> 'ReceiveController@cancelReceive', //取消收货
     'warehouse.receive.list'=> 'ReceiveController@list', //列表

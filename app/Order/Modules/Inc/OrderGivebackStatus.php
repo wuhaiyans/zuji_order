@@ -193,7 +193,7 @@ class OrderGivebackStatus{
 	 * 押金退还中
      * @var int 2
      */
-    const YAJIN_STATUS_ON_RETURN = 2;
+    const YAJIN_STATUS_IN_RETURN = 2;
     /**
 	 * 押金退还完成
      * @var int 3
@@ -211,7 +211,7 @@ class OrderGivebackStatus{
     public static function getYajinStatusList(){
         return [
             self::YAJIN_STATUS_NO_NEED_RETURN => '无需退还押金',
-            self::YAJIN_STATUS_ON_RETURN => '退还押金中',
+            self::YAJIN_STATUS_IN_RETURN => '退还押金中',
             self::YAJIN_STATUS_RETURN_COMOLETION => '押金退还完成',
             self::YAJIN_STATUS_RETURN_FAIL => '押金退还失败',
         ];
@@ -224,6 +224,59 @@ class OrderGivebackStatus{
      */
     public static function getYajinStatusName($status){
         $list = self::getYajinStatusList();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+	//-+------------------------------------------------------------------------
+	// | 还机单代扣状态定义
+	//-+------------------------------------------------------------------------
+    /**
+	 * 初始化：无意义
+     * @var int 0
+     */
+    const WITHHOLD_STATUS_INIT = 0;
+    /**
+	 * 无需代扣
+     * @var int 1
+     */
+    const WITHHOLD_STATUS_NO_NEED_WITHHOLD = 1;
+    /**
+	 * 代扣中
+     * @var int 2
+     */
+    const WITHHOLD_STATUS_IN_WITHOLD = 2;
+    /**
+	 * 代扣成功
+     * @var int 3
+     */
+    const WITHHOLD_STATUS_SUCCESS = 3;
+    /**
+	 * 代扣失败
+     * @var int 4
+     */
+    const WITHHOLD_STATUS_FAIL = 4;
+    /**
+     * 订单还机代扣状态列表
+     * @return array
+     */
+    public static function getWithholdStatusList(){
+        return [
+            self::YAJIN_STATUS_NO_NEED_RETURN => '无需代扣',
+            self::YAJIN_STATUS_ON_RETURN => '代扣中',
+            self::YAJIN_STATUS_RETURN_COMOLETION => '代扣成功',
+            self::YAJIN_STATUS_RETURN_FAIL => '代扣失败',
+        ];
+    }
+
+    /**
+     * 订单还机代扣状态值 转换成 状态名称
+     * @param int $status   订单还机代扣状态值
+     * @return string 订单还机代扣状态名称
+     */
+    public static function getWithholdStatusName($status){
+        $list = self::getWithholdStatusList();
         if( isset($list[$status]) ){
             return $list[$status];
         }
