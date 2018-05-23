@@ -9,6 +9,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 
 use App\Warehouse\Modules\Service\ImeiService;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Request;
 
 class ImeiController extends Controller
 {
@@ -55,6 +56,18 @@ class ImeiController extends Controller
         }
 
         return \apiResponse([]);
+    }
+
+
+    /**
+     * 上传文件
+     */
+    public function upload(Request $request)
+    {
+        $filepath = ImeiService::upload($request);
+
+        dd($filepath);
+
     }
 
 

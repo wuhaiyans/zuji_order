@@ -9,6 +9,9 @@ namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Repository\ImeiRepository;
+use Dotenv\Exception\InvalidFileException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Support\Facades\Storage;
 
 class ImeiService
 {
@@ -48,5 +51,43 @@ class ImeiService
         }
 
         return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+    }
+
+    /**
+     * @param Request $request
+     *
+     * 上传imei文件
+     */
+    public static function upload()
+    {
+        $request = request();
+
+        if (!$request->isMethod('post')) {
+            throw new MethodNotAllowedHttpException('请使用post方法上传文件');
+        }
+
+        $files = $request->file('params');
+        if (!$files) {
+            throw new InvalidFileException('上传文件失败');
+        }
+
+        $file = $files['imei_file'];
+        if (!$file->isValid()) {
+            throw new InvalidFileException('上传文件失败');
+        }
+        $ext = $file->getClientOriginalExtension();     // 扩展名
+        $realPath = $file->getRealPath();   //临时文件的绝对路径
+
+        // 上传文件
+        $filename = date('Y-m-d-H-i-s') . '-' . uniqid() . '.' . $ext;
+
+        $bool = Storage::disk('uploads')->put($filename, file_get_contents($realPath));
+
+
+        if ($bool) {
+            return storage_path('app/uploads') . '/' . $filename;
+        }
+
+        throw new InvalidFileException('上传文件失败');
     }
 }
