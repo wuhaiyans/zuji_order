@@ -20,8 +20,7 @@ class OrderGiveback extends Model
 		'order_no', //订单编号
 		'goods_no', //商品编号
 		'user_id', //用户ID
-		'trade_no', //交易流水号
-		'out_trade_no', //返回的交易流水号
+		'withhold_status', //还机列表代扣状态 0 默认
 		'status', //还机列表状态 0 默认
 		'instalment_num', //剩余还款的分期数
 		'instalment_amount', //剩余还款的分期总金额（分）
