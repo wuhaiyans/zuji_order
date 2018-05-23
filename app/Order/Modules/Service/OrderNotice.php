@@ -99,7 +99,13 @@ class OrderNotice{
 					'appid' => $order_info['appid'],
 				]);
 			}
-			\App\Lib\Common\SmsApi::sendCode( $order_info['mobile'] );
+			\App\Lib\Common\LogApi::debug('短信通知',[
+					'order_no' => $this->order_no,
+					'scene' => $this->scene,
+					'mobile' => $order_info['mobile'],
+					'templateCode' => $code,
+			]);
+			//\App\Lib\Common\SmsApi::sendCode( $order_info['mobile'] );
 			//\App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, $order_info);
 		} 
 		
