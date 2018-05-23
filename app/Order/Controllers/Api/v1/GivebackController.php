@@ -190,6 +190,23 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
+			//-+------------------------------------------------------------------------------
+			// |收货时：查询未完成分期直接进行代扣，无未完成分期代扣状态直接修改【无需代扣】
+			//-+------------------------------------------------------------------------------
+			//获取当前商品未完成分期列表数据
+			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+			//剩余分期需要支付的总金额、还机需要支付总金额
+			$zujinNeedPay = $givebackNeedPay = 0;
+			//剩余分期数
+			$instalmentNum = 0;
+			if( !empty($instalmentList[$goodsNo]) ){
+				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+					if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+						$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+						$instalmentNum++;
+					}
+				}
+			}
 			
 			//更新还机单状态到待收货
 			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
