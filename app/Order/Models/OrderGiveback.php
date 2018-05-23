@@ -27,6 +27,8 @@ class OrderGiveback extends Model
 		'instalment_amount', //剩余还款的分期总金额（分）
 		'payment_status', //支付状态 0默认 
 		'payment_time', //支付时间
+		'logistics_id', //物流类型
+		'logistics_name', //物流名称
 		'logistics_no', //物流编号
 		'evaluation_status', //检测结果状态
 		'evaluation_remark', //检测结果备注

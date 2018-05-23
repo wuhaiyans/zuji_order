@@ -24,12 +24,14 @@ class OrderGiveback
 			'order_no' => 'required',//订单编号
 			'goods_no' => 'required',//商品编号
 			'user_id' => 'required',//用户id
+			'logistics_id' => 'required',//物流类型
+			'logistics_name' => 'required',//物流名称
 			'logistics_no' => 'required',//物流单号
 			'giveback_no' => 'required',//还机单编号
 			'status' => 'required',//订单状态
 		]);
 
-		if( count($data)!=6 ){
+		if( count($data)!=8 ){
 			set_apistatus(\App\Lib\ApiStatus::CODE_92100, '还机单创建：必要参数缺失!');
 			return false;
 		}
@@ -80,6 +82,8 @@ class OrderGiveback
 	 *		'instalment_amount'=>'',//剩余还款的分期总金额（分）<br/>
 	 *		'payment_status'=>'',//支付状态 0默认<br/>
 	 *		'payment_time'=>'',//支付时间<br/>
+	 *		'logistics_id'=>'',//物流类型<br/>
+	 *		'logistics_name'=>'',//物流名称<br/>
 	 *		'logistics_no'=>'',//物流编号<br/>
 	 *		'evaluation_status'=>'',//检测结果<br/>
 	 *		'evaluation_remark'=>'',//检测备注<br/>
@@ -101,6 +105,8 @@ class OrderGiveback
 			'instalment_amount' => 'required',
 			'payment_status' => 'required',
 			'payment_time' => 'required',
+			'logistics_id' => 'required',
+			'logistics_name' => 'required',
 			'logistics_no' => 'required',
 			'evaluation_status' => 'required',
 			'evaluation_remark' => 'required',

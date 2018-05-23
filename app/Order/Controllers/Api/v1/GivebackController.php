@@ -95,12 +95,14 @@ class GivebackController extends Controller
             'order_no'     => 'required',//订单编号
             'user_id'     => 'required',//用户id
             'logistics_no'     => 'required',//物流单号
+            'logistics_id'     => 'required',//物流id
+            'logistics_name'     => 'required',//物流名称
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
-		$goodsNoArr = $paramsArr['goods_no'];
+		$goodsNoArr = is_array($paramsArr['goods_no']) ? $paramsArr['goods_no'] : [$paramsArr['goods_no']];
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
@@ -185,10 +187,24 @@ class GivebackController extends Controller
 		if( $orderGoodsInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
             return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
-		$result = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
-		if( !$result ){
-            return apiResponse([],ApiStatus::CODE_92701);
+		//开启事务
+		DB::beginTransaction();
+		try{
+			
+			//更新还机单状态到待收货
+			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
+			if( !$orderGivebackResult ){
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([],ApiStatus::CODE_92701);
+			}
+		} catch (Exception $ex) {
+			//事务回滚
+			DB::rollBack();
+			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
 		}
+		//提交事务
+		DB::commit();
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
 	}
 	
@@ -364,9 +380,14 @@ class GivebackController extends Controller
 	
 	/**
 	 * 还机单清算完成回调接口
-	 * @param Request $request
+	 * @param array $params 还机单清算完成回调参数<br/>
+	 * $params = [
+	 *		'business_type' => '',//业务类型【必须是还机业务】
+	 *		'business_no' => '',//业务编码【必须是还机单编码】
+	 *		'status' => '',//支付状态  processing：处理中；success：支付完成
+	 * ]
 	 */
-	public function callbackClearing( Request $request ) {
+	public function callbackClearing( $params ) {
 		//清算成功
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
@@ -381,7 +402,7 @@ class GivebackController extends Controller
 	 * 还机单支付完成回调接口
 	 * @param Request $request
 	 */
-	public function callbackPayment( Request $request ) {
+	public function callbackPayment( $params ) {
 		//-+--------------------------------------------------------------------
 		// | 判断是否支付成功
 		//-+--------------------------------------------------------------------
