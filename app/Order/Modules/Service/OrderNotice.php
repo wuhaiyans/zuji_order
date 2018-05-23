@@ -97,6 +97,7 @@ class OrderNotice{
 					'app_id' => $order_info['app_id'],
 				]);
 			}
+			\App\Lib\Common\SmsApi::sendCode('15311371612');
 			//\App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, $order_info);
 		} 
 		
