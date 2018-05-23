@@ -59,6 +59,7 @@ class PayController extends Controller
     		'out_agreement_no'	=> 'FA52283402712189', //业务平台签约协议号
     		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
 		]);
+		
 		var_dump( $info );exit;
 	}
 		
