@@ -33,20 +33,25 @@ class OrderGivebackStatus{
      */
     const STATUS_DEAL_WAIT_PAY = 3;
     /**
-	 * 处理中【待清算】
+	 * 处理中【支付确认中】
      * @var int 4
      */
-    const STATUS_DEAL_WAIT_RETURN_DEPOSTI = 4;
+    const STATUS_DEAL_IN_PAY = 4;
     /**
-	 * 逾期违约|结束
+	 * 处理中【押金退还中】【待清算】
      * @var int 5
      */
-    const STATUS_AGED_FAIL = 5;
+    const STATUS_DEAL_WAIT_RETURN_DEPOSTI = 5;
     /**
-	 * 交易完成
+	 * 逾期违约|结束
      * @var int 6
      */
-    const STATUS_DEAL_DONE = 6;
+    const STATUS_AGED_FAIL = 6;
+    /**
+	 * 交易完成
+     * @var int 7
+     */
+    const STATUS_DEAL_DONE = 7;
 
 
     /**
@@ -59,7 +64,8 @@ class OrderGivebackStatus{
             self::STATUS_DEAL_WAIT_DELIVERY => '处理中|待收货',
             self::STATUS_DEAL_WAIT_CHECK => '处理中|待检测',
             self::STATUS_DEAL_WAIT_PAY => '处理中|待支付',
-            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => '处理中|待清算',
+            self::STATUS_DEAL_IN_PAY => '处理中|支付确认中',
+            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => '处理中|押金退还中',
             self::STATUS_AGED_FAIL => '逾期违约|关闭',
             self::STATUS_DEAL_DONE => '交易完成|关闭',
         ];
@@ -243,20 +249,10 @@ class OrderGivebackStatus{
      */
     const WITHHOLD_STATUS_NO_NEED_WITHHOLD = 1;
     /**
-	 * 代扣中
+	 * 代扣已执行【不考虑后果】
      * @var int 2
      */
-    const WITHHOLD_STATUS_IN_WITHOLD = 2;
-    /**
-	 * 代扣成功
-     * @var int 3
-     */
-    const WITHHOLD_STATUS_SUCCESS = 3;
-    /**
-	 * 代扣失败
-     * @var int 4
-     */
-    const WITHHOLD_STATUS_FAIL = 4;
+    const WITHHOLD_STATUS_ALREADY_WITHHOLD = 2;
     /**
      * 订单还机代扣状态列表
      * @return array
@@ -264,9 +260,7 @@ class OrderGivebackStatus{
     public static function getWithholdStatusList(){
         return [
             self::YAJIN_STATUS_NO_NEED_RETURN => '无需代扣',
-            self::YAJIN_STATUS_ON_RETURN => '代扣中',
-            self::YAJIN_STATUS_RETURN_COMOLETION => '代扣成功',
-            self::YAJIN_STATUS_RETURN_FAIL => '代扣失败',
+            self::WITHHOLD_STATUS_ALREADY_WITHHOLD => '代扣已执行',
         ];
     }
 

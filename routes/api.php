@@ -35,7 +35,7 @@ $api->version('v1', [
             ->name('api.user.show');
 
         // 代扣扣款回调
-        $api->post('createpayNotify', 'PayController@createpayNotify');
+        $api->post('createpayNotify', 'WithholdController@createpayNotify');
 
         // 提前还款回调
         $api->post('repaymentNotify', 'PayController@repaymentNotify');

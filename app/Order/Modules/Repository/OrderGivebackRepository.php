@@ -47,6 +47,7 @@ class OrderGivebackRepository
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_PAY,
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_IN_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI,
 		];
 		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->get();

@@ -65,18 +65,18 @@ class GivebackController extends Controller
 		
 		//长租代扣分期，展示已支付租金和待支付租金
 		$data['zujin_view_flag'] = 1;
-		$zujinAlreadyPay = $zujinNeedPay = 0;
+		$zujinAlreadyPay = $instalmentAmount = 0;
 		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
 				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
 			}
 			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-				$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+				$instalmentAmount += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
 			}
 		}
 		//组合最终返回价格基础数据
 		$data['zujin_already_pay'] = $zujinAlreadyPay;
-		$data['zujin_need_pay'] = $zujinNeedPay;
+		$data['zujin_need_pay'] = $instalmentAmount;
 		return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
 	}
 	/**
@@ -191,32 +191,26 @@ class GivebackController extends Controller
 		DB::beginTransaction();
 		try{
 			//-+------------------------------------------------------------------------------
-			// |收货时：查询未完成分期直接进行代扣，无未完成分期代扣状态直接修改【无需代扣】
+			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
-			//剩余分期需要支付的总金额、还机需要支付总金额
-			$zujinNeedPay = $givebackNeedPay = 0;
-			//剩余分期数
-			$instalmentNum = 0;
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					$withholdParams = [
-						'agreement_no'	=> $instalmentInfo['agreement_no'], //支付平台代扣协议号
-						'out_trade_no'	=> $instalmentInfo['out_trade_no'], //业务系统授权码
-						'amount'		=> $instalmentInfo['amount'], //交易金额；单位：分
-						'back_url'		=> config('pay_callback_admin.giveback_withhlod'), //后台通知地址
-						'name'			=> 'giveback_withhold', //交易名称
-						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
-					];
-					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
-					$zujinNeedPay += $instalmentInfo['amount'];
-					$instalmentNum++;
+					OrderInstalment::instalment_withhold($instalmentInfo['id']);
 				}
+				//代扣已执行
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
+			} else {
+				//无需代扣
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
 			
 			//更新还机单状态到待收货
-			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
+			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+				'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
+				'withhold_status' => $withhold_status,
+			]);
 			if( !$orderGivebackResult ){
 				//事务回滚
 				DB::rollBack();
@@ -232,7 +226,11 @@ class GivebackController extends Controller
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
 	}
 	
-	public function confirmDetection( Request $request ) {
+	/**
+	 * 还机确认收货结果
+	 * @param Request $request
+	 */
+	public function confirmEvaluation( Request $request ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
@@ -279,41 +277,86 @@ class GivebackController extends Controller
 		}
 		
 		//获取当前商品未完成分期列表数据
-		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 		//剩余分期需要支付的总金额、还机需要支付总金额
-		$zujinNeedPay = $givebackNeedPay = 0;
+		$instalmentAmount = $givebackNeedPay = 0;
 		//剩余分期数
 		$instalmentNum = 0;
 		if( !empty($instalmentList[$goodsNo]) ){
 			foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 				if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-					$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+					$instalmentAmount += $instalmentInfo['amount'];
 					$instalmentNum++;
 				}
 			}
 		}
-		//总共需要支付金额
-		$givebackNeedPay = $zujinNeedPay + $paramsArr['compensate_amount'];
-		//押金金额
-		$yajin = $orderGoodsInfo['yajin'];
+		
+		//拼接相关参数到paramsArr数组
+		$paramsArr['order_no'] = $orderGivevbackInfo['order_no'];//订单编号
+		$paramsArr['user_id'] = $orderGivevbackInfo['user_id'];//用户id
+		$paramsArr['giveback_no'] = $orderGivevbackInfo['giveback_no'];//还机单编号
+		
+		$paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
+		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
+		$paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
+		
+		$paramsArr['unfinished_num'] = count($orderGivebackService->getUnfinishedListByOrderNo($orderGivevbackInfo['order_no']));//当前商品对应订单所有处于还机处理中状态还机单数量
 		
 		//开启事务
 		DB::beginTransaction();
 		try{
+			//存在未完成分期单，关闭分期单
+			if( $instalmentNum ){
+				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
+			}
+			//分期关闭失败，回滚
+			if( !$instalmentResult ) {
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
+			}
+			//-+----------------------------------------------------------------
+			// | 检测合格-代扣成功(无剩余分期)
+			//-+----------------------------------------------------------------
+			if( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED && !$instalmentNum ){
+				$dealResult = $this->__dealEvaYesWitNo( $paramsArr, $status );
+			}
+			//-+----------------------------------------------------------------
+			// | 检测合格-代扣不成功(有剩余分期)
+			//-+----------------------------------------------------------------
+			elseif ( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED && $instalmentNum ) {
+				$dealResult = $this->__dealEvaYesWitYes( $paramsArr, $status );
+			}
+			
+			//-+----------------------------------------------------------------
+			// | 检测不合格-代扣成功(无剩余分期)
+			//-+----------------------------------------------------------------
+			
+			elseif ( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && !$instalmentNum ) {
+				
+			}
+			
+			//-+----------------------------------------------------------------
+			// | 检测不合格-代扣不成功(有剩余分期)
+			//-+----------------------------------------------------------------
+			elseif ( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && $instalmentNum ) {
+				
+			}
+			//-+----------------------------------------------------------------
+			// | 不应该出现的结果，直接返回错误
+			//-+----------------------------------------------------------------
+			else {
+				throw new \Exception('你需要一个女娲！');
+			}
+			
 			//初始化还机单需要更新的数据
 			$data = [
 				'instalment_num' => $instalmentNum,
-				'instalment_amount' => $zujinNeedPay,
+				'instalment_amount' => $instalmentAmount,
 				'evaluation_status' => $paramsArr['evaluation_status'],
 				'evaluation_remark' => $paramsArr['evaluation_remark'],
 				'evaluation_time' => $paramsArr['evaluation_time'],
 				'compensate_amount' => $paramsArr['compensate_amount'],
 			];
-			//存在未完成分期单，关闭分期单
-			if( $instalmentNum ){
-				
-				//分期关闭失败，回滚
-			}
 
 			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
 			if( $givebackNeedPay == 0 && $yajin == 0 ) {
@@ -327,7 +370,7 @@ class GivebackController extends Controller
 						DB::rollBack();
 						return apiResponse([], ApiStatus::CODE_92700, '订单解冻失败!');
 					}
-				}
+				} 
 				//修改还机单状态
 				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
@@ -378,15 +421,12 @@ class GivebackController extends Controller
 			}
 			
 			//更新还机表状态失败回滚
-			if( !$orderGivebackResult ){
+			if( !$dealResult ){
 				DB::rollBack();
-				return apiResponse([], ApiStatus::CODE_0, '成功');
+				return apiResponse([], ApiStatus::CODE_92701);
 			}
-			$goodsData = [
-				'goods_status' => $data['status'],
-			];
 			//更新商品表状态
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], $goodsData);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], ['goods_status'=>$status]);
 			if( !$orderGoodsResult ){
 				//事务回滚
 				DB::rollBack();
@@ -400,6 +440,104 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 		return apiResponse([], ApiStatus::CODE_0, '成功');
+	}
+	/**
+	 * 检测结果处理【检测合格-代扣失败(有剩余分期)】
+	 * @param array $paramsArr 业务处理的必要参数数组
+	 * $paramsArr = [<br/>
+	 *		'goods_no' => '',//商品编号	【必须】<br/>
+	 *		'evaluation_status' => '',//检测结果 【必须】<br/>
+	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
+	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'order_no' => '',//订单编号 【必须】<br/>
+	 *		'user_id' => '',//用户id 【必须】<br/>
+	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
+	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'unfinished_num' => '',//当前订单下所有处于还机未完成中的还机单数量【还机单数量大于等于1时不能解冻订单】<br/>
+	 * ]
+	 * @param int $status 还机单最新还机单状态
+	 * @return boolen 处理结果【true:处理完成;false:处理出错】
+	 */
+	private function __dealEvaYesWitNo( $paramsArr, &$status ) {
+		
+	}
+	/**
+	 * 检测结果处理【检测合格-代扣成功(无剩余分期)】
+	 * @param array $paramsArr 业务处理的必要参数数组
+	 * $paramsArr = [<br/>
+	 *		'goods_no' => '',//商品编号	【必须】<br/>
+	 *		'evaluation_status' => '',//检测结果 【必须】<br/>
+	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
+	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'order_no' => '',//订单编号 【必须】<br/>
+	 *		'user_id' => '',//用户id 【必须】<br/>
+	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
+	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'unfinished_num' => '',//当前订单下所有处于还机未完成中的还机单数量【还机单数量大于等于1时不能解冻订单】<br/>
+	 * ]
+	 * @param int $status 还机单最新还机单状态
+	 * @return boolen 处理结果【true:处理完成;false:处理出错】
+	 */
+	private function __dealEvaYesWitYes( $paramsArr, &$status ) {
+		
+	}
+	/**
+	 * 检测结果处理【检测不合格-代扣失败(有剩余分期)】
+	 * @param array $paramsArr 业务处理的必要参数数组
+	 * $paramsArr = [<br/>
+	 *		'goods_no' => '',//商品编号	【必须】<br/>
+	 *		'evaluation_status' => '',//检测结果 【必须】<br/>
+	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
+	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'order_no' => '',//订单编号 【必须】<br/>
+	 *		'user_id' => '',//用户id 【必须】<br/>
+	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
+	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'unfinished_num' => '',//当前订单下所有处于还机未完成中的还机单数量【还机单数量大于等于1时不能解冻订单】<br/>
+	 * ]
+	 * @param int $status 还机单最新还机单状态
+	 * @return boolen 处理结果【true:处理完成;false:处理出错】
+	 */
+	private function __dealEvaNoWitNo( $paramsArr, &$status ) {
+		
+	}
+	/**
+	 * 检测结果处理【检测不合格-代扣成功(无剩余分期)】
+	 * @param array $paramsArr 业务处理的必要参数数组
+	 * $paramsArr = [<br/>
+	 *		'goods_no' => '',//商品编号	【必须】<br/>
+	 *		'evaluation_status' => '',//检测结果 【必须】<br/>
+	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
+	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'order_no' => '',//订单编号 【必须】<br/>
+	 *		'user_id' => '',//用户id 【必须】<br/>
+	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
+	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'unfinished_num' => '',//当前订单下所有处于还机未完成中的还机单数量【还机单数量大于等于1时不能解冻订单】<br/>
+	 * ]
+	 * @param int $status 还机单最新还机单状态
+	 * @return boolen 处理结果【true:处理完成;false:处理出错】
+	 */
+	private function __dealEvaNoWitYes( $paramsArr, &$status ) {
+		
+	}
+	private function __parseParams( $paramsArr, &$status ) {
 	}
 	
 }

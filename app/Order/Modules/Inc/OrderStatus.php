@@ -153,7 +153,7 @@ class OrderStatus{
     }
 
     /**
-     * 订单冻结类型
+     * 订单状态
      * @return array
      */
     public static function getStatusType(){
