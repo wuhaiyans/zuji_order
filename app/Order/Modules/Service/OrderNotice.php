@@ -14,6 +14,8 @@ use App\Order\Modules\Repository\OrderRepository;
 
 /**
  * 订单通知
+ * @access public
+ * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
 class OrderNotice{
 	
@@ -46,6 +48,8 @@ class OrderNotice{
 	
 	/**
 	 * 构造函数
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param string	$order_no	订单编号
 	 * @param string	$scene		场景
 	 */
@@ -57,7 +61,10 @@ class OrderNotice{
 	
 	/**
 	 * 设置通知渠道
-	 * @param int $channel
+	 * 一个二进制位代表一个渠道，1:表示需要；0：不需要
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @param int $channel		渠道选项
 	 * @return $this
 	 */
 	public function setChannel( int $channel ){
@@ -67,9 +74,12 @@ class OrderNotice{
 
 	/**
 	 * 异步通知
+	 * 通过任务系统实现异步处理
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return bool
 	 */
-	public function asynNotify():bool{
+	public function asyncNotify():bool{
 		return \App\Lib\Common\JobQueueApi::addRealTime($this->scene.'-'.$this->order_no, env('APP_URL').'/order/notice/notify', [
 			'order_no' => $this->order_no,
 			'scene' => $this->scene,
@@ -77,7 +87,7 @@ class OrderNotice{
 	}
 	
 	/**
-	 * 发送通知
+	 * 同步通知
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @throws \Exception	发生错误时抛出异常

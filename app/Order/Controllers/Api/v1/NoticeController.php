@@ -19,7 +19,7 @@ class NoticeController extends Controller
 		// 通知器
 		$notice = new \App\Order\Modules\Service\OrderNotice( 'A522161963164886', 'order_created' );
 		
-		$b = $notice->asynNotify();
+		$b = $notice->asyncNotify();
 		
 		var_dump( $b );exit;
 	}
