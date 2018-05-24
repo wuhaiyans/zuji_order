@@ -79,4 +79,45 @@ class CommonMiniApi extends BaseApi {
 		return true;
 	}
 
+	/**
+	 * 信用套餐产品订单确认接口
+	 * @param $params
+	 * @return bool|mixed
+	 */
+	public function orderConfirm( $params ){
+
+		$params = filter_array($params, [
+			'order_no' => 'required',		    // 【必须】芝麻信用订单号
+			'transaction_id' => 'required'		// 【必须】一笔请求的唯一标志
+		]);
+
+		if( count($params)!=2 ){
+			$this->error = '信用套餐产品订单确认接口业务参数错误';
+			return false;
+		}
+
+		//请求业务参数
+		$biz_content['order_no'] = $params['order_no'];
+		$biz_content['transaction_id'] = $params['transaction_id'];
+
+		$request = new \ZhimaMerchantOrderConfirmRequest();
+		$request->setBizContent(json_encode($biz_content));
+		$result = $this->execute ( $request);
+		$debug_data = [
+			'request' => $biz_content,
+			'response' => json_decode(json_encode($result),true),
+		];
+		\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
+		$responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
+		$resultCode = $result->$responseNode->code;
+		if(!empty($resultCode)&&$resultCode == 10000){
+			$result = json_decode(json_encode($result),true);
+			return $result['zhima_merchant_order_confirm_response'];
+		} else {
+			$msg = $result->zhima_merchant_order_confirm_response->sub_msg;
+			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$msg);
+			return false;
+		}
+	}
+
 }
