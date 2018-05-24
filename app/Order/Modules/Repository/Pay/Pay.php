@@ -228,7 +228,7 @@ class Pay extends \App\Lib\Configurable
 	 * 获取 当前环节 跳转URL地址
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
-	 * @param int		$channel	请求参数
+	 * @param int		$channel	支付渠道
 	 * @param array		$params		请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
@@ -602,6 +602,7 @@ class Pay extends \App\Lib\Configurable
 	
 	/**
 	 * 获取支付跳转地址和参数
+	 * @param int		$channel	支付渠道
 	 * @param array				支付请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
@@ -635,6 +636,7 @@ class Pay extends \App\Lib\Configurable
 	
 	/**
 	 * 获取 预授权 跳转地址和参数
+	 * @param int		$channel	支付渠道
 	 * @param array				签约请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
@@ -665,6 +667,7 @@ class Pay extends \App\Lib\Configurable
 	
 	/**
 	 * 获取 代扣 签约跳转地址和参数
+	 * @param int		$channel	支付渠道
 	 * @param array				签约请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
