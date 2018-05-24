@@ -417,6 +417,8 @@ class Pay extends \App\Lib\Configurable
 	 * @param array		$params		支付成功参数
 	 * [
 	 *		'out_payment_no'	=> '',	// 支付系统支付码
+	 *		'payment_amount'	=> '',	// 支付金额；单位元
+	 *		'payment_channel'	=> '',	// 支付渠道
 	 *		'payment_time'	=> '',	// 支付时间
 	 * ]
 	 * @return bool
@@ -443,6 +445,8 @@ class Pay extends \App\Lib\Configurable
 		])->update([
 			'status' => $status,
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
+			'payment_channel' => $params['payment_channel'],
+			'payment_amount' => $params['payment_amount'],
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
