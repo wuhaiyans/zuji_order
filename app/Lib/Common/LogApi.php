@@ -76,7 +76,9 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-		dispatch(new \App\Jobs\LogJob($str));
+		$job = new \App\Jobs\LogJob($str);
+		//$job->delay(5);
+		dispatch( $job );
 		
 		$_config = [
 			'service' => gethostname(),					// 服务器名称
