@@ -33,20 +33,25 @@ class OrderGivebackStatus{
      */
     const STATUS_DEAL_WAIT_PAY = 3;
     /**
-	 * 处理中【待清算】
+	 * 处理中【支付确认中】
      * @var int 4
      */
-    const STATUS_DEAL_WAIT_RETURN_DEPOSTI = 4;
+    const STATUS_DEAL_IN_PAY = 4;
     /**
-	 * 逾期违约|结束
+	 * 处理中【押金退还中】【待清算】
      * @var int 5
      */
-    const STATUS_AGED_FAIL = 5;
+    const STATUS_DEAL_WAIT_RETURN_DEPOSTI = 5;
     /**
-	 * 交易完成
+	 * 逾期违约|结束
      * @var int 6
      */
-    const STATUS_DEAL_DONE = 6;
+    const STATUS_AGED_FAIL = 6;
+    /**
+	 * 交易完成
+     * @var int 7
+     */
+    const STATUS_DEAL_DONE = 7;
 
 
     /**
@@ -59,7 +64,8 @@ class OrderGivebackStatus{
             self::STATUS_DEAL_WAIT_DELIVERY => '处理中|待收货',
             self::STATUS_DEAL_WAIT_CHECK => '处理中|待检测',
             self::STATUS_DEAL_WAIT_PAY => '处理中|待支付',
-            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => '处理中|待清算',
+            self::STATUS_DEAL_IN_PAY => '处理中|支付确认中',
+            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => '处理中|押金退还中',
             self::STATUS_AGED_FAIL => '逾期违约|关闭',
             self::STATUS_DEAL_DONE => '交易完成|关闭',
         ];

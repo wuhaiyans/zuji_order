@@ -186,18 +186,17 @@ class WithholdController extends Controller
      * ]
      */
     public function createpay(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
 
-        if(!$appid){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        $rules = [
+            'instalment_id'     => 'required|int',
+            'remark'            => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
         }
-
-        $params = filter_array($params, [
-            'instalment_id'=>'required',
-            'remark'=>'required',
-        ]);
+        $params = $params['params'];
 
         $instalmentId   = $params['instalment_id'];
         $remark         = $params['remark'];
@@ -215,7 +214,6 @@ class WithholdController extends Controller
         }
 
         $allow = OrderInstalment::allowWithhold($instalmentId);
-
         if(!$allow){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "不允许扣款" );
@@ -256,12 +254,10 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_71004, ApiStatus::$errCodes[ApiStatus::CODE_71004]);
         }
 
-        $third = new ThirdInterface();
-        $userInfo = $third->GetUser($orderInfo['user_id']);
-
+        $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
         if( !is_array($userInfo )){
             DB::rollBack();
-            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
+            return apiResponse([], ApiStatus::CODE_60000, "获取用户接口失败");
         }
 
         // 保存 备注，更新状态
@@ -278,10 +274,16 @@ class WithholdController extends Controller
         $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
 
         // 价格
-        $amount = $instalmentInfo['amount'];
+        $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
+        }
+
+        $orderGoods = New \App\Order\Modules\Service\OrderGoods();
+        $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
+        if(!$goodsInfo){
+            return false;
         }
 
         //扣款要发送的短信
@@ -289,7 +291,7 @@ class WithholdController extends Controller
             'mobile'        => $userInfo['mobile'],
             'orderNo'       => $orderInfo['order_no'],
             'realName'      => $userInfo['realname'],
-            'goodsName'     => $orderInfo['goods_name'],
+            'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $amount,
         ];
 
@@ -362,6 +364,7 @@ class WithholdController extends Controller
             $withholding_b = $withholding->deduct($withholding_data);
             if (!$withholding_b) {
                 DB::rollBack();
+                \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $data_sms);
                     return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
@@ -491,10 +494,7 @@ class WithholdController extends Controller
                 continue;
             }
 
-            // 查询用户协议
-            $third = new ThirdInterface();
-            $userInfo = $third->GetUser($orderInfo['user_id']);
-
+            $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
             if (!is_array($userInfo)) {
                 DB::rollBack();
                 Log::error("用户信息错误");
@@ -516,11 +516,17 @@ class WithholdController extends Controller
             $subject = '订单-' . $instalmentInfo['order_no'] . '-' . $instalmentInfo['goods_no'] . '-第' . $instalmentInfo['times'] . '期扣款';
 
             // 价格
-            $amount = $instalmentInfo['amount'];
+            $amount = $instalmentInfo['amount'] * 100;
             if ($amount < 0) {
                 DB::rollBack();
                 Log::error("扣款金额不能小于1分");
                 continue;
+            }
+
+            $orderGoods = New \App\Order\Modules\Service\OrderGoods();
+            $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
+            if(!$goodsInfo){
+                return false;
             }
 
             //扣款要发送的短信
@@ -528,54 +534,17 @@ class WithholdController extends Controller
                 'mobile' => $userInfo['mobile'],
                 'orderNo' => $orderInfo['order_no'],
                 'realName' => $userInfo['realname'],
-                'goodsName' => $orderInfo['goods_name'],
+                'goodsName' => $goodsInfo['goods_name'],
                 'zuJin' => $amount,
             ];
 
             //判断支付方式
-            //判断支付方式
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
-//            $this->zhima_order_confrimed_table =$this->load->table('order2/zhima_order_confirmed');
-//            //获取订单的芝麻订单编号
-//            $zhima_order_info = $this->zhima_order_confrimed_table->where(['order_no'=>$order_info['order_no']])->find(['lock'=>true]);
-//            if(!$zhima_order_info){
-//                $this->order_service->rollback();
-//                showmessage('该订单没有芝麻订单号！','null',0);
-//            }
-//            //芝麻小程序下单渠道
-//            $Withhold = new \zhima\Withhold();
-//            $params['out_order_no'] = $order_info['order_no'];
-//            $params['zm_order_no'] = $zhima_order_info['zm_order_no'];
-//            $params['out_trans_no'] = $trade_no;
-//            $params['pay_amount'] = $amount;
-//            $params['remark'] = $remark;
-//            $b = $Withhold->withhold( $params );
-//            \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求",$params);
-//            //判断请求发送是否成功
-//            if($b == 'PAY_SUCCESS'){
-//                // 提交事务
-//                $this->order_service->commit();
-//                \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求回执",$b);
-//                showmessage('小程序扣款操作成功','null',1);
-//            }elseif($b =='PAY_FAILED'){
-//                $this->order_service->rollback();
-//                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$data_sms);
-//                showmessage("小程序支付失败", 'null');
-//
-//            }elseif($b == 'PAY_INPROGRESS'){
-//                $this->order_service->commit();
-//                showmessage("小程序支付处理中请等待", 'null');
-//            }else{
-//                $this->order_service->rollback();
-//                showmessage("小程序支付处理失败", 'null');
-//            }
-
 
             } else {
 
                 // 支付宝用户的user_id
-                $alipayUserId = $withholdInfo['out_withhold_no'];//$userInfo['alipay_user_id'];
-
+                $alipayUserId = $withholdInfo['out_withhold_no'];
                 if (!$alipayUserId) {
                     DB::rollBack();
                     Log::error("支付宝用户的user_id错误");
@@ -590,11 +559,11 @@ class WithholdController extends Controller
                     continue;
                 }
                 // 代扣接口
-                $withholding = new WithholdingApi();
-                // 扣款
+                $withholding = new \App\Lib\Payment\CommonWithholdingApi;
+
                 $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
-                $withholdingData = [
+                $withholding_data = [
                     'out_trade_no'  => $agreementNo,         //业务系统授权码
                     'amount'        => $amount,              //交易金额；单位：分
                     'back_url'      => $backUrl,             //后台通知地址
@@ -602,8 +571,12 @@ class WithholdController extends Controller
                     'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
                     'user_id'       => $orderInfo['user_id'],//业务平台用户id
                 ];
-                $withholdingResult = $withholding->withholdingPay( $withholdingData);
-                if (!$withholdingResult) {
+                $withholding_b = $withholding->deduct($withholding_data);
+
+                if (!$withholding_b) {
+                    \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
+                    //修改扣款失败
+                    OrderInstalment::save(['id'=>$instalmentId],['status'=>OrderInstalmentStatus::FAIL]);
                     if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                         OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
                         Log::error("买家余额不足");
@@ -736,7 +709,41 @@ class WithholdController extends Controller
     }
 
 
+    /**
+     * 分期扣款异步回调处理
+     */
+    public function createpayNotify(Request $request){
+        $params     = $request->all();
 
+        $rules = [
+            'reason'            => 'required',
+            'status'            => 'required|int',
+            'agreement_no'      => 'required',
+            'out_agreement_no'  => 'required',
+            'trade_no'          => 'required',
+            'out_trade_no'      => 'required',
+        ];
+
+        // 参数过滤
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        // 扣款成功 修改分期状态
+        $params = $params['params'];
+        if($params['status'] == "success"){
+            $trade_no = $params['trade_no'];
+            //修改分期状态
+            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
+            if(!$b){
+                echo "FILE";
+            }
+
+            echo "SUCCESS";
+        }
+
+    }
 
 
 }
