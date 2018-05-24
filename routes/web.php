@@ -32,3 +32,8 @@ Route::get('users/{action}', function(App\Order\Controllers\Api\v1\UsersControll
 Route::get('return/{action}', function(App\Order\Controllers\Api\v1\ReturnController $index, $action){
     return $index->$action();
 });
+//还机的回调
+
+Route::any('order/giveback/{action}', function(App\Order\Controllers\Api\v1\GivebackController $index, $action){
+    return $index->$action();
+});
