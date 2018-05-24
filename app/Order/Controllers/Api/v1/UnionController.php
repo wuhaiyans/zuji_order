@@ -18,7 +18,6 @@ class UnionController extends Controller
 
     //银联已开通银行卡列表查询接口
     public function bankCardlist(Request $request){
-        var_dump("银联已开通银行卡列表查询接口");die;
         $params =$request->all();
         $params =$params['params'];
 
@@ -30,21 +29,19 @@ class UnionController extends Controller
         if(empty($user_id)){
             return apiResponse([],ApiStatus::CODE_20001,"user_id不能为空");
         }
-
         $data =[
             'user_id'=>$user_id,
         ];
-        $res = UnionpayApi::BankCardList($appid,$data);
-        if(!is_array($res)){
+        $res = UnionpayApi::BankCardList($data);
+        if(!$res){
             return apiResponse([],ApiStatus::CODE_60001,"请开通银行卡");
         }
-        var_dump($res);die;
-        return apiResponse($res,ApiStatus::CODE_20001,"user_id不能为空");
+        return apiResponse($res,ApiStatus::CODE_0);
     }
     
     //银联开通银行卡接口
     public function openBankCard(Request $request){
-        var_dump("银联开通银行卡接口");
+        var_dump("银联开通银行卡接口");die;
         //接收请求参数
         $params = $request->all();
         $appid =$params['appid'];
@@ -62,7 +59,7 @@ class UnionController extends Controller
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
 
-        $res =UnionpayApi::openBankCard($appid,$data);
+        $res =UnionpayApi::openBankCard($data);
         var_dump($res);die;
         if(!is_array($res)){
             return api_resopnse( [], ApiStatus::CODE_60001);
@@ -86,7 +83,7 @@ class UnionController extends Controller
         if(count($data)!=2){
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
-        $res =UnionpayApi::backPolling($appid,$data);
+        $res =UnionpayApi::backPolling($data);
         var_dump($res);die;
         if(!is_array($res)){
             return api_resopnse( [], ApiStatus::CODE_60001);
@@ -109,7 +106,7 @@ class UnionController extends Controller
         if(count($data)!=3){
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
-        $res =$this->orderTrade->sendsms($appid,$data);
+        $res =$this->orderTrade->sendsms($data);
         var_dump($res);die;
         if(!$res){
             return api_resopnse( [], ApiStatus::CODE_60001);
@@ -132,7 +129,7 @@ class UnionController extends Controller
         if(count($data)!=4){
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
-        $res =$this->orderTrade->sendsms($appid,$data);
+        $res =$this->orderTrade->consume($data);
         var_dump($res);die;
         if(!$res){
             return api_resopnse( [], ApiStatus::CODE_60001);
