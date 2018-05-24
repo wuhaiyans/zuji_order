@@ -57,8 +57,8 @@ class PayController extends Controller
 		
 		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
     		'user_id'		=> '5', //租机平台用户ID
-    		'agreement_no'	=> '30A52283670286585', //支付平台签约协议号
-    		'out_agreement_no'	=> 'FA52283402712189', //业务平台签约协议号
+    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
+    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
     		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
 		]);
 		
@@ -71,7 +71,7 @@ class PayController extends Controller
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
     		'out_refund_no' => \createNo(1),		//业务系统退款码
-    		'payment_no'	=> '10A52223623034601', //支付系统支付码
+    		'payment_no'	=> '10A52440913004167', //支付系统支付码
     		'amount'		=> 1, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.01',
+				'paymentAmount' => '0.02',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
@@ -228,6 +228,8 @@ class PayController extends Controller
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
+				'payment_amount'	=> sprintf('%0.2f',$params['payment_amount']/100),	// 支付金额；单位元
+				'payment_channel'	=> \App\Order\Modules\Repository\Pay\Channel::Alipay,	// 支付渠道
 				'payment_time' => time(),
 			]);
 			

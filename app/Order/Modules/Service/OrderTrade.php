@@ -253,7 +253,7 @@ class OrderTrade
         } catch (\App\Lib\NotFoundException $exc) {
 
             // 创建支付
-            $pay = PayCreater::createPayment([
+            $pay = PayCreater::createFundauth([
                 'user_id'		=> $data['user_id'],
                 'businessType'	=> OrderStatus::BUSINESS_ZUJI,
                 'businessNo'	=> $data['order_no'],

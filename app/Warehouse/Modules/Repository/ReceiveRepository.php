@@ -1,5 +1,7 @@
 <?php
 /**
+ * 收货单仓库
+ *
  * User: wansq
  * Date: 2018/5/9
  * Time: 11:17
@@ -8,23 +10,25 @@
 
 namespace App\Warehouse\Modules\Repository;
 
-
 use App\Warehouse\Config;
 use App\Warehouse\Models\CheckItems;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
+use App\Warehouse\Modules\Func\WarehouseHelper;
 use Illuminate\Support\Facades\DB;
 use Monolog\Handler\IFTTTHandler;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
-
 class ReceiveRepository
 {
-    public static function generateReceiveNo()
-    {
-        return date('YmdHis') . rand(1000, 9999);
-    }
+    /**
+     * 暂时弃用
+     */
+//    public static function generateReceiveNo()
+//    {
+//        return date('YmdHis') . rand(1000, 9999);
+//    }
 
     /**
      * @param $params
@@ -84,8 +88,7 @@ class ReceiveRepository
 
         try {
             DB::beginTransaction();
-
-            $receiveNo = self::generateReceiveNo();
+            $receiveNo = WarehouseHelper::generateNo();
             $time = time();
             $da = [
                 'receive_no' => $receiveNo,

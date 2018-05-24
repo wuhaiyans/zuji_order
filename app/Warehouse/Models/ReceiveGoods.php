@@ -13,6 +13,9 @@ class ReceiveGoods extends Warehouse
     protected $table = 'zuji_receive_goods';
     public $timestamps = false;
 
+    /**
+     * 收货单中设备状态
+     */
     const STATUS_NONE = 0;//已取消
     const STATUS_INIT = 1;//待验收
     const STATUS_PART_RECEIVE = 2;//部分收货完成
@@ -21,15 +24,32 @@ class ReceiveGoods extends Warehouse
     const STATUS_ALL_CHECK = 4;//全部检测完成
 
 
-    //检测
+    /**
+     * 检测结果
+     */
     const CHECK_RESULT_INVALID  = 0;//无效
     const CHECK_RESULT_OK       = 1;//合格
     const CHECK_RESULT_FALSE    = 2;//不合格
 
 
-    protected $fillable = ['receive_no', 'serial_no','quantity','goods_name',
-        'quantity_delivered', 'status', 'status_time', 'check_time', 'check_result',
-        'check_result','check_description','check_price'
+    /**
+     * @var array
+     *
+     * 可填充字段
+     */
+    protected $fillable = [
+        'receive_no',
+        'serial_no',
+        'quantity',
+        'goods_name',
+        'quantity_delivered',
+        'status',
+        'status_time',
+        'check_time',
+        'check_result',
+        'check_result',
+        'check_description',
+        'check_price'
     ];
 
     /**
@@ -48,9 +68,7 @@ class ReceiveGoods extends Warehouse
             self::STATUS_ALL_CHECK      => '全部检测完成'
         ];
 
-
         if ($status === null) return $st;
-
         return isset($st[$status]) ? $st[$status] : '';
     }
 
