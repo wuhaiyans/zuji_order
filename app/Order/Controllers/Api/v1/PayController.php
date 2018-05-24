@@ -53,6 +53,8 @@ class PayController extends Controller
 	// 测试 代扣解约
 	public function testWithholdUnsign(){
 		
+		$user_id = '';
+		
 		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
     		'user_id'		=> '5', //租机平台用户ID
     		'agreement_no'	=> '30A52283670286585', //支付平台签约协议号
@@ -110,7 +112,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA52283402709380';
+		$business_no = 'FA52283402709381';
 		$pay = null;
 		try {
 			// 查询
@@ -152,7 +154,7 @@ class PayController extends Controller
 				'name'			=> '测试支付',					//【必选】string 交易名称
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
-			$url_info = $pay->getCurrentUrl( $_params );
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			
@@ -439,10 +441,8 @@ class PayController extends Controller
 		}
 		
 	}
-	
 
-
-    /**
+   /**
      * 订单清算退款回调地址
      * Author: heaven
      * @param Request $request
@@ -569,7 +569,7 @@ class PayController extends Controller
 
         } else {
 
-            LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
         }
         $this->innerOkMsg();
 
@@ -639,11 +639,11 @@ class PayController extends Controller
 
         } else {
 
-            LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
         }
         $this->innerOkMsg();
 
     }
 
-
+	
 }

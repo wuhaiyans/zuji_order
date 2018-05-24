@@ -33,8 +33,8 @@ function _demo_callback( array $params ){
 return [
 
 	'payment' => [
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\_demo_callback',
+		// 业务类型为1的租机订单支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\OrderPayNotify\callback',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\_demo_callback',
 		// 业务类型为1的支付回调通知

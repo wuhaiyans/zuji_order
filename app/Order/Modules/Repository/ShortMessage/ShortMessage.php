@@ -8,10 +8,18 @@ interface ShortMessage {
 	
 	
 	/**
-	 * 短息模板ID
-	 * @return string 
+	 * 设置业务类型
+	 * @param int $business_type 业务类型
+	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage 
 	 */
-	public function getCode();
+	public function setBusinessType( int $business_type );
+	
+	/**
+	 * 设置业务编号
+	 * @param string $business_no 业务编号
+	 * @return  \App\Order\Modules\Repository\ShortMessage\ShortMessage
+	 */
+	public function setBusinessNo( string $business_no );
 	
 	/**
 	 * 发送短息通知
