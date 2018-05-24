@@ -44,7 +44,7 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'payment_status'	=> $params['payment_status'],
+			'payment_status'	=> $params['paymentStatus'],
 			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
@@ -206,7 +206,7 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'payment_status'	=> $params['payment_status'],
+			'payment_status'	=> $params['paymentStatus'],
 			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
@@ -260,7 +260,7 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'payment_status'	=> $params['payment_status'],
+			'payment_status'	=> $params['paymentStatus'],
 			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
