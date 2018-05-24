@@ -196,7 +196,7 @@ class GivebackController extends Controller
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			//剩余分期需要支付的总金额、还机需要支付总金额
-			$zujinNeedPay = $givebackNeedPay = 0;
+			$zujinNeedPay = 0;
 			//剩余分期数
 			$instalmentNum = 0;
 			if( !empty($instalmentList[$goodsNo]) ){
@@ -206,13 +206,18 @@ class GivebackController extends Controller
 						'out_trade_no'	=> $instalmentInfo['out_trade_no'], //业务系统授权码
 						'amount'		=> $instalmentInfo['amount'], //交易金额；单位：分
 						'back_url'		=> config('pay_callback_admin.giveback_withhlod'), //后台通知地址
-						'name'			=> 'giveback_withhold', //交易名称
+						'name'			=> '[还机]商品编号'. $instalmentInfo['order_no'] .'剩余分期:第'. $instalmentInfo['times'] .'期扣款', //交易名称
 						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
 					];
 					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
 					$zujinNeedPay += $instalmentInfo['amount'];
 					$instalmentNum++;
 				}
+				//代扣进行中
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHOLD;
+			} else {
+				//无需代扣
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
 			
 			//更新还机单状态到待收货
