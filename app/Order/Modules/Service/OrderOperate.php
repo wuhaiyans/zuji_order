@@ -144,6 +144,8 @@ class OrderOperate
     }
 
 
+
+
     /**
      * 获取订单列表
      * Author: heaven
@@ -179,12 +181,43 @@ class OrderOperate
 
 
     }
+    
 
-
+    /**
+     * 根据订单号查询订单可操作的列表
+     * Author: heaven
+     * @param $orderNo
+     */
     public static function getOrderOprate($orderNo)
     {
+        if (empty($orderNo)) return false;
+        $actArray = [];
+        $orderData   =  self::getOrderInfo($orderNo);
+        if (empty($orderData['order_info'])) return false;
+        $actArray   =   Inc\OrderOperateInc::orderInc($orderData['order_info']['order_status'], 'actState');
+        //长期租用中七天之内出现售后
+        if ($orderData['order_info']['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH &&
+            $orderData['order_info']['order_status'] == Inc\OrderStatus::OrderInService)
+        {
+            //收货后超过7天不出现售后按钮
+            if (time()-config('web.month_service_days')>$orderData['order_info']['receive_time'] && $orderData['order_info']['receive_time']>0) {
+                unset($actArray['service_btn']);
+            }
+            //到期时间多于1个月不出现到期处理
+            if (time()-config('web.month_expiry_process_days')>$orderData['goods_info']['end_time'] && $orderData['goods_info']['end_time']>0) {
+                unset($actArray['service_btn']);
+            }
+
+            //无分期或者分期已全部还完不出现提前还款按钮
+            $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'status'=>Inc\OrderInstalmentStatus::UNPAID));
+            if (empty($orderInstalmentData)){
+                unset($actArray['prePay_btn']);
+            }
+
+        }
 
 
+            return $actArray;
 
 
     }
