@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use Mockery\Exception;
 
 /**
@@ -59,6 +60,8 @@ class SkuComponnet implements OrderCreater
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
+            $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])?$sku[$i]['begin_time']:"";
+            $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])?$sku[$i]['end_time']:"";
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
             $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
             if ($this->zuqiType == 1) {
@@ -101,6 +104,14 @@ class SkuComponnet implements OrderCreater
         foreach ($this->goodsArr as $k=>$v){
             $skuInfo =$v['sku_info'];
             $spuInfo =$v['spu_info'];
+
+            //计算短租租期
+            if($this->zuqiType ==1){
+                if(strtotime($skuInfo['begin_time'])-strtotime($skuInfo['begin_time'])<86400*2){
+                    $this->getOrderCreater()->setError('短租时间错误');
+                    $this->flag = false;
+                }
+            }
 
             // 计算金额
             $amount = $skuInfo['zuqi']*$skuInfo['shop_price']+$spuInfo['yiwaixian'];
@@ -215,6 +226,8 @@ class SkuComponnet implements OrderCreater
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
                     'deposit_yajin' => !empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:0.00,
                     'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$coupon_amount,
+                    'begin_time'=>$skuInfo['begin_time'],
+                    'end_time'=>$skuInfo['end_time'],
             ];
         }
         $arr['coupon'] =$this->couponInfo;
@@ -327,6 +340,24 @@ class SkuComponnet implements OrderCreater
                     'weight'=>$v['weight'],
                     'create_time'=>time(),
                 ];
+                //如果是短租 把租期时间写到goods 和goods_unit 中
+                if($this->zuqiType ==1){
+                    $goodsData['begin_time'] = strtotime($v['begin_time']);
+                    $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
+                    $unitData['unit_value'] =($goodsData['end_time']-$goodsData['begin_time'])/86400;
+                    $unitData['unit'] =1;
+                    $unitData['goods_no'] =$goodsData['goods_no'];
+                    $unitData['order_no'] =$orderNo;
+                    $unitData['user_id'] =$userId;
+                    $unitData['begin_time'] =$goodsData['begin_time'];
+                    $unitData['end_time'] =$goodsData['end_time'];
+
+                    $unitId =OrderGoodsUnitRepository::add($unitData);
+                    if(!$unitId){
+                        $this->getOrderCreater()->setError("保存设备周期表信息失败");
+                        return false;
+                    }
+                }
 
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
