@@ -27,9 +27,7 @@ class PayCreater {
 	 * [
 	 *		'businessType'		=> '',	// 业务类型 
 	 *		'businessNo'		=> '',	// 业务编号
-	 *		'paymentNo'			=> '',	// 业务支付编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
-	 *		'paymentChannel'	=> '',	// int 支付渠道
 	 *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
@@ -45,9 +43,9 @@ class PayCreater {
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
-			'payment_status'	=> $params['paymentStatus'],
-			'payment_no'		=> $params['paymentNo'],
-			'payment_channel'	=> $params['paymentChannel'],
+			
+			'payment_status'	=> $params['payment_status'],
+			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
 		];
@@ -68,8 +66,6 @@ class PayCreater {
 	 * [
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
-	 *		'withholdNo'		=> '',	// 代扣编号
-	 *		'withholdChannel'	=> '',	// int 签约渠道
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
@@ -85,9 +81,8 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'withhold_no'	=> $params['withholdNo'],
+			'withhold_no'		=> \creage_withhold_no(),
 			'withhold_status'	=> $params['withholdStatus'],
-			'withhold_channel'	=> $params['withholdChannel'],
 		];
 		//sql_profiler()
 		$b = $payModel->insert( $data );
@@ -106,9 +101,7 @@ class PayCreater {
 	 * [
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
-	 *		'fundauthNo'		=> '',	// 预授权编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
-	 *		'fundauthChannel'	=> '',	// int 预授权渠道
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
@@ -124,10 +117,10 @@ class PayCreater {
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
-			'fundauth_no'	=> $params['fundauthNo'],
+			
+			'fundauth_no'		=> \creage_fundauth_no(),
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
-			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
 		$b = $payModel->insert( $data );
@@ -147,12 +140,7 @@ class PayCreater {
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
-	 *		'withholdNo'		=> '',	// 代扣编号
-	 *		'withholdChannel'	=> '',	// int 签约渠道
-	 * 
-	 *		'fundauthNo'		=> '',	// 预授权编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
-	 *		'fundauthChannel'	=> '',	// int 预授权渠道
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
@@ -170,14 +158,12 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'withhold_no'	=> $params['withholdNo'],
+			'withhold_no'		=> \creage_withhold_no(),
 			'withhold_status'	=> $params['withholdStatus'],
-			'withhold_channel'	=> $params['withholdChannel'],
 			
-			'fundauth_no'	=> $params['fundauthNo'],
+			'fundauth_no'		=> \creage_fundauth_no(),
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
-			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
 		$b = $payModel->insert();
@@ -198,14 +184,10 @@ class PayCreater {
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
-	 *		'paymentNo'			=> '',	// 业务支付编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
-	 *		'paymentChannel'	=> '',	// int 支付渠道
 	 *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
 	 * 
-	 *		'fundauthNo'		=> '',	// 预授权编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
-	 *		'fundauthChannel'	=> '',	// int 预授权渠道
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
@@ -224,16 +206,14 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'payment_status'	=> $params['paymentStatus'],
-			'payment_no'		=> $params['paymentNo'],
-			'payment_channel'	=> $params['paymentChannel'],
+			'payment_status'	=> $params['payment_status'],
+			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
-			
-			'fundauth_no'	=> $params['fundauthNo'],
+						
+			'fundauth_no'		=> \creage_fundauth_no(),
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
-			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		//sql_profiler();
 		$b = $payModel->insert($data);
@@ -254,24 +234,18 @@ class PayCreater {
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
-	 *		'paymentNo'			=> '',	// 业务支付编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
-	 *		'paymentChannel'	=> '',	// int 支付渠道
 	 *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
-	 * 
-	 *		'withholdNo'		=> '',	// 代扣编号
-	 *		'withholdChannel'	=> '',	// int 签约渠道
-			
+	 * 			
 	 *		'fundauthNo'		=> '',	// 预授权编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
-	 *		'fundauthChannel'	=> '',	// int 预授权渠道
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
 	public static function createPaymentWithholdFundauth( array $params ): Pay
 	{
 		// 状态
-		$params['status'] = PayStatus::WAIT_PAYMENT;
+		$params['status'] = PayStatus::WAIT_PAYMENT;	
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
@@ -286,20 +260,17 @@ class PayCreater {
 			'status'		=> $params['status'],
 			'create_time'	=> time(),
 			
-			'payment_status'	=> $params['paymentStatus'],
-			'payment_no'		=> $params['paymentNo'],
-			'payment_channel'	=> $params['paymentChannel'],
+			'payment_status'	=> $params['payment_status'],
+			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
 			
-			'withhold_no'	=> $params['withholdNo'],
+			'withhold_no'		=> \creage_withhold_no(),
 			'withhold_status'	=> $params['withholdStatus'],
-			'withhold_channel'	=> $params['withholdChannel'],
 			
-			'fundauth_no'	=> $params['fundauthNo'],
+			'fundauth_no'		=> \creage_fundauth_no(),
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
-			'fundauth_channel'	=> $params['fundauthChannel'],
 		];
 		$b = $payModel->insert( $data );
 		if( !$b ){
