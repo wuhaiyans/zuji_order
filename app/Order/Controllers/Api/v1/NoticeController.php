@@ -17,7 +17,7 @@ class NoticeController extends Controller
 	public function test(){
 		
 		// 通知器
-		$notice = new \App\Order\Modules\Service\OrderNotice( 'A522161963164886', 'order_create' );
+		$notice = new \App\Order\Modules\Service\OrderNotice( '1', 'A522161963164886', 'order_create' );
 		
 //		$b = $notice->asyncNotify();
 		$b = $notice->notify();
@@ -42,16 +42,21 @@ class NoticeController extends Controller
 			$this->error($params, '输入错误[array]');
 		}
 		
-		if( !isset( $params['order_no'] ) ){
-			$this->error($params, '输入错误[order_no]');
+		if( !isset( $params['business_type'] ) ){
+			$this->error($params, '输入错误[business_type]');
 		}
-		
+		if( !isset( $params['business_no'] ) ){
+			$this->error($params, '输入错误[business_no]');
+		}
 		if( !isset( $params['scene'] ) ){
 			$this->error($params, '输入错误[scene]');
 		}
 		
 		// 通知器
-		$notice = new \App\Order\Modules\Service\OrderNotice( $params['order_no'], $params['scene'] );
+		$notice = new \App\Order\Modules\Service\OrderNotice( 
+				$params['business_type'],
+				$params['business_no'],
+				$params['scene'] );
 		
 		// 通知渠道
 		isset( $params['channel'] ) && $notice->setChannel( $params['channel'] );

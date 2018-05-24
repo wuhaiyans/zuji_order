@@ -232,7 +232,7 @@ function v($data, $exit = '')
 /**
  * 规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）
  * Author: heaven
- * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码6.goods_no生成方式,7.还机单编号
+ * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码6.goods_no生成方式,7.还机单编号，8:代扣协议；9：预授权协议；
  * @return bool|string
 
  */
@@ -246,6 +246,8 @@ function createNo($noType=1){
         5 => 'C',
         6 => 'G',
         7 => 'H',
+        8 => 'W',
+        9 => 'A',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
@@ -257,6 +259,30 @@ function createNo($noType=1){
     }
     $orderSn = $npreNoType[$noType].$year[(intval(date('Y')))-2018] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
     return $orderSn;
+}
+
+/**
+ * 创建支付编号
+ * @return string
+ */
+function creage_payment_no(){
+	return createNo(3);
+}
+
+/**
+ * 创建代扣协议编号
+ * @return string
+ */
+function creage_withhold_no(){
+	return createNo(8);
+}
+
+/**
+ * 创建资金预授权编号
+ * @return string
+ */
+function creage_fundauth_no(){
+	return createNo(9);
 }
 
 /**
