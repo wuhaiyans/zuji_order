@@ -112,7 +112,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA52283402709382';
+		$business_no = 'FA52283402709383';
 		$pay = null;
 		try {
 			// 查询
@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.02',
+				'paymentAmount' => '2.00',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
