@@ -1,0 +1,310 @@
+<?php
+/**
+ *  芝麻小程序下单接口
+ *   zhangjinhui
+ *   date:2018-05-14
+ */
+namespace App\Order\Controllers\Api\v1;
+
+use App\Lib\ApiStatus;
+use Illuminate\Http\Request;
+use App\Lib\Goods\Goods;
+use Illuminate\Support\Facades\Redis;
+use App\Order\Modules\Service;
+
+class MiniOrderController extends Controller
+{
+    protected $OrderCreate;
+
+    public function __construct(Service\OrderCreater $OrderCreate)
+    {
+        $this->OrderCreate = $OrderCreate;
+    }
+
+    /**
+     * 创建临时订单
+     * @author: <zhangjinghui@huishoubao.com.cn>
+     *
+     *  参数
+     *      sku_id      子商品ID
+     */
+    public function temporary_order(Request $request){
+        $params     = $request->all();
+        // 验证参数
+        $rules = [
+            'sku_id' => 'required', //【必须】int；子商品ID
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
+        //获取订单号
+        $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+
+        $data = [
+            'order_no' => $orderNo,
+            'sku_id' => intval($params['sku_id'])
+        ];
+        //redis 存储数据
+        $values = Redis::command($orderNo, $data);
+        if(!$values){
+            return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
+        }
+        //返回订单号
+        return apiResponse([],ApiStatus::CODE_0,'保存临时订单号失败');
+    }
+
+    /**
+     * 小程序下单接口
+     * @author: <zhangjinghui@huishoubao.com.cn>
+     */
+    public function create(Request $request){
+        $orders =$request->all();
+        // 验证参数
+        $rules = [
+            'sku_id' => 'required', //【必须】int；子商品ID
+        ];
+        $validateParams = $this->validateParams($rules,$orders);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        //获取appid
+        $appid =$orders['appid'];
+        $orderNo =$orders['appid'];
+        $pay_type =$orders['params']['pay_type'];//支付方式ID
+        $address_id=$orders['params']['address_id'];//收货地址ID
+        $sku =$orders['params']['sku_info'];
+        $coupon = $orders['params']['coupon'];
+        $data =[
+            'appid'=>1,
+            'pay_type'=>1,
+            'address_id'=>8,
+            'sku'=>$sku,
+            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
+            'user_id'=>18,  //增加用户ID
+        ];
+        //获取芝麻订单信息
+        $zmOrderInfo = Redis::get($orderNo);
+        $res = $this->OrderCreate->miniCreate($zmOrderInfo);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+        }
+
+        return apiResponse($res,ApiStatus::CODE_0);
+
+
+        //Debug::error(Location::L_Order, '小程序下单接口', $this->params );
+        $app_id = api_request()->getAppid();
+        $params   = $this->params;
+        $params = filter_array($params, [
+            'order_no' => 'required',
+            'payment_type_id' => 'required', //【必须】int；支付方式
+            'address_id' => 'required|is_id',	//【必须】int；用户收货地址ID
+            'coupon_no'=>'required',  //【可选】string;优惠券编号
+        ]);
+
+        if(empty($params['address_id']) ){
+            Debug::error(Location::L_Order, '下单错误--支付方式',['msg'=>'收货地址错误'] );
+            api_resopnse( [], ApiStatus::CODE_20001,'参数错误', ApiSubCode::Address_Error_Address_id,'收货地址错误');
+            return;
+        }
+        $address_id = $params['address_id'];
+        if( $params['payment_type_id'] != \zuji\Config::MiniAlipay ){
+            Debug::error(Location::L_Order, '下单错误--支付方式',['msg'=>'不支持的支付方式'] );
+            api_resopnse( [], ApiStatus::CODE_50000,'', ApiSubCode::Params_Error,'不支持的支付方式');
+            return;
+        }
+
+        // ？这里的缓存做什么的？ 暂时不确定，先注释掉 liuhongxing
+//        $redis_key = $this->member['id']."-".date("YmdHi");
+//        $redis = \zuji\cache\Redis::getInstans();
+//        $result = $redis->get($redis_key);
+//        if($result){
+//			Debug::error(Location::L_Order, '下单错误--redis缓存',['msg'=>$result] );
+//            api_resopnse( [], ApiStatus::CODE_20001,'正在处理中');
+//            return;
+//        }
+//        else{
+//            $redis->set($redis_key,json_encode(['user_id'=>$this->member['id']]),60);
+//        }
+
+        // 订单编号
+        $order_no = $params['order_no'];
+
+        //查询临时订单信息
+        $order2_temp_table = $this->load->table('mini/order2_temporary');
+        $order_info = $order2_temp_table->where(['order_no' => $order_no])->find();
+        if(empty($order_info)){
+            Debug::error(Location::L_Order, '下单错误--临时订单',['msg'=>$order_info] );
+            api_resopnse([], ApiStatus::CODE_50003,'订单错误', '获取临时订单失败' );
+            return;
+        }
+        $sku_id = $order_info['sku_id'];
+        $user_id = $this->member['id'];
+
+
+        $order_service = $this->load->service('order2/order');
+        $order2_info = $order_service->get_order_info(['order_no' => $order_no]);
+        if($order2_info){
+            Debug::error(Location::L_Order, '下单错误--订单号已使用',['msg'=>$order2_info] );
+            api_resopnse([], ApiStatus::CODE_50003,'订单错误', '该订单号已存在！' );
+            return;
+        }
+
+        $zhima_order = $this->load->service('order2/zhima_certification');
+        $zhima_order_info = $zhima_order->field('credit_amount')->where(['out_order_no' => $order_no])->find();
+        if($zhima_order_info){
+            //Debug::error(Location::L_Order, '下单错误--订单号已确认',['order_no'=>$order_no, 'msg'=>$zhima_order_info] );
+            //api_resopnse([], ApiStatus::CODE_50003,'订单错误', '该订单号已存在！' );
+            //return;
+        }
+
+        //开启事务
+        $b = $order_service->startTrans();
+        if( !$b ){
+            Debug::error(Location::L_Order, '事务失败','' );
+            api_resopnse( [], ApiStatus::CODE_40003,'事务失败', '','服务器繁忙，请稍后重试...');
+            return;
+        }
+
+        try {
+            $business_key = \zuji\Business::BUSINESS_ZUJI;// 此处的 业务类型 作为 确认订单的默认值（该接口只读，不记录订单，用任何业务类型都不影响）
+            // 订单创建器
+            $orderCreaterComponnet = new \oms\OrderCreater( $business_key,$order_no );
+
+            // 用户
+            $UserComponnet = new \oms\order_creater\UserComponnet($orderCreaterComponnet,$user_id);
+            $orderCreaterComponnet->set_user_componnet($UserComponnet);
+
+            // 商品
+            $SkuComponnet = new \oms\order_creater\SkuComponnet($orderCreaterComponnet,$sku_id,$params['payment_type_id']);
+            $orderCreaterComponnet->set_sku_componnet($SkuComponnet);
+            $orderCreaterComponnet->get_sku_componnet()->discrease_yajin($zhima_order_info['credit_amount']*100);
+
+            // 装饰者 信用
+            $orderCreaterComponnet = new \oms\order_creater\CreditComponnet($orderCreaterComponnet,$certified_flag=true,$app_id);
+
+            // 装饰者 风险
+            $orderCreaterComponnet = new \oms\order_creater\YidunComponnet($orderCreaterComponnet,$address_id);
+
+            // 装饰者 收货地址
+            $orderCreaterComponnet = new \oms\order_creater\AddressComponnet($orderCreaterComponnet,$address_id);
+
+            // 装饰着 渠道
+            $orderCreaterComponnet = new \oms\order_creater\ChannelComponnet($orderCreaterComponnet, $app_id);
+
+            //装饰者 优惠券
+            $orderCreaterComponnet = new \oms\order_creater\CouponComponnet($orderCreaterComponnet, $params['coupon_no']);
+
+            // 装饰者 分期单
+            $orderCreaterComponnet = new \oms\order_creater\InstalmentComponnet($orderCreaterComponnet);
+
+            $b = $orderCreaterComponnet->filter();
+            if( !$b ){
+                $order_service->rollback();
+                Debug::error(Location::L_Order,'创建订单组件过滤失败',$orderCreaterComponnet->get_order_creater()->get_error());
+                // 无法下单原因
+                $this->order_remark($user_id,$orderCreaterComponnet->get_order_creater()->get_error());
+//				var_dump( $orderCreaterComponnet->get_order_creater()->get_error() );
+                api_resopnse( [], ApiStatus::CODE_50002,'', '', $orderCreaterComponnet->get_order_creater()->get_error());
+                return;
+            }
+
+            // 元数据
+            $schema_data = $orderCreaterComponnet->get_data_schema();
+            $b = $orderCreaterComponnet->create();
+            //创建成功组装数据返回结果
+            if(!$b){
+                $order_service->rollback();
+                $error = $orderCreaterComponnet->get_order_creater()->get_error();
+                // 无法下单原因
+                $this->order_remark($user_id,$error);
+                Debug::error(Location::L_Order, '下单失败', ['error'=>$error,'_data_schema'=>$schema_data]);
+                api_resopnse( [], ApiStatus::CODE_50003, get_error(),  ApiSubCode::Order_Creation_Failed, '服务器繁忙，请稍后重试...');
+                return;
+            }
+            $order_id = $orderCreaterComponnet->get_order_creater()->get_order_id();
+            $order_no = $orderCreaterComponnet->get_order_creater()->get_order_no();
+
+            // 记录操作日志
+            $this->add_order_log($schema_data['user']['user_id'],$schema_data['user']['mobile'],$order_no,'创建订单','');
+
+            $b = $order_service->commit();
+            if( !$b ){
+                Debug::error(Location::L_Order, '芝麻小程序下单失败','事务失败' );
+                api_resopnse( [], ApiStatus::CODE_50003, '事务失败',  ApiSubCode::Order_Creation_Failed, '服务器繁忙，请稍后重试...');
+                return;
+            }
+            // 清空 无法下单原因
+            $this->order_remark($user_id,'');
+
+            //创建订单后 发送支付短信。
+            $result = ['auth_token'=>  $this->auth_token,];
+            $sms = new \zuji\sms\HsbSms();
+            //-+----------------------------------------------------------------
+            // |  为满足其它渠道短信文案不同的提示进行短信发送修改
+            // |  时间：2018-05-10，yaodongxu
+            //-+----------------------------------------------------------------
+            //修改前短信模板id
+            //$sms_template_id = 'SMS_113461066';
+            $sms_template_id = get_sms_template_id(['appid'=>$app_id], \zuji\sms\Config::ORDER_NODE_CREATE_NOTIFY_MINI, \zuji\sms\Config::CHANNELID_ZHIMA_MINI);
+            // $b = $sms->send_sm($schema_data['user']['mobile'],'SMS_113461042',[
+            //     'goodsName' => $schema_data['sku']['sku_name'],    // 传递参数
+            // ],$order_no);
+
+//			Debug::error(Location::L_Order,'线上小程序下单短信',['appid'=>$app_id,'$sms_template_id'=>$sms_template_id]);
+            $b = $sms->send_sm($schema_data['user']['mobile'],$sms_template_id,[
+                'goodsName' => $schema_data['sku']['sku_name'],  // 大疆小程序需要的参数
+                'zidongQuxiao' => '半',// 芝麻小程序需要的参数
+            ],$order_no);
+
+//            $b = $sms->send_sm($schema_data['user']['mobile'],'SMS_113461066',[
+//                'zidongQuxiao' => '半',    // 传递参数
+//            ],$order_no);
+            if (!$b) {
+                Debug::error(Location::L_Order,'线上下单短信',$b);
+            }
+
+            $result = [
+                'order_id'			=> $order_id,
+                'order_no'			=> $order_no,
+                'certified'			=> $schema_data['credit']['certified']?'Y':'N',
+                'certified_platform'=> zuji\certification\Certification::getPlatformName($schema_data['credit']['certified_platform']),
+                'credit'			=> $schema_data['credit']['credit'],
+                'credit_status'		=> $schema_data['sku']['yajin']==0?'Y':'N',  // 是否免押金
+                'amount'			=> Order::priceFormat($schema_data['sku']['amount']/100),	// 订单金额
+                'discount_amount'	=> Order::priceFormat($schema_data['sku']['discount_amount']/100),// 优惠金额
+                'all_amount'		=> Order::priceFormat($schema_data['sku']['all_amount']/100),// 商品总金额
+                'buyout_price'	    => Order::priceFormat($schema_data['sku']['buyout_price']/100),	// 买断价
+                'yajin'				=> Order::priceFormat($schema_data['sku']['yajin']/100),
+                'mianyajin'			=> Order::priceFormat($schema_data['sku']['mianyajin']/100),
+                'zujin'				=> Order::priceFormat($schema_data['sku']['zujin']/100),
+                'yiwaixian'			=> Order::priceFormat($schema_data['sku']['yiwaixian']/100),
+                'zuqi'				=> $schema_data['sku']['zuqi'],
+                'chengse'			=> $schema_data['sku']['chengse'],
+                'payment_type_id'				=> $schema_data['sku']['payment_type_id'],
+                'sku_info'			=> '',
+                '_order_info' => $schema_data,
+            ];
+            //Debug::error(Location::L_Order,'创建订单成功返回参数',$result);
+            api_resopnse( ['order_info'=>$result], ApiStatus::CODE_0);
+            return;
+
+        } catch (\oms\order_creater\ComponnetException $exc) {
+            $order_service->rollback();
+            Debug::error(Location::L_Order, '芝麻小程序下单失败',$exc->getMessage() );
+            api_resopnse( [], ApiStatus::CODE_50003,'下单失败', ApiSubCode::Order_Creation_Failed,$exc->getMessage());
+            return;
+        } catch (\Exception $exc){
+            $order_service->rollback();
+            Debug::error(Location::L_Order, '芝麻小程序下单失败',$exc->getMessage() );
+            api_resopnse( [], ApiStatus::CODE_50003, '下单失败',  ApiSubCode::Order_Creation_Failed, '服务器繁忙，请稍后重试...');
+            return;
+        }
+//        $MiniOrderRepository = new \App\Order\Modules\Repository\MiniOrderRepository();
+//        $result = $MiniOrderRepository->add($data);
+        //请求获取商品信息
+//        $goodsArr = Goods::getSku(config('tripartite.Interior_Goods_Request_data'),intval($params['sku_id']));
+    }
+}
