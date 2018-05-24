@@ -16,22 +16,28 @@ class DeliveryGoodsImei extends Warehouse
     const STATUS_NO = 0; //无效
     const STATUS_YES = 1; //有效
 
+    /**
+     * @var array
+     *
+     * 可填充字段
+     */
+    protected $fillable = [
+        'delivery_no',
+        'serial_no',
+        'imei',
+        'apple_serial', //苹果手机序列号
+        'status',
+        'create_time',
+        'status_time'
+    ];
 
-    protected $fillable = ['delivery_no', 'serial_no', 'imei', 'apple_serial', 'status', 'create_time', 'status_time'];
 
     /**
-     * @param $data
-     * 存储
+     * @param $delivery_id
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     *
+     * 根据delivery_id查找goods_imeis
      */
-//    public static function store($data)
-//    {
-//        $model = new self();
-//
-//        $model->create($data);
-//
-//        return $model;
-//    }
-
     public static function listByDelivery($delivery_id)
     {
         return self::where(['delivery_no'=>$delivery_id, 'status'=>self::STATUS_YES])->all();

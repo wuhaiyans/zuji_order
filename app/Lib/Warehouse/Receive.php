@@ -47,7 +47,8 @@ class Receive
                 if (!$d['serial_no'] || !$d['quantity']) continue;
                 
                 $receive_detail[] = [
-                    'serial_no' => $d['serial_no'],
+                    'serial_no' => $d['serial_no'],//可以不传
+                    'goods_no'  => $d['goods_no'],
                     'quantity'  => $d['quantity'],
                     'imei'      => isset($d['imei']) ? $d['imei'] : ''
                 ];
