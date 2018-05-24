@@ -57,8 +57,8 @@ class PayController extends Controller
 		
 		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
     		'user_id'		=> '5', //租机平台用户ID
-    		'agreement_no'	=> '30A52283670286585', //支付平台签约协议号
-    		'out_agreement_no'	=> '30A52454197872461', //业务平台签约协议号
+    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
+    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
     		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
 		]);
 		
