@@ -9,15 +9,17 @@ interface ShortMessage {
 	
 	/**
 	 * 设置业务类型
-	 * @return string 
+	 * @param int $business_type 业务类型
+	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage 
 	 */
 	public function setBusinessType( int $business_type );
 	
 	/**
 	 * 设置业务编号
-	 * @return string 
+	 * @param string $business_no 业务编号
+	 * @return  \App\Order\Modules\Repository\ShortMessage\ShortMessage
 	 */
-	public function setBusinessNo( int $business_no );
+	public function setBusinessNo( string $business_no );
 	
 	/**
 	 * 发送短息通知

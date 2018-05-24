@@ -18,7 +18,7 @@ class OrderCreate implements ShortMessage {
 		$this->business_type = $business_type;
 	}
 	
-	public function setBusinessNo( int $business_no ){
+	public function setBusinessNo( string $business_no ){
 		$this->business_no = $business_no;
 	}
 
@@ -31,6 +31,7 @@ class OrderCreate implements ShortMessage {
 		
 		// 查询订单
 		$order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+		
 		if( !$order_info ){
 			return false;
 		}
@@ -40,6 +41,7 @@ class OrderCreate implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
+		
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, [
 			'order_no' => '',

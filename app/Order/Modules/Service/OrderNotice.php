@@ -50,11 +50,6 @@ class OrderNotice{
 	 */
 	private $scene;
 	
-	/**
-	 * 订单基本信息
-	 * @var array
-	 */
-	private $order_info;
 	
 	/**
 	 * 构造函数
@@ -106,7 +101,7 @@ class OrderNotice{
 	 */
 	public function notify(){
 				
-		if( $this->channel & self::SM && $this->order_info['mobile'] ){
+		if( $this->channel & self::SM ){
 			// 短信
 			$short_message = $this->getShortMessage( );
 			if( !$short_message ){
@@ -116,15 +111,15 @@ class OrderNotice{
 					'scene' => $this->scene,
 				]);
 			}
+			
+			// 通知
+			$b = $short_message->notify();
 			\App\Lib\Common\LogApi::debug('短信通知',[
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,
+					'status' => $b?'success':'failed',
 			]);
-			
-			// 通知
-			$short_message->notify();
-			//\App\Lib\Common\SmsApi::sendCode( $order_info['mobile'] );
 		} 
 		
 		return true;
