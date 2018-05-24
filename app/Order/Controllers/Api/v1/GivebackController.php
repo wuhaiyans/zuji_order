@@ -194,17 +194,24 @@ class GivebackController extends Controller
 			// |收货时：查询未完成分期直接进行代扣，无未完成分期代扣状态直接修改【无需代扣】
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
-			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			//剩余分期需要支付的总金额、还机需要支付总金额
 			$zujinNeedPay = $givebackNeedPay = 0;
 			//剩余分期数
 			$instalmentNum = 0;
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-						$zujinNeedPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
-						$instalmentNum++;
-					}
+					$withholdParams = [
+						'agreement_no'	=> $instalmentInfo['agreement_no'], //支付平台代扣协议号
+						'out_trade_no'	=> $instalmentInfo['out_trade_no'], //业务系统授权码
+						'amount'		=> $instalmentInfo['amount'], //交易金额；单位：分
+						'back_url'		=> config('pay_callback_admin.giveback_withhlod'), //后台通知地址
+						'name'			=> 'giveback_withhold', //交易名称
+						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
+					];
+					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
+					$zujinNeedPay += $instalmentInfo['amount'];
+					$instalmentNum++;
 				}
 			}
 			
