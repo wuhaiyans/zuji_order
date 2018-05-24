@@ -12,7 +12,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * 预授权获取URL接口
      * @param array $params
      * [
-     *		'out_auth_no'	=> '', //业务系统授权码 
+     *		'out_fundauth_no'	=> '', //业务系统授权码 
      *		'amount'			=> '', //授权金额；单位：分
      *		'channel_type'		=> '', //授权渠道
      *		'front_url'			=> '', //前端回跳地址

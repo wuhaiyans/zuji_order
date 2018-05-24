@@ -11,29 +11,52 @@ namespace App\Lib\Goods;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
-class Goods{
+class Goods  extends \App\Lib\BaseApi{
 
+    /**
+     * 获取商品信息
+     * @param array $skuids		SKU ID 数组
+     * @return array
+	 * @throws \Exception			请求失败时抛出异常
+     */
+    public static function getSkuList( array $skuids ){
+		$_params = [];
+		foreach( $skuids as $id){
+			$_params[] =['sku_id'=>$id];
+		}
+		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
+	}
+	
     /**
      * 获取商品信息
      * @param $data 配置参数
      * @param $sku_id
      * @return string or array
      */
-    public static function getSku($data,$sku){
-        $data['method'] ='zuji.goods.spusku.get';
-        $data['params'] = [
-            'list_sku_id'=>$sku,
-        ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-       // var_dump($info);die;
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
-        }
-        if($info['code']!=0){
-            return $info['code'];
-        }
-        return $info['data'];
+    public static function getSku( array $skuid ){
+		$params = [
+            'list_sku_id'=>[],
+		];
+		foreach($skuid as $id){
+			$params['list_sku_id'][]['sku_id'] = $id;
+		}
+		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
+		
+		
+//        $data['method'] ='zuji.goods.spusku.get';
+//        $data['params'] = [
+//            'list_sku_id'=>$sku,
+//        ];
+//        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+//        $info =json_decode($info,true);
+//       // var_dump($info);die;
+//        if(!is_array($info)){
+//            return ApiStatus::CODE_60000;
+//        }
+//        if($info['code']!=0){
+//            return $info['code'];
+//        }
+//        return $info['data'];
 
     }
     /**

@@ -606,6 +606,7 @@ class Pay extends \App\Lib\Configurable
 	 * @param array				支付请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
+	 *		'payment_amount'=> '',	// 交易名称
 	 *		'back_url'		=> '',	// 后台通知地址
 	 *		'front_url'		=> '',	// 前端回跳地址
 	 * ]
@@ -651,9 +652,8 @@ class Pay extends \App\Lib\Configurable
 	 * @throws \Exception	失败时抛出异常
 	 */
 	public function getFundauthUrl( int $channel,array $params ){
-		
 				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
-					'out_auth_no'	=> $this->getFundauthNo(),
+					'out_fundauth_no'	=> $this->getFundauthNo(),
 					'channel_type'	=> $channel,						//【必选】int 支付渠道
 					'amount'		=> $this->getFundauthAmount()*100,	//【必选】int 预授权金额；单位：分
 					'user_id'		=> $this->getUserId(),				//【可选】int 业务平台yonghID
