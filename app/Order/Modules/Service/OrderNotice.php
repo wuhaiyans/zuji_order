@@ -10,7 +10,6 @@
 
 namespace App\Order\Modules\Service;
 
-use App\Order\Modules\Repository\OrderRepository;
 
 /**
  * 订单通知
@@ -39,7 +38,12 @@ class OrderNotice{
 	 *
 	 * @var string
 	 */
-	private $order_no;
+	private $business_type;
+	/**
+	 *
+	 * @var string
+	 */
+	private $business_no;
 	/**
 	 *
 	 * @var string
@@ -59,8 +63,9 @@ class OrderNotice{
 	 * @param string	$order_no	订单编号
 	 * @param string	$scene		场景
 	 */
-	public function __construct( string $order_no, string $scene ) {
-		$this->order_no = $order_no;
+	public function __construct( string $business_type, string $business_no, string $scene ) {
+		$this->business_type = $business_type;
+		$this->business_no = $business_no;
 		$this->scene = $scene;
 	}
 	
@@ -87,7 +92,8 @@ class OrderNotice{
 	 */
 	public function asyncNotify():bool{
 		return \App\Lib\Common\JobQueueApi::addRealTime($this->scene.'-'.$this->order_no, env('APP_URL').'/order/notice/notify', [
-			'order_no' => $this->order_no,
+			'business_type' => $this->business_type,
+			'business_no' => $this->business_no,
 			'scene' => $this->scene,
 		]);
 	}
@@ -99,28 +105,21 @@ class OrderNotice{
 	 * @throws \Exception	发生错误时抛出异常
 	 */
 	public function notify(){
-		
-		// 查询订单
-		$this->order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
-		if( !$this->order_info ){
-			return false;
-		}
-		
+				
 		if( $this->channel & self::SM && $this->order_info['mobile'] ){
 			// 短信
 			$short_message = $this->getShortMessage( );
 			if( !$short_message ){
 				\App\Lib\Common\LogApi::error('订单短息模板不存在', [
-					'order_no' => $this->order_no,
+					'business_type' => $this->business_type,
+					'business_no' => $this->business_no,
 					'scene' => $this->scene,
-					'appid' => $this->order_info['appid'],
 				]);
 			}
 			\App\Lib\Common\LogApi::debug('短信通知',[
-					'order_no' => $this->order_no,
+					'business_type' => $this->business_type,
+					'business_no' => $this->business_no,
 					'scene' => $this->scene,
-					'mobile' => $this->order_info['mobile'],
-					'templateCode' => $short_message->getCode(),
 			]);
 			
 			// 通知
@@ -144,7 +143,10 @@ class OrderNotice{
 		if( !isset($arr[$this->scene]) ){
 			return false;
 		}
-		return new $arr[$this->scene]( $this->order_info );
+		$short_message = new $arr[$this->scene]( );
+		$short_message->setBusinessType( $this->business_type );
+		$short_message->setBusinessNo( $this->business_no );
+		return $short_message;
 	}
 	
 }
