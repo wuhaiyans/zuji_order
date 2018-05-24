@@ -18,14 +18,30 @@ class OrderController extends Controller
         $this->OrderCreate = $OrderCreate;
     }
 
-    //下单确认查询接口
+    /**
+	 * 
+	 * @param Request $request
+	 * [
+	 *		'pay_type'	=> '',	//【必选】string 支付方式
+	 *		'sku_info'	=> [	//【必选】string	SKU信息
+	 *			[
+	 *				'sku_id' => '',		//【必选】SKU ID
+	 *				'sku_num' => '',	//【必选】SKU 数量
+	 *			]
+	 *		]',
+	 *		'coupon'	=> '',	//【可选】string 优惠券
+	 * ]
+	 * @return type
+	 */
     public function confirmation(Request $request){
-        $orders =$request->all();
+		
+        $orders = $request->all();
+		
         //获取appid
-        $appid =$orders['appid'];
-        $pay_type =$orders['params']['pay_type'];//支付方式ID
-        $sku =$orders['params']['sku_info'];
-        $coupon = $orders['params']['coupon'];
+        $appid		= $orders['appid'];
+        $pay_type	= $orders['params']['pay_type'];//支付方式ID
+        $sku		= $orders['params']['sku_info'];
+        $coupon		= $orders['params']['coupon'];
 
         //判断参数是否设置
         if(empty($appid)){

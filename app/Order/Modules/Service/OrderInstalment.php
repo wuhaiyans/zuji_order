@@ -10,6 +10,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 
 class OrderInstalment
@@ -379,23 +380,21 @@ class OrderInstalment
      * @param  int $instalment_id 分期ID
      * @return bool
      */
-    public static function instalment_withhold($instalment_id){
-        if ( !$instalment_id ) {
+    public static function instalment_withhold($instalment_id ){
+        if ( $instalment_id == "") {
             return false;
         }
 
         $remark         = "换机代扣剩余分期";
-
         //开启事务
         DB::beginTransaction();
 
         // 查询分期信息
         $instalmentInfo = OrderInstalment::queryByInstalmentId($instalment_id);
-
         if( !is_array($instalmentInfo)){
             DB::rollBack();
             // 提交事务
-            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
+            return false;
         }
 
         // 生成交易码
@@ -403,16 +402,16 @@ class OrderInstalment
 
         // 状态在支付中或已支付时，直接返回成功
         if( $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS && $instalmentInfo['status'] = OrderInstalmentStatus::PAYING ){
-            return apiResponse($instalmentInfo,ApiStatus::CODE_0,"success");
+            return false;
         }
 
         // 扣款交易码
-        if( $instalmentInfo['trade_no']=='' ){
+        if( $instalmentInfo['trade_no'] == '' ){
             // 1)记录租机交易码
             $b = OrderInstalment::set_trade_no($instalment_id, $tradeNo);
             if( $b === false ){
                 DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_71002, "租机交易码错误");
+                return false;
             }
             $instalmentInfo['trade_no'] = $tradeNo;
         }
@@ -423,22 +422,20 @@ class OrderInstalment
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
             DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+            return false;
         }
 
         // 查询用户协议
         $withholdInfo = OrderPayWithhold::find($orderInfo['user_id']);
         if(empty($withholdInfo)){
             DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71004, ApiStatus::$errCodes[ApiStatus::CODE_71004]);
+            return false;
         }
 
-        $third = new ThirdInterface();
-        $userInfo = $third->GetUser($orderInfo['user_id']);
-
+        $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
         if( !is_array($userInfo )){
             DB::rollBack();
-            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
+            return false;
         }
 
         // 保存 备注，更新状态
@@ -449,75 +446,78 @@ class OrderInstalment
         $result = OrderInstalmentRepository::save(['id'=>$instalment_id],$data);
         if(!$result){
             DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71001, '扣款备注保存失败');
+            return false;
         }
         // 商品
         $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
 
-        // 价格
-        $amount = $instalmentInfo['amount'];
-        if( $amount<0 ){
+        // 价格 元转化分
+        $amount = $instalmentInfo['amount'] * 100;
+        if( $amount < 0 ){
             DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
+            return false;
         }
 
+
+        $orderGoods = New \App\Order\Modules\Service\OrderGoods();
+        $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
+        if(!$goodsInfo){
+            return false;
+        }
         //扣款要发送的短信
         $data_sms =[
             'mobile'        => $userInfo['mobile'],
             'orderNo'       => $orderInfo['order_no'],
             'realName'      => $userInfo['realname'],
-            'goodsName'     => $orderInfo['goods_name'],
+            'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $amount,
         ];
-
         //判断支付方式
-        if( $orderInfo['pay_type'] == PayInc::MiniAlipay ){
+        if( $orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::MiniAlipay ){
 
         }else {
-
             // 支付宝用户的user_id
             $alipayUserId = $withholdInfo['out_withhold_no'];
             if (!$alipayUserId) {
                 DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_71009, '支付宝用户的user_id错误');
+                return false;
             }
 
             // 代扣协议编号
             $agreementNo = $withholdInfo['withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
+                return false;
             }
             // 代扣接口
             $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
             $backUrl = env("API_INNER_URL") . "/createpayNotify";
-
             $withholding_data = [
-                'out_trade_no'  => $agreementNo,         //业务系统授权码
-                'amount'        => $amount,              //交易金额；单位：分
-                'back_url'      => $backUrl,             //后台通知地址
-                'name'          => $subject,             //交易备注
-                'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
-                'user_id'       => $orderInfo['user_id'],//业务平台用户id
+                'out_trade_no'  => $agreementNo,            //业务系统授权码
+                'amount'        => $amount,                 //交易金额；单位：分
+                'back_url'      => $backUrl,                //后台通知地址
+                'name'          => $subject,                //交易备注
+                'agreement_no'  => $alipayUserId,           //支付平台代扣协议号
+                'user_id'       => $orderInfo['user_id'],   //业务平台用户id
             ];
             $withholding_b = $withholding->deduct($withholding_data);
             if (!$withholding_b) {
                 DB::rollBack();
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalment_id, $instalmentInfo['term'], $data_sms);
-                    return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
+                    return false;
                 } else {
-                    return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
+                    return false;
                 }
             }
 
             //发送短信
             SmsApi::sendMessage($data_sms['mobile'], 'hsb_sms_b427f', $data_sms);
+        }
 
-
-
-
+        DB::commit();
+        return apiResponse([],ApiStatus::CODE_0,"success");
     }
 
 

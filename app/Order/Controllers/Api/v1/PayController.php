@@ -57,8 +57,8 @@ class PayController extends Controller
 		
 		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
     		'user_id'		=> '5', //租机平台用户ID
-    		'agreement_no'	=> '30A52283670286585', //支付平台签约协议号
-    		'out_agreement_no'	=> 'FA52283402712189', //业务平台签约协议号
+    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
+    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
     		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
 		]);
 		
@@ -71,7 +71,7 @@ class PayController extends Controller
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
     		'out_refund_no' => \createNo(1),		//业务系统退款码
-    		'payment_no'	=> '10A52223623034601', //支付系统支付码
+    		'payment_no'	=> '10A52440913004167', //支付系统支付码
     		'amount'		=> 1, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.01',
+				'paymentAmount' => '0.02',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
@@ -228,6 +228,8 @@ class PayController extends Controller
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
+				'payment_amount'	=> sprintf('%0.2f',$params['payment_amount']/100),	// 支付金额；单位元
+				'payment_channel'	=> \App\Order\Modules\Repository\Pay\Channel::Alipay,	// 支付渠道
 				'payment_time' => time(),
 			]);
 			
@@ -441,5 +443,209 @@ class PayController extends Controller
 		}
 		
 	}
+
+   /**
+     * 订单清算退款回调地址
+     * Author: heaven
+     * @param Request $request
+     */
+    public function refundClean(Request $request){
+
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退款回调地址参数:'.$input);
+        $param = json_decode($input,true);
+        $rule = [
+         'out_refund_no'=>'required', //订单系统退款码
+         'refund_no'=>'required', //支付系统退款码
+         'status'=>'required',//状态类型
+         'reason'=>'required', //错误原因
+       ];
+
+        $validateParams = $this->validateParams($rule,$param);
+        if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+        if ($param['params']['status']!='success'){
+            LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
+        }
+        //更新查看清算表的状态
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        if ($orderCleanInfo['code']) {
+            LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+
+        }
+            $orderCleanInfo = $orderCleanInfo['data'];
+            //查看清算状态是否已支付
+            if ($orderCleanInfo['refund_status']==OrderCleaningStatus::refundUnpayed){
+
+                //更新订单清算退款状态
+                $orderParam = [
+                    'out_refund_no' => $orderCleanInfo['out_refund_no'],
+                    'refund_no'     => $param['params']['refund_no'],
+                    'refund_status' => OrderCleaningStatus::refundPayd
+                ];
+                $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                if ($success) {
+                    //查看其他状态是否完成，如果完成，更新整体清算的状态
+                    if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
+                        $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+                        $orderParam = [
+                            'out_refund_no' => $param['params']['out_refund_no'],
+                            'status' => OrderCleaningStatus::orderCleaningComplete
+                        ];
+                        $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                        if ($success) {
+                            //更新业务系统的状态
+                            $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                        }
+                    }
+                } else {
+                    $this->innerErrMsg();
+                    LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+                }
+
+             } else {
+
+                \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+            }
+            $this->innerOkMsg();
+
+        }
+
+
+    /**
+     * 订单清算退押金回调接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unFreezeClean(Request $request)
+    {
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
+        $param = json_decode($input,true);
+        $rule = [
+            "reason"=>'required',                //类型：String  必有字段  备注：错误原因
+            "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+            "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
+            "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
+            "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
+            "user_id"=>'required'                //类型：String  必有字段  备注：用户id
+        ];
+
+        $validateParams = $this->validateParams($rule,$param);
+        if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+        //更新查看清算表的状态
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        if ($orderCleanInfo['code']) {
+            LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+
+        }
+        $orderCleanInfo = $orderCleanInfo['data'];
+        //查看退押金状态是否是待退押金状态
+        if ($orderCleanInfo['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+
+            //更新订单退押金状态
+            $orderParam = [
+                'out_refund_no' => $orderCleanInfo['out_refund_no'],
+                'auth_no'     => $param['params']['refund_no'],
+                'deposit_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusPayd
+            ];
+            $success = OrderCleaning::upOrderCleanStatus($orderParam);
+            if ($success) {
+                //查看其他状态是否完成，如果完成，更新整体清算的状态
+                if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
+                    $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+                    $orderParam = [
+                        'out_refund_no' => $param['params']['out_refund_no'],
+                        'status' => OrderCleaningStatus::orderCleaningComplete
+                    ];
+                    $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                    if ($success) {
+                        //更新业务系统的状态
+                        $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                    }
+                }
+            } else {
+                $this->innerErrMsg();
+                LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+            }
+
+        } else {
+
+            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+        }
+        $this->innerOkMsg();
+
+    }
+
+
+    /**
+     * 订单清算押金转支付回调接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unfreezeAndPayClean(Request $request)
+    {
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
+        $param = json_decode($input,true);
+        $rule = [
+            "reason"=>'required',                //类型：String  必有字段  备注：错误原因
+            "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+            "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
+            "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
+            "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
+            "user_id"=>'required'                //类型：String  必有字段  备注：用户id
+        ];
+
+        $validateParams = $this->validateParams($rule,$param);
+        if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+        if ($param['params']['status']!='success'){
+            LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
+        }
+        //更新查看清算表的状态
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        if ($orderCleanInfo['code']) {
+            LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+
+        }
+        $orderCleanInfo = $orderCleanInfo['data'];
+        //查看清算状态是否已支付
+        if ($orderCleanInfo['refund_status']==OrderCleaningStatus::refundUnpayed){
+
+            //更新订单清算退款状态
+            $orderParam = [
+                'out_refund_no' => $orderCleanInfo['out_refund_no'],
+                'trade_no'     => $param['params']['refund_no'],
+                'deposit_deduction_status' => OrderCleaningStatus::depositDeductionStatusPayd
+            ];
+            $success = OrderCleaning::upOrderCleanStatus($orderParam);
+            if ($success) {
+                //查看其他状态是否完成，如果完成，更新整体清算的状态
+                if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
+                    $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+                    $orderParam = [
+                        'out_refund_no' => $param['params']['out_refund_no'],
+                        'status' => OrderCleaningStatus::orderCleaningComplete
+                    ];
+                    $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                    if ($success) {
+                        //更新业务系统的状态
+                        $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                    }
+                }
+            } else {
+                $this->innerErrMsg();
+                LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+            }
+
+        } else {
+
+            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+        }
+        $this->innerOkMsg();
+
+    }
+
 	
 }
