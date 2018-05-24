@@ -47,6 +47,12 @@ class OrderNotice{
 	private $scene;
 	
 	/**
+	 * 订单基本信息
+	 * @var array
+	 */
+	private $order_info;
+	
+	/**
 	 * 构造函数
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
@@ -95,52 +101,50 @@ class OrderNotice{
 	public function notify(){
 		
 		// 查询订单
-		$order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
-		if( !$order_info ){
+		$this->order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
+		if( !$this->order_info ){
 			return false;
 		}
 		
-		if( $this->channel & self::SM && $order_info['mobile'] ){
-			$code = $this->getSMCode($this->scene, $order_info['appid']);
-			if( !$code ){
+		if( $this->channel & self::SM && $this->order_info['mobile'] ){
+			// 短信
+			$short_message = $this->getShortMessage( );
+			if( !$short_message ){
 				\App\Lib\Common\LogApi::error('订单短息模板不存在', [
 					'order_no' => $this->order_no,
 					'scene' => $this->scene,
-					'appid' => $order_info['appid'],
+					'appid' => $this->order_info['appid'],
 				]);
 			}
 			\App\Lib\Common\LogApi::debug('短信通知',[
 					'order_no' => $this->order_no,
 					'scene' => $this->scene,
-					'mobile' => $order_info['mobile'],
-					'templateCode' => $code,
+					'mobile' => $this->order_info['mobile'],
+					'templateCode' => $short_message->getCode(),
 			]);
+			
+			// 通知
+			$short_message->notify();
 			//\App\Lib\Common\SmsApi::sendCode( $order_info['mobile'] );
-			//\App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, $order_info);
 		} 
 		
 		return true;
 	}
 	
-	
-	private function getSMCode( $scene, $app_id ){
+	/**
+	 * 根据场景获取短息
+	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage
+	 */
+	private function getShortMessage( ){
 		
 		$arr = [
-			'1' => [
-				'order_created' => '123456',
-				'order_cancel' => '123456',
-			],
-			'91' => [
-				
-			],
+			'order_create' => '\App\Order\Modules\Repository\ShortMessage\OrderCreate',
+			'order_cancel' => '\App\Order\Modules\Repository\ShortMessage\OrderCancel',
 		];
-		if( !isset($arr[$app_id]) ){
-			$app_id = 1;
-		}
-		if( !isset($arr[$app_id][$scene]) ){
+		if( !isset($arr[$this->scene]) ){
 			return false;
 		}
-		return $arr[$app_id][$scene];		
+		return new $arr[$this->scene]( $this->order_info );
 	}
 	
 }
