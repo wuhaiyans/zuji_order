@@ -14,6 +14,10 @@ use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use Mockery\Exception;
 
+/**
+ * SKU 组件
+ * 处理订单中商品的基本信息
+ */
 class SkuComponnet implements OrderCreater
 {
     //组件
@@ -31,10 +35,22 @@ class SkuComponnet implements OrderCreater
     private $sku=[];
 
 
+	/**
+	 * 
+	 * @param \App\Order\Modules\OrderCreater\OrderCreater $componnet
+	 * @param array $sku
+	 * [
+	 *		'sku_id' => '',		//【必选】SKU ID
+	 *		'sku_num' => '',	//【必选】SKU 数量
+	 * ]
+	 * @param int $payType
+	 * @throws Exception
+	 */
     public function __construct(OrderCreater $componnet, array $sku,int $payType)
     {
         $this->componnet = $componnet;
-        $goodsArr = Goods::getSku(config('tripartite.Interior_Goods_Request_data'),$sku);
+        $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
+		
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
