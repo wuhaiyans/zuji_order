@@ -606,6 +606,7 @@ class Pay extends \App\Lib\Configurable
 	 * @param array				支付请求参数
 	 * [
 	 *		'name'			=> '',	// 交易名称
+	 *		'payment_amount'=> '',	// 交易名称
 	 *		'back_url'		=> '',	// 后台通知地址
 	 *		'front_url'		=> '',	// 前端回跳地址
 	 * ]

@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.01',
+				'paymentAmount' => '0.02',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
