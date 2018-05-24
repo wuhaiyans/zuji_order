@@ -10,30 +10,36 @@ namespace App\Warehouse\Models;
 
 class ReceiveGoodsImei extends Warehouse
 {
-
     public $incrementing = false;
     protected $table = 'zuji_receive_goods_imei';
     public $timestamps = false;
 
-
-    //状态；0；已取消；1：待收货；2：收货完成；3：待检测；4：检测完成
+    /**
+     * 状态；0；已取消；1：待收货；2：收货完成；3：待检测；4：检测完成
+     */
     const STATUS_INVALID = 0;//无效
     const STATUS_WAIT_RECEIVE = 1;//待收
     const STATUS_RECEIVED   = 2;//收完成
     const STATUS_WAIT_CHECK = 3;//待检测
     const STATUS_CHECK_OVER = 4; //检测完成
 
+    /**
+     * 类型
+     */
     const TYPE_APPLE    = 1; //苹果
     const TYPE_ANDROID  = 2;//安卓
 
-
-    const RESULT_OK = 1;
-    const RESULT_NOT = 2;
-
-
-    protected $fillable = ['receive_no', 'serial_no','imei','check_price',
-        'status', 'create_time', 'cancel_time', 'cancel_remark', 'check_time',
-        'check_result','check_description','type', 'serial_number'
+    protected $fillable = [
+        'receive_no',
+        'serial_no',
+        'imei',
+        'check_price',
+        'status',
+        'create_time',
+        'cancel_time',
+        'cancel_remark',
+        'type',
+        'serial_number'//序列号,ios设备
     ];
 
     /**
@@ -51,7 +57,6 @@ class ReceiveGoodsImei extends Warehouse
         if ($status === null) return $st;
         return isset($st[$status]) ? $st[$status] : '';
     }
-
 
     /**
      * @param null $type
