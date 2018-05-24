@@ -34,21 +34,31 @@ return [
 
 	'payment' => [
 		// 业务类型为1的支付回调通知
-		'1' => '\_demo_callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\_demo_callback',
 		// 业务类型为1的支付回调通知
-		'2' => '\_demo_callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\_demo_callback',
 		// 业务类型为1的支付回调通知
-		'3' => '\_demo_callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\_demo_callback',
 		// 业务类型为4还机的支付回调通知
-		'4' => '\App\Order\Controllers\Api\v1\callbackPayment',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Controllers\Api\v1\callbackPayment',
 		// 业务类型为1的支付回调通知
-		'5' => '\_demo_callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\_demo_callback',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET => '\_demo_callback',
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'2' => '\App\Lib\Refund\Refund\refundUpdate',
-		// 业务类型为4还机的清算回调通知
-		'4' => '\App\Order\Controllers\Api\v1\callbackClearing',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\_demo_callback',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为1的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET => '\App\Lib\Refund\Refund\refundUpdate',
 	],
 ];

@@ -49,10 +49,14 @@ class WithholdController extends Controller
         }
         $params = $params['params'];
 
+//   *		'businessType'		=> '',	// 业务类型
+//	 *		'businessNo'		=> '',	// 业务编号
+//	 *		'withholdNo'		=> '',	// 代扣编号
+//	 *		'withholdChannel'	=> '',	// int 签约渠道
 
         $params['back_url'] = env("API_INNER_URL") . "/signNotify";
 
-        $url = AlipayApi::withholdingUrl($params);
+        $url = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($params);
 
         if(!$url){
             return apiResponse(['url'=>''], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
@@ -343,7 +347,7 @@ class WithholdController extends Controller
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
             }
             // 代扣接口
-            $withholding = new WithholdingApi();
+            $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
             $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
@@ -355,7 +359,7 @@ class WithholdController extends Controller
                 'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
                 'user_id'       => $orderInfo['user_id'],//业务平台用户id
             ];
-            $withholding_b = $withholding->withholdingPay($withholding_data);
+            $withholding_b = $withholding->deduct($withholding_data);
             if (!$withholding_b) {
                 DB::rollBack();
                 if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {

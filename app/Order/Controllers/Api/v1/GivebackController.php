@@ -191,32 +191,26 @@ class GivebackController extends Controller
 		DB::beginTransaction();
 		try{
 			//-+------------------------------------------------------------------------------
-			// |收货时：查询未完成分期直接进行代扣，无未完成分期代扣状态直接修改【无需代扣】
+			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
-			//剩余分期需要支付的总金额、还机需要支付总金额
-			$zujinNeedPay = $givebackNeedPay = 0;
-			//剩余分期数
-			$instalmentNum = 0;
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					$withholdParams = [
-						'agreement_no'	=> $instalmentInfo['agreement_no'], //支付平台代扣协议号
-						'out_trade_no'	=> $instalmentInfo['out_trade_no'], //业务系统授权码
-						'amount'		=> $instalmentInfo['amount'], //交易金额；单位：分
-						'back_url'		=> config('pay_callback_admin.giveback_withhlod'), //后台通知地址
-						'name'			=> 'giveback_withhold', //交易名称
-						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
-					];
-					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
-					$zujinNeedPay += $instalmentInfo['amount'];
-					$instalmentNum++;
+					OrderInstalment::instalment_withhold($instalmentInfo['id']);
 				}
+				//代扣已执行
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
+			} else {
+				//无需代扣
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
 			
 			//更新还机单状态到待收货
-			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
+			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+				'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
+				'withhold_status' => $withhold_status,
+			]);
 			if( !$orderGivebackResult ){
 				//事务回滚
 				DB::rollBack();
@@ -232,6 +226,10 @@ class GivebackController extends Controller
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
 	}
 	
+	/**
+	 * 还机确认收货结果
+	 * @param Request $request
+	 */
 	public function confirmDetection( Request $request ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
@@ -311,8 +309,12 @@ class GivebackController extends Controller
 			];
 			//存在未完成分期单，关闭分期单
 			if( $instalmentNum ){
-				
-				//分期关闭失败，回滚
+				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
+			}
+			//分期关闭失败，回滚
+			if( !$instalmentResult ) {
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
 			}
 
 			//需要支付金额和押金均为0时，直接修改还机单和商品单状态

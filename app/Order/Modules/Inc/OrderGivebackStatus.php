@@ -243,20 +243,10 @@ class OrderGivebackStatus{
      */
     const WITHHOLD_STATUS_NO_NEED_WITHHOLD = 1;
     /**
-	 * 代扣中
+	 * 代扣已执行【不考虑后果】
      * @var int 2
      */
-    const WITHHOLD_STATUS_IN_WITHOLD = 2;
-    /**
-	 * 代扣成功
-     * @var int 3
-     */
-    const WITHHOLD_STATUS_SUCCESS = 3;
-    /**
-	 * 代扣失败
-     * @var int 4
-     */
-    const WITHHOLD_STATUS_FAIL = 4;
+    const WITHHOLD_STATUS_ALREADY_WITHHOLD = 2;
     /**
      * 订单还机代扣状态列表
      * @return array
@@ -264,9 +254,7 @@ class OrderGivebackStatus{
     public static function getWithholdStatusList(){
         return [
             self::YAJIN_STATUS_NO_NEED_RETURN => '无需代扣',
-            self::YAJIN_STATUS_ON_RETURN => '代扣中',
-            self::YAJIN_STATUS_RETURN_COMOLETION => '代扣成功',
-            self::YAJIN_STATUS_RETURN_FAIL => '代扣失败',
+            self::WITHHOLD_STATUS_ALREADY_WITHHOLD => '代扣已执行',
         ];
     }
 
