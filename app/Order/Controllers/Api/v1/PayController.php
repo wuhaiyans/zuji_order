@@ -228,6 +228,8 @@ class PayController extends Controller
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
+				'payment_amount'	=> sprintf('%0.2f',$params['payment_amount']/100),	// 支付金额；单位元
+				'payment_channel'	=> \App\Order\Modules\Repository\Pay\Channel::Alipay,	// 支付渠道
 				'payment_time' => time(),
 			]);
 			

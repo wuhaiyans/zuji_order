@@ -130,6 +130,11 @@ class Pay extends \App\Lib\Configurable
 		return $this->paymentChannel;
 	}
 	
+	public function setPaymentAmount( $amount ){
+		$this->paymentAmount = $amount;
+		return $this;
+	}
+	
 	public function getWithholdNo(){
 		return $this->withholdNo;
 	}
