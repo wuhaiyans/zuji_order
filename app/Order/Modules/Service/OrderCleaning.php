@@ -131,8 +131,8 @@ class OrderCleaning
             $orderPayInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($orderCleanData['business_type'], $orderCleanData['business_no']);
             if (empty($orderPayInfo)) return false;
             $params = [
-                'out_refund_no' => $orderCleanData['out_refund_no'], //订单系统退款码
-                'payment_no'	=> $orderPayInfo['payment_no'], //业务系统支付码
+                'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
+                'payment_no'	=> $orderPayInfo['payment_no'], //支付平台支付码
                 'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
                 'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
             ];

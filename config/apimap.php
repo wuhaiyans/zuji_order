@@ -16,6 +16,8 @@ return [
     'api.order.orderdetail'=>'OrderController@orderInfo',
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
+    //支付宝资金预授权接口
+    'api.alipay.fundauth'=>'AlipayController@alipayFundAuth',
     //通用支付URL地址接口，满足url跳转支付
     'api.pay.payment.url'=>'PayController@getPaymentUrl',
     //银联已开通银行卡列表查询接口
