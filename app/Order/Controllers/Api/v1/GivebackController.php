@@ -197,15 +197,7 @@ class GivebackController extends Controller
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					$withholdParams = [
-						'agreement_no'	=> $instalmentInfo['agreement_no'], //支付平台代扣协议号
-						'out_trade_no'	=> $instalmentInfo['out_trade_no'], //业务系统授权码
-						'amount'		=> $instalmentInfo['amount'], //交易金额；单位：分
-						'back_url'		=> config('pay_callback_admin.giveback_withhlod'), //后台通知地址
-						'name'			=> '[还机]商品编号'. $instalmentInfo['order_no'] .'剩余分期:第'. $instalmentInfo['times'] .'期扣款', //交易名称
-						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
-					];
-					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
+					OrderInstalment::instalment_withhold($instalmentInfo['id']);
 				}
 				//代扣已执行
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
@@ -234,6 +226,10 @@ class GivebackController extends Controller
 		return apiResponse([],ApiStatus::CODE_0,'确认收货成功');
 	}
 	
+	/**
+	 * 还机确认收货结果
+	 * @param Request $request
+	 */
 	public function confirmDetection( Request $request ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
