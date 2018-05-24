@@ -17,9 +17,10 @@ class NoticeController extends Controller
 	public function test(){
 		
 		// 通知器
-		$notice = new \App\Order\Modules\Service\OrderNotice( 'A522161963164886', 'order_created' );
+		$notice = new \App\Order\Modules\Service\OrderNotice( 'A522161963164886', 'order_create' );
 		
-		$b = $notice->asyncNotify();
+//		$b = $notice->asyncNotify();
+		$b = $notice->notify();
 		
 		var_dump( $b );exit;
 	}
