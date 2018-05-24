@@ -191,14 +191,10 @@ class GivebackController extends Controller
 		DB::beginTransaction();
 		try{
 			//-+------------------------------------------------------------------------------
-			// |收货时：查询未完成分期直接进行代扣，无未完成分期代扣状态直接修改【无需代扣】
+			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
-			//剩余分期需要支付的总金额、还机需要支付总金额
-			$zujinNeedPay = 0;
-			//剩余分期数
-			$instalmentNum = 0;
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					$withholdParams = [
@@ -210,18 +206,19 @@ class GivebackController extends Controller
 						'user_id'		=> $instalmentInfo['user_id'], //业务平台用户id
 					];
 					\App\Lib\Payment\CommonWithholdingApi::deduct($withholdParams);
-					$zujinNeedPay += $instalmentInfo['amount'];
-					$instalmentNum++;
 				}
-				//代扣进行中
-				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHOLD;
+				//代扣已执行
+				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
 			} else {
 				//无需代扣
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
 			
 			//更新还机单状态到待收货
-			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], ['status'=>OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK]);
+			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+				'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
+				'withhold_status' => $withhold_status,
+			]);
 			if( !$orderGivebackResult ){
 				//事务回滚
 				DB::rollBack();
@@ -316,8 +313,12 @@ class GivebackController extends Controller
 			];
 			//存在未完成分期单，关闭分期单
 			if( $instalmentNum ){
-				
-				//分期关闭失败，回滚
+				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
+			}
+			//分期关闭失败，回滚
+			if( !$instalmentResult ) {
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
 			}
 
 			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
