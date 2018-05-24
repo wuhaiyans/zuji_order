@@ -19,5 +19,8 @@ class VerifyCsrfToken extends Middleware
 		'/order/pay/withholdUnsignNotify',		// 代扣解约通知
 		'/order/pay/fundauthNotify',			// 资金预授权冻结通知
 		'/order/pay/fundauthUnfreezeNotify',	// 资金预授权解冻通知
+		
+		//
+		'/order/notice/notify',	// 订单通知
     ];
 }

@@ -218,6 +218,10 @@ class ApiRequest {
 			'method' => $this->method,
 			'version' => $this->version,
 			'params' => $this->params,
+			
+			'sign_type'=>'MD5',
+			'sign'=>'',
+			'timestamp'=>date("Y-m-d H:i:s"),
 		);
 	}
 

@@ -248,7 +248,15 @@ class OrderRepository
         }
     }
 
-
+    public static function orderPayStatus(string $orderNo,int $payStatus){
+        if(empty($orderNo) || empty($payStatus)){
+            return false;
+        }
+        $data['order_status'] = $payStatus;
+        $data['pay_time'] =time();
+        $data['update_time'] = time();
+        return Order::where('order_no','=',$orderNo)->update($data);
+    }
 
     /**
      *

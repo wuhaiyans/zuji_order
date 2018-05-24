@@ -22,19 +22,43 @@ class ReletController extends Controller
     }
 
     /**
-     * 去创建续租页数据
+     * 去续租页数据
+     *
+     * @request [
+     *      goods_id=>订单商品自增id,
+     *      user_id=>用户编号,
+     *      order_no=>订单编号,
+     * ]
+     * @return [
+     *      订单商品数据,
+     *      list=>['zuqi'=>租期单位(短租日长租月),'zujin'=>租金]
+     * ]
      */
     public function toCreateRelet(Request $request){
-        //接收参数
-        $req = $request->all();
+        try{
+            //接收参数
+            $params = $request->input('params');
 
-        //整理参数
-        //判断参数是否设置
-        if(empty($req['order_no'])){
-            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
-        }
-        if(empty($req['goods_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"goods_id不能为空");
+            //整理参数
+            $params = filter_array($params, [
+                'goods_id'      => 'required', //续租商品ID
+                'user_id'       => 'required', //用户ID
+                'order_no'     => 'required', //订单编号
+            ]);
+            //判断参数是否设置
+            if(count($params) < 3){
+                return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+            }
+            $row = $this->relet->getGoodsZuqi($params);
+            if($row){
+                return apiResponse($row, ApiStatus::CODE_0);
+            }else{
+                return apiResponse([],ApiStatus::CODE_50000, get_msg());
+            }
+
+        }catch(\Exception $e){
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
         }
     }
 
@@ -105,6 +129,9 @@ class ReletController extends Controller
 
     /**
      * 支付续租费用
+     *
+     * 1.代扣
+     * 2.分期一次性结清
      */
     public function paymentRelet(){
         //接收参数

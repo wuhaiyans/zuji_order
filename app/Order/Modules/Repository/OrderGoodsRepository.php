@@ -15,6 +15,20 @@ class OrderGoodsRepository
     public function add($data){
         return $this->orderGoods->insertGetId($data);
     }
+
+    /**
+     * 执行where查询并获得第一个结果。
+     *
+     * @author jinlin wang
+     * @param array $where
+     * @return array|bool
+     */
+    public static function getGoodsRow($where = [['1','=','1']]){
+        if (empty($goods_no)) return false;
+        $result =  orderGoods::query()->where($where)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
     //获取商品信息
     public static function getgoodsList($goods_no){
         if (empty($goods_no)) return false;
