@@ -84,8 +84,8 @@ class OrderClearingRepository
             return false;
         }
         $whereArray = array();
-        if (isset($param['out_refund_no'])){
-            $whereArray[] = ['out_refund_no', '=', $param['out_refund_no']];
+        if (isset($param['clean_no'])){
+            $whereArray[] = ['clean_no', '=', $param['clean_no']];
             $orderData =  OrderClearing::where($whereArray)->first()->toArray();
             return $orderData;
         }
@@ -182,7 +182,7 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
-        $whereArray[] = ['out_refund_no', '=', $param['out_refund_no']];
+        $whereArray[] = ['clean_no', '=', $param['clean_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
 
