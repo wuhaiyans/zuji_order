@@ -16,19 +16,24 @@ class Delivery
 {
     /**
      * 客户收货或系统自动签收会通知到此方法
-     * @param $order_no 订单号
-     * @param bool $auto $auto=true时为系统自动签收,为false时，为客户主动签收
-     * 需要写成curl形式 供发货系统使-用
-     *$params array($order_no,$goods_no)
+     * @param string $orderNo
+     * @param int $role  在 App\Lib\publicInc 中;
+     *  const Type_Admin = 1; //管理员
+     *  const Type_User = 2;    //用户
+     *  const Type_System = 3; // 系统自动化任务
+     *  const Type_Store =4;//线下门店
      */
-    public static function receive($params)
+
+    public static function receive($orderNo,$role)
     {
         $base_api = config('tripartitle.API_INNER_URL');
+        $params['order_no'] =$orderNo;
+        $params['role'] =$role;
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.updateOrder',//模拟
+            'method'=> 'api.delivery.receive',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 
