@@ -38,7 +38,7 @@ class SmsApi {
 				'_timestamps' => $time, // 当前时间戳
 			],
 			'_param' => [
-				'smsSign' => '3', // 
+				'smsSign' => '12', // 
 				'phones' => $mobile, // 手机号
 				'templateCode' => 'SMS_113450943', // 验证码模板ID
 				'templateParam' => [],
@@ -97,7 +97,7 @@ class SmsApi {
 				'_timestamps' => $time, // 当前时间戳
 			],
 			'_param' => [
-				'smsSign' => '3', // 
+				'smsSign' => '12', // 
 				'phones' => $mobile, // 手机号
 				'templateCode' => 'SMS_113450943', // 短息模板ID
 				'code' => $code,
@@ -157,7 +157,7 @@ class SmsApi {
 				'_timestamps' => time(), // 当前时间戳
 			],
 			'_param' => [
-				'smsSign' => '3', // 
+//				'smsSign' => '3', // 
 				'phones' => $mobile, // 手机号
 				'templateCode' => $templateCode, // 短息模板ID
 				'templateParam' => $templateParam,

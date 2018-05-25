@@ -8,7 +8,9 @@ namespace App\Order\Modules\Service;
 
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
+use App\Lib\Warehouse\Delivery;
 use App\Order\Modules\Inc;
+use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
@@ -17,6 +19,80 @@ use App\Lib\ApiStatus;
 
 class OrderOperate
 {
+    /**
+     * 确认收货接口
+     * @param int $orderNo 订单编号
+     * @param int $role  在 App\Lib\publicInc 中;
+     *  const Type_Admin = 1; //管理员
+     *  const Type_User = 2;    //用户
+     *  const Type_System = 3; // 系统自动化任务
+     *  const Type_Store =4;//线下门店
+     * ]
+     * @return boolean
+     */
+
+    public static function deliveryReceive($orderNo,$role){
+        if(empty($orderNo) || empty($role)){return false;}
+        DB::beginTransaction();
+        try{
+            $b =OrderRepository::deliveryReceive($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+
+            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
+            if(!$id){
+                DB::rollBack();
+                return false;
+            }
+
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
+    }
+    /**
+     * 后台确认订单操作
+     * $data =[
+     *   'order_no'  => '',//订单编号
+     *   'remark'=>'',//操作备注
+     * ]
+     * @return boolean
+     */
+
+    public static function confirmOrder($data){
+        if(empty($data)){return false;}
+        DB::beginTransaction();
+        try{
+            $b =OrderRepository::confirmOrder($data['order_no'],$data['remark']);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+
+            $delivery =Delivery::apply($data['order_no']);
+            if(!$delivery){
+                DB::rollBack();
+                return false;
+
+            }
+
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
+    }
 
     /**
      * 取消订单

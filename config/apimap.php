@@ -14,6 +14,11 @@ return [
     'api.order.cancel' => 'OrderController@cancelOrder',
     //订单详情接口
     'api.order.orderdetail'=>'OrderController@orderInfo',
+
+
+    //确认订单接口
+    'api.order.confirmOrder'=>'OrderController@confirmOrder',
+
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
     //支付宝资金预授权接口
