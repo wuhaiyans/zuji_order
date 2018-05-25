@@ -84,7 +84,7 @@ class OrderTrade
                 }
                 $orderInfo['trade_no'] =$trade_no;
             }
-            $amount =$orderInfo['order_amount']+$orderInfo['order_yajin']+$orderInfo['order_insurance'];
+            $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
             $fenqi =0;
             if($orderInfo['zuqi_type']==2){
                 $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
@@ -173,7 +173,7 @@ class OrderTrade
                 }
                 $orderInfo['trade_no'] =$trade_no;
             }
-            $amount =$orderInfo['order_amount']+$orderInfo['order_yajin']+$orderInfo['order_insurance'];
+            $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
             $fenqi =0;
             if($orderInfo['zuqi_type']==2){
                 $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
