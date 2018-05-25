@@ -19,6 +19,15 @@ class Delivery
 {
 
 
+    /*
+    *
+    * 用户换货，发货
+    * array('order_no'=>'2312123','goods_no'=>'sdfsfsdfsd','imei'=>"wdew")
+    */
+    public  static function createDelivery($params){
+        return true;
+
+    }
     /**
      * 订单请求 发货申请
      *

@@ -11,8 +11,10 @@ namespace App\Order\Modules\Service;
 
 
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ReletRepository;
 
 class Relet
@@ -70,6 +72,13 @@ class Relet
      * @return bool
      */
     public function createRelet($params){
+        $where = [
+            ['id', '=', $params['goods_id']],
+            ['user_id', '=', $params['user_id']],
+            ['order_no', '=', $params['order_no']]
+        ];
+        $row = OrderGoodsRepository::getGoodsRow($where);
+
         return $this->reletRepository->createRelet($params);
     }
 
@@ -97,6 +106,9 @@ class Relet
                 }
             }
             $row['list'] = $list;
+            $orderInfo = OrderRepository::getGoodsExtendInfo($params['order_no']);
+            $row['pay_type'] = $orderInfo['pay_type'];
+            $row['pay_name'] = PayInc::getPayName($orderInfo['pay_type']);
             return $row;
         }else{
             set_msg('数据未查到');

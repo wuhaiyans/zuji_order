@@ -43,13 +43,14 @@ class OrderClearingRepository
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
             'order_type' => $param['order_type'] ?? 1,
-            'out_auth_no'=> $param['out_auth_no'] ??  '',
-            'deposit_deduction_amount'=>    isset($param['deposit_deduction_amount'])?$param['deposit_deduction_amount']:0.00 ,
-            'deposit_deduction_time'=>  isset($param['deposit_deduction_time'])?$param['deposit_deduction_time']:0 ,
-            'deposit_deduction_status'=>    isset($param['deposit_deduction_status'])?$param['deposit_deduction_status']:0 ,
-            'deposit_unfreeze_amount'=>     isset($param['deposit_unfreeze_amount'])?$param['deposit_unfreeze_amount']:0.00 ,
-            'deposit_unfreeze_time'=>   isset($param['deposit_unfreeze_time'])?$param['deposit_unfreeze_time']:0 ,
-            'deposit_unfreeze_status'=>  isset($param['deposit_unfreeze_status'])?$param['deposit_unfreeze_status']:0 ,
+            'auth_no'=> $param['out_auth_no'] ??  '',
+            'payment_no'=> $param['out_payment_no'] ??  '',
+            'auth_deduction_amount'=>    isset($param['auth_deduction_amount'])?$param['auth_deduction_amount']:0.00 ,
+            'auth_deduction_time'=>  isset($param['auth_deduction_time'])?$param['auth_deduction_time']:0 ,
+            'auth_deduction_status'=>    isset($param['auth_deduction_status'])?$param['auth_deduction_status']:0 ,
+            'auth_unfreeze_amount'=>     isset($param['auth_unfreeze_amount'])?$param['auth_unfreeze_amount']:0.00 ,
+            'auth_unfreeze_time'=>   isset($param['auth_unfreeze_time'])?$param['auth_unfreeze_time']:0 ,
+            'auth_unfreeze_status'=>  isset($param['auth_unfreeze_status'])?$param['auth_unfreeze_status']:0 ,
             'refund_amount'=>   isset($param['refund_amount'])?$param['refund_amount']:0.00 ,
             'refund_time'=>     isset($param['refund_time'])?$param['refund_time']:0 ,
             'refund_status'=>   isset($param['refund_status'])?$param['refund_status']:0 ,
@@ -207,24 +208,24 @@ class OrderClearingRepository
         }
 
         //更新退款押金状态
-        if (isset($param['deposit_unfreeze_status']) && !empty($param['deposit_unfreeze_status']) && in_array($param['deposit_unfreeze_status'],array_keys(OrderCleaningStatus::getDepositUnfreezeStatusList()))) {
+        if (isset($param['auth_unfreeze_status']) && !empty($param['auth_unfreeze_status']) && in_array($param['auth_unfreeze_status'],array_keys(OrderCleaningStatus::getDepositUnfreezeStatusList()))) {
 
-            $orderData->deposit_unfreeze_status  = $param['deposit_unfreeze_status'];
-            if ($param['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
+            $orderData->auth_unfreeze_status  = $param['auth_unfreeze_status'];
+            if ($param['auth_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
 
-                $orderData->deposit_unfreeze_time  = time();
+                $orderData->auth_unfreeze_time  = time();
                 $orderData->out_unfreeze_trade_no   = $param['out_unfreeze_trade_no'];
             }
         }
 
 
         //更新扣除押金状态
-        if (isset($param['deposit_deduction_status']) && !empty($param['deposit_deduction_status']) && in_array($param['deposit_deduction_status'],array_keys(OrderCleaningStatus::getDepositDeductionStatusList()))) {
+        if (isset($param['auth_deduction_status']) && !empty($param['auth_deduction_status']) && in_array($param['auth_deduction_status'],array_keys(OrderCleaningStatus::getDepositDeductionStatusList()))) {
 
-            $orderData->deposit_deduction_status  = $param['deposit_deduction_status'];
-            if ($param['deposit_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
+            $orderData->auth_deduction_status  = $param['auth_deduction_status'];
+            if ($param['auth_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
 
-                $orderData->deposit_deduction_time  = time();
+                $orderData->auth_deduction_time  = time();
                 $orderData->out_unfreeze_pay_trade_no   = $param['out_unfreeze_pay_trade_no'];
             }
         }
