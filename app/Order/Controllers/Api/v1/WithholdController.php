@@ -21,10 +21,9 @@ class WithholdController extends Controller
 
     /**
      *  签约代扣接口
+     * @request Array
      * [
-     *      'user_id'           => '' // 用户ID
-     *      'alipay_user_id'    => '' // 用户支付宝id（2088开头）
-     *      'front_url'         => '' // 前端回跳地址
+     *      'front_url'         => '' 【必须】String 前端回跳地址
      * ]
      * @return mixed false：失败；array：成功
      * [
@@ -78,10 +77,20 @@ class WithholdController extends Controller
 
     /*
      * 代扣协议查询
-     * @$request array $request
-     * [
-     *		'user_id' => '',        //租机平台用户id
-     * ]
+     * @param array $request
+	 * [
+	 *		'user_id'		=> '', //【必选】int 用户ID
+	 * ]
+	 * @return array
+	 * [
+	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
+	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
+	 *		'status'			=> '', //【必选】string 状态；init：初始化；signed：已签约；unsigned：已解约
+	 *		'create_time'		=> '', //【必选】int	创建时间
+	 *		'sign_time'			=> '', //【必选】int 签约时间
+	 *		'unsign_time'		=> '', //【必选】int 解约时间
+	 *		'user_id'			=> '', //【必选】int 用户ID
+	 * ]
      */
     public function query(Request $request){
         $request    = $request->all();
@@ -112,9 +121,7 @@ class WithholdController extends Controller
             return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
         }
 
-
         return apiResponse($withholdInfo['data'],ApiStatus::CODE_0);
-
     }
 
 
@@ -125,7 +132,7 @@ class WithholdController extends Controller
      * [
      *      'user_id' => '1', // 用户ID
      * ]
-     * returnn string 
+     * returnn string
      */
     public function unsign(Request $request){
         $params     = $request->all();
@@ -438,24 +445,24 @@ class WithholdController extends Controller
      * 多项扣款
      * @$request array
      * [
-     *      'ids' => '', //分期表自增id数组
+     *      'ids' => [], 【必须】分期表自增id数组
      * ]
+     * return String
      */
     public function multi_createpay(Request $request)
     {
         ini_set('max_execution_time', '0');
 
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
 
-        if (!$appid) {
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        $rules = [
+            'ids'            => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
         }
-
-        $params = filter_array($params, [
-            'ids' => 'required',
-        ]);
+        $params = $params['params'];
 
         $ids = $params['ids'];
         if(!is_array($ids) && empty($ids)){
