@@ -40,7 +40,7 @@ return [
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\_demo_callback',
 		// 业务类型为4还机的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Controllers\Api\v1\callbackPayment',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => 'App\Order\Modules\Service\OrderGiveback\callbackPayment',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\_demo_callback',
 		// 业务类型为1的支付回调通知
@@ -55,7 +55,7 @@ return [
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\App\Lib\Refund\Refund\refundUpdate',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Lib\Refund\Refund\refundUpdate',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => 'App\Order\Modules\Service\OrderGiveback\callbackClearing',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Lib\Refund\Refund\refundUpdate',
 		// 业务类型为1的支付回调通知

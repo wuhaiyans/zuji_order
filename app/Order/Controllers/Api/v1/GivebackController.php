@@ -441,6 +441,61 @@ class GivebackController extends Controller
 	}
 	
 	/**
+	 * 获取支付信息
+	 * @param Request $request
+	 * @return type
+	 */
+	public function getPaymentInfo( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'giveback_no'     => 'required',//还机单编号
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+        }
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//获取还机单基本信息
+		$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($paramsArr['givebackNo']);
+		if( !$orderGivebackInfo ){
+            return apiResponse([], get_code(), get_msg());
+		}
+		//获取商品信息
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivebackInfo['goodsNo']);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		//获取支付的url
+		
+		//拼接返回数据
+		$data = [
+			'order_no' => $orderGoodsInfo['order_no'],
+			'goods_no' => $orderGoodsInfo['goods_no'],
+			'goods_thumb' => $orderGoodsInfo['goods_thumb'],
+			'goods_name' => $orderGoodsInfo['goods_name'],
+			'chengse' => $orderGoodsInfo['chengse'],
+			'zuqi_type' => $orderGoodsInfo['zuqi_type'],
+			'zuqi' => $orderGoodsInfo['zuqi'],
+			'begin_time' => $orderGoodsInfo['begin_time'],
+			'end_time' => $orderGoodsInfo['end_time'],
+			'status' => $orderGivebackInfo['status'],
+			'status_name' => OrderGivebackStatus::getStatusName($orderGivebackInfo['status']),
+			'instalment_num' => $orderGivebackInfo['instalment_num'],
+			'instalment_amount' => $orderGivebackInfo['instalment_amount'],
+			'payment_status' => $orderGivebackInfo['payment_status'],
+			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
+			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
+			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
+		];
+	}
+	
+	/**
 	 * 检测结果处理【检测合格-代扣成功(无剩余分期)】
 	 * @param OrderGiveback $orderGivebackService 还机单服务对象
 	 * @param array $paramsArr 业务处理的必要参数数组

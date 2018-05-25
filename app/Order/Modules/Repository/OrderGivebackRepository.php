@@ -37,6 +37,20 @@ class OrderGivebackRepository
 		return false;
 	}
     /**
+     * 根据还机编号获取一条还机单数据
+	 * @param string $givebackNo 还机编号
+	 * @return array|false
+	 */
+	public function getInfoByGivabackNo( $givebackNo ) {
+		$where['giveback_no'] = $givebackNo;
+		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->first();
+		if( $result ) {
+			return $result->toArray();
+		}
+		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
+		return false;
+	}
+    /**
      * 获取当前订单下所有未完成的还机单
 	 * @param string $orderNo 订单编号
 	 * @return array|false

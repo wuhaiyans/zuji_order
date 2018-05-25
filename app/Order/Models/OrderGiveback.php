@@ -17,6 +17,7 @@ class OrderGiveback extends Model
     // create()时可以被赋值的属性。
     public $fillable = [
 		'id', //主键id
+		'giveback_no', //还机单编号
 		'order_no', //订单编号
 		'goods_no', //商品编号
 		'user_id', //用户ID
@@ -32,6 +33,7 @@ class OrderGiveback extends Model
 		'evaluation_status', //检测结果状态
 		'evaluation_remark', //检测结果备注
 		'evaluation_time', //检测时间
+		'yajin_status', //押金状态
 		'compensate_amount', //赔偿金额
 		'create_time', //创建时间
 		'update_time', //更新时间
