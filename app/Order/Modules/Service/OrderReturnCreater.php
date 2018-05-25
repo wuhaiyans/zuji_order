@@ -127,9 +127,9 @@ class OrderReturnCreater
            $create_data['out_account']=$order_info[0]->pay_type;//出账方式
            $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;
            $create_data['business_no']=ReturnStatus::OrderTuiKuan;
-           $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
-           $create_data['deposit_unfreeze_amount']=$order_info[0]->goods_yajin;//退还押金金额
-           $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+           $create_data['auth_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+           $create_data['auth_unfreeze_amount']=$order_info[0]->goods_yajin;//退还押金金额
+           $create_data['auth_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
            $create_data['refund_amount']=$order_info[0]->order_amount;//退款金额（租金）
            $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
            $create_data['user_id']=$order_info[0]->user_id;
@@ -571,9 +571,9 @@ public function _parse_order_where($where=[]){
                 $create_data['out_account']=$order_info['pay_type'];//出账方式
                 $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;
                 $create_data['business_no']=ReturnStatus::OrderTuiKuan;
-                $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
-                $create_data['deposit_unfreeze_amount']=$order_info['goods_yajin'];//退还押金金额
-                $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+                $create_data['auth_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+                $create_data['auth_unfreeze_amount']=$order_info['goods_yajin'];//退还押金金额
+                $create_data['auth_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
                 $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
                 $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
                 $create_data['user_id']=$order_info['user_id'];
@@ -733,21 +733,6 @@ public function _parse_order_where($where=[]){
             return ApiStatus::CODE_33009;//修改商品状态失败
         }
         return ApiStatus::CODE_0;
-    }
-    //创建换货单记录
-    public function createchange($params){
-        if (isset($param['order_no']) && isset($param['good_id']) &&  isset($param['good_no']) &&  isset($param['serial_number'])){
-           return ApiStatus::CODE_20001;//参数错误
-        }
-        //开启事物
-        DB::beginTransaction();
-        $goods_result= $this->orderReturnRepository->createchange($params);
-        if(!$goods_result){
-            DB::rollBack();
-            return ApiStatus::CODE_34009;//创建换货单记录失败
-        }
-        return ApiStatus::CODE_0;
-
     }
     //退款成功更新退款状态
     public function refundUpdate($params){

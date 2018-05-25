@@ -7,6 +7,7 @@
 
 
 namespace App\Lib\Warehouse;
+use App\Lib\ApiStatus;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
 
@@ -18,10 +19,20 @@ class Delivery
 {
 
 
+    /*
+    *
+    * 用户换货，发货
+    * array('order_no'=>'2312123','goods_no'=>'sdfsfsdfsd','imei'=>"wdew")
+    */
+    public  static function createDelivery($params){
+        return true;
+
+    }
     /**
      * 订单请求 发货申请
      *
      * @param string $order_no 订单号
+     * @return boolean
      */
     public static function apply($order_no)
     {
@@ -29,12 +40,13 @@ class Delivery
 
         $info = self::getOrderDetail($order_no);
 
-        return Curl::post($base_api, [
+        $res= Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.delivery.send',//模拟
             'params' => json_encode($info)
         ]);
+         return true;
     }
 
     /**
@@ -56,30 +68,36 @@ class Delivery
 
 
     /**
-     * 客户签收后操作请求 或者自动签收
+     * 确认收货接口
      * 接收反馈
-     *
+    *
      * @param string $order_no
-     * @param bool $auto 是否是自动收货 当auto=true时，为系统到期自己修改为签收
-     */
-    public static function receive($order_no, $auto=false)
+    * @param int $role  在 App\Lib\publicInc 中;
+     *  const Type_Admin = 1; //管理员
+     *  const Type_User = 2;    //用户
+     *  const Type_System = 3; // 系统自动化任务
+     *  const Type_Store =4;//线下门店
+     * @return
+        */
+    public static function receive($orderNo, $role)
     {
-        \App\Lib\Order\Delivery::receive($order_no, $auto);
+        return \App\Lib\Order\Delivery::receive($orderNo, $role);
+
+
     }
 
 
     /**
      * Delivery constructor.
      * 发货反馈
-     * @param array $order_no 订单号
-     * [
-     *      '' => '', //【必须】 string
-     * ]
+     * @param $params array $
+        'order_no'=> 订单号  string,
+        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
+        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
      */
-    public static function delivery($order_no)
+    public static function delivery($params)
     {
-        return true;
-        \App\Lib\Order\Delivery::delivery($order_no);
+      return \App\Lib\Order\Delivery::delivery($params);
     }
 
     /**

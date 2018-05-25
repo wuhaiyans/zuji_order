@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Order\Modules\Service\OrderOperate;
+
 
 class OrderController extends Controller
 {
@@ -198,8 +200,101 @@ class OrderController extends Controller
         echo "订单详情接口";
 
     }
+    /**
+     *  发货接口
+     * $params
+     * @param $param :array[
+        'order_no'=> 订单号  string,
+        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
+        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
+     *
+     * ]
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function delivery(Request $request)
+    {
+        $params =$request->all();
+        $params =$params['params'];
+        $params = filter_array($params,[
+            'order_no'           => 'required',
+            'goods_no'           =>'required',
+            'serial_number'     =>'required',
+            'goods_id'     =>'required',
+        ]);
+        if(count($params)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res = OrderOperate::delivery($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30012);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+    }
+    /**
+     *  确认收货接口
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function deliveryReceive(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'role'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30012);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+    }
+
+    /**
+     * 确认订单接口
+     * $params[
+     *   'order_no'  => '',//订单编号
+     *   'remark'=>'',//操作备注
+     * ]
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function confirmOrder(Request $request){
+
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+        $res =Service\OrderOperate::confirmOrder($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30011);
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+        die;
 
 
+
+
+    }
 
     /**
      * 未支付用户取消接口
