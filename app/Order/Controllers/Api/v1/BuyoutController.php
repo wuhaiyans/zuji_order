@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -66,12 +67,11 @@ class BuyoutController extends Controller
         if($goods_info['goods_status']>0){
             return apiResponse([],ApiStatus::CODE_20001,"该订单商品当前状态不能买断");
         }
+        //获取订单商品服务时间
+        $this->OrderGoodsUnitRepository = new OrderGoodsUnitRepository;
+        $goodsServe = $this->OrderGoodsUnitRepository->getGoodsUnitInfo($params['goods_no']);
 
-        //验证是否租用中
-        if($order_info['order_status'] != OrderStatus::OrderInService){
-            return apiResponse([],ApiStatus::CODE_20001,"该订单状态不能卖断");
-        }
-
+        
         $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
         if($return_info){
            if($return_info[0]['status'] ==ReturnStatus::ReturnCreated) {
