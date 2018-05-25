@@ -112,7 +112,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA52283402709384';
+		$business_no = 'FA52283402709386';
 		$pay = null;
 		try {
 			// 查询
@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '2.00',
+				'paymentAmount' => '0.01',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
@@ -154,6 +154,9 @@ class PayController extends Controller
 				'name'			=> '测试支付',					//【必选】string 交易名称
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
+			
+			$pay->setPaymentAmount(0.02);
+			
 			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
