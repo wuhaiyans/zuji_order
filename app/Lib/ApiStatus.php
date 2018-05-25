@@ -37,6 +37,9 @@ class ApiStatus {
      * @var string 状态码：程序异常（程序未捕获的异常：程序发生致命错误）
      */
     const CODE_50000 = '50000'; //
+    const CODE_50001 = '50001'; //订单获取失败
+    const CODE_50002 = '50002'; //订单商品获取失败
+    const CODE_50003 = '50003'; //商品获取失败
     const CODE_50010 = '50010'; //优惠券错误
     /**
      * @var string 状态码：支付错误
@@ -325,7 +328,9 @@ class ApiStatus {
         self::CODE_41006 => '[发货]获取数据失败',
         self::CODE_41007 => '[发货]更新数据失败',
 
-
+        self::CODE_50001 => '订单不存在',
+        self::CODE_50002 => '订单商品不存在',
+        self::CODE_50003 => '商品不存在',
         self::CODE_50010 => '优惠券不可用',
         self::CODE_50004 => '支付错误',
         self::CODE_50005 => '支付状态错误',

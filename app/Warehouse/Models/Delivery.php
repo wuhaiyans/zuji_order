@@ -5,7 +5,7 @@ namespace App\Warehouse\Models;
 
 class Delivery extends Warehouse
 {
-
+    //状态
     const STATUS_NONE = 0;
     const STATUS_INIT = 1;//待配货
     const STATUS_WAIT_SEND  = 2;//已配货 待发货
@@ -14,24 +14,40 @@ class Delivery extends Warehouse
     const STATUS_REFUSE     = 5;//拒签
     const STATUS_CANCEL     = 6;//已取消
 
-
     public $incrementing = false;
-    const CREATED_AT = 'create_time';
-//    const UPDATED_AT = 'update_time';
 
-    // Rest omitted for brevity
+//    $timestamps=false时，没有用
+//    const CREATED_AT = 'create_time';
+//    const UPDATED_AT = 'update_time';
 
     protected $table = 'zuji_delivery';
 
     protected $primaryKey='delivery_no';
 
-    protected $fillable = ['delivery_no', 'order_no', 'logistics_id','status_time','app_id','customer','is_auto',
-        'customer_mobile','customer_address','logistics_no', 'status', 'create_time', 'delivery_time', 'status_remark'];
-
+    /**
+     * @var array
+     *
+     * 可以直接插入表的数据
+     */
+    protected $fillable = [
+        'delivery_no',
+        'order_no',
+        'logistics_id',
+        'status_time',
+        'app_id',
+        'customer',
+        'is_auto',
+        'customer_mobile',
+        'customer_address',
+        'logistics_no',
+        'status',
+        'create_time',
+        'delivery_time',
+        'status_remark'
+    ];
 
     /**
-     * 默认使用时间戳戳功能
-     *
+     * 不使用框架自动填充功能
      * @var bool
      */
     public $timestamps = false;
@@ -55,17 +71,34 @@ class Delivery extends Warehouse
         return $value;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * delivery_goods表关联
+     * 外键 delivery_no
+     */
     public function goods()
     {
         return $this->hasMany(DeliveryGoods::class, 'delivery_no');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * delivery_imeis表关联
+     * 外键 delivery_no
+     */
     public function imeis()
     {
         return $this->hasMany(DeliveryGoodsImei::class, 'delivery_no');
     }
 
 
+    /**
+     * @param null $status 不传值或传null时，返回状态列表，否则返回对应状态值
+     * @return array|mixed|string
+     *
+     * 获取状态列表，或状态值
+     */
     public static function sta($status=null)
     {
         $st = [
@@ -92,7 +125,5 @@ class Delivery extends Warehouse
     {
         return self::sta($this->status);
     }
-
-
 
 }

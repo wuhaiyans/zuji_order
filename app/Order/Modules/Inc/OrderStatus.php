@@ -98,8 +98,41 @@ class OrderStatus{
     //月租
     const ZUQI_TYPE2 = 2;
 
+
     /**
-     * 订单核心业务类型
+     * 租期类型 1.天 2月
+     */
+
+    const ZUQI_TYPE_DAY = 1;
+    const ZUQI_TYPE_MONTH = 2;
+
+
+    /**
+     * 订单租期类型
+     * @return array
+     */
+    public static function getZuqiType(){
+        return [
+            self::ZUQI_TYPE_DAY => '天',
+            self::ZUQI_TYPE_MONTH => '月',
+        ];
+    }
+    /**
+     * 订单租期类型 转换成 类型名称
+     * @param int $status   订单租期类型值
+     * @return string 订单租期类型名称
+     */
+    public static function getZuqiTypeName($status){
+        $list = self::getZuqiType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+
+
+    /**
+     * 订单租期类型
      * @return array
      */
     public static function getBusinessType(){

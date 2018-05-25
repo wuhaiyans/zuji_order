@@ -71,7 +71,7 @@ class PayController extends Controller
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
     		'out_refund_no' => \createNo(1),		//业务系统退款码
-    		'payment_no'	=> '10A52223623034601', //支付系统支付码
+    		'payment_no'	=> '10A52469942269732', //支付系统支付码
     		'amount'		=> 1, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
@@ -112,7 +112,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA52283402709381';
+		$business_no = 'FA52283402709383';
 		$pay = null;
 		try {
 			// 查询
@@ -131,7 +131,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentNo' => \createNo(1),
-				'paymentAmount' => '0.02',
+				'paymentAmount' => '2.00',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
@@ -467,7 +467,7 @@ class PayController extends Controller
             LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
         }
         //更新查看清算表的状态
-        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['params']['out_refund_no']]);
         if ($orderCleanInfo['code']) {
             LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
@@ -478,8 +478,8 @@ class PayController extends Controller
 
                 //更新订单清算退款状态
                 $orderParam = [
-                    'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                    'refund_no'     => $param['params']['refund_no'],
+                    'clean_no' => $param['params']['out_refund_no'],
+                    'out_refund_no'     => $param['params']['refund_no'],
                     'refund_status' => OrderCleaningStatus::refundPayd
                 ];
                 $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -488,13 +488,14 @@ class PayController extends Controller
                     if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                         $orderParam = [
-                            'out_refund_no' => $param['params']['out_refund_no'],
+                            'clean_no' => $param['params']['out_refund_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
                         $success = OrderCleaning::upOrderCleanStatus($orderParam);
                         if ($success) {
                             //更新业务系统的状态
                             $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                            LogApi::info('退款回调业务接口', $success);
                         }
                     }
                 } else {
@@ -504,7 +505,7 @@ class PayController extends Controller
 
              } else {
 
-                \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
             }
             $this->innerOkMsg();
 
@@ -534,7 +535,7 @@ class PayController extends Controller
         $validateParams = $this->validateParams($rule,$param);
         if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
         //更新查看清算表的状态
-        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['params']['out_trade_no']]);
         if ($orderCleanInfo['code']) {
             LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
@@ -545,8 +546,8 @@ class PayController extends Controller
 
             //更新订单退押金状态
             $orderParam = [
-                'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'auth_no'     => $param['params']['refund_no'],
+                'clean_no' => $param['params']['out_trade_no'],
+                'out_unfreeze_trade_no'     => $param['params']['trade_no'],
                 'deposit_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -555,13 +556,14 @@ class PayController extends Controller
                 if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                     $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                     $orderParam = [
-                        'out_refund_no' => $param['params']['out_refund_no'],
+                        'clean_no' => $param['params']['out_trade_no'],
                         'status' => OrderCleaningStatus::orderCleaningComplete
                     ];
                     $success = OrderCleaning::upOrderCleanStatus($orderParam);
                     if ($success) {
                         //更新业务系统的状态
                         $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                        LogApi::info('押金解押回调业务接口', $success);
                     }
                 }
             } else {
@@ -571,7 +573,7 @@ class PayController extends Controller
 
         } else {
 
-            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+            LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
         }
         $this->innerOkMsg();
 
@@ -604,7 +606,7 @@ class PayController extends Controller
             LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
         }
         //更新查看清算表的状态
-        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['params']['out_refund_no']]);
+        $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['params']['out_trade_no']]);
         if ($orderCleanInfo['code']) {
             LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
@@ -615,8 +617,8 @@ class PayController extends Controller
 
             //更新订单清算退款状态
             $orderParam = [
-                'out_refund_no' => $orderCleanInfo['out_refund_no'],
-                'trade_no'     => $param['params']['refund_no'],
+                'clean_no' => $param['params']['out_trade_no'],
+                'out_unfreeze_pay_trade_no'     => $param['params']['trade_no'],
                 'deposit_deduction_status' => OrderCleaningStatus::depositDeductionStatusPayd
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -625,13 +627,14 @@ class PayController extends Controller
                 if ($orderCleanInfo['deposit_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                     $orderCleanInfo['deposit_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                     $orderParam = [
-                        'out_refund_no' => $param['params']['out_refund_no'],
+                        'clean_no' => $param['params']['out_trade_no'],
                         'status' => OrderCleaningStatus::orderCleaningComplete
                     ];
                     $success = OrderCleaning::upOrderCleanStatus($orderParam);
                     if ($success) {
                         //更新业务系统的状态
                         $success =  OrderCleaning::getBusinessCleanCallback($orderCleanInfo['business_type'], $orderCleanInfo['business_no'], $param['params']['status']);
+                        LogApi::info('押金转支付回调业务接口', $success);
                     }
                 }
             } else {
@@ -641,7 +644,7 @@ class PayController extends Controller
 
         } else {
 
-            \Log::debug(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+            LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
         }
         $this->innerOkMsg();
 

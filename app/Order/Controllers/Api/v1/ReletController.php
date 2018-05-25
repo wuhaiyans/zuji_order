@@ -34,7 +34,7 @@ class ReletController extends Controller
      *      list=>['zuqi'=>租期单位(短租日长租月),'zujin'=>租金]
      * ]
      */
-    public function toCreateRelet(Request $request){
+    public function pageRelet(Request $request){
         try{
             //接收参数
             $params = $request->input('params');
