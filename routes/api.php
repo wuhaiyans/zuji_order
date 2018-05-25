@@ -38,10 +38,11 @@ $api->version('v1', [
         $api->post('createpayNotify', 'WithholdController@createpayNotify');
 
         // 提前还款回调
-        $api->post('repaymentNotify', 'PayController@repaymentNotify');
+        $api->post('repaymentNotify', 'WithholdController@repaymentNotify');
 
-        // 代扣签约回调
-        $api->post('signNotify', 'PayController@sign_notify');
+        // 代扣解约回调
+        $api->post('unSignNotify', 'WithholdController@unSignNotify');
+
 
         // 预授权回调
         $api->post('fundauthNotify', 'PayController@fundauth_notify');
