@@ -29,10 +29,13 @@ return [
 		'4' => 'var_dump',
 		// 业务类型为1的支付回调通知
 		'5' => 'var_dump',
+
+		'6'=>''
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
 		'2' => '\App\Lib\Refund\Refund\refundUpdate'
+
 	],
 ];
