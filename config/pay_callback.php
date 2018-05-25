@@ -16,49 +16,26 @@
 //		要求：如果这时要取消支付后，必须进行退款处理，然后才可以关闭业务。
 //	2）status 为 success
 // 格式： 键：业务类型；值：可调用的函数，类静态方法
-
-/**
- * 
- * @param array $params
- * @return boolean
- */
-function _demo_callback( array $params ){
-	\App\Lib\Common\LogApi::info( '支付内部回调', $params );
-	
-	// 状态更新
-	
-	return true;
-}
-
 return [
 
 	'payment' => [
-		// 业务类型为1的租机订单支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\OrderPayNotify\callback',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\_demo_callback',
+		'1' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\_demo_callback',
-		// 业务类型为4还机的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Controllers\Api\v1\callbackPayment',
+		'2' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\_demo_callback',
+		'3' => 'var_dump',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET => '\_demo_callback',
+		'4' => 'var_dump',
+		// 业务类型为1的支付回调通知
+		'5' => 'var_dump',
+
+		'6'=>''
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\_demo_callback',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\App\Lib\Refund\Refund\refundUpdate',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => '\App\Lib\Refund\Refund\refundUpdate',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Lib\Refund\Refund\refundUpdate',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Lib\Refund\Refund\refundUpdate',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET => '\App\Lib\Refund\Refund\refundUpdate',
+		'2' => '\App\Lib\Refund\Refund\refundUpdate'
+
 	],
 ];
