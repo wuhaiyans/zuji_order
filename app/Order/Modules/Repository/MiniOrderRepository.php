@@ -45,7 +45,7 @@ class MiniOrderRepository
      *		'create_time' => '',//创建时间<br/>
      * ]
      */
-    public function getMiniOrderInfo( $orderNo ) {
+    public static function getMiniOrderInfo( $orderNo ) {
         $MiniOrder = new MiniOrder();
         $result =  $MiniOrder->where(['order_no'=> $orderNo])->first();
         if (!$result) {
