@@ -5,6 +5,7 @@
  *    date : 2018-05-14
  */
 namespace App\Order\Modules\Service;
+use App\Lib\Common\LogApi;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
@@ -134,6 +135,7 @@ class OrderCleaning
                 'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
             ];
            $succss =  CommonRefundApi::apple($params);
+            LogApi::info('退款申请接口返回', $succss);
 
 
         }
@@ -163,14 +165,16 @@ class OrderCleaning
             $freezePayParams = [
 
                 'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
-         		'out_trade_no' => $orderCleanData['out_refund_no'], //业务系统授权码
+         		'out_trade_no' => $orderCleanData['clean_no'], //业务系统授权码
          		'auth_no' => $orderCleanData['out_auth_no'], //支付系统授权码
          		'amount' => $orderCleanData['deposit_deduction_amount']*100, //交易金额；单位：分
          		'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
          		'user_id' => $orderCleanData['user_id'], //用户id
 
             ];
-            CommonFundAuthApi::unfreezeAndPay($freezePayParams);
+            $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
+
+            LogApi::info('预授权转支付接口返回', $succss);
 
         }
 
@@ -197,13 +201,14 @@ class OrderCleaning
         if ($orderCleanData['deposit_unfreeze_amount']>0 && $orderCleanData['deposit_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
             $unFreezeParams = [
          		'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
-         		'out_trade_no' => $orderCleanData['out_refund_no'], //订单系统交易码
+         		'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
          		'auth_no' => $orderCleanData['out_auth_no'], //支付系统授权码
          		'amount' => $orderCleanData['deposit_unfreeze_amount']*100, //解冻金额 单位：分
          		'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
          		'user_id' => $orderCleanData['user_id'],//用户id
             ];
-            CommonFundAuthApi::unfreeze($unFreezeParams);
+            $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
+            LogApi::info('预授权解冻接口返回', $succss);
         }
 
         return true;

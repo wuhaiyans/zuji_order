@@ -135,9 +135,13 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([], get_code(), get_msg());
 				}
-
 				//推送到收发货系统
-				//等待接口
+				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, ['goods_no'=>$goodsNo]);
+				if( !$warehouseResult ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_93200, '收货单创建失败!');
+				}
 			}
 			//冻结订单
 			$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($paramsArr['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Reback);
@@ -438,6 +442,114 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 		return apiResponse([], ApiStatus::CODE_0, '成功');
+	}
+	
+	/**
+	 * 获取支付信息
+	 * @param Request $request
+	 * @return type
+	 */
+	public function getPaymentInfo( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'goods_no'     => 'required',//还机单编号
+            'callback_url'     => 'required',//回调地址
+            'channel_id'     => 'required',//支付的渠道id
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+        }
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//获取还机单基本信息
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($paramsArr['goods_no']);
+		if( !$orderGivebackInfo ){
+            return apiResponse([], get_code(), get_msg());
+		}
+		//获取商品信息
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivebackInfo['goodsNo']);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		//获取支付的url
+		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,$paramsArr['givebackNo'] );
+		$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
+			'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goodsNo'].'还机支付',
+			'front_url' => $paramsArr['callback_url'],
+		]);
+		//拼接返回数据
+		$data = [
+			'order_no' => $orderGoodsInfo['order_no'],
+			'goods_no' => $orderGoodsInfo['goods_no'],
+			'goods_thumb' => $orderGoodsInfo['goods_thumb'],
+			'goods_name' => $orderGoodsInfo['goods_name'],
+			'chengse' => $orderGoodsInfo['chengse'],
+			'zuqi_type' => $orderGoodsInfo['zuqi_type'],
+			'zuqi' => $orderGoodsInfo['zuqi'],
+			'begin_time' => $orderGoodsInfo['begin_time'],
+			'end_time' => $orderGoodsInfo['end_time'],
+			'status' => $orderGivebackInfo['status'],
+			'status_name' => OrderGivebackStatus::getStatusName($orderGivebackInfo['status']),
+			'instalment_num' => $orderGivebackInfo['instalment_num'],
+			'instalment_amount' => $orderGivebackInfo['instalment_amount'],
+			'payment_status' => $orderGivebackInfo['payment_status'],
+			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
+			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
+			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
+			'payment_url' => $paymentUrl,
+		];
+		return apiResponse($data);
+	}
+	
+	/**
+	 * 还机单支付成功的同步回调
+	 * @param Request $request
+	 */
+	public function syncPaymentStatus( Request $request ) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+		if( !isset($paramsArr['payment_status']) || $paramsArr['payment_status'] != 'success' ){
+			return apiResponse([], ApiStatus::CODE_91000, '支付状态参数错误!');
+		}
+		if( empty($paramsArr['goods_no']) ){
+			return apiResponse([], ApiStatus::CODE_91000, '商品编号不能为空!');
+		}
+		//创建商品服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//开始事务
+		DB::beginTransaction();
+		try{
+			//更新还机单状态为还机处理中
+			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_IN_PAY]);
+			if( !$orderGivebackResult ){
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '还机单状态更新失败!');
+			}
+			//同步到商品表
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_IN_PAY]);
+			if( !$orderGoodsResult ){
+				//事务回滚
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '商品同步状态更新失败!');
+			}
+		} catch (Exception $ex) {
+			//事务回滚
+			DB::rollBack();
+			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
+		}
+		DB::commit();
+		return apiResponse();
 	}
 	
 	/**
