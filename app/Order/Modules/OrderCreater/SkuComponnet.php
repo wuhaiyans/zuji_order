@@ -344,6 +344,7 @@ class SkuComponnet implements OrderCreater
                 if($this->zuqiType ==1){
                     $goodsData['begin_time'] = strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
+                    $goodsData['zuqi'] = ($goodsData['end_time']-$goodsData['begin_time'])/86400;
                     $unitData['unit_value'] =($goodsData['end_time']-$goodsData['begin_time'])/86400;
                     $unitData['unit'] =1;
                     $unitData['goods_no'] =$goodsData['goods_no'];

@@ -262,8 +262,8 @@ class OrderGiveback
 					'order_no' => $orderGivebackInfo['order_no'],
 					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 					'bussiness_no' => $orderGivebackInfo['giveback_no'],
-					'deposit_deduction_amount' => 0,//扣除押金金额
-					'deposit_unfreeze_amount' => $orderGivebackInfo['yajin'],//退还押金金额
+					'auth_deduction_amount' => 0,//扣除押金金额
+					'auth_unfreeze_amount' => $orderGivebackInfo['yajin'],//退还押金金额
 				];
 				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 				if( !$orderCleanResult ){
