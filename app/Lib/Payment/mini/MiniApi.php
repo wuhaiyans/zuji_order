@@ -8,21 +8,21 @@ namespace App\Lib\Payment\mini;
  */
 class MiniApi {
     //取消
-    private $CANCEL = 'CANCEL';
+    private static $CANCEL = 'CANCEL';
     //完结
-    private $FINISH = 'FINISH';
+    private static $FINISH = 'FINISH';
     //分期扣款
-    private $INSTALLMENT = 'INSTALLMENT';
+    private static $INSTALLMENT = 'INSTALLMENT';
 
-    private $error = '';
+    private static $error = '';
     /*
      * 错误信息
      */
-    public function getError( ){
-        return $this->error;
+    public static function getError( ){
+        return self::$error;
     }
     /*
-     * 订单关闭（代扣）发送请求
+     * 订单代扣发送请求
      * params [
      *      'out_order_no'=>'',//商户端订单号
      *      'zm_order_no'=>'',//芝麻订单号
@@ -32,12 +32,12 @@ class MiniApi {
      *      'app_id'=>'',//芝麻小程序APPID
      * ]
      */
-    public function withhold( $params ){
-        $params['order_operate_type'] = $this->INSTALLMENT;
+    public static function withhold( $params ){
+        $params['order_operate_type'] = self::$INSTALLMENT;
         $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b == false){
-            $this->error = $CommonMiniApi->getError();
+            self::$error = $CommonMiniApi->getError();
             return false;
         }
         $result = $CommonMiniApi->getResult();
@@ -57,12 +57,12 @@ class MiniApi {
      *      'app_id'=>'',//芝麻小程序APPID
      * ]
      */
-    public function OrderClose( $params ){
+    public static function OrderClose( $params ){
         $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
-        $params['order_operate_type'] = $this->FINISH;
+        $params['order_operate_type'] = self::$FINISH;
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
-            $this->error = $CommonMiniApi->getError();
+            self::$error = $CommonMiniApi->getError();
             return false;
         }
         $result = $CommonMiniApi->getResult();
@@ -80,12 +80,12 @@ class MiniApi {
      *      'app_id'=>'',//芝麻小程序APPID
      * ]
      */
-    public function OrderCancel( $params ){
-        $params['order_operate_type'] = $this->CANCEL;
+    public static function OrderCancel( $params ){
+        $params['order_operate_type'] = self::$CANCEL;
         $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
-            $this->error = $CommonMiniApi->getError();
+            self::$error = $CommonMiniApi->getError();
             return false;
         }
         $result = $CommonMiniApi->getResult();

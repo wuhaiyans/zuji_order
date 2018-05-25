@@ -16,10 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderLogRepository
 {
-    const Type_User = 2;    //用户
-    const Type_Admin = 1; //管理员
-    const Type_System = 3; // 系统自动化任务
-    const Type_Store =4;//线下门店
 
     protected $orderLog;
 

@@ -199,7 +199,41 @@ class OrderController extends Controller
 
     }
 
+    /**
+     * 确认订单接口
+     * $params[
+     *   'order_no'  => '',//订单编号
+     *   'remark'=>'',//操作备注
+     * ]
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
 
+    public function confirmOrder(Request $request){
+
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+        $res =Service\OrderOperate::confirmOrder($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30011);
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+        die;
+
+
+
+
+    }
 
     /**
      * 未支付用户取消接口
