@@ -22,7 +22,35 @@ use Illuminate\Support\Facades\DB;
 
 class BuyoutController extends Controller
 {
-
+    /*
+     * 买断详情
+     * @param array $params 【必选】
+     * [
+     *      "id"=>"",买断单id
+     * ]
+     * @return json
+     */
+    public function getBuyout(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        //过滤参数
+        $params= filter_array($params,[
+            'goods_no'=>'required',
+        ]);
+        $buyoutInfo = OrderBuyout::getInfo($params['goods_no']);
+        if(empty($buyoutInfo)){
+            return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
+        }
+        $this->OrderGoodsRepository = new OrderGoodsRepository;
+        $goods_info = $this->OrderGoodsRepository->getGoodsInfo($buyoutInfo['goods_no']);
+        if(empty($goods_info)){
+            return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
+        }
+        $goods_info['status'] = $buyoutInfo['status'];
+        $goods_info['buyout_price'] = $buyoutInfo['buyout_price'];
+        return apiResponse($goods_info,ApiStatus::CODE_0);
+    }
+    
     /*
      * 用户买断
      * @param array $params 【必选】
@@ -82,7 +110,6 @@ class BuyoutController extends Controller
         }
 
         //创建买断单
-        $this->OrderBuyout = new OrderBuyout;
         $data = [
             'order_no'=>$goods_info['order_no'],
             'goods_no'=>$goods_info['goods_no'],
