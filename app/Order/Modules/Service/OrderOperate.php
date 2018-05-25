@@ -248,6 +248,7 @@ class OrderOperate
                 $orderListArray['data'][$keys]['goodsInfo'] = OrderRepository::getGoodsListByOrderId($values['order_no']);
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
 
             }
@@ -257,7 +258,7 @@ class OrderOperate
 
 
     }
-    
+
 
     /**
      * 根据订单号查询订单可操作的列表

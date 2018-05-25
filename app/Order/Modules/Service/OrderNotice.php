@@ -130,15 +130,20 @@ class OrderNotice{
 	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage
 	 */
 	private function getShortMessage( ){
+//		$arr = [
+//			'order_create' => '\App\Order\Modules\Repository\ShortMessage\OrderCreate',
+//			'order_cancel' => '\App\Order\Modules\Repository\ShortMessage\OrderCancel',
+//		];
+//		if( !isset($arr[$this->scene]) ){
+//			return false;
+//		}
+//		$short_message = new $arr[$this->scene]( );
 		
-		$arr = [
-			'order_create' => '\App\Order\Modules\Repository\ShortMessage\OrderCreate',
-			'order_cancel' => '\App\Order\Modules\Repository\ShortMessage\OrderCancel',
-		];
-		if( !isset($arr[$this->scene]) ){
+		$className = '\App\Order\Modules\Repository\ShortMessage\\' . $this->scene;
+		if(!class_exists($className) ){
 			return false;
 		}
-		$short_message = new $arr[$this->scene]( );
+		$short_message = new $className;
 		$short_message->setBusinessType( $this->business_type );
 		$short_message->setBusinessNo( $this->business_no );
 		return $short_message;

@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Repository\OrderGivebackRepository;
 use App\Order\Modules\Inc\OrderGivebackStatus;
+use Illuminate\Support\Facades\DB;
 
 class OrderGiveback
 {
@@ -53,6 +54,18 @@ class OrderGiveback
 			return false;
 		}
 		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
+	}
+    /**
+     * 根据还机编号获取一条还机单数据
+	 * @param string $givebackNo 还机编号
+	 * @return array|false
+	 */
+	public function getInfoByGivabackNo( $givebackNo ) {
+		if( empty($givebackNo) ) {
+			set_apistatus(\App\Lib\ApiStatus::CODE_92300,'获取还机单数据时还机单编号参数为空!');
+			return false;
+		}
+		return $this->order_giveback_repository->getInfoByGivabackNo($givebackNo);
 	}
     /**
      * 获取当前订单下所有未完成的还机单
@@ -133,14 +146,52 @@ class OrderGiveback
 	 * ]
 	 */
 	public static function callbackClearing( $params ) {
+		//参数过滤
+        $rules = [
+            'business_type'     => 'required',//业务类型
+            'business_no'     => 'required',//业务编码
+            'status'     => 'required',//支付状态
+        ];
+        $validator = app('validator')->make($params, $rules);
+        if ($validator->fails()) {
+			set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
+			return false;
+        }
 		//清算成功
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
+			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
+			return false;
+		}
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
-		//清算失败
-		//-+--------------------------------------------------------------------
-		// | 更新订单状态（交易完成，清算失败）
-		//-+--------------------------------------------------------------------
+		//开启事务
+		DB::beginTransaction();
+		try{
+			$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
+				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
+			]);
+			if( !$orderGivebackResult ){
+				//事务回滚
+				DB::rollBack();
+				return false;
+			}
+			$orderGoodsService = new OrderGoods();
+			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
+			if( !$orderGoodsResult ){
+				//事务回滚
+				DB::rollBack();
+				return false;
+			}
+		} catch (Exception $ex) {
+			//事务回滚
+			DB::rollBack();
+			return false;
+		}
+		//事务提交
+		DB::commit();
+		return true;
 	}
 	
 	/**
@@ -148,21 +199,93 @@ class OrderGiveback
 	 * @param Request $request
 	 */
 	public function callbackPayment( $params ) {
-		//-+--------------------------------------------------------------------
-		// | 判断是否支付成功
-		//-+--------------------------------------------------------------------
-		//支付成功
-		
-		//-+--------------------------------------------------------------------
-		// | 判断订单押金，是否生成清算单
-		//-+--------------------------------------------------------------------
-		//不生成
-		//-+--------------------------------------------------------------------
-		// | 更新订单状态（交易完成）
-		//-+--------------------------------------------------------------------
-		//生成
-		//-+--------------------------------------------------------------------
-		// | 更新订单状态（处理中，待清算）
-		//-+--------------------------------------------------------------------
+		//参数过滤
+        $rules = [
+            'business_type'     => 'required',//业务类型
+            'business_no'     => 'required',//业务编码
+            'status'     => 'required',//支付状态
+        ];
+        $validator = app('validator')->make($params, $rules);
+        if ($validator->fails()) {
+			set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
+			return false;
+        }
+		//清算成功
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
+			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
+			return false;
+		}
+		//查询当前还机单基础信息
+		$orderGivebackInfo = $this->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivebackInfo ){
+			return false;
+		}
+		//开启事务
+		DB::beginTransaction();
+		try{
+			//-+--------------------------------------------------------------------
+			// | 判断订单押金，是否生成清算单
+			//-+--------------------------------------------------------------------
+
+			//-+--------------------------------------------------------------------
+			// | 不生成=》更新订单状态（交易完成）
+			//-+--------------------------------------------------------------------
+			if( $orderGivebackInfo['yajin'] == 0 ){
+				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
+				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+					'status'=> $status,
+					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
+					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
+				]);
+				if( !$orderGivebackResult ){
+					DB::rollBack();
+					return false;
+				}
+			}
+			//-+--------------------------------------------------------------------
+			// | 生成=>更新订单状态（处理中，待清算）
+			//-+--------------------------------------------------------------------
+			else{
+				$status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
+				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+					'status'=> $status,
+					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_IN_RETURN,
+					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
+				]);
+				if( !$orderGivebackResult ){
+					DB::rollBack();
+					return false;
+				}
+				//清算处理数据拼接
+				$clearData = [
+					'user_id' => $orderGivebackInfo['user_id'],
+					'order_no' => $orderGivebackInfo['order_no'],
+					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'bussiness_no' => $orderGivebackInfo['giveback_no'],
+					'deposit_deduction_amount' => 0,//扣除押金金额
+					'deposit_unfreeze_amount' => $orderGivebackInfo['yajin'],//退还押金金额
+				];
+				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+				if( !$orderCleanResult ){
+					set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
+					DB::rollBack();
+					return false;
+				}
+			}
+			//更新商品信息
+			$orderGoodsService = new OrderGoods();
+			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> $status]);
+			if( !$orderGoodsResult ){
+				//事务回滚
+				DB::rollBack();
+				return false;
+			}
+		} catch (Exception $ex) {
+			//事务回滚
+			DB::rollBack();
+			return false;
+		}
+		DB::commit();
+		return true;
 	}
 }
