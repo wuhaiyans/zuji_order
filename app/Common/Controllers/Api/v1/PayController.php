@@ -44,13 +44,80 @@ class PayController extends Controller
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
     		'out_refund_no' => \createNo(1),		//业务系统退款码
-    		'payment_no'	=> '10A52670538684219', //支付系统支付码
+    		'payment_no'	=> '10A52684422871571', //支付系统支付码
     		'amount'		=> 2, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
 		var_dump( $info );exit;
 	}
 	
+	
+	
+	// 测试 支付
+	public function test(){
+		
+		
+		$business_type = 1; 
+		$business_no = 'FA522834027093801';
+		$pay = null;
+		try {
+			// 查询
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+			// 取消
+			$pay->cancel();
+			// 恢复
+			$pay->resume();
+
+		} catch (\App\Lib\NotFoundException $exc) {
+
+			// 创建支付
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
+				'user_id'		=> '5',
+				'businessType'	=> $business_type,
+				'businessNo'	=> $business_no,
+				
+				'paymentNo' => \createNo(1),
+				'paymentAmount' => '0.01',
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'paymentFenqi'	=> 0,
+				
+				'withholdNo' => \createNo(1),
+				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				
+				'fundauthNo' => \createNo(1),
+				'fundauthAmount' => '1.00',
+				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+			]);
+		} catch (\Exception $exc) {
+			exit('error');
+		}
+		
+		try {
+			$step = $pay->getCurrentStep();
+			// echo '当前阶段：'.$step."\n";
+			
+			$_params = [
+				'name'			=> '测试支付',					//【必选】string 交易名称
+				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+			];
+			
+			$pay->setPaymentAmount(0.02);
+			
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+			header( 'Location: '.$url_info['url'] ); 
+//			var_dump( $url_info );
+			
+		} catch (\Exception $exc) {
+			echo $exc->getMessage()."\n";
+			echo $exc->getTraceAsString();
+		}
+		
+	}
+	// 测试 支付前端回跳
+	public function testPaymentFront(){
+		LogApi::info('支付同步通知', $_GET);
+		var_dump( $_GET );exit;
+	}
 	
 	
 }
