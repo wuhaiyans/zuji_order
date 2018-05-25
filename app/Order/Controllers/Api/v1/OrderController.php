@@ -195,11 +195,6 @@ class OrderController extends Controller
         }
     }
 
-    public function orderDetail(){
-        return apiResponse([],ApiStatus::CODE_0,"success");
-        echo "订单详情接口";
-
-    }
     /**
      *  发货接口
      * $params

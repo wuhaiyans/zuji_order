@@ -310,12 +310,21 @@ class OrderOperate
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
 
+
+
         $order['order_info'] = $orderData;
+//        dd($orderData);
 
         //订单商品列表相关的数据
-        $goodsData =  OrderRepository::getGoodsListByOrderId($orderNo);
+        $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
+
+
+        $goodsData =  self::getGoodsListActState($orderNo, $actArray);
+
+
 
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+//        dd($goodsData);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
         $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
@@ -343,6 +352,7 @@ class OrderOperate
 
         $orderList = OrderRepository::getOrderList($param);
         $orderListArray = objectToArray($orderList);
+
         if (!empty($orderListArray['data'])) {
 
             foreach ($orderListArray['data'] as $keys=>$values) {
@@ -353,16 +363,26 @@ class OrderOperate
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+
                 //设备名称
-                $orderListArray['data'][$keys]['goodsInfo'] = OrderRepository::getGoodsListByOrderId($values['order_no']);
+
+                //订单商品列表相关的数据
+                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
+
+
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
                 $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
 
+
             }
 
         }
+
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
 
@@ -378,38 +398,71 @@ class OrderOperate
     {
         if (empty($orderNo)) return [];
         $actArray = [];
+
         $orderData   =  self::getOrderInfo($orderNo);
+
+        $orderData  =   $orderData['data'];
         if (empty($orderData['order_info'])) return [];
         $actArray   =   Inc\OrderOperateInc::orderInc($orderData['order_info']['order_status'], 'actState');
         //长期租用中七天之内出现售后
         if ($orderData['order_info']['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH &&
             $orderData['order_info']['order_status'] == Inc\OrderStatus::OrderInService)
         {
+
             //收货后超过7天不出现售后按钮
             if (time()-config('web.month_service_days')>$orderData['order_info']['receive_time'] && $orderData['order_info']['receive_time']>0) {
                 unset($actArray['service_btn']);
-            }
-            //到期时间多于1个月不出现到期处理
-            if (time()-config('web.month_expiry_process_days')>$orderData['goods_info']['end_time'] && $orderData['goods_info']['end_time']>0) {
-                unset($actArray['service_btn']);
+                unset($actArray['expiry_process']);
             }
 
-            //无分期或者分期已全部还完不出现提前还款按钮
-            $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'status'=>Inc\OrderInstalmentStatus::UNPAID));
-            if (empty($orderInstalmentData)){
-                unset($actArray['prePay_btn']);
-            }
 
         } else {
-
-
+            //短租在到期之前不出现到期处理
+            if (time()>= $orderData['goods_info']['end_time'] && $orderData['goods_info']['end_time']>0) {
+                unset($actArray['service_btn']);
+            }
         }
-
 
             return $actArray;
 
 
     }
+
+
+    /**
+     * 获取设置的操作列表
+     * Author: heaven
+     * @param $orderNo
+     * @param $actArray
+     * @return array|bool
+     */
+   public static function getGoodsListActState($orderNo, $actArray)
+   {
+       $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+       if (empty($goodsList)) return [];
+       foreach ($goodsList as $keys=>$values) {
+           //到期时间多于1个月不出现到期处理
+           foreach($goodsList as $keys=>$values) {
+               $goodsList[$keys]['actGoodsState']= $actArray;
+               //是否处于售后之中
+               $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
+               if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
+                   || $expire_process
+               ) {
+                   unset($goodsList[$keys]['actGoodsState']['expiry_process']);
+               }
+               //无分期或者分期已全部还完不出现提前还款按钮
+               $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+               if (empty($orderInstalmentData)){
+                   unset($goodsList[$keys]['actGoodsState']['prePay_btn']);
+               }
+           }
+       }
+
+       return $goodsList;
+
+
+   }
 
 
 

@@ -70,17 +70,17 @@ class OrderOperateInc
         //订单状态
         if (isset(self::getOrderOperate()[$incName])) {
             if ($id!=''){
-                if (isset(self::getOrderState()[$incName][$id])) {
-                    return self::getOrderState()[$incName][$id];
+                if (isset(self::getOrderOperate()[$incName][$id])) {
+                    return self::getOrderOperate()[$incName][$id];
                 } else {
                     return false;
                 }
 
             } else {
-                return self::getOrderState()[$incName];
+                return self::getOrderOperate()[$incName];
             }
         } else {
-            return self::getOrderState();
+            return self::getOrderOperate();
         }
     }
 
