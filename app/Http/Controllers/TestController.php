@@ -9,6 +9,11 @@ use App\Lib\Common\JobQueueApi;
 use App\Lib\Warehouse\Delivery;
 use App\Lib\Warehouse\Receive;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Helper\Sample;
 
 class TestController extends Controller
 {
@@ -16,9 +21,14 @@ class TestController extends Controller
     public function test()
     {
 
+        $inputFileName = storage_path('app') . '/world.xlsx';
+        $helper = new Sample();
 
-        $a = Delivery::cancel(578);
-        dd($a);
+        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
+        $spreadsheet = IOFactory::load($inputFileName);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        var_dump($sheetData);
+
 
 
 

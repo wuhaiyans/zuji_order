@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Lib\Goods\Goods;
 use Illuminate\Support\Facades\Redis;
 use App\Order\Modules\Service;
+use App\Lib\Payment\mini\sdk\CommonMiniApi;
 
 class MiniOrderController extends Controller
 {
@@ -34,7 +35,7 @@ class MiniOrderController extends Controller
         $rules = [
             'sku_id' => 'required', //【必须】int；子商品ID
         ];
-        $validateParams = $this->validateParams($rules,$params);
+        $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
@@ -53,6 +54,126 @@ class MiniOrderController extends Controller
         }
         //返回订单号
         return apiResponse([],ApiStatus::CODE_0,'保存临时订单号失败');
+    }
+
+
+    /**
+     * 订单确认（查询订单信息 获取免押金额）
+     */
+    public function confirmation_query(Request $request){
+        $params     = $request->all();
+        // 验证参数
+        $rules = [
+            'zm_order_no' => 'required', //【必须】string；芝麻订单号
+            'out_order_no' => 'required', //【必须】string；业务订单号
+            'payment_type_id' => 'required', //【必须】string；支付方式id
+            'coupon_no' => 'required', //【必须】string；优惠券
+        ];
+        $validateParams = $this->validateParams($rules,$params['params']);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
+        //判断支付状态
+        if($params['payment_type_id'] != \App\Order\Modules\Inc\PayInc::MiniAlipay){
+            return apiResponse([],ApiStatus::CODE_50005,'小程序支付状态错误');
+        }
+        //判断当前是否有临时订单
+        $data = Redis::get($params['out_order_no']);
+        if(!$data){
+            \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
+            return apiResponse([],$validateParams['code'],'业务临时订单不存在');
+        }
+        //查询芝麻订单确认结果
+        $miniApi = new CommonMiniApi(config('ALIPAY_MINI_APP_ID'));
+        //获取请求流水号
+        $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+        $miniParams = [
+            'transaction_id'=>$transactionNo,
+            'order_no'=>$params['zm_order_no'],
+        ];
+        $miniData = $miniApi->orderConfirm($miniParams);
+        if($miniData === false){
+            \App\Lib\Common\LogApi::notify('芝麻接口请求错误',$miniParams);
+            return apiResponse( [], ApiStatus::CODE_35003, '查询芝麻订单确认结果失败');
+        }
+        //用户处理
+        $userInfo = [];
+
+        //处理用户收货地址
+
+//        $address_data = [
+//            'mid' => $user_id,
+//            'name' => $data['name'],
+//            'mobile' => $data['mobile'],
+//            'address' => $data['house'],
+//        ];
+//        $member_address_table = $load->table('member/member_address');
+//        $member_address_service = $load->service('member/member_address');
+//        $address_id = $member_address_table->edit_address($address_data);
+//        $address_info = $member_address_service->user_address_default($user_id);
+//        $address_info['address_id'] = $address_id;
+
+        //优惠券处理
+
+//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('ALIPAY_MINI_APP_ID'));
+//        //100元全场通用优惠券
+//        $app_ids = [
+//            1,5,9,11,12,13,14,15,16,21,22,24,27
+//        ];
+//        if(in_array($appid,$app_ids)){
+//            $coupon = \zuji\coupon\Coupon::set_coupon_user(array("user_id"=>$this->member['id'],"only_id"=>'87da43c62f09a2c43f905ae05335c31c'));
+//            $params['coupon_no'] = $coupon['coupon_no']?$coupon['coupon_no']:$params['coupon_no'];
+//        }
+//        //首月0租金优惠券领取活动--(临时)--
+//        $sku_info = $this->load->service("goods2/goods_sku")->api_get_info($sku_id,"spu_id");
+//        $this->coupon = $this->load->table("coupon/coupon_type");
+//        $coupon_info = $this->coupon->where(['only_id'=>'4033f1cdfa5d835ea70cd07be787babc'])->find();
+//        $num = explode(",",substr($coupon_info['range_value'],0,-1));
+//        if(in_array($sku_info['spu_id'],$num)){
+//            $coupon = \zuji\coupon\Coupon::set_coupon_user(array("user_id"=>$this->member['id'],"only_id"=>$coupon_info['only_id']));
+//            $params['coupon_no'] = $coupon['coupon_no']?$coupon['coupon_no']:$params['coupon_no'];
+//        }
+
+        $result = [
+            'coupon_no'         => $params['coupon_no'],
+            'certified'			=> $userInfo['credit']['certified']?'Y':'N',
+            'certified_platform'=>  \App\Lib\Certification::getPlatformName($userInfo['certified_platform']),
+            'credit'			=> ''.$userInfo['credit']['credit'],
+
+            'amount'			=> Order::priceFormat($schema_data['sku']['amount']/100),	// 订单金额
+            'discount_amount'	=> Order::priceFormat($schema_data['sku']['discount_amount']/100),// 优惠金额
+            'all_amount'		=> Order::priceFormat($schema_data['sku']['all_amount']/100),
+            // 买断价
+            'buyout_price'	    => Order::priceFormat($schema_data['sku']['buyout_price']/100),
+            // 市场价
+            'market_price'	    => Order::priceFormat($schema_data['sku']['market_price']/100),
+            //押金
+            'yajin'				=> Order::priceFormat($schema_data['sku']['yajin']/100),
+            //免押金
+            'mianyajin'			=> Order::priceFormat($schema_data['sku']['mianyajin']/100),
+            //原始租金
+            'zujin'				=> Order::priceFormat($schema_data['sku']['zujin']/100),
+            //首期金额
+            'first_amount'				=> Order::priceFormat($schema_data['instalment']['first_amount']/100),
+            //每期金额
+            'fenqi_amount'				=> Order::priceFormat($schema_data['instalment']['fenqi_amount']/100),
+            'yiwaixian'			=> Order::priceFormat($schema_data['sku']['yiwaixian']/100),
+            'zuqi'				=> ''.$schema_data['sku']['zuqi'],
+            //租期类型
+            'zuqi_type'			=> $zuqi_type,
+            'chengse'			=> ''.$schema_data['sku']['chengse'],
+            // 支付方式
+            'payment_type_id'			 => ''.$params['payment_type_id'],
+
+            'sku_info'			=> '',
+            '_order_info' => $schema_data,
+            'address_info' => $address_info,
+            '$b' => $b,
+            '_error' => $orderCreaterComponnet->get_order_creater()->get_error(),
+        ];
+
+        return apiResponse( $result, ApiStatus::CODE_0 );
     }
 
     /**
@@ -307,4 +428,50 @@ class MiniOrderController extends Controller
         //请求获取商品信息
 //        $goodsArr = Goods::getSku(config('tripartite.Interior_Goods_Request_data'),intval($params['sku_id']));
     }
+
+    /**
+     * 前段确认订单同步通知接口
+     * 获取订单详细信息
+     */
+    public function front_transition(){
+        // 验证参数
+        $params = $this->params;
+        $params = filter_array($params, [
+            'zm_order_no' => 'required', //【必须】string；芝麻订单号
+            'out_order_no' => 'required', //【必须】string；商户订单号
+            'order_status' => 'required', //【必须】string；下单状态 SUCCESS成功,FAIL失败,UNKOWN处理中
+            'order_create_time' => 'required', //【必须】string；订单创建时间
+        ]);
+
+        if( count($params)<4 ){
+            api_resopnse( [], ApiStatus::CODE_20001,'', ApiSubCode::Params_Error,'请求参数错误');
+            return;
+        }
+
+        //订单加锁 如果状态已变更 不需要加锁
+        $this->order = $this->load->service('order2/order');
+        $where['order_no'] = $params['out_order_no'];
+        $where['status'] = State::PaymentSuccess;
+        //获取订单信息
+        $order = $this->order->get_order_info($where);
+        if(!$order){
+            \zuji\OrderLocker::lock($params['out_order_no'], \zuji\OrderLocker::ZMminiPaying);
+        }
+
+        // 验签 验证 通过 修改数据
+        if($params['order_status'] == 'SUCCESS'){
+            Debug::error(Location::L_Order, '芝麻小程序确认订单同步通知参数',$this->params );
+            api_resopnse( [], ApiStatus::CODE_0);
+            return;
+        }elseif ($params['order_status'] == 'UNKOWN'){
+            //处理中不做处理
+            api_resopnse( [], ApiStatus::CODE_50003,'', '处理中','小程序处理中');
+            return;
+        }else{
+            //处理中不做处理
+            api_resopnse( [], ApiStatus::CODE_50003,'', '确认订单失败','小程序确认订单失败');
+            return;
+        }
+    }
+
 }

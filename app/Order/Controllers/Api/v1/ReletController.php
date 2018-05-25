@@ -63,7 +63,10 @@ class ReletController extends Controller
     }
 
     /**
-     * 创建续租
+     * 创建续租并支付
+     *
+     * 1.创建数据
+     * 2.支付
      */
     public function createRelet(Request $request){
         try {
@@ -73,16 +76,12 @@ class ReletController extends Controller
             //整理参数
             $params = filter_array($params, [
                 'user_id'       => 'required', //用户ID
-                'zuqi_type'     => 'required', //类型 长租短租
                 'zuqi'          => 'required', //租期
                 'order_no'      => 'required', //订单编号
-                'pay_type'      => 'required', //支付方式及渠道
-                'user_name'     => 'required', //用户名
-                'user_phone'    => 'required', //手机号
-                'goods_id'      => 'required', //续租商品ID
+                'pay_type'      => 'required', //支付方式
                 'relet_amount'  => 'required',//续租金额
             ]);
-            if(count($params) < 9){
+            if(count($params) < 5){
                 return apiResponse([], ApiStatus::CODE_20001, "参数错误");
             }
 

@@ -26,6 +26,57 @@ class OrderRepository
     public function add($data){
         return $this->order->insertGetId($data);
     }
+    /**
+     * 发货操作
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function delivery($orderNo)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['order_status'] =OrderStatus::OrderDeliveryed;
+        $data['delivery_time'] =time();
+        return Order::where('order_no','=',$orderNo)->update($data);
+
+    }
+
+    /**
+     * 确认收货操作
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function deliveryReceive($orderNo)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['order_status'] =OrderStatus::OrderInService;
+        $data['confirm_time'] =time();
+        return Order::where('order_no','=',$orderNo)->update($data);
+
+    }
+    /**
+     * 确认订单操作
+     * @param $orderNo
+     * @param $remark
+     * @return boolean
+     */
+    public static function confirmOrder($orderNo,$remark)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        if (empty($remark)) {
+            return false;
+        }
+        $data['order_status'] = OrderStatus::OrderInStock;
+        $data['remark'] =$remark;
+        $data['confirm_time'] =time();
+        return Order::where('order_no','=',$orderNo)->update($data);
+
+    }
 
     /**
      *  保存支付交易号

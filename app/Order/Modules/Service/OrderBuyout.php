@@ -12,8 +12,14 @@ class OrderBuyout
 	 */
 	public function __construct(  ) {
 	}
+	public static function getInfo($goodsNo){
+		if(!$goodsNo){
+			return false;
+		}
+		return OrderBuyoutRepository::getInfo(['goods_no'=>$goodsNo]);
+	}
     /**
-     * 保存还机单数据
+     * 创建买断单
      * @param $data
      * @return id
      */
@@ -29,5 +35,19 @@ class OrderBuyout
 			return false;
 		}
 		return OrderBuyoutRepository::create($data);
+	}
+	/**
+	 * 取消买断单
+	 * @param int $id 买断单主键id
+	 * @param int $userId 操作人id
+	 * @return id
+	 */
+	public static function cancel($id,$userId){
+		$id = intval($id);
+		$userId = intval($userId);
+		if(!$id || $userId){
+			return false;
+		}
+		return OrderBuyoutRepository::setOrderBuyoutCancel($id,$userId);
 	}
 }
