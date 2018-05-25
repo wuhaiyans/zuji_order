@@ -135,9 +135,13 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([], get_code(), get_msg());
 				}
-
 				//推送到收发货系统
-				//等待接口
+				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, ['goods_no'=>$goodsNo]);
+				if( !$warehouseResult ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_93200, '收货单创建失败!');
+				}
 			}
 			//冻结订单
 			$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($paramsArr['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Reback);
