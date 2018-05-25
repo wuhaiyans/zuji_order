@@ -17,15 +17,17 @@ class OrderBuyout
      * @param $data
      * @return id
      */
-    public function create($data)
+    public static function create($array)
 	{
-		$data = filter_array($data, [
-				'order_no' => 'required',//订单编号
-				'goods_no' => 'required',//商品编号
-				'user_id' => 'required',//用户id
-				'logistics_no' => 'required',//物流单号
-				'giveback_no' => 'required',//还机单编号
-				'status' => 'required',//订单状态
+		$data = filter_array($array,[
+				'order_no'=>'required',
+				'goods_no'=>'required',
+				'user_id'=>'required',
+				'buyout_price'=>'required',
 		]);
+		if(count($data)!=4){
+			return false;
+		}
+		return OrderBuyoutRepository::create($data);
 	}
 }

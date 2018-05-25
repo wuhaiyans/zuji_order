@@ -120,6 +120,16 @@ return [
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
     //审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
+
+    //续租接口
+    // 续租页
+    'api.Relet.pageRelet'       => 'ReletController@pageRelet',
+    // 续租详情
+    'api.Relet.detailsRelet'       => 'ReletController@detailsRelet',
+    // 续租列表
+    'api.Relet.listRelet'       => 'ReletController@listRelet',
+    // 取消续租
+    'api.Relet.cancelRelet'       => 'ReletController@cancelRelet',
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
