@@ -24,10 +24,10 @@ class ReletRepository
      * 获取续租列表
      *
      * @params[
-     *      user_id=>用户ID(必填),
-     *      status=>状态
-     *      pages=>页数,
-     *      num=>每页显示条数,
+     *      user_id=>用户ID(选填),
+     *      status=>状态(选填),
+     *      pages=>页数(选填),
+     *      pagesize=>每页显示条数(选填),
      * ]
      * @return [
      *  [
@@ -51,8 +51,11 @@ class ReletRepository
     public function getList($params){
         //拼接 页数 搜索参数 每页显示数
         $whereArray = [];
+
         //根据用户id
-        $whereArray[] = ['order_relet.user_id', '=', $params['user_id']];
+        if (isset($params['user_id']) && !empty($params['user_id'])) {
+            $whereArray[] = ['order_relet.user_id', '=', $params['user_id']];
+        }
         //状态
         if (isset($params['status']) && !empty($params['status'])) {
             $whereArray[] = ['order_relet.status', '=', $params['status']];
