@@ -112,7 +112,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA52283402709383';
+		$business_no = 'FA52283402709384';
 		$pay = null;
 		try {
 			// 查询
