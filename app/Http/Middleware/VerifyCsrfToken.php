@@ -13,5 +13,14 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         //
+		'/order/pay/paymentNotify',				// 支付通知
+		'/order/pay/refundNotify',				// 退款通知
+		'/order/pay/withholdSignNotify',		// 代扣签约通知
+		'/order/pay/withholdUnsignNotify',		// 代扣解约通知
+		'/order/pay/fundauthNotify',			// 资金预授权冻结通知
+		'/order/pay/fundauthUnfreezeNotify',	// 资金预授权解冻通知
+		
+		//
+		'/order/notice/notify',	// 订单通知
     ];
 }

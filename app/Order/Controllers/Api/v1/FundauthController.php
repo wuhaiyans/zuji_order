@@ -4,60 +4,47 @@ namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
-use App\Lib\Payment\FundAuthApi;
+use App\Lib\Payment\CommonFundAuthApi;
+use App\Order\Modules\Repository\OrderPayWithholdRepository;
 
 class FundauthController extends Controller
 {
 
-    /*
-     * 资金预授权
-     * @request array
+    /**
+     * 预授权获取URL接口
+     * @param array $params
      * [
-     *      'appid'     => '' //渠道ID
-     *      'params'    => [
-     *          'amount'        => '' // 授权金额；单位：分
-     *          'front_url'     => '' // 前端回跳地址
-     *      ]
-     * ]
-     * return String $url  预授权地址
+     *		'out_auth_no'	    => '', //业务系统授权码
+     *		'amount'			=> '', //授权金额；单位：分
+     *		'channel_type'		=> '', //授权渠道
+     *		'front_url'			=> '', //前端回跳地址
+     *		'back_url'			=> '', //后台通知地址
+     *		'name'				=> '', //预授权名称
+     *		'user_id'			=> '', //用户ID
      */
     public function fundauth(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
 
-        $params = filter_array($params, [
-            'amount'        => 'required', //授权金额；单位：分
-            'front_url'     => 'required', //前端回跳地址
-            'name'          => 'required', //预授权名称
-            'user_id'       => 'required', //用户ID
-        ]);
-        if(count($params) < 4){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
-        }
+        $params     = $request->all();
 
-        $params = [
-            'out_auth_no'   => createNo(4),         //订单系统授权码
-            'amount'        => $params['amount'],   //授权金额；单位：分
-            'front_url'     => $params['amount'],   //前端回跳地址
-            'back_url'      => 'api.Fundauth.fund_auth_notify', //后台通知地址
-            'name'          => $params['name'],     //预授权名称
-            'user_id'       => $params['user_id'],  //用户ID
+        $rules = [
+            'amount'            => 'required',      //授权金额；单位：分
+            'front_url'         => 'required',      //前端回跳地址
+            'name'              => 'required',      //预授权名称
+            'user_id'           => 'required|int',  //用户ID
         ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
 
-        $data = FundAuthApi::fundauthUrl($appid, $params);
+        $params['out_auth_no']  = createNo(4);         //订单系统授权码
+        $params['channel_type'] = 2;                   //渠道 默认为2 支付宝
+        $params['back_url']     = env("API_INNER_URL") . "/fundauthNotify";//后台通知地址
+
+        $data = CommonFundAuthApi::fundauthUrl($params);
         $url = !empty($data['authorization_url']) ? $data['authorization_url'] : "";
         return apiResponse(['url'=>$url],ApiStatus::CODE_0,"success");
-    }
-
-    /*
-     * 资金预授权回调接口
-     */
-    public function fundauth_notify(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
-        p($params);
     }
 
     /*
@@ -66,26 +53,40 @@ class FundauthController extends Controller
     * [
     *      'appid'     => '' //渠道ID
     *      'params'    => [
-    *          'auth_no'        => '' // 支付系统授权码
+    *           'user_id'        => '' // 用户id
     *      ]
     * ]
     * return String $url  预授权地址
     */
     public function fundauth_query(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
+        $rules = [
+            'user_id'           => 'required|int',  //用户id
+        ];
 
-        $params = filter_array($params, [
-            'auth_no'        => 'required', //支付系统授权码
-        ]);
-        if(count($params) < 1){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
+
+        $withholdInfo = OrderPayWithholdRepository::find($params['user_id']);
+        if(!$withholdInfo){
+            return apiResponse([], ApiStatus::CODE_81001, "获取用户协议错误");
         }
 
-        $data = FundAuthApi::authorizationStatus($appid, $params);
-        v($data);
-        return $data;
+        $data = [
+            'auth_no'       => $withholdInfo['withhold_no'],
+            'out_auth_no'   => $withholdInfo['out_withhold_no'],
+            'user_id'       => $params['user_id'],
+        ];
+
+        $result = CommonFundAuthApi::queryFundAuthStatus( $data );
+        if(!$result){
+            apiResponse([],ApiStatus::CODE_81002, "预授权状态查询失败");
+        }
+
+        apiResponse($result,ApiStatus::CODE_0,"success");
     }
 
     /**
@@ -93,32 +94,40 @@ class FundauthController extends Controller
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'out_trade_no' => '', //订单系统交易码
-     *		'auth_no' => '', //支付系统授权码
-     *		'amount' => '', //解冻金额 单位：分
-     *		'back_url' => '', //后台通知地址
+     *		'user_id' => '',    //用户ID
+     *		'amount' => '',     //解冻金额 单位：分
+     *		'name' => '',       //名称
      * ]
      */
     public function fundauth_unfreeze( Request $request ){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
+        $rules = [
+            'amount'            => 'required',      //授权金额；单位：分
+            'name'              => 'required',      //预授权名称
+            'user_id'           => 'required|int',  //用户ID
+        ];
 
-        $data = FundAuthApi::thaw($appid, $params);
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
+
+        $withholdInfo = OrderPayWithholdRepository::find($params['user_id']);
+        if(!$withholdInfo){
+            return apiResponse([], ApiStatus::CODE_81001, "获取用户协议错误");
+        }
+        $data['out_trade_no']   = $withholdInfo['out_trade_no'];
+        $data['auth_no']        = $withholdInfo['auth_no'];
+        $data['back_url']       = env("API_INNER_URL") . "/fundauthUnfreezeNotify";//后台通知地址
 
 
-        apiResponse(['url'=>$data],ApiStatus::CODE_0,"success");
-    }
+        $result = CommonFundAuthApi::unfreeze( $params );
+        if(!$result){
+            apiResponse([],ApiStatus::CODE_81003, "预授权解冻失败");
+        }
 
-    /**
-     * 预授权解冻接口回调接口
-     */
-    public function fundauth_unfreeze_notify( Request $request ){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
-
-        p('OK');
+        apiResponse([],ApiStatus::CODE_0,"success");
     }
 
     /**
@@ -126,30 +135,45 @@ class FundauthController extends Controller
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'out_trade_no' => '', //业务系统授权码
-     *		'auth_no' => '', //支付系统授权码
+     *		'name' => '',   //交易名称
      *		'amount' => '', //交易金额；单位：分
-     *		'back_url' => '', //后台通知地址
+     *		'user_id' => '', //用户ID
      * ]
      */
     public function fundauth_to_pay( Request $request ){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
+        $params     = $request->all();
+        $rules = [
+            'amount'            => 'required',      //授权金额；单位：分
+            'name'              => 'required',      //预授权名称
+            'user_id'           => 'required|int',  //用户ID
+        ];
 
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params = $params['params'];
 
-        $data = FundAuthApi::thawPay($appid, $params);
-        apiResponse(['url'=>$data],ApiStatus::CODE_0,"success");
+        $withholdInfo = OrderPayWithholdRepository::find($params['user_id']);
+        if(!$withholdInfo){
+            return apiResponse([], ApiStatus::CODE_81001, "获取用户协议错误");
+        }
+
+        $data = [
+            'name'		    => $params['name'],                 //交易名称
+     		'out_trade_no'  => $withholdInfo['withhold_no'],    //订单系统交易码
+     		'auth_no'       => $withholdInfo['out_withhold_no'],//支付系统授权码
+     		'amount'        => $params['amount'],               //解冻金额 单位：分
+     		'back_url'      => env("API_INNER_URL") . "/unfreezeAndPayNotify",//后台通知地址
+     		'user_id'       => $params['user_id'],              //用户id
+        ];
+
+        $result = CommonFundAuthApi::unfreezeAndPay($data);
+        if(!$result){
+            apiResponse([], ApiStatus::CODE_81004, "预授权转支付失败");
+        }
+
+        apiResponse([], ApiStatus::CODE_0, "success");
     }
 
-    /**
-     * 预授权转支付回调接口
-     */
-    public function fundauth_to_pay_notify( Request $request ){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
-
-        p('OK');
-    }
 }

@@ -15,6 +15,20 @@ class OrderGoodsRepository
     public function add($data){
         return $this->orderGoods->insertGetId($data);
     }
+
+    /**
+     * 执行where查询并获得第一个结果。
+     *
+     * @author jinlin wang
+     * @param array $where
+     * @return array|bool
+     */
+    public static function getGoodsRow($where = [['1','=','1']]){
+        if (empty($goods_no)) return false;
+        $result =  orderGoods::query()->where($where)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
     //获取商品信息
     public static function getgoodsList($goods_no){
         if (empty($goods_no)) return false;
@@ -74,10 +88,20 @@ class OrderGoodsRepository
 			return [];
 		}
         $goodsInfo = $result->toArray();
-		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
-		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
+//		var_dump($goodsInfo);exit;
+//		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
+//		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
 		$goodsInfo['begin_time'] = date('Y-m-d H:i:s',$goodsInfo['begin_time']);
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;
+	}
+	/**
+	 * 根据条件更新数据
+	 * @param array $where
+	 * @param array $data
+	 * @return boolen
+	 */
+	public function update( $where, $data ) {
+		return $this->orderGoods->where($where)->update($data);
 	}
 }

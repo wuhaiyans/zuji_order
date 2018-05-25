@@ -80,11 +80,13 @@ class PayTest extends TestCase
 			var_dump( $url_info );
 			
 		} catch (\Exception $exc) {
+			echo $exc->getMessage()."\n";
 			echo $exc->getTraceAsString();
 		}
 
 	}
-//	
+
+	
 //    /**
 //     * 测试 payment + withhold + fundauth
 //     * @return void
@@ -174,7 +176,7 @@ class PayTest extends TestCase
 //				//var_dump( $payment_query );
 //				echo "ok\n";
 //				echo "支付状态：{$payment_query['status']}\n";
-//			} catch (\Exception $ex) {
+//			} catch (\Exception $exc) {
 //				echo "error: {$exc->getMessage()}\n";
 //				$this->assertTrue(false,$exc->getMessage());
 //			}
@@ -323,10 +325,10 @@ class PayTest extends TestCase
 //				echo "error: {$exc->getMessage()}\n";
 //				$this->assertTrue(false,$exc->getMessage());
 //			}
-//			
-//			
 //    }
-//	
+    
+    
+	
 //    /**
 //     * 测试 withhold 代扣签约
 //     * @return void

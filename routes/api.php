@@ -27,25 +27,15 @@ $api->version('v1', [
 
         $apiMap = config('apimap');
         $method = request()->input('method');
-
         if (isset($apiMap[$method])) {
             $api->post('/',  $apiMap[$method]);
         }
-        $api->post('order', 'OrderController@store')
-            ->name('api.order.store');
-        $api->post('order/confirmation', 'OrderController@confirmation')
-        ->name('api.order.confirmation'); //创建订单接口
-        $api->post('order/create', 'OrderController@create')
-            ->name('api.order.create'); //创建订单接口
-        $api->post('order/orderlist', 'OrderController@orderList')
-            ->name('api.order.orderlist');//订单列表接口
-        $api->post('order/orderdetail', 'OrderController@orderDetail')
-            ->name('api.order.orderdetail');//订单列表接口
+
         $api->post('user', 'UserController@me') //获取用户信息接口
             ->name('api.user.show');
 
         // 代扣扣款回调
-        $api->post('createpayNotify', 'PayController@createpayNotify');
+        $api->post('createpayNotify', 'WithholdController@createpayNotify');
 
         // 提前还款回调
         $api->post('repaymentNotify', 'PayController@repaymentNotify');
@@ -53,11 +43,24 @@ $api->version('v1', [
         // 代扣签约回调
         $api->post('signNotify', 'PayController@sign_notify');
 
-        // 代扣解约回调
-        $api->post('unSignNotify', 'PayController@unsign_notify');
+        // 预授权回调
+        $api->post('fundauthNotify', 'PayController@fundauth_notify');
+
+        // 预授权解冻回调
+        $api->post('fundauthUnfreezeNotify', 'PayController@fundauth_unfreeze_notify');
+
+        //预授权转支付回调
+        $api->post('unfreezeAndPayNotify', 'PayController@unfreeze_pay_notify');
+
+        //订单清算押金转支付回调接口
+        $api->post('unfreezeAndPayClean', 'PayController@unfreezeAndPayClean');
+
+        //订单清算退款回调接口
+        $api->post('refundClean', 'PayController@refundClean');
+
+        //订单清算退押金回调接口
+        $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
 
-
-//    });
 });
    

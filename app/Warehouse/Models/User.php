@@ -14,6 +14,8 @@ class User extends Authenticatable implements JWTSubject
     use Notifiable;
     protected $table = 'users';
     protected $primaryKey = 'id';
+
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -22,17 +24,18 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
+
     /**
      * @return mixed
      */
     // Rest omitted for brevity
 
-       public function getJWTIdentifier()
+    public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
-        public function getJWTCustomClaims()
+    public function getJWTCustomClaims()
     {
         return [];
     }

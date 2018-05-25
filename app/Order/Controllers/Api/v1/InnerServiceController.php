@@ -11,28 +11,6 @@ use Illuminate\Http\Request;
 class InnerServiceController extends Controller
 {
 
-    /**
-     * 队列处理成功，返回该函数
-     * @param int $type
-     * @return string
-     */
-    protected function innerOkMsg(){
-        $returnData = array('status'=>'ok');
-        return json_encode($returnData);
-
-    }
-
-    /**
-     *
-     * 消费处理失败，返回该函数，处理失败，队列可能会开启重试机制
-     * @param int $type
-     * @return string
-     */
-    protected function innerErrMsg(){
-        $returnData = array('status'=>'error');
-        return json_encode($returnData);
-
-    }
 
     /**
      * 订单取消处理接口

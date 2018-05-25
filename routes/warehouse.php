@@ -21,13 +21,10 @@ $api->version('v1', [
 
     $apiMap = config('apimapwarehouse');
 
-    $data = apiData();
-
-    $method = $data['method'];
-
-    if (isset($apiMap[$method])) {
-        $api->any('/',  $apiMap[$method]);
-    }
+	$method = request()->input('method');
+	if (isset($apiMap[$method])) {
+		$api->post('/',  $apiMap[$method]);
+	}
 });
 
 

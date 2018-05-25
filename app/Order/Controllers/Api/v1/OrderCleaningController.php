@@ -161,9 +161,12 @@ class OrderCleaningController extends Controller
 
         $rules = [
             'business_type'  => 'required',
-            'business_no'  => 'required'
+            'business_no'  => 'required',
+            'order_no'   => 'required'
         ];
+
         $validateParams = $this->validateParams($rules,$params);
+
         if ($validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
@@ -193,8 +196,6 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required',
             'out_refund_no'=> 'required'
         ];
         $validateParams = $this->validateParams($rules,$params);

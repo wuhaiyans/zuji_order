@@ -15,14 +15,22 @@ class DeliveryGoods extends Warehouse
 
     public $timestamps = false;
 
-
     //状态：0：未配货；1：部分配货完成；2：全部配货完成
     const STATUS_INIT = 0; //未配
     const STATUS_PART = 1; //配货部分
     const STATUS_ALL = 2; //配货完成
 
-    protected $fillable = ['delivery_no', 'serial_no', 'order_no','quantity','goods_name',
-        'quantity_delivered', 'status', 'status_time'];
+
+    protected $fillable = [
+        'delivery_no',
+        'serial_no',
+        'order_no',
+        'quantity',
+        'goods_name',
+        'quantity_delivered',
+        'status',
+        'status_time'
+    ];
 
     /**
      * @param $data
@@ -34,13 +42,7 @@ class DeliveryGoods extends Warehouse
         $model = new self();
 
         $model->create($data);
-
         return $model;
     }
-
-
-
-
-
 
 }

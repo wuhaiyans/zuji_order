@@ -21,11 +21,22 @@ Route::get('test/{action}', function(App\Http\Controllers\TestController $contro
 Route::get('order/{action}', function(App\Order\Controllers\Api\v1\OrderController $index, $action){
     return $index->$action();
 });
+Route::any('order/pay/{action}', function(App\Order\Controllers\Api\v1\PayController $index, $action){
+    return $index->$action();
+});
+Route::any('order/notice/{action}', function(App\Order\Controllers\Api\v1\NoticeController $index, $action){
+    return $index->$action();
+});
 
 Route::get('users/{action}', function(App\Order\Controllers\Api\v1\UsersController $index, $action){
     return $index->$action();
 });
 
 Route::get('return/{action}', function(App\Order\Controllers\Api\v1\ReturnController $index, $action){
+    return $index->$action();
+});
+//还机的回调
+
+Route::any('order/giveback/{action}', function(App\Order\Controllers\Api\v1\GivebackController $index, $action){
     return $index->$action();
 });

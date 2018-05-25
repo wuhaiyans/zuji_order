@@ -17,21 +17,15 @@ class Warehouse extends Model
     }
 
 
+    /**
+     * @param array $options
+     *
+     * 每次保存完数据后，记录日志
+     */
     protected function finishSave(array $options)
     {
         parent::finishSave($options);
 
-//-- desc zuji_delivery_goods
-//        select COLUMN_NAME,COLUMN_TYPE,COLUMN_COMMENT  from information_schema.columns
-//where table_schema = 'zuji_warehouse' #表所在数据库
-//    and table_name = 'zuji_delivery_goods' ; #你要查的表
-
-
-//        $a = Schema::getConnection()->getSchemaBuilder()->getColumnListing('admin');
-//
-//        $a = DB::select('show columns from user');
-//
-//        dd($a);die;
 
         DB::listen(function ($sql) {
             foreach ($sql->bindings as $i => $binding) {
@@ -48,6 +42,5 @@ class Warehouse extends Model
             Log::info($query);
         });
     }
-
 
 }

@@ -36,6 +36,7 @@ class ApiResponse {
 		if ($jsonStr == '') {
 			return;
 		}
+		Common\LogApi::debug('ApiResponse初始化', $jsonStr);
 		//-+--------------------------------------------------------------------
 		// | 解析响应数据
 		//-+--------------------------------------------------------------------
@@ -44,7 +45,6 @@ class ApiResponse {
 			return;
 		}
 		$data = json_decode($jsonStr, true);
-		Common\LogApi::debug('ApiResponse初始化', $data);
 		if (!is_array($data)) {
 			$status->setCode(ApiStatus::CODE_10101)->setMsg('非json格式');
 			return;

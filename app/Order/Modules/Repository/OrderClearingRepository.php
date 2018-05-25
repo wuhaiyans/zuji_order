@@ -29,6 +29,7 @@ class OrderClearingRepository
         if (empty($param) || empty($param['order_no'])) {
             return false;
         }
+
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
 
@@ -37,9 +38,12 @@ class OrderClearingRepository
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
-            'out_refund_no' => createNo(5),
+            'user_id' => $orderInfo['user_id'],
+            'clean_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
+            'order_type' => $param['order_type'] ?? 1,
+            'out_auth_no'=> $param['out_auth_no'] ??  '',
             'deposit_deduction_amount'=>    isset($param['deposit_deduction_amount'])?$param['deposit_deduction_amount']:0.00 ,
             'deposit_deduction_time'=>  isset($param['deposit_deduction_time'])?$param['deposit_deduction_time']:0 ,
             'deposit_deduction_status'=>    isset($param['deposit_deduction_status'])?$param['deposit_deduction_status']:0 ,
@@ -53,8 +57,13 @@ class OrderClearingRepository
             'create_time'=>time(),
             'update_time'=>time(),
             'app_id' => $orderInfo['appid'],
-            'out_account'=>$orderInfo['pay_type'],
+            'out_account'=> $orderInfo['out_account'],
+            'out_refund_no'=>   $param['out_refund_no'] ??  '',
+            'out_unfreeze_trade_no'=> $param['out_unfreeze_trade_no'] ??  '',
+            'out_unfreeze_pay_trade_no'=> $param['out_unfreeze_pay_trade_no'] ??  '',
+
         ];
+//        sql_profiler();
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
@@ -192,6 +201,8 @@ class OrderClearingRepository
             if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
 
                 $orderData->refund_time  = time();
+                $orderData->refund_no   = $param['refund_no'];
+
             }
         }
 
@@ -202,6 +213,7 @@ class OrderClearingRepository
             if ($param['deposit_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
 
                 $orderData->deposit_unfreeze_time  = time();
+                $orderData->out_unfreeze_trade_no   = $param['out_unfreeze_trade_no'];
             }
         }
 
@@ -213,6 +225,7 @@ class OrderClearingRepository
             if ($param['deposit_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
 
                 $orderData->deposit_deduction_time  = time();
+                $orderData->out_unfreeze_pay_trade_no   = $param['out_unfreeze_pay_trade_no'];
             }
         }
 
