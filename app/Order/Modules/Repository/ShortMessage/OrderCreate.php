@@ -23,7 +23,7 @@ class OrderCreate implements ShortMessage {
 	}
 
 	public function getCode(){
-		return Config::getCode($this->order_info['appid'], 'order_create');
+		return Config::getCode($this->order_info['appid'], __CLASS__);
 	}
 	
 	public function notify(){
@@ -37,7 +37,7 @@ class OrderCreate implements ShortMessage {
 		}
 		
 		// 短息模板
-		$code = Config::getCode($order_info['appid'], 'order_create');
+		$code = Config::getCode($channelId, __CLASS__);
 		if( !$code ){
 			return false;
 		}
