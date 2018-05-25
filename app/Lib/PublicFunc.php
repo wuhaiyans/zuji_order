@@ -261,6 +261,31 @@ function createNo($noType=1){
 }
 
 /**
+ * 生成 支付单
+ * @return string
+ */
+function creage_payment_no(){
+	return 'P'.createNo(3);
+}
+
+/**
+ * 资金预授权
+ * @return string
+ */
+function creage_fundauth_no(){
+	return 'F'.createNo(3);
+}
+
+/**
+ * 代扣协议编号
+ * @return string
+ */
+function creage_withhold_no(){
+	return 'W'.createNo(3);
+}
+
+
+/**
  * 根据key 二维数组分组
  * @param $arr 数组
  * @param $key 按照分组的key
