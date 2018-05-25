@@ -9,9 +9,14 @@ namespace App\Order\Modules\Service;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
+use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Modules\Inc;
+use App\Order\Modules\Repository\OrderGoodsExtendRepository;
+use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\OrderReturnRepository;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
@@ -19,6 +24,61 @@ use App\Lib\ApiStatus;
 
 class OrderOperate
 {
+    /**
+     * 订单发货接口
+     * @param $param :array[
+            'order_no'=> 订单号  string,
+            'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
+            e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
+     *
+     * ]
+     * @return boolean
+     */
+
+    public static function delivery($params){
+        if(empty($orderNo)){return false;}
+        DB::beginTransaction();
+        try{
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$params['order_no']]);
+            if(empty($orderInfo)){
+                DB::rollBack();
+                return false;
+            }
+            //判断订单冻结类型 冻结就走换货发货
+            if($orderInfo['freeze_type']!=0){
+                $b = OrderReturnRepository::createchange($params);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                DB::commit();
+                return true;
+
+            }
+            //订单未冻结 走订单发货
+            //更新订单状态
+            $b =OrderRepository::delivery($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+
+            //增加商品扩展表信息
+            $b =OrderGoodsExtendRepository::add($params);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
+    }
     /**
      * 确认收货接口
      * @param int $orderNo 订单编号
@@ -35,10 +95,46 @@ class OrderOperate
         if(empty($orderNo) || empty($role)){return false;}
         DB::beginTransaction();
         try{
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
+            if(empty($orderInfo)){
+                DB::rollBack();
+                return false;
+            }
+
             $b =OrderRepository::deliveryReceive($orderNo);
             if(!$b){
                 DB::rollBack();
                 return false;
+            }
+            //查询订单 如果是长租 生成租期周期表 更新商品表
+            if($orderInfo['zuqi_type'] ==2){
+                //查询商品信息
+                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
+                //更新商品表
+                $goodsData['begin_time'] = time();
+                $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[0]['zuqi']);
+                $orderGoodsRepository = new OrderGoodsRepository();
+                $b =$orderGoodsRepository->updateServiceTime($goodsInfo[0]['goods_no'],$goodsData);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+
+                //增加商品租期表
+                $unitData =[
+                    'order_no'=>$orderNo,
+                    'goods_no'=>$goodsInfo[0]['goods_no'],
+                    'user_id'=>$orderInfo['user_id'],
+                    'unit'=>2,
+                    'unit_value'=>$goodsInfo[0]['goods_no'],
+                    'begin_time'=>$goodsData['begin_time'],
+                    'end_time'=>$goodsData['end_time'],
+                ];
+                $b =OrderGoodsUnitRepository::add($unitData);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
             }
 
             $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
@@ -56,6 +152,19 @@ class OrderOperate
 
         }
 
+    }
+    private static function calculateEndTime($beginTime, $zuqi){
+        $day = 0;
+
+        if($zuqi ==12){
+            $day = 365;
+        }else if($zuqi ==6){
+            $day = 180;
+        }else{
+            $day = 90;
+        }
+        $endTime = $beginTime + $day*86400;
+        return $endTime;
     }
     /**
      * 后台确认订单操作

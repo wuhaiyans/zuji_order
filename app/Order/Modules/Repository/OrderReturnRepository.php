@@ -458,7 +458,7 @@ class OrderReturnRepository
     }
     //创建换货单记录
     public static function createchange($params){
-        if (isset($param['order_no']) && isset($param['good_id']) &&  isset($param['good_no']) &&  isset($param['serial_number'])){
+        if (isset($param['order_no']) && isset($param['goods_id']) &&  isset($param['goods_no']) &&  isset($param['serial_number'])){
             return false;//参数错误
         }
         $create_result=OrderGoodsExtend::query()->insert($params);

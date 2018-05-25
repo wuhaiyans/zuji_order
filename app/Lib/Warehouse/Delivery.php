@@ -70,23 +70,19 @@ class Delivery
     /**
      * 确认收货接口
      * 接收反馈
-     *
+    *
      * @param string $order_no
-     * @param int $role  在 App\Lib\publicInc 中;
+    * @param int $role  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
      *  const Type_Store =4;//线下门店
-     * @return boolean
-     */
+     * @return
+        */
     public static function receive($orderNo, $role)
     {
-      $response =\App\Lib\Order\Delivery::receive($orderNo, $role);
-      $response = json_decode($response);
-      if($response['code'] == ApiStatus::CODE_0){
-          return true;
-      }
-       return false;
+        return \App\Lib\Order\Delivery::receive($orderNo, $role);
+
 
     }
 
@@ -94,15 +90,14 @@ class Delivery
     /**
      * Delivery constructor.
      * 发货反馈
-     * @param array $order_no 订单号
-     * [
-     *      '' => '', //【必须】 string
-     * ]
+     * @param $params array $
+        'order_no'=> 订单号  string,
+        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
+        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
      */
-    public static function delivery($order_no)
+    public static function delivery($params)
     {
-        return true;
-        \App\Lib\Order\Delivery::delivery($order_no);
+      return \App\Lib\Order\Delivery::delivery($params);
     }
 
     /**

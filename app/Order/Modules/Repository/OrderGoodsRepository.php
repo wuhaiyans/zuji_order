@@ -15,6 +15,27 @@ class OrderGoodsRepository
     public function add($data){
         return $this->orderGoods->insertGetId($data);
     }
+    /**
+     *  更新服务时间
+     * @param array $goodsNo //商品编号
+     * @param array $data
+     * [
+     *      'begin_time'=>''// int 服务开始时间
+     *      'end_time'=>''// int 服务结束时间
+     * ]
+     * @return boolen
+     */
+    public function updateServiceTime( $goodsNo, $data ) {
+        $data =filter_array($data,[
+            'begin_time'=>'required|int',
+            'end_time'=>'required|int',
+        ]);
+        if(count($data)!=2){
+            return false;
+        }
+        $data['update_time'] = time();
+        return $this->orderGoods->where('goods_no','=',$goodsNo)->update($data);
+    }
 
     /**
      * 执行where查询并获得第一个结果。

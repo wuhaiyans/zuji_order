@@ -734,21 +734,6 @@ public function _parse_order_where($where=[]){
         }
         return ApiStatus::CODE_0;
     }
-    //创建换货单记录
-    public function createchange($params){
-        if (isset($param['order_no']) && isset($param['good_id']) &&  isset($param['good_no']) &&  isset($param['serial_number'])){
-           return ApiStatus::CODE_20001;//参数错误
-        }
-        //开启事物
-        DB::beginTransaction();
-        $goods_result= $this->orderReturnRepository->createchange($params);
-        if(!$goods_result){
-            DB::rollBack();
-            return ApiStatus::CODE_34009;//创建换货单记录失败
-        }
-        return ApiStatus::CODE_0;
-
-    }
     //退款成功更新退款状态
     public function refundUpdate($params){
         $param = filter_array($params,[
