@@ -191,10 +191,10 @@ class OrderOperate
      */
     public static function getOrderOprate($orderNo)
     {
-        if (empty($orderNo)) return false;
+        if (empty($orderNo)) return [];
         $actArray = [];
         $orderData   =  self::getOrderInfo($orderNo);
-        if (empty($orderData['order_info'])) return false;
+        if (empty($orderData['order_info'])) return [];
         $actArray   =   Inc\OrderOperateInc::orderInc($orderData['order_info']['order_status'], 'actState');
         //长期租用中七天之内出现售后
         if ($orderData['order_info']['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH &&
@@ -214,6 +214,9 @@ class OrderOperate
             if (empty($orderInstalmentData)){
                 unset($actArray['prePay_btn']);
             }
+
+        } else {
+
 
         }
 

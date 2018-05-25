@@ -387,8 +387,8 @@ class GivebackController extends Controller
 //					'order_no' => $orderGivevbackInfo['order_no'],
 //					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 //					'bussiness_no' => $orderGivevbackInfo['giveback_no'],
-//					'deposit_deduction_amount' => ''.$givebackNeedPay,//扣除押金金额
-//					'deposit_unfreeze_amount' => ''.( $yajin - $givebackNeedPay ),//退还押金金额
+//					'auth_deduction_amount' => ''.$givebackNeedPay,//扣除押金金额
+//					'auth_unfreeze_amount' => ''.( $yajin - $givebackNeedPay ),//退还押金金额
 //				];
 //				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 //				if( !$orderCleanResult ){
@@ -779,8 +779,8 @@ class GivebackController extends Controller
 			'order_no' => $paramsArr['order_no'],
 			'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			'bussiness_no' => $paramsArr['giveback_no'],
-			'deposit_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
-			'deposit_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
+			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
+			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){
