@@ -22,7 +22,7 @@ return [
         'appid'=>1,
         'version'=>'1.0',
     ],
-    //订单内部接口地址
+    //内部接口回调地址
     'API_INNER_URL'=>env('ORDER_API_URI','http://dev-order.com/api'),
     'Interior_Order_Request_data'=>[
         'appid'=>1,
