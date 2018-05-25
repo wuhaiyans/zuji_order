@@ -26,6 +26,21 @@ class OrderRepository
     public function add($data){
         return $this->order->insertGetId($data);
     }
+    /**
+     * 发货操作
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function delivery($orderNo)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['order_status'] =OrderStatus::OrderDeliveryed;
+        $data['delivery_time'] =time();
+        return Order::where('order_no','=',$orderNo)->update($data);
+
+    }
 
     /**
      * 确认收货操作

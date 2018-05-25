@@ -18,6 +18,11 @@ return [
 
     //确认订单接口
     'api.order.confirmOrder'=>'OrderController@confirmOrder',
+    //订单确认收货接口
+    'api.order.deliveryReceive'=>'OrderController@deliveryReceive',
+    //订单发货接口
+    'api.order.delivery'=>'OrderController@delivery',
+
 
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
