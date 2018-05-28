@@ -41,7 +41,20 @@ class OrderRepository
         return Order::where('order_no','=',$orderNo)->update($data);
 
     }
+    /**
+     * 保存渠道信息
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function updateChannel($orderNo,$channelId)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['channel_id'] =$channelId;
+        return Order::where('order_no','=',$orderNo)->update($data);
 
+    }
     /**
      * 确认收货操作
      * @param $orderNo

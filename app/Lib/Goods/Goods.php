@@ -89,15 +89,18 @@ class Goods  extends \App\Lib\BaseApi{
     }
     /**
      * 减少库存
-     * @param $spu_id
-     * @param $sku_id
+     * @param $goods_arr
+        "goods_arr": - [                //类型：Array  必有字段  备注：参数集
+        "spu_id=>1",                //类型：String  必有字段  备注：spu_id
+        "sku_id=>2",                //类型：String  必有字段  备注：sku_id
+        "num=>1"                    //类型：String  必有字段  备注：数量
+    ]
      * @return string or array
      */
-    public static function reduceStock($data,$spu_id,$sku_id){
+    public static function reduceStock($data,$goods_arr){
         $data['method'] ='zuji.goods.number.minus';
         $data['params'] = [
-            'spu_id'=>$spu_id,
-            'sku_id'=>$sku_id
+            'goods_arr'=>$goods_arr
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
@@ -108,7 +111,7 @@ class Goods  extends \App\Lib\BaseApi{
         if($info['code']!=0){
             return $info['code'];
         }
-        return $info['data'];
+        return true;
     }
 
 }

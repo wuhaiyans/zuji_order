@@ -70,7 +70,7 @@ class InstalmentComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("分期组件 -create");
+
         $schema =$this->componnet->getDataSchema();
         $b = $this->componnet->create();
         if( !$b ){

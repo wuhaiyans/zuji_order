@@ -39,13 +39,15 @@ class User{
 
     public static function setRemark($user_id,$remark){
         $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.user.remark.set';
         $data['params'] = [
             'user_id'=>$user_id,
-            'address_id'=>$remark,
+            'order_remark'=>$remark,
         ];
         //var_dump($data);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
+        //var_dump($info);die;
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

@@ -235,7 +235,6 @@ class OrderComponnet implements OrderCreater
         if (!$b) {
             return false;
         }
-        var_dump('创建订单...');
         $order_amount = 0;
         $goods_yajin = 0;
         $order_yajin = 0;
@@ -268,6 +267,7 @@ class OrderComponnet implements OrderCreater
             'appid' =>$this->appid,
             'create_time'=>time(),
             'order_type'=>$this->orderType,
+            'mobile'=>$data['user']['user_mobile'],
         ];
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);

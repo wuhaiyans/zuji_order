@@ -24,7 +24,7 @@ class OrderPayWithholdRepository
         }
 
         $withholdInfo = OrderPayWithhold::query()
-            ->where(['uid'=>$userId])
+            ->where(['user_id'=>$userId])
             ->first();
         if(!$withholdInfo){
             return [];

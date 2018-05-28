@@ -27,6 +27,11 @@ class AlipayController extends Controller
     public function alipayInitialize(Request $request){
 
         $params =$request->all();
+        $params['params']=[
+            'return_url' =>'http://www.baidu.com',
+              'order_no' =>'A528100728283349',
+              'user_id' =>'18',
+        ];
         $rules = [
             'return_url'  => 'required',
             'order_no'  => 'required',
