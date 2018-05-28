@@ -129,7 +129,6 @@ class OrderReturnCreater
         if(!$order_info){
             return ApiStatus::CODE_34005;//查无此订单
         }
-
         $where[]=['order_no','=',$params['order_no']];
         if($params['business_key']==ReturnStatus::OrderTuiKuan){
             //创建退款清单
@@ -953,6 +952,7 @@ class OrderReturnCreater
         if(!$user_result){
            return false;
         }
+
         $data['mobile']=$user_result['mobile'];
         $data['realname']=$user_result['realname'];
         $data['address_info']=$user_result['address_info'];
@@ -1104,7 +1104,7 @@ class OrderReturnCreater
     public function returnApplyList($params){
         $where[]=['order_return.order_no','=',$params['order_no']];
         $where[]=['order_return.business_key','=',$params['business_key']];
-        $status=ReturnStatus::ReturnCreated;
+        $status=ReturnStatus::ReturnAgreed;
         $where[]=['order_return.status','=',$status];
         $return_list= $this->orderReturnRepository->returnApplyList($where);//创建退款清单
         return $return_list;
