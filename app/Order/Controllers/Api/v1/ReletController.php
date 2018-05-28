@@ -182,7 +182,7 @@ class ReletController extends Controller
     }
 
     /**
-     * 获取续租列表(用户)
+     * 获取未完成续租列表(用户)
      *
      * @param Request $request[
      *      user_id 用户ID
