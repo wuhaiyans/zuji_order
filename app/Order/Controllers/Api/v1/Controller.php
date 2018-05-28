@@ -31,7 +31,8 @@ class Controller extends BaseController
         } else if (is_array($params['params'])) {
             $params = $params['params'];
         }
-
+        p($rules,1);
+        p($params);
         $validator = app('validator')->make($params, $rules);
 
         if ($validator->fails()) {
