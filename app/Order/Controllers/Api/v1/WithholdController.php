@@ -57,7 +57,7 @@ class WithholdController extends Controller
             'businessNo'    => createNo(),
         ];
         $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
-
+        p($payment);
 
         // 获取URL地址
         $subject = "签署代扣协议";
