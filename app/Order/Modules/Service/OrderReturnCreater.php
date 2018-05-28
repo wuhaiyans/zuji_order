@@ -253,7 +253,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return ApiStatus::CODE_33008;//更新审核状态失败
                 }
-                $deny_goods=$this->orderReturnRepository->deny_goods_update($params);//修改商品状态
+                $deny_goods=$this->orderReturnRepository->deny_goods_update($params_data[$k]);//修改商品状态
                 if(!$deny_goods){
                     //事务回滚
                     DB::rollBack();

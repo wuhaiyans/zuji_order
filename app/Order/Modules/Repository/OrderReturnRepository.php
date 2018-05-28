@@ -99,12 +99,16 @@ class OrderReturnRepository
             foreach($params['goods_no'] as $k=>$v){
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$params['order_no']];
+
                 //获取退货单信息
                 $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
                 $data['goods_status']=ReturnStatus::ReturnCreated;
                 $update_result=ordergoods::where($where[$k])->update($data);
+                if(!$update_result){
+                    return false;
+                }
             }
 
         }else{
@@ -115,12 +119,11 @@ class OrderReturnRepository
             $data['business_no']=$order_return['refund_no'];
             $data['goods_status']=ReturnStatus::ReturnCreated;
             $update_result=ordergoods::where($where)->update($data);
+            if(!$update_result){
+                return false;
+            }
         }
-        if($update_result){
-            return true;
-        }else{
-            return false;
-        }
+        return true;
 
     }
     //更新商品状态-退货-审核同意

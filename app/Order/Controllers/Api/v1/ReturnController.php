@@ -288,7 +288,7 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     /**
-     *   申请退换货/退款审核
+     *   退换货/退款审核
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * 选中即同意
