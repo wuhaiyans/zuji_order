@@ -20,34 +20,9 @@ class TestController extends Controller
 
     public function test()
     {
-
-        $inputFileName = storage_path('app') . '/world.xlsx';
-        $helper = new Sample();
-
-        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
-        $spreadsheet = IOFactory::load($inputFileName);
-        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        var_dump($sheetData);
+        Delivery::createDelivery(['order_no'=>123333, 'goods_no'=> 12122]);
 
 
-
-
-//        $a = Receive::create(1, 1, [
-//                [
-//                    'serial_no' => 1,
-//                    'quantity'  => 1,
-//                    'imei'      => 1234
-//                ],
-//            [
-//                'serial_no' => 1,
-//                'quantity'  => 1,
-//                'imei'      => 1234
-//            ],
-//
-//            ]);
-//
-//
-//        dd($a);
     }
 
 
@@ -108,6 +83,18 @@ class TestController extends Controller
 //		
 //		
 //	}
+
+
+    public function excel()
+    {
+        $inputFileName = storage_path('app') . '/world.xlsx';
+        $helper = new Sample();
+
+        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
+        $spreadsheet = IOFactory::load($inputFileName);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        var_dump($sheetData);
+    }
 	
 	public function test_alipay_url(){
 		

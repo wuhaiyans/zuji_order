@@ -10,6 +10,7 @@ namespace App\Lib\Warehouse;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 /**
  * Class Delivery
@@ -17,16 +18,50 @@ use App\Lib\Order\OrderInfo;
  */
 class Delivery
 {
+    use ValidatesRequests;
 
-
+    const SESSION_ERR_KEY = 'warehouse.delivery.errors';
     /*
     *
     * 用户换货，发货
     * array('order_no'=>'2312123','goods_no'=>'sdfsfsdfsd','imei'=>"wdew")
     */
     public  static function createDelivery($params){
-        return true;
+        $base_api = config('tripartite.warehouse_api_uri');
 
+        $rules = [
+            'order_no' => 'required',
+            'goods_no' => 'required'
+        ];
+
+        $validator = app('validator')->make($params, $rules);
+
+        if ($validator->fails()) {
+            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
+            return false;
+        }
+
+        $data = [
+            'order_no' => $params['order_no'],
+            'delivery_detail' => [
+                'goods_no' => $params['goods_no']
+            ]
+        ];
+
+        $postData = array_merge(self::getParams(),[
+            'method'=> 'warehouse.delivery.deliveryCreate',//模拟
+            'params' => json_encode($data)
+        ]);
+
+        $res= Curl::post($base_api, $postData);
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
     }
     /**
      * 订单请求 发货申请
@@ -110,6 +145,17 @@ class Delivery
     {
         $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
         return $info;
+    }
+
+
+
+
+    public static function getParams()
+    {
+        return [
+            'appid'=> 1,
+            'version' => 1.0,
+        ];
     }
 
 }
