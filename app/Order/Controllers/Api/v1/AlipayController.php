@@ -14,6 +14,9 @@ class AlipayController extends Controller
     {
         $this->orderTrade = $orderTrade;
     }
+    public function test(){
+        $this->alipayInitialize();
+    }
 
     /**
      * 支付宝初始化接口
