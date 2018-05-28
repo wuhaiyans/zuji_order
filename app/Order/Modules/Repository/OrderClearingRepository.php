@@ -58,7 +58,7 @@ class OrderClearingRepository
             'create_time'=>time(),
             'update_time'=>time(),
             'app_id' => $orderInfo['appid'],
-            'out_account'=> $orderInfo['out_account'],
+            'out_account'=> $orderInfo['pay_type'],
             'out_refund_no'=>   $param['out_refund_no'] ??  '',
             'out_unfreeze_trade_no'=> $param['out_unfreeze_trade_no'] ??  '',
             'out_unfreeze_pay_trade_no'=> $param['out_unfreeze_pay_trade_no'] ??  '',
