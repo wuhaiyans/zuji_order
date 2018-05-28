@@ -35,6 +35,7 @@ class DeliveryController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
+
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
