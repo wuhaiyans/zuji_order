@@ -58,6 +58,15 @@ class Curl {
 	 * 
      * @access public
      * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @return string
+	 */
+	public static function getErrno():string{
+		return self::$errno;
+	}
+	/**
+	 * 
+     * @access public
+     * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param array $data
 	 * @return string
 	 */
@@ -154,6 +163,7 @@ class Curl {
                 return $output;
             }
 			self::$error = curl_error($ch);
+			self::$errno = curl_errno($ch);
             --$i;
         }
         return false;

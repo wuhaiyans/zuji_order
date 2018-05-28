@@ -264,22 +264,6 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->user_receive($params);
         return apiResponse([],$res);
     }
-    //创建换货记录
-    public function createChange(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'           => 'required',
-            'good_no'           =>'required',
-            'serial_number'     =>'required',
-            'good_id'     =>'required',
-        ]);
-        if(count($param)<4){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->createchange($params);
-        return apiResponse([],$res);
-    }
     //退款成功更新退款状态
     public function refundUpdate(Request $request){
         $orders =$request->all();

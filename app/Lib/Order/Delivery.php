@@ -33,7 +33,7 @@ class Delivery
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.delivery.receive',//模拟
+            'method'=> 'api.order.deliveryReceive',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 
@@ -58,11 +58,13 @@ class Delivery
     }
 
     /**
+     * 发货更新请求
+     * 判断是订单发货还是换货发货
      * 换货发货新商品反馈到此方法 order_good_extend
      * @param $param :array[
-                         'order_no'=> 订单号  string,
-                         'good_info'=> 商品信息：good_id` '商品id',good_no 商品编号，ime号 array（'ime1','ime2'）
-                         e.g: array('order_no'=>'1111','good_id'=>12,'good_no'=>'abcd',ime1=>'ime1',ime2=>'ime2'),'serial_number'=>'abcd')
+        'order_no'=> 订单号  string,
+        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
+        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
      *
      * ]
      *
@@ -70,14 +72,12 @@ class Delivery
      */
     public static function delivery($params)
     {
-
-
         $base_api = config('tripartitle.API_INNER_URL');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'api.Return.createChange',//模拟
+            'method'=> 'api.order.delivery',//模拟
             'data' => json_encode(['params'=>$params])
         ]);
 

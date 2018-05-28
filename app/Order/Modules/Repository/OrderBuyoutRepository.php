@@ -41,14 +41,14 @@ class OrderBuyoutRepository
 	 * @param int $platId 【必选】 操作人id
 	 * @return int|bool
 	 */
-	public static function setOrderCancel($id,$platId){
+	public static function setOrderBuyoutCancel($id,$platId){
 		if (!$id) return false;
 		$data =[
 				'plat_id'=>$platId,
 				'status'=>OrderBuyoutStatus::OrderCancel,
 				'update_time'=>time()
 		];
-		$ret = Order::where('id', '=', $id)->update($data);
+		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){
 			return true;
 		}else{
