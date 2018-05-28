@@ -26,8 +26,7 @@ class Delivery
     * 用户换货，发货
     * array(
     * 'order_no'=>'2312123', //必须
-    * 'goods_no'=>'sdfsfsdfsd',//必须
-    * 'imei'=>"wdew", //可不填
+    * 'goods_no'=>['sdfsfsdfsd'],//必须
     * 'customer'=>'张三',//可不填
     * 'customer_mobile=>'18588884444',//可不填
     * 'customer_address=>'北京昌平某地址',//可不填

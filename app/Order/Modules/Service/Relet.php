@@ -27,7 +27,7 @@ class Relet
     }
 
     /**
-     * 获取续租列表
+     * 获取续租列表(后台)
      *      带分页
      *
      * @param $params
@@ -35,6 +35,17 @@ class Relet
      */
     public function getList($params){
         return $this->reletRepository->getList($params);
+
+    }
+
+    /**
+     * 获取用户未完成续租列表(前段)
+     *
+     * @param $params
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getUserList($params){
+        return $this->reletRepository->getUserList($params);
 
     }
 

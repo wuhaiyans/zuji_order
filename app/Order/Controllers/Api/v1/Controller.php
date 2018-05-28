@@ -1,6 +1,6 @@
 <?php
 namespace App\Order\Controllers\Api\v1;
-use App\lib\ApiStatus;
+use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use Validator;
 use Dingo\Api\Routing\Helpers;
