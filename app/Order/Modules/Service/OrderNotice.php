@@ -99,7 +99,7 @@ class OrderNotice{
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @throws \Exception	发生错误时抛出异常
 	 */
-	public function notify(){
+	public function notify($data = []){
 				
 		if( $this->channel & self::SM ){
 			// 短信

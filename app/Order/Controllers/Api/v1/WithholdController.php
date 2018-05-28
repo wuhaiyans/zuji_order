@@ -353,7 +353,10 @@ class WithholdController extends Controller
             }
 
             //发送短信
-            SmsApi::sendMessage($data_sms['mobile'], 'hsb_sms_b427f', $data_sms);
+            $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+            $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $data_sms['mobile'], "InstalmentWithhold");
+
+            $orderNoticeObj->notify($data_sms);
 
             //发送消息通知
             //通过用户id查询支付宝用户id
@@ -561,7 +564,11 @@ class WithholdController extends Controller
                 }
 
                 //发送短信
-                SmsApi::sendMessage($dataSms['mobile'], 'hsb_sms_b427f', $dataSms);
+                $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+                $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $data_sms['mobile'], "InstalmentWithhold");
+
+                $orderNoticeObj->notify($data_sms);
+
 
                 //发送消息通知
                 //通过用户id查询支付宝用户id

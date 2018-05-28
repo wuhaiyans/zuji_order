@@ -38,6 +38,7 @@ class Config {
 			// 机市短息模板配置
 			self::CHANNELID_OFFICAL => [
 				SceneConfig::ORDER_CREATE => 'SMS_113450944',
+				SceneConfig::INSTALMENT_WITHHOLD => 'hsb_sms_b427f',
 			],
 			// 小程序
 			self::CHANNELID_MINI_ZHIMA => [
@@ -52,7 +53,6 @@ class Config {
 				SceneConfig::ORDER_CREATE => 'SMS_113450944',
 			],
 		];
-		
 		if( !isset($arr[$channelId][$scene]) ){
 			return false;
 		}
