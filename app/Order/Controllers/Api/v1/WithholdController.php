@@ -43,35 +43,41 @@ class WithholdController extends Controller
         }
         $params = $params['params'];
 
-        // 获取渠道ID
-        $ChannelInfo = \App\Lib\Channel\Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
-        if (!is_array($ChannelInfo)) {
-            return apiResponse([], ApiStatus::CODE_10102, "channel_id 错误");
+        try{
+            // 获取渠道ID
+            $ChannelInfo = \App\Lib\Channel\Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
+            if (!is_array($ChannelInfo)) {
+                return apiResponse([], ApiStatus::CODE_10102, "channel_id 错误");
+            }
+            $channelId = intval($ChannelInfo['_channel']['id']);
+
+
+            // 创建第支付方式
+            $data = [
+                'businessType'  => \App\Order\Modules\Inc\OrderStatus::OrderWaitPaying, //暂留
+                'businessNo'    => createNo(),
+            ];
+            $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
+
+
+            // 获取URL地址
+            $subject = "签署代扣协议";
+            $urlData = [
+                'name'			=> $subject,	            // 交易名称
+                'front_url'		=> $params['front_url'],	// 前端回跳地址
+            ];
+            $url = $payment->getCurrentUrl($channelId,$urlData);
+            p($url);
+            if(!$url){
+                return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
+            }
+
+            return apiResponse(['url'=>$url['withholding_url']],ApiStatus::CODE_0,"success");
+
+        } catch (\Exception $exc) {
+            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+
         }
-        $channelId = intval($ChannelInfo['_channel']['id']);
-
-
-        // 创建第支付方式
-        $data = [
-            'businessType'  => \App\Order\Modules\Inc\OrderStatus::OrderWaitPaying, //暂留
-            'businessNo'    => createNo(),
-        ];
-        $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
-
-
-        // 获取URL地址
-        $subject = "签署代扣协议";
-        $urlData = [
-            'name'			=> $subject,	            // 交易名称
-	 		'front_url'		=> $params['front_url'],	// 前端回跳地址
-        ];
-        $url = $payment->getCurrentUrl($channelId,$urlData);
-        p($url);
-        if(!$url){
-            return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
-        }
-
-        return apiResponse(['url'=>$url['withholding_url']],ApiStatus::CODE_0,"success");
     }
 
 
