@@ -159,7 +159,7 @@ class ReletController extends Controller
     }
 
     /**
-     * 续租列表
+     * 续租列表(后台)
      */
     public function listRelet(Request $request){
         try {
@@ -168,6 +168,39 @@ class ReletController extends Controller
             if(isset($params['user_id']) && !empty($params['user_id'])){
                 $req = $this->relet->getList($params);
                 return apiResponse($req,ApiStatus::CODE_0);
+
+            }else{
+                return apiResponse([],ApiStatus::CODE_50000, '用户ID不能为空');
+
+            }
+
+        }catch(\Exception $e){
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+
+    }
+
+    /**
+     * 获取续租列表(用户)
+     *
+     * @param Request $request[
+     *      user_id 用户ID
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userListRelet(Request $request){
+        try {
+            //接收参数
+            $params = $request->input('params');
+            if(isset($params['user_id']) && !empty($params['user_id'])){
+                $req = $this->relet->getUserList($params);
+                if($req){
+                    return apiResponse($req,ApiStatus::CODE_0);
+                }else{
+                    return apiResponse([],ApiStatus::CODE_50000, '该用户无未完成的续租');
+                }
+
 
             }else{
                 return apiResponse([],ApiStatus::CODE_50000, '用户ID不能为空');
