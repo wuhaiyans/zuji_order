@@ -37,10 +37,10 @@ class WithholdController extends Controller
         $rules = [
             'front_url'         => 'required',  //前端跳转地址
         ];
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
-        }
+//        $validateParams = $this->validateParams($rules,$params);
+//        if ($validateParams['code'] != 0) {
+//            return apiResponse([],$validateParams['code']);
+//        }
         $params = $params['params'];
 
         // 获取渠道ID
