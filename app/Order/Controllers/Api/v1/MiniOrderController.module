@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use App\Lib\Goods\Goods;
 use Illuminate\Support\Facades\Redis;
 use App\Order\Modules\Service;
-use App\Lib\Payment\mini\sdk\CommonMiniApi;
+use App\Lib\AlipaySdk\sdk\CommonMiniApi;
 
 class MiniOrderController extends Controller
 {
@@ -134,6 +134,9 @@ class MiniOrderController extends Controller
 //            $coupon = \zuji\coupon\Coupon::set_coupon_user(array("user_id"=>$this->member['id'],"only_id"=>$coupon_info['only_id']));
 //            $params['coupon_no'] = $coupon['coupon_no']?$coupon['coupon_no']:$params['coupon_no'];
 //        }
+
+        //商品信息处理
+        $goods = \App\Lib\Goods\Goods::getSku( $data['sku_id']  );
 
         $result = [
             'coupon_no'         => $params['coupon_no'],

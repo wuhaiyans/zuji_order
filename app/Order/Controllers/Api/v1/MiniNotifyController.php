@@ -29,7 +29,7 @@ class MiniNotifyController extends Controller
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi( $appid );
+        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
         if(!$b){
             \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');

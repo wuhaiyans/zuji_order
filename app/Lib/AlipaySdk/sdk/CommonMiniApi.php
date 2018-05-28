@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Payment\mini\sdk;
+namespace App\Lib\AlipaySdk\sdk;
 /*
  * 芝麻扣款 取消订单 关闭订单 接口
  */
