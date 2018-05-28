@@ -20,7 +20,8 @@ class Controller extends BaseController
      */
     protected function  validateParams($rules, $params)
     {
-
+        p($rules,1);
+        p($params);
         if (!isset($params['params'])) {
             return apiResponseArray(ApiStatus::CODE_10102,[]);
         }
