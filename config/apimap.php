@@ -136,10 +136,14 @@ return [
     'api.Relet.pageRelet'       => 'ReletController@pageRelet',
     // 续租详情
     'api.Relet.detailsRelet'       => 'ReletController@detailsRelet',
-    // 续租列表
+    // 续租列表(后台)
     'api.Relet.listRelet'       => 'ReletController@listRelet',
     // 取消续租
     'api.Relet.cancelRelet'       => 'ReletController@cancelRelet',
+    // 获取未完成续租列表(用户)
+    'api.Relet.userListRelet'       => 'ReletController@userListRelet',
+    // 创建续租(支付)
+    'api.Relet.createRelet'       => 'ReletController@createRelet',
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
