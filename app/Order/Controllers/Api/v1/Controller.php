@@ -32,7 +32,8 @@ class Controller extends BaseController
         }
 
         $validator = app('validator')->make($params, $rules);
-        v($validator);
+        echo "OK";
+        p($validator);
         if ($validator->fails()) {
             return apiResponseArray(ApiStatus::CODE_10102,[], $validator->errors()->first());
         }
