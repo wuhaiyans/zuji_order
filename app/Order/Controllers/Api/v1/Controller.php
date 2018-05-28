@@ -20,8 +20,7 @@ class Controller extends BaseController
      */
     protected function  validateParams($rules, $params)
     {
-        p($rules,1);
-        p($params);
+
         if (!isset($params['params'])) {
             return apiResponseArray(ApiStatus::CODE_10102,[]);
         }
@@ -31,10 +30,9 @@ class Controller extends BaseController
         } else if (is_array($params['params'])) {
             $params = $params['params'];
         }
-        p($rules,1);
-        p($params);
-        $validator = app('validator')->make($params, $rules);
 
+        $validator = app('validator')->make($params, $rules);
+        v($validator);
         if ($validator->fails()) {
             return apiResponseArray(ApiStatus::CODE_10102,[], $validator->errors()->first());
         }
