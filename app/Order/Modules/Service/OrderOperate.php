@@ -11,6 +11,7 @@ use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Modules\Inc;
+use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
@@ -154,15 +155,7 @@ class OrderOperate
 
     }
     private static function calculateEndTime($beginTime, $zuqi){
-        $day = 0;
-
-        if($zuqi ==12){
-            $day = 365;
-        }else if($zuqi ==6){
-            $day = 180;
-        }else{
-            $day = 90;
-        }
+        $day = P
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
@@ -311,20 +304,14 @@ class OrderOperate
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
 
 
-
         $order['order_info'] = $orderData;
-//        dd($orderData);
 
         //订单商品列表相关的数据
         $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
 
-
         $goodsData =  self::getGoodsListActState($orderNo, $actArray);
 
-
-
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-//        dd($goodsData);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
         $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
@@ -443,18 +430,18 @@ class OrderOperate
        foreach ($goodsList as $keys=>$values) {
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
-               $goodsList[$keys]['actGoodsState']= $actArray;
+               $goodsList[$keys]['act_goods_state']= $actArray;
                //是否处于售后之中
                $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
                    || $expire_process
                ) {
-                   unset($goodsList[$keys]['actGoodsState']['expiry_process']);
+                   unset($goodsList[$keys]['act_goods_state']['expiry_process']);
                }
                //无分期或者分期已全部还完不出现提前还款按钮
                $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                if (empty($orderInstalmentData)){
-                   unset($goodsList[$keys]['actGoodsState']['prePay_btn']);
+                   unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
                }
            }
        }

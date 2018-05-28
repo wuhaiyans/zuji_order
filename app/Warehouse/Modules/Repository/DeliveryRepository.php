@@ -50,7 +50,10 @@ class DeliveryRepository
             'order_no' => $data['order_no'],
             'status' => Delivery::STATUS_INIT,
             'create_time' => $time,
-            'app_id' => $data['app_id']
+            'app_id' => $data['app_id'],
+            'customer' => isset($data['customer']) ? $data['customer'] : '',
+            'customer_mobile' => isset($data['customer_mobile']) ? $data['customer_mobile'] : '',
+            'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : '',
         ];
 
         try {
@@ -85,9 +88,9 @@ class DeliveryRepository
         foreach ($data as $k=>$val){
             $row = [
                 'delivery_no'   =>  $delivery_no,
-                'serial_no'     =>  $val['serial_no'],
+//                'serial_no'     =>  $val['serial_no'],
                 'goods_no'      =>  $val['goods_no'],
-                'quantity'      =>  $val['quantity'],
+                'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
                 'status_time'   =>  $time
             ];

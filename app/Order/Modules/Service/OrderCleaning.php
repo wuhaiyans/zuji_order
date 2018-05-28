@@ -15,6 +15,7 @@ use App\Order\Modules\Repository\MiniOrderRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Repository\OrderPayRepository;
+use App\Order\Modules\Repository\Pay\PayQuery;
 use Illuminate\Support\Facades\Log;
 
 
@@ -132,10 +133,17 @@ class OrderCleaning
 
             //需退款金额大于0，并且属于待退款状态，发起清算，退租金
             if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed) {
-                //根据业务编号查找支付相关数据
+
+                //根据支付编号查找支付相关数据
+                $payInfo = PayQuery::getPayByPaymentNo($orderCleanData['payment_no']);
+                if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
+
+                    return false;
+                    LogApi::info('PayQuery::getPayByPaymentNo获取失败,参数：{$orderCleanData[\'payment_no\']}', $payInfo);
+                }
                 $params = [
                     'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
-                    'payment_no'	=> $orderCleanData['payment_no'], //支付平台支付码
+                    'payment_no'	=> $payInfo['out_payment_no'], //支付平台支付码
                     'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
                     'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
                 ];
@@ -165,12 +173,19 @@ class OrderCleaning
              *		'out_auth_no' => '',//支付系统授权码
              * ]
              */
+            //根据预授权编号查找预授权相关数据
+            $authInfo = PayQuery::getPayByFundauthNo($orderCleanData['auth_no']);
+            if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
+
+                return false;
+                LogApi::info('PayQuery::getPayByFundauthNo获取失败,参数：{$orderCleanData[\'auth_no\']}', $authInfo);
+            }
             if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
                 $freezePayParams = [
 
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //业务系统授权码
-                    'auth_no' => $orderCleanData['auth_no'], //支付系统授权码
+                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
                     'user_id' => $orderCleanData['user_id'], //用户id
@@ -205,7 +220,7 @@ class OrderCleaning
                 $unFreezeParams = [
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
-                    'auth_no' => $orderCleanData['auth_no'], //支付系统授权码
+                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id

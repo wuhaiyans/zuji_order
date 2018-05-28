@@ -193,19 +193,29 @@ class OrderCleaningController extends Controller
     public function orderCleanOperate(Request $request)
     {
 
-        $params = $request->all();
+        try {
 
-        $rules = [
-            'out_refund_no'=> 'required'
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code']!=0) {
+            $params = $request->all();
 
-            return apiResponse([],$validateParams['code']);
+            $rules = [
+                'out_refund_no'=> 'required'
+            ];
+            $validateParams = $this->validateParams($rules,$params);
+            if ($validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $res = OrderCleaning::orderCleanOperate($params['params']);
+            if (!$res) return apiResponse($res,ApiStatus::CODE_0,"success");
+            return apiResponse([],ApiStatus::CODE_31202);
+
+        } catch(\Exception $e)
+        {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
         }
 
-        $res = OrderCleaning::orderCleanOperate($params['params']);
-        return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
 

@@ -6,7 +6,7 @@
  * @copyright (c) 2017, Huishoubao
  */
 
-namespace App\Lib;
+namespace App\Order\Modules\Inc;
 
 
 class publicInc
