@@ -38,7 +38,6 @@ class WithholdController extends Controller
             'front_url'         => 'required',  //前端跳转地址
         ];
         $validateParams = $this->validateParams($rules,$params);
-        p($validateParams);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
