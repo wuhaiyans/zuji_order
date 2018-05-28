@@ -43,7 +43,7 @@ class WithholdController extends Controller
         }
         $params = $params['params'];
 
-        try{
+        //try{
             // 获取渠道ID
             $ChannelInfo = \App\Lib\Channel\Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
             if (!is_array($ChannelInfo)) {
@@ -58,7 +58,7 @@ class WithholdController extends Controller
                 'businessNo'    => createNo(),
             ];
             $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
-
+            v($payment);
 
             // 获取URL地址
             $subject = "签署代扣协议";
@@ -74,10 +74,10 @@ class WithholdController extends Controller
 
             return apiResponse(['url'=>$url['withholding_url']],ApiStatus::CODE_0,"success");
 
-        } catch (\Exception $exc) {
-            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
-
-        }
+//        } catch (\Exception $exc) {
+//            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+//
+//        }
     }
 
 
