@@ -155,7 +155,7 @@ class OrderOperate
 
     }
     private static function calculateEndTime($beginTime, $zuqi){
-        $day = P
+        $day = Inc\publicInc::calculateDay($zuqi);
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }

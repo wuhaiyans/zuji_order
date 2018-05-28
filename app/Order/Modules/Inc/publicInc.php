@@ -67,6 +67,21 @@ class publicInc
         ];
     }
 
+    public static function getCangzuRow($n){
+        $row = [
+            self::CHANGZU3=>true,
+            self::CHANGZU6=>true,
+            self::CHANGZU9=>true,
+            self::CHANGZU12=>true,
+        ];
+        return $row[$n];
+    }
+
+    /**
+     * 获取短租天数选项
+     *
+     * @return array
+     */
     public static function getDuanzuList(){
         return [
             self::DUANZU3,
@@ -74,6 +89,16 @@ class publicInc
             self::DUANZU15,
             self::DUANZU30,
         ];
+    }
+
+    public static function getDuanzuRow($n){
+        $row = [
+            self::DUANZU3=>true,
+            self::DUANZU7=>true,
+            self::DUANZU15=>true,
+            self::DUANZU30=>true,
+        ];
+        return $row[$n];
     }
 
     /**

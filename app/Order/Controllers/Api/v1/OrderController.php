@@ -37,31 +37,35 @@ class OrderController extends Controller
 	 */
     public function confirmation(Request $request){
 		
-        $orders = $request->all();
+        $params = $request->all();
 		
         //获取appid
-        $appid		= $orders['appid'];
-        $pay_type	= $orders['params']['pay_type'];//支付方式ID
-        $sku		= $orders['params']['sku_info'];
-        $coupon		= $orders['params']['coupon'];
+        $appid		= $params['appid'];
+        $payType	= $params['params']['pay_type'];//支付方式ID
+        $sku		= $params['params']['sku_info'];
+        $coupon		= $params['params']['coupon'];
+        $userId		= $params['params']['user_id'];
 
         //判断参数是否设置
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
-        if(empty($pay_type)){
+        if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($userId)){
+            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
         $data =[
-            'appid'=>1,
-            'pay_type'=>1,
+            'appid'=>$appid,
+            'pay_type'=>$payType,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
-            'user_id'=>18,  //增加用户ID
+            'coupon'=>$coupon,
+            'user_id'=>$userId,  //增加用户ID
         ];
         $res = $this->OrderCreate->confirmation($data);
         if(!is_array($res)){
@@ -80,36 +84,41 @@ class OrderController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request){
-        $orders =$request->all();
+
+        $params = $request->all();
+
         //获取appid
-        $appid =$orders['appid'];
-        $pay_type =$orders['params']['pay_type'];//支付方式ID
-        $address_id=$orders['params']['address_id'];//收货地址ID
-        $sku =$orders['params']['sku_info'];
-        $coupon = $orders['params']['coupon'];
-        $user_id =18;
+        $appid		= $params['appid'];
+        $payType	= $params['params']['pay_type'];//支付方式ID
+        $sku		= $params['params']['sku_info'];
+        $coupon		= $params['params']['coupon'];
+        $userId		= $params['params']['user_id'];
+        $addressId		= $params['params']['address_id'];
 
         //判断参数是否设置
-        if(empty($pay_type)){
-            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
-        }
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
-        if(empty($address_id)){
-            return apiResponse([],ApiStatus::CODE_20001,"收货地址不能为空");
+        if(empty($payType)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($userId)){
+            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
+        }
+        if(empty($addressId)){
+            return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
         $data =[
-            'appid'=>1,
-            'pay_type'=>1,
-            'address_id'=>8,
+            'appid'=>$appid,
+            'pay_type'=>$payType,
+            'address_id'=>$addressId,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
-            'user_id'=>18,  //增加用户ID
+            'coupon'=>$coupon,
+            'user_id'=>$userId,  //增加用户ID
         ];
         $res = $this->OrderCreate->create($data);
         if(!$res){
@@ -128,36 +137,40 @@ class OrderController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function storeCreate(Request $request){
-        $orders =$request->all();
+        $params = $request->all();
+
         //获取appid
-        $appid =$orders['appid'];
-        $pay_type =$orders['params']['pay_type'];//支付方式ID
-        $address_id=$orders['params']['address_id'];//收货地址ID
-        $sku =$orders['params']['sku_info'];
-        $coupon = $orders['params']['coupon'];
-        $user_id =18;
+        $appid		= $params['appid'];
+        $payType	= $params['params']['pay_type'];//支付方式ID
+        $sku		= $params['params']['sku_info'];
+        $coupon		= $params['params']['coupon'];
+        $userId		= $params['params']['user_id'];
+        $addressId		= $params['params']['address_id'];
 
         //判断参数是否设置
-        if(empty($pay_type)){
-            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
-        }
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
-        if(empty($address_id)){
-            return apiResponse([],ApiStatus::CODE_20001,"收货地址不能为空");
+        if(empty($payType)){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        }
+        if(empty($userId)){
+            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
+        }
+        if(empty($addressId)){
+            return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
 
         $data =[
-            'appid'=>1,
-            'pay_type'=>1,
-            'address_id'=>8,
+            'appid'=>$appid,
+            'pay_type'=>$payType,
+            'address_id'=>$addressId,
             'sku'=>$sku,
-            'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"],
-            'user_id'=>18,  //增加用户ID
+            'coupon'=>$coupon,
+            'user_id'=>$userId,  //增加用户ID
         ];
         $res = $this->OrderCreate->storeCreate($data);
         if(!$res){

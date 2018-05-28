@@ -158,7 +158,6 @@ class UserComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump('创建用户...');
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
         // 写入用户信息

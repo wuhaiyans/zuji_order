@@ -149,11 +149,8 @@ class ReletRepository
      * @param $params
      * @return bool
      */
-    public function createRelet($params){
-        $time = time();
-        $params['create_time'] = $time;
-        $params['status'] = 1;
-        return $this->orderRelet->save($params);
+    public function createRelet($data){
+        return $this->orderRelet->save($data);
     }
 
 }

@@ -96,7 +96,7 @@ class CouponComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("Coupon组件 -create");
+
         $b = $this->componnet->create();
         if( !$b ){
             return false;

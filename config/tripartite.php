@@ -9,7 +9,7 @@
 //只有订单内部接收的接口appid =1;
 return [
 
-    'Interior_Goods_Url' =>env("API_TRIPARTITE_URL","https://admin-zuji.huishoubao.com/api.php"),
+    'Interior_Goods_Url' =>env("GOODS_API","https://admin-zuji.huishoubao.com/api.php"),
     'Interior_Goods_Request_data'=>[
         'appid'=>1,
         'sign_type'=>'MD5',
@@ -17,7 +17,7 @@ return [
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
     ],
-    'Interior_Fengkong_Url' =>env("API_FENGKONG_URL","http://admin-zuji.huishoubao.com/api.php"),
+    'Interior_Fengkong_Url' =>env("API_FENGKONG_URL","https://dev-fk-zuji.huishoubao.com"),
     'Interior_Fengkong_Request_data'=>[
         'appid'=>1,
         'version'=>'1.0',

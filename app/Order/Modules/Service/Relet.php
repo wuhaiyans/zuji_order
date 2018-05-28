@@ -12,6 +12,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -68,7 +69,7 @@ class Relet
      */
     public function setStatus($params){
         $row = $this->reletRepository->getRowId($params['id']);
-        if($row['status'] == 1){
+        if($row['status'] == ReletStatus::STATUS1){
             return $this->reletRepository->setStatus($params);
         }else{
             set_msg('只允许创建续租取消');
@@ -89,8 +90,45 @@ class Relet
             ['order_no', '=', $params['order_no']]
         ];
         $row = OrderGoodsRepository::getGoodsRow($where);
+        if( $row ){
+            if( $row['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
+                if( !publicInc::getDuanzuRow($params['zuqi']) ){
+                    set_msg('租期错误');
+                    return false;
+                }
+            }else{
+                if( !publicInc::getCangzuRow($params['zuqi']) ){
+                    set_msg('租期错误');
+                    return false;
+                }
+            }
+            $amount = $row['zujin']*$params['zuqi'];
+            if($amount == $params['relet_amount']){
 
-        return $this->reletRepository->createRelet($params);
+                $data = [
+                    'user_id'=>$params['user_id'],
+                    'zuqi_type'=>$row['zuqi_type'],
+                    'zuqi'=>$row['zuqi'],
+                    'order_no'=>$params['order_no'],
+                    'create_time'=>time(),
+                    'pay_type'=>$params['pay_type'],
+                    'user_name'=>$params['user_name'],
+                    'goods_id'=>$params['goods_id'],
+                    'relet_amount'=>$params['relet_amount'],
+                    'status'=>ReletStatus::STATUS1,
+                ];
+
+                return $this->reletRepository->createRelet($data);
+            }else{
+                set_msg('金额错误');
+                return false;
+            }
+
+        }else{
+            set_msg('未获取到订单商品信息');
+            return false;
+        }
+
     }
 
     /**
@@ -106,12 +144,12 @@ class Relet
         $row = OrderGoodsRepository::getGoodsRow($where);
         if($row){
             if($row['zuqi_type']==OrderStatus::ZUQI_TYPE1){
-                $list = ReletStatus::getDuanzuList();
+                $list = publicInc::getDuanzuList();
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
             }else{
-                $list = ReletStatus::getCangzulist();
+                $list = publicInc::getCangzulist();
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
