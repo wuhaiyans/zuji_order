@@ -97,6 +97,12 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('芝麻接口请求错误',$miniParams);
             return apiResponse( [], ApiStatus::CODE_35003, '查询芝麻订单确认结果失败');
         }
+        //查询成功记录表
+        $result = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
+        if( !$result ){
+            \App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
+        }
+
         //用户处理
         $userInfo = [];
 
