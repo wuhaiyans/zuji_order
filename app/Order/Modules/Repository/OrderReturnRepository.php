@@ -5,6 +5,7 @@ use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\Order;
 use App\Order\Models\OrderUserInfo;
+use App\Order\Models\OrderPayModel;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Support\Facades\DB;
@@ -99,7 +100,7 @@ class OrderReturnRepository
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$params['order_no']];
                 //获取退货单信息
-                $order_return=OrderReturn::where($where)->first()->toArray();
+                $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
                 $data['goods_status']=ReturnStatus::ReturnCreated;
@@ -174,15 +175,19 @@ class OrderReturnRepository
 
     //用户取消退货更新商品状态
     public static function cancel_goods_update($params){
-        if(isset($params['goods_no'])){
-            $where[]=['goods_no','=',$params['goods_no']];
-        }
         if(empty($params['order_no'])){
             return false;
         }
-        $where[]=['order_no','=',$params['order_no']];
+        if(empty($params['goods_no'])){
+            return false;
+        }
         $data['goods_status']=ReturnStatus::ReturnCanceled;
-        if(ordergoods::where($where)->update($data)){
+        foreach($params['goods_no'] as $k=>$v) {
+            $where[$k][] = ['order_no', '=', $params['order_no']];
+            $where[$k][] = ['goods_no', '=', $v];
+            $goodsRes=ordergoods::where($where[$k])->update($data);
+        }
+        if($goodsRes){
             return true;
         }else{
             return false;
@@ -213,8 +218,12 @@ class OrderReturnRepository
             return false;
         }
         $data['status']=ReturnStatus::ReturnCanceled;
-        $order_no=$params['order_no'];
-        if(OrderReturn::where('order_no','=',$order_no)->update($data)){
+        foreach($params['goods_no'] as $k=>$v) {
+            $where[$k][] = ['order_no', '=', $params['order_no']];
+            $where[$k][] = ['goods_no', '=', $v];
+            $return_res=OrderReturn::where($where[$k])->update($data);
+        }
+        if($return_res){
             return true;
         }else{
             return false;
@@ -229,14 +238,14 @@ class OrderReturnRepository
             return false;
         }
         foreach($params['goods_no'] as $k=>$v){
-            $where[]=['order_return.order_no','=',$params['order_no']];
-            $where[]=['order_return.user_id','=',$params['user_id']];
-            $where[]=['order_return.goods_no','=',$params['goods_no'][$k]];
+            $where[$k][]=['order_return.order_no','=',$params['order_no']];
+            $where[$k][]=['order_return.user_id','=',$params['user_id']];
+            $where[$k][]=['order_return.goods_no','=',$v];
             $parcels = DB::table('order_return')
                 ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
-                ->leftJoin('order_goods_extend',[['order_return.order_no', '=', 'order_goods_extend.order_no'],['order_return.goods_no', '=', 'order_goods_extend.good_no']])
-                ->where($where)
-                ->select('order_return.user_id','order_return.business_key','order_return.status','order_return.wuliu_channel_id','order_return.logistics_no','order_goods.quantity','order_goods_extend.serial_number','order_goods_extend.imei1','order_goods_extend.imei2','order_goods_extend.imei3')
+                ->leftJoin('order_goods_extend',[['order_return.order_no', '=', 'order_goods_extend.order_no'],['order_return.goods_no', '=', 'order_goods_extend.goods_no']])
+                ->where($where[$k])
+                ->select('order_return.user_id','order_return.business_key','order_return.status','order_return.logistics_id','order_return.logistics_name','order_return.logistics_no','order_goods.quantity','order_goods_extend.serial_number','order_goods_extend.imei1','order_goods_extend.imei2','order_goods_extend.imei3')
                 ->get()->toArray();
         }
         if($parcels){
@@ -258,7 +267,7 @@ class OrderReturnRepository
         if($params['goods_no']){
             $return_info= DB::table('order_return')
                 ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
-                ->leftJoin('order_goods_extend',[['order_return.order_no', '=', 'order_goods_extend.order_no'],['order_return.goods_no', '=', 'order_goods_extend.good_no']])
+                ->leftJoin('order_goods_extend',[['order_return.order_no', '=', 'order_goods_extend.order_no'],['order_return.goods_no', '=', 'order_goods_extend.goods_no']])
                 ->where($where)
                 ->select('order_goods_extend.*','order_goods.*','order_return.*')
                 ->get()->toArray();
@@ -285,27 +294,26 @@ class OrderReturnRepository
         if(empty($data['logistics_no'])){
             return false;
         }
-        if(empty($data['wuliu_channel_id'])){
+        if(empty($data['logistics_id'])){
             return false;
         }
-        if(isset($data['goods_no'])){
+        if(empty($data['logistics_name'])){
+            return false;
+        }
+        if(empty($data['goods_no'])){
+            return false;
+        }
+
             foreach($data['goods_no'] as $k=>$v){
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$data['order_no']];
-                $params['wuliu_channel_id']=$data['wuliu_channel_id'];
+                $params['logistics_id']=$data['logistics_id'];
                 $params['logistics_no']=$data['logistics_no'];
+                $params['logistics_name']=$data['logistics_name'];
                 $update_result=OrderReturn::where($where[$k])->update($params);
             }
-
-        }else{
-            $where[]=['order_no','=',$data['order_no']];
-            $params['wuliu_channel_id']=$data['wuliu_channel_id'];
-            $params['logistics_no']=$data['logistics_no'];
-            $update_result=OrderReturn::where($where)->update($params);
-        }
         if($update_result){
-            $res=OrderReturn::where('order_no','=',$data['order_no'])->first()->toArray();
-            return $res;
+            return true;
         }else{
             return false;
         }
@@ -340,7 +348,11 @@ class OrderReturnRepository
         if(empty($params['goods_no'])){
             return false;
         }
-         $result=OrderReturn::where($params)->get();
+        foreach($params['goods_no'] as $k=>$v){
+            $where[$k][]=['goods_no','=',$v];
+            $where[$k][]=['order_no','=',$params['order_no']];
+            $result=OrderReturn::where($where[$k])->first();
+        }
          if($result){
              return $result->toArray();
          }else{
@@ -356,13 +368,6 @@ class OrderReturnRepository
         }
     }
 
-    public static function is_tui_qualified($where,$data){
-        if(OrderReturn::where($where)->update($data)){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
     public static function update_return_info($order_no){
         if(OrderGoods::where('order_no','=',$order_no)->update(['goods_status'=>'1'])){
@@ -553,4 +558,117 @@ class OrderReturnRepository
             return [];
         }
     }
+    //获取付款编码
+    public static function get_pay_no($business_key,$order_no){
+        if(empty($business_key)){
+            return false;//业务类型不能为空
+        }
+        if(empty($order_no)){
+            return false;//订单编号不能为空
+        }
+        $Data=OrderPayModel::where([['business_type','=',$business_key],['business_no','=',$order_no]])->first();
+        if($Data){
+            return $Data->toArray();
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 换货，更新原商品为无效
+     * @param $params
+     * @return bool
+     */
+    public static function updateGoodsExtendStatus($where,$data){
+        $goods_extend_res= OrderGoodsExtend::where($where)->update($data);//修改商品扩展表商品状态为无效
+        if(!$goods_extend_res){
+            return false;
+        }
+        return true;
+    }
+    public static function createGoods($data){
+        if(empty($data)){
+            return false;
+        }
+        foreach($data as $k=>$v){
+            $create_result=OrderGoodsExtend::query()->insert($data[$k]);
+        }
+        if($create_result){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 获取订单支付方式
+     * @param $params
+     */
+    public static function payRefund($params){
+        if(empty($params['order_no'])){
+            return false;
+        }
+
+        $where[]=['business_no','=',$params['order_no']];
+        $where[]=['business_type','=','1'];
+        $OrderPayModel = new OrderPayModel();
+        $pay_result= $OrderPayModel::where($where)->first()->toArray();
+        if(!$pay_result){
+            return false;
+        }
+        return $pay_result;
+
+    }
+
+    /**
+     * 获取商品和订单的信息
+     * @param $params
+     */
+    public static function orderGoodsInfo($params){
+        $where[]=['order_goods.goods_no','=',$params['goods_no']];
+        $where[]=['order_info.order_no','=',$params['order_no']];
+        $goods_info= DB::table('order_goods')
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods.order_no')
+            ->leftJoin('order_return', [['order_return.order_no', '=','order_goods.order_no'],['order_return.goods_no', '=','order_goods.goods_no']])
+            ->where($where)
+            ->select('order_goods.*','order_info.*','order_return.*')
+            ->get()->toArray();
+        if(!$goods_info){
+            return false;
+        }
+        return $goods_info;
+    }
+
+    /**
+     * 获取用户信息
+     * $params
+     */
+    public static function getUserInfo($params){
+        if(empty($params['order_no'])){
+            return false;
+        }
+        $user_result= Order::where('order_no','=',$params['order_no'])->first()->toArray();
+        if(!$user_result){
+            return false;
+        }
+        return $user_result;
+    }
+
+    /**
+     * 获取退换货单数据
+     * @param $where
+     *
+     */
+    public static function returnApplyList($where){
+        $return_result= DB::table('order_return')
+            ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+            ->where($where)
+            ->select('order_goods.*','order_return.*')
+            ->get()->toArray();
+        if(!$return_result){
+            return [];
+        }
+        return $return_result;
+    }
+
 }

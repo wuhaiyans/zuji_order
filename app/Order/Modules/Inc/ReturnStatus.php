@@ -63,7 +63,37 @@ class ReturnStatus {
     //退款中
     const ReturnTui= 10;
 
-    
+
+    /***********退换货审核原因******************/
+    /**
+     * @var int 其他
+     */
+    const  ReturnOtherQuestion = 0;
+    /**
+     * @var int 设备问题
+     */
+    const ReturnGoodsQuestion = 1;
+    /**
+     * @var int 用户问题
+     */
+    const ReturnUserQuestion = 2;
+
+
+
+    /***********检测结果******************/
+    /**
+     * @var int 待检测
+     */
+    const  ReturnEvaluation = 0;
+    /**
+     * @var int 检测合格
+     */
+    const ReturnEvaluationSuccess= 1;
+    /**
+     * @var int 检测不合格
+     */
+    const ReturnEvaluationFalse= 2;
+
     public static function getStatusList(){
         return [
             self::ReturnInvalid => '无效状态',
@@ -77,6 +107,13 @@ class ReturnStatus {
             self::ReturnTuiKuan => '已退款',
             self::ReturnTui =>'退款中',
         ];
+    }
+    public static function getReturnEvaluationList(){
+        return [
+                self::ReturnEvaluation => '待检测',
+                self::ReturnEvaluationSuccess => '检测合格',
+                self::ReturnEvaluationFalse => '检测不合格',
+            ];
     }
     public static function getReturnList(){
         return [
@@ -127,6 +164,13 @@ class ReturnStatus {
             self::OrderTuiKuan => '退款业务',
             self::OrderTuiHuo => '退货业务',
             self::OrderHuanHuo => '换货业务',
+        ];
+    }
+    public static function ReturnQuestion(){
+        return [
+            self::ReturnOtherQuestion => '其他',
+            self::ReturnGoodsQuestion => '设备问题',
+            self::ReturnUserQuestion => '用户问题 ',
         ];
     }
     public static function getLostName($status){

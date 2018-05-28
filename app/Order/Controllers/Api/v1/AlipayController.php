@@ -27,9 +27,9 @@ class AlipayController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|void
      */
-    public function alipayInitialize(Request $request){
+    public function alipayInitialize(){
 
-        $params =$request->all();
+       // $params =$request->all();
         $params['params']=[
             'return_url' =>'http://www.baidu.com',
               'order_no' =>'A528100728283349',
