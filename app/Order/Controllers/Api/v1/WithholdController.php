@@ -37,10 +37,10 @@ class WithholdController extends Controller
         $rules = [
             'front_url'         => 'required',  //前端跳转地址
         ];
-//        $validateParams = $this->validateParams($rules,$params);
-//        if ($validateParams['code'] != 0) {
-//            return apiResponse([],$validateParams['code']);
-//        }
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
         $params = $params['params'];
 
         // 获取渠道ID
@@ -57,7 +57,7 @@ class WithholdController extends Controller
             'businessNo'    => createNo(),
         ];
         $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
-        p($payment);
+
 
         // 获取URL地址
         $subject = "签署代扣协议";
@@ -66,7 +66,7 @@ class WithholdController extends Controller
 	 		'front_url'		=> $params['front_url'],	// 前端回跳地址
         ];
         $url = $payment->getCurrentUrl($channelId,$urlData);
-
+        p($url);
         if(!$url){
             return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
         }
