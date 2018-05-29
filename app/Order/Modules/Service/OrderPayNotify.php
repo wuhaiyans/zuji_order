@@ -40,17 +40,18 @@ class OrderPayNotify
         $orderNo = $params['business_no']; //订单支付也就是订单编号
         $status = $params['status'];
 
+
         if ($status == "processing") {
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPaying);
             if (!$b) {
-                LogApi::notify("订单支付失败", $params);
+                LogApi::notify("订单支付失败", $orderNo);
             }
         } else {
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPayed);
             if (!$b) {
-                LogApi::notify("订单支付失败", $params);
+                LogApi::notify("订单支付失败", $orderNo);
             }
-            $orderInfo = OrderRepository::getOrderInfo(['order_no' => $orderNo]);
+             $orderInfo = OrderRepository::getOrderInfo(['order_no' => $orderNo]);
             //发送支付成功短信
             //发送支付宝推送消息
             //发送邮件 -----begin

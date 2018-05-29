@@ -6,11 +6,11 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderCreated
+ * OrderPay
  *
  * @author Administrator
  */
-class OrderCreate implements ShortMessage {
+class OrderPay implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -23,10 +23,10 @@ class OrderCreate implements ShortMessage {
 		$this->business_no = $business_no;
 	}
 
-	public function getCode($channel_id){
-	    $class =basename(str_replace('\\', '/', __CLASS__));
-		return Config::getCode($channel_id, $class);
-	}
+    public function getCode($channel_id){
+        $class =basename(str_replace('\\', '/', __CLASS__));
+        return Config::getCode($channel_id, $class);
+    }
 	
 	public function notify($data=[]){
 		// 根据业务，获取短息需要的数据
@@ -39,11 +39,10 @@ class OrderCreate implements ShortMessage {
 		}
 		
 		// 短息模板
-		$code = $this->getCode($order_info['channel_id']);
+        $code = $this->getCode($order_info['channel_id']);
 		if( !$code ){
 			return false;
 		}
-
 		
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, [
