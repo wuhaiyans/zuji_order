@@ -49,9 +49,10 @@ class MiniNotifyController extends Controller
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$result);
             }
-            if( isset($redis_order) ){
+            $redis_order = Redis::get($_POST['out_order_no']);
+            if( $redis_order == 'MiniWithhold' ){
                 $this->withholdingNotify();
-            }else if( isset($redis_order) ){
+            }else if( $redis_order == 'MiniOrderClose' ){
                 $this->orderCloseNotify();
             }
         }else if($this->data['notify_type'] == $this->CREATE){
