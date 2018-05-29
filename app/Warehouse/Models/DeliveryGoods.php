@@ -24,6 +24,7 @@ class DeliveryGoods extends Warehouse
     protected $fillable = [
         'delivery_no',
         'serial_no',
+        'goods_no',
         'order_no',
         'quantity',
         'goods_name',

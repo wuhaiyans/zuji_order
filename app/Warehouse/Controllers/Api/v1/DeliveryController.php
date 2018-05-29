@@ -28,30 +28,24 @@ class DeliveryController extends Controller
      * delivery_detail 设备明细
      */
     public function deliveryCreate(){
-
         $rules = [
             'order_no' => 'required', //单号
             'delivery_detail'   => 'required', //序号
         ];
-        $params = $this->_dealParams($rules);
 
+        $params = $this->_dealParams($rules);
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $delivery_row['app_id'] = $params['app_id'];
-        $delivery_row['order_no'] =$params['order_no'];//订单编号
-        $delivery_row['delivery_detail'] =$params['delivery_detail'];//发货清单
-
         try {
-            $this->DeliveryCreate->confirmation($delivery_row);
+            $this->DeliveryCreate->confirmation($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
-
     }
 
 

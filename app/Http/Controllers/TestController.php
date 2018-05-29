@@ -20,7 +20,28 @@ class TestController extends Controller
 
     public function test()
     {
-        Delivery::createDelivery(['order_no'=>123333, 'goods_no'=> 12122]);
+        $filePath = storage_path('/app/download/imei_data_tpl.xlsx');
+
+
+        return response()->download($filePath,'imei数据导入模板.xls');
+
+
+
+        //换货 发货测试
+//        Delivery::createDelivery([
+//            'order_no'=>123333,
+//            'realname' => '张三',
+//            'mobile' => '手机号',
+//            'address_info' => '收货地址',
+//            'goods'=> [
+//                ['goods_no'=> 123],
+//                ['goods_no'=> 456]
+//        ]]);
+
+
+        //新订单发货
+//        $a = Delivery::apply('A511125156960043');
+
 
 
     }

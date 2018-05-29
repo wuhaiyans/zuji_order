@@ -5,8 +5,8 @@ return [
     //imei导入
     'warehouse.imei.import' => 'ImeiController@import', //导入imei
     'warehouse.imei.list' => 'ImeiController@list', //列表
-    'warehouse.imei.upload' => 'ImeiController@upload', //列表
-
+    'warehouse.imei.importFromExcel' => 'ImeiController@importFromExcel', //导入
+    'warehouse.imei.downTpl' => 'ImeiController@downTpl', //列表
 
     //物流
     'warehouse.delivery.logisticList' => 'DeliveryController@logisticList', //取物流列表

@@ -69,6 +69,7 @@ class DeliveryRepository
             DB::rollBack();
 
             throw new \Exception($e->getMessage());
+
             return false;
         }
 
