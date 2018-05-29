@@ -283,6 +283,23 @@ class OrderRepository
         }
     }
 
+
+    /**
+     * 根据订单号获取用户优惠券信息
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
+    public static function getCouponListByOrderId($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderCouponData = OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get()->toArray();
+        return $orderCouponData ?? false;
+
+    }
+
     /**
      * heaven
      * 获取订单详情
@@ -414,7 +431,7 @@ class OrderRepository
         }
 
         //下单时间
-        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
             $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
         }
 
@@ -436,5 +453,15 @@ class OrderRepository
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 
+    }
+
+    //更新订单状态-订单完成
+    public static function orderClose($order_no){
+        $data['order_status']=OrderStatus::OrderCompleted;
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

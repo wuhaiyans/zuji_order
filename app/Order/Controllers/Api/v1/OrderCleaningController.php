@@ -94,8 +94,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required'
+            'clean_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -127,7 +126,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'out_refund_no'  => 'required',
+            'clean_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -137,8 +136,8 @@ class OrderCleaningController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
-        $res = OrderCleaning::upOrderCleanStatus($params['params']);
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        $res = OrderCleaning::upOrderCleanStatus($validateParams['data']);
+        return apiResponse([] , $res);
 
     }
 
@@ -198,7 +197,7 @@ class OrderCleaningController extends Controller
             $params = $request->all();
 
             $rules = [
-                'out_refund_no'=> 'required'
+                'clean_no'=> 'required'
             ];
             $validateParams = $this->validateParams($rules,$params);
             if ($validateParams['code']!=0) {
