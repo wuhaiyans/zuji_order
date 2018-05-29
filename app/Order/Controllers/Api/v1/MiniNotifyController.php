@@ -9,7 +9,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
-
+use App\Order\Modules\Repository\OrderRepository;
 
 class MiniNotifyController extends Controller
 {
@@ -17,8 +17,6 @@ class MiniNotifyController extends Controller
     private $CANCEL = 'ZM_RENT_ORDER_CANCEL';
     //完结
     private $FINISH = 'ZM_RENT_ORDER_FINISH';
-//    //分期扣款
-//    private $INSTALLMENT = 'ZM_RENT_ORDER_INSTALLMENT';
     //确认订单
     private $CREATE = 'ZM_RENT_ORDER_CREATE';
     //返回数组
@@ -70,7 +68,7 @@ class MiniNotifyController extends Controller
     private function OrderCancelNotify(){
         $data = $this->data;
         //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['order_no'] );
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
@@ -87,11 +85,27 @@ class MiniNotifyController extends Controller
     private function orderCloseNotify(){
         $data = $this->data;
         //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['order_no'] );
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
-
+        //修改订单状态
+        $b = \App\Order\Modules\Repository\OrderRepository::orderClose($data['out_order_no']);
+        if(!$b){
+            echo "修改订单状态FAIL";return;
+        }
+        //修改商品表状态 （还机完成）
+        $where = [
+            'order_no'=>$data['out_order_no']
+        ];
+        $data = [
+            'goods_status'=>\App\Order\Modules\Inc\OrderGoodStatus::COMPLETE_THE_MACHINE,
+        ];
+        $OrderGoodsRepository = new \App\Order\Modules\Repository\OrderGoodsRepository();
+        $b = $OrderGoodsRepository->update( $where, $data );
+        if(!$b){
+            echo "修改商品表状态FAIL";return;
+        }
         echo 'success';return;
     }
 
@@ -101,7 +115,7 @@ class MiniNotifyController extends Controller
     private function  withholdingNotify(){
         $data = $this->data;
         //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['order_no'] );
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
@@ -111,7 +125,7 @@ class MiniNotifyController extends Controller
             //修改分期状态
             $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
             if(!$b){
-                echo "修改分期状态.FAIL";exit;
+                echo "修改分期状态.FAIL";return;
             }
         }
         echo 'success';return;
@@ -123,12 +137,10 @@ class MiniNotifyController extends Controller
      */
     public function rentTransition(){
         $data = $this->data;
-        //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['order_no'] );
-        if( $orderInfo == false ){
-            echo '订单不存在';return;
+        $b = OrderRepository::orderPayStatus($data['out_order_no'], \App\Order\Modules\Inc\OrderStatus::OrderPayed);
+        if (!$b) {
+            echo "小程序订单支付失败";return;
         }
-
         echo 'success';return;
     }
 }
