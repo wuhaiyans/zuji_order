@@ -23,9 +23,9 @@ class TestController extends Controller
     {
 
 
+//        $this->testApply('A511125156960043');
+
         $this->testSend('201805281944493333');
-
-
 //        $this->testReceive();
 //        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
 //
@@ -128,6 +128,15 @@ class TestController extends Controller
 
         $res = json_decode($res, true);
 
+    }
+
+
+    /**
+     * 发货申请
+     */
+    public function testApply($order_no)
+    {
+        Delivery::apply($order_no);
     }
 
 
