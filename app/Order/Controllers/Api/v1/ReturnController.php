@@ -162,18 +162,6 @@ class ReturnController extends Controller
         if(!$ret){
             return apiResponse([], ApiStatus::CODE_33008, '上传物流失败');
         }
-        //创建收货单
-        $data['logistics_id']=$return_info[0]->logistics_id;
-        $data['logistics_no']=$return_info[0]->logistics_no;
-        $data['receive_detail']['serial_no']=$return_info[0]->serial_number;
-        $data['receive_detail']['quantity']=$return_info[0]->quantity;
-        $data['receive_detail']['imei1']=$return_info[0]->imei1;
-        $data['receive_detail']['imei2']=$return_info[0]->imei2;
-        $data['receive_detail']['imei3']=$return_info[0]->imei3;
-        $create_res= Receive::create($ret['order_no'],$return_info[0]->business_key,$data);
-        if(!$create_res){
-            return apiResponse([], ApiStatus::CODE_34003, '创建收货单失败');
-        }
 
         return apiResponse([], ApiStatus::CODE_0,'success');
 
@@ -232,7 +220,7 @@ class ReturnController extends Controller
         if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data'][0]);
+        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data']);
         return apiResponse([],$res);
     }
     /**
@@ -343,10 +331,10 @@ class ReturnController extends Controller
             'order_no'=> 'required',
         ]);
         if(count($param)<1){
-            return ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
         }
         if(empty($params['goods'])){
-            return  ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->exchangeGoods($params);
         return apiResponse([],$res);

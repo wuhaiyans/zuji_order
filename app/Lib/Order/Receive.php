@@ -20,7 +20,24 @@ class Receive
      * @param $data
      *
      * 收货系统 检测结果反馈
+     *  $data = [
+    [
+    'goods_no' => '123',
+    'check_result' => 'success',//是否合格 fasle/success
+    'check_description' => '原因',
+    'evaluation_time' => '123123123',//检测时间
+    'price' => '342'
+    ],
+    [
+    'goods_no' => '123',
+    'check_result' => 'success',//是否合格 fasle/success
+    'check_description' => '原因',
+    'evaluation_time' => '123123123',//检测时间
+    'price' => '21'
+    ]
+    ];
      */
+
     public static function checkResult($order_no, $business_key,$data)
     {
         $base_api = config('tripartitle.API_INNER_URL');
@@ -33,30 +50,6 @@ class Receive
         ]);
 
         return $response;
-        dd($data);
-
-        $data = [
-            [
-                'sku_no' => '123',
-                'good_id' => '123',
-                'imei' => 'abcde',
-                'check_result' => 'success',//是否合格 fasle/success
-                'check_description' => '原因',
-                'serial_number' => "sdsdsd",//金额
-                'check_time' => '1526030858'
-            ],
-            [
-                'sku_no' => '123',
-                'good_id' => '123',
-                'imei' => 'abcde',
-                'check_result' => 'success',//是否合格 fasle/success
-                'check_description' => '原因',
-                'serial_number' => "sdsdsd",//金额
-                'check_time' => '1526030858'
-            ]
-        ];
-
-
     }
 
 

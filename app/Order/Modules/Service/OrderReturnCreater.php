@@ -182,8 +182,6 @@ class OrderReturnCreater
             DB::commit();
             return ApiStatus::CODE_0;
         }
-
-
         foreach($goods_info as $k=>$v){
             $receive_data['logistics_id']=$goods_info[$k]->logistics_id;
             $receive_data['logistics_no']=$goods_info[$k]->logistics_no;
@@ -600,132 +598,56 @@ class OrderReturnCreater
             return ApiStatus::CODE_33003;//订单编号不能为空
         }
         $where[] = ['order_no', '=', $order_no];
-        if (isset($data['sku_no'])){
-            $where[] = ['goods_no', '=', $data['sku_no']];
-        }
         //开启事务
         DB::beginTransaction();
         //获取订单信息
-        $order_info = $this->orderReturnRepository->order_info($order_no);
-        $params['evaluation_remark'] = $data['check_description'];
-        $params['evaluation_amount'] =$data['price'];
-        $params['evaluation_time'] =time();
-        if ($data['check_result'] == "success"){
-            $params['evaluation_status'] =  ReturnStatus::ReturnEvaluationSuccess;
-            if ($business_key == ReturnStatus::OrderTuiHuo){
-                $params['status'] = ReturnStatus::ReturnTuiHuo;
-                $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
-                if(!$result){
-                    //事务回滚
-                    DB::rollBack();
-                    return ApiStatus::CODE_33008;//修改退货单信息失败
+      //  $order_info = $this->orderReturnRepository->order_info($order_no);
+        foreach($data as $k=>$v){
+            $where[]=['goods_no','=',$data[$k]['goods_no']];
+            $params['evaluation_remark'] = $data[$k]['check_description'];
+            $params['evaluation_amount'] =$data[$k]['price'];
+            $params['evaluation_time'] =$data[$k]['evaluation_time'];
+            if($data[$k]['check_result']=="success") {
+                $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
+                if ($business_key == ReturnStatus::OrderTuiHuo) {
+                    $params['status'] = ReturnStatus::ReturnTuiHuo;
+                    //修改商品状态
+                    $goods_data['goods_status'] = $params['status'];
                 }
-                //修改商品状态
-                $goods_data['goods_status']=$params['status'];
-                $goods_result=$this->orderReturnRepository->updategoods($where,$goods_data);
-                if (!$goods_result){
-                    //事务回滚
-                    DB::rollBack();
-                    return ApiStatus::CODE_33009;//修改商品状态失败
+                if ($business_key == ReturnStatus::OrderHuanHuo) {
+                    $params['status'] = ReturnStatus::ReturnReceive;
+                    //修改商品状态
+                    $goods_data['goods_status'] = $params['status'];
+                   // $goods_data['business_key'] = $business_key;
                 }
-                //创建退货记录
-                /*     if (isset($data['order_no']) && isset($data['goods_id']) &&  isset($data['sku_no']) &&  isset($data['serial_number'])){
-                         return ApiStatus::CODE_20001;//参数错误
-                     }
-                     $createdata['order_no']=$order_no;
-                     $createdata['goods_id']=$data['goods_id'];
-                     $createdata['goods_no']=$data['sku_no'];
-                     $createdata['serial_number']=$data['serial_number'];
-                     $createdata['imei1']=isset($data['imei1'])?$data['imei1']:'' ;
-                     $createdata['imei2']=isset($data['imei2'])?$data['imei2']:'' ;
-                     $createdata['imei3']=isset($data['imei3'])?$data['imei3']:'' ;
-                     $createdata['status']='1' ;
-                     $create_result= $this->orderReturnRepository->createchange($createdata);
-                     if(!$create_result){
-                         //事务回滚
-                         DB::rollBack();
-                         return ApiStatus::CODE_34009;//创建换货单记录失败
-                     }*/
-                //创建退款清单
-                /*   $create_data['order_no']=$order_no;
-                   $create_data['out_account']=$order_info['pay_type'];//出账方式
-                   $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;
-                   $create_data['business_no']=ReturnStatus::OrderTuiKuan;
-                   $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
-                   $create_data['deposit_unfreeze_amount']=$order_info['goods_yajin'];//退还押金金额
-                   $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
-                   $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
-                   $create_data['refund_status']=OrderCleaningStatus::refundCancel;//退款状态
-                   $create_data['user_id']=$order_info['user_id'];
-                   //信息待定
-                   $create_clear= $this->OrderClearingRepository->createOrderClean($create_data);//创建退款清单
-                   if(!$create_clear){
-                       //事务回滚
-                       DB::rollBack();
-                       return ApiStatus::CODE_34008;//创建退款清单失败
-                   }
-                   //修改退款状态为退款中
-                   $data_tui['status']=ReturnStatus::ReturnTui;
-                   $tui_result=$this->orderReturnRepository->is_tui_qualified($where,$data_tui);
-                   if(!$tui_result){
-                       //事务回滚
-                       DB::rollBack();
-                       return ApiStatus::CODE_33008;
-                   }
-                   return ApiStatus::CODE_0;*/
-            }
-            if ($business_key == ReturnStatus::OrderHuanHuo){
-                $params['status'] = ReturnStatus::ReturnReceive;
-                $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
-                if(!$result){
-                    //事务回滚
-                    DB::rollBack();
-                    return ApiStatus::CODE_33008;//修改退货单信息失败
-                }
-                //修改商品状态
-                $goods_params['goods_status'] = $params['status'];
-                $goods_params['business_key'] = $business_key;
-                $goods_result = $this->orderReturnRepository->updategoods($where, $goods_params);
-                if (!$goods_result){
+                $goods_result = $this->orderReturnRepository->updategoods($where, $goods_data);
+                if (!$goods_result) {
                     //事务回滚
                     DB::rollBack();
                     return ApiStatus::CODE_33009;//修改商品状态失败
                 }
-                /* $delivery= Delivery::apply($order_no);//创建换货发货请求
-                 if(!$delivery){
-                     //事务回滚
-                     DB::rollBack();
-                     return false;//发货失败
-                 }*/
 
             }
-
-        }
-        if($data['check_result'] == "false"){
-            $params['evaluation_status'] =  ReturnStatus::ReturnEvaluationFalse;
+            if ($data[$k]['check_result'] == 'false') {
+                $params['evaluation_status'] = ReturnStatus::ReturnEvaluationFalse;
+                //修改订单冻结状态
+                $freeze_type = OrderFreezeStatus::Non;
+                $freeze_result = $this->orderReturnRepository->update_freeze($params, $freeze_type);
+                if (!$freeze_result) {
+                    //事务回滚
+                    DB::rollBack();
+                    return ApiStatus::CODE_33007;//修改订单冻结状态失败
+                }
+            }
             $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
-            if(!$result){
+            if (!$result) {
                 //事务回滚
                 DB::rollBack();
                 return ApiStatus::CODE_33008;//修改退货单信息失败
             }
-            //修改订单冻结状态
-            $freeze_type=OrderFreezeStatus::Non;
-            $freeze_result=$this->orderReturnRepository->update_freeze($params,$freeze_type);
-            if(!$freeze_result){
-                //事务回滚
-                DB::rollBack();
-                return ApiStatus::CODE_33007;//修改订单冻结状态失败
-            }
-            //寄回
-            /*   $delivery= Delivery::apply($order_no);//创建发货请求
-               if(!$delivery){
-                   //事务回滚
-                   DB::rollBack();
-                   return ApiStatus::CODE_34003;//发货失败
-               }
-              */
+
         }
+
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -747,7 +669,7 @@ class OrderReturnCreater
         if(!$order_result){
             return ApiStatus::CODE_34005;//未找到此订单
         }
-        if($order_result['order_status']!=OrderStatus::OrderInStock  || $order_result['order_status']!=OrderStatus::OrderPayed){
+        if($order_result['order_status'] !=OrderStatus::OrderInStock && $order_result['order_status'] !=OrderStatus::OrderPayed){
             return ApiStatus::CODE_34001;//此订单不符合规则
         }
         $data['business_key']=$params['business_key'];
@@ -1104,7 +1026,7 @@ class OrderReturnCreater
     public function returnApplyList($params){
         $where[]=['order_return.order_no','=',$params['order_no']];
         $where[]=['order_return.business_key','=',$params['business_key']];
-        $status=ReturnStatus::ReturnAgreed;
+        $status=ReturnStatus::ReturnCreated;
         $where[]=['order_return.status','=',$status];
         $return_list= $this->orderReturnRepository->returnApplyList($where);//创建退款清单
         return $return_list;
