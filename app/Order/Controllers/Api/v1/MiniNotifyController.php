@@ -72,6 +72,7 @@ class MiniNotifyController extends Controller
      * 芝麻支付宝小程序 订单关闭接口异步回调
      */
     private function orderCloseNotify(){
+
         $data = $this->data;
         echo '取消订单成功';
     }

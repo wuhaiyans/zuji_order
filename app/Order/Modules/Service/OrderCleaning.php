@@ -248,7 +248,7 @@ class OrderCleaning
                 'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
             ];
 
-           $succss =  $miniApi::withhold($params);
+           $succss =  $miniApi::OrderClose($params);
            LogApi::info('支付小程序解冻押金', $succss);
 
         }

@@ -4,6 +4,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
+use App\Order\Models\OrderCoupon;
 use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
@@ -267,6 +268,23 @@ class OrderRepository
         }
     }
 
+
+    /**
+     * 根据订单号获取用户优惠券信息
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
+    public static function getCouponListByOrderId($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderCouponData = OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get()->toArray();
+        return $orderCouponData ?? false;
+
+    }
+
     /**
      * heaven
      * 获取订单详情
@@ -398,7 +416,7 @@ class OrderRepository
         }
 
         //下单时间
-        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
             $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
         }
 

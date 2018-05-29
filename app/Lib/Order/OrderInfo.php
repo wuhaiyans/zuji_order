@@ -29,8 +29,7 @@ use App\Lib\ApiStatus;
                     'order_no'=>$param['order_no'],
                 ];
                 $baseUrl = config("tripartite.API_INNER_URL");
-                $info = Curl::post($baseUrl, json_encode($data));
-
+                $info = Curl::post($baseUrl, $data);
                 return apiResponse($info,ApiStatus::CODE_0);
 
             }
