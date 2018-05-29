@@ -14,6 +14,10 @@ class AlipayController extends Controller
     {
         $this->orderTrade = $orderTrade;
     }
+    public function test(){
+        $res =$this->alipayInitialize();
+        header("Location: ".$res['url']);
+    }
 
     /**
      * 支付宝初始化接口
@@ -24,12 +28,18 @@ class AlipayController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|void
      */
-    public function alipayInitialize(Request $request){
+    public function alipayInitialize(){
 
-        $params =$request->all();
+       // $params =$request->all();
+        $params['params']=[
+            'return_url' =>'http://www.baidu.com',
+            'order_no' =>'A528100728283349',
+            'user_id' =>'18',
+        ];
         $rules = [
             'return_url'  => 'required',
             'order_no'  => 'required',
+            'user_id'=>'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -39,6 +49,7 @@ class AlipayController extends Controller
         }
         $params =$params['params'];
         $res= $this->orderTrade->alipayInitialize($params);
+        return $res;
         if(!$res){
             return apiResponse([],ApiStatus::CODE_50004);
         }
@@ -52,9 +63,14 @@ class AlipayController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function alipayFundAuth(Request $request)
+    public function alipayFundAuth()
     {
-        $params =$request->all();
+       // $params =$request->all();
+        $params['params']=[
+            'return_url' =>'http://www.baidu.com',
+            'order_no' =>'A528100728283349',
+            'user_id' =>'18',
+        ];
         $rules = [
             'return_url'  => 'required',
             'order_no'  => 'required',
@@ -68,6 +84,7 @@ class AlipayController extends Controller
         }
         $params =$params['params'];
         $res= $this->orderTrade->alipayFundAuth($params);
+        return $res;
         if(!$res){
             return apiResponse([],ApiStatus::CODE_50004);
         }

@@ -301,13 +301,18 @@ class SkuComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump('创建goods...');
+
         $data = $this->componnet->getDataSchema();
         //var_dump($data);die;
         $userId =$this->componnet->getOrderCreater()->getUserComponnet()->getUserId();
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $goodsRepository = new OrderGoodsRepository();
         foreach ($data['sku'] as $k=>$v){
+            $goodsArr[] = [
+                'sku_id'=>$v['sku_id'],
+                'spu_id'=>$v['spu_id'],
+                'num'=>$v['sku_num']
+            ];
             for($i=0;$i<$v['sku_num'];$i++){
                 $goodsData =[
                     'goods_name'=>$v['spu_name'],
@@ -370,8 +375,13 @@ class SkuComponnet implements OrderCreater
 
         /**
          * 在这里要调用减少库存方法
+         *
          */
-        var_dump("别忘了减少库存");
+        $b =Goods::reduceStock(config('tripartite.Interior_Goods_Request_data'),$goodsArr);
+        if(!$b){
+            $this->getOrderCreater()->setError("减少库存失败");
+            return false;
+        }
 
         return true;
     }

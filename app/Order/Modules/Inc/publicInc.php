@@ -1,32 +1,16 @@
 <?php
-
 /**
- * ReletStatus 续租状态
- *
- * @author wangjinlin
+ * PhpStorm
+ * @access public (访问修饰符)
+ * @author wuhaiyan <wuhaiyan@huishoubao.com>
+ * @copyright (c) 2017, Huishoubao
  */
 
 namespace App\Order\Modules\Inc;
 
 
-class ReletStatus {
-
-    //--------------------------------------------------------------------------------------------
-    //--+ 续租状态 --------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------
-    /**
-     * @var int 1创建
-     */
-    const STATUS1 = 1;
-    /**
-     * @var int 2完成
-     */
-    const STATUS2 = 2;
-    /**
-     * @var int 3取消
-     */
-    const STATUS3 = 3;
-
+class publicInc
+{
     //--------------------------------------------------------------------------------------------
     //--+ 长租租期 --------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
@@ -83,6 +67,21 @@ class ReletStatus {
         ];
     }
 
+    public static function getCangzuRow($n){
+        $row = [
+            self::CHANGZU3=>true,
+            self::CHANGZU6=>true,
+            self::CHANGZU9=>true,
+            self::CHANGZU12=>true,
+        ];
+        return $row[$n];
+    }
+
+    /**
+     * 获取短租天数选项
+     *
+     * @return array
+     */
     public static function getDuanzuList(){
         return [
             self::DUANZU3,
@@ -92,29 +91,32 @@ class ReletStatus {
         ];
     }
 
+    public static function getDuanzuRow($n){
+        $row = [
+            self::DUANZU3=>true,
+            self::DUANZU7=>true,
+            self::DUANZU15=>true,
+            self::DUANZU30=>true,
+        ];
+        return $row[$n];
+    }
 
-    /*
-     * 类型转换汉字
+    /**
+     * 根據周期返回相应天数
+     * @param $zuqi
+     * @return int
      */
-//    public static function get_coupon_type_name(int $num):string {
-//        $type_arr = [
-//            self::CouponTypeFixed=>'固定金额',
-//            self::CouponTypePercentage=>'租金百分比',
-//            self::CouponTypeFirstMonthRentFree=>'首月0租金',
-//            self::CouponTypeDecline=>'租金递减类型',
-//        ];
-//        return $type_arr[$num];
-//    }
-
-    /*
-     * 转换状态
-     */
-//    public static function get_coupon_status_name(int $num):string {
-//        $name_arr = [
-//            self::CouponStatusNotUsed=>'未使用',
-//            self::CouponStatusAlreadyUsed=>'已使用',
-//        ];
-//        return $name_arr[$num];
-//    }
-
+    public static function calculateDay($zuqi){
+        $day = 0;
+        if($zuqi ==self::CHANGZU3){
+            $day = 90;
+        }else if($zuqi ==self::CHANGZU6){
+            $day = 180;
+        }else if($zuqi == self::CHANGZU9){
+            $day = 270;
+        }else{
+            $day =365;
+        }
+        return $day;
+    }
 }

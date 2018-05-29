@@ -19,62 +19,6 @@ use App\Lib\Common\LogApi;
 class WithholdController extends Controller
 {
 
-    /**
-     *  签约代扣接口
-     * @request Array
-     * [
-     *      'front_url'         => '' 【必须】String 前端回跳地址
-     * ]
-     * @return mixed false：失败；array：成功
-     * [
-     *		'url' => '',//签约跳转url地址
-     * ]
-     */
-    public function sign(Request $request){
-        $params     = $request->all();
-        $appid      = $request['appid'];
-        // 参数过滤
-        $rules = [
-            'front_url'         => 'required',  //前端跳转地址
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
-        }
-        $params = $params['params'];
-
-        // 获取渠道ID
-        $ChannelInfo = \App\Lib\Channel\Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
-        if (!is_array($ChannelInfo)) {
-            return apiResponse([], ApiStatus::CODE_10102, "channel_id 错误");
-        }
-        $channelId = intval($ChannelInfo['_channel']['id']);
-
-
-        // 创建第支付方式
-        $data = [
-            'businessType'  => \App\Order\Modules\Inc\OrderStatus::OrderWaitPaying, //暂留
-            'businessNo'    => createNo(),
-        ];
-        $payment = \App\Order\Modules\Repository\Pay\PayCreater::createWithhold($data);
-
-
-        // 获取URL地址
-        $subject = "签署代扣协议";
-        $urlData = [
-            'name'			=> $subject,	            // 交易名称
-	 		'front_url'		=> $params['front_url'],	// 前端回跳地址
-        ];
-        $url = $payment->getCurrentUrl($channelId,$urlData);
-
-        if(!$url){
-            return apiResponse([], ApiStatus::CODE_71008, "获取签约代扣URL地址失败");
-        }
-
-        return apiResponse(['url'=>$url['withholding_url']],ApiStatus::CODE_0,"success");
-    }
-
-
     /*
      * 代扣协议查询
      * @param array $request
@@ -223,7 +167,6 @@ class WithholdController extends Controller
      */
     public function createpay(Request $request){
         $params     = $request->all();
-
         $rules = [
             'instalment_id'     => 'required|int',
             'remark'            => 'required',
@@ -410,29 +353,30 @@ class WithholdController extends Controller
             }
 
             //发送短信
-            SmsApi::sendMessage($data_sms['mobile'], 'hsb_sms_b427f', $data_sms);
+            $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+            $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $data_sms['mobile'], "InstalmentWithhold");
+
+            $orderNoticeObj->notify($data_sms);
 
             //发送消息通知
             //通过用户id查询支付宝用户id
-
-//            $MessageSingleSendWord = new \alipay\MessageSingleSendWord($alipayUserId);
-//            //查询账单
-//            $year = substr($instalment_info['term'], 0, 4);
-//            $month = substr($instalment_info['term'], -2);
-//            $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
-//            $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
-//            $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
-//            $messageArr = [
-//                'amount' => $amount,
-//                'bill_type' => '租金',
-//                'bill_time' => $year . '年' . $month . '月1日' . '-' . $y . '年' . $m . '月' . $d . '日',
-//                'pay_time' => date('Y-m-d H:i:s'),
-//            ];
-//            $b = $MessageSingleSendWord->PaySuccess($messageArr);
-//            if ($b === false) {
-//                \zuji\debug\Debug::error(Location::L_Trade, '发送消息通知PaySuccess', $MessageSingleSendWord->getError());
-//                return;
-//            }
+            $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($alipayUserId);
+            //查询账单
+            $year = substr($instalmentInfo['term'], 0, 4);
+            $month = substr($instalmentInfo['term'], -2);
+            $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
+            $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
+            $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
+            $messageArr = [
+                'amount' => $amount,
+                'bill_type' => '租金',
+                'bill_time' => $year . '年' . $month . '月1日' . '-' . $y . '年' . $m . '月' . $d . '日',
+                'pay_time' => date('Y-m-d H:i:s'),
+            ];
+            $b = $MessageSingleSendWord->PaySuccess($messageArr);
+            if ($b === false) {
+                Log::error("发送消息通知错误-" . $MessageSingleSendWord->getError());
+            }
 
             // 提交事务
             DB::commit();
@@ -574,11 +518,10 @@ class WithholdController extends Controller
                 'zuJin' => $amount,
             ];
 
-            //判断支付方式
+            //判断支付方式 小程序
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
 
             } else {
-
                 // 支付宝用户的user_id
                 $alipayUserId = $withholdInfo['out_withhold_no'];
                 if (!$alipayUserId) {
@@ -621,29 +564,31 @@ class WithholdController extends Controller
                 }
 
                 //发送短信
-                SmsApi::sendMessage($dataSms['mobile'], 'hsb_sms_b427f', $dataSms);
+                $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+                $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $data_sms['mobile'], "InstalmentWithhold");
+
+                $orderNoticeObj->notify($data_sms);
+
 
                 //发送消息通知
                 //通过用户id查询支付宝用户id
-
-//            $MessageSingleSendWord = new \alipay\MessageSingleSendWord($alipay_user_id);
-//            //查询账单
-//            $year = substr($instalment_info['term'], 0, 4);
-//            $month = substr($instalment_info['term'], -2);
-//            $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
-//            $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
-//            $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
-//            $message_arr = [
-//                'amount' => $amount,
-//                'bill_type' => '租金',
-//                'bill_time' => $year . '年' . $month . '月1日' . '-' . $y . '年' . $m . '月' . $d . '日',
-//                'pay_time' => date('Y-m-d H:i:s'),
-//            ];
-//            $b = $MessageSingleSendWord->PaySuccess($message_arr);
-//            if ($b === false) {
-//                \zuji\debug\Debug::error(Location::L_Trade, '发送消息通知PaySuccess', $MessageSingleSendWord->getError());
-//                return;
-//            }
+                $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($alipayUserId);
+                //查询账单
+                $year = substr($instalmentInfo['term'], 0, 4);
+                $month = substr($instalmentInfo['term'], -2);
+                $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
+                $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
+                $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
+                $messageArr = [
+                    'amount' => $amount,
+                    'bill_type' => '租金',
+                    'bill_time' => $year . '年' . $month . '月1日' . '-' . $y . '年' . $m . '月' . $d . '日',
+                    'pay_time' => date('Y-m-d H:i:s'),
+                ];
+                $b = $MessageSingleSendWord->PaySuccess($messageArr);
+                if ($b === false) {
+                    Log::error("发送消息通知错误-" . $MessageSingleSendWord->getError());
+                }
             }
             // 提交事务
             DB::commit();

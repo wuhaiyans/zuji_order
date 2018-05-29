@@ -3,6 +3,7 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 
 /**
  * OrderCreated
@@ -35,16 +36,25 @@ class OrderCreate implements ShortMessage {
 		if( !$order_info ){
 			return false;
 		}
+
+        $goods =OrderRepository::getGoodsListByOrderId($this->business_no);
+		if(!$goods){
+		    return false;
+        }
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
 		
 		// 短息模板
-		$code = Config::getCode($channelId, __CLASS__);
+		$code = Config::getCode($order_info['channel_id'], __CLASS__);
 		if( !$code ){
 			return false;
 		}
 		
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, [
-			'order_no' => '',
+            'goodsName' => $goodsName,    // 传递参数
 		]);
 	}
 	

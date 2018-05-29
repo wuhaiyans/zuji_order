@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use App\Lib\Curl;
 
 class TestController extends Controller
 {
@@ -21,33 +22,30 @@ class TestController extends Controller
     public function test()
     {
 
-        $inputFileName = storage_path('app') . '/world.xlsx';
-        $helper = new Sample();
 
-        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
-        $spreadsheet = IOFactory::load($inputFileName);
-        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        var_dump($sheetData);
-
-
-
-
-//        $a = Receive::create(1, 1, [
-//                [
-//                    'serial_no' => 1,
-//                    'quantity'  => 1,
-//                    'imei'      => 1234
-//                ],
-//            [
-//                'serial_no' => 1,
-//                'quantity'  => 1,
-//                'imei'      => 1234
-//            ],
+        $this->testReceive();
+//        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
 //
-//            ]);
-//
-//
-//        dd($a);
+//        var_dump($a);
+
+
+        //换货 发货测试
+//        Delivery::createDelivery([
+//            'order_no'=>123333,
+//            'realname' => '张三',
+//            'mobile' => '手机号',
+//            'address_info' => '收货地址',
+//            'goods'=> [
+//                ['goods_no'=> 123],
+//                ['goods_no'=> 456]
+//        ]]);
+
+
+        //新订单发货
+//        $a = Delivery::apply('A511125156960043');
+
+
+
     }
 
 
@@ -108,6 +106,36 @@ class TestController extends Controller
 //		
 //		
 //	}
+
+
+    public function testReceive()
+    {
+        $base_api = config('api.warehouse_api_uri');
+
+        $res = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.receive',//模拟
+            'params' => json_encode(['delivery_no'=>'201805281926104525', 'receive_type'=>2])
+        ]);
+
+        $res = json_decode($res, true);
+
+
+        dd($res);
+    }
+
+
+    public function excel()
+    {
+        $inputFileName = storage_path('app') . '/world.xlsx';
+        $helper = new Sample();
+
+        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
+        $spreadsheet = IOFactory::load($inputFileName);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        var_dump($sheetData);
+    }
 	
 	public function test_alipay_url(){
 		

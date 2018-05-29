@@ -10,6 +10,7 @@ namespace App\Lib\Warehouse;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 /**
  * Class Delivery
@@ -17,21 +18,86 @@ use App\Lib\Order\OrderInfo;
  */
 class Delivery
 {
+    use ValidatesRequests;
 
+    const SESSION_ERR_KEY = 'warehouse.delivery.errors';
 
     /*
-    *
     * 用户换货，发货
-    * array('order_no'=>'2312123','goods_no'=>'sdfsfsdfsd','imei'=>"wdew")
+    * array(
+    * 'order_no'=>'2312123', //必须
+    * 'goods'=>[ //必须
+    *  [
+    *      'goods_no' => 'abcde123xx1'//必须
+    * ],
+    *  [
+    *      'goods_no' => 'abcde123xx1'
+    * ],
+    * ],//必须
+    * 'realname'=>'张三',//可不填
+    * 'mobile=>'18588884444',//可不填
+    * 'address_info=>'北京昌平某地址',//可不填
+    * )
+    *
+    *
+    * 例:Delivery::createDelivery([
+        'order_no'=>123333,
+        'realname' => '张三',
+        'mobile' => '手机号',
+        'address_info' => '收货地址',
+        'goods'=> [
+            ['goods_no'=> 123],
+            ['goods_no'=> 456]
+    ]]);
+    *
+    *
     */
     public  static function createDelivery($params){
-        return true;
+        $base_api = config('tripartite.warehouse_api_uri');
 
+        $rules = [
+            'order_no' => 'required',
+            'goods' => 'required'
+        ];
+
+        $validator = app('validator')->make($params, $rules);
+
+        if ($validator->fails()) {
+            session()->flash(self::SESSION_ERR_KEY, $validator->errors()->first());
+            return false;
+        }
+
+        $data = [
+            'order_no' => $params['order_no'],
+            'customer' => isset($params['realname']) ? $params['realname'] : '',
+            'customer_mobile' => isset($params['mobile']) ? $params['mobile'] : '',
+            'customer_address' => isset($params['address_info']) ? $params['address_info'] : '',
+            'delivery_detail' => $params['goods']
+        ];
+
+        $postData = array_merge(self::getParams(),[
+            'method'=> 'warehouse.delivery.deliveryCreate',//模拟
+            'params' => json_encode($data)
+        ]);
+
+        $res= Curl::postArray($base_api, $postData);
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+        return true;
     }
+
+
+
+
     /**
      * 订单请求 发货申请
      *
-     * @param string $order_no 订单号
+     * @param string $order_no 订单号, 根据订单号获取商品数据
      * @return boolean
      */
     public static function apply($order_no)
@@ -40,12 +106,10 @@ class Delivery
 
         $info = self::getOrderDetail($order_no);
 
-        $res= Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
+        $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.send',//模拟
             'params' => json_encode($info)
-        ]);
+        ]));
          return true;
     }
 
@@ -58,12 +122,19 @@ class Delivery
     {
         $base_api = config('api.warehouse_api_uri');
 
-        return Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
+        $res = Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.cancel',//模拟
             'params' => json_encode(['order_no'=>$order_no])
-        ]);
+        ]));
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -82,8 +153,6 @@ class Delivery
     public static function receive($orderNo, $role)
     {
         return \App\Lib\Order\Delivery::receive($orderNo, $role);
-
-
     }
 
 
@@ -110,6 +179,17 @@ class Delivery
     {
         $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
         return $info;
+    }
+
+
+
+
+    public static function getParams()
+    {
+        return [
+            'appid'=> 1,
+            'version' => 1.0,
+        ];
     }
 
 }

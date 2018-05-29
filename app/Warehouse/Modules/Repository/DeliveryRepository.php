@@ -50,7 +50,10 @@ class DeliveryRepository
             'order_no' => $data['order_no'],
             'status' => Delivery::STATUS_INIT,
             'create_time' => $time,
-            'app_id' => $data['app_id']
+            'app_id' => $data['app_id'],
+            'customer' => isset($data['customer']) ? $data['customer'] : '',
+            'customer_mobile' => isset($data['customer_mobile']) ? $data['customer_mobile'] : '',
+            'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : '',
         ];
 
         try {
@@ -66,6 +69,7 @@ class DeliveryRepository
             DB::rollBack();
 
             throw new \Exception($e->getMessage());
+
             return false;
         }
 
@@ -85,9 +89,9 @@ class DeliveryRepository
         foreach ($data as $k=>$val){
             $row = [
                 'delivery_no'   =>  $delivery_no,
-                'serial_no'     =>  $val['serial_no'],
+//                'serial_no'     =>  $val['serial_no'],
                 'goods_no'      =>  $val['goods_no'],
-                'quantity'      =>  $val['quantity'],
+                'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
                 'status_time'   =>  $time
             ];
@@ -256,7 +260,7 @@ class DeliveryRepository
      *
      * 收货操作
      */
-    public static function receive($delivery_no, $auto=false)
+    public static function receive($delivery_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
         $model = Delivery::find($delivery_no);
 
@@ -265,8 +269,11 @@ class DeliveryRepository
         }
         $model->status = Delivery::STATUS_RECEIVED;
         $model->status_time = time();
-        $model->is_auto = (int)$auto;
-        return $model->update();
+        $model->receive_type = (int)$receive_type;
+
+        $model->update();
+
+        return $model->toArray();
     }
 
 

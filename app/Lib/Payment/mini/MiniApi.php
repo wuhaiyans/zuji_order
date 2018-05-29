@@ -34,7 +34,7 @@ class MiniApi {
      */
     public static function withhold( $params ){
         $params['order_operate_type'] = self::$INSTALLMENT;
-        $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
+        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b == false){
             self::$error = $CommonMiniApi->getError();
@@ -58,7 +58,7 @@ class MiniApi {
      * ]
      */
     public static function OrderClose( $params ){
-        $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
+        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
         $params['order_operate_type'] = self::$FINISH;
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
@@ -82,7 +82,7 @@ class MiniApi {
      */
     public static function OrderCancel( $params ){
         $params['order_operate_type'] = self::$CANCEL;
-        $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi($params['app_id']);
+        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
             self::$error = $CommonMiniApi->getError();

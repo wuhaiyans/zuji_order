@@ -11,6 +11,7 @@ use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Modules\Inc;
+use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
@@ -154,15 +155,7 @@ class OrderOperate
 
     }
     private static function calculateEndTime($beginTime, $zuqi){
-        $day = 0;
-
-        if($zuqi ==12){
-            $day = 365;
-        }else if($zuqi ==6){
-            $day = 180;
-        }else{
-            $day = 90;
-        }
+        $day = Inc\publicInc::calculateDay($zuqi);
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }

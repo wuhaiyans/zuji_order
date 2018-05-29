@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Payment\mini\sdk;
+namespace App\Lib\AlipaySdk\sdk;
 
 use App\Lib\Payment\mini\sdk\aop\AopClient;
 

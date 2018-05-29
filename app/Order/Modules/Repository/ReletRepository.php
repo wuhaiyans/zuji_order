@@ -9,6 +9,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderRelet;
+use App\Order\Modules\Inc\ReletStatus;
 use Illuminate\Support\Facades\DB;
 
 class ReletRepository
@@ -85,6 +86,23 @@ class ReletRepository
     }
 
     /**
+     * 获取用户未完成续租列表(前段)
+     *
+     * @param $params[
+     *      user_id 用户ID
+     *      status 状态
+     * ]
+     * @return array
+     */
+    public function getUserList($params){
+        return OrderRelet::query()->where([
+            ['user_id','=',$params['user_id']],
+            ['status','=',ReletStatus::STATUS1],
+        ])->get()->toArray();
+
+    }
+
+    /**
      * 通过ID获取一条记录
      *
      * @params[
@@ -131,11 +149,8 @@ class ReletRepository
      * @param $params
      * @return bool
      */
-    public function createRelet($params){
-        $time = time();
-        $params['create_time'] = $time;
-        $params['status'] = 1;
-        return $this->orderRelet->save($params);
+    public function createRelet($data){
+        return $this->orderRelet->save($data);
     }
 
 }

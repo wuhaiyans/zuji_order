@@ -33,6 +33,9 @@ $api->version('v1', [
 
         $api->post('user', 'UserController@me') //获取用户信息接口
             ->name('api.user.show');
+        // 支付测试
+        $api->get('testpay', 'AlipayController@test');
+
 
         // 代扣扣款回调
         $api->post('createpayNotify', 'WithholdController@createpayNotify');

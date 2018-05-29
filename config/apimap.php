@@ -130,16 +130,36 @@ return [
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
     //审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
+    //退货退款
+    'api.Return.refundMoney'       => 'ReturnController@refundMoney',
+    //发起退款创建清单
+    'api.Return.refundTo'       => 'ReturnController@refundTo',
+    //发起换货
+    'api.Return.exchangeGoods'       => 'ReturnController@exchangeGoods',
+    //退款成功回调
+    'api.Return.refundUpdate'       => 'ReturnController@refundUpdate',
+    //客户退换货已发货发起通知
+    'api.Return.userReceive'       => 'ReturnController@userReceive',
+    //用户换货成功回调
+    'api.Return.updateOrder'       => 'ReturnController@updateOrder',
 
+    //检测状态更改
+    'api.Return.isQualified'       => 'ReturnController@isQualified',
+   //获取所有待审核的退换货信息
+    'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
     //续租接口
     // 续租页
     'api.Relet.pageRelet'       => 'ReletController@pageRelet',
     // 续租详情
     'api.Relet.detailsRelet'       => 'ReletController@detailsRelet',
-    // 续租列表
+    // 续租列表(后台)
     'api.Relet.listRelet'       => 'ReletController@listRelet',
     // 取消续租
     'api.Relet.cancelRelet'       => 'ReletController@cancelRelet',
+    // 获取未完成续租列表(用户)
+    'api.Relet.userListRelet'       => 'ReletController@userListRelet',
+    // 创建续租(支付)
+    'api.Relet.createRelet'       => 'ReletController@createRelet',
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
