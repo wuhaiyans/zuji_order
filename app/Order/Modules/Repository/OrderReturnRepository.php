@@ -650,7 +650,7 @@ class OrderReturnRepository
         if(empty($params['order_no'])){
             return false;
         }
-        $user_result= Order::where('order_no','=',$params['order_no'])->first()->toArray();
+        $user_result= OrderUserInfo::where('order_no','=',$params['order_no'])->first()->toArray();
         if(!$user_result){
             return false;
         }

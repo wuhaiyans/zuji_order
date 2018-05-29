@@ -14,6 +14,14 @@ class Delivery extends Warehouse
     const STATUS_REFUSE     = 5;//拒签
     const STATUS_CANCEL     = 6;//已取消
 
+
+
+    const RECEIVE_TYPE_ADMIN = 1;//管理员
+    const RECEIVE_TYPE_USER = 2;//用户
+    const RECEIVE_TYPE_SYSTEM = 3;//系统自动化
+    const RECEIVE_TYPE_STORE = 4;//线下门店
+
+
     public $incrementing = false;
 
 //    $timestamps=false时，没有用
@@ -21,8 +29,29 @@ class Delivery extends Warehouse
 //    const UPDATED_AT = 'update_time';
 
     protected $table = 'zuji_delivery';
-
     protected $primaryKey='delivery_no';
+
+    public static function receiveTypes($type = null)
+    {
+        $t = [
+          self::RECEIVE_TYPE_ADMIN => '管理员',
+          self::RECEIVE_TYPE_USER  => '客户',
+          self::RECEIVE_TYPE_SYSTEM=> '系统',
+          self::RECEIVE_TYPE_STORE => '线下门店'
+        ];
+
+        if ($type === null) {
+            return $t;
+        }
+
+        return isset($t[$type]) ? $t[$type] : '';
+    }
+
+    public function getReceiveType()
+    {
+        return self::receiveTypes($this->receive_type);
+    }
+
 
     /**
      * @var array
@@ -36,7 +65,7 @@ class Delivery extends Warehouse
         'status_time',
         'app_id',
         'customer',
-        'is_auto',
+        'receive_type',
         'customer_mobile',
         'customer_address',
         'logistics_no',

@@ -235,7 +235,7 @@ class OrderOperate
 
             }
 
-            if ($success || empty($orderGoods)) {
+            if (!$success || empty($orderGoods)) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }

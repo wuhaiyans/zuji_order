@@ -26,7 +26,7 @@ class Delivery
 
     public static function receive($orderNo,$role)
     {
-        $base_api = config('tripartitle.API_INNER_URL');
+        $base_api = config('tripartite.API_INNER_URL');
         $params['order_no'] =$orderNo;
         $params['role'] =$role;
 
@@ -44,7 +44,7 @@ class Delivery
 
     public static function user_receive($params)
     {
-        $base_api = config('tripartitle.API_INNER_URL');
+        $base_api = config('tripartite.API_INNER_URL');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
@@ -72,7 +72,7 @@ class Delivery
      */
     public static function delivery($params)
     {
-        $base_api = config('tripartitle.API_INNER_URL');
+        $base_api = config('tripartite.API_INNER_URL');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,

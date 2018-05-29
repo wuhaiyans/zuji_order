@@ -14,13 +14,36 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use App\Lib\Curl;
 
 class TestController extends Controller
 {
 
     public function test()
     {
-        Delivery::createDelivery(['order_no'=>123333, 'goods_no'=> 12122]);
+
+
+        $this->testReceive();
+//        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
+//
+//        var_dump($a);
+
+
+        //换货 发货测试
+//        Delivery::createDelivery([
+//            'order_no'=>123333,
+//            'realname' => '张三',
+//            'mobile' => '手机号',
+//            'address_info' => '收货地址',
+//            'goods'=> [
+//                ['goods_no'=> 123],
+//                ['goods_no'=> 456]
+//        ]]);
+
+
+        //新订单发货
+//        $a = Delivery::apply('A511125156960043');
+
 
 
     }
@@ -83,6 +106,24 @@ class TestController extends Controller
 //		
 //		
 //	}
+
+
+    public function testReceive()
+    {
+        $base_api = config('api.warehouse_api_uri');
+
+        $res = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.receive',//模拟
+            'params' => json_encode(['delivery_no'=>'201805281926104525', 'receive_type'=>2])
+        ]);
+
+        $res = json_decode($res, true);
+
+
+        dd($res);
+    }
 
 
     public function excel()
