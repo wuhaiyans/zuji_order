@@ -19,36 +19,35 @@ class Receive
      * 创建待收货
      * type 类型:退 换 还 ...
      *
-     *   order_no
-     *   data=[
+     * order_no
+     * data=[
      *      [
      *          serial_no 【可选】
-     *          goods_no 【必须】
-     *          quantity 【必须】
+     *          goods_no 【必须】 //商品编号
+     *          quantity 【必须】 //商品数量
      *          imei  【可以没有】
      *      ]
      *  ]
-     *
-     *
-     *
      */
     public static function create($order_no, $type, $data)
     {
         $receive_detail = [];
 
-        $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
-        $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
+//        $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
+//        $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
+//
+//        $detail = $data['receive_detail'];
 
-        $detail = $data['receive_detail'];
+        $detail = $data;
 
         if (is_array($detail)) {
             foreach ($detail as $d) {
                 if (!$d['serial_no'] || !$d['quantity']) continue;
                 
                 $receive_detail[] = [
-                    'serial_no' => $d['serial_no'],//可以不传
+                    'serial_no' => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
                     'goods_no'  => $d['goods_no'],
-                    'quantity'  => $d['quantity'],
+                    'quantity'  => isset($d['quantity']) ? $d['quantity'] : 1,
                     'imei'      => isset($d['imei']) ? $d['imei'] : ''
                 ];
             }
@@ -57,8 +56,8 @@ class Receive
         $result = [
             'order_no' => $order_no,
             'receive_detail' => $receive_detail,
-            'logistics_id' => $logistics_id,
-            'logistics_no' => $logistics_no,
+//            'logistics_id' => $logistics_id,
+//            'logistics_no' => $logistics_no,
             'type' => $type
         ];
 
@@ -93,7 +92,40 @@ class Receive
 
      * ]
      */
+    /**
+     * 更新物流信息
+     *
+     * @param $params string 订单信息 【必须】
+        $params = [
+            'order_no' => '123444',
+            'logistics_id' => 1,
+            'logistics_no' => 123,
+            'goods_info' => [
+                [
+                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                ],
+                [
+                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                ],
+                [
+                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                ],
+            ]
+        ];
+     *
+     *
+     *
+     *
+     *
+     * @return bool
+     *
+     *
+     */
     public function updateLogistics($params){
+
+
+
+
         return true;
     }
     /**
