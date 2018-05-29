@@ -25,8 +25,8 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => 'var_dump',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => 'var_dump',
-		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => 'var_dump',
+		// 业务类型为【还机】4的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback\callbackPayment',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => 'var_dump',
 
@@ -35,7 +35,9 @@ return [
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'2' => '\App\Lib\Refund\Refund\refundUpdate'
+		'2' => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为【还机】4的清算回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback\callbackClearing',
 
 	],
 ];
