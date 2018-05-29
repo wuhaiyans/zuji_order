@@ -198,7 +198,7 @@ class OrderGiveback
 	 * 还机单支付完成回调接口
 	 * @param Request $request
 	 */
-	public function callbackPayment( $params ) {
+	public static function callbackPayment( $params ) {
 		//参数过滤
         $rules = [
             'business_type'     => 'required',//业务类型
