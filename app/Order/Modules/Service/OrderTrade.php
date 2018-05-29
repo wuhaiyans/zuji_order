@@ -190,7 +190,7 @@ class OrderTrade
                     'businessNo'	=> $data['order_no'],
 
                     'paymentNo' => $orderInfo['trade_no'],
-                    'paymentAmount' => $amount,
+                    'paymentAmount' => 0.01,
                     'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
                     'paymentFenqi'	=> $fenqi,
                 ]);
