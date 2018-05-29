@@ -313,4 +313,42 @@ class MiniOrderController extends Controller
         }
     }
 
+    /**
+     * 小程序取消订单（解冻预授权 解约代扣）
+     * $params = [
+     *   'order_no'=>'',
+     *   'remark'=>'',
+     * ]
+     */
+    public function miniOrderCancel(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        //查询芝麻订单
+        $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($params['order_no']);
+        if( empty($result) ){
+            return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
+        }
+        //发送取消请求
+        $data = [
+            'out_order_no'=>$result['out_order_no'],//商户端订单号
+            'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
+            'remark'=>$params['remark'],//订单操作说明
+            'app_id'=>$result['notify_app_id'],//小程序appid
+        ];
+        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+        if($b === false){
+            return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+    }
+
 }
