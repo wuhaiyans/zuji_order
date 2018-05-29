@@ -263,7 +263,7 @@ class WithholdController extends Controller
         $orderGoods = New \App\Order\Modules\Service\OrderGoods();
         $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
         if(!$goodsInfo){
-            return false;
+            return apiResponse([], ApiStatus::CODE_71001, '产品信息错误');
         }
 
         //扣款要发送的短信
@@ -337,7 +337,6 @@ class WithholdController extends Controller
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
-
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
@@ -503,7 +502,8 @@ class WithholdController extends Controller
             $orderGoods = New \App\Order\Modules\Service\OrderGoods();
             $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
             if(!$goodsInfo){
-                return false;
+                Log::error("产品信息错误");
+                continue;
             }
 
             //扣款要发送的短信
@@ -517,7 +517,31 @@ class WithholdController extends Controller
 
             //判断支付方式 小程序
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
-
+                //获取订单的芝麻订单编号
+                $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
+                if( empty($miniOrderInfo) ){
+                    \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$params['order_no']);
+                    return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
+                }
+                //芝麻小程序扣款请求
+                $params['out_order_no'] = $miniOrderInfo['out_order_no'];
+                $params['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+                //扣款交易号
+                $params['out_trans_no'] = $tradeNo;
+                $params['pay_amount'] = $amount;
+                $params['remark'] = $subject;
+                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $params );
+                //判断请求发送是否成功
+                if($pay_status == 'PAY_SUCCESS'){
+                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+                }elseif($pay_status =='PAY_FAILED'){
+                    OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                }elseif($pay_status == 'PAY_INPROGRESS'){
+                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                }else{
+                    return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
+                }
             } else {
                 // 支付宝用户的user_id
                 $alipayUserId = $withholdInfo['out_withhold_no'];
