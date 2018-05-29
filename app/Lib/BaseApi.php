@@ -44,7 +44,6 @@ class BaseApi {
 		//-+--------------------------------------------------------------------
 		// | 失败处理
 		//-+--------------------------------------------------------------------
-		$status = $response->getStatus();
-		throw new \Exception($status->getMsg(),$status->getCode());
+		throw new ApiException($response);
 	}
 }

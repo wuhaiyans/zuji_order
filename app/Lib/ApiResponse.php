@@ -22,6 +22,8 @@ class ApiResponse {
 	private $code = ApiStatus::CODE_50000;
 	private $msg = '';
 	private $data = '';
+	
+	private $originalValue = '';
 
 	/**
 	 * 构造函数，初始化当前响应对象
@@ -30,6 +32,7 @@ class ApiResponse {
 	 */
 
 	public function __construct($jsonStr = '') {
+		$this->originalValue = $jsonStr;
 		$status = new ApiStatus();
 		$status->success(); // 默认为成功状态
 		$this->status = $status;
@@ -123,6 +126,10 @@ class ApiResponse {
 	 */
 	public function getData() {
 		return $this->data;
+	}
+	
+	public function getOriginalValue() {
+		return $this->originalValue;
 	}
 
 	/**
