@@ -23,11 +23,24 @@ class CouponComponnet implements OrderCreater
     private $sku;
 
 
-    public function __construct(OrderCreater $componnet, array $coupon=[])
+    public function __construct(OrderCreater $componnet, array $coupon=[],int $userId)
     {
         $this->componnet = $componnet;
         if(!empty($coupon)){
             //获取优惠券类型接口
+            foreach ($coupon as $k=>$v){
+                $couponData[]=[
+                    'user_id'=>$userId,
+                    'coupon_no'=>$v,
+                ];
+            }
+            //var_dump($couponData);die;
+            $coupon = Coupon::getCoupon($couponData);
+            $couponInfo =[];
+            foreach ($coupon as $k=>$v){
+                
+            }
+
             $couponInfo=[
                 0=>[
                     'coupon_id'=>"1",
