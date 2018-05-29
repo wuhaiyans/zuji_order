@@ -111,7 +111,7 @@ class OrderCreater
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
-            //DB::commit();
+            DB::commit();
 
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';

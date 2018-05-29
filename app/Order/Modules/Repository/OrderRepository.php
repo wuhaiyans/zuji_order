@@ -4,6 +4,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
+use App\Order\Models\OrderCoupon;
 use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
@@ -140,6 +141,21 @@ class OrderRepository
             $order =  Order::query()->where($whereArray)->first();
             if (!$order) return false;
             return $order->toArray();
+    }
+
+    /**
+     * 根据订单编号查询有关订单使用的优惠券
+     * @param $orderNo
+     * @return array|bool
+     */
+
+    public static function getCouponByOrderNo($orderNo){
+        if (empty($orderNo)) return false;
+        $orderCoupon =  OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get();
+        if (!$orderCoupon) return false;
+        return $orderCoupon->toArray();
     }
 
 
