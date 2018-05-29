@@ -175,7 +175,7 @@ class Delivery
      */
     public static function delivery($order_no, $goods_info)
     {
-      return \App\Lib\Order\Delivery::delivery($order_no, $goods_info);
+//      return \App\Lib\Order\Delivery::delivery($order_no, $goods_info);
     }
 
     /**
