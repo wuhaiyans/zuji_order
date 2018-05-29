@@ -22,15 +22,16 @@ class InstalmentWithhold implements ShortMessage {
         $this->business_no = $business_no;
     }
 
-    public function getCode(){
-        return Config::getCode($this->order_info['appid'], __CLASS__);
+    public function getCode($channel_id){
+        $class =basename(str_replace('\\', '/', __CLASS__));
+        return Config::getCode($channel_id, $class);
     }
 
     public function notify($data = ""){
         // 根据业务，获取短息需要的数据
 
         // 短息模板
-        $code = Config::getCode($this->business_type, "InstalmentWithhold");
+        $code = $this->getCode($this->business_type);
         if( !$code ){
             return false;
         }

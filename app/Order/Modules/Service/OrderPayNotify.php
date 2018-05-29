@@ -13,6 +13,7 @@ use App\Http\Requests\Request;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Contracts\Logging\Log;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Debug\Debug;
@@ -53,6 +54,8 @@ class OrderPayNotify
             }
              $orderInfo = OrderRepository::getOrderInfo(['order_no' => $orderNo]);
             //发送支付成功短信
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
+            $orderNoticeObj->notify();
             //发送支付宝推送消息
             //发送邮件 -----begin
             //        $data =[
