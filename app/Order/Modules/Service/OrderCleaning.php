@@ -64,7 +64,7 @@ class OrderCleaning
     public static function cancelOrderClean($param = array())
     {
         $success= OrderClearingRepository::cancelOrderClean($param);
-        return $success;
+        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_CODE_31203;
 
     }
 
@@ -79,7 +79,8 @@ class OrderCleaning
     {
 
         $success= OrderClearingRepository::upOrderCleanStatus($param);
-        return $success;
+        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_CODE_31202;
+
 
     }
 
@@ -108,7 +109,7 @@ class OrderCleaning
      * @param $param
      * @return bool
      */
-    public static function orderCleanOperate($param, MiniApi $miniApi)
+    public static function orderCleanOperate($param)
     {
         //查询清算表根据业务平台退款码out_refund_no
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);

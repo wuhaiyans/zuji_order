@@ -314,20 +314,20 @@ class OrderController extends Controller
     public function cancelOrder(Request $request)
     {
 
+        $params = $request->all();
+        $rule = [
+            'order_no'=> 'required'
+        ];
+
+        $validateParams = $this->validateParams($rule,  $params);
 
 
-//       $orderNo =  Service\OrderOperate::createOrderNo(1);
-//       dd($orderNo);
+        if ($validateParams['code']!=0) {
 
-        $params = $request->input('params');
-
-        $a = OrderInfo::getOrderInfo(array('order_no'=>$params['order_no']));
-
-        if (!isset($params['order_no']) || empty($params['order_no'])) {
-            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+            return apiResponse([],$validateParams['code']);
         }
 
-        $code = Service\OrderOperate::cancelOrder($params['order_no'], $params['user_id']=18);
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $params['user_id']=18);
 
         return apiResponse([],$code);
 
@@ -421,7 +421,7 @@ class OrderController extends Controller
 
 
                 $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
-                
+
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
 
