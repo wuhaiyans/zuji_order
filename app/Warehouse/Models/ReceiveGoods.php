@@ -40,7 +40,9 @@ class ReceiveGoods extends Warehouse
     protected $fillable = [
         'receive_no',
         'serial_no',
+        'goods_no',
         'quantity',
+        'goods_no',
         'goods_name',
         'quantity_delivered',
         'status',

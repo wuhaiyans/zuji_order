@@ -23,10 +23,11 @@ class TestController extends Controller
     {
 
 
+
 //        $this->testApply('A511125156960043');
 
-        $this->testSend('201805281944493333');
-//        $this->testReceive();
+//        $this->testSend('201805281944493333');
+        $this->testReceive();
 //        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
 //
 //        var_dump($a);
@@ -122,9 +123,9 @@ class TestController extends Controller
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.delivery.receive',//模拟
-            'params' => json_encode(['delivery_no'=>'201805281926104525', 'receive_type'=>2])
+            'params' => ['delivery_no'=>'201805281926104525', 'receive_type'=>2]
         ]);
-        dd($res);
+        p($res);
 
         $res = json_decode($res, true);
 
