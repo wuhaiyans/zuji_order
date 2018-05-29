@@ -41,3 +41,8 @@ Route::get('return/{action}', function(App\Order\Controllers\Api\v1\ReturnContro
 Route::any('order/giveback/{action}', function(App\Order\Controllers\Api\v1\GivebackController $index, $action){
     return $index->$action();
 });
+
+//下载文件 imeitpl imei模板文件
+Route::get('download/{action}', function(App\Http\Controllers\DownloadController $controller, $action){
+    return $controller->$action();
+});

@@ -159,23 +159,8 @@ class ReturnController extends Controller
             return apiResponse([], ApiStatus::CODE_20001,'已上传物流单号');
         }
         $ret = $this->OrderReturnCreater->upload_wuliu($params);
-        if(!$ret){
-            return apiResponse([], ApiStatus::CODE_33008, '上传物流失败');
-        }
-        //创建收货单
-        $data['logistics_id']=$return_info[0]->logistics_id;
-        $data['logistics_no']=$return_info[0]->logistics_no;
-        $data['receive_detail']['serial_no']=$return_info[0]->serial_number;
-        $data['receive_detail']['quantity']=$return_info[0]->quantity;
-        $data['receive_detail']['imei1']=$return_info[0]->imei1;
-        $data['receive_detail']['imei2']=$return_info[0]->imei2;
-        $data['receive_detail']['imei3']=$return_info[0]->imei3;
-        $create_res= Receive::create($ret['order_no'],$return_info[0]->business_key,$data);
-        if(!$create_res){
-            return apiResponse([], ApiStatus::CODE_34003, '创建收货单失败');
-        }
 
-        return apiResponse([], ApiStatus::CODE_0,'success');
+        return apiResponse([], $ret);
 
     }
 
@@ -232,7 +217,7 @@ class ReturnController extends Controller
         if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data'][0]);
+        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data']);
         return apiResponse([],$res);
     }
     /**
@@ -271,7 +256,7 @@ class ReturnController extends Controller
     /**
      * 退款成功更新退款状态
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     *
      */
     public function refundUpdate(Request $request){
         $orders =$request->all();
@@ -280,6 +265,7 @@ class ReturnController extends Controller
             'business_type'           =>'required',
             'business_no'     =>'required',
             'status'     =>'required',
+            'order_no'     =>'required',
         ]);
         if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
@@ -343,10 +329,10 @@ class ReturnController extends Controller
             'order_no'=> 'required',
         ]);
         if(count($param)<1){
-            return ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
         }
         if(empty($params['goods'])){
-            return  ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->exchangeGoods($params);
         return apiResponse([],$res);
@@ -408,8 +394,31 @@ class ReturnController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        $params['params']['status']=ReturnStatus::ReturnCreated;
         $res=$this->OrderReturnCreater->returnApplyList($params['params']);
-        return apiResponse([$res],ApiStatus::CODE_0);
+        return apiResponse($res,ApiStatus::CODE_0);
+    }
+
+    /**
+     * 点击换货获取此订单检测合格的数据
+     */
+    public function getExchange(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'business_key'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationSuccess;
+        $res=$this->OrderReturnCreater->returnApplyList($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0);
+
+
     }
 
 }

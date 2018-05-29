@@ -167,6 +167,7 @@ class WithholdController extends Controller
      */
     public function createpay(Request $request){
         $params     = $request->all();
+
         $rules = [
             'instalment_id'     => 'required|int',
             'remark'            => 'required',
@@ -266,7 +267,7 @@ class WithholdController extends Controller
         }
 
         //扣款要发送的短信
-        $data_sms =[
+        $dataSms =[
             'mobile'        => $userInfo['mobile'],
             'orderNo'       => $orderInfo['order_no'],
             'realName'      => $userInfo['realname'],
@@ -300,7 +301,7 @@ class WithholdController extends Controller
 //                showmessage('小程序扣款操作成功','null',1);
 //            }elseif($b =='PAY_FAILED'){
 //                $this->order_service->rollback();
-//                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$data_sms);
+//                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$dataSms);
 //                showmessage("小程序支付失败", 'null');
 //
 //            }elseif($b == 'PAY_INPROGRESS'){
@@ -340,20 +341,31 @@ class WithholdController extends Controller
                 'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
                 'user_id'       => $orderInfo['user_id'],//业务平台用户id
             ];
-            $withholding_b = $withholding->deduct($withholding_data);
-            if (!$withholding_b) {
+
+            try{
+                // 请求代扣接口
+                $withholding->deduct($withholding_data);
+
+            }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
-                if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $data_sms);
+
+                //捕获异常 买家余额不足
+                if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                    OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
                     return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
                 } else {
                     return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
                 }
+
             }
 
+
             //发送短信
-            SmsApi::sendMessage($data_sms['mobile'], 'hsb_sms_b427f', $data_sms);
+            $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+            $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $dataSms['mobile'], "InstalmentWithhold");
+
+            $orderNoticeObj->notify($dataSms);
 
             //发送消息通知
             //通过用户id查询支付宝用户id
@@ -374,6 +386,7 @@ class WithholdController extends Controller
             if ($b === false) {
                 Log::error("发送消息通知错误-" . $MessageSingleSendWord->getError());
             }
+
 
             // 提交事务
             DB::commit();
@@ -547,13 +560,18 @@ class WithholdController extends Controller
                     'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
                     'user_id'       => $orderInfo['user_id'],//业务平台用户id
                 ];
-                $withholding_b = $withholding->deduct($withholding_data);
 
-                if (!$withholding_b) {
+                try{
+                    // 请求代扣接口
+                    $withholding->deduct($withholding_data);
+
+                }catch(\Exception $exc){
+                    DB::rollBack();
                     \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
                     //修改扣款失败
                     OrderInstalment::save(['id'=>$instalmentId],['status'=>OrderInstalmentStatus::FAIL]);
-                    if (get_error() == "BUYER_BALANCE_NOT_ENOUGH" || get_error() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                    //捕获异常 买家余额不足
+                    if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                         OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
                         Log::error("买家余额不足");
                         continue;
@@ -561,7 +579,10 @@ class WithholdController extends Controller
                 }
 
                 //发送短信
-                SmsApi::sendMessage($dataSms['mobile'], 'hsb_sms_b427f', $dataSms);
+                $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
+                $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $dataSms['mobile'], "InstalmentWithhold");
+                $orderNoticeObj->notify($dataSms);
+
 
                 //发送消息通知
                 //通过用户id查询支付宝用户id
