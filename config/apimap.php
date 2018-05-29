@@ -146,6 +146,8 @@ return [
     'api.Return.isQualified'       => 'ReturnController@isQualified',
    //获取所有待审核的退换货信息
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
+    //获取订单检测合格的数据
+    'api.Return.getExchange'       =>'ReturnController@getExchange',
 
 
     //续租接口

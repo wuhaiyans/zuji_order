@@ -92,8 +92,6 @@ class Delivery
     }
 
 
-
-
     /**
      * 订单请求 发货申请
      *
@@ -104,13 +102,23 @@ class Delivery
     {
         $base_api = config('tripartite.warehouse_api_uri');
 
-        $info = self::getOrderDetail($order_no);
+        $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
+
+        dd($info);
 
         $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.send',//模拟
             'params' => json_encode($info)
         ]));
-         return true;
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -139,17 +147,18 @@ class Delivery
 
 
     /**
+     * ok
      * 确认收货接口
      * 接收反馈
-    *
+     *
      * @param string $order_no
-    * @param int $role  在 App\Lib\publicInc 中;
+     * @param int $role  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
      *  const Type_Store =4;//线下门店
      * @return
-        */
+     */
     public static function receive($orderNo, $role)
     {
         return \App\Lib\Order\Delivery::receive($orderNo, $role);
@@ -158,7 +167,7 @@ class Delivery
 
 
     /**
-     * 发货反馈
+     * 发货反馈 ok
      * @param $order_no string  订单编号 【必须】
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
@@ -177,20 +186,6 @@ class Delivery
     {
       return \App\Lib\Order\Delivery::delivery($order_no, $goods_info);
     }
-
-    /**
-     * 根据order_no取发货详细内容
-     * 直接调用订单那边提供的方法
-     *
-     * @param array $order_no 订单号
-     */
-    public static function getOrderDetail($order_no)
-    {
-        $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
-        return $info;
-    }
-
-
 
 
     public static function getParams()
