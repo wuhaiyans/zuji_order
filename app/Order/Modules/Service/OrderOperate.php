@@ -206,12 +206,12 @@ class OrderOperate
     public static function cancelOrder($orderNo,$userId='')
     {
         if (empty($orderNo)) {
-            return false;
+           return  ApiStatus::CODE_31001;
             }
         //查询订单的状态
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
 
-        if ($orderInfoData['order_status']!=Inc\OrderStatus::OrderWaitPaying)  return false;
+        if ($orderInfoData['order_status']!=Inc\OrderStatus::OrderWaitPaying)  return  ApiStatus::CODE_31007;
         //开启事物
         DB::beginTransaction();
         try {

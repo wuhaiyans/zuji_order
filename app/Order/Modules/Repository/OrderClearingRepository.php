@@ -158,8 +158,7 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
-        $whereArray[] = ['business_type', '=', $param['business_type']];
-        $whereArray[] = ['business_no', '=', $param['business_no']];
+        $whereArray[] = ['clean_no', '=', $param['clean_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
         $orderData->status  = OrderCleaningStatus::orderCleaningCancel;
