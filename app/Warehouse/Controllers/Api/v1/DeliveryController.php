@@ -52,7 +52,7 @@ class DeliveryController extends Controller
 
 
     /**
-     * 配货
+     * 单件配货
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -66,7 +66,7 @@ class DeliveryController extends Controller
          */
         $rules = [
             'delivery_no' => 'required', //单号
-            'serial_no'   => 'required', //序号
+            'goods_no'   => 'required', //序号
             'quantity'    => 'required', //数量
         ];
         $params = $this->_dealParams($rules);

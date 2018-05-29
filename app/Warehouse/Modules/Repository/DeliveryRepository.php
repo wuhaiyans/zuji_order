@@ -181,7 +181,7 @@ class DeliveryRepository
             DB::beginTransaction();
 
             $delivery_no = $params['delivery_no'];
-            $serial_no   = $params['serial_no'];
+            $goods_no   = $params['goods_no'];
 
 
             $delivery = Delivery::find($delivery_no);
@@ -193,7 +193,7 @@ class DeliveryRepository
             $time = time();
             $imei_data = [
                 'delivery_no' => $delivery_no,
-                'serial_no'   => $serial_no,
+                'goods_no'   => $goods_no,
                 'status'      => DeliveryGoodsImei::STATUS_YES,
                 'create_time' => $time
             ];
@@ -205,7 +205,7 @@ class DeliveryRepository
                     if (!$imei) continue;
                     $goods_imei_model = DeliveryGoodsImei::where([
                         'delivery_no'=>$delivery_no,
-                        'serial_no'=>$serial_no,
+                        'goods_no'=>$goods_no,
                         'imei'=>$imei
                     ])->first();
 
@@ -218,6 +218,7 @@ class DeliveryRepository
 
                     #imei总表修改状态
                     $imei_model = Imei::find($imei);
+                    if (!$imei_model) continue;
                     $imei_model->status = Imei::STATUS_OUT;
                     $imei_model->update_time = $time;
                     $imei_model->update();
@@ -227,9 +228,8 @@ class DeliveryRepository
             #2修改 goods 状态
             $goods_model = DeliveryGoods::where([
                 'delivery_no'=>$params['delivery_no'],
-                'serial_no'=>$params['serial_no'
-                ]])
-                ->first();
+                'goods_no'=>$params['goods_no']
+            ])->first();
 
             $goods_status = DeliveryGoods::STATUS_ALL;
             if ($goods_model->quantity > $params['quantity']) {
@@ -245,7 +245,6 @@ class DeliveryRepository
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-
             throw new \Exception($e->getMessage());
         }
 
