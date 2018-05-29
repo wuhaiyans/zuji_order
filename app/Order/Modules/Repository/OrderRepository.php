@@ -454,4 +454,14 @@ class OrderRepository
         return $orderList;
 
     }
+
+    //更新订单状态-订单完成
+    public static function orderClose($order_no){
+        $data['order_status']=OrderStatus::OrderCompleted;
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

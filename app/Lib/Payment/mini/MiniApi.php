@@ -1,6 +1,7 @@
 <?php
 namespace App\Lib\Payment\mini;
 
+use Illuminate\Support\Facades\Redis;
 /**
  * 支付宝芝麻小程序(代扣) 发送请求
  *
@@ -42,6 +43,8 @@ class MiniApi {
         }
         $result = $CommonMiniApi->getResult();
         \App\Lib\Common\LogApi::error('发送扣款请求',['request'=>$params,'response'=>$result]);
+        //加redis订单扣款标示
+        Redis::set($params['out_order_no'], 'MiniWithhold');
         //返回字符串
         return $result['zhima_merchant_order_credit_pay_response']['pay_status'];
     }
@@ -67,6 +70,8 @@ class MiniApi {
         }
         $result = $CommonMiniApi->getResult();
         \App\Lib\Common\LogApi::error('发送关闭订单请求',['request'=>$params,'response'=>$result]);
+        //加redis订单完成标示
+        Redis::set($params['out_order_no'], 'MiniOrderClose');
         //返回
         return $result;
     }
