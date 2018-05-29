@@ -60,7 +60,6 @@ class UnionController extends Controller
         }
 
         $res =UnionpayApi::openBankCard($data);
-        var_dump($res);die;
         if(!is_array($res)){
             return api_resopnse( [], ApiStatus::CODE_60001);
         }
@@ -84,7 +83,6 @@ class UnionController extends Controller
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
         $res =UnionpayApi::backPolling($data);
-        var_dump($res);die;
         if(!is_array($res)){
             return api_resopnse( [], ApiStatus::CODE_60001);
         }
@@ -107,7 +105,6 @@ class UnionController extends Controller
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
         $res =$this->orderTrade->sendsms($data);
-        var_dump($res);die;
         if(!$res){
             return api_resopnse( [], ApiStatus::CODE_60001);
         }
@@ -130,7 +127,6 @@ class UnionController extends Controller
             return api_resopnse( [], ApiStatus::CODE_20001);
         }
         $res =$this->orderTrade->consume($data);
-        var_dump($res);die;
         if(!$res){
             return api_resopnse( [], ApiStatus::CODE_60001);
         }
