@@ -156,17 +156,26 @@ class Delivery
     }
 
 
+
     /**
-     * Delivery constructor.
      * 发货反馈
-     * @param $params array $
-        'order_no'=> 订单号  string,
-        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
-        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
+     * @param $order_no string  订单编号 【必须】
+     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * [
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     * ]
+     * @return string
+     *
+     *
      */
-    public static function delivery($params)
+    public static function delivery($order_no, $goods_info)
     {
-      return \App\Lib\Order\Delivery::delivery($params);
+      return \App\Lib\Order\Delivery::delivery($order_no, $goods_info);
     }
 
     /**

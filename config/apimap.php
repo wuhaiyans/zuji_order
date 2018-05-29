@@ -142,11 +142,12 @@ return [
     'api.Return.userReceive'       => 'ReturnController@userReceive',
     //用户换货成功回调
     'api.Return.updateOrder'       => 'ReturnController@updateOrder',
-
     //检测状态更改
     'api.Return.isQualified'       => 'ReturnController@isQualified',
    //获取所有待审核的退换货信息
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
+
+
     //续租接口
     // 续租页
     'api.Relet.pageRelet'       => 'ReletController@pageRelet',
