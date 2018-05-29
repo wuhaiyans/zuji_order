@@ -115,6 +115,7 @@ class DeliveryController extends Controller
      */
     public function cancel()
     {
+
         $rules = ['order_no' => 'required'];
         $params = $this->_dealParams($rules);
 
@@ -156,13 +157,13 @@ class DeliveryController extends Controller
 
     /**
      * 签收
-     * params[delivery_id, auto=false]
+     * params[delivery_id, receive_type=1]
      */
     public function receive()
     {
-
         $rules = [
-            'delivery_no' => 'required'
+            'delivery_no' => 'required',
+            'receive_type'=> 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -170,10 +171,13 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $auto = isset($params['auto']) ? $params['auto'] : false;
+        $receive_type = isset($params['receive_type']) ? $params['receive_type'] : false;
 
         try {
-            $this->delivery->receive($params['delivery_no'], $auto);
+            $deliveryInfo = $this->delivery->receive($params['delivery_no'], $receive_type);
+
+            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], $params['receive_type']);
+
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

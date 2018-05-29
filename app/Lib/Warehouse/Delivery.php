@@ -106,12 +106,10 @@ class Delivery
 
         $info = self::getOrderDetail($order_no);
 
-        $res= Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
+        $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.send',//模拟
             'params' => json_encode($info)
-        ]);
+        ]));
          return true;
     }
 
@@ -124,12 +122,19 @@ class Delivery
     {
         $base_api = config('api.warehouse_api_uri');
 
-        return Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
+        $res = Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.cancel',//模拟
             'params' => json_encode(['order_no'=>$order_no])
-        ]);
+        ]));
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -148,8 +153,6 @@ class Delivery
     public static function receive($orderNo, $role)
     {
         return \App\Lib\Order\Delivery::receive($orderNo, $role);
-
-
     }
 
 

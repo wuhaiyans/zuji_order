@@ -24,7 +24,8 @@ class Receive
      *  logistics_no, 【必须】
      *  receive_detail = [
      *      [
-     *          serial_no 【必须】
+     *          serial_no 【可选】
+     *          goods_no 【必须】
      *          quantity 【必须】
      *          imei  【可以没有】
      *      ]

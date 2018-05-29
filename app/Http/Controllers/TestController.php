@@ -14,17 +14,19 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use App\Lib\Curl;
 
 class TestController extends Controller
 {
 
     public function test()
     {
-        $filePath = storage_path('/app/download/imei_data_tpl.xlsx');
 
 
-        return response()->download($filePath,'imei数据导入模板.xls');
-
+        $this->testReceive();
+//        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
+//
+//        var_dump($a);
 
 
         //换货 发货测试
@@ -104,6 +106,24 @@ class TestController extends Controller
 //		
 //		
 //	}
+
+
+    public function testReceive()
+    {
+        $base_api = config('api.warehouse_api_uri');
+
+        $res = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.receive',//模拟
+            'params' => json_encode(['delivery_no'=>'201805281926104525', 'receive_type'=>2])
+        ]);
+
+        $res = json_decode($res, true);
+
+
+        dd($res);
+    }
 
 
     public function excel()
