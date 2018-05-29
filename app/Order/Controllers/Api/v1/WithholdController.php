@@ -277,44 +277,32 @@ class WithholdController extends Controller
 
         //判断支付方式
         if( $orderInfo['pay_type'] == PayInc::MiniAlipay ){
-//            $this->zhima_order_confrimed_table =$this->load->table('order2/zhima_order_confirmed');
-//            //获取订单的芝麻订单编号
-//            $zhima_order_info = $this->zhima_order_confrimed_table->where(['order_no'=>$order_info['order_no']])->find(['lock'=>true]);
-//            if(!$zhima_order_info){
-//                $this->order_service->rollback();
-//                showmessage('该订单没有芝麻订单号！','null',0);
-//            }
-//            //芝麻小程序下单渠道
-//            $Withhold = new \zhima\Withhold();
-//            $params['out_order_no'] = $order_info['order_no'];
-//            $params['zm_order_no'] = $zhima_order_info['zm_order_no'];
-//            $params['out_trans_no'] = $trade_no;
-//            $params['pay_amount'] = $amount;
-//            $params['remark'] = $remark;
-//            $b = $Withhold->withhold( $params );
-//            \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求",$params);
-//            //判断请求发送是否成功
-//            if($b == 'PAY_SUCCESS'){
-//                // 提交事务
-//                $this->order_service->commit();
-//                \zuji\debug\Debug::error(Location::L_Trade,"小程序退款请求回执",$b);
-//                showmessage('小程序扣款操作成功','null',1);
-//            }elseif($b =='PAY_FAILED'){
-//                $this->order_service->rollback();
-//                $this->instalment_failed($instalment_info['fail_num'],$instalment_id,$instalment_info['term'],$dataSms);
-//                showmessage("小程序支付失败", 'null');
-//
-//            }elseif($b == 'PAY_INPROGRESS'){
-//                $this->order_service->commit();
-//                showmessage("小程序支付处理中请等待", 'null');
-//            }else{
-//                $this->order_service->rollback();
-//                showmessage("小程序支付处理失败", 'null');
-//            }
-
-
+            //获取订单的芝麻订单编号
+            $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
+            if( empty($miniOrderInfo) ){
+                \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$params['order_no']);
+                return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
+            }
+            //芝麻小程序扣款请求
+            $params['out_order_no'] = $miniOrderInfo['out_order_no'];
+            $params['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+            //扣款交易号
+            $params['out_trans_no'] = $tradeNo;
+            $params['pay_amount'] = $amount;
+            $params['remark'] = $subject;
+            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $params );
+            //判断请求发送是否成功
+            if($pay_status == 'PAY_SUCCESS'){
+                return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+            }elseif($pay_status =='PAY_FAILED'){
+                OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
+                return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+            }elseif($pay_status == 'PAY_INPROGRESS'){
+                return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+            }else{
+                return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
+            }
         }else {
-
             // 支付宝用户的user_id
             $alipayUserId = $withholdInfo['out_withhold_no'];
             if (!$alipayUserId) {

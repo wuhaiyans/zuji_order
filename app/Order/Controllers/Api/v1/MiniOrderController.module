@@ -329,12 +329,12 @@ class MiniOrderController extends Controller
         $validateParams = $this->validateParams($rules,$params);
 
         if (empty($validateParams) || $validateParams['code']!=0) {
-
             return apiResponse([],$validateParams['code']);
         }
         //查询芝麻订单
         $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($params['order_no']);
         if( empty($result) ){
+            \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$params['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
         }
         //发送取消请求
