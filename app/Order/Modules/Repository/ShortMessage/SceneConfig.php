@@ -10,6 +10,11 @@ class SceneConfig {
 	 */
 	const ORDER_CREATE = 'OrderCreate';
 
+    /**
+     * 场景:<b>【支付成功】</b>
+     */
+    const ORDER_PAY = 'OrderPay';
+
 	/**
 	 * 场景:<b>【分期扣款】</b>
 	 */

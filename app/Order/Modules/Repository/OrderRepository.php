@@ -143,6 +143,21 @@ class OrderRepository
             return $order->toArray();
     }
 
+    /**
+     * 根据订单编号查询有关订单使用的优惠券
+     * @param $orderNo
+     * @return array|bool
+     */
+
+    public static function getCouponByOrderNo($orderNo){
+        if (empty($orderNo)) return false;
+        $orderCoupon =  OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get();
+        if (!$orderCoupon) return false;
+        return $orderCoupon->toArray();
+    }
+
 
 
     /**

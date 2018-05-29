@@ -119,5 +119,18 @@ class PayController extends Controller
 		var_dump( $_GET );exit;
 	}
 	
+	// 测试 解冻
+	public function testFundauthUnfreeze(){
+		$info = \App\Lib\Payment\CommonFundAuthApi::unfreeze([
+    		'name'			=> '测试退款',			//交易名称
+    		'out_trade_no' => \createNo(1),		//业务系统交易码
+    		'fundauth_no'	=> '20A52283846181612', //支付系统授权码
+    		'amount'		=> 2, //支付金额；单位：分
+			'user_id' => '5',
+			'back_url'		=> env('APP_URL').'/order/pay/fundautUnfreezeNotify',	//【必选】string //退款回调URL
+		]);
+		var_dump( $info );exit;
+	}
+	
 	
 }

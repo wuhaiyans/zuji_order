@@ -24,11 +24,11 @@ class MiniOrderRepository
     }
 
     /**
-     * 根据商品编号获取单条商品信息
-     * @param string $goodsNo 商品编号
-     * @return array $goodsInfo 商品基础信息|空<br/>
-     * $goodsInfo = [<br/>
-     *		'id' => '',//订单商品自增id<br/>
+     * 根据订单编号获取单条订单信息
+     * @param string $orderNo 订单编号
+     * @return array $miniOrderInfo 小程序订单基础信息|空<br/>
+     * $orderInfo = [<br/>
+     *		'id' => '',//订单自增id<br/>
      *		'order_no' => '',//业务平台订单号<br/>
      *		'zm_order_no' => '',//芝麻订单号<br/>
      *		'transaction_id' => '',//芝麻请求流水号<br/>

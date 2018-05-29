@@ -42,7 +42,7 @@ class Receive
 
         if (is_array($detail)) {
             foreach ($detail as $d) {
-                if (!$d['serial_no'] || !$d['quantity']) continue;
+                if (!$d['goods_no']) continue;
                 
                 $receive_detail[] = [
                     'serial_no' => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
