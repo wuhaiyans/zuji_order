@@ -215,8 +215,9 @@ class OrderGiveback
 			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
 			return false;
 		}
+		$orderGivebackObj = new OrderGiveback();
 		//查询当前还机单基础信息
-		$orderGivebackInfo = $this->getInfoByGivabackNo($params['business_no']);
+		$orderGivebackInfo = $orderGivebackObj->getInfoByGivabackNo($params['business_no']);
 		if( !$orderGivebackInfo ){
 			return false;
 		}
@@ -232,7 +233,7 @@ class OrderGiveback
 			//-+--------------------------------------------------------------------
 			if( $orderGivebackInfo['yajin'] == 0 ){
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
-				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+				$orderGivebackResult = $orderGivebackObj->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
@@ -247,7 +248,7 @@ class OrderGiveback
 			//-+--------------------------------------------------------------------
 			else{
 				$status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
-				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+				$orderGivebackResult = $orderGivebackObj->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_IN_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
