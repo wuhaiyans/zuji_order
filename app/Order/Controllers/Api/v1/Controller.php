@@ -37,7 +37,7 @@ class Controller extends BaseController
             return apiResponseArray(ApiStatus::CODE_10102,[], $validator->errors()->first());
         }
 
-        return apiResponseArray(ApiStatus::CODE_0, []);
+        return apiResponseArray(ApiStatus::CODE_0, $params);
     }
 
 
