@@ -159,11 +159,8 @@ class ReturnController extends Controller
             return apiResponse([], ApiStatus::CODE_20001,'已上传物流单号');
         }
         $ret = $this->OrderReturnCreater->upload_wuliu($params);
-        if(!$ret){
-            return apiResponse([], ApiStatus::CODE_33008, '上传物流失败');
-        }
 
-        return apiResponse([], ApiStatus::CODE_0,'success');
+        return apiResponse([], $ret);
 
     }
 
@@ -259,7 +256,7 @@ class ReturnController extends Controller
     /**
      * 退款成功更新退款状态
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     *
      */
     public function refundUpdate(Request $request){
         $orders =$request->all();
@@ -268,6 +265,7 @@ class ReturnController extends Controller
             'business_type'           =>'required',
             'business_no'     =>'required',
             'status'     =>'required',
+            'order_no'     =>'required',
         ]);
         if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
@@ -397,7 +395,7 @@ class ReturnController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $res=$this->OrderReturnCreater->returnApplyList($params['params']);
-        return apiResponse([$res],ApiStatus::CODE_0);
+        return apiResponse($res,ApiStatus::CODE_0);
     }
 
 }

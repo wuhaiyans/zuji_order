@@ -183,9 +183,8 @@ class OrderReturnCreater
             return ApiStatus::CODE_0;
         }
         foreach($goods_info as $k=>$v){
-            $receive_data['logistics_id']=$goods_info[$k]->logistics_id;
-            $receive_data['logistics_no']=$goods_info[$k]->logistics_no;
-            $receive_data['receive_detail'][$k] =[
+            $receive_data[$k] =[
+                'goods_no' => $goods_info[$k]->goods_no,
                 'serial_no' => $goods_info[$k]->serial_number,
                 'quantity' => $goods_info[$k]->quantity,
                 'imei1'     =>$goods_info[$k]->imei1,
@@ -379,7 +378,37 @@ class OrderReturnCreater
         if(empty($data['goods_no'])){
             return ApiStatus::CODE_20001;
         }
-        return $this->orderReturnRepository->upload_wuliu($data);
+        //开启事务
+        DB::beginTransaction();
+        $ret= $this->orderReturnRepository->upload_wuliu($data);
+        if(!$ret){
+            //事务回滚
+            DB::rollBack();
+            return aApiStatus::CODE_33008;
+        }
+        //上传物流单号到收货系统
+        $data_params['order_no']=$data['order_no'];
+        $data_params['logistics_id']=$data['logistics_id'];
+        $data_params['logistics_no']=$data['logistics_no'];
+        foreach($data['goods_no'] as $k=>$v){
+            $data_params['goods_info'][$k]['goods_no']=$v;
+            $where[]=['order_no','=',$data['order_no']];
+            $where[]=['goods_no','=',$v];
+            //获取商品信息
+            $goods_res= $this->orderReturnRepository->getGoodsExtendInfo($where);
+            $data_params['goods_info'][$k]['imei1']=$goods_res['imei1'];
+            $data_params['goods_info'][$k]['imei2']=$goods_res['imei2'];
+            $data_params['goods_info'][$k]['imei3']=$goods_res['imei3'];
+        }
+        $create_receive= Receive::updateLogistics($data_params);
+        if(!$create_receive){
+            //事务回滚
+            DB::rollBack();
+            return ApiStatus::CODE_34003;//创建待收货单失败
+        }
+        //提交事务
+        DB::commit();
+        return ApiStatus::CODE_0;
     }
     //获取退换货订单列表方法
     public function get_list($params)
@@ -773,8 +802,14 @@ class OrderReturnCreater
     }
     //创建换货单记录
     public function createchange($params){
-        if (isset($param['order_no']) && isset($param['goods_id']) &&  isset($param['goods_no']) &&  isset($param['serial_number'])){
-            return ApiStatus::CODE_20001;//参数错误
+        $param = filter_array($params,[
+            'order_no'  =>'required',
+            'goods_id'    =>'required',
+            'goods_no'          =>'required',
+            'serial_number'        =>'required',
+        ]);
+        if(count($param)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
         }
         $goods_result= $this->orderReturnRepository->createchange($params);
         if(!$goods_result){
@@ -786,9 +821,10 @@ class OrderReturnCreater
     //退款成功更新退款状态
     public function refundUpdate($params){
         $param = filter_array($params,[
-            'business_type'           =>'required',
-            'business_no'     =>'required',
-            'status'     =>'required',
+            'business_type'  =>'required',
+            'business_no'    =>'required',
+            'status'          =>'required',
+            'order_no'        =>'required',
         ]);
         if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
