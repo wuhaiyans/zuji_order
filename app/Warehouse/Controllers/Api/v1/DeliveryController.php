@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Warehouse\Controllers\Api\v1;
+
 use App\Lib\ApiStatus;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
@@ -8,6 +9,7 @@ use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class DeliveryController extends Controller
 {
@@ -251,8 +253,10 @@ class DeliveryController extends Controller
 
         try {
             $this->delivery->send($params['delivery_no']);
-            $order_no = $this->delivery->getOrderNoByDeliveryNo($params['delivery_no']);
-            \App\Lib\Warehouse\Delivery::delivery($order_no);
+            $result = $this->_info($params['delivery_no']);
+
+            //通知订单接口
+            \App\Lib\Warehouse\Delivery::delivery($result['order_no'], $result['goods_info']);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
@@ -419,6 +423,39 @@ class DeliveryController extends Controller
     {
         $list = $this->delivery->getLogistics();
         return apiResponse(['list'=>$list]);
+    }
+
+
+    protected function _info($delivery_no)
+    {
+        $model = Delivery::where(['delivery_no'=>$delivery_no])->first();
+
+        if (!$model) {
+            throw new NotFoundResourceException('发货单未找到');
+        }
+
+        $goods = $model->goods;
+        $imeis = $model->imeis->toArray();
+
+        if (!$goods) {
+            throw new NotFoundResourceException('设备信息未找到');
+        }
+        $result = [];
+        foreach ($goods as $g) {
+            $result[$g->goods_no]['goods_no'] = $g->goods_no;
+            if (is_array($imeis)) {
+                $i=1;
+                foreach ($imeis as $imei) {
+                    if ($imei['goods_no'] == $g->goods_no) {
+                        $result[$g->goods_no]['imei' . $i] = $imei['imei'];
+                        $result[$g->goods_no]['serial_number'] = $imei['apple_serial'];
+                        $i++;
+                    }
+                }
+            }
+        }
+
+        return ['order_no'=>$model->order_no, 'goods_info'=>$result];
     }
 
 }

@@ -23,7 +23,10 @@ class TestController extends Controller
     {
 
 
-        $this->testReceive();
+        $this->testSend('201805281944493333');
+
+
+//        $this->testReceive();
 //        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
 //
 //        var_dump($a);
@@ -108,6 +111,9 @@ class TestController extends Controller
 //	}
 
 
+    /**
+     * 收货测试
+     */
     public function testReceive()
     {
         $base_api = config('api.warehouse_api_uri');
@@ -118,25 +124,34 @@ class TestController extends Controller
             'method'=> 'warehouse.delivery.receive',//模拟
             'params' => json_encode(['delivery_no'=>'201805281926104525', 'receive_type'=>2])
         ]);
+        dd($res);
 
         $res = json_decode($res, true);
 
-
-        dd($res);
     }
 
 
-    public function excel()
+    /**
+     * 发货通知订单测试
+     */
+    public function testSend($delivery_no)
     {
-        $inputFileName = storage_path('app') . '/world.xlsx';
-        $helper = new Sample();
+        $base_api = config('api.warehouse_api_uri');
 
-        $helper->log('Loading file ' . pathinfo($inputFileName, PATHINFO_BASENAME) . ' using IOFactory to identify the format');
-        $spreadsheet = IOFactory::load($inputFileName);
-        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        var_dump($sheetData);
+        $res = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.send',//模拟
+            'params' => json_encode(['delivery_no'=>$delivery_no])
+        ]);
+
+        p($res);
+
     }
-	
+
+
+
+
 	public function test_alipay_url(){
 		
 		
