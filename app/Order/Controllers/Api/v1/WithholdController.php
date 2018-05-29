@@ -363,8 +363,7 @@ class WithholdController extends Controller
 
             //发送短信
             $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
-            $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $dataSms['mobile'], "InstalmentWithhold");
-
+            $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, "", "InstalmentWithhold");
             $orderNoticeObj->notify($dataSms);
 
             //发送消息通知
@@ -580,9 +579,8 @@ class WithholdController extends Controller
 
                 //发送短信
                 $business_type = \App\Order\Modules\Repository\ShortMessage\Config::CHANNELID_OFFICAL;
-                $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, $dataSms['mobile'], "InstalmentWithhold");
+                $orderNoticeObj  = new \App\Order\Modules\Service\OrderNotice($business_type, "", "InstalmentWithhold");
                 $orderNoticeObj->notify($dataSms);
-
 
                 //发送消息通知
                 //通过用户id查询支付宝用户id
