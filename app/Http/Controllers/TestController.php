@@ -23,11 +23,12 @@ class TestController extends Controller
     {
 
 
+        $this->testCreateReceive();
 
 //        $this->testApply('A511125156960043');
 
 //        $this->testSend('201805281944493333');
-        $this->testReceive();
+//        $this->testReceive();
 //        $a = Delivery::receive('201805281926104525', \App\Warehouse\Models\Delivery::RECEIVE_TYPE_USER);
 //
 //        var_dump($a);
@@ -129,6 +130,12 @@ class TestController extends Controller
 
         $res = json_decode($res, true);
 
+    }
+
+
+    public function testCreateReceive()
+    {
+        Receive::create(123456, 1, [['goods_no'=>123444]]);
     }
 
 

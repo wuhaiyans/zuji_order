@@ -100,6 +100,7 @@ class ReceiveRepository
                 'type' => isset($data['type']) ? $data['type'] : 0,
                 'app_id' => $data['app_id']
             ];
+
             $model = new Receive();
             $model->create($da);
 
@@ -120,7 +121,8 @@ class ReceiveRepository
 
                 $gmodel->create($detail);
 
-                if (!$detail['imei']) continue;
+
+                if (!isset($detail['imei']) || !$detail['imei']) continue;
                 $mmodel = new ReceiveGoodsImei();
                 $mmodel->create($detail);
             }
