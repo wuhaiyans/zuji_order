@@ -109,6 +109,7 @@ class ReceiveRepository
                 throw new \Exception("缺少相关参数");
             }
 
+
             foreach ($details as $detail) {//存receiveGoods
                 $detail['receive_no'] = $receiveNo;
                 $detail['imei'] = isset($detail['imei']) ? $detail['imei'] : '';
@@ -116,6 +117,7 @@ class ReceiveRepository
                 $detail['create_time'] = $time;
 
                 $gmodel = new ReceiveGoods();
+
                 $gmodel->create($detail);
 
                 if (!$detail['imei']) continue;
