@@ -230,7 +230,7 @@ class OrderRepository
         }
         $order =  Order::where($whereArray)->first();
         if (!$order) return false;
-        $order->order_status = OrderStatus::OrderClosed;
+        $order->order_status = OrderStatus::OrderCancel;
         if ($order->save()) {
             return true;
         } else {

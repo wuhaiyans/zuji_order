@@ -80,10 +80,10 @@ class Goods  extends \App\Lib\BaseApi{
 
         //var_dump($info);
         if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+            return false;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return false;
         }
         return true;
     }
