@@ -466,8 +466,19 @@ class OrderReturnRepository
     }
     //创建换货单记录
     public static function createchange($params){
-        if (isset($param['order_no']) && isset($param['goods_id']) &&  isset($param['goods_no']) &&  isset($param['serial_number'])){
-            return false;//参数错误
+        $param = filter_array($params,[
+            'order_no'  =>'required',
+            'goods_id'    =>'required',
+            'goods_no'          =>'required',
+            'serial_number'        =>'required',
+        ]);
+        if(count($param)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $data['status']=1;
+        $return_result= OrderGoodsExtend::where([['goods_no','=',$params['goods_no']],['order_no','=',$params['order_no']]])->update($data);
+        if(!$return_result){
+            return false;
         }
         $create_result=OrderGoodsExtend::query()->insert($params);
         if($create_result){
@@ -672,6 +683,19 @@ class OrderReturnRepository
             return [];
         }
         return $return_result;
+    }
+
+    /**
+     * 获取商品的ime号
+     * @param $where
+     *
+     */
+    public static function getGoodsExtendInfo($where){
+        $goods_result= OrderGoodsExtend::where($where)->first()->toArray();
+        if(!$goods_result){
+            return false;
+        }
+        return $goods_result;
     }
 
 }
