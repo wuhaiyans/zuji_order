@@ -32,21 +32,31 @@ class OrderPay implements ShortMessage {
 		// 根据业务，获取短息需要的数据
 		
 		// 查询订单
-		$order_info = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
 		
-		if( !$order_info ){
+		if( !$orderInfo ){
 			return false;
 		}
 		
 		// 短息模板
-        $code = $this->getCode($order_info['channel_id']);
+        $code = $this->getCode($orderInfo['channel_id']);
 		if( !$code ){
 			return false;
 		}
+        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+        if(!$goods){
+            return false;
+        }
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
 		
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($order_info['mobile'], $code, [
-
+		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
+            'goodsName'=>$goodsName,
 		]);
 	}
 	

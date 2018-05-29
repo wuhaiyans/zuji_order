@@ -113,7 +113,7 @@ class OrderNotice{
 			}
 			
 			// 通知
-			$b = $short_message->notify();
+			$b = $short_message->notify($data);
 			\App\Lib\Common\LogApi::debug('短信通知',[
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
