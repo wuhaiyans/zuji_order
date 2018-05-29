@@ -30,7 +30,7 @@ class InstalmentWithhold implements ShortMessage {
         // 根据业务，获取短息需要的数据
 
         // 短息模板
-        $code = Config::getCode($this->business_type, __CLASS__);
+        $code = Config::getCode($this->business_type, "InstalmentWithhold");
         if( !$code ){
             return false;
         }
