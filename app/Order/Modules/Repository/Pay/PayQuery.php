@@ -88,4 +88,23 @@ class PayQuery {
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');
 	}
+	
+	/**
+	 * 根据 支付编号，获取支付系统支付信息
+	 * @param string	$payment_no		支付编号
+	 * @return array	
+	 * [
+	 * 
+	 * ]
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getPaymentInfoByPaymentNo( string $payment_no ){
+		$info = \App\Order\Models\OrderPayPaymentModel::where([
+			'payment_no'	=> $payment_no,
+		])->first();
+		if( $info ){
+			return new Pay( $info->toArray() );
+		}
+		throw new \App\Lib\NotFoundException('支付系统支付信息不存在');
+	}
 }
