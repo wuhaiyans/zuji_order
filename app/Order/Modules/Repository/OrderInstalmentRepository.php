@@ -317,7 +317,9 @@ class OrderInstalmentRepository
 
     //默认分期单生成
     public function default_fenqi(){
-
+        if($this->goods_no == ""){
+            return false;
+        }
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
         // 默认分期
@@ -360,6 +362,9 @@ class OrderInstalmentRepository
 
     //递减式分期
     function diminishing_fenqi(){
+        if($this->goods_no == ""){
+            return false;
+        }
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
         //优惠金额
