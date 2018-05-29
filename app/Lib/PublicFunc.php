@@ -398,3 +398,6 @@ function set_msg( $msg ){
 function get_msg( ){
 	return ''.get_instance()->getMsg();
 }
+function set_apistatus( $code, $msg ){
+	return get_instance()->setCode(strval($code))->setMsg(strval($msg));
+}
