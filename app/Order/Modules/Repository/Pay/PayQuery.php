@@ -94,7 +94,9 @@ class PayQuery {
 	 * @param string	$payment_no		支付编号
 	 * @return array	
 	 * [
-	 * 
+	 *		'payment_no'		=> '',	//【必选】string 业务支付编码
+	 *		'out_payment_no'	=> '',	//【必选】string  支付系统支付编码
+	 *		'create_time'		=> '',	//【必选】int  创建时间戳
 	 * ]
 	 * @throws \App\Lib\NotFoundException
 	 */
