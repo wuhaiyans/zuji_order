@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Payment\mini\sdk;
+namespace App\Lib\AlipaySdk\sdk;
 /*
  * 芝麻扣款 取消订单 关闭订单 接口
  */
@@ -54,10 +54,15 @@ class CommonMiniApi extends BaseApi {
 			$biz_content['pay_amount'] = $params['pay_amount'];
 		}
 		if(isset($params['remark'])){
-			$biz_content['remark'] = $params['remark'];	    // 请求序列号，标识一次退款请求，同一笔交易多次退款需要保证唯一，如需部分退款，则此参数必传。
+			$biz_content['remark'] = $params['remark'];
 		}
 		$request = new \ZhimaMerchantOrderCreditPayRequest();
 		$request->setBizContent (json_encode($biz_content) );
+		//入库请求信息
+		$result = \App\Order\Modules\Repository\MiniOrderCreditPayRepository::add($biz_content);
+		if( !$result ){
+			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
+		}
 		$response = $this->execute($request);
 		$result = json_decode(json_encode($response),true);
 		$debug_data = [
@@ -80,7 +85,7 @@ class CommonMiniApi extends BaseApi {
 	}
 
 	/**
-	 * 信用套餐产品订单确认接口
+	 * 信用套餐产品订单确认接口（查询芝麻订单信息）
 	 * @param $params
 	 * @return bool|mixed
 	 */

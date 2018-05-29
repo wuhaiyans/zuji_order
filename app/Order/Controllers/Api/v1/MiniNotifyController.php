@@ -29,7 +29,7 @@ class MiniNotifyController extends Controller
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        $CommonMiniApi = new \App\Lib\Payment\mini\sdk\CommonMiniApi( $appid );
+        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
         if(!$b){
             \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
@@ -37,13 +37,22 @@ class MiniNotifyController extends Controller
         }
         $this->data = $_POST;
         if($this->data['notify_type'] == $this->CANCEL){
+            //入库取消订单回调信息
+            $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
+            if( !$result ){
+                \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$result);
+            }
             $this->OrderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
-            $this->orderCloseNotify();
+            //入库 完成 或 扣款 回调信息
+            $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
+            if( !$result ){
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$result);
+            }
             if( isset($redis_order) ){
                 $this->withholdingNotify();
-                echo 'success';
-                exit;
+            }else if( isset($redis_order) ){
+                $this->orderCloseNotify();
             }
         }else if($this->data['notify_type'] == $this->CREATE){
             $this->rentTransition();

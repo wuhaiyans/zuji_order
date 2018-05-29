@@ -202,7 +202,7 @@ class OrderTrade
                     'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
                 ];
                 $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-                //var_dump( $urlInfo );
+                var_dump( $urlInfo );
                 DB::commit();
                 return $urlInfo;
             } catch (\Exception $exc) {

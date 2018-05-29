@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Payment\mini\sdk\aop;
+namespace App\Lib\AlipaySdk\sdk\aop;
 
 require_once 'AopEncrypt.php';
 
