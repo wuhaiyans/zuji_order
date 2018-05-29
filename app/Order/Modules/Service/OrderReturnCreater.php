@@ -1062,8 +1062,13 @@ class OrderReturnCreater
     public function returnApplyList($params){
         $where[]=['order_return.order_no','=',$params['order_no']];
         $where[]=['order_return.business_key','=',$params['business_key']];
-        $status=ReturnStatus::ReturnCreated;
-        $where[]=['order_return.status','=',$status];
+        if(isset($params['status'])){
+            $where[]=['order_return.status','=',$params['status']];
+        }
+        if(isset($params['evaluation_status'])){
+            $where[]=['order_return.evaluation_status','=',$params['evaluation_status']];
+        }
+
         $return_list= $this->orderReturnRepository->returnApplyList($where);//创建退款清单
         return $return_list;
     }

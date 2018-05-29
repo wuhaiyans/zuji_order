@@ -394,8 +394,31 @@ class ReturnController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        $params['params']['status']=ReturnStatus::ReturnCreated;
         $res=$this->OrderReturnCreater->returnApplyList($params['params']);
         return apiResponse($res,ApiStatus::CODE_0);
+    }
+
+    /**
+     * 点击换货获取此订单检测合格的数据
+     */
+    public function getExchange(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'business_key'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationSuccess;
+        $res=$this->OrderReturnCreater->returnApplyList($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0);
+
+
     }
 
 }
