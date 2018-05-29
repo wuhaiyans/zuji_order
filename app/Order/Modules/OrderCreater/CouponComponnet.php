@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Coupon\Coupon;
 use App\Order\Modules\Repository\OrderCouponRepository;
 
 class CouponComponnet implements OrderCreater
@@ -107,6 +108,7 @@ class CouponComponnet implements OrderCreater
             return true;
         }
         $orderNo =$this->getOrderCreater()->getOrderNo();
+        $coupon =[];
         foreach ($data['coupon'] as $k=>$v){
             if($v['is_use'] ==1){
                 $couponData =[
@@ -122,6 +124,7 @@ class CouponComponnet implements OrderCreater
                     $this->getOrderCreater()->setError("保存订单优惠券信息失败");
                     return false;
                 }
+                $coupon[] =$v['coupon_id'];
             }
 
         }
@@ -129,7 +132,11 @@ class CouponComponnet implements OrderCreater
         /**
          * 调用优惠券使用接口
          */
-        var_dump("别忘了调用优惠券使用接口");
+        $b = Coupon::useCoupon($coupon);
+        if(!$b){
+            $this->getOrderCreater()->setError("调用使用优惠券接口失败");
+            return false;
+        }
 
         return true;
 
