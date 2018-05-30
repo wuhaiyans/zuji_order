@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
+use App\Lib\Order\OrderInfo;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
@@ -313,19 +314,22 @@ class OrderController extends Controller
     public function cancelOrder(Request $request)
     {
 
+        $params = $request->all();
+        $rule = [
+            'order_no'=> 'required'
+        ];
 
-//       $orderNo =  Service\OrderOperate::createOrderNo(1);
-//       dd($orderNo);
+        $validateParams = $this->validateParams($rule,  $params);
 
-        $params = $request->input('params');
 
-        if (!isset($params['order_no']) || empty($params['order_no'])) {
-            return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
         }
 
-        $code = Service\OrderOperate::cancelOrder($params['order_no'], $params['user_id']=18);
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $params['user_id']=18);
 
-        return apiResponse([],ApiStatus::CODE_0,"success");
+        return apiResponse([],$code);
 
 
     }
@@ -402,15 +406,22 @@ class OrderController extends Controller
     public function orderInfo(Request $request)
     {
             try{
+                $params = $request->all();
+                $rule = [
+                    'order_no'=> 'required'
+                ];
 
-                $params = $request->input('params');
+                $validateParams = $this->validateParams($rule,  $params);
 
-                if (!isset($params['order_no']) || empty($params['order_no'])) {
-                    return apiResponse([],ApiStatus::CODE_31001,"订单号不能为空");
+
+                if ($validateParams['code']!=0) {
+
+                    return apiResponse([],$validateParams['code']);
                 }
 
-                $orderData = Service\OrderOperate::getOrderInfo($params['order_no']);
-                
+
+                $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
+
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
 

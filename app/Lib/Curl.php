@@ -95,13 +95,53 @@ class Curl {
      * @return string
      */    
     public static function post(string $url, $params=null,array $header=[]){
+
 		if(is_array($params) ){
 			$params = http_build_query( $params );
 		}
 
-//		dd($params);
+
         $output = self::_send($url, $params, $header);
-//        dd($output);
+
+        return $output;
+    }
+
+
+    /**
+     * @param $url
+     * @param $params
+     *
+     * 提交数组
+     */
+    public static function postArray($url, $params, $header=array(), $json=false)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        // post数据
+        curl_setopt($ch, CURLOPT_POST, true);
+        // post的变量
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        // https请求不验证证书和hosts
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        // header 头参数
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        //至关重要，CURLINFO_HEADER_OUT选项可以拿到请求头信息
+        curl_setopt($ch, CURLINFO_HEADER_OUT, TRUE);
+        // 返回 response_header, 该选项非常重要,如果不为 true, 只会获得响应的正文
+        // curl_setopt($ch, CURLOPT_HEADER, true);
+        // 发送请求
+
+        if ($json) {
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length:' . strlen($params)
+            ]);
+        }
+        $output = self::_curl_exec($ch,$url,$params);
+        curl_close($ch);
         return $output;
     }
     

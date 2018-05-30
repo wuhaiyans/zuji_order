@@ -71,20 +71,17 @@ class PayController extends Controller
 		} catch (\App\Lib\NotFoundException $exc) {
 
 			// 创建支付
-			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createFundauth([
 				'user_id'		=> '5',
 				'businessType'	=> $business_type,
 				'businessNo'	=> $business_no,
 				
-				'paymentNo' => \createNo(1),
 				'paymentAmount' => '0.01',
 				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
-				'withholdNo' => \createNo(1),
 				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				
-				'fundauthNo' => \createNo(1),
 				'fundauthAmount' => '1.00',
 				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 			]);
@@ -117,6 +114,35 @@ class PayController extends Controller
 	public function testPaymentFront(){
 		LogApi::info('支付同步通知', $_GET);
 		var_dump( $_GET );exit;
+	}
+	
+	// 测试 解冻
+	public function testFundauthUnfreeze(){
+		
+		try {
+			
+			$info = \App\Lib\Payment\CommonFundAuthApi::unfreeze([
+				'name'			=> '测试退款',			//交易名称
+				'out_trade_no' => \createNo(1),		//业务系统交易码
+				'fundauth_no'	=> '20A52283846181612', //支付系统授权码
+				'amount'		=> 1, //支付金额；单位：分
+				'user_id' => '5',
+				'back_url'		=> env('APP_URL').'/order/pay/fundautUnfreezeNotify',	//【必选】string //退款回调URL
+			]);
+			var_dump( $info );exit;
+			
+		} catch (\App\Lib\ApiException $exc) {
+			
+			var_dump( $exc->getCode() );
+			var_dump( $exc->getMessage() );
+			var_dump( $exc->getData() );
+			echo $exc->getOriginalValue();exit;
+		} catch (\Exception $exc) {
+			echo $exc->getTraceAsString();
+		}
+
+
+
 	}
 	
 	

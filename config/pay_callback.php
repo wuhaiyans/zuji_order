@@ -19,23 +19,25 @@
 return [
 
 	'payment' => [
+		// 业务类型为租机的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\Service\OrderPayNotify\callback',
 		// 业务类型为1的支付回调通知
-		'1' => 'var_dump',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => 'var_dump',
 		// 业务类型为1的支付回调通知
-		'2' => 'var_dump',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => 'var_dump',
+		// 业务类型为【还机】4的支付回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackPayment',
 		// 业务类型为1的支付回调通知
-		'3' => 'var_dump',
-		// 业务类型为1的支付回调通知
-		'4' => 'var_dump',
-		// 业务类型为1的支付回调通知
-		'5' => 'var_dump',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => 'var_dump',
 
-		'6'=>''
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET=>''
 	],
 
 	'refund' => [
 		// 业务类型为1的支付回调通知
-		'2' => '\App\Lib\Refund\Refund\refundUpdate'
+		'2' => '\App\Lib\Refund\Refund\refundUpdate',
+		// 业务类型为【还机】4的清算回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback\callbackClearing',
 
 	],
 ];

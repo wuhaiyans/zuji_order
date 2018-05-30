@@ -1,32 +1,32 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
-use App\Order\Models\MiniOrder;
+use App\Order\Models\MiniOrderRentNotify;
 
 /**
- * 小程序临时订单表
- * Class MiniOrderRepository
+ * 小程序确认订单回调 记录表
+ * Class MiniOrderRentNotifyRepository
  * Author zhangjinhui
  * @package App\Order\Modules\Repository
  */
-class MiniOrderRepository
+class MiniOrderRentNotifyRepository
 {
     public function __construct(){}
 
     /**
-     * 添加芝麻订单信息
+     * 添加记录信息
      * @param $data
      * @return $last_id
      */
     public static function add($data){
-        $info =MiniOrder::create($data);
+        $info =MiniOrderRentNotify::create($data);
         return $info->getQueueableId();
     }
 
     /**
      * 根据订单编号获取单条订单信息
      * @param string $orderNo 订单编号
-     * @return array $miniOrderInfo 小程序订单基础信息|空<br/>
+     * @return array $orderInfo 订单基础信息|空<br/>
      * $orderInfo = [<br/>
      *		'id' => '',//订单自增id<br/>
      *		'order_no' => '',//业务平台订单号<br/>
@@ -45,8 +45,8 @@ class MiniOrderRepository
      *		'create_time' => '',//创建时间<br/>
      * ]
      */
-    public static function getMiniOrderInfo( $orderNo ) {
-        $MiniOrder = new MiniOrder();
+    public static function getMiniOrderRentNotify( $orderNo ) {
+        $MiniOrder = new MiniOrderRentNotify();
         $result =  $MiniOrder->where(['order_no'=> $orderNo])->first();
         if (!$result) {
             get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');

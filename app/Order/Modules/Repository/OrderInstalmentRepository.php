@@ -158,7 +158,15 @@ class OrderInstalmentRepository
         if (!$result) return false;
         return $result->toArray();
     }
-
+    /**
+     * 查询分期统计应付金额
+     */
+    public static function getSumAmount($params){
+        if (empty($params)) return false;
+        $result =  OrderInstalment::query()->where($params)->sum("amount");
+        if (!$result) return false;
+        return $result->toArray();
+    }
     /**
      * 查询总数
      */
@@ -317,13 +325,17 @@ class OrderInstalmentRepository
 
     //默认分期单生成
     public function default_fenqi(){
-
+        if($this->goods_no == ""){
+            return false;
+        }
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['business_no']     = createNo(9);
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
@@ -360,6 +372,9 @@ class OrderInstalmentRepository
 
     //递减式分期
     function diminishing_fenqi(){
+        if($this->goods_no == ""){
+            return false;
+        }
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
         //优惠金额
@@ -368,6 +383,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['business_no']     = createNo(9);
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号

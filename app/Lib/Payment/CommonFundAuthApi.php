@@ -97,7 +97,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * [
      *		'name'		=> '', //交易名称
      *		'out_trade_no' => '', //订单系统交易码
-     *		'auth_no' => '', //支付系统授权码
+     *		'fundauth_no' => '', //支付系统授权码
      *		'amount' => '', //解冻金额 单位：分
      *		'back_url' => '', //后台通知地址
      *		'user_id' => '', //用户id
@@ -110,17 +110,19 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function unfreeze( array $params ){
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.api.unfreeze');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '解冻预授权金额失败';
-            return false;
-        }
-        return $Response->getData();
+		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.unfreeze', '1.0', $params);
+		
+//        $ApiRequest = new ApiRequest();
+//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.api.unfreeze');
+//        $ApiRequest->setParams($params);
+//        $Response = $ApiRequest->send();
+//        if( !$Response->isSuccessed() ){
+//            self::$error = '解冻预授权金额失败';
+//            return false;
+//        }
+//        return $Response->getData();
     }
 
     /**

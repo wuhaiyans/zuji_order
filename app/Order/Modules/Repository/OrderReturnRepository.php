@@ -99,12 +99,16 @@ class OrderReturnRepository
             foreach($params['goods_no'] as $k=>$v){
                 $where[$k][]=['goods_no','=',$v];
                 $where[$k][]=['order_no','=',$params['order_no']];
+
                 //获取退货单信息
                 $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
                 $data['goods_status']=ReturnStatus::ReturnCreated;
                 $update_result=ordergoods::where($where[$k])->update($data);
+                if(!$update_result){
+                    return false;
+                }
             }
 
         }else{
@@ -115,12 +119,11 @@ class OrderReturnRepository
             $data['business_no']=$order_return['refund_no'];
             $data['goods_status']=ReturnStatus::ReturnCreated;
             $update_result=ordergoods::where($where)->update($data);
+            if(!$update_result){
+                return false;
+            }
         }
-        if($update_result){
-            return true;
-        }else{
-            return false;
-        }
+        return true;
 
     }
     //更新商品状态-退货-审核同意
@@ -450,11 +453,17 @@ class OrderReturnRepository
         }
     }*/
     //获取订单信息
-    public static function order_info($order_no){
-        if(empty($order_no)){
+    public static function order_info($params){
+        if(empty($params['order_no'])){
             return false;
         }
-        $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
+        $orderData= DB::table('order_info')
+            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_return', 'order_info.order_no', '=', 'order_return.order_no')
+            ->where([['order_info.order_no','=',$params['order_no']],['order_return.goods_no','=',$params['goods_no']]])
+            ->select('order_info.*','order_userinfo.*','order_return.*')
+            ->get()->toArray();
+     //   $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
         if($orderData){
             return $orderData;
         }else{
@@ -463,8 +472,19 @@ class OrderReturnRepository
     }
     //创建换货单记录
     public static function createchange($params){
-        if (isset($param['order_no']) && isset($param['goods_id']) &&  isset($param['goods_no']) &&  isset($param['serial_number'])){
-            return false;//参数错误
+        $param = filter_array($params,[
+            'order_no'  =>'required',
+            'goods_id'    =>'required',
+            'goods_no'          =>'required',
+            'serial_number'        =>'required',
+        ]);
+        if(count($param)<4){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $data['status']=1;
+        $return_result= OrderGoodsExtend::where([['goods_no','=',$params['goods_no']],['order_no','=',$params['order_no']]])->update($data);
+        if(!$return_result){
+            return false;
         }
         $create_result=OrderGoodsExtend::query()->insert($params);
         if($create_result){
@@ -647,7 +667,7 @@ class OrderReturnRepository
         if(empty($params['order_no'])){
             return false;
         }
-        $user_result= Order::where('order_no','=',$params['order_no'])->first()->toArray();
+        $user_result= OrderUserInfo::where('order_no','=',$params['order_no'])->first()->toArray();
         if(!$user_result){
             return false;
         }
@@ -669,6 +689,29 @@ class OrderReturnRepository
             return [];
         }
         return $return_result;
+    }
+
+    /**
+     * 获取商品的ime号
+     * @param $where
+     *
+     */
+    public static function getGoodsExtendInfo($where){
+        $goods_result= OrderGoodsExtend::where($where)->first()->toArray();
+        if(!$goods_result){
+            return false;
+        }
+        return $goods_result;
+    }
+
+    /**
+     * 获取退
+     * @param $where
+     *
+     *
+     */
+    public static function getReturnInfo($where){
+
     }
 
 }

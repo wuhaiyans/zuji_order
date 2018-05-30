@@ -83,11 +83,16 @@ class DeliveryService
      * @throws \Exception
      * 签收
      */
-    public function receive($delivery_no, $auto=false)
+    public function receive($delivery_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
-        if (!DeliveryRepository::receive($delivery_no, $auto)) {
+
+        $receive_info = DeliveryRepository::receive($delivery_no, $receive_type);
+
+        if (!$receive_info) {
             throw new \Exception('签收失败');
         }
+
+        return $receive_info;
     }
 
     /**

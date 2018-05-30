@@ -282,9 +282,7 @@ class OrderCreater
     public function miniCreate($data){
         try{
             DB::beginTransaction();
-            //var_dump($data);die;
-            $orderType =OrderStatus::orderStoreService;
-            $order_no = OrderOperate::createOrderNo(1);
+            $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
             $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
 
@@ -338,36 +336,36 @@ class OrderCreater
             }
             DB::commit();
 
-            // 是否需要签署代扣协议
-            $need_to_sign_withholding = 'N';
-            if( $data['pay_type']== PayInc::WithhodingPay){
-                if( !$schemaData['withholding']['withholding_no'] ){
-                    $need_to_sign_withholding = 'Y';
-                }
-            }
+//            // 是否需要签署代扣协议
+//            $need_to_sign_withholding = 'N';
+//            if( $data['pay_type']== PayInc::WithhodingPay){
+//                if( !$schemaData['withholding']['withholding_no'] ){
+//                    $need_to_sign_withholding = 'Y';
+//                }
+//            }
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
-                // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+//                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+//                // 是否需要 签收代扣协议
+//                'need_to_sign_withholding'	 => $need_to_sign_withholding,
                 '_order_info' => $schemaData,
                 'order_no'=>$data['order_no'],
                 'pay_type'=>$data['pay_type'],
             ];
-            //创建订单后 发送支付短信。;
-            $b = SmsApi::sendMessage($schemaData['user']['user_mobile'],'SMS_113450944',[
-                'goodsName' => $goods_name,    // 传递参数
-            ]);
+//            //创建订单后 发送支付短信。;
+//            $b = SmsApi::sendMessage($schemaData['user']['user_mobile'],'SMS_113450944',[
+//                'goodsName' => $goods_name,    // 传递参数
+//            ]);
             //发送取消订单队列
             $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
                 'order_no'=>$data['order_no'],
                 'user_id'=>$data['user_id'],
                 'time' => date('Y-m-d H:i:s'),
-            ],time()+7200,"");
+            ],time()+1800,"");
             Log::error($b?"Order :".$data['order_no']." IS OK":"IS error");
             return $result;
 

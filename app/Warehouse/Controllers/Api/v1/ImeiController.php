@@ -7,9 +7,14 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 
+use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Service\ImeiService;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
+
 
 class ImeiController extends Controller
 {
@@ -60,14 +65,70 @@ class ImeiController extends Controller
 
 
     /**
+     * 下载 imei 导入模板文件
+     */
+    public function downTpl()
+    {
+
+        $filePath = storage_path('/app/download/imei_data_tpl.xlsx');
+
+        $file = fopen ( $filePath, "r" );
+
+        Header ( "Content-type: application/octet-stream" );
+        Header ( "Accept-Ranges: bytes" );
+        Header ( "Accept-Length: " . filesize ( $filePath ) );
+        Header ( "Content-Disposition: attachment; filename=" . $filePath );
+        //输出文件内容
+        //读取文件内容并直接输出到浏览器
+        echo fread ( $file, filesize ( $filePath ) );
+        fclose ( $file );
+        exit ();
+
+
+
+
+
+
+
+        return response()->download($filePath,'imei数据导入模板.xls');
+    }
+
+    /**
      * 上传文件
      */
-    public function upload(Request $request)
+    public function importFromExcel(Request $request)
     {
-        $filepath = ImeiService::upload($request);
+        $inputFileName = ImeiService::upload($request);
+        $data = Excel::read($inputFileName);
 
-        dd($filepath);
+        unset($data[1]);//第一行文档名
+        unset($data[2]);//第二行标题
 
+        if (count($data) == 0) {
+            return ;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $result = [];
+            foreach ($data as $cel) {
+                if (!isset($cel['A']) || !isset($cel['B'])) continue;
+                $result[] = [
+                    'imei' => $cel['A'],
+                    'price' => $cel['B']
+                ];
+            }
+            $this->imei->import($result);
+            DB::commit();
+        } catch (\Exception $e) {
+            Log::error('imei数据导入出错');
+            DB::rollBack();
+
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse();
     }
 
 

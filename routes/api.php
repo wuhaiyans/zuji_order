@@ -26,6 +26,7 @@ $api->version('v1', [
    // $api->group(['middleware' => ['auth:api']], function($api) {
 
         $apiMap = config('apimap');
+
         $method = request()->input('method');
         if (isset($apiMap[$method])) {
             $api->post('/',  $apiMap[$method]);
