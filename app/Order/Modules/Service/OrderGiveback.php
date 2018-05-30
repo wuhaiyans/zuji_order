@@ -175,31 +175,31 @@ class OrderGiveback
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
-		//开启事务
-		DB::beginTransaction();
+//		//开启事务
+//		DB::beginTransaction();
 		try{
 			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
 			]);
 			if( !$orderGivebackResult ){
-				//事务回滚
-				DB::rollBack();
+//				//事务回滚
+//				DB::rollBack();
 				return false;
 			}
 			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
 			if( !$orderGoodsResult ){
-				//事务回滚
-				DB::rollBack();
+//				//事务回滚
+//				DB::rollBack();
 				return false;
 			}
 		} catch (\Exception $ex) {
-			//事务回滚
-			DB::rollBack();
+//			//事务回滚
+//			DB::rollBack();
 			return false;
 		}
-		//事务提交
-		DB::commit();
+//		//事务提交
+//		DB::commit();
 		return true;
 	}
 	
@@ -237,8 +237,6 @@ class OrderGiveback
 		if( !$orderGoodsInfo ) {
 			return false;
 		}
-		//开启事务
-		DB::beginTransaction();
 		try{
 			//-+--------------------------------------------------------------------
 			// | 判断订单押金，是否生成清算单
@@ -255,7 +253,6 @@ class OrderGiveback
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
 				if( !$orderGivebackResult ){
-					DB::rollBack();
 					return false;
 				}
 			}
@@ -270,7 +267,6 @@ class OrderGiveback
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
 				if( !$orderGivebackResult ){
-					DB::rollBack();
 					return false;
 				}
 				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
@@ -290,22 +286,16 @@ class OrderGiveback
 				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 				if( !$orderCleanResult ){
 					set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
-					DB::rollBack();
 					return false;
 				}
 			}
-			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> $status]);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> $status]);
 			if( !$orderGoodsResult ){
-				//事务回滚
-				DB::rollBack();
 				return false;
 			}
 		} catch (\Exception $ex) {
-			//事务回滚
-			DB::rollBack();
 			return false;
 		}
-		DB::commit();
 		return true;
 	}
 }
