@@ -158,7 +158,15 @@ class OrderInstalmentRepository
         if (!$result) return false;
         return $result->toArray();
     }
-
+    /**
+     * 查询分期统计应付金额
+     */
+    public static function getSumAmount($params){
+        if (empty($params)) return false;
+        $result =  OrderInstalment::query()->where($params)->sum("amount");
+        if (!$result) return false;
+        return $result->toArray();
+    }
     /**
      * 查询总数
      */

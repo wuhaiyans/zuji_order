@@ -25,7 +25,62 @@ class OrderBuyoutRepository
 		if (!$orderBuyoutRow) return false;
 		return $orderBuyoutRow->toArray();
 	}
-
+	/**
+	 * 查询统计数
+	 * @param array $data 【必须】 查询条件
+	 * [
+	 * 		"id" =>"", 主键id
+	 * 		"order_no" =>"", 订单编号
+	 * 		"goods_no" =>"", 商品编号
+	 * ]
+	 * @return array|bool
+	 */
+	public static function getCount(array $where){
+		if(!$where){
+			return false;
+		}
+		$count = OrderBuyout::query()
+				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
+				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
+				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
+				->where($where)
+				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
+				->count();
+		return $count;
+	}
+	/**
+	 * 查询统计数
+	 * @param array $data 【必须】 查询条件
+	 * [
+	 * 		"id" =>"", 主键id
+	 * 		"offset" =>"", 分页偏移
+	 * 		"size" =>"", 显示条数
+	 * ]
+	 * @return array|bool
+	 */
+	public static function getList(array $where,array $additional){
+		if(!$where){
+			return false;
+		}
+		if(!isset($additional['offset'])){
+			return false;
+		}
+		if(!isset($additional['limit'])){
+			return false;
+		}
+		$additional['page'] = ($additional['page'] - 1) * $additional['limit'];
+		$parcels = OrderBuyout::query()
+				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
+				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
+				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
+				->where($where)
+				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
+				->paginate($additional['offset'],$columns = ['*'], $pageName = '', $additional['limit']);
+		if($parcels){
+			return $parcels->toArray();
+		}
+		return [];
+	}
 	/**
 	 * 创建买断单数据
 	 * @param array $data 【必选】 插入内容
