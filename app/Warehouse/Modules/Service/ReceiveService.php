@@ -8,6 +8,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\ReceiveRepository;
 
 class ReceiveService
@@ -28,72 +29,120 @@ class ReceiveService
     public function list($params)
     {
         $limit = 20;
-        if (isset($params['limit']) && $params['limit']) {
-            $limit = $params['limit'];
+        if (isset($params['size']) && $params['size']) {
+            $limit = $params['size'];
         }
         $whereParams = [];
 
-        if (isset($params['order_no']) && $params['order_no']) {
-            $whereParams['order_no'] = $params['order_no'];
+        //1：待收货；2：已收货，待拆包；3：检测完成；
+        if (isset($params['status']) && $params['status']) {
+            $whereParams['status'] = $params['status'];
         }
 
-        if (isset($params['delivery_no']) && $params['delivery_no']) {
-            $whereParams['delivery_no'] = $params['delivery_no'];
+        $search = $this->paramsSearch($params);
+        if ($search) {
+            $whereParams = array_merge($whereParams, $search);
         }
-        $page = isset($params['page']) ? $params['page'] : null;
 
+        $page = isset($params['page']) ? $params['page'] : 1;
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
         $logic_params = [];
         if ($time_type != 'none') {
-            if (!isset($params['time_begin']) || !$params['time_begin']) {
+            if (!isset($params['begin_time']) || !$params['begin_time']) {
                 throw new \Exception('请填写开始时间');
             }
 
-            if (!isset($params['time_end']) || !$params['time_end']) {
+            if (!isset($params['end_time']) || !$params['end_time']) {
                 throw new \Exception('请填写结束时间');
             }
 
             switch ($time_type) {
                 case self::TIME_TYPE_CREATE:
-                    array_push($logic_params, ['create_time', '<=', strtotime($params['time_end'])]);
-                    array_push($logic_params, ['create_time', '>=', strtotime($params['time_begin'])]);
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
                     break;
 
                 case self::TIME_TYPE_RECEIVE:
                 default:
-                    array_push($logic_params, ['receive_time', '<=', strtotime($params['time_end'])]);
-                    array_push($logic_params, ['receive_time', '>=', strtotime($params['time_begin'])]);
+                    array_push($logic_params, ['receive_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['receive_time', '>=', strtotime($params['begin_time'])]);
             }
         }
+
 
         $collect = ReceiveRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
         if (!$items) {
-            return [];
+            return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'current_page'=>0];
         }
 
         $show_detail = isset($params['detail']) ? $params['detail'] : false;
 
         if (!$show_detail) {
-            return ['data'=>$items, 'limit'=>$limit, 'page'=>$page];
+            return ['data'=>$items, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
         }
 
         $result = [];
         foreach ($items as $item) {
-
             $it = $item->toArray();
+            $it['logistics_name'] = WarehouseHelper::getLogisticsName($it['logistics_id']);
+            $it['status_mark'] = $item->getStatus();
+            $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
+            $it['receive_time'] = date('Y-m-d H:i', $it['receive_time']);
+
+            $goods_list = $item->goods->toArray();
+            $imei_list  = $item->imeis->toArray();
+
+            foreach ($goods_list as &$g) {
+                if (!is_array($imei_list)) continue;
+                foreach ($imei_list as $im) {
+                    if ($im['goods_no'] == $g['goods_no']) {
+                        $g['imeis'][] = $im['imei'];
+                    }
+                }
+            }unset($g);
 
             $it['imeis'] = $item->imeis->toArray();
-            $it['goods'] = $item->goods->toArray();
+            $it['goods'] = $goods_list;
+
             array_push($result, $it);
         }
 
-        return ['data'=>$result, 'limit'=>$limit, 'page'=>$page];
+        return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
+
 
     }
+
+
+    /**
+     * @param $id
+     * @param $no
+     * 取物流名
+     */
+    public function getLogisticsName($id)
+    {
+        return '顺风';
+    }
+
+    /**
+     * 查找类型
+     */
+    public function paramsSearch($params)
+    {
+        if (!isset($params['kw_type']) || !$params['kw_type']) {
+            return false;
+        }
+
+        if (!isset($params['keywords']) || !$params['keywords']) {
+            return false;
+        }
+
+        return [self::$searchs[$params['kw_type']] => $params['keywords']];
+    }
+
 
 
     /**
