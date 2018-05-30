@@ -327,12 +327,25 @@ class BuyoutController extends Controller
      * ]
      * @return json
      */
-    public function pay(){
+    public function pay(Request $request){
+        //接收请求参数
+        $orders =$request->all();
+        $params = $orders['params'];
+        //过滤参数
+        $params= filter_array($params,[
+            'goods_no'=>'required',
+            'user_id'=>'required',
+            'channel_id'=>'required',
+            'callback_url'=>'required'
+        ]);
         if (empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
         }
         if (empty($params['user_id'])){
             return apiResponse([],ApiStatus::CODE_20001,"user_id必须");
+        }
+        if (empty($params['channel_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"channel_id必须");
         }
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['goods_no'],$params['user_id']);
@@ -345,15 +358,22 @@ class BuyoutController extends Controller
         if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
             return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
         }
+
         $payInfo = [
             'businessType'=>''.OrderStatus::BUSINESS_BUYOUT,
             'businessNo'=>$buyout['buyout_no'],
             'paymentAmount'=>$buyout['buyout_price'],
             'paymentFenqi'=>0,
         ];
-        $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
+        \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
 
+        $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
 
+        $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
+            'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
+            'front_url' => $params['callback_url'],
+        ]);
+        return apiResponse($paymentUrl,ApiStatus::CODE_0);
     }
     /*
      * 支付完成
@@ -386,6 +406,14 @@ class BuyoutController extends Controller
         }
         if($buyout['status']==OrderBuyoutStatus::OrderPaid){
             return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+        }
+        $data = [
+            'order_no'=>$buyout['order_no'],
+            'goods_no'=>$buyout['goods_no'],
+        ];
+        $ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
         }
         //更新买断单
         $ret = OrderBuyout::paid($buyout['id'],$params['user_id']);
