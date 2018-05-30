@@ -28,28 +28,32 @@ class OrderCreate implements ShortMessage {
 		return Config::getCode($channel_id, $class);
 	}
 	
+//	public function notify($data=[]){
+//		// 根据业务，获取短息需要的数据
+//		
+//		// 查询订单
+//        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+//		if( !$orderInfo ){
+//			return false;
+//		}
+//		// 短息模板
+//		$code = $this->getCode($orderInfo['channel_id']);
+//		if( !$code ){
+//			return false;
+//		}
+//        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+//		if(!$goods){
+//		    return false;
+//        }
+//
+//		// 发送短息
+//		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+//
+//		]);
+//	}
 	public function notify($data=[]){
-		// 根据业务，获取短息需要的数据
-		
-		// 查询订单
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
-		if( !$orderInfo ){
-			return false;
-		}
-		// 短息模板
-		$code = $this->getCode($orderInfo['channel_id']);
-		if( !$code ){
-			return false;
-		}
-        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
-		if(!$goods){
-		    return false;
-        }
-
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-
-		]);
+		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), []);
+		var_dump($result);exit;
 	}
 	
 }

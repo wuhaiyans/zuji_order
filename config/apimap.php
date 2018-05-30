@@ -186,6 +186,7 @@ return [
 
     // test
     'api.Test.test'       => 'TestController@test',
+    'api.test.send.sms'       => 'TestController@sendSms',
 
 
 
