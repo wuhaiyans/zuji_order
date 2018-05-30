@@ -433,7 +433,7 @@ class OrderInstalment
             return false;
         }
 
-        $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
+        $userInfo = \App\Lib\User\User::getUser($orderInfo['user_id']);
         if( !is_array($userInfo )){
             DB::rollBack();
             return false;

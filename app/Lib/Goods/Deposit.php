@@ -24,7 +24,8 @@ class Deposit{
      * ]
      * @return string or array
      */
-    public static function getDeposit($data,$arr){
+    public static function getDeposit($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.rule.get';
         $data['params'] = [
             'spu_id'=>$arr['spu_id'],

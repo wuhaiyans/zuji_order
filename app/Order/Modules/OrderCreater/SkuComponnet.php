@@ -257,7 +257,7 @@ class SkuComponnet implements OrderCreater
      *
      */
     public function discrease_coupon($coupon){
-        $schema =$this->componnet->getDataSchema();
+        $schema =$this->getDataSchema();
         $sku =$schema['sku'];
         //计算总租金
         $totalAmount =0;
@@ -379,7 +379,7 @@ class SkuComponnet implements OrderCreater
          * 在这里要调用减少库存方法
          *
          */
-        $b =Goods::reduceStock(config('tripartite.Interior_Goods_Request_data'),$goodsArr);
+        $b =Goods::reduceStock($goodsArr);
         if(!$b){
             $this->getOrderCreater()->setError("减少库存失败");
             return false;

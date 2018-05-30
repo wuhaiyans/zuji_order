@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Coupon\Coupon;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderCouponRepository;
 
 class CouponComponnet implements OrderCreater
@@ -106,7 +107,7 @@ class CouponComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        $data =$this->getOrderCreater()->getDataSchema();
+        $data =$this->getDataSchema();
         //无优惠券
         if(empty($data['coupon'])){
             return true;
@@ -116,7 +117,8 @@ class CouponComponnet implements OrderCreater
         foreach ($data['coupon'] as $k=>$v){
             if($v['is_use'] ==1){
                 $couponData =[
-                    'order_no'=>$orderNo,
+                    'business_type'=>OrderStatus::BUSINESS_ZUJI,
+                    'business_no'=>$orderNo,
                     'coupon_no'=>$v['coupon_no'],
                     'coupon_id'=>$v['coupon_id'],
                     'discount_amount'=>$v['discount_amount'],

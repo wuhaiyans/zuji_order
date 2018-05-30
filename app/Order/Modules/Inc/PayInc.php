@@ -11,7 +11,7 @@ class PayInc{
      */
     const  UnionPay = 4;
     /**
-     * @var int 支付方式(押金预授权)
+     * @var int 押金预授权
      */
     const FlowerDepositPay = 3;
     /**
@@ -19,7 +19,7 @@ class PayInc{
      */
     const FlowerStagePay = 2;
     /**
-     * @var int 支付方式(预授权)
+     * @var int 代扣
      */
     const WithhodingPay = 1;
 

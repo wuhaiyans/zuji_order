@@ -56,7 +56,7 @@ class UserComponnet implements OrderCreater
         $this->userId =$userId;
 
         //获取用户信息
-        $userInfo =User::getUser(config('tripartite.Interior_Goods_Request_data'), $this->userId,$addressId);
+        $userInfo =User::getUser($this->userId,$addressId);
         if (!is_array($userInfo)) {
             throw new Exception("获取用户接口失败");
         }

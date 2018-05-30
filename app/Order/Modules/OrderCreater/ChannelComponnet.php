@@ -64,7 +64,7 @@ class ChannelComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         //获取渠道信息
-        $ChannelInfo = Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
+        $ChannelInfo = Channel::getChannel($appid);
         if (!is_array($ChannelInfo)) {
             throw new Exception("获取渠道接口数据失败");
         }

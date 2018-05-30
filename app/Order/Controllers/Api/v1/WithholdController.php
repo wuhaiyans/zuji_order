@@ -234,7 +234,7 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_71004, ApiStatus::$errCodes[ApiStatus::CODE_71004]);
         }
 
-        $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
+        $userInfo = \App\Lib\User\User::getUser($orderInfo['user_id']);
         if( !is_array($userInfo )){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_60000, "获取用户接口失败");
@@ -470,7 +470,7 @@ class WithholdController extends Controller
                 continue;
             }
 
-            $userInfo = \App\Lib\User\User::getUser(config('tripartite.Interior_Goods_Request_data'), $orderInfo['user_id']);
+            $userInfo = \App\Lib\User\User::getUser($orderInfo['user_id']);
             if (!is_array($userInfo)) {
                 DB::rollBack();
                 Log::error("用户信息错误");
@@ -670,7 +670,7 @@ class WithholdController extends Controller
         }
 
         // 渠道
-        $ChannelInfo = \App\Lib\Channel\Channel::getChannel(config('tripartite.Interior_Goods_Request_data'),$appid);
+        $ChannelInfo = \App\Lib\Channel\Channel::getChannel($appid);
         if (!is_array($ChannelInfo)) {
             return apiResponse([], ApiStatus::CODE_10102, "channel_id 错误");
         }

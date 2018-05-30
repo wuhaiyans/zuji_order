@@ -72,7 +72,7 @@ class OrderCreater
             $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
-            $orderCreater = new YidunComponnet($orderCreater);
+            $orderCreater = new YidunComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
@@ -101,9 +101,9 @@ class OrderCreater
 //                return false;
 //            }
             $schemaData = $orderCreater->getDataSchema();
-            //var_dump($schemaData);die;
+
             $b = $orderCreater->create();
-            //var_dump($schemaData);die;
+            var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -122,7 +122,6 @@ class OrderCreater
                 }
             }
             $result = [
-                'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],

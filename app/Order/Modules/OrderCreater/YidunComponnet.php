@@ -32,19 +32,21 @@ class YidunComponnet implements OrderCreater
 
     //蚁盾数据
     private $yidun;
-    public function __construct(OrderCreater $componnet)
+    public function __construct(OrderCreater $componnet,int $appId)
     {
         $this->componnet = $componnet;
         $schema =$componnet->getDataSchema();
         $this->userInfo =$schema['user'];
 
         //获取蚁盾信息
-        $yidun =Fengkong::getYidun(config('tripartite.Interior_Fengkong_Request_data'),[
-            'user_id'=>$schema['user']['user_id'],
-            'user_name'=>$schema['user']['realname'],
-            'cert_no'=>$schema['user']['cert_no'],
-            'mobile'=>$schema['user']['user_mobile'],
-        ]);
+//        $yidun =Fengkong::getYidun([
+//            'user_id'=>$schema['user']['user_id'],
+//            'user_name'=>$schema['user']['realname'],
+//            'cert_no'=>$schema['user']['cert_no'],
+//            'mobile'=>$schema['user']['user_mobile'],
+//            'channel_appid'=>$appId,
+//        ]);
+//        var_dump($yidun);die;
 
         $yidun_data =[
             'yidun'=>[

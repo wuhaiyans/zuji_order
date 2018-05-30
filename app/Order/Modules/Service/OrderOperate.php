@@ -240,7 +240,7 @@ class OrderOperate
                         'num'=>$orderGoodsValues['quantity']
                     ];
                 }
-                $success =Goods::addStock(config('tripartite.Interior_Goods_Request_data'),$goods_arr);
+                $success =Goods::addStock($goods_arr);
 
 
             }
@@ -255,7 +255,7 @@ class OrderOperate
             $orderCouponData = OrderRepository::getCouponListByOrderId($orderNo);
             if ($orderCouponData) {
                 $coupon_id = array_column($orderCouponData, 'coupon_id');
-                $success =  Coupon::setCoupon(config('tripartite.Interior_Goods_Request_data'),['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
+                $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
 
                 if ($success) {
                     DB::rollBack();
