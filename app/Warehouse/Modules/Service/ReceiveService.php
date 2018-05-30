@@ -216,6 +216,19 @@ class ReceiveService
     }
 
     /**
+     * @param $params
+     * @throws \Exception
+     *
+     * 修改收货单物流信息
+     */
+    public function logistics($params)
+    {
+        if (!ReceiveRepository::logistics($params)) {
+            throw new \Exception('订单'.$params['order_no'] . '设备:'.$params['goods_no'].'修改物流失败');
+        }
+    }
+
+    /**
      * 取消检测
      */
     public function cancelCheck($params)

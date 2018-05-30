@@ -73,27 +73,7 @@ class Receive
 		return $res;
 
     }
-    /**
-     *[
-     * order_no
-     * goods_info=[
-     * [
-     * 'goods_no' => 12,
-     * 'imei1' => 0
-     *
-     * ],
-     * ['goods_no' => 12,
-     * 'imei1' => 0
-     *
-     * ]
-     *
-     *
-     * ]
-     * logistics_id
-     * logistics_no
 
-     * ]
-     */
     /**
      * 更新物流信息
      *
@@ -115,18 +95,33 @@ class Receive
             ]
         ];
      *
-     *
-     *
-     *
-     *
      * @return bool
-     *
      *
      */
     public function updateLogistics($params){
 
+        try {
+            $result = [
+                'order_no' => $params['order_no'],
+                'logistics_id' => $params['logistics_id'],
+                'logistics_no' => $params['logistics_no'],
+                'goods_no' => $params['goods_info'][0]['goods_no']
+            ];
+
+            $base_api = config('tripartite.warehouse_api_uri');
+
+            $res = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'warehouse.receive.create',//模拟
+                'params' => json_encode($result)
+            ]);
+            return $res;
 
 
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
 
         return true;
     }

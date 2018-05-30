@@ -56,6 +56,41 @@ class ReceiveRepository
             'page', $page);
     }
 
+
+    /**
+     * @param $params
+     * @return bool
+     *
+     * 修改物流
+     */
+    public static function logistics($params)
+    {
+        $goods_list = ReceiveGoods::where(['goods_no'=>$params['goods_no']])->get();
+        if (!$goods_list) return false;
+
+        $receives = [];
+        foreach ($goods_list as $g) {
+            array_push($receives, $g->receive_no);
+        }
+
+        $receiveModels = Receive::where(['receive_no'=>$receives])->get();
+
+        $receive = null;
+        foreach ($receiveModels as $r) {
+            if ($r->order_no == $params['order_no']) {
+                $receive = $r;
+                break;
+            }
+        }
+
+        if (!$receive) return false;
+
+        $receive->logistics_id = $params['logistics_id'];
+        $receive->logistics_no = $params['logistics_no'];
+
+        return $receive->update();
+    }
+
     /**
      * 清单查询
      */
