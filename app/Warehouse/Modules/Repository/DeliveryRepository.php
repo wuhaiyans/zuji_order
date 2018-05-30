@@ -91,6 +91,7 @@ class DeliveryRepository
             $row = [
                 'delivery_no'   =>  $delivery_no,
 //                'serial_no'     =>  $val['serial_no'],
+                'goods_name'    => isset($val['goods_name']) ? $val['goods_name'] : '',
                 'goods_no'      =>  $val['goods_no'],
                 'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
@@ -257,7 +258,7 @@ class DeliveryRepository
             }
 
             $goods_data = [
-                'quantity_delivered' => $params['quantity'],
+                'quantity_delivered' => isset($params['quantity']) ? $params['quantity'] : $goods_model->quantity,
                 'status'             => $goods_status,
                 'status_time'        => $time
             ];

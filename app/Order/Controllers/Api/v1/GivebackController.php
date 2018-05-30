@@ -220,7 +220,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92701);
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
@@ -435,7 +435,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([], get_code(), get_msg());
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//回滚事务
 			DB::rollBack();
 			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
@@ -478,12 +478,16 @@ class GivebackController extends Controller
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
-		//获取支付的url
-		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
-		$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
-			'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
-			'front_url' => $paramsArr['callback_url'],
-		]);
+		try{
+			//获取支付的url
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
+			$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
+				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
+				'front_url' => $paramsArr['callback_url'],
+			]);
+		} catch (\Exception $ex) {
+			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());
+		}
 		//拼接返回数据
 		$data = [
 			'order_no' => $orderGoodsInfo['order_no'],
@@ -545,7 +549,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([], ApiStatus::CODE_92700, '商品同步状态更新失败!');
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
@@ -775,6 +779,8 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
+		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
 		//清算处理数据拼接
 		$clearData = [
 			'user_id' => $paramsArr['user_id'],
@@ -783,6 +789,8 @@ class GivebackController extends Controller
 			'bussiness_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
+			'payment_no' => $payObj->getPaymentNo(),//payment_no
+			'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){

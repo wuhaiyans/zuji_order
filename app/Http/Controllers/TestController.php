@@ -24,14 +24,14 @@ class TestController extends Controller
     public function test()
     {
 
-        ImeiRepository::search('b');
+//        ImeiRepository::search('b');
 
 
 //        DeliveryRepository::cancelMatchGoodsStatus('201805291931525799');
 
 //        $this->testCreateReceive();
 
-//        $this->testApply('A511125156960043');
+        $this->testApply('A528100728283349');
 
 //        $this->testSend('201805281944493333');
 //        $this->testReceive();
