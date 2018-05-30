@@ -89,36 +89,18 @@ class WithholdController extends Controller
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
-        $params = $params['params'];
+        $userId     = $params['params']['user_id'];
 
-        //开启事务
-        DB::beginTransaction();
-
-        $userId     = $params['user_id'];
         // 查询用户协议
         $withholdInfo = OrderPayWithhold::find($userId);
         if( !$withholdInfo ){
-            DB::rollBack();
             Log::error("[代扣解约]查询用户信息失败");
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
 
         if( !$withholdInfo['withhold_status'] == OrderPayWithholdStatus::UNSIGN ){
-            DB::rollBack();
             Log::error("用户未签约该协议");
             return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
-        }
-
-        if( !$withholdInfo['out_withhold_no'] ){
-            DB::rollBack();
-            Log::error("获取用户支付宝id失败");
-            return apiResponse( [], ApiStatus::CODE_71004, '获取支付系统代扣协议码失败');
-        }
-
-        if( !$withholdInfo['withhold_no'] ){
-            DB::rollBack();
-            Log::error("获取用户代扣协议码失败");
-            return apiResponse( [], ApiStatus::CODE_71004, '获取用户代扣协议码失败');
         }
 
         // 查看用户是否有未扣款的分期
@@ -132,8 +114,9 @@ class WithholdController extends Controller
             Log::error("[代扣解约]订单分期查询错误");
             return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
         }
-        try {
 
+
+        try {
             $data = [
                 'user_id'           => $userId, //租机平台用户ID
                 'agreement_no'      => $withholdInfo['out_withhold_no'], //支付平台签约协议号
@@ -143,13 +126,10 @@ class WithholdController extends Controller
 
             $b = \App\Lib\Payment\CommonWithholdingApi::unSign( $data );
             if( !$b ){
-                DB::rollBack();
                 Log::error("[代扣解约]调用支付宝解约接口失败");
                 return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
             }
 
-            // 成功
-            DB::commit();
             return apiResponse([], ApiStatus::CODE_0, "success");
         } catch (\Exception $exc) {
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
