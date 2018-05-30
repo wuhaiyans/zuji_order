@@ -762,7 +762,7 @@ class OrderReturnCreater
                           DB::rollBack();
                           return ApiStatus::CODE_33008;//修改退货单信息失败
                       }
-
+                     $deliveray_data['goods'][$k]['goods_no']=$data[$k]['goods_no'];
                   }
 
               }
@@ -786,6 +786,26 @@ class OrderReturnCreater
 
 
 
+          }
+          //如果业务类型是换货并且有检测合格的数据，创建换货记录
+          if($business_key == ReturnStatus::OrderHuanHuo){
+              if($deliveray_data){
+                  $order_data['order_no']=$order_no;
+                  //查询用户信息
+                  $user_result= $this->orderReturnRepository->getUserInfo($order_data);
+                  if(!$user_result){
+                      return false;
+                  }
+
+                  $deliveray_data['mobile']=$user_result['mobile'];
+                  $deliveray_data['realname']=$user_result['realname'];
+                  $deliveray_data['address_info']=$user_result['address_info'];
+                  //创建换货单
+                  $delivery_result=Delivery::createDelivery($deliveray_data);
+                  if(!$delivery_result){
+                      return ApiStatus::CODE_34009;//创建换货单失败
+                  }
+              }
           }
 
           //提交事务
