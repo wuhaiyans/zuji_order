@@ -27,6 +27,7 @@ class OrderCreate implements ShortMessage {
 	    $class =basename(str_replace('\\', '/', __CLASS__));
 		return Config::getCode($channel_id, $class);
 	}
+<<<<<<< Updated upstream
 	
 //	public function notify($data=[]){
 //		// 根据业务，获取短息需要的数据
@@ -51,9 +52,19 @@ class OrderCreate implements ShortMessage {
 //
 //		]);
 //	}
+=======
+
+>>>>>>> Stashed changes
 	public function notify($data=[]){
 		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
 		var_dump($result);exit;
 	}
+<<<<<<< Updated upstream
+=======
+//	public function notify($data=[]){
+//		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
+//		var_dump($result);exit;
+//	}
+>>>>>>> Stashed changes
 	
 }
