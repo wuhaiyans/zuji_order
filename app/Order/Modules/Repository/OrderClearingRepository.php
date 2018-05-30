@@ -201,7 +201,7 @@ class OrderClearingRepository
             if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
 
                 $orderData->refund_time  = time();
-                $orderData->refund_no   = $param['refund_no'];
+                $orderData->out_refund_no   = $param['out_refund_no'];
 
             }
         }

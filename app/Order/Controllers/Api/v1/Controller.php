@@ -21,14 +21,14 @@ class Controller extends BaseController
     protected function  validateParams($rules, $params)
     {
 
-        if (!isset($params['params'])) {
-            return apiResponseArray(ApiStatus::CODE_10102,[]);
-        }
+        if (empty($params)) return  apiResponseArray(ApiStatus::CODE_10102,[]);
 
-        if (is_string($params['params'])) {
+        if (isset($params['params']) && is_string($params['params'])) {
             $params = json_decode($params['params'], true);
-        } else if (is_array($params['params'])) {
+        } else if (isset($params['params']) && is_array($params['params'])) {
             $params = $params['params'];
+        } else if (!isset($params['params']) &&  is_string($params)) {
+            $params = json_decode($params, true);
         }
 
         $validator = app('validator')->make($params, $rules);
@@ -46,9 +46,9 @@ class Controller extends BaseController
      * @param int $type
      * @return string
      */
-    protected function innerOkMsg(){
+    public function innerOkMsg(){
         $returnData = array('status'=>'ok');
-        return response()->json($returnData);
+        return response()->json($returnData)->send();
 
     }
 
@@ -60,7 +60,7 @@ class Controller extends BaseController
      */
     protected function innerErrMsg(){
         $returnData = array('status'=>'error');
-        return response()->json($returnData);
+        return response()->json($returnData)->send();
 
     }
 }
