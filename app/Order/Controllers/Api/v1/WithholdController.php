@@ -621,8 +621,7 @@ class WithholdController extends Controller
 
     }
 
-
-    /**
+     /**
      * 主动还款
      * @requwet Array
      * [
@@ -645,39 +644,29 @@ class WithholdController extends Controller
             return apiResponse([], $validateParams['code']);
         }
         $params = $params['params'];
+        // 判断分期状态
+        $instalmentId   = $params['instalment_id'];
 
-        // 订单详情
-        $orderInfo  = OrderRepository::getOrderInfo($params);
-        if(!$orderInfo){
-            return apiResponse([], ApiStatus::CODE_20001, "order_no不能为空");
+        // 查询分期信息
+        $instalmentInfo = OrderInstalment::queryByInstalmentId($instalmentId);
+        if( !is_array($instalmentInfo)){
+            // 提交事务
+            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
-
-        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
-            return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
-        }
-
-        // 查询分期
-        if(empty($params['nologin'])){
-            $instal_where = ['id'=>$params['instalment_id']];
-        }else{
-            $instal_where = [
-                'order_no'  => $params['order_no'],
-                'term'      => date('Ym'),
-            ];
-        }
-        $instalmentInfo  = OrderInstalment::queryInfo($instal_where);
-        if(!$instalmentInfo){
-            return apiResponse([], ApiStatus::CODE_20001, "查询分期数据错误");
-        }
-
+        //分期状态
         if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
             return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
         }
 
-        // 代扣协议
-        $payWithhold = \App\Order\Modules\Repository\OrderPayWithholdRepository::find($orderInfo['user_id']);
-        if(empty($payWithhold)){
-            return apiResponse([],ApiStatus::CODE_20001, "参数错误");
+        //查询订单记录
+        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+        if( !$orderInfo ){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+        // 订单状态
+        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
+            return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
         }
 
         // 渠道
@@ -687,28 +676,48 @@ class WithholdController extends Controller
         }
         $channelId = intval($ChannelInfo['_channel']['id']);
 
-        // 优惠券判断 (暂留)
-        $amount = $instalmentInfo['amount'] * 100;
+        $youhui = 0;
+        // 租金抵用券
+        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+        if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
+            $youhui = $couponInfo['youhui'];
+        }
+        // 最小支付一分钱
+        $amount = $instalmentInfo['amount'] - $youhui;
+        $amount = $amount > 0 ? $amount : 0.01;
 
-        // 回调地址
-        $backUrl = env("API_INNER_URL") . "/repaymentNotify";
+        //修改优惠券信息
+        if($youhui > 0){
+            // 创建优惠券使用记录
+            $couponData = [
+                'coupon_id'         => $couponInfo['coupon_id'],
+                'discount_amount'   => $couponInfo['youhui'],
+                'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'       => $instalmentInfo['trade_no'],
+            ];
+            \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
 
-        $payData = [
-            'out_payment_no'	=> $payWithhold['withhold_no'],	//【必选】string    业务支付唯一编号
-	 		'payment_amount'	=> $amount,	                    //【必选】int       交易金额；单位：分
-	 		'payment_fenqi'		=> $instalmentInfo['times'],	//【必选】int       分期数
-	 		'channel_type'	    => $channelId,	                //【必选】int       支付渠道
-	 		'name'			    => '主动还款',	                //【必选】string    交易名称
-	 		'back_url'		    => $backUrl,	                //【必选】string    后台通知地址
-	 		'front_url'		    => $params['return_url'],	    //【必选】string    前端回跳地址
-	 		'user_id'		    => $orderInfo['user_id'],	    //【可选】int       业务平台yonghID
-        ];
+            // 修改优惠券状态
+            $couponStatus = \App\Lib\Coupon\Coupon::useCoupon([$couponInfo['coupon_id']]);
+            if($couponStatus != ApiStatus::CODE_0){
+                return apiResponse([],ApiStatus::CODE_50010);
+            }
+        }
 
         // 创建支付单
-        $url = CommonPaymentApi::pageUrl($payData);
-        if(!$url){
-            return apiResponse([],ApiStatus::CODE_30900, "创建支付单失败");
-        }
+        $payData = [
+            'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
+	 		'businessNo'		=> $instalmentInfo['trade_no'],	// 业务编号
+	 		'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
+	 		'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+        ];
+        $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+
+        //获取支付的url
+        $url = $payResult->getCurrentUrl($channelId, [
+            'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
+            'front_url' => $params['return_url'], //回调URL
+        ]);
 
         return apiResponse(['url'=>$url['payment_url']],ApiStatus::CODE_0);
 
@@ -759,49 +768,7 @@ class WithholdController extends Controller
         echo "SUCCESS";
     }
 
-    /**
-     * 主动还款回调
-     * @requwet Array
-     * [
-     *      'reason'            => '', 【必须】 String 错误原因
-     *      'status'            => '', 【必须】 int：success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
-     *      'payment_no'        => '', 【必须】 String 支付平台支付码
-     *      'out_no'            => '', 【必须】 String 订单平台支付码
-     * ]
-     * @return String FAIL：失败  SUCCESS：成功
-     */
-    public function repaymentNotify(Request $request){
-        $params     = $request->all();
 
-        $rules = [
-            'payment_no'  => 'required',
-            'out_no'      => 'required',
-            'status'      => 'required',
-            'reason'      => 'required',
-        ];
-        // 参数过滤
-        $validateParams = $this->validateParams($rules,$params);
-        if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
-        }
-
-        // 扣款成功 修改分期状态
-        $params = $params['params'];
-
-        if($params['status'] == "success"){
-            $trade_no = $params['out_no'];
-            //修改分期状态
-            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
-            if(!$b){
-                echo "FAIL";exit;
-            }
-        }else{
-            LogApi::info('支付异步通知', $params);
-        }
-
-        echo "SUCCESS";
-
-    }
 
     /**
      * 代扣解约接口

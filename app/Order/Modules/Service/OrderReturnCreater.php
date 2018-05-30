@@ -429,7 +429,8 @@ if(!$create_receive){
 
         //创建退款清单
         $create_data['order_no']=$params['order_no'];
-        $pay_result=$this->orderReturnRepository->get_pay_no(1,$params['order_no']);
+        $business_key=ReturnStatus::OrderTuiKuan;
+        $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$params['order_no']);
         if(!$pay_result){
             return ApiStatus::CODE_50004;//订单未支付
         }
