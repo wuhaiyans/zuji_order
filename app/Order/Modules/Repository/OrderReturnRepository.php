@@ -8,6 +8,7 @@ use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderPayModel;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use Illuminate\Support\Facades\DB;
 
 class OrderReturnRepository
@@ -168,7 +169,7 @@ class OrderReturnRepository
             return false;
         }
         $where[]=['order_no','=',$params['order_no']];
-        $data['goods_status']=ReturnStatus::ReturnDenied;
+        $data['goods_status']=OrderGoodStatus::RENTING_MACHINE;
         if(ordergoods::where($where)->update($data)){
             return true;
         }else{

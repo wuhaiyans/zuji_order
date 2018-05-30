@@ -62,6 +62,7 @@ class Receive extends Warehouse
         'status_time',
         'create_time',
         'app_id',
+        'receive_type',
         'receive_time',
         'check_time',
         'check_result',
