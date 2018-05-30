@@ -136,7 +136,7 @@ class OrderCleaning
             if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed) {
 
                 //根据支付编号查找支付相关数据
-                $payInfo = PayQuery::getPayByPaymentNo($orderCleanData['payment_no']);
+                $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);
                 if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
 
                     return false;
@@ -148,7 +148,7 @@ class OrderCleaning
                     'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
                     'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
                 ];
-                $succss =  CommonRefundApi::apple($params);
+                $succss =  CommonRefundApi::apply($params);
                 LogApi::info('退款申请接口返回', $succss);
 
 
@@ -175,7 +175,7 @@ class OrderCleaning
              * ]
              */
             //根据预授权编号查找预授权相关数据
-            $authInfo = PayQuery::getPayByFundauthNo($orderCleanData['auth_no']);
+            $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
                 return false;

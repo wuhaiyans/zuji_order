@@ -47,7 +47,7 @@ return [
     'warehouse.receive.finishCheck'=> 'ReceiveController@finishCheck',//验收完成，针对收货单
     'warehouse.receive.show'=> 'ReceiveController@show',//清单查询，针对收货单
     'warehouse.receive.note'=> 'ReceiveController@note',//录入检测项，针对收货单
-    'warehouse.receive.checkItemsFinish'=> 'ReceiveController@checkItemsFinish'//检测完成
-
+    'warehouse.receive.checkItemsFinish'=> 'ReceiveController@checkItemsFinish',//检测完成
+    'warehouse.receive.logistics'=> 'ReceiveController@logistics'//修改物流
 
 ];

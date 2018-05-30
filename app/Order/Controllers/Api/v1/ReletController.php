@@ -72,7 +72,6 @@ class ReletController extends Controller
      *
      * @params
      *  'user_id'       => 'required', //用户ID
-     *  //'zuqi_type'     => 'required', //租期类型
      *  'zuqi'          => 'required', //租期
      *  'order_no'      => 'required', //订单编号
      *  'pay_type'      => 'required', //支付方式
@@ -97,6 +96,7 @@ class ReletController extends Controller
                 'user_name'     => 'required',//用户名(手机号)
             ]);
             if(count($params) < 5){
+
                 return apiResponse([], ApiStatus::CODE_20001, "参数错误");
             }
 

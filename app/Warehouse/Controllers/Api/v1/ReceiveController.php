@@ -129,6 +129,39 @@ class ReceiveController extends Controller
     }
 
 
+
+    /**
+     * 修改物流
+     */
+    public function logistics()
+    {
+        /**
+         * delivery_no 发货单号
+         * logistics_id 物流渠道
+         * logistics_no 物流编号
+         */
+        $rules = [
+            'order_no'  => 'required',
+            'logistics_id' => 'required',//物流渠道
+            'logistics_no' => 'required',
+            'goods_no' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->receive->logistics($params);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
+
     /**
      * 收货单明细收货
      */
