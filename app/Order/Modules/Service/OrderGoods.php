@@ -11,7 +11,7 @@ class OrderGoods
 	 */
 	protected $orderGoodsRepository;
 	public function __construct(  ) {
-		$this->orderGoodsRepository = new OrderGoodsRepository(new \App\Order\Models\OrderGoods());
+		$this->orderGoodsRepository = new OrderGoodsRepository();
 	}
 	/**
 	 * 获取一条商品信息
