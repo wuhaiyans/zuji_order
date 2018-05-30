@@ -163,9 +163,14 @@ class OrderGiveback
 			return false;
 		}
 		
-		//创建商品服务层对象
+		//创建服务层对象
 		$orderGoodsService = new OrderGoods();
 		$orderGivebackService = new OrderGiveback();
+		//获取还机单信息
+		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivevbackInfo ) {
+			return false;
+		}
 		
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
@@ -182,7 +187,7 @@ class OrderGiveback
 				DB::rollBack();
 				return false;
 			}
-			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
 			if( !$orderGoodsResult ){
 				//事务回滚
 				DB::rollBack();
@@ -219,17 +224,17 @@ class OrderGiveback
 			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
 			return false;
 		}
-		//创建商品服务层对象
+		//创建服务层对象
 		$orderGoodsService = new OrderGoods();
 		$orderGivebackService = new OrderGiveback();
-		//获取商品信息
-		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
-		if( !$orderGoodsInfo ) {
+		//获取还机单信息
+		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivevbackInfo ) {
 			return false;
 		}
-		//获取还机单信息
-		$orderGivevbackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
-		if( !$orderGivevbackInfo ) {
+		//获取商品信息
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivevbackInfo['goods_no']);
+		if( !$orderGoodsInfo ) {
 			return false;
 		}
 		//开启事务
