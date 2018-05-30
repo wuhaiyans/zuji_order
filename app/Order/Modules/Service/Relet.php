@@ -17,6 +17,7 @@ use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ReletRepository;
+use Illuminate\Support\Facades\DB;
 
 class Relet
 {
@@ -84,6 +85,7 @@ class Relet
      * @return bool
      */
     public function createRelet($params){
+        DB::beginTransaction();
         $where = [
             ['id', '=', $params['goods_id']],
             ['user_id', '=', $params['user_id']],
@@ -93,18 +95,21 @@ class Relet
         if( $row ){
             if( $row['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
                 if( !publicInc::getDuanzuRow($params['zuqi']) ){
+                    DB::rollBack();
                     set_msg('租期错误');
                     return false;
                 }
+                $fundauthNo = \createNo(3);
             }else{
                 if( !publicInc::getCangzuRow($params['zuqi']) ){
+                    DB::rollBack();
                     set_msg('租期错误');
                     return false;
                 }
+                $fundauthNo = \createNo();
             }
             $amount = $row['zujin']*$params['zuqi'];
             if($amount == $params['relet_amount']){
-
                 $data = [
                     'user_id'=>$params['user_id'],
                     'zuqi_type'=>$row['zuqi_type'],
@@ -118,17 +123,73 @@ class Relet
                     'status'=>ReletStatus::STATUS1,
                 ];
 
-                return $this->reletRepository->createRelet($data);
+                if($this->reletRepository->createRelet($data)){
+                    // 创建支付
+                    $pay = PayCreater::createFundauth([
+                        'user_id'		=> $data['user_id'],
+                        'businessType'	=> OrderStatus::BUSINESS_RELET,
+                        'businessNo'	=> $data['order_no'],
+
+                        'fundauthNo' => \createNo(9),
+                        'fundauthAmount' => $data['amount'],
+                        'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                    ]);
+                    $step = $pay->getCurrentStep();
+                    //echo '当前阶段：'.$step."\n";
+
+                    $_params = [
+                        'name'			=> '订单续租',					//【必选】string 交易名称
+                        'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+                    ];
+                    $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+                    DB::commit();
+                    return $urlInfo;
+
+                }else{
+                    DB::rollBack();
+                    set_msg('创建续租失败');
+                    return false;
+                }
             }else{
+                DB::rollBack();
                 set_msg('金额错误');
                 return false;
             }
 
         }else{
+            DB::rollBack();
             set_msg('未获取到订单商品信息');
             return false;
         }
 
+    }
+
+    /**
+     * 创建支付
+     *
+     * @param $data
+     * @return mixed
+     */
+    public function createPay($data){
+        // 创建支付
+        $pay = PayCreater::createFundauth([
+            'user_id'		=> $data['user_id'],
+            'businessType'	=> OrderStatus::BUSINESS_RELET,
+            'businessNo'	=> $data['order_no'],
+
+            'fundauthNo' => \createNo($data['noType']),
+            'fundauthAmount' => $data['amount'],
+            'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+        ]);
+        $step = $pay->getCurrentStep();
+        //echo '当前阶段：'.$step."\n";
+
+        $_params = [
+            'name'			=> '订单续租',					//【必选】string 交易名称
+            'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+        ];
+        $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+        return $urlInfo;
     }
 
     /**
@@ -158,7 +219,7 @@ class Relet
                 $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
             }
             $row['list'] = $list;
-            $orderInfo = OrderRepository::getGoodsExtendInfo($params['order_no']);
+            $orderInfo = OrderRepository::getInfoById($params['order_no']);
             $row['pay_type'] = $orderInfo['pay_type'];
             $row['pay_name'] = PayInc::getPayName($orderInfo['pay_type']);
             return $row;
