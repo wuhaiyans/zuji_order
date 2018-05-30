@@ -426,10 +426,13 @@ if(!$create_receive){
         if(!$order_info){
             return ApiStatus::CODE_34005;//查无此订单
         }
+        $where[]=['order_no','=',$params['order_no']];
         //获取订单支付方式
         if($order_info['order_status']!=OrderStatus::BUSINESS_RETURN && $order_info['order_status']!=OrderStatus::OrderPayed){
            return ApiStatus::CODE_34001;//此订单不符合规则
         }
+        //获取退货单号
+        $return_no=$this->orderReturnRepository->get_type($where);
         //创建退款清单
         $create_data['order_no']=$params['order_no'];
         $business_key=ReturnStatus::OrderTuiKuan;
@@ -439,7 +442,7 @@ if(!$create_receive){
         }
         $create_data['order_type']=$order_info['order_type'];//订单类型
         $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;//业务类型
-        $create_data['business_no']=$params['order_no'];//业务编号
+        $create_data['business_no']=$return_no['refund_no'];//业务编号
         $create_data['user_id']=$order_info['user_id'];
         //退款：直接支付
         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
@@ -507,7 +510,6 @@ if(!$create_receive){
         //修改退款状态为退款中
         $data['status']=ReturnStatus::ReturnTui;
         $data['remark']=$params['remark'];
-        $where[]=['order_no','=',$params['order_no']];
         $tui_result=$this->orderReturnRepository->is_qualified($where,$data);
         if(!$tui_result){
             //事务回滚
