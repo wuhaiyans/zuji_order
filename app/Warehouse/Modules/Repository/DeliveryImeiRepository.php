@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Modules\Repository;
 use App\Warehouse\Models\DeliveryGoodsImei;
+use App\Warehouse\Models\Imei;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class DeliveryImeiRepository
@@ -64,19 +65,24 @@ class DeliveryImeiRepository
      * @return bool
      * 添加或修改
      */
-    public static function add($delivery_no, $imei, $serial_no)
+    public static function add($params)
     {
-        $model = DeliveryGoodsImei::where(['delivery_no'=>$delivery_no, 'serial_no'=>$serial_no])->first();
+        $model = DeliveryGoodsImei::where([
+            'delivery_no'=>$params['delivery_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
 
         if (!$model) {
             $model = new DeliveryGoodsImei();
-            $model->delivery_no = $delivery_no;
-            $model->serial_no = $serial_no;
-            $model->status_time = time();
-            $model->create_time = time();
+            $model->delivery_no = $params['delivery_no'];
+            $model->goods_no = $params['goods_no'];
+            $model->status_time = $model->create_time = time();
         }
-        $model->imei = $imei;
+        $model->imei = $params['imei'];
+        $model->apple_serial = isset($params['apple_serial']) ? $params['apple_serial'] : '';
         $model->status = DeliveryGoodsImei::STATUS_YES;
+
+        Imei::out($params['imei']);
         return $model->save();
     }
 
@@ -94,7 +100,11 @@ class DeliveryImeiRepository
         if (!$model) {
             throw new NotFoundResourceException('对应imei未找到');
         }
-        return $model->delete();
+
+        Imei::in($imei);
+
+        $model->status = DeliveryGoodsImei::STATUS_NO;
+        return $model->update();
     }
 
 }

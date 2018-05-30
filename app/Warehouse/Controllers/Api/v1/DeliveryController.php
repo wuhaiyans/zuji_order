@@ -321,6 +321,32 @@ class DeliveryController extends Controller
     }
 
 
+
+    /**
+     * 取消配货 完成后 为待配货状态
+     */
+    public function cancelMatchGoods()
+    {
+        $rules = [ //delivery_no 发货单号
+            'delivery_no' => 'required',
+            'goods_no' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->cancelMatchGoods($params);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
     /**
      * 取消关联imei
      */
@@ -364,7 +390,7 @@ class DeliveryController extends Controller
         $rules = [
             'delivery_no' => 'required',
             'imei'      => 'required',
-            'serial_no' => 'required'
+            'goods_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -373,7 +399,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $server->add($params['delivery_no'], $params['imei'], $params['serial_no']);
+            $server->add($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
