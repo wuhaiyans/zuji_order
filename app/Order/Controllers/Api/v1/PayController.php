@@ -386,7 +386,7 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
             if ($param['status']!='success'){
                 LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
             }
@@ -477,7 +477,7 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
             if ($orderCleanInfo['code']) {
@@ -550,7 +550,6 @@ class PayController extends Controller
     public function unfreezeAndPayClean(Request $request)
     {
 
-
         try{
 
             $input = file_get_contents("php://input");
@@ -566,7 +565,7 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code']);
+            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
             if ($param['status']!='success'){
                 LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
             }
