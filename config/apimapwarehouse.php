@@ -3,6 +3,7 @@
 return [
 
     //imei导入
+    'warehouse.imei.search' => 'ImeiController@search', //列表
     'warehouse.imei.import' => 'ImeiController@import', //导入imei
     'warehouse.imei.list' => 'ImeiController@list', //列表
     'warehouse.imei.importFromExcel' => 'ImeiController@importFromExcel', //导入
@@ -15,6 +16,7 @@ return [
     //发货
     'warehouse.delivery.deliveryCreate' => 'DeliveryController@deliveryCreate', //发货单 -- 创建
     'warehouse.delivery.matchGoods' => 'DeliveryController@matchGoods', //发货清单 -- 配货
+    'warehouse.delivery.cancelMatchGoods' => 'DeliveryController@cancelMatchGoods', //取消单品配货
 
     'warehouse.delivery.cancel' => 'DeliveryController@cancel', //取消发货
     'warehouse.delivery.cancelDelivery' => 'DeliveryController@cancelDelivery', //取消发货
@@ -44,5 +46,8 @@ return [
     'warehouse.receive.cancelCheck'=> 'ReceiveController@cancelCheck',//验收取消，针对设备
     'warehouse.receive.finishCheck'=> 'ReceiveController@finishCheck',//验收完成，针对收货单
     'warehouse.receive.show'=> 'ReceiveController@show',//清单查询，针对收货单
-    'warehouse.receive.note'=> 'ReceiveController@note'//录入检测项，针对收货单
+    'warehouse.receive.note'=> 'ReceiveController@note',//录入检测项，针对收货单
+    'warehouse.receive.checkItemsFinish'=> 'ReceiveController@checkItemsFinish'//检测完成
+
+
 ];

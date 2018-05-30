@@ -20,19 +20,26 @@ class OrderGoodsExtendRepository
     public function __construct()
     {
     }
-    public static function add($params){
-        $data =[
-            'order_no'=>$params['order_no'],
-            'goods_id'=>$params['goods_id'],
-            'goods_no'=>$params['goods_no'],
-            'imei1'=>isset($params['imei1'])?$params['imei1']:"",
-            'imei2'=>isset($params['imei2'])?$params['imei2']:"",
-            'imei3'=>isset($params['imei3'])?$params['imei3']:"",
-            'serial_number'=>$params['serial_number'],
-            'status'=>0,
-        ];
-        $res =OrderLog::create($data);
-        return $res->getQueueableId();
+    public static function add($orderNo,$goodsInfo){
+        foreach ($goodsInfo as $k=>$v){
+            $data =[
+                'order_no'=>$orderNo,
+                'goods_id'=>$v['goods_id'],
+                'goods_no'=>$v['goods_no'],
+                'imei1'=>isset($v['imei1'])?$v['imei1']:"",
+                'imei2'=>isset($v['imei2'])?$v['imei2']:"",
+                'imei3'=>isset($v['imei3'])?$v['imei3']:"",
+                'serial_number'=>$v['serial_number'],
+                'status'=>0,
+            ];
+            $res =OrderLog::create($data);
+            $id =$res->getQueueableId();
+            if(!$id){
+                return false;
+            }
+        }
+        return true;
+
     }
 
     /**

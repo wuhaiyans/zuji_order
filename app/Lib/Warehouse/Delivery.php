@@ -101,13 +101,10 @@ class Delivery
     public static function apply($order_no)
     {
         $base_api = config('tripartite.warehouse_api_uri');
-
-        $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
-
-        dd($info);
+        $info = self::getOrderInfo($order_no);
 
         $res= Curl::post($base_api, array_merge(self::getParams(), [
-            'method'=> 'warehouse.delivery.send',//模拟
+            'method'=> 'warehouse.delivery.deliveryCreate',//模拟
             'params' => json_encode($info)
         ]));
 
@@ -119,6 +116,44 @@ class Delivery
         }
 
         return true;
+    }
+
+    /**
+     * @param $order_no
+     * @return array|bool
+     *
+     * 为创建发货申请提供数据源
+     */
+    public static function getOrderInfo($order_no)
+    {
+        $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
+        $info = json_decode($info, true);
+        $info = $info['data'];
+
+        if (!$info || !isset( $info['order_info']) || !isset( $info['goods_info'])) {
+            return false;
+        }
+        $order_info = $info['order_info'];
+        $goods_list = $info['goods_info'];
+
+        $result = [
+            'order_no'  => $order_no,
+            'realname'  => $order_info['name'],
+            'mobile'    => $order_info['user_mobile'],
+            'address_info' => $order_info['address_info'],
+        ];
+
+        foreach ($goods_list as $goods) {
+            $g[] = [
+                'goods_no' => $goods['goods_no'],
+                'goods_name' => $goods['goods_name'],
+                'quantity'  => $goods['quantity']
+            ];
+        }
+
+        $result['delivery_detail'] = $g;
+
+        return $result;
     }
 
     /**

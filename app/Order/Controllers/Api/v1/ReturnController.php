@@ -84,8 +84,9 @@ class ReturnController extends Controller
         $data= filter_array($params,[
             'order_no'=>'required',
             'user_id'=>'required',
+            'business_key'=>'required',
         ]);
-        if(count($data)<2){
+        if(count($data)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
@@ -274,7 +275,7 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     /**
-     *   退换货/退款审核
+     *   退换货审核
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * 选中即同意
@@ -288,7 +289,7 @@ class ReturnController extends Controller
      *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
      *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
      * ]
-     *
+     *business_key
      * ]
      *
      */
@@ -303,16 +304,44 @@ class ReturnController extends Controller
         if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-
         if(isset($params['agree'])){
             $res=$this->OrderReturnCreater->agree_return($params);//审核同意
+            if($res!=0){
+                return  apiResponse([],$res);
+            }
+
         }
         if(isset($params['disagree'])){
             $res=$this->OrderReturnCreater->deny_return($params);
+            if($res!=0){
+                return  apiResponse([],$res);
+            }
+        }
+        return  apiResponse([],$res);;
+    }
+    /**
+     * 订单退款审核
+     * @param Request $request
+     *
+     */
+    public function refundReply(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',
+            'remark'=> 'required',
+            'status'=> 'required',
+        ]);
+        if(count($param)<3){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        if($params['status']==0){
+            $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
+        }else{
+            $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核同意
         }
         return apiResponse([],$res);
     }
-
     /**
      * 换货
      * @param Request $request

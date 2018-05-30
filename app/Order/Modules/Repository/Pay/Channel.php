@@ -17,6 +17,10 @@ class Channel {
 	 * 支付宝
 	 */
 	const Alipay = 2;
+	/**
+	 * 京东支付
+	 */
+	const Jdpay = 3;
 	
 	
 }

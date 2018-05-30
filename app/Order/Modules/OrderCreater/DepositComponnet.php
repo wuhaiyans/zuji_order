@@ -33,10 +33,7 @@ class DepositComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         $this->payType =$payType;
-        $schema = $this->componnet->getDataSchema();
-        //var_dump($schema);die;
         $this->certifiedFlag =$certifiedFlag;
-        $this->schema =$schema;
 
     }
     /**
@@ -58,6 +55,8 @@ class DepositComponnet implements OrderCreater
     public function filter(): bool
     {
         $filter =  $this->componnet->filter();
+        $schema = $this->componnet->getDataSchema();
+        $this->schema =$schema;
         /*
          * 2018-02-22 liuhongxing 暂时去掉 人脸识别 限制条件（为 芝麻活动 提高订单量）
          * 2018-03-05 liuhongxing 恢复人脸识别 限制条件
@@ -90,7 +89,7 @@ class DepositComponnet implements OrderCreater
             //支付押金规则
             foreach ($this->schema['sku'] as $k=>$v)
             {
-                $deposit =Goods\Deposit::getDeposit(config('tripartite.Interior_Goods_Request_data'),[
+                $deposit =Goods\Deposit::getDeposit([
                     'spu_id'=>$v['spu_id'],
                     'pay_type'=>$this->payType,
                     'credit'=>$this->schema['user']['credit']?$this->schema['user']['credit']:0,
@@ -116,7 +115,7 @@ class DepositComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        return $this->schema;
+        return $this->componnet->getDataSchema();
     }
 
     /**
