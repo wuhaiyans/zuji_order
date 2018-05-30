@@ -78,12 +78,9 @@ class CouponComponnet implements OrderCreater
         if(empty($coupon)){
             return $this->flag && $filter;
         }
-        $schema =$this->componnet->getDataSchema();
-        $sku =$schema['sku'];
 
         //计算优惠券信息
-        $this->coupon =$this->componnet->getOrderCreater()->getSkuComponnet()->discrease_coupon($sku,$coupon);
-
+        $this->coupon =$this->componnet->getOrderCreater()->getSkuComponnet()->discrease_coupon($coupon);
         return $this->flag && $filter;
     }
 
