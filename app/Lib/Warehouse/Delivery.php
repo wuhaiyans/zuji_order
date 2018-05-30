@@ -124,7 +124,7 @@ class Delivery
      *
      * 为创建发货申请提供数据源
      */
-    public static function getOrderInfo($order_no)
+    protected static function getOrderInfo($order_no)
     {
         $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);
         $info = json_decode($info, true);
