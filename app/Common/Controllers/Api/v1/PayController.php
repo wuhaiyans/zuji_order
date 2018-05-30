@@ -58,7 +58,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093802';
+		$business_no = 'FA522834027093803';
 		$pay = null;
 		try {
 			// 查询
@@ -77,7 +77,7 @@ class PayController extends Controller
 				'businessNo'	=> $business_no,
 				
 				'paymentAmount' => '0.01',
-				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Jdpay,
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
 				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
@@ -86,7 +86,7 @@ class PayController extends Controller
 				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 			]);
 		} catch (\Exception $exc) {
-			exit('error');
+			echo $exc->getMessage();exit;
 		}
 		
 		try {
@@ -100,7 +100,7 @@ class PayController extends Controller
 			
 			$pay->setPaymentAmount(0.02);
 			
-			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Jdpay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			
