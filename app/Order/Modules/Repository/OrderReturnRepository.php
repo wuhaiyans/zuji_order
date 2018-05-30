@@ -712,7 +712,11 @@ class OrderReturnRepository
      *
      */
     public static function getReturnInfo($where){
-
+        $return_result= OrderReturn::where($where)->get()->toArray();
+        if(!$return_result){
+            return false;
+        }
+        return $return_result;
     }
 
 }
