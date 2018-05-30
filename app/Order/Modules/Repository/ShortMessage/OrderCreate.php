@@ -52,7 +52,7 @@ class OrderCreate implements ShortMessage {
 //		]);
 //	}
 	public function notify($data=[]){
-		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), []);
+		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
 		var_dump($result);exit;
 	}
 	
