@@ -58,7 +58,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093804';
+		$business_no = 'FA522834027093805';
 		$pay = null;
 		try {
 			// 查询
@@ -71,7 +71,7 @@ class PayController extends Controller
 		} catch (\App\Lib\NotFoundException $exc) {
 
 			// 创建支付
-			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPayment([
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
 				'user_id'		=> '5',
 				'businessType'	=> $business_type,
 				'businessNo'	=> $business_no,
