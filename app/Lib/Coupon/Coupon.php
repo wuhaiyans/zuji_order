@@ -30,8 +30,33 @@ class Coupon{
         ];
         //var_dump($data);die;
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
+        $info = json_decode($info,true);
         //var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+
+    }
+
+    /**
+     * 根据用户id获取用户租金抵用券
+     * @param $user_id 用户ID
+     * @return string
+     */
+    public static function getUserCoupon($user_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.coupon.voucher.get';
+        $data['params'] = [
+            'user_id'=>$user_id,
+        ];
+
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info = json_decode($info,true);
+
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

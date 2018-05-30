@@ -522,4 +522,48 @@ class OrderInstalment
 
 
 
+    /**
+     * 主动还款回调
+     * @requwet Array
+     * [
+     *      'reason'            => '', 【必须】 String 错误原因
+     *      'status'            => '', 【必须】 int：success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+     *      'payment_no'        => '', 【必须】 String 支付平台支付码
+     *      'out_no'            => '', 【必须】 String 订单平台支付码
+     * ]
+     * @return String FAIL：失败  SUCCESS：成功
+     */
+    public function repaymentNotify($params){
+
+        $rules = [
+            'payment_no'  => 'required',
+            'out_no'      => 'required',
+            'status'      => 'required',
+            'reason'      => 'required',
+        ];
+        $validator = app('validator')->make($params, $rules);
+        if ($validator->fails()) {
+            set_apistatus(ApiStatus::CODE_20001, $validator->errors()->first());
+            return false;
+        }
+
+        if($params['status'] == "success"){
+            $trade_no = $params['out_no'];
+            //修改分期状态
+            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
+            if(!$b){
+                echo "FAIL";exit;
+            }
+        }else{
+            // 支付失败 还原优惠券使用状态
+
+
+
+            LogApi::info('支付异步通知', $params);
+        }
+
+        echo "SUCCESS";
+
+    }
+
 }
