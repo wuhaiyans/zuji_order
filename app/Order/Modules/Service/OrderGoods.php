@@ -94,6 +94,8 @@ class OrderGoods
 			return false;
 		}
 		$data['update_time'] = time();
+		var_dump($where);
+		var_dump($data);exit;
 		return $this->orderGoodsRepository->update( $where, $data );
 	}
 }
