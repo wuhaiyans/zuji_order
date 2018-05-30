@@ -130,10 +130,8 @@ return [
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
     //退换货审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
-    //订单退款审核同意
-    'api.Return.refundReplyAgree'       => 'ReturnController@refundReplyAgree',
-     //订单退款审核拒绝
-    'api.Return.refundReplyDisAgree'       => 'ReturnController@refundReplyDisAgree',
+    //订单退款审核
+    'api.Return.refundReply'       => 'ReturnController@refundReply',
     //退货退款
     'api.Return.refundMoney'       => 'ReturnController@refundMoney',
     //发起退款创建清单
