@@ -77,6 +77,8 @@ class OrderGoods
 	 * ]
 	 */
 	public function update( $where, $data ) {
+		var_dump($where);
+		var_dump($data);exit;
 		$where = filter_array($where, [
 			'goods_no' => 'required',
 		]);
@@ -94,8 +96,6 @@ class OrderGoods
 			return false;
 		}
 		$data['update_time'] = time();
-		var_dump($where);
-		var_dump($data);exit;
 		return $this->orderGoodsRepository->update( $where, $data );
 	}
 }
