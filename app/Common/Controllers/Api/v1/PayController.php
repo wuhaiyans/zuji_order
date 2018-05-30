@@ -58,7 +58,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093803';
+		$business_no = 'FA522834027093804';
 		$pay = null;
 		try {
 			// 查询
@@ -100,7 +100,7 @@ class PayController extends Controller
 			
 			$pay->setPaymentAmount(0.02);
 			
-			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Jdpay, $_params );
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			
