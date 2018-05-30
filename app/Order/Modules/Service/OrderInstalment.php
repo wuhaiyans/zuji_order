@@ -158,7 +158,8 @@ class OrderInstalment
     }
 
     /**
-     * 根据goods_no查询分期数据
+     * 查询分期数据
+     * @params array 查询条件
      * @return array
      */
     public static function queryInfo($params){
@@ -174,7 +175,7 @@ class OrderInstalment
     }
 
     /**
-     * 根据goods_no查询分期数据
+     * 根据InstalmentId查询分期数据
      * @return array
      */
     public static function queryByInstalmentId($id){
@@ -521,5 +522,62 @@ class OrderInstalment
     }
 
 
+
+    /**
+     * 主动还款回调
+     * @requwet Array
+     * [
+     *      'reason'            => '', 【必须】 String 错误原因
+     *      'status'            => '', 【必须】 int：success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+     *      'payment_no'        => '', 【必须】 String 支付平台支付码
+     *      'out_no'            => '', 【必须】 String 订单平台支付码
+     * ]
+     * @return String FAIL：失败  SUCCESS：成功
+     */
+    public function repaymentNotify($params){
+
+        $rules = [
+            'payment_no'  => 'required',
+            'out_no'      => 'required',
+            'status'      => 'required',
+            'reason'      => 'required',
+        ];
+        $validator = app('validator')->make($params, $rules);
+        if ($validator->fails()) {
+            set_apistatus(ApiStatus::CODE_20001, $validator->errors()->first());
+            return false;
+        }
+
+        $trade_no = $params['out_no'];
+
+        if($params['status'] == "success"){
+            //修改分期状态
+            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
+            if(!$b){
+                echo "FAIL";exit;
+            }
+        }else{
+            // 支付失败 恢复优惠券
+            $where = [
+                'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'       => $trade_no,
+            ];
+            $couponInfo = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
+            if(!empty($couponInfo)){
+                $instalmentInfo     = $this->queryInfo(['trade_no'=>$trade_no]);
+                $arr = [
+                    'user_id'       => $instalmentInfo['user_id'],
+                    'coupon_id'     => $couponInfo['coupon_id'],
+                ];
+                \App\Lib\Coupon\Coupon::setCoupon([],$arr);
+
+            }
+
+            LogApi::info('支付异步通知', $params);
+        }
+
+        echo "SUCCESS";
+
+    }
 
 }

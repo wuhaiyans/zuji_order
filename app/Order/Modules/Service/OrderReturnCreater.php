@@ -113,6 +113,7 @@ class OrderReturnCreater
             if($params['business_key']==ReturnStatus::OrderTuiHuo){
                 //创建退款清单
                 $create_data['order_no']=$params['order_no'];
+
                 $pay_result=$this->orderReturnRepository->get_pay_no(1,$params['order_no']);
                 if(!$pay_result){
                     return ApiStatus::CODE_50004;//订单未支付
@@ -415,7 +416,7 @@ if(!$create_receive){
      * @param $params
      *
      */
-    public function refundReplyAgree($params){
+    public function  refundReplyAgree($params){
         $OrderClearingRepository=new OrderClearingRepository();
         $OrderRepository=new OrderRepository();
         //开启事务
@@ -425,19 +426,11 @@ if(!$create_receive){
         if(!$order_info){
             return ApiStatus::CODE_34005;//查无此订单
         }
-        //修改退款状态为退款中
-        $data['status']=ReturnStatus::ReturnTui;
-        $data['remark']=$params['remark'];
-        $where[]=['order_no','=',$params['order_no']];
-        $tui_result=$this->orderReturnRepository->is_qualified($where,$data);
-        if(!$tui_result){
-            //事务回滚
-            DB::rollBack();
-            return ApiStatus::CODE_33008;
-        }
+
         //创建退款清单
         $create_data['order_no']=$params['order_no'];
-        $pay_result=$this->orderReturnRepository->get_pay_no($params['business_key'],$params['order_no']);
+        $business_key=ReturnStatus::OrderTuiKuan;
+        $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$params['order_no']);
         if(!$pay_result){
             return ApiStatus::CODE_50004;//订单未支付
         }
@@ -461,6 +454,16 @@ if(!$create_receive){
             //事务回滚
             DB::rollBack();
             return ApiStatus::CODE_34008;//创建退款清单失败
+        }
+        //修改退款状态为退款中
+        $data['status']=ReturnStatus::ReturnTui;
+        $data['remark']=$params['remark'];
+        $where[]=['order_no','=',$params['order_no']];
+        $tui_result=$this->orderReturnRepository->is_qualified($where,$data);
+        if(!$tui_result){
+            //事务回滚
+            DB::rollBack();
+            return ApiStatus::CODE_33008;
         }
 
         /*$b =SmsApi::sendMessage($order_info['user_mobile'],'SMS_113455999',[
