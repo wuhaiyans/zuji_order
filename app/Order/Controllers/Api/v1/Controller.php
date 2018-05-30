@@ -43,6 +43,7 @@ class Controller extends BaseController
 
     /**
      * 队列处理成功，返回该函数
+     * Author: heaven
      * @param int $type
      * @return string
      */
@@ -55,6 +56,7 @@ class Controller extends BaseController
     /**
      *
      * 消费处理失败，返回该函数，处理失败，队列可能会开启重试机制
+     * Author: heaven
      * @param int $type
      * @return string
      */
