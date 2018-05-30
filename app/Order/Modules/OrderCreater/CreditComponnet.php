@@ -28,11 +28,11 @@ class CreditComponnet implements OrderCreater
         $schema =$componnet->getDataSchema();
         $this->userInfo =$schema['user'];
         //获取信用分
-//        $score = Fengkong::getCredit(config('tripartite.Interior_Fengkong_Request_data'),['user_id'=>$schema['user']['user_id']]);
-//        if(!is_array($score)){
-//            $this->score =0;
-//        }
-        $this->score=99;//$score['score'];
+        $score = Fengkong::getCredit(['user_id'=>$schema['user']['user_id']]);
+        if(!is_array($score)){
+            $this->score =0;
+        }
+        $this->score=$score['score'];
         $this->componnet->getOrderCreater()->getUserComponnet()->setScore($this->score);
     }
     /**

@@ -136,7 +136,7 @@ class GivebackController extends Controller
 					return apiResponse([], get_code(), get_msg());
 				}
 				//推送到收发货系统
-				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, ['goods_no'=>$goodsNo]);
+				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, [['goods_no'=>$goodsNo]]);
 				if( !$warehouseResult ){
 					//事务回滚
 					DB::rollBack();
@@ -220,7 +220,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92701);
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
@@ -255,7 +255,7 @@ class GivebackController extends Controller
 		if( $paramsArr['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && (empty($paramsArr['evaluation_remark']) || empty($paramsArr['compensate_amount'])) ){
             return apiResponse([],ApiStatus::CODE_91000,'检测不合格时：检测备注和赔偿金额均不能为空!');
 		}
-		$paramsArr['compensate_amount'] = isset($paramsArr['compensate_amount'])?intval($paramsArr['compensate_amount']):0;
+		$paramsArr['compensate_amount'] = isset($paramsArr['compensate_amount'])? floatval($paramsArr['compensate_amount']):0;
 		$paramsArr['evaluation_remark'] = isset($paramsArr['evaluation_remark'])?strval($paramsArr['evaluation_remark']):'';
 		$goodsNo = $paramsArr['goods_no'];//商品编号提取
 		
@@ -308,6 +308,7 @@ class GivebackController extends Controller
 		DB::beginTransaction();
 		try{
 			//存在未完成分期单，关闭分期单
+			$instalmentResult = true;
 			if( $instalmentNum ){
 				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
 			}
@@ -434,7 +435,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([], get_code(), get_msg());
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//回滚事务
 			DB::rollBack();
 			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
@@ -473,16 +474,20 @@ class GivebackController extends Controller
             return apiResponse([], get_code(), get_msg());
 		}
 		//获取商品信息
-		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivebackInfo['goodsNo']);
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivebackInfo['goods_no']);
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
-		//获取支付的url
-		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,$paramsArr['givebackNo'] );
-		$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
-			'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goodsNo'].'还机支付',
-			'front_url' => $paramsArr['callback_url'],
-		]);
+		try{
+			//获取支付的url
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
+			$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
+				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
+				'front_url' => $paramsArr['callback_url'],
+			]);
+		} catch (\Exception $ex) {
+			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());
+		}
 		//拼接返回数据
 		$data = [
 			'order_no' => $orderGoodsInfo['order_no'],
@@ -498,11 +503,12 @@ class GivebackController extends Controller
 			'status_name' => OrderGivebackStatus::getStatusName($orderGivebackInfo['status']),
 			'instalment_num' => $orderGivebackInfo['instalment_num'],
 			'instalment_amount' => $orderGivebackInfo['instalment_amount'],
+			'compensate_amount' => $orderGivebackInfo['compensate_amount'],
 			'payment_status' => $orderGivebackInfo['payment_status'],
 			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
 			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
 			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
-			'payment_url' => $paymentUrl,
+			'payment_url' => $paymentUrl['url'],
 		];
 		return apiResponse($data);
 	}
@@ -543,7 +549,7 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([], ApiStatus::CODE_92700, '商品同步状态更新失败!');
 			}
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
@@ -611,7 +617,7 @@ class GivebackController extends Controller
 		}
 		
 		//更新还机单
-		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goodsNo']], $data);
+		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
 	}
 	
@@ -652,7 +658,7 @@ class GivebackController extends Controller
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 		//更新还机单
-		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goodsNo']], $data);
+		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
 	}
 	
@@ -707,7 +713,7 @@ class GivebackController extends Controller
 		}
 		
 		//更新还机单
-		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goodsNo']], $data);
+		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
 		
 	}
@@ -749,7 +755,7 @@ class GivebackController extends Controller
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 		//更新还机单
-		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goodsNo']], $data);
+		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
 	}
 	
@@ -773,6 +779,8 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
+		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
 		//清算处理数据拼接
 		$clearData = [
 			'user_id' => $paramsArr['user_id'],
@@ -781,6 +789,8 @@ class GivebackController extends Controller
 			'bussiness_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
+			'payment_no' => $payObj->getPaymentNo(),//payment_no
+			'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){
@@ -817,16 +827,12 @@ class GivebackController extends Controller
 			'paymentFenqi' => 0,//不分期
 		];
 		$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
-		if( !$payResult->isSuccess() ){
-			set_apistatus(ApiStatus::CODE_93200, '支付单创建失败!');
-			return false;
-		}
 		return true;
 	}
 	
 	/**
 	 * 还机单检测完成需要更新的基础数据初始化
-	 * @param array $paramArr
+	 * @param array $paramsArr
 	 * $paramsArr = [<br/>
 	 *		'evaluation_status' => '',//检测结果 【必须】<br/>
 	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
@@ -841,7 +847,7 @@ class GivebackController extends Controller
 	 *		'compensate_amount' => '',//赔偿金额 【<br/>
 	 * ]
 	 */
-	private function __givebackUpdateDataInit( $paramArr ) {
+	private function __givebackUpdateDataInit( $paramsArr ) {
 		return [
 			'evaluation_status' => $paramsArr['evaluation_status'],
 			'evaluation_time' => $paramsArr['evaluation_time'],

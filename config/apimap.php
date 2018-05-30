@@ -128,8 +128,10 @@ return [
     'api.Return.cancelApply'       => 'ReturnController@cancelApply',
     //申请退款
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
-    //审核
+    //退换货审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
+    //订单退款审核
+    'api.Return.refundReply'       => 'ReturnController@refundReply',
     //退货退款
     'api.Return.refundMoney'       => 'ReturnController@refundMoney',
     //发起退款创建清单
@@ -144,7 +146,7 @@ return [
     'api.Return.updateOrder'       => 'ReturnController@updateOrder',
     //检测状态更改
     'api.Return.isQualified'       => 'ReturnController@isQualified',
-   //获取所有待审核的退换货信息
+   //获取订单所有待审核的退换货信息
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
     //获取订单检测合格的数据
     'api.Return.getExchange'       =>'ReturnController@getExchange',
@@ -182,8 +184,25 @@ return [
 	//还机同步支付的状态
     'api.giveback.sync.paymentstatus'       => 'GivebackController@syncPaymentStatus',
 
+    //-+------------------------------------------------------------------------
+    // | 买断相关接口
+    //-+------------------------------------------------------------------------
+    //用户买断
+    'api.buyout.userBuyout'       => 'BuyoutController@userBuyout',
+    //提前买断
+    'api.buyout.adminBuyout'       => 'BuyoutController@adminBuyout',
+    //买断列表
+    'api.buyout.getBuyoutList'       => 'BuyoutController@getBuyoutList',
+    //买断详情
+    'api.buyout.getBuyout'       => 'BuyoutController@getBuyout',
+    //取消买断
+    'api.buyout.cancel'       => 'BuyoutController@cancel',
+    //买断支付
+    'api.buyout.pay'       => 'BuyoutController@pay',
+
     // test
     'api.Test.test'       => 'TestController@test',
+    'api.test.send.sms'       => 'TestController@sendSms',
 
 
 

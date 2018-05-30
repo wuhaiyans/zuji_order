@@ -20,9 +20,7 @@ class AddressComponnet implements OrderCreater
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
-        //获取用户信息
-        $schema =$this->componnet->getDataSchema();
-        $this->address =$schema['address'];
+
     }
 
     /**
@@ -44,8 +42,9 @@ class AddressComponnet implements OrderCreater
     public function filter(): bool
     {
         $filter =$this->componnet->filter();
-
-        if(empty($this->address)){
+        //获取用户信息
+        $schema =$this->componnet->getOrderCreater()->getUserComponnet()->getDataSchema();
+        if(empty($schema['address'])){
             $this->getOrderCreater()->setError('收货地址不允许为空');
             $this->flag = false;
         }

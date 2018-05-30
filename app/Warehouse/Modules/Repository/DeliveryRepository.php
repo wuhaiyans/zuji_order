@@ -17,6 +17,7 @@ use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Inc\DeliveryStatus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
@@ -90,6 +91,7 @@ class DeliveryRepository
             $row = [
                 'delivery_no'   =>  $delivery_no,
 //                'serial_no'     =>  $val['serial_no'],
+                'goods_name'    => isset($val['goods_name']) ? $val['goods_name'] : '',
                 'goods_no'      =>  $val['goods_no'],
                 'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
@@ -148,7 +150,14 @@ class DeliveryRepository
     }
 
 
-
+    /**
+     * @param $delivery_no string 发货单号
+     * @return bool
+     * @throws \Exception
+     *
+     * 这里判断其下设备，是否都已经配货完成，
+     * 如果全部完成，则整单配货完成，否则状态为待配货
+     */
     public static function match($delivery_no)
     {
         $model = Delivery::find($delivery_no);
@@ -156,16 +165,16 @@ class DeliveryRepository
         if (!$model) {
             throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
-
         $goods = $model->goods;
 
+        $status = Delivery::STATUS_WAIT_SEND;//配货完成状态
         foreach ($goods as $g){
             if ($g->status != DeliveryGoods::STATUS_ALL) {
-                throw new \Exception('商品尚未全部配货完成');
+//                throw new \Exception('商品尚未全部配货完成');
+                $status = Delivery::STATUS_INIT;
             }
         }
-
-        $model->status = Delivery::STATUS_WAIT_SEND;
+        $model->status = $status;
         return $model->update();
     }
 
@@ -181,7 +190,7 @@ class DeliveryRepository
             DB::beginTransaction();
 
             $delivery_no = $params['delivery_no'];
-            $serial_no   = $params['serial_no'];
+            $goods_no   = $params['goods_no'];
 
 
             $delivery = Delivery::find($delivery_no);
@@ -193,43 +202,55 @@ class DeliveryRepository
             $time = time();
             $imei_data = [
                 'delivery_no' => $delivery_no,
-                'serial_no'   => $serial_no,
+                'goods_no'   => $goods_no,
                 'status'      => DeliveryGoodsImei::STATUS_YES,
                 'create_time' => $time
             ];
 
             #1修改delivery_imei表
-            if (isset($params['imeis']) && $params['imeis']) {
-                $imeis = $params['imeis'];
-                foreach ($imeis as $imei) {
-                    if (!$imei) continue;
-                    $goods_imei_model = DeliveryGoodsImei::where([
-                        'delivery_no'=>$delivery_no,
-                        'serial_no'=>$serial_no,
-                        'imei'=>$imei
-                    ])->first();
+            if (isset($params['imei']) && $params['imei']) {
+                $goods_imei_model = DeliveryGoodsImei::where([
+                    'delivery_no'=>$delivery_no,
+                    'goods_no'=>$goods_no,
+                    'imei'=>$params['imei']
+                ])->first();
 
-                    if ($goods_imei_model) continue;
-
+                if (!$goods_imei_model) {
                     #goods_imei表添加
-                    $imei_data['imei'] = $imei;
+                    $imei_data['imei'] = $params['imei'];
                     $model = new DeliveryGoodsImei();
                     $model->create($imei_data);
-
-                    #imei总表修改状态
-                    $imei_model = Imei::find($imei);
-                    $imei_model->status = Imei::STATUS_OUT;
-                    $imei_model->update_time = $time;
-                    $imei_model->update();
                 }
+
+                Imei::out($params['imei']);
+
+
+//                $imeis = $params['imeis'];
+//                foreach ($imeis as $imei) {
+//                    if (!$imei) continue;
+//                    $goods_imei_model = DeliveryGoodsImei::where([
+//                        'delivery_no'=>$delivery_no,
+//                        'goods_no'=>$goods_no,
+//                        'imei'=>$imei
+//                    ])->first();
+//
+//                    if ($goods_imei_model) continue;
+//
+//                    #goods_imei表添加
+//                    $imei_data['imei'] = $imei;
+//                    $model = new DeliveryGoodsImei();
+//                    $model->create($imei_data);
+//
+//                    #imei总表修改状态
+//                    Imei::out($imei);
+//                }
             }
 
             #2修改 goods 状态
             $goods_model = DeliveryGoods::where([
                 'delivery_no'=>$params['delivery_no'],
-                'serial_no'=>$params['serial_no'
-                ]])
-                ->first();
+                'goods_no'=>$params['goods_no']
+            ])->first();
 
             $goods_status = DeliveryGoods::STATUS_ALL;
             if ($goods_model->quantity > $params['quantity']) {
@@ -237,7 +258,7 @@ class DeliveryRepository
             }
 
             $goods_data = [
-                'quantity_delivered' => $params['quantity'],
+                'quantity_delivered' => isset($params['quantity']) ? $params['quantity'] : $goods_model->quantity,
                 'status'             => $goods_status,
                 'status_time'        => $time
             ];
@@ -245,7 +266,6 @@ class DeliveryRepository
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-
             throw new \Exception($e->getMessage());
         }
 
@@ -320,6 +340,53 @@ class DeliveryRepository
         return $model->imeis;
 
     }
+
+
+    /**
+     *
+     * 单品取消配货
+     * @param $params array
+     * [
+     *  delivery_no => 1,
+     *  goods_no => '12323',
+     *  imei => '12123'
+     * ]
+     * @return bool
+     *
+     */
+    public static function cancelMatchGoods($params)
+    {
+        $goodsModel = DeliveryGoods::where([
+            'delivery_no'=>$params['delivery_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
+
+        if (!$goodsModel) return false;
+
+        try {
+            $goodsModel->status = DeliveryGoods::STATUS_INIT;
+            $goodsModel->status_time = time();
+            $goodsModel->update();
+
+            $goodsImeiModel = DeliveryGoodsImei::where([
+                'delivery_no'=>$params['delivery_no'],
+                'goods_no'=>$params['goods_no'],
+                'imei' => $params['imei']
+            ])->first();
+
+            $goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
+            $goodsImeiModel->status_time = time();
+            $goodsImeiModel->update();
+
+            Imei::in($params['imei']);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * @param $order_no

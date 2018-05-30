@@ -20,6 +20,6 @@ class ReturnLog extends Model
      *
      * @var array
      */
-    protected $fillable = ['business_type','business_status','operator_time'];
+    protected $fillable = ['business_type','business_status','create_time'];
 
 }

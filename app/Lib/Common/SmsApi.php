@@ -170,6 +170,7 @@ class SmsApi {
 					'HSB-OPENAPI-SIGNATURE:' . $signature, // 签名字符串
 					'HSB-OPENAPI-CALLERSERVICEID:' . self::$service_id  // 服务ID
 		]);
+		var_dump($response);exit;
 
 		// curl请求失败
 		if (empty($response)) {

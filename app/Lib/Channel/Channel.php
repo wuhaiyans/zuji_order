@@ -18,7 +18,8 @@ class Channel{
      * @param $appid
      * @return string or array
      */
-    public static function getChannel($data,$appid){
+    public static function getChannel($appid){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.channel.appid.get';
         $data['params'] = [
             'appid'=>$appid,
@@ -42,9 +43,9 @@ class Channel{
      * Author: heaven
      * @return mixed|string
      */
-    public static function getChannelListName($data)
+    public static function getChannelListName()
     {
-
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.channel.list.get';
         $data['params'] = [
         ];

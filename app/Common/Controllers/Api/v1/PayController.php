@@ -58,7 +58,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093801';
+		$business_no = 'FA522834027093802';
 		$pay = null;
 		try {
 			// 查询
@@ -71,13 +71,13 @@ class PayController extends Controller
 		} catch (\App\Lib\NotFoundException $exc) {
 
 			// 创建支付
-			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createFundauth([
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPayment([
 				'user_id'		=> '5',
 				'businessType'	=> $business_type,
 				'businessNo'	=> $business_no,
 				
 				'paymentAmount' => '0.01',
-				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Jdpay,
 				'paymentFenqi'	=> 0,
 				
 				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,

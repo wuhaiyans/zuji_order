@@ -78,4 +78,24 @@ class ImeiRepository
     }
 
 
+    /**
+     * @param $imei
+     *
+     * 模糊查询
+     */
+    public static function search($imei, $limit)
+    {
+        $list = \App\Warehouse\Models\Imei::where('imei','like','%'.$imei.'%')
+            ->where(['status' => \App\Warehouse\Models\Imei::STATUS_IN])
+            ->limit($limit)
+            ->get()->toArray();
+
+        $result = [];
+        foreach ($list as $v) {
+            $result[$v['imei']] = $v;
+        }
+
+        return $result;
+    }
+
 }

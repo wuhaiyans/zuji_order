@@ -9,6 +9,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Service\Relet;
 use Illuminate\Support\Facades\Request;
 
@@ -32,6 +33,7 @@ class ReletController extends Controller
      * @return [
      *      订单商品数据,
      *      list=>['zuqi'=>租期单位(短租日长租月),'zujin'=>租金]
+     *      pay=>[]['pay_type'=>支付方式,'pay_name'=>支付方式名] 短租只有一次性结清,长租代扣或分期
      * ]
      */
     public function pageRelet(Request $request){
@@ -70,7 +72,6 @@ class ReletController extends Controller
      *
      * @params
      *  'user_id'       => 'required', //用户ID
-     *  //'zuqi_type'     => 'required', //租期类型
      *  'zuqi'          => 'required', //租期
      *  'order_no'      => 'required', //订单编号
      *  'pay_type'      => 'required', //支付方式
@@ -95,6 +96,7 @@ class ReletController extends Controller
                 'user_name'     => 'required',//用户名(手机号)
             ]);
             if(count($params) < 5){
+
                 return apiResponse([], ApiStatus::CODE_20001, "参数错误");
             }
 
@@ -124,6 +126,7 @@ class ReletController extends Controller
                 $par['id'] = $params['id'];
                 $par['status'] = 3;
                 if($this->relet->setStatus($par)){
+
                     return apiResponse([],ApiStatus::CODE_0);
                 }else{
                     return apiResponse([],ApiStatus::CODE_50000, get_msg());
