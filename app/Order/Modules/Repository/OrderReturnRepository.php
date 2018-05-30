@@ -461,7 +461,7 @@ class OrderReturnRepository
         $orderData= DB::table('order_info')
             ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
             ->leftJoin('order_return', 'order_info.order_no', '=', 'order_return.order_no')
-            ->where([['order_info.order_no','=',$params['order_no']],['order_return.goods_no','=',$params['goods_no']]])
+            ->where([['order_return.order_no','=',$params['order_no']],['order_return.goods_no','=',$params['goods_no']]])
             ->select('order_info.*','order_userinfo.*','order_return.*')
             ->get()->toArray();
      //   $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
@@ -714,7 +714,7 @@ class OrderReturnRepository
     }
 
     /**
-     * 获取退
+     * 获取退货单信息
      * @param $where
      *
      *
@@ -726,5 +726,19 @@ class OrderReturnRepository
         }
         return $return_result;
     }
+
+    /**
+     * //获取商品信息
+     * @param $params
+     *
+     */
+    public static function getGoodsInfo($where){
+        $goods_result= OrderGoods::where($where)->first()->toArray();
+        if(!$goods_result){
+            return false;
+        }
+        return $goods_result;
+    }
+
 
 }

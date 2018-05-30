@@ -426,9 +426,57 @@ if(!$create_receive){
         if(!$order_info){
             return ApiStatus::CODE_34005;//查无此订单
         }
-
+        //获取订单支付方式
+        if($order_info['order_status']!=OrderStatus::BUSINESS_RETURN && $order_info['order_status']!=OrderStatus::OrderPayed){
+           return ApiStatus::CODE_34001;//此订单不符合规则
+        }
         //创建退款清单
         $create_data['order_no']=$params['order_no'];
+        $business_key=ReturnStatus::OrderTuiKuan;
+        $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$params['order_no']);
+        if(!$pay_result){
+            return ApiStatus::CODE_50004;//订单未支付
+        }
+        $create_data['order_type']=$order_info['order_type'];//订单类型
+        $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;//业务类型
+        $create_data['business_no']=$params['order_no'];//业务编号
+        $create_data['user_id']=$order_info['user_id'];
+        //退款：直接支付
+        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\app\Order\Modules\Inc\PayInc::UnionPay){
+            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+            $create_data['order_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
+            if($create_data['order_amount']>0){
+                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+            }
+
+        }
+        //退款：代扣+预授权
+        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::FlowerDepositPay){
+            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+            $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+           // $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+            $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+            $create_data['order_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
+            $create_data['auth_unfreeze_amount']=$order_info['order_yajin'];//订单实际支付押金
+            if($create_data['order_amount']>0 && $create_data['auth_unfreeze_amount']>0){
+                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+            }
+
+        }
+        //退款：预授权
+        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::WithhodingPay){
+            $create_data['out_auth_no']=$pay_result['fundauth_no'];
+            //$create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+            $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+            $create_data['auth_unfreeze_amount']=$order_info['order_yajin'];//订单实际支付押金
+            if($create_data['auth_unfreeze_amount']>0){
+                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+            }
+        }
+
+        //创建退款清单
+     /*   $create_data['order_no']=$params['order_no'];
         $business_key=ReturnStatus::OrderTuiKuan;
         $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$params['order_no']);
         if(!$pay_result){
@@ -449,6 +497,7 @@ if(!$create_receive){
         $create_data['refund_amount']=$order_info['order_amount'];//退款金额（租金）
         $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
         $create_data['user_id']=$order_info['user_id'];
+        */
         $create_clear= $OrderClearingRepository->createOrderClean($create_data);//创建退款清单
         if(!$create_clear){
             //事务回滚
@@ -648,6 +697,9 @@ if(!$create_receive){
         if (isset($params['user_id'])) {
             $where['user_id'] = $params['user_id'];
         }
+        if (isset($params['reason_key'])) {
+            $where['reason_key'] = $params['reason_key'];
+        }
         if (isset($params['order_status'])) {
             $where['order_status'] = $params['order_status'];
         }
@@ -660,7 +712,11 @@ if(!$create_receive){
         $where= $this->_parse_order_where($where);
         $data = $this->orderReturnRepository->get_list($where, $additional);
         foreach($data['data'] as $k=>$v){
-
+            if($data['data'][$k]->status!=ReturnStatus::ReturnCreated){
+                $data['data'][$k]->operate_status="false";
+            }else{
+                $data['data'][$k]->operate_status="true";
+            }
             //业务类型
             if($data['data'][$k]->business_key==ReturnStatus::OrderTuiKuan){
                 $data['data'][$k]->business_name=ReturnStatus::getBusinessName(ReturnStatus::OrderTuiKuan);//退款业务
@@ -674,7 +730,9 @@ if(!$create_receive){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderWaitPaying);//待支付
             }elseif($data['data'][$k]->order_status==OrderStatus::OrderPayed){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPayed);//已支付
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
+            }elseif($data['data'][$k]->order_status==OrderStatus::BUSINESS_RETURN){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::BUSINESS_RETURN);//已支付
+            } elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInStock);//备货中
             }elseif($data['data'][$k]->order_status==OrderStatus::OrderDeliveryed){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderDeliveryed);//已发货
@@ -759,6 +817,9 @@ if(!$create_receive){
         // order_no 订单编号查询，使用前缀模糊查询
         if( isset($where['order_no']) ){
             $where1[] = ['order_return.order_no', 'like', '%'.$where['order_no'].'%'];
+        }
+        if( isset($where['reason_key']) ){
+            $where1[] = ['order_return.reason_key', '=',$where['reason_key']];
         }
         // order_no 订单编号查询，使用前缀模糊查询
         if( isset($where['goods_name'])){
@@ -897,6 +958,7 @@ if(!$create_receive){
               return ApiStatus::CODE_20001;//参数错误
           }
           $where[] = ['order_no', '=', $order_no];
+         // $OrderRepository=new OrderRepository();
           //开启事务
           DB::beginTransaction();
           //获取订单信息
@@ -904,7 +966,10 @@ if(!$create_receive){
               $where[]=['goods_no','=',$data[$k]['goods_no']];
               $where_info['order_no']=$order_no;
               $where_info['goods_no']=$data[$k]['goods_no'];
+              //获取订单和退货单信息
               $order_info = $this->orderReturnRepository->order_info($where_info);
+              //获取商品信息
+              $goods_info = $this->orderReturnRepository->getGoodsInfo($where);
               $params['evaluation_remark'] = $data[$k]['check_description'];
               $params['evaluation_amount'] =$data[$k]['price'];
               $params['evaluation_time'] =$data[$k]['evaluation_time'];
@@ -919,15 +984,57 @@ if(!$create_receive){
                    //       DB::rollBack();
                    //       return ApiStatus::CODE_33009;//修改商品状态失败
                   //    }
-                      $pay_where['order_no']=$order_no;
-                      //获取此订单的支付方式
-                      $pay_result=$this->orderReturnRepository->payRefund($pay_where);
+                      //获取订单支付方式
+                      if($order_info[0]->order_status!=OrderStatus::BUSINESS_RETURN &&$order_info[0]->order_status!=OrderStatus::OrderPayed){
+                          return ApiStatus::CODE_34001;//此订单不符合规则
+                      }
+                      //创建退款清单
+                      $create_data['order_no']=$order_no;
+                      $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$order_no);
                       if(!$pay_result){
-                          return ApiStatus::CODE_50001;//获取订单支付方式错误
+                          return ApiStatus::CODE_50004;//订单未支付
+                      }
+                      $create_data['order_type']=$order_info[0]->order_type;//订单类型
+                      $create_data['business_type']=OrderCleaningStatus::businessTypeReturn;//业务类型
+                      $create_data['business_no']=$order_info[0]->refund_no;//业务编号
+                      $create_data['user_id']=$order_info[0]->user_id;
+                      $create_data['app_id']=$order_info[0]->appid;
+                      //退款：直接支付
+                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::UnionPay){
+                          $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                          $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
+                          if($goods_info['order_amount']>0){
+                              $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+                          }
+
+                      }
+                      //退款：代扣+预授权
+                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::FlowerDepositPay){
+                          $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                          $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                          // $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+                          $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+                          $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+                          $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
+                          $create_data['auth_unfreeze_amount']=$order_info['yajin'];//商品实际支付押金
+                          if($create_data['order_amount']>0 && $create_data['auth_unfreeze_amount']>0){
+                              $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+                          }
+
+                      }
+                      //退款：预授权
+                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::WithhodingPay){
+                          $create_data['out_auth_no']=$pay_result['fundauth_no'];
+                          //$create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
+                          $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
+                          $create_data['auth_unfreeze_amount']=$order_info['yajin'];//商品实际支付押金
+                          if($create_data['auth_unfreeze_amount']>0){
+                              $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+                          }
                       }
                       $OrderClearingRepository=new OrderClearingRepository();
                       //创建退款清单
-                      $create_data['order_no']=$order_no;//支付方式
+                     /* $create_data['order_no']=$order_no;//支付方式
                       $create_data['out_account']=$order_info[0]->pay_type;//支付方式
                       $create_data['order_type']=$order_info[0]->order_type;//订单类型
                       $create_data['business_type']=OrderCleaningStatus::businessTypeReturn;//业务类型：退货
@@ -939,7 +1046,7 @@ if(!$create_receive){
                       $create_data['refund_amount']=$order_info[0]->refund_amount;//退款金额（租金）
                       $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                       $create_data['user_id']=$order_info[0]->user_id;
-                      $create_data['app_id']=$order_info[0]->appid;
+                      $create_data['app_id']=$order_info[0]->appid;*/
                       $create_clear= $OrderClearingRepository->createOrderClean($create_data);//创建退款清单
                       if(!$create_clear){
                           return ApiStatus::CODE_34008;//创建退款清单失败
@@ -1036,7 +1143,7 @@ if(!$create_receive){
         if(!$order_result){
             return ApiStatus::CODE_34005;//未找到此订单
         }
-        if($order_result['order_status'] !=OrderStatus::OrderInStock && $order_result['order_status'] !=OrderStatus::OrderPayed){
+        if($order_result['order_status'] !=OrderStatus::BUSINESS_RETURN && $order_result['order_status'] !=OrderStatus::OrderPayed){
             return ApiStatus::CODE_34001;//此订单不符合规则
         }
         $data['business_key']=$params['business_key'];
@@ -1411,4 +1518,13 @@ if(!$create_receive){
         return $return_list;
     }
 
+    /**
+     *获取退款单数据
+     * @param $params
+     */
+    public function getOrderStatus($params){
+        $where[]=['order_no','=',$params['order_no']];
+        $return_list= $this->orderReturnRepository->get_type($where);
+        return $return_list;
+    }
 }
