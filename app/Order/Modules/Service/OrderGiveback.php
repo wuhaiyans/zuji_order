@@ -252,6 +252,7 @@ class OrderGiveback
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
+				var_dump($orderGivebackResult);exit;
 				if( !$orderGivebackResult ){
 					return false;
 				}
