@@ -290,7 +290,6 @@ class OrderGiveback
 					return false;
 				}
 			}
-			var_dump($orderGoodsService);exit;
 			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> $status]);
 				var_dump($orderGoodsResult);exit;
 			if( !$orderGoodsResult ){
