@@ -77,8 +77,6 @@ class OrderGoods
 	 * ]
 	 */
 	public function update( $where, $data ) {
-		var_dump($where);
-		var_dump($data);exit;
 		$where = filter_array($where, [
 			'goods_no' => 'required',
 		]);
