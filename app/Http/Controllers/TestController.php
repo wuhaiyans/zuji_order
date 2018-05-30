@@ -9,6 +9,8 @@ use App\Lib\Common\JobQueueApi;
 use App\Lib\Warehouse\Delivery;
 use App\Lib\Warehouse\Receive;
 
+use App\Warehouse\Modules\Repository\DeliveryRepository;
+use App\Warehouse\Modules\Repository\ImeiRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
@@ -22,8 +24,12 @@ class TestController extends Controller
     public function test()
     {
 
+        ImeiRepository::search('b');
 
-        $this->testCreateReceive();
+
+//        DeliveryRepository::cancelMatchGoodsStatus('201805291931525799');
+
+//        $this->testCreateReceive();
 
 //        $this->testApply('A511125156960043');
 
