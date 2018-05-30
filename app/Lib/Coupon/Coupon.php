@@ -36,7 +36,7 @@ class Coupon{
             return ApiStatus::CODE_60000;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return $info;
         }
         return $info['data'];
 
