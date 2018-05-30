@@ -128,8 +128,12 @@ return [
     'api.Return.cancelApply'       => 'ReturnController@cancelApply',
     //申请退款
     'api.Return.returnMoney'       => 'ReturnController@returnMoney',
-    //审核
+    //退换货审核
     'api.Return.returnReply'       => 'ReturnController@returnReply',
+    //订单退款审核同意
+    'api.Return.refundReplyAgree'       => 'ReturnController@refundReplyAgree',
+     //订单退款审核拒绝
+    'api.Return.refundReplyDisAgree'       => 'ReturnController@refundReplyDisAgree',
     //退货退款
     'api.Return.refundMoney'       => 'ReturnController@refundMoney',
     //发起退款创建清单
@@ -144,7 +148,7 @@ return [
     'api.Return.updateOrder'       => 'ReturnController@updateOrder',
     //检测状态更改
     'api.Return.isQualified'       => 'ReturnController@isQualified',
-   //获取所有待审核的退换货信息
+   //获取订单所有待审核的退换货信息
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
     //获取订单检测合格的数据
     'api.Return.getExchange'       =>'ReturnController@getExchange',

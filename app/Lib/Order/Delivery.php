@@ -61,18 +61,23 @@ class Delivery
      * 发货更新请求
      * 判断是订单发货还是换货发货
      * 换货发货新商品反馈到此方法 order_good_extend
-     * @param $param :array[
-        'order_no'=> 订单号  string,
-        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
-        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
-     *
+     * @param $order_no string  订单编号 【必须】
+     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * [
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
      * ]
-     *
      * 需要写成curl形式 供发货系统使用
      */
-    public static function delivery($params)
+    public static function delivery($orderNo,$goodsInfo)
     {
         $base_api = config('tripartite.API_INNER_URL');
+        $params['order_no'] =$orderNo;
+        $params['goods_info'] =$goodsInfo;
 
         $response = Curl::post($base_api, [
             'appid'=> 1,

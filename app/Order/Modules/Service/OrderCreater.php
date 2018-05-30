@@ -87,7 +87,7 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -101,7 +101,7 @@ class OrderCreater
 //                return false;
 //            }
             $schemaData = $orderCreater->getDataSchema();
-            //var_dump($schemaData);die;
+            var_dump($schemaData);die;
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
@@ -200,7 +200,7 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -310,7 +310,7 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -412,7 +412,7 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);

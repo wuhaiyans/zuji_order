@@ -30,10 +30,13 @@ use App\Lib\ApiStatus;
                 ];
                 $baseUrl = config("tripartite.API_INNER_URL");
                 $info = Curl::post($baseUrl, $data);
-                return apiResponse($info,ApiStatus::CODE_0);
+                return $info;
+//                return apiResponse($info,ApiStatus::CODE_0);
 
             }
-            return apiResponse([],ApiStatus::CODE_10104);
+            return false;
+
+//            return apiResponse([],ApiStatus::CODE_10104);
 
      }
         /**

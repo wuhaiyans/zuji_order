@@ -77,6 +77,14 @@ class DeliveryService
     }
 
 
+    public function cancelMatchGoods($params)
+    {
+        if (!DeliveryRepository::cancelMatchGoods($params)) {
+            throw new \Exception('取消配货失败,请重新操作');
+        }
+    }
+
+
     /**
      * @param $delivery_no
      * @param bool $auto

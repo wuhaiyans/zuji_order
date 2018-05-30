@@ -274,7 +274,7 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     /**
-     *   退换货/退款审核
+     *   退换货审核
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * 选中即同意
@@ -312,7 +312,42 @@ class ReturnController extends Controller
         }
         return apiResponse([],$res);
     }
-
+    /**
+     * 订单退款审核同意
+     * @param Request $request
+     *
+     */
+    public function refundReplyAgree(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',
+            'remark'=> 'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
+        return apiResponse([],$res);
+    }
+    /**
+     * 订单退款审核拒绝
+     * @param Request $request
+     *
+     */
+    public function refundReplyDisagree(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',
+            'remark'=> 'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核拒绝
+        return apiResponse([],$res);
+    }
     /**
      * 换货
      * @param Request $request
