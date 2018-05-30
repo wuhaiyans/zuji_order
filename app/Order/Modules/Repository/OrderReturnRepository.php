@@ -453,11 +453,17 @@ class OrderReturnRepository
         }
     }*/
     //获取订单信息
-    public static function order_info($order_no){
-        if(empty($order_no)){
+    public static function order_info($params){
+        if(empty($params['order_no'])){
             return false;
         }
-        $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
+        $orderData= DB::table('order_info')
+            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_return', 'order_info.order_no', '=', 'order_return.order_no')
+            ->where([['order_info.order_no','=',$params['order_no']],['order_return.goods_no','=',$params['goods_no']]])
+            ->select('order_info.*','order_userinfo.*','order_return.*')
+            ->get()->toArray();
+     //   $orderData=Order::where('order_no','=',$order_no)->first()->toArray();
         if($orderData){
             return $orderData;
         }else{
@@ -696,6 +702,16 @@ class OrderReturnRepository
             return false;
         }
         return $goods_result;
+    }
+
+    /**
+     * 获取退
+     * @param $where
+     *
+     *
+     */
+    public static function getReturnInfo($where){
+
     }
 
 }
