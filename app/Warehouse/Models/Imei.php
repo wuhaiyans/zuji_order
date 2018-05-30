@@ -37,4 +37,32 @@ class Imei extends Warehouse
      * 可填充字段
      */
     protected $fillable = ['imei', 'price', 'status'];
+
+
+    /**
+     * @param $imei
+     * @return bool
+     *
+     * 库存中
+     */
+    public static function in($imei)
+    {
+        $model = self::where(['imei'=>$imei])->first();
+        $model->status = self::STATUS_IN;
+
+        return $model->update();
+    }
+
+    /**
+     * @param $imei
+     * @return bool
+     * 出库
+     */
+    public static function out($imei)
+    {
+        $model = self::where(['imei'=>$imei])->first();
+        $model->status = self::STATUS_OUT;
+
+        return $model->update();
+    }
 }

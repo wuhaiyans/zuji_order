@@ -20,32 +20,37 @@ class CouponComponnet implements OrderCreater
 
 
     private $couponInfo=[];
-    private $sku;
+    private $coupon;
 
 
-    public function __construct(OrderCreater $componnet, array $coupon=[])
+    public function __construct(OrderCreater $componnet, array $coupon=[],int $userId)
     {
         $this->componnet = $componnet;
         if(!empty($coupon)){
             //获取优惠券类型接口
-            $couponInfo=[
-                0=>[
-                    'coupon_id'=>"1",
-                    'coupon_no'=>"1111111111",
-                    'coupon_type'=>1,// 1,现金券 2,首月0租金
-                    'discount_amount'=>200,
-                    'coupon_name'=>"现金优惠券",
-                    'is_use'=>0,//是否使用 0未使用
-                ],
-                1=>[
-                    'coupon_id'=>"2",
-                    'coupon_no'=>"22222222",
-                    'coupon_type'=>2,// 1,现金券 2,首月0租金
-                    'discount_amount'=>200,
-                    'coupon_name'=>"首月0租金",
-                    'is_use'=>0,//是否使用 0未使用
-                ]
-            ];
+            foreach ($coupon as $k=>$v){
+                $couponData[]=[
+                    'user_id'=>$userId,
+                    'coupon_no'=>$v,
+                ];
+            }
+            //var_dump($couponData);die;
+            $coupon = Coupon::getCoupon($couponData);
+            $couponInfo =[];
+            foreach ($coupon as $key=>$value){
+                foreach ($value as $k=>$v){
+                    $couponInfo[]=[
+                        'coupon_id'=>$v['coupon_id'],
+                        'coupon_no'=>$v['coupon_no'],
+                        'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
+                        'discount_amount'=>$v['coupon_value']/100,
+                        'coupon_name'=>$v['coupon_name'],
+                        'is_use'=>0,//是否使用 0未使用
+                    ];
+
+                }
+            }
+            //var_dump($couponInfo);
             $this->couponInfo = $couponInfo;
         }
     }
@@ -73,12 +78,9 @@ class CouponComponnet implements OrderCreater
         if(empty($coupon)){
             return $this->flag && $filter;
         }
-        $schema =$this->componnet->getDataSchema();
-        $sku =$schema['sku'];
 
         //计算优惠券信息
-        $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_coupon($sku,$coupon);
-
+        $this->coupon =$this->componnet->getOrderCreater()->getSkuComponnet()->discrease_coupon($coupon);
         return $this->flag && $filter;
     }
 
@@ -88,7 +90,9 @@ class CouponComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        return $this->componnet->getDataSchema();
+        $schema =$this->componnet->getDataSchema();
+        $coupon['coupon']=$this->coupon;
+        return array_merge($schema,$coupon);
     }
 
     /**

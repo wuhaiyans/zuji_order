@@ -24,12 +24,12 @@ class Receive
      *      [
      *          serial_no 【可选】
      *          goods_no 【必须】 //商品编号
-     *          quantity 【必须】 //商品数量
+     *          quantity 【可选】 //商品数量
      *          imei  【可以没有】
      *      ]
      *  ]
      */
-    public static function create($order_no, $type, $data)
+    public static function create($order_no, $type, $goods_info)
     {
         $receive_detail = [];
 
@@ -38,10 +38,8 @@ class Receive
 //
 //        $detail = $data['receive_detail'];
 
-        $detail = $data;
-
-        if (is_array($detail)) {
-            foreach ($detail as $d) {
+        if (is_array($goods_info)) {
+            foreach ($goods_info as $d) {
                 if (!$d['goods_no']) continue;
                 
                 $receive_detail[] = [
@@ -63,12 +61,13 @@ class Receive
 
         $base_api = config('tripartite.warehouse_api_uri');
 
-        return Curl::post($base_api, [
+        $res = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
+		return $res;
 
     }
     /**

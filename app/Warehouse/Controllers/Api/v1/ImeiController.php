@@ -8,6 +8,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 
 use App\Warehouse\Modules\Func\Excel;
+use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ImeiService;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,32 @@ class ImeiController extends Controller
         $params = $this->_dealParams([]);
         $list = $this->imei->list($params);
         return \apiResponse($list);
+    }
+
+
+    /**
+     * @param $imei
+     * 前端imei模糊查询
+     */
+    public function search()
+    {
+        $rules = ['imei' => 'required'];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        $limit = isset($params['limit']) ? $params['limit'] : 10;
+        $limit = $limit > 50 ? 50 : $limit;//最大50
+
+        try {
+            $imeis = ImeiRepository::search($params['imei'], $limit);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse(['imeis' => $imeis]);
     }
 
 

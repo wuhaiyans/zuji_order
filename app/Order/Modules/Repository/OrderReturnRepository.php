@@ -8,6 +8,7 @@ use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderPayModel;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use Illuminate\Support\Facades\DB;
 
 class OrderReturnRepository
@@ -104,7 +105,7 @@ class OrderReturnRepository
                 $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
-                $data['goods_status']=ReturnStatus::ReturnCreated;
+                $data['goods_status']=OrderGoodStatus::REFUNDS;
                 $update_result=ordergoods::where($where[$k])->update($data);
                 if(!$update_result){
                     return false;
@@ -117,7 +118,7 @@ class OrderReturnRepository
             $order_return=OrderReturn::where($where)->first()->toArray();
             $data['business_key']=$params['business_key'];
             $data['business_no']=$order_return['refund_no'];
-            $data['goods_status']=ReturnStatus::ReturnCreated;
+            $data['goods_status']=OrderGoodStatus::REFUNDS;
             $update_result=ordergoods::where($where)->update($data);
             if(!$update_result){
                 return false;
@@ -168,7 +169,7 @@ class OrderReturnRepository
             return false;
         }
         $where[]=['order_no','=',$params['order_no']];
-        $data['goods_status']=ReturnStatus::ReturnDenied;
+        $data['goods_status']=OrderGoodStatus::RENTING_MACHINE;
         if(ordergoods::where($where)->update($data)){
             return true;
         }else{
@@ -471,6 +472,14 @@ class OrderReturnRepository
         }
     }
     //创建换货单记录
+
+    /**
+     * @param $params
+     * [
+     *      'order_no'=>'','goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
     public static function createchange($params){
         $param = filter_array($params,[
             'order_no'  =>'required',
@@ -711,7 +720,11 @@ class OrderReturnRepository
      *
      */
     public static function getReturnInfo($where){
-
+        $return_result= OrderReturn::where($where)->get()->toArray();
+        if(!$return_result){
+            return false;
+        }
+        return $return_result;
     }
 
 }

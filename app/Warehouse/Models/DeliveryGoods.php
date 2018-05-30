@@ -25,6 +25,7 @@ class DeliveryGoods extends Warehouse
         'delivery_no',
         'serial_no',
         'goods_no',
+        'goods_name',
         'order_no',
         'quantity',
         'goods_name',

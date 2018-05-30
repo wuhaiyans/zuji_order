@@ -20,9 +20,9 @@ class DeliveryImeiService
      * @throws \Exception
      * 添加
      */
-    public function add($delivery_no, $imei, $serial_no)
+    public function add($params)
     {
-        if (!DeliveryImeiRepository::add($delivery_no, $imei, $serial_no)) {
+        if (!DeliveryImeiRepository::add($params)) {
             throw new \Exception('添加imei失败');
         }
     }

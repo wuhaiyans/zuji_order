@@ -148,11 +148,14 @@ class Relet
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
+                $row['pay'][] = ['pay_type'=>PayInc::WithhodingPay,'pay_name'=>PayInc::getPayName(PayInc::WithhodingPay)];
+                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
             }else{
                 $list = publicInc::getCangzulist();
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
+                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
             }
             $row['list'] = $list;
             $orderInfo = OrderRepository::getGoodsExtendInfo($params['order_no']);

@@ -27,34 +27,40 @@ class OrderOperate
 {
     /**
      * 订单发货接口
-     * @param $param :array[
-            'order_no'=> 订单号  string,
-            'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
-            e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
-     *
+     * @param $order_no string  订单编号 【必须】
+     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * [
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
      * ]
      * @return boolean
      */
 
-    public static function delivery($params){
+    public static function delivery($orderNo,$goodsInfo){
         if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
-            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$params['order_no']]);
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
             if(empty($orderInfo)){
                 DB::rollBack();
                 return false;
             }
             //判断订单冻结类型 冻结就走换货发货
             if($orderInfo['freeze_type']!=0){
-                $b = OrderReturnRepository::createchange($params);
-                if(!$b){
-                    DB::rollBack();
-                    return false;
+                foreach ($goodsInfo as $k=>$v){
+                    $v['order_no']=$orderNo;
+                    $b = OrderReturnRepository::createchange($v);
+                    if(!$b){
+                        DB::rollBack();
+                        return false;
+                    }
                 }
                 DB::commit();
                 return true;
-
             }
             //订单未冻结 走订单发货
             //更新订单状态
@@ -65,7 +71,7 @@ class OrderOperate
             }
 
             //增加商品扩展表信息
-            $b =OrderGoodsExtendRepository::add($params);
+            $b =OrderGoodsExtendRepository::add($orderNo,$goodsInfo);
             if(!$b){
                 DB::rollBack();
                 return false;

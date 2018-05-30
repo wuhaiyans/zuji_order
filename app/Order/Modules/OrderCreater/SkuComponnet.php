@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Goods\Goods;
+use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
@@ -197,6 +198,7 @@ class SkuComponnet implements OrderCreater
                     'spu_name' => $spuInfo['name'],
                     'sku_no' => $skuInfo['sn'],
                     'spu_no' => $spuInfo['sn'],
+                    'goods_no'=>createNo(6),
                     'weight' => $skuInfo['weight'],
                     'edition' => $skuInfo['edition'],
                     'sku_num' => intval($skuInfo['sku_num']),
@@ -230,7 +232,6 @@ class SkuComponnet implements OrderCreater
                     'end_time'=>$skuInfo['end_time'],
             ];
         }
-        $arr['coupon'] =$this->couponInfo;
         return $arr;
     }
     /**
@@ -255,7 +256,9 @@ class SkuComponnet implements OrderCreater
      * 计算优惠券信息
      *
      */
-    public function discrease_coupon($sku,$coupon){
+    public function discrease_coupon($coupon){
+        $schema =$this->componnet->getDataSchema();
+        $sku =$schema['sku'];
         //计算总租金
         $totalAmount =0;
         foreach ($sku as $k=>$v){
@@ -267,14 +270,14 @@ class SkuComponnet implements OrderCreater
                 $youhui =0;
                 foreach ($coupon as $key=>$val) {
                     //首月0租金
-                    if ($val['coupon_type'] == 2 && $v['zuqi_type'] == 2) {
+                    if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == 2) {
                         $zongzujin = ($v['zuqi'] - 1) * $v['zujin'];
                         $youhui+= $v['zujin'];
                         $skuyouhui[$v['sku_id']]['coupon_amount'] =$youhui;
                         $coupon[$key]['is_use'] = 1;
                     }
                     //现金券
-                    if ($val['coupon_type'] == 1) {
+                    if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
                         $zongzujin = $v['zuqi'] * $v['zujin'] - $v['discount_amount'];
                         $skuyouhui[$v['sku_id']]['coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
 
@@ -292,8 +295,9 @@ class SkuComponnet implements OrderCreater
                 }
             }
         }
-        $this->couponInfo = $coupon;
+
         $this->sku =$skuyouhui;
+        return $coupon;
     }
     /**
      * 创建数据
@@ -301,9 +305,7 @@ class SkuComponnet implements OrderCreater
      */
     public function create(): bool
     {
-
         $data = $this->componnet->getDataSchema();
-        //var_dump($data);die;
         $userId =$this->componnet->getOrderCreater()->getUserComponnet()->getUserId();
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $goodsRepository = new OrderGoodsRepository();
@@ -319,7 +321,7 @@ class SkuComponnet implements OrderCreater
                     'zuji_goods_id'=>$v['sku_id'],
                     'zuji_goods_sn'=>$v['sku_no'],
                     'goods_thumb'=>$v['thumb'],
-                    'goods_no'=>createNo(6),
+                    'goods_no'=>$v['goods_no'],
                     'prod_id'=>$v['spu_id'],
                     'prod_no'=>$v['spu_no'],
                     'brand_id'=>$v['brand_id'],
