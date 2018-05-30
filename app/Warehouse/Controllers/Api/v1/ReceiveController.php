@@ -139,7 +139,7 @@ class ReceiveController extends Controller
          */
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'quantity'   => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -189,7 +189,7 @@ class ReceiveController extends Controller
 
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'imei'       => 'required',
             'check_result'  => 'required', //针对设备的检测结果
         ];
@@ -201,7 +201,7 @@ class ReceiveController extends Controller
         }
 
         try {
-            $this->receive->check($params['receive_no'],$params['serial_no'], $params);
+            $this->receive->check($params['receive_no'],$params['goods_no'], $params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -216,7 +216,7 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',//收货单编号
-            'serial_no'  => 'required' //设备序号
+            'goods_no'  => 'required' //设备序号
         ];
 
         $params = $this->_dealParams($rules);
@@ -253,16 +253,14 @@ class ReceiveController extends Controller
 
         try {
             $receive = $this->receive->finishCheck($params['receive_no']);
-
             $imeis = $receive->imeis;
 
+
             foreach ($imeis as $imei) {
-                $imodel = Imei::find($imei->imei);
-                $imodel->status = Imei::STATUS_IN;
-                $imodel->update();
+                Imei::in($imei->imei);
             }
 
-            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
+//            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
 
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
@@ -279,7 +277,7 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'check_item' => 'required'
         ];
 

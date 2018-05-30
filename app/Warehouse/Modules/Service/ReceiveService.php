@@ -196,10 +196,10 @@ class ReceiveService
     /**
      * 检测
      */
-    public function check($receive_no, $serial_no, $data)
+    public function check($receive_no, $goods_no, $data)
     {
-        if (!ReceiveRepository::check($receive_no, $serial_no, $data)) {
-            throw new \Exception($receive_no . '设备:'.$serial_no.'验签失败');
+        if (!ReceiveRepository::check($receive_no, $goods_no, $data)) {
+            throw new \Exception($receive_no . '设备:'.$goods_no.'验签失败');
         }
     }
 
@@ -250,7 +250,7 @@ class ReceiveService
     public function checkItems($params)
     {
         if (!ReceiveRepository::checkItems($params)) {
-            throw new \Exception($params['receive_no'] . '设备:'.$params['serial_no'].'添加检测项失败');
+            throw new \Exception($params['receive_no'] . '设备:'.$params['goods_no'].'添加检测项失败');
         }
     }
 }

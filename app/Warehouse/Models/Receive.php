@@ -154,7 +154,7 @@ class Receive extends Warehouse
         $count = count($imeis);
         $checkOk = 0;
         foreach ($imeis as $imei) {
-            if ($imei->check_result == ReceiveGoodsImei::RESULT_OK) {
+            if ($imei->check_result == ReceiveGoods::CHECK_RESULT_OK) {
                 $checkOk++;
             }
         }
