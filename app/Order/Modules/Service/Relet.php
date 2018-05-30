@@ -16,6 +16,7 @@ use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\Pay\PayCreater;
 use App\Order\Modules\Repository\ReletRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -124,18 +125,32 @@ class Relet
                 ];
 
                 if($this->reletRepository->createRelet($data)){
-                    // 创建支付
-                    $pay = PayCreater::createFundauth([
-                        'user_id'		=> $data['user_id'],
+//                    // 创建支付
+//                    $pay = PayCreater::createFundauth([
+//                        'user_id'		=> $data['user_id'],
+//                        'businessType'	=> OrderStatus::BUSINESS_RELET,
+//                        'businessNo'	=> $data['order_no'],
+//
+//                        'fundauthNo' => \createNo(9),
+//                        'fundauthAmount' => $data['relet_amount'],
+//                        'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+//                    ]);
+//                    $step = $pay->getCurrentStep();
+//                    //echo '当前阶段：'.$step."\n";
+
+                    // 创建支付 一次性结清
+                    $pay = PayCreater::createPayment([
+//                        'user_id'		=> $data['user_id'],
                         'businessType'	=> OrderStatus::BUSINESS_RELET,
                         'businessNo'	=> $data['order_no'],
 
-                        'fundauthNo' => \createNo(9),
-                        'fundauthAmount' => $data['amount'],
-                        'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+//                        'paymentNo' => $orderInfo['trade_no'],
+                        'paymentAmount' => $data['relet_amount'],
+//                        'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                        'paymentFenqi'	=> 0,
                     ]);
+
                     $step = $pay->getCurrentStep();
-                    //echo '当前阶段：'.$step."\n";
 
                     $_params = [
                         'name'			=> '订单续租',					//【必选】string 交易名称
