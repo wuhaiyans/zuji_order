@@ -8,6 +8,8 @@
 namespace App\Warehouse\Modules\Func;
 
 
+use App\Warehouse\Config;
+
 class WarehouseHelper
 {
     /**
@@ -16,5 +18,13 @@ class WarehouseHelper
     public static function generateNo()
     {
         return date('YmdHis') . rand(1000, 9999);
+    }
+
+
+    public static function getLogisticsName($id)
+    {
+        $logis = Config::$logistics;
+
+        return isset($logis[$id]) ? $logis[$id] : '';
     }
 }

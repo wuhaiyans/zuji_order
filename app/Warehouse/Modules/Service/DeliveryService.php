@@ -11,6 +11,7 @@ namespace App\Warehouse\Modules\Service;
 use App\Warehouse\Config;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
+use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -227,24 +228,24 @@ class DeliveryService
 
         $logic_params = [];
         if ($time_type != 'none') {
-            if (!isset($params['time_begin']) || !$params['time_begin']) {
+            if (!isset($params['begin_time']) || !$params['begin_time']) {
                 throw new \Exception('请填写开始时间');
             }
 
-            if (!isset($params['time_end']) || !$params['time_end']) {
+            if (!isset($params['end_time']) || !$params['end_time']) {
                 throw new \Exception('请填写结束时间');
             }
 
             switch ($time_type) {
                 case self::TIME_TYPE_CREATE:
-                    array_push($logic_params, ['create_time', '<=', strtotime($params['time_end'])]);
-                    array_push($logic_params, ['create_time', '>=', strtotime($params['time_begin'])]);
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
                     break;
 
                 case self::TIME_TYPE_DELIVERY:
                 default:
-                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['time_end'])]);
-                    array_push($logic_params, ['delivery_time', '>=', strtotime($params['time_begin'])]);
+                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['delivery_time', '>=', strtotime($params['begin_time'])]);
             }
         }
 
@@ -252,7 +253,7 @@ class DeliveryService
         $items = $collect->items();
 
         if (!$items) {
-            return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'currentPage'=>0];
+            return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'current_page'=>0];
         }
 
         $show_detail = isset($params['detail']) ? $params['detail'] : false;
@@ -264,7 +265,7 @@ class DeliveryService
         $result = [];
         foreach ($items as $item) {
             $it = $item->toArray();
-            $it['logistics_name'] = $this->getLogisticsName($it['logistics_id']);
+            $it['logistics_name'] = WarehouseHelper::getLogisticsName($it['logistics_id']);;
             $it['status_mark'] = $item->getStatus();
             $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
             $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
@@ -275,7 +276,7 @@ class DeliveryService
             foreach ($goods_list as &$g) {
                 if (!is_array($imei_list)) continue;
                 foreach ($imei_list as $im) {
-                    if ($im['serial_no'] == $g['serial_no']) {
+                    if ($im['goods_no'] == $g['goods_no']) {
                         $g['imeis'][] = $im['imei'];
                     }
                 }

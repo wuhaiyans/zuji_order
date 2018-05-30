@@ -48,6 +48,9 @@ class Imei extends Warehouse
     public static function in($imei)
     {
         $model = self::where(['imei'=>$imei])->first();
+        if (!$model) {
+            return ;
+        }
         $model->status = self::STATUS_IN;
 
         return $model->update();
