@@ -676,6 +676,7 @@ class WithholdController extends Controller
         }
         $channelId = intval($ChannelInfo['_channel']['id']);
 
+
         $youhui = 0;
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
