@@ -14,18 +14,18 @@ use App\Lib\Curl;
 class Fengkong{
 
 
-    public static function getYidun($data,$arr){
+    public static function getYidun($arr){
+        $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='yidun.get.user.yiduninfo';
         $data['params'] = [
             'member_id'=>$arr['user_id'],
             'user_name'=>$arr['user_name'],
             'cert_no'=>$arr['cert_no'],
             'mobile'=>$arr['mobile'],
+            'channel_appid'=>$arr['channel_appid'],
         ];
-        //var_dump($data);die;
-        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), json_encode($data));
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
-        //var_dump($info);die;
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
@@ -39,15 +39,14 @@ class Fengkong{
      * 获取风控系统的分数
      * @return int
      */
-    public static function getCredit($data,$arr){
+    public static function getCredit($arr){
+        $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='system.get.risk.score';
         $data['params'] = [
             'member_id'=>$arr['user_id'],
         ];
-        //var_dump($data);die;
-        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), json_encode($data));
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
-        var_dump($info);die;
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

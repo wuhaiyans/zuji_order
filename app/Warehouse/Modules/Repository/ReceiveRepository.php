@@ -68,6 +68,7 @@ class ReceiveRepository
         }
 
         $result = $model->toArray();
+        $result['status_mark'] = $model->getStatus();
 
         if ($model->imeis) {
             $result['imeis'] = $model->imeis;
@@ -118,9 +119,7 @@ class ReceiveRepository
                 $detail['create_time'] = $time;
 
                 $gmodel = new ReceiveGoods();
-
                 $gmodel->create($detail);
-
 
                 if (!isset($detail['imei']) || !$detail['imei']) continue;
                 $mmodel = new ReceiveGoodsImei();
@@ -164,11 +163,20 @@ class ReceiveRepository
             throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
         }
 
-        if ($model->status != Receive::STATUS_INIT) {
-            throw new Exception('收货单' . $receive_no . '非待收货状态，收货失败');
+//        if ($model->status != Receive::STATUS_INIT) {
+//            throw new \Exception('收货单' . $receive_no . '非待收货状态，收货失败');
+//        }
+
+        $goods = $model->goods;
+
+        $status = Receive::STATUS_RECEIVED;
+        foreach ($goods as $g) {
+            if ($g->status == ReceiveGoods::STATUS_INIT || $g->status == ReceiveGoods::STATUS_PART_RECEIVE) {
+                $status = Receive::STATUS_INIT;
+            }
         }
 
-        $model->status = Receive::STATUS_RECEIVED;
+        $model->status = $status;
         $model->receive_time = time();
         return $model->update();
     }
@@ -184,11 +192,11 @@ class ReceiveRepository
     {
         $model = ReceiveGoods::where([
             'receive_no'=>$params['receive_no'],
-            'serial_no'=>$params['serial_no']
+            'goods_no'=>$params['goods_no']
         ])->first();
 
         if (!$model) {
-            throw new NotFoundResourceException('收货单商品序号' . $params['serial_no'] . '未找到');
+            throw new NotFoundResourceException('收货单商品' . $params['goods_no'] . '未找到');
         }
 
         $model->quantity_received = $params['quantity'];
@@ -206,7 +214,47 @@ class ReceiveRepository
 
 
     /**
-     * 取消签收
+     *
+     *
+     * 	'goods_no' => '',//商品编号<br/>
+     *		'evaluation_status' => '',//检测状态【必须】【1：合格；2：不合格】<br/>
+     *		'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
+     *		'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     */
+
+    /**
+     * 检测完成
+     */
+    public static function checkItemsFinish($receive_no)
+    {
+        $checkItems = CheckItems::where(['receive_no'=>$receive_no])->get();
+
+        if (!$checkItems) return false;
+
+
+        return $checkItems->toArray();
+
+//        $result = [];
+//
+//        foreach ($checkItems as $item) {
+//            $result[] = [
+//                'goods_no' => $item->goods_no,
+//                'check_item' => $item->check_item,//检测项
+//                'check_name' => $item->check_name, //测试名
+//                'check_description' => $item->check_description,//检测备注
+//                'check_result' => $item->check_result,//检测结果
+//                'check_price' => $item->check_price
+//            ];
+//        }
+
+
+
+    }
+
+
+    /**
+     * 取消签收 为待收货状态
      */
     public static function cancelReceive($receive_no)
     {
@@ -221,7 +269,8 @@ class ReceiveRepository
             throw new \Exception('收货单' . $receive_no . '非已收货状态，取消收货失败');
         }
 
-        $model->status = Receive::STATUS_CANCEL;
+        $model->status = Receive::STATUS_INIT;
+
         return $model->update();
     }
 
@@ -235,23 +284,25 @@ class ReceiveRepository
      *
      * 检测
      */
-    public static function check($receive_no,$serial_no, $data)
+    public static function check($receive_no,$goods_no, $data)
     {
 
         try {
             DB::beginTransaction();
 
-            $goods_model = ReceiveGoods::where(['receive_no'=>$receive_no, 'serial_no'=>$serial_no])->first();
+            $goods_model = ReceiveGoods::where(['receive_no'=>$receive_no, 'goods_no'=>$goods_no])->first();
 
             if (!$goods_model) {
-                throw new NotFoundResourceException('设备未找到，serial_no:' . $serial_no);
+                throw new NotFoundResourceException('设备未找到:' . $goods_no);
             }
 
             if (!$data['check_result']) {
                 throw new \Exception('请选择检测结果');
             }
 
-            if ($data['check_result'] == ReceiveGoodsImei::RESULT_NOT && !$data['check_description']) {
+
+
+            if ($data['check_result'] == ReceiveGoods::CHECK_RESULT_FALSE && !$data['check_description']) {
                 throw new \Exception('请选择检测不合格原因');
             }
 
@@ -324,15 +375,17 @@ class ReceiveRepository
     {
         $goods_model = ReceiveGoods::where([
             'receive_no'=>$params['receive_no'],
-            'serial_no'=>$params['serial_no']
+            'goods_no'=>$params['goods_no']
         ])->first();
 
-
         if (!$goods_model) {
-            throw new NotFoundResourceException('设备未找到，serial_no:' . $params['serial_no']);
+            throw new NotFoundResourceException('设备未找到:' . $params['goods_no']);
         }
 
+        $goods_model->check_result = ReceiveGoods::CHECK_RESULT_INVALID;
+        $goods_model->check_description = '';
         $goods_model->status = ReceiveGoods::STATUS_ALL_RECEIVE;
+        $goods_model->check_price = 0;
         $goods_model->status_time = time();
 
         return $goods_model->update();
@@ -350,7 +403,8 @@ class ReceiveRepository
         }
 
         $receive->status = Receive::STATUS_FINISH;//检测完成
-        if ($receive->save()){
+
+        if ($receive->update()){
             return $receive;
         }
 

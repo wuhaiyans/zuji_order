@@ -36,7 +36,7 @@ class Coupon{
             return ApiStatus::CODE_60000;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return $info;
         }
         return $info['data'];
 
@@ -98,7 +98,8 @@ class Coupon{
      * ]
      * @return string or array
      */
-    public static function setCoupon($data,$arr){
+    public static function setCoupon($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.coupon.status0.set';
         $data['params'] = [
             'user_id'=>$arr['user_id'],

@@ -184,6 +184,22 @@ return [
 	//还机同步支付的状态
     'api.giveback.sync.paymentstatus'       => 'GivebackController@syncPaymentStatus',
 
+    //-+------------------------------------------------------------------------
+    // | 买断相关接口
+    //-+------------------------------------------------------------------------
+    //用户买断
+    'api.buyout.userBuyout'       => 'BuyoutController@userBuyout',
+    //提前买断
+    'api.buyout.adminBuyout'       => 'BuyoutController@adminBuyout',
+    //买断列表
+    'api.buyout.getBuyoutList'       => 'BuyoutController@getBuyoutList',
+    //买断详情
+    'api.buyout.getBuyout'       => 'BuyoutController@getBuyout',
+    //取消买断
+    'api.buyout.cancel'       => 'BuyoutController@cancel',
+    //买断支付
+    'api.buyout.pay'       => 'BuyoutController@pay',
+
     // test
     'api.Test.test'       => 'TestController@test',
     'api.test.send.sms'       => 'TestController@sendSms',

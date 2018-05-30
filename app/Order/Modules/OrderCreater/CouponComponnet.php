@@ -9,8 +9,11 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\ApiStatus;
 use App\Lib\Coupon\Coupon;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderCouponRepository;
+use Mockery\Exception;
 
 class CouponComponnet implements OrderCreater
 {
@@ -36,6 +39,9 @@ class CouponComponnet implements OrderCreater
             }
             //var_dump($couponData);die;
             $coupon = Coupon::getCoupon($couponData);
+            if(!is_array($coupon)){
+                throw new Exception("优惠券信息错误");
+            }
             $couponInfo =[];
             foreach ($coupon as $key=>$value){
                 foreach ($value as $k=>$v){
@@ -50,7 +56,6 @@ class CouponComponnet implements OrderCreater
 
                 }
             }
-            //var_dump($couponInfo);
             $this->couponInfo = $couponInfo;
         }
     }
@@ -106,7 +111,7 @@ class CouponComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        $data =$this->getOrderCreater()->getDataSchema();
+        $data =$this->getDataSchema();
         //无优惠券
         if(empty($data['coupon'])){
             return true;
@@ -116,7 +121,8 @@ class CouponComponnet implements OrderCreater
         foreach ($data['coupon'] as $k=>$v){
             if($v['is_use'] ==1){
                 $couponData =[
-                    'order_no'=>$orderNo,
+                    'business_type'=>OrderStatus::BUSINESS_ZUJI,
+                    'business_no'=>$orderNo,
                     'coupon_no'=>$v['coupon_no'],
                     'coupon_id'=>$v['coupon_id'],
                     'discount_amount'=>$v['discount_amount'],
@@ -128,7 +134,7 @@ class CouponComponnet implements OrderCreater
                     $this->getOrderCreater()->setError("保存订单优惠券信息失败");
                     return false;
                 }
-                $coupon[] =$v['coupon_id'];
+                $coupon[] =intval($v['coupon_id']);
             }
 
         }
@@ -136,8 +142,8 @@ class CouponComponnet implements OrderCreater
         /**
          * 调用优惠券使用接口
          */
-        $b = Coupon::useCoupon($coupon);
-        if(!$b){
+        $coupon = Coupon::useCoupon($coupon);
+        if($coupon !=ApiStatus::CODE_0){
             $this->getOrderCreater()->setError("调用使用优惠券接口失败");
             return false;
         }

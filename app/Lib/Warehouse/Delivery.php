@@ -118,6 +118,12 @@ class Delivery
         return true;
     }
 
+    /**
+     * @param $order_no
+     * @return array|bool
+     *
+     * 为创建发货申请提供数据源
+     */
     public static function getOrderInfo($order_no)
     {
         $info = OrderInfo::getOrderInfo(['order_no'=>$order_no]);

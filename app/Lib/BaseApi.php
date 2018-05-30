@@ -20,7 +20,7 @@ class BaseApi {
      * @return	array				业务返回参数（具体业务查阅具体接口协议）
 	 * @throws \Exception			请求失败时抛出异常
      */
-    public static function request( int $appid, string $url, string $method, string $version, array $params ){
+    public static function request( string $appid, string $url, string $method, string $version, array $params ){
 		
 		//-+--------------------------------------------------------------------
 		// | 创建请求

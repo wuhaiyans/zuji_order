@@ -102,7 +102,6 @@ class Curl {
 
 
         $output = self::_send($url, $params, $header);
-
         return $output;
     }
 
