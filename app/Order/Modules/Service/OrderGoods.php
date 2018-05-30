@@ -77,8 +77,6 @@ class OrderGoods
 	 * ]
 	 */
 	public function update( $where, $data ) {
-		var_dump($where);
-		var_dump($data);exit;
 		$where = filter_array($where, [
 			'goods_no' => 'required',
 		]);
@@ -87,6 +85,8 @@ class OrderGoods
 			'bussiness_no' => 'required',
 			'goods_status' => 'required',
 		]);
+		var_dump($where);
+		var_dump($data);exit;
 		if( count( $where ) < 1 ){
 			set_apistatus(\App\Lib\ApiStatus::CODE_92600, '商品信息修改：条件参数缺失!');
 			return false;
