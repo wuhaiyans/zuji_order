@@ -24,8 +24,8 @@ class Goods  extends \App\Lib\BaseApi{
 		foreach( $skuids as $id){
 			$_params[] =['sku_id'=>$id];
 		}
-		$data =self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
-        var_dump($data);die;
+		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
+
 	}
 	
     /**
