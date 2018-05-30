@@ -326,6 +326,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['business_no']     = createNo(9);
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
@@ -373,6 +375,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['business_no']     = createNo(9);
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
