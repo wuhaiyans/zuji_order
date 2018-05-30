@@ -472,6 +472,14 @@ class OrderReturnRepository
         }
     }
     //创建换货单记录
+
+    /**
+     * @param $params
+     * [
+     *      'order_no'=>'','goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
     public static function createchange($params){
         $param = filter_array($params,[
             'order_no'  =>'required',

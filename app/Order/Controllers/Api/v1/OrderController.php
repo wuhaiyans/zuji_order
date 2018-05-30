@@ -211,12 +211,15 @@ class OrderController extends Controller
 
     /**
      *  发货接口
-     * $params
-     * @param $param :array[
-        'order_no'=> 订单号  string,
-        'good_info'=> 商品信息：goods_id` '商品id',goods_no 商品编号
-        e.g: array('order_no'=>'1111','goods_id'=>12,'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd')
-     *
+     * @param $order_no string  订单编号 【必须】
+     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * [
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -226,16 +229,13 @@ class OrderController extends Controller
     {
         $params =$request->all();
         $params =$params['params'];
-        $params = filter_array($params,[
-            'order_no'           => 'required',
-            'goods_no'           =>'required',
-            'serial_number'     =>'required',
-            'goods_id'     =>'required',
-        ]);
-        if(count($params)<4){
+        if(empty($params['order_no'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params);
+        if(count($params['goods_info'] <1)){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
@@ -334,42 +334,7 @@ class OrderController extends Controller
 
     }
 
-    /**
-     *
-     *  发货后，插入设置imei号
-     *
-     */
-    public function OrderDeliverImei(Request $request){
 
-        $orders = $request->all();
-        $params = $orders['params'];
-
-        //判断参数是否设置
-        if(empty($params['order_no'])){
-            return apiResponse([],ApiStatus::CODE_20001,"订单号不能为空");
-        }
-        if(empty($params['good_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
-        }
-        if(empty($params['good_no'])){
-            return apiResponse([],ApiStatus::CODE_20001,"商品编码不能为空");
-        }
-        if(empty($params['imei1'])){
-            return apiResponse([],ApiStatus::CODE_20001,"imei不能为空");
-        }
-        if(empty($params['serial_number'])){
-            return apiResponse([],ApiStatus::CODE_20001,"序列号不能为空");
-        }
-
-        $OrderGoodExtend = new OrderGoodExtend();
-        $id = $OrderGoodExtend->create($params);
-        if(!$id){
-            return apiResponse(['id'=>$id],ApiStatus::CODE_20001,"设置imei号失败");
-        }
-
-        return apiResponse(['id'=>$id],ApiStatus::CODE_0,"success");
-
-    }
     /*
       *
       *

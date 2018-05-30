@@ -101,7 +101,7 @@ class OrderCreater
 //                return false;
 //            }
             $schemaData = $orderCreater->getDataSchema();
-            //var_dump($schemaData);die;
+            var_dump($schemaData);die;
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
