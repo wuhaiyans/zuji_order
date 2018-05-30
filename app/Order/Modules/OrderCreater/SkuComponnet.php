@@ -256,7 +256,9 @@ class SkuComponnet implements OrderCreater
      * 计算优惠券信息
      *
      */
-    public function discrease_coupon($sku,$coupon){
+    public function discrease_coupon($coupon){
+        $schema =$this->componnet->getDataSchema();
+        $sku =$schema['sku'];
         //计算总租金
         $totalAmount =0;
         foreach ($sku as $k=>$v){
@@ -293,6 +295,7 @@ class SkuComponnet implements OrderCreater
                 }
             }
         }
+
         $this->sku =$skuyouhui;
         return $coupon;
     }
@@ -302,9 +305,7 @@ class SkuComponnet implements OrderCreater
      */
     public function create(): bool
     {
-
         $data = $this->componnet->getDataSchema();
-        //var_dump($data);die;
         $userId =$this->componnet->getOrderCreater()->getUserComponnet()->getUserId();
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $goodsRepository = new OrderGoodsRepository();
