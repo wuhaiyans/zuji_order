@@ -14,6 +14,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\Warehouse\Delivery;
+use \app\Order\Modules\Inc\PayInc;
 use App\Lib\Warehouse\Logistics;
 class OrderReturnCreater
 {
@@ -442,7 +443,7 @@ if(!$create_receive){
         $create_data['business_no']=$params['order_no'];//业务编号
         $create_data['user_id']=$order_info['user_id'];
         //退款：直接支付
-        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\app\Order\Modules\Inc\PayInc::UnionPay){
+        if($order_info['pay_type']==PayInc::FlowerStagePay ||$order_info['pay_type']==PayInc::UnionPay){
             $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
             $create_data['order_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
             if($create_data['order_amount']>0){
@@ -451,7 +452,7 @@ if(!$create_receive){
 
         }
         //退款：代扣+预授权
-        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::FlowerDepositPay){
+        if($order_info['pay_type']==PayInc::FlowerDepositPay){
             $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
             $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
            // $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
@@ -465,7 +466,7 @@ if(!$create_receive){
 
         }
         //退款：预授权
-        if($order_info['pay_type']==\app\Order\Modules\Inc\PayInc::WithhodingPay){
+        if($order_info['pay_type']==PayInc::WithhodingPay){
             $create_data['out_auth_no']=$pay_result['fundauth_no'];
             //$create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
             $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
@@ -1000,7 +1001,7 @@ if(!$create_receive){
                       $create_data['user_id']=$order_info[0]->user_id;
                       $create_data['app_id']=$order_info[0]->appid;
                       //退款：直接支付
-                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::UnionPay){
+                      if($order_info[0]->pay_type==PayInc::FlowerStagePay ||$order_info[0]->pay_type==PayInc::UnionPay){
                           $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                           $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
                           if($goods_info['order_amount']>0){
@@ -1009,7 +1010,7 @@ if(!$create_receive){
 
                       }
                       //退款：代扣+预授权
-                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::FlowerDepositPay){
+                      if($order_info[0]->pay_type==PayInc::FlowerDepositPay){
                           $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                           $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                           // $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
@@ -1023,7 +1024,7 @@ if(!$create_receive){
 
                       }
                       //退款：预授权
-                      if($order_info[0]->pay_type==\app\Order\Modules\Inc\PayInc::WithhodingPay){
+                      if($order_info[0]->pay_type==PayInc::WithhodingPay){
                           $create_data['out_auth_no']=$pay_result['fundauth_no'];
                           //$create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
                           $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
