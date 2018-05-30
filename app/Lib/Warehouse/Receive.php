@@ -67,8 +67,7 @@ class Receive
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
-
-        dd($res);
+		return $res;
 
     }
     /**
