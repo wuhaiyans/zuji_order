@@ -2,6 +2,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
 
@@ -119,6 +120,7 @@ class ReceiveController extends Controller
 
         try {
             $this->receive->received($params['receive_no']);
+            Receive::receive($params['receive_no']);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -180,6 +182,33 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+
+    /**
+     * 检测完成
+     */
+    public function checkItemsFinish()
+    {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $items = $this->receive->checkItemsFinish($params['receive_no']);
+
+            Receive::checkItemsResult($items);
+
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse(['items'=>$items]);
+    }
 
     /**
      * 验收 针对设备

@@ -204,6 +204,18 @@ class ReceiveService
     }
 
     /**
+     * 检测完成
+     */
+    public function checkItemsFinish($receive_no)
+    {
+        $items = ReceiveRepository::checkItemsFinish($receive_no);
+        if (!$items) {
+            throw new \Exception($receive_no . '操作失败');
+        }
+        return $items;
+    }
+
+    /**
      * 取消检测
      */
     public function cancelCheck($params)

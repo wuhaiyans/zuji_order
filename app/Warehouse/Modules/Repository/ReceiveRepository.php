@@ -214,6 +214,46 @@ class ReceiveRepository
 
 
     /**
+     *
+     *
+     * 	'goods_no' => '',//商品编号<br/>
+     *		'evaluation_status' => '',//检测状态【必须】【1：合格；2：不合格】<br/>
+     *		'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
+     *		'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     */
+
+    /**
+     * 检测完成
+     */
+    public static function checkItemsFinish($receive_no)
+    {
+        $checkItems = CheckItems::where(['receive_no'=>$receive_no])->get();
+
+        if (!$checkItems) return false;
+
+
+        return $checkItems->toArray();
+
+//        $result = [];
+//
+//        foreach ($checkItems as $item) {
+//            $result[] = [
+//                'goods_no' => $item->goods_no,
+//                'check_item' => $item->check_item,//检测项
+//                'check_name' => $item->check_name, //测试名
+//                'check_description' => $item->check_description,//检测备注
+//                'check_result' => $item->check_result,//检测结果
+//                'check_price' => $item->check_price
+//            ];
+//        }
+
+
+
+    }
+
+
+    /**
      * 取消签收 为待收货状态
      */
     public static function cancelReceive($receive_no)
@@ -230,7 +270,7 @@ class ReceiveRepository
         }
 
         $model->status = Receive::STATUS_INIT;
-        
+
         return $model->update();
     }
 
