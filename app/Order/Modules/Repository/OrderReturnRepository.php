@@ -105,7 +105,7 @@ class OrderReturnRepository
                 $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
-                $data['goods_status']=ReturnStatus::ReturnCreated;
+                $data['goods_status']=OrderGoodStatus::REFUNDS;
                 $update_result=ordergoods::where($where[$k])->update($data);
                 if(!$update_result){
                     return false;
@@ -118,7 +118,7 @@ class OrderReturnRepository
             $order_return=OrderReturn::where($where)->first()->toArray();
             $data['business_key']=$params['business_key'];
             $data['business_no']=$order_return['refund_no'];
-            $data['goods_status']=ReturnStatus::ReturnCreated;
+            $data['goods_status']=OrderGoodStatus::REFUNDS;
             $update_result=ordergoods::where($where)->update($data);
             if(!$update_result){
                 return false;

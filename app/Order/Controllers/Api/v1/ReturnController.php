@@ -322,10 +322,9 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $param = filter_array($params,[
             'order_no'=> 'required',
-            'business_key'=> 'required',
             'remark'=> 'required',
         ]);
-        if(count($param)<3){
+        if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
@@ -341,10 +340,9 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $param = filter_array($params,[
             'order_no'=> 'required',
-            'business_key'=> 'required',
             'remark'=> 'required',
         ]);
-        if(count($param)<3){
+        if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核拒绝

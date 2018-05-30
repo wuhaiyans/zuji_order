@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\Warehouse\Receive;
 use \App\Lib\Common\SmsApi;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
 use \App\Order\Modules\Inc\OrderCleaningStatus;
@@ -896,21 +897,14 @@ if(!$create_receive){
               if($data[$k]['check_result']=="success"){
                   $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
                   if ($business_key == ReturnStatus::OrderTuiHuo){
-                      $params['status'] = ReturnStatus::ReturnTuiHuo;
                       //修改商品状态
-                      $goods_data['goods_status'] = $params['status'];
-                      $goods_result = $this->orderReturnRepository->updategoods($where, $goods_data);
-                      if (!$goods_result) {
+                    //  $goods_data['goods_status'] = $params['status'];
+                   //   $goods_result = $this->orderReturnRepository->updategoods($where, $goods_data);
+                   //   if (!$goods_result) {
                           //事务回滚
-                          DB::rollBack();
-                          return ApiStatus::CODE_33009;//修改商品状态失败
-                      }
-                      $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
-                      if (!$result) {
-                          //事务回滚
-                          DB::rollBack();
-                          return ApiStatus::CODE_33008;//修改退货单信息失败
-                      }
+                   //       DB::rollBack();
+                   //       return ApiStatus::CODE_33009;//修改商品状态失败
+                  //    }
                       $pay_where['order_no']=$order_no;
                       //获取此订单的支付方式
                       $pay_result=$this->orderReturnRepository->payRefund($pay_where);
@@ -936,18 +930,17 @@ if(!$create_receive){
                       if(!$create_clear){
                           return ApiStatus::CODE_34008;//创建退款清单失败
                       }
+                      $params['status'] = ReturnStatus::ReturnTui;
+                      $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
+                      if (!$result) {
+                          //事务回滚
+                          DB::rollBack();
+                          return ApiStatus::CODE_33008;//修改退货单信息失败
+                      }
 
                   }
                   if ($business_key == ReturnStatus::OrderHuanHuo) {
                       $params['status'] = ReturnStatus::ReturnReceive;
-                      //修改商品状态
-                      $goods_data['goods_status'] = $params['status'];
-                      $goods_result = $this->orderReturnRepository->updategoods($where, $goods_data);
-                      if (!$goods_result) {
-                          //事务回滚
-                          DB::rollBack();
-                          return ApiStatus::CODE_33009;//修改商品状态失败
-                      }
                       $result = $this->orderReturnRepository->is_qualified($where, $params);//修改退货单状态和原因
                       if (!$result) {
                           //事务回滚
@@ -996,6 +989,14 @@ if(!$create_receive){
                   $delivery_result=Delivery::createDelivery($deliveray_data);
                   if(!$delivery_result){
                       return ApiStatus::CODE_34009;//创建换货单失败
+                  }
+                  //修改商品状态
+                  $goods_data['goods_status'] = OrderGoodStatus::EXCHANGE_GOODS;//换货中
+                  $goods_result = $this->orderReturnRepository->updategoods($where, $goods_data);
+                  if (!$goods_result) {
+                      //事务回滚
+                      DB::rollBack();
+                      return ApiStatus::CODE_33009;//修改商品状态失败
                   }
               }
           }
