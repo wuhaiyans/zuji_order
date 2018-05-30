@@ -155,7 +155,7 @@ class OrderOperate
 
     }
     private static function calculateEndTime($beginTime, $zuqi){
-        $day = P
+        $day = Inc\publicInc::calculateDay($zuqi);
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
@@ -206,8 +206,12 @@ class OrderOperate
     public static function cancelOrder($orderNo,$userId='')
     {
         if (empty($orderNo)) {
-            return false;
+           return  ApiStatus::CODE_31001;
             }
+        //查询订单的状态
+        $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
+
+        if ($orderInfoData['order_status']!=Inc\OrderStatus::OrderWaitPaying)  return  ApiStatus::CODE_31007;
         //开启事物
         DB::beginTransaction();
         try {
@@ -235,25 +239,38 @@ class OrderOperate
 
             }
 
-            if ($success || empty($orderGoods)) {
+            if (!$success || empty($orderGoods)) {
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
             //优惠券归还
 
-           $success =  Coupon::setCoupon(config('tripartite.Interior_Goods_Request_data'),['user_id'=>$userId ,'coupon_id'=>$orderNo]);
+            //通过订单号获取优惠券信息
+            $orderCouponData = OrderRepository::getCouponListByOrderId($orderNo);
+            if ($orderCouponData) {
+                $coupon_id = array_column($orderCouponData, 'coupon_id');
+                $success =  Coupon::setCoupon(config('tripartite.Interior_Goods_Request_data'),['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
 
-            if ($success) {
-                DB::rollBack();
-                return ApiStatus::CODE_31003;
+                if ($success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31003;
+                }
+
             }
 
             //分期关闭
-            $success =  OrderInstalment::close(['order_no'=>$orderNo]);
-             if (!$success) {
-                 DB::rollBack();
-                 return ApiStatus::CODE_31004;
-             }
+            //查询分期
+            if ($orderInfoData['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH) {
+
+                $success =  OrderInstalment::close(['order_no'=>$orderNo]);
+                if (!$success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31004;
+                }
+
+            }
+
+            DB::commit();
             return ApiStatus::CODE_0;
 
         } catch (\Exception $exc) {
@@ -340,6 +357,7 @@ class OrderOperate
         $orderList = OrderRepository::getOrderList($param);
         $orderListArray = objectToArray($orderList);
 
+
         if (!empty($orderListArray['data'])) {
 
             foreach ($orderListArray['data'] as $keys=>$values) {
@@ -358,12 +376,14 @@ class OrderOperate
 
 
                 $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
 
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
-                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
+                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
 
             }
@@ -403,11 +423,6 @@ class OrderOperate
             }
 
 
-        } else {
-            //短租在到期之前不出现到期处理
-            if (time()>= $orderData['goods_info']['end_time'] && $orderData['goods_info']['end_time']>0) {
-                unset($actArray['service_btn']);
-            }
         }
 
             return $actArray;
@@ -425,26 +440,35 @@ class OrderOperate
      */
    public static function getGoodsListActState($orderNo, $actArray)
    {
+
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
        if (empty($goodsList)) return [];
-       foreach ($goodsList as $keys=>$values) {
+
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
-               $goodsList[$keys]['act_goods_state']= $actArray;
-               //是否处于售后之中
-               $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
-               if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
-                   || $expire_process
-               ) {
-                   unset($goodsList[$keys]['act_goods_state']['expiry_process']);
+
+               if (empty($actArray)){
+                   $goodsList[$keys]['act_goods_state']= [];
+               } else {
+
+                   $goodsList[$keys]['act_goods_state']= $actArray;
+                   //是否处于售后之中
+                   $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
+                   if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
+                       || $expire_process
+                   ) {
+                       unset($goodsList[$keys]['act_goods_state']['expiry_process']);
+                   }
+                   //无分期或者分期已全部还完不出现提前还款按钮
+
+                   $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                   if (empty($orderInstalmentData)){
+                       unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
+                   }
+
                }
-               //无分期或者分期已全部还完不出现提前还款按钮
-               $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-               if (empty($orderInstalmentData)){
-                   unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
-               }
+
            }
-       }
 
        return $goodsList;
 

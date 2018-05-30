@@ -190,21 +190,25 @@ class OrderTrade
                     'businessNo'	=> $data['order_no'],
 
                     'paymentNo' => $orderInfo['trade_no'],
-                    'paymentAmount' => $amount,
+                    'paymentAmount' => 0.01,
                     'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
                     'paymentFenqi'	=> $fenqi,
                 ]);
                 $step = $pay->getCurrentStep();
                 //echo '当前阶段：'.$step."\n";
+                if($step =="payment"){
+                    $_params = [
+                        'name'			=> '订单支付',					//【必选】string 交易名称
+                        'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+                    ];
+                    $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 
-                $_params = [
-                    'name'			=> '订单支付',					//【必选】string 交易名称
-                    'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
-                ];
-                $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-                //var_dump( $urlInfo );
-                DB::commit();
-                return $urlInfo;
+                    //var_dump( $urlInfo );
+                    DB::commit();
+                    return $urlInfo;
+                }
+                DB::rollBack();
+                return false;
             } catch (\Exception $exc) {
                 DB::rollBack();
                 echo $exc->getMessage();
@@ -270,7 +274,7 @@ class OrderTrade
                 'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
             ];
             $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-            //var_dump( $urlInfo );
+            //var_dump( $urlInfo );die;
             DB::commit();
             return $urlInfo;
         } catch (\Exception $exc) {

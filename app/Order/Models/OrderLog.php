@@ -20,6 +20,6 @@ class OrderLog extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','action','operator','operator_name','operator_type','msg','system_time','clientip'];
+    protected $fillable = ['order_no','action','operator_id','operator_name','operator_type','msg','system_time'];
 
 }

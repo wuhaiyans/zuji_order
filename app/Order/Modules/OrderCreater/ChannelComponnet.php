@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Channel\Channel;
+use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
 class ChannelComponnet implements OrderCreater
@@ -146,8 +147,16 @@ class ChannelComponnet implements OrderCreater
      */
     public function create(): bool
     {
+        $data =$this->getOrderCreater()->getDataSchema();
         $b = $this->componnet->create();
         if( !$b ){
+            return false;
+        }
+
+        //保存订单渠道信息
+        $b= OrderRepository::updateChannel($data['order']['order_no'],$this->channelId);
+        if(!$b){
+            $this->getOrderCreater()->setError('保存渠道信息失败');
             return false;
         }
         return true;

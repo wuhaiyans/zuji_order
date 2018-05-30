@@ -39,12 +39,12 @@ class YidunComponnet implements OrderCreater
         $this->userInfo =$schema['user'];
 
         //获取蚁盾信息
-//        $yidun =Fengkong::getYidun(config('tripartite.Interior_Fengkong_Request_data'),[
-//            'user_id'=>$schema['user']['user_id'],
-//            'user_name'=>$schema['user']['realname'],
-//            'cert_no'=>$schema['user']['cert_no'],
-//            'mobile'=>$schema['user']['user_mobile'],
-//        ]);
+        $yidun =Fengkong::getYidun(config('tripartite.Interior_Fengkong_Request_data'),[
+            'user_id'=>$schema['user']['user_id'],
+            'user_name'=>$schema['user']['realname'],
+            'cert_no'=>$schema['user']['cert_no'],
+            'mobile'=>$schema['user']['user_mobile'],
+        ]);
 
         $yidun_data =[
             'yidun'=>[
@@ -92,7 +92,7 @@ class YidunComponnet implements OrderCreater
      */
     public function create(): bool
     {
-        var_dump("yidun组件 -create");
+
         $b = $this->componnet->create();
         if( !$b ){
             return false;

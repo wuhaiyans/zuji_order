@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Warehouse\Controllers\Api\v1;
+
 use App\Lib\ApiStatus;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
@@ -8,6 +9,7 @@ use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class DeliveryController extends Controller
 {
@@ -28,30 +30,24 @@ class DeliveryController extends Controller
      * delivery_detail 设备明细
      */
     public function deliveryCreate(){
-
         $rules = [
             'order_no' => 'required', //单号
             'delivery_detail'   => 'required', //序号
         ];
-        $params = $this->_dealParams($rules);
 
+        $params = $this->_dealParams($rules);
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $delivery_row['app_id'] = $params['app_id'];
-        $delivery_row['order_no'] =$params['order_no'];//订单编号
-        $delivery_row['delivery_detail'] =$params['delivery_detail'];//发货清单
-
         try {
-            $this->DeliveryCreate->confirmation($delivery_row);
+            $this->DeliveryCreate->confirmation($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return \apiResponse([]);
-
     }
 
 
@@ -121,6 +117,7 @@ class DeliveryController extends Controller
      */
     public function cancel()
     {
+
         $rules = ['order_no' => 'required'];
         $params = $this->_dealParams($rules);
 
@@ -162,13 +159,13 @@ class DeliveryController extends Controller
 
     /**
      * 签收
-     * params[delivery_id, auto=false]
+     * params[delivery_id, receive_type=1]
      */
     public function receive()
     {
-
         $rules = [
-            'delivery_no' => 'required'
+            'delivery_no' => 'required',
+            'receive_type'=> 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -176,10 +173,13 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $auto = isset($params['auto']) ? $params['auto'] : false;
+        $receive_type = isset($params['receive_type']) ? $params['receive_type'] : false;
 
         try {
-            $this->delivery->receive($params['delivery_no'], $auto);
+            $deliveryInfo = $this->delivery->receive($params['delivery_no'], $receive_type);
+
+            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], $params['receive_type']);
+
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -253,8 +253,10 @@ class DeliveryController extends Controller
 
         try {
             $this->delivery->send($params['delivery_no']);
-            $order_no = $this->delivery->getOrderNoByDeliveryNo($params['delivery_no']);
-            \App\Lib\Warehouse\Delivery::delivery($order_no);
+            $result = $this->_info($params['delivery_no']);
+
+            //通知订单接口
+            \App\Lib\Warehouse\Delivery::delivery($result['order_no'], $result['goods_info']);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
@@ -421,6 +423,39 @@ class DeliveryController extends Controller
     {
         $list = $this->delivery->getLogistics();
         return apiResponse(['list'=>$list]);
+    }
+
+
+    protected function _info($delivery_no)
+    {
+        $model = Delivery::where(['delivery_no'=>$delivery_no])->first();
+
+        if (!$model) {
+            throw new NotFoundResourceException('发货单未找到');
+        }
+
+        $goods = $model->goods;
+        $imeis = $model->imeis->toArray();
+
+        if (!$goods) {
+            throw new NotFoundResourceException('设备信息未找到');
+        }
+        $result = [];
+        foreach ($goods as $g) {
+            $result[$g->goods_no]['goods_no'] = $g->goods_no;
+            if (is_array($imeis)) {
+                $i=1;
+                foreach ($imeis as $imei) {
+                    if ($imei['goods_no'] == $g->goods_no) {
+                        $result[$g->goods_no]['imei' . $i] = $imei['imei'];
+                        $result[$g->goods_no]['serial_number'] = $imei['apple_serial'];
+                        $i++;
+                    }
+                }
+            }
+        }
+
+        return ['order_no'=>$model->order_no, 'goods_info'=>$result];
     }
 
 }

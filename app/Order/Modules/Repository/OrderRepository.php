@@ -4,6 +4,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
+use App\Order\Models\OrderCoupon;
 use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
@@ -41,7 +42,20 @@ class OrderRepository
         return Order::where('order_no','=',$orderNo)->update($data);
 
     }
+    /**
+     * 保存渠道信息
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function updateChannel($orderNo,$channelId)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['channel_id'] =$channelId;
+        return Order::where('order_no','=',$orderNo)->update($data);
 
+    }
     /**
      * 确认收货操作
      * @param $orderNo
@@ -127,6 +141,21 @@ class OrderRepository
             $order =  Order::query()->where($whereArray)->first();
             if (!$order) return false;
             return $order->toArray();
+    }
+
+    /**
+     * 根据订单编号查询有关订单使用的优惠券
+     * @param $orderNo
+     * @return array|bool
+     */
+
+    public static function getCouponByOrderNo($orderNo){
+        if (empty($orderNo)) return false;
+        $orderCoupon =  OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get();
+        if (!$orderCoupon) return false;
+        return $orderCoupon->toArray();
     }
 
 
@@ -230,7 +259,7 @@ class OrderRepository
         }
         $order =  Order::where($whereArray)->first();
         if (!$order) return false;
-        $order->order_status = OrderStatus::OrderClosed;
+        $order->order_status = OrderStatus::OrderCancel;
         if ($order->save()) {
             return true;
         } else {
@@ -252,6 +281,23 @@ class OrderRepository
         }else{
             return $order;
         }
+    }
+
+
+    /**
+     * 根据订单号获取用户优惠券信息
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
+    public static function getCouponListByOrderId($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderCouponData = OrderCoupon::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get()->toArray();
+        return $orderCouponData ?? false;
+
     }
 
     /**
@@ -385,7 +431,7 @@ class OrderRepository
         }
 
         //下单时间
-        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
             $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
         }
 
@@ -407,5 +453,15 @@ class OrderRepository
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 
+    }
+
+    //更新订单状态-订单完成
+    public static function orderClose($order_no){
+        $data['order_status']=OrderStatus::OrderCompleted;
+        if(Order::where('order_no', '=', $order_no)->update($data)){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

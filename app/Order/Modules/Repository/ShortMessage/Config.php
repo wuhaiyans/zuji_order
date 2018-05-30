@@ -37,22 +37,26 @@ class Config {
 		$arr = [
 			// 机市短息模板配置
 			self::CHANNELID_OFFICAL => [
-				SceneConfig::ORDER_CREATE => 'SMS_113450944',
+				SceneConfig::ORDER_CREATE => 'SMS_113461042',  //用户下单
+                SceneConfig::ORDER_PAY =>'SMS_113461043',//用户支付或授权 成功
+				SceneConfig::INSTALMENT_WITHHOLD => 'hsb_sms_b427f',
 			],
 			// 小程序
 			self::CHANNELID_MINI_ZHIMA => [
-				SceneConfig::ORDER_CREATE => 'SMS_113450944',
+				SceneConfig::ORDER_CREATE => 'SMS_113461066',//用户下单
+                SceneConfig::ORDER_PAY =>'SMS_113461043',//用户支付或授权 成功
 			],
 			// 大疆
 			self::CHANNELID_MINI_DAJIANG => [
-				SceneConfig::ORDER_CREATE => 'SMS_113450944',
+				SceneConfig::ORDER_CREATE => 'SMS_113460977',//用户下单
+                SceneConfig::ORDER_PAY =>'SMS_113460978',//用户支付或授权 成功
 			],
 			// 极米
 			self::CHANNELID_MINI_JIMI => [
-				SceneConfig::ORDER_CREATE => 'SMS_113450944',
+				SceneConfig::ORDER_CREATE => 'SMS_113461002',//用户下单
+                SceneConfig::ORDER_PAY =>'SMS_113461003',//用户支付或授权 成功
 			],
 		];
-		
 		if( !isset($arr[$channelId][$scene]) ){
 			return false;
 		}

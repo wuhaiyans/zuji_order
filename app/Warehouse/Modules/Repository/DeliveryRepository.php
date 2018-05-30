@@ -69,6 +69,7 @@ class DeliveryRepository
             DB::rollBack();
 
             throw new \Exception($e->getMessage());
+
             return false;
         }
 
@@ -259,7 +260,7 @@ class DeliveryRepository
      *
      * 收货操作
      */
-    public static function receive($delivery_no, $auto=false)
+    public static function receive($delivery_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
         $model = Delivery::find($delivery_no);
 
@@ -268,8 +269,11 @@ class DeliveryRepository
         }
         $model->status = Delivery::STATUS_RECEIVED;
         $model->status_time = time();
-        $model->is_auto = (int)$auto;
-        return $model->update();
+        $model->receive_type = (int)$receive_type;
+
+        $model->update();
+
+        return $model->toArray();
     }
 
 

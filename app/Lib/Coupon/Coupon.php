@@ -44,7 +44,32 @@ class Coupon{
         }
         return $info['data'];
 
-    }    /**
+    }
+    /**
+     *  使用优惠券
+     * @param $arr[
+     * coupon_id
+     * ]
+     * @return string or array
+     */
+    public static function useCoupon($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.coupon.status1.set';
+        $data['params'] = [
+            'coupon_id'=>$arr,
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return ApiStatus::CODE_0;
+    }
+
+    /**
      * 优惠券恢复
      * @param$arr[
      * $user_id //spu_id
@@ -60,7 +85,6 @@ class Coupon{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        dd($info);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
