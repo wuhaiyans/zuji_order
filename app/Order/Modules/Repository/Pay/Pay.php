@@ -782,6 +782,10 @@ class Pay extends \App\Lib\Configurable
 				&& $step == 'payment' )
 		{
 			$call = $this->_getBusinessCallback();
+			if( !is_callable( $call ) ){
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付环节完成)');
+				throw new \Exception( '支付回调设置不可调用-'.$call );
+			}
 			$b = $call( [
 				'business_type' => $this->businessType,
 				'business_no' => $this->businessNo,
@@ -798,6 +802,7 @@ class Pay extends \App\Lib\Configurable
 		{
 			$call = $this->_getBusinessCallback();
 			if( !is_callable( $call ) ){
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付阶段完成)');
 				throw new \Exception( '支付回调设置不可调用-'.$call );
 			}
 			$b = $call( [
