@@ -2,6 +2,10 @@
 namespace App\Lib\Common;
 
 use App\Lib\Curl;
+//将时区设置为中国
+date_default_timezone_set("PRC");
+//将时区设置为上海时区
+ini_set('date.timezone','Asia/Shanghai');
 
 /**
  * JobQueueApi 工作队列
@@ -31,9 +35,8 @@ class JobQueueApi {
 	 * @return bool
 	 */
 	public static function addScheduleOnce( string $key, string $url, array $data,int $timestamp, string $callback='' ):bool{
-        $shiqu =date_default_timezone_get();
-        var_dump($shiqu);die;
-        $timestamp =$timestamp+3600*8;
+
+       var_dump(date("Y-m-d H:i:s"));die;
 		$start = '@at '.date('Y-m-d',$timestamp)."T".date('H:i:s',$timestamp).'+00:00';
 
 		return self::push($key, $url, $data, $callback, 'scheduled',$start);
