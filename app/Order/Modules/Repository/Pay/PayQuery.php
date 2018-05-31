@@ -35,6 +35,7 @@ class PayQuery {
 			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
 		}
+		var_dump($info);exit;
 		throw new \App\Lib\NotFoundException('支付单不存在');
 	}
 	
