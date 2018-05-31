@@ -601,11 +601,11 @@ class OrderInstalment
             return false;
         }
 
-        $trade_no = $params['out_no'];
+        $tradeNo = $params['out_no'];
 
         if($params['status'] == "success"){
             //修改分期状态
-            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
+            $b = OrderInstalment::save(['trade_no'=>$tradeNo],['status'=>OrderInstalmentStatus::SUCCESS]);
             if(!$b){
                 echo "FAIL";exit;
             }
@@ -613,16 +613,16 @@ class OrderInstalment
             // 支付失败 恢复优惠券
             $where = [
                 'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'       => $trade_no,
+                'business_no'       => $tradeNo,
             ];
             $couponInfo = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
             if(!empty($couponInfo)){
-                $instalmentInfo     = $this->queryInfo(['trade_no'=>$trade_no]);
+                $instalmentInfo     = $this->queryInfo(['trade_no'=>$tradeNo]);
                 $arr = [
                     'user_id'       => $instalmentInfo['user_id'],
                     'coupon_id'     => $couponInfo['coupon_id'],
                 ];
-                \App\Lib\Coupon\Coupon::setCoupon([],$arr);
+                \App\Lib\Coupon\Coupon::setCoupon($arr);
 
             }
 

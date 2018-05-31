@@ -715,9 +715,9 @@ if(!$create_receive){
         $data = $this->orderReturnRepository->get_list($where, $additional);
         foreach($data['data'] as $k=>$v){
             if($data['data'][$k]->status!=ReturnStatus::ReturnCreated){
-                $data['data'][$k]->operate_status="false";
+                $data['data'][$k]->operate_status=false;
             }else{
-                $data['data'][$k]->operate_status="true";
+                $data['data'][$k]->operate_status=true;
             }
             //业务类型
             if($data['data'][$k]->business_key==ReturnStatus::OrderTuiKuan){
