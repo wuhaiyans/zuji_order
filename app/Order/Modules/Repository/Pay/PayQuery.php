@@ -31,6 +31,8 @@ class PayQuery {
 			'business_type'	=> $business_type,
 			'business_no'	=> $business_no,
 		])->first();
+var_dump($business_type);
+var_dump($business_no);
 		if( $info ){
 			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
