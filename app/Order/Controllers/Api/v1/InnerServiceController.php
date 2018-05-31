@@ -20,7 +20,10 @@ class InnerServiceController extends Controller
      */
     public function cancelOrder(Request $request)
     {
-        $params = $request->all();
+
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        $params = json_decode($input,true);
         $rules = [
             'order_no'  => 'required',
             'user_id'  => 'required',
