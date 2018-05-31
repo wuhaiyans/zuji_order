@@ -44,7 +44,7 @@ class MiniOrderController extends Controller
      *  参数
      *      sku_id      子商品ID
      */
-    public function temporary_order(Request $request){
+    public function getTemporaryOrderNo(Request $request){
         $params     = $request->all();
         // 验证参数
         $rules = [
@@ -75,7 +75,7 @@ class MiniOrderController extends Controller
     /**
      * 订单确认（查询订单信息 获取免押金额）
      */
-    public function confirmation_query(Request $request){
+    public function confirmationQuery(Request $request){
         $params     = $request->all();
         // 验证参数
         $rules = [
@@ -289,7 +289,7 @@ class MiniOrderController extends Controller
      * 前段确认订单同步通知接口
      * 获取订单详细信息
      */
-    public function front_transition(Request $request){
+    public function frontTransition(Request $request){
         $params     = $request->all();
         // 验证参数
         $rules = [
