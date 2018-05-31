@@ -123,6 +123,7 @@ class CouponComponnet implements OrderCreater
                 $couponData =[
                     'business_type'=>OrderStatus::BUSINESS_ZUJI,
                     'business_no'=>$orderNo,
+                    'order_no'=>$orderNo,
                     'coupon_no'=>$v['coupon_no'],
                     'coupon_id'=>$v['coupon_id'],
                     'discount_amount'=>$v['discount_amount'],

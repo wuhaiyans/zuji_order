@@ -150,70 +150,64 @@ class OrderTrade
     public function alipayInitialize($data)
     {
         DB::beginTransaction();
+        $order =$this->orderRepository->isPay($data['order_no'],$data['user_id']);
+        if($order===false){
+            DB::rollBack();
+            return false;
+        }
+        $orderInfo =OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+
+        if($orderInfo===false){
+            DB::rollBack();
+            return false;
+        }
+
+        if($orderInfo['trade_no']==""){
+            $trade_no =createNo(3);
+            $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+            $orderInfo['trade_no'] =$trade_no;
+        }
+        $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
+        $fenqi =0;
+        if($orderInfo['zuqi_type']==2){
+            $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
+            $fenqi =$orderGoodsInfo[0]['zuqi'];
+        }
         try {
-
-            $order =$this->orderRepository->isPay($data['order_no'],$data['user_id']);
-            if($order===false){
-                DB::rollBack();
-                return false;
-            }
-            $orderInfo =OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
-
-            if($orderInfo===false){
-                DB::rollBack();
-                return false;
-            }
-
-            if($orderInfo['trade_no']==""){
-                $trade_no =createNo(3);
-                $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
-                if(!$b){
-                    DB::rollBack();
-                    return false;
-                }
-                $orderInfo['trade_no'] =$trade_no;
-            }
-            $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
-            $fenqi =0;
-            if($orderInfo['zuqi_type']==2){
-                $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
-                $fenqi =$orderGoodsInfo[0]['zuqi'];
-            }
             // 查询
             $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderInfo['trade_no']);
-            } catch (\App\Lib\NotFoundException $exc) {
+        } catch (\App\Lib\NotFoundException $exc) {
+            // 创建支付
+            $pay = PayCreater::createPayment([
+                'user_id'		=> $data['user_id'],
+                'businessType'	=> OrderStatus::BUSINESS_ZUJI,
+                'businessNo'	=> $data['order_no'],
 
-                // 创建支付
-                $pay = PayCreater::createPayment([
-                    'user_id'		=> $data['user_id'],
-                    'businessType'	=> OrderStatus::BUSINESS_ZUJI,
-                    'businessNo'	=> $data['order_no'],
+                'paymentNo' => $orderInfo['trade_no'],
+                'paymentAmount' => 0.01,
+                'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                'paymentFenqi'	=> $fenqi,
+            ]);
+        }
+        try{
+            $_params = [
+                'name'			=> '订单支付',					//【必选】string 交易名称
+                'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+            ];
+            $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 
-                    'paymentNo' => $orderInfo['trade_no'],
-                    'paymentAmount' => 0.01,
-                    'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                    'paymentFenqi'	=> $fenqi,
-                ]);
-                $step = $pay->getCurrentStep();
-                //echo '当前阶段：'.$step."\n";
-                if($step =="payment"){
-                    $_params = [
-                        'name'			=> '订单支付',					//【必选】string 交易名称
-                        'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
-                    ];
-                    $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+            DB::commit();
+            return $urlInfo;
 
-                    //var_dump( $urlInfo );
-                    DB::commit();
-                    return $urlInfo;
-                }
-                DB::rollBack();
-                return false;
-            } catch (\Exception $exc) {
-                DB::rollBack();
-                echo $exc->getMessage();
-                die;
-            }
+        }catch (\Exception $exc) {
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
 
     }
     /**
