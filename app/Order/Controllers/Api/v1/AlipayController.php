@@ -53,7 +53,7 @@ class AlipayController extends Controller
 			
 		} catch (\App\Lib\NotFoundException $e) {
 			$payData = [
-				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
+				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,// 业务类型 
 				'businessNo' => $params['order_no'],// 业务编号
 				'fundauthAmount' => $params['fundauth_amount'],
 			];
