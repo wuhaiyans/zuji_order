@@ -174,7 +174,7 @@ class PayCreater {
 			'fundauth_amount'	=> $params['fundauthAmount'],
 		];
 		//sql_profiler();
-		$b = $payModel->insert();
+		$b = $payModel->insert($data);
 		if( !$b )
 		{
 			LogApi::debug('[支付阶段]WF创建失败',$data);

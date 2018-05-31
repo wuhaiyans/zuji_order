@@ -352,11 +352,11 @@ class OrderReturnRepository
         if(empty($params['goods_no'])){
             return false;
         }
-        foreach($params['goods_no'] as $k=>$v){
-            $where[$k][]=['goods_no','=',$v];
-            $where[$k][]=['order_no','=',$params['order_no']];
-            $result=OrderReturn::where($where[$k])->first();
-        }
+        //foreach($params['goods_no'] as $k=>$v){
+            $where[]=['goods_no','=',$params['goods_no']];
+            $where[]=['order_no','=',$params['order_no']];
+            $result=OrderReturn::where($where)->first();
+        //}
          if($result){
              return $result->toArray();
          }else{
