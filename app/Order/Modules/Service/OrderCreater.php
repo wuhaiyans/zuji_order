@@ -112,7 +112,6 @@ class OrderCreater
                 return false;
             }
             DB::commit();
-
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
@@ -140,7 +139,7 @@ class OrderCreater
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => time(),
-        ],time()+10,"");
+        ],time()+7200,"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
             return $result;
 
