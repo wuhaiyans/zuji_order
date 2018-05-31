@@ -993,7 +993,7 @@ if(!$create_receive){
                       }
                       //创建退款清单
                       $create_data['order_no']=$order_no;
-                      $pay_result=$this->orderReturnRepository->get_pay_no($business_key,$order_no);
+                      $pay_result=$this->orderReturnRepository->get_pay_no('1',$order_no);
                       if(!$pay_result){
                           return ApiStatus::CODE_50004;//订单未支付
                       }
@@ -1019,7 +1019,7 @@ if(!$create_receive){
                           $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
                           $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                           $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
-                          $create_data['auth_unfreeze_amount']=$order_info['yajin'];//商品实际支付押金
+                          $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                           if($create_data['order_amount']>0 && $create_data['auth_unfreeze_amount']>0){
                               $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                           }
@@ -1030,7 +1030,7 @@ if(!$create_receive){
                           $create_data['out_auth_no']=$pay_result['fundauth_no'];
                           //$create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
                           $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
-                          $create_data['auth_unfreeze_amount']=$order_info['yajin'];//商品实际支付押金
+                          $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                           if($create_data['auth_unfreeze_amount']>0){
                               $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                           }
