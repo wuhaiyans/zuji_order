@@ -32,7 +32,6 @@ class CreditComponnet implements OrderCreater
         if(!is_array($score)){
             $this->score =0;
         }
-        var_dump($score);die;
         $this->score=$score['score'];
         $this->componnet->getOrderCreater()->getUserComponnet()->setScore($this->score);
     }
