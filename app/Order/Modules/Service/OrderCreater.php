@@ -103,7 +103,7 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            var_dump($schemaData);
+            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -136,12 +136,13 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce("OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => date('Y-m-d H:i:s'),
         ],time()+7200,"");
+        var_dump($b);die;
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
             return $result;
