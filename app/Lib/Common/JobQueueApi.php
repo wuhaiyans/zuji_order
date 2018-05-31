@@ -88,7 +88,7 @@ class JobQueueApi {
 			'cron' => $cron,
 			'retries' => 3, // 错误重试次数
 		];
-		p($_config);die;
+		p($_config);
 		LogApi::info('[任务]'.$key,$_config);
 		// 请求
 		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
