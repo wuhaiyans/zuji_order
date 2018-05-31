@@ -170,8 +170,6 @@ class SmsApi {
 					'HSB-OPENAPI-SIGNATURE:' . $signature, // 签名字符串
 					'HSB-OPENAPI-CALLERSERVICEID:' . self::$service_id  // 服务ID
 		]);
-		var_dump($response);exit;
-
 		// curl请求失败
 		if (empty($response)) {
 			//\zuji\debug\Debug::error(\zuji\debug\Location::L_SMS, '短息接口请求失败', \zuji\Curl::getError());
