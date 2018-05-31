@@ -112,6 +112,7 @@ class OrderCreater
                 return false;
             }
             DB::commit();
+            var_dump($schemaData);die;
 
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';

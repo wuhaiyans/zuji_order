@@ -69,69 +69,55 @@ class OrderTrade
     public function sendsms($data)
     {
         DB::beginTransaction();
-        try {
-            $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
-            if($orderInfo===false){
+
+        $orderInfo =$this->orderRepository->getInfoById($data['order_no'],$data['user_id']);
+        if($orderInfo===false){
+            DB::rollBack();
+            return false;
+        }
+        if($orderInfo['trade_no']==""){
+            $trade_no =createNo(3);
+            $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
+            if(!$b){
                 DB::rollBack();
                 return false;
             }
-            if($orderInfo['trade_no']==""){
-                $trade_no =createNo(3);
-                $b =$this->orderRepository->updateTrade($data['order_no'], $trade_no);
-                if(!$b){
-                    DB::rollBack();
-                    return false;
-                }
-                $orderInfo['trade_no'] =$trade_no;
-            }
-            $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
-            $fenqi =0;
-            if($orderInfo['zuqi_type']==2){
-                $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
-                $fenqi =$orderGoodsInfo[0]['zuqi'];
-            }
+            $orderInfo['trade_no'] =$trade_no;
+        }
+        $amount =$orderInfo['order_amount']+$orderInfo['order_insurance'];
+        $fenqi =0;
+        if($orderInfo['zuqi_type']==2){
+            $orderGoodsInfo =OrderRepository::getGoodsListByOrderId($data['order_no']);
+            $fenqi =$orderGoodsInfo[0]['zuqi'];
+        }
+
+        try {
             // 查询
             $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderInfo['trade_no']);
         } catch (\App\Lib\NotFoundException $exc) {
-
             // 创建支付
             $pay = PayCreater::createPayment([
-                'user_id'		=> $data['user_id'],
-                'businessType'	=> OrderStatus::BUSINESS_ZUJI,
-                'businessNo'	=> $data['order_no'],
+                'user_id' => $data['user_id'],
+                'businessType' => OrderStatus::BUSINESS_ZUJI,
+                'businessNo' => $data['order_no'],
 
                 'paymentNo' => $orderInfo['trade_no'],
                 'paymentAmount' => $amount,
-                'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Unionpay,
-                'paymentFenqi'	=> $fenqi,
+                'paymentChannel' => \App\Order\Modules\Repository\Pay\Channel::Unionpay,
+                'paymentFenqi' => $fenqi,
             ]);
+        }
 
-            $step = $pay->getCurrentStep();
-            //echo '当前阶段：'.$step."\n";
+        try{
             $_params = [
                 'name'			=> '订单支付',					//【必选】string 交易名称
                 'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
             ];
             $urlInfo = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Unionpay,$_params );
-            //var_dump( $urlInfo );
-            $alipay=['payment_url'=>$urlInfo['url'],'payment_form'=>$urlInfo['_data']];
             DB::commit();
-            return $alipay;
-//            $arr =[
-//                'bankcard_id' => $data['bankcard_id'],
-//                'out_no' => $orderInfo['trade_no'],
-//                'amount'=>"",//需要支付的金额 和分期期数 （多个商品 等需求）
-//                'user_id' =>$data['user_id'],
-//                'back_url' => '', //后端回调地址
-//                'fenqi' => '', //分期期数 0 为不分期
-//            ];
-//            $res = UnionpayApi::sendSms($arr);
-//            if(!$res){
-//                DB::rollBack();
-//                return false;
-//            }
+            return $urlInfo;
 
-        } catch (\Exception $exc) {
+        }catch (\Exception $exc) {
             DB::rollBack();
             echo $exc->getMessage();
             die;
