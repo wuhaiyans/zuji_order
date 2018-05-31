@@ -18,5 +18,4 @@ class PublicInc
     const Type_Admin = 1; //管理员
     const Type_System = 3; // 系统自动化任务
     const Type_Store =4;//线下门店
-
 }
