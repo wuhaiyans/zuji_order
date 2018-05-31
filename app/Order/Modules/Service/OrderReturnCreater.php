@@ -730,26 +730,22 @@ if(!$create_receive){
             //订单状态
             if($data['data'][$k]->order_status==OrderStatus::OrderWaitPaying){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderWaitPaying);//待支付
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderPaying){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPaying);//支付中
             }elseif($data['data'][$k]->order_status==OrderStatus::OrderPayed){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPayed);//已支付
-            }elseif($data['data'][$k]->order_status==OrderStatus::BUSINESS_RETURN){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::BUSINESS_RETURN);//已支付
-            } elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderInStock){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInStock);//备货中
             }elseif($data['data'][$k]->order_status==OrderStatus::OrderDeliveryed){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderDeliveryed);//已发货
             }elseif($data['data'][$k]->order_status==OrderStatus::OrderInService){
                 $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInService);//租用中
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderClosed){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosed);//关闭:已取消完成
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderRefunded){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderRefunded);//退货退款完成单
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderGivebacked){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderGivebacked);//还机完成单
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderBuyouted){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderBuyouted);//买断完成单
-            }elseif($data['data'][$k]->order_status==OrderStatus::OrderChanged){
-                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderChanged);//换货完成单
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderCancel){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderCancel);//已取消完成(未支付)
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderClosedRefunded){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosedRefunded);//关闭（支付完成后退款）
+            }elseif($data['data'][$k]->order_status==OrderStatus::OrderCompleted){
+                $data['data'][$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderCompleted);//已完成
             }
             //（退款、退机、换机）状态
             if($data['data'][$k]->status==ReturnStatus::ReturnCreated){
@@ -1183,22 +1179,41 @@ if(!$create_receive){
         return ApiStatus::CODE_0;
 
     }
-    //换货用户收货
 
+    /**
+     * 换货用户收到货
+     * @param $params
+     * @return string
+     * @throws \Exception
+     *[order_no=>'111'
+     * [goods_no=>'222']
+     * [goods_no=>'333']
+     * ]
+     */
     public function updateorder($params){
         if (empty($params['order_no']) && empty($params['goods_no'])){
             return ApiStatus::CODE_20001;//参数错误
         }
-        $where[] = ['order_no', '=', $params['order_no']];
-        $where[] = ['goods_no', '=', $params['goods_no']];
         $data['status']=ReturnStatus::ReturnHuanHuo;//已换货
         //开启事物
         DB::beginTransaction();
-        $result = $this->orderReturnRepository->is_qualified($where, $data);//修改退货单状态和原因
-        if(!$result){
-            //事务回滚
-            DB::rollBack();
-            return ApiStatus::CODE_33008;//修改退货单信息失败
+        $where[] = ['order_no', '=', $params['order_no']];
+        foreach($params as $k=>$v){
+            $where[] = ['goods_no', '=', $params[$k]['goods_no']];
+            $result = $this->orderReturnRepository->is_qualified($where, $data);//修改退货单状态和原因
+            if(!$result){
+                //事务回滚
+                DB::rollBack();
+                return ApiStatus::CODE_33008;//修改退货单信息失败
+            }
+            //修改商品状态
+            $goodsdata['goods_status']=OrderGoodStatus::EXCHANGE_OF_GOODS;//已换货
+            $goods_result = $this->orderReturnRepository->updategoods($where, $goodsdata);
+            if (!$goods_result){
+                //事务回滚
+                DB::rollBack();
+                return ApiStatus::CODE_33009;//修改商品状态失败
+            }
         }
         //更新订单冻结状态
         $freeze_type=OrderFreezeStatus::Non;
@@ -1208,14 +1223,7 @@ if(!$create_receive){
             DB::rollBack();
             return ApiStatus::CODE_33007;//修改订单状态失败
         }
-        //修改商品状态
-        $goodsdata['goods_status']=ReturnStatus::ReturnHuanHuo;//已换货
-        $goods_result = $this->orderReturnRepository->updategoods($where, $goodsdata);
-        if (!$goods_result){
-            //事务回滚
-            DB::rollBack();
-            return ApiStatus::CODE_33009;//修改商品状态失败
-        }
+
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -1237,13 +1245,13 @@ if(!$create_receive){
             return ApiStatus::CODE_33008;//修改退货单信息失败
         }
         //修改商品状态
-        $goodsdata['goods_status']=ReturnStatus::ReturnReceive;//已收货
+       /* $goodsdata['goods_status']=ReturnStatus::ReturnReceive;//已收货
         $goods_result = $this->orderReturnRepository->updategoods($where, $goodsdata);
         if (!$goods_result){
             //事务回滚
             DB::rollBack();
             return ApiStatus::CODE_33009;//修改商品状态失败
-        }
+        }*/
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -1279,12 +1287,12 @@ if(!$create_receive){
         }
         if($params['status']=="processing"){//退款处理中
             $return_data['status']=ReturnStatus::ReturnTui;//退货/退款单状态
-            $goods_data['goods_status']=ReturnStatus::ReturnTui;//商品状态
+            //$goods_data['goods_status']=OrderGoodStatus::REFUNDED;//商品状态已退款
 
         }
         if($params['status']=="success"){
             $return_data['status']=ReturnStatus::ReturnTuiKuan;//退货/退款单状态
-            $goods_data['goods_status']=ReturnStatus::ReturnTuiKuan;//商品状态
+            $goods_data['goods_status']=OrderGoodStatus::REFUNDED;//商品状态
             $order_data['order_status']=OrderStatus::OrderRefunded;//订单状态
         }
         //获取退货单信息
@@ -1307,13 +1315,16 @@ if(!$create_receive){
             DB::rollBack();
             return ApiStatus::CODE_33008;//修改退货单信息失败
         }
-        //修改商品状态
-        $goods_result= $this->orderReturnRepository->updategoodsStatus($params,$goods_data);
-        if(!$goods_result){
-            //事务回滚
-            DB::rollBack();
-            return ApiStatus::CODE_33009;//修改商品状态失败
+        if(isset($goods_data)){
+            //修改商品状态
+            $goods_result= $this->orderReturnRepository->updategoodsStatus($params,$goods_data);
+            if(!$goods_result){
+                //事务回滚
+                DB::rollBack();
+                return ApiStatus::CODE_33009;//修改商品状态失败
+            }
         }
+
         //修改订单状态
         $order_result= $this->orderReturnRepository->updateorderStatus($params,$order_data);
         if(!$order_result){
