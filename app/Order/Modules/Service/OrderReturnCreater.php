@@ -107,10 +107,10 @@ class OrderReturnCreater
                 if(!$goods_info){
                     //事务回滚
                     DB::rollBack();
-                    return ApiStatus::CODE_40000;//商品信息错误
+                    return ApiStatus::CODE_34005;//商品信息错误
                 }
             }
-            if($params['business_key']==ReturnStatus::OrderTuiHuo){
+          /*  if($params['business_key']==ReturnStatus::OrderTuiHuo){
                 //创建退款清单
                 $create_data['order_no']=$params['order_no'];
 
@@ -149,7 +149,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return ApiStatus::CODE_33008;
                 }
-            }
+            }*/
 
 
         }
@@ -642,7 +642,7 @@ if(!$create_receive){
         if(!$ret){
             //事务回滚
             DB::rollBack();
-            return aApiStatus::CODE_33008;
+            return ApiStatus::CODE_33008;
         }
         //上传物流单号到收货系统
         $data_params['order_no']=$data['order_no'];
@@ -654,6 +654,9 @@ if(!$create_receive){
             $where[]=['goods_no','=',$v];
             //获取商品信息
             $goods_res= $this->orderReturnRepository->getGoodsExtendInfo($where);
+            if(!$goods_res){
+                return  ApiStatus::CODE_50003;
+            }
             $data_params['goods_info'][$k]['imei1']=$goods_res['imei1'];
             $data_params['goods_info'][$k]['imei2']=$goods_res['imei2'];
             $data_params['goods_info'][$k]['imei3']=$goods_res['imei3'];
@@ -860,15 +863,19 @@ if(!$create_receive){
     //退货结果查看
     public function returnResult($params){
         if(empty($params['order_no'])){
-            return apiResponse( [], ApiStatus::CODE_33003,'订单编号不能为空' );
+            return ApiStatus::CODE_20001;
         }
         if(empty($params['goods_no'])){
-            return apiResponse( [], ApiStatus::CODE_40000,'商品编号不能为空' );
+            return ApiStatus::CODE_20001;
         }
         $result= $this->orderReturnRepository->returnResult($params);
+        if(!$result){
+           return ApiStatus::CODE_34002;
+        }
         //（退款、退机、换机）状态
         if($result['status']==ReturnStatus::ReturnCreated){
             $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnCreated);//提交申请
+
         }elseif($result['status']==ReturnStatus::ReturnAgreed){
             $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnAgreed);//同意
         }elseif($result['status']==ReturnStatus::ReturnDenied){
@@ -885,9 +892,6 @@ if(!$create_receive){
             $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiKuan);//已退款
         }elseif($result['status']==ReturnStatus::ReturnTui){
             $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
-        }
-        if(!$result){
-            return ApiStatus::CODE_34002;
         }
         return $result;
     }

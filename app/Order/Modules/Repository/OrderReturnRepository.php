@@ -706,11 +706,11 @@ class OrderReturnRepository
      *
      */
     public static function getGoodsExtendInfo($where){
-        $goods_result= OrderGoodsExtend::where($where)->first()->toArray();
+        $goods_result= OrderGoodsExtend::where($where)->first();
         if(!$goods_result){
             return false;
         }
-        return $goods_result;
+        return $goods_result->toArray();
     }
 
     /**
