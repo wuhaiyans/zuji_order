@@ -8,7 +8,7 @@
 
 //只有订单内部接收的接口appid =1;
 return [
-
+    'Fengkong_Score'=>env("ORDER_SCORE",50),
     'Interior_Goods_Url' =>env("GOODS_API","https://dev-api-zuji.huishoubao.com/api.php"),
     'Interior_Goods_Request_data'=>[
         'appid'=>1,

@@ -39,7 +39,7 @@ $api->version('v1', [
         $api->get('testpay', 'AlipayController@test');
 
         // 订单清算测试预授权
-        $api->get('testpay', 'OrderCleaningController@testPay');
+        $api->get('testCleanPay', 'OrderCleaningController@testPay');
 
         // 代扣扣款回调
         $api->post('createpayNotify', 'WithholdController@createpayNotify');
