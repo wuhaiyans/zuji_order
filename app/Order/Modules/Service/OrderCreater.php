@@ -132,15 +132,16 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
            // 创建订单后 发送支付短信。;
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-            $orderNoticeObj->notify();
+//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+//            $orderNoticeObj->notify();
             //发送取消订单队列
         $b =JobQueueApi::addScheduleOnce("OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => time(),
-        ],time()+7200,"");
+        ],time()+10,"");
+        var_dump($b);die;
 
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");

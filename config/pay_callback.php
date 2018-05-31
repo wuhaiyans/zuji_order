@@ -20,7 +20,7 @@ return [
 
 	'payment' => [
 		// 业务类型为租机的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\Service\OrderPayNotify\callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\Service\OrderPayNotify::callback',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => 'var_dump',
 		// 业务类型为1的支付回调通知
