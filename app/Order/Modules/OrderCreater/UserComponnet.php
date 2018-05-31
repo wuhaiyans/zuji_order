@@ -174,6 +174,8 @@ class UserComponnet implements OrderCreater
             'certified'=>$data['user']['certified'],
             'cretified_platform'=>$data['user']['certified_platform'],
             'credit'=>$data['user']['credit'],
+            'face'=>$data['user']['face'],
+            'risk'=>$data['user']['risk'],
             'realname'=>$data['user']['realname'],
             'cret_no'=>$data['user']['cert_no'],
             'score'=>$this->score,
