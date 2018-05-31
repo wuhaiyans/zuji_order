@@ -68,7 +68,7 @@ class AlipayController extends Controller
  //       $params =$request->all();
         $params['params']=[
             'return_url' =>'http://www.baidu.com',
-            'order_no' =>'A528100728283349',
+            'order_no' =>'A531153964431177',
             'user_id' =>'18',
         ];
         $rules = [
