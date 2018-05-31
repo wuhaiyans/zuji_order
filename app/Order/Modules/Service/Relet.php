@@ -83,7 +83,11 @@ class Relet
      * 创建续租单
      *
      * @param $params
-     * @return bool
+     * @return bool|array			返回参数
+     * [
+     *		'url'		=> '',	// 跳转地址
+     *		'params'	=> '',	// 跳转附件参数
+     * ]
      */
     public function createRelet($params){
         DB::beginTransaction();
@@ -125,36 +129,32 @@ class Relet
                 ];
 
                 if($this->reletRepository->createRelet($data)){
-//                    // 创建支付
-//                    $pay = PayCreater::createFundauth([
-//                        'user_id'		=> $data['user_id'],
-//                        'businessType'	=> OrderStatus::BUSINESS_RELET,
-//                        'businessNo'	=> $data['order_no'],
-//
-//                        'fundauthNo' => \createNo(9),
-//                        'fundauthAmount' => $data['relet_amount'],
-//                        'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-//                    ]);
-//                    $step = $pay->getCurrentStep();
-//                    //echo '当前阶段：'.$step."\n";
 
-                    // 创建支付 一次性结清
-                    $pay = PayCreater::createPayment([
+                    if(PayInc::FlowerStagePay){
+                        // 创建支付 一次性结清
+                        $pay = PayCreater::createPayment([
 //                        'user_id'		=> $data['user_id'],
-                        'businessType'	=> OrderStatus::BUSINESS_RELET,
-                        'businessNo'	=> $data['order_no'],
+                            'businessType'	=> OrderStatus::BUSINESS_RELET,
+                            'businessNo'	=> $data['order_no'],
 
 //                        'paymentNo' => $orderInfo['trade_no'],
-                        'paymentAmount' => $data['relet_amount'],
+                            'paymentAmount' => $data['relet_amount'],
 //                        'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                        'paymentFenqi'	=> 0,
-                    ]);
-
+                            'paymentFenqi'	=> 0,
+                        ]);
+                    }else{
+                        // 创建支付 代扣签约
+                        $pay = PayCreater::createWithhold([
+                            'businessType'	=> OrderStatus::BUSINESS_RELET,
+                            'businessNo'	=> $data['order_no'],
+                        ]);
+                    }
                     $step = $pay->getCurrentStep();
+                    //echo '当前阶段：'.$step."\n";
 
                     $_params = [
-                        'name'			=> '订单续租',					//【必选】string 交易名称
-                        'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
+                        'name'			=> '订单续租',				//【必选】string 交易名称
+                        'front_url'		=> $params['return_url'],	//【必选】string 前端回跳地址
                     ];
                     $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
                     DB::commit();
