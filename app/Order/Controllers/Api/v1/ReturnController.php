@@ -93,7 +93,7 @@ class ReturnController extends Controller
         return apiResponse([],$return);
 
     }
-    // 退货记录列表接口
+    // 退货/换货/退款记录列表接口
     /*
      * business_key 业务类型  必选
      *
@@ -188,7 +188,12 @@ class ReturnController extends Controller
         }
 
     }
-    //取消退货申请
+
+    /**
+     * 取消退货申请
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|string
+     */
     public function cancelApply(Request $request)
     {
         $orders = $request->all();
@@ -207,7 +212,13 @@ class ReturnController extends Controller
         $ret = $this->OrderReturnCreater->cancel_apply($params);
         return apiResponse( [], $ret);
     }
-    //退换货检测结果
+
+    /**
+     * 退货结果检测
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     */
     public function isQualified(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
@@ -239,7 +250,13 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->updateorder($params);
         return apiResponse([],$res);
     }
-    //客户发货后通知
+
+    /**
+     * 客户发货后通知
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     */
     public function userReceive(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
