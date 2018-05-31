@@ -46,13 +46,16 @@ class OrderPayNotify
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPaying);
             if (!$b) {
                 LogApi::notify("订单支付失败", $orderNo);
+            }else{
+                LogApi::notify("订单支付成功", $orderNo);
             }
         } else {
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPayed);
             if (!$b) {
                 LogApi::notify("订单支付失败", $orderNo);
+            }else{
+                LogApi::notify("订单支付成功", $orderNo);
             }
-             $orderInfo = OrderRepository::getOrderInfo(['order_no' => $orderNo]);
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();

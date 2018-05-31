@@ -15,6 +15,11 @@ class AlipayController extends Controller
         $this->orderTrade = $orderTrade;
     }
     public function test(){
+//        $params['business_type']=1;
+//        $params['business_no']='A531153964431177'; //订单支付也就是订单编号
+//        $params['status']='success';
+//        $b =Service\OrderPayNotify::callback($params);
+//        var_dump($b);die;
         $res =$this->alipayInitialize();
         header("Location: ".$res['url']);
     }
@@ -68,7 +73,7 @@ class AlipayController extends Controller
  //       $params =$request->all();
         $params['params']=[
             'return_url' =>'http://www.baidu.com',
-            'order_no' =>'A531153964431177',
+            'order_no' =>'A531153474749290',
             'user_id' =>'18',
         ];
         $rules = [
