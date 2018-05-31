@@ -316,6 +316,7 @@ class WithholdController extends Controller
 
             }catch(\Exception $exc){
                 DB::rollBack();
+                p($exc->getMessage());
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
