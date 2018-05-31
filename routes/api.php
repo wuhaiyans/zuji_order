@@ -28,6 +28,7 @@ $api->version('v1', [
         $apiMap = config('apimap');
 
         $method = request()->input('method');
+
         if (isset($apiMap[$method])) {
             $api->post('/',  $apiMap[$method]);
         }

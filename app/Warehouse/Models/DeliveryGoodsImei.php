@@ -25,6 +25,7 @@ class DeliveryGoodsImei extends Warehouse
         'delivery_no',
         'serial_no',
         'imei',
+        'goods_no',
         'apple_serial', //苹果手机序列号
         'status',
         'create_time',

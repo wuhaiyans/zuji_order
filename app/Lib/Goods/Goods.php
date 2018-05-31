@@ -25,6 +25,7 @@ class Goods  extends \App\Lib\BaseApi{
 			$_params[] =['sku_id'=>$id];
 		}
 		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
+
 	}
 	
     /**
@@ -70,7 +71,8 @@ class Goods  extends \App\Lib\BaseApi{
      ]
      * @return string or array
      */
-    public static function addStock($data,$goods_arr){
+    public static function addStock($goods_arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.number.add';
         $data['params'] = [
             'goods_arr'=>$goods_arr
@@ -97,7 +99,8 @@ class Goods  extends \App\Lib\BaseApi{
     ]
      * @return string or array
      */
-    public static function reduceStock($data,$goods_arr){
+    public static function reduceStock($goods_arr){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.number.minus';
         $data['params'] = [
             'goods_arr'=>$goods_arr

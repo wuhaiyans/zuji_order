@@ -2,6 +2,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
 
@@ -119,11 +120,45 @@ class ReceiveController extends Controller
 
         try {
             $this->receive->received($params['receive_no']);
+            Receive::receive($params['receive_no']);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
         return apiResponse([]);
+    }
+
+
+
+    /**
+     * 修改物流
+     */
+    public function logistics()
+    {
+        /**
+         * delivery_no 发货单号
+         * logistics_id 物流渠道
+         * logistics_no 物流编号
+         */
+        $rules = [
+            'order_no'  => 'required',
+            'logistics_id' => 'required',//物流渠道
+            'logistics_no' => 'required',
+            'goods_no' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->receive->logistics($params);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
     }
 
 
@@ -139,7 +174,7 @@ class ReceiveController extends Controller
          */
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'quantity'   => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -182,6 +217,33 @@ class ReceiveController extends Controller
 
 
     /**
+     * 检测完成
+     */
+    public function checkItemsFinish()
+    {
+        $rules = [
+            'receive_no' => 'required',
+        ];
+
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $items = $this->receive->checkItemsFinish($params['receive_no']);
+
+            Receive::checkItemsResult($items);
+
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse(['items'=>$items]);
+    }
+
+    /**
      * 验收 针对设备
      */
     public function check()
@@ -189,7 +251,7 @@ class ReceiveController extends Controller
 
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'imei'       => 'required',
             'check_result'  => 'required', //针对设备的检测结果
         ];
@@ -201,7 +263,7 @@ class ReceiveController extends Controller
         }
 
         try {
-            $this->receive->check($params['receive_no'],$params['serial_no'], $params);
+            $this->receive->check($params['receive_no'],$params['goods_no'], $params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -216,7 +278,7 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',//收货单编号
-            'serial_no'  => 'required' //设备序号
+            'goods_no'  => 'required' //设备序号
         ];
 
         $params = $this->_dealParams($rules);
@@ -253,16 +315,14 @@ class ReceiveController extends Controller
 
         try {
             $receive = $this->receive->finishCheck($params['receive_no']);
-
             $imeis = $receive->imeis;
 
+
             foreach ($imeis as $imei) {
-                $imodel = Imei::find($imei->imei);
-                $imodel->status = Imei::STATUS_IN;
-                $imodel->update();
+                Imei::in($imei->imei);
             }
 
-            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
+//            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
 
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
@@ -279,7 +339,7 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',
-            'serial_no'  => 'required',
+            'goods_no'  => 'required',
             'check_item' => 'required'
         ];
 

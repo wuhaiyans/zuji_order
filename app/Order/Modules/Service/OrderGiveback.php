@@ -108,6 +108,7 @@ class OrderGiveback
 	public function update( $where, $data ) {
 		$where = filter_array($where, [
 			'goods_no' => 'required',
+			'giveback_no' => 'required',
 		]);
 		$data = filter_array($data, [
 			'status' => 'required',
@@ -162,35 +163,44 @@ class OrderGiveback
 			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
 			return false;
 		}
+		
+		//创建服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//获取还机单信息
+		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivevbackInfo ) {
+			return false;
+		}
+		
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
-		//开启事务
-		DB::beginTransaction();
+//		//开启事务
+//		DB::beginTransaction();
 		try{
-			$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
 			]);
 			if( !$orderGivebackResult ){
-				//事务回滚
-				DB::rollBack();
+//				//事务回滚
+//				DB::rollBack();
 				return false;
 			}
-			$orderGoodsService = new OrderGoods();
-			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
 			if( !$orderGoodsResult ){
-				//事务回滚
-				DB::rollBack();
+//				//事务回滚
+//				DB::rollBack();
 				return false;
 			}
-		} catch (Exception $ex) {
-			//事务回滚
-			DB::rollBack();
+		} catch (\Exception $ex) {
+//			//事务回滚
+//			DB::rollBack();
 			return false;
 		}
-		//事务提交
-		DB::commit();
+//		//事务提交
+//		DB::commit();
 		return true;
 	}
 	
@@ -198,7 +208,7 @@ class OrderGiveback
 	 * 还机单支付完成回调接口
 	 * @param Request $request
 	 */
-	public function callbackPayment( $params ) {
+	public static function callbackPayment( $params ) {
 		//参数过滤
         $rules = [
             'business_type'     => 'required',//业务类型
@@ -215,13 +225,19 @@ class OrderGiveback
 			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
 			return false;
 		}
-		//查询当前还机单基础信息
-		$orderGivebackInfo = $this->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivebackInfo ){
+		//创建服务层对象
+		$orderGoodsService = new OrderGoods();
+		$orderGivebackService = new OrderGiveback();
+		//获取还机单信息
+		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivevbackInfo ) {
 			return false;
 		}
-		//开启事务
-		DB::beginTransaction();
+		//获取商品信息
+		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivevbackInfo['goods_no']);
+		if( !$orderGoodsInfo ) {
+			return false;
+		}
 		try{
 			//-+--------------------------------------------------------------------
 			// | 判断订单押金，是否生成清算单
@@ -230,15 +246,14 @@ class OrderGiveback
 			//-+--------------------------------------------------------------------
 			// | 不生成=》更新订单状态（交易完成）
 			//-+--------------------------------------------------------------------
-			if( $orderGivebackInfo['yajin'] == 0 ){
+			if( $orderGoodsInfo['yajin'] == 0 ){
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
-				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+				$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
 				if( !$orderGivebackResult ){
-					DB::rollBack();
 					return false;
 				}
 			}
@@ -247,15 +262,16 @@ class OrderGiveback
 			//-+--------------------------------------------------------------------
 			else{
 				$status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
-				$orderGivebackResult = $this->update(['giveback_no'=>$params['business_no']], [
+				$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_IN_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
 				if( !$orderGivebackResult ){
-					DB::rollBack();
 					return false;
 				}
+				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderGoodsInfo['order_no'] );
 				//清算处理数据拼接
 				$clearData = [
 					'user_id' => $orderGivebackInfo['user_id'],
@@ -263,29 +279,24 @@ class OrderGiveback
 					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 					'bussiness_no' => $orderGivebackInfo['giveback_no'],
 					'auth_deduction_amount' => 0,//扣除押金金额
-					'auth_unfreeze_amount' => $orderGivebackInfo['yajin'],//退还押金金额
+					'auth_unfreeze_amount' => $orderGoodsInfo['yajin'],//退还押金金额
+					'payment_no' => $payObj->getPaymentNo(),//payment_no
+					'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
 				];
+				//进入清算处理
 				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 				if( !$orderCleanResult ){
 					set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
-					DB::rollBack();
 					return false;
 				}
 			}
-			//更新商品信息
-			$orderGoodsService = new OrderGoods();
-			$orderGoodsResult = $orderGoodsService->update(['business_no'=>$params['business_no']], ['status'=> $status]);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
 			if( !$orderGoodsResult ){
-				//事务回滚
-				DB::rollBack();
 				return false;
 			}
-		} catch (Exception $ex) {
-			//事务回滚
-			DB::rollBack();
+		} catch (\Exception $ex) {
 			return false;
 		}
-		DB::commit();
 		return true;
 	}
 }

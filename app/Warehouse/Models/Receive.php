@@ -62,6 +62,7 @@ class Receive extends Warehouse
         'status_time',
         'create_time',
         'app_id',
+        'receive_type',
         'receive_time',
         'check_time',
         'check_result',
@@ -153,7 +154,7 @@ class Receive extends Warehouse
         $count = count($imeis);
         $checkOk = 0;
         foreach ($imeis as $imei) {
-            if ($imei->check_result == ReceiveGoodsImei::RESULT_OK) {
+            if ($imei->check_result == ReceiveGoods::CHECK_RESULT_OK) {
                 $checkOk++;
             }
         }

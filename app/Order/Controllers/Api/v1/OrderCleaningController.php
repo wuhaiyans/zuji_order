@@ -6,6 +6,7 @@
  */
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\Pay\PayCreater;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Support\Facades\Log;
@@ -94,8 +95,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'business_type'  => 'required',
-            'business_no'  => 'required'
+            'clean_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -127,7 +127,7 @@ class OrderCleaningController extends Controller
         $params = $request->all();
 
         $rules = [
-            'out_refund_no'  => 'required',
+            'clean_no'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -137,8 +137,8 @@ class OrderCleaningController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
-        $res = OrderCleaning::upOrderCleanStatus($params['params']);
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        $res = OrderCleaning::upOrderCleanStatus($validateParams['data']);
+        return apiResponse([] , $res);
 
     }
 
@@ -178,6 +178,87 @@ class OrderCleaningController extends Controller
     }
 
 
+    /**
+     * 支付测试
+     * Author: heaven
+     * @throws \ErrorException
+     */
+    public function testPay()
+    {
+
+        $business_type = 1;
+        $business_no = 'A528197713276854'; //\createNo(1);
+        $pay = null;
+        try {
+            // 查询
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+
+            // 取消
+            //$pay->cancel();
+            // 恢复
+            //$pay->resume();
+
+        } catch (\App\Lib\NotFoundException $exc) {
+
+            // 创建支付
+            $pay = PayCreater::createPaymentWithholdFundauth([
+                'user_id'		=> '5',
+                'businessType'	=> $business_type,
+                'businessNo'	=> $business_no,
+
+                'paymentNo' => \createNo(1),
+                'paymentAmount' => '0.01',
+                'paymentChannel'=> Channel::Alipay,
+                'paymentFenqi'	=> 0,
+
+                'withholdNo' => \createNo(1),
+                'withholdChannel'=> Channel::Alipay,
+
+                'fundauthNo' => \createNo(1),
+                'fundauthAmount' => '1.00',
+                'fundauthChannel'=> Channel::Alipay,
+            ]);
+        } catch (\Exception $exc) {
+            exit('error');
+        }
+
+//        // 支付阶段状态
+//        $this->assertFalse( $pay->isSuccess(), '支付阶段状态错误' );
+//
+//
+//        // 支付状态
+//        $this->assertTrue( $pay->getPaymentStatus() == PaymentStatus::WAIT_PAYMENT,
+//            '支付环节状态初始化错误' );
+//
+//        // 代扣签约状态
+//        $this->assertTrue(  $pay->getWithholdStatus() == WithholdStatus::WAIT_WITHHOLD,
+//            '代扣签约状态初始化错误' );
+//
+//        // 资金预授权状态
+//        $this->assertTrue( $pay->getFundauthStatus() == FundauthStatus::WAIT_FUNDAUTH,
+//            '资金预授权状态初始化错误' );
+
+        try {
+            $step = $pay->getCurrentStep();
+            echo '当前阶段：'.$step."\n";
+
+            $_params = [
+                'name'			=> '测试支付',					//【必选】string 交易名称
+                'back_url'		=> 'https://alipay/Test/back',	//【必选】string 后台通知地址
+                'front_url'		=> 'https://alipay/Test/front',	//【必选】string 前端回跳地址
+            ];
+            $url_info = $pay->getCurrentUrl( 2,$_params );
+            p($url_info['url']);
+            header("Location: {$url_info['url']}");
+//            return redirect($url_info['url']);
+
+        } catch (\Exception $exc) {
+            echo $exc->getMessage()."\n";
+            echo $exc->getTraceAsString();
+        }
+
+
+    }
 
     /**
      * 订单清算出帐
@@ -195,10 +276,14 @@ class OrderCleaningController extends Controller
 
         try {
 
+
+//            $this->testPay();
+//            exit;
+
             $params = $request->all();
 
             $rules = [
-                'out_refund_no'=> 'required'
+                'clean_no'=> 'required'
             ];
             $validateParams = $this->validateParams($rules,$params);
             if ($validateParams['code']!=0) {
