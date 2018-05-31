@@ -31,7 +31,7 @@ class JobQueueApi {
 	 * @return bool
 	 */
 	public static function addScheduleOnce( string $key, string $url, array $data,int $timestamp, string $callback='' ):bool{
-		$start = '@at '.date('Y-m-d',$timestamp)."T".date('H:i:s',$timestamp).'+08:00';
+		$start = '@at '.date('Y-m-d',$timestamp)."T".date('H:i:s',$timestamp).'+00:00';
 		return self::push($key, $url, $data, $callback, 'scheduled',$start);
 	}
 	/**
