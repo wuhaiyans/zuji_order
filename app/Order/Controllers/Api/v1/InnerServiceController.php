@@ -7,6 +7,7 @@
  * Time: 下午 2:18
  */
 namespace App\Order\Controllers\Api\v1;
+use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
 class InnerServiceController extends Controller
 {
