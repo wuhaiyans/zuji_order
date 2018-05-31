@@ -105,7 +105,7 @@ class PayController extends Controller
 			
 			$pay->setPaymentAmount(0.01);
 			
-			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Jdpay, $_params );
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			
