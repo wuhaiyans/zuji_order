@@ -8,6 +8,7 @@ use App\Order\Modules\Service\OrderGiveback;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Service\OrderGoods;
 use App\Order\Modules\Service\OrderInstalment;
+use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 
 class GivebackController extends Controller
@@ -201,7 +202,7 @@ class GivebackController extends Controller
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					OrderInstalment::instalment_withhold($instalmentInfo['id']);
+					OrderWithhold::instalment_withhold($instalmentInfo['id']);
 				}
 				//代扣已执行
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;

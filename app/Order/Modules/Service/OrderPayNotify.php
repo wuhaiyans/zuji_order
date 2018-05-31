@@ -35,7 +35,7 @@ class OrderPayNotify
 //		要求：如果这时要取消支付后，必须进行退款处理，然后才可以关闭业务。
 //	2）status 为 success
 // 格式： 键：业务类型；值：可调用的函数，类静态方法
-    public function callback($params)
+    public static function callback($params)
     {
         $businessType = $params['business_type'];
         $orderNo = $params['business_no']; //订单支付也就是订单编号
@@ -46,13 +46,14 @@ class OrderPayNotify
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPaying);
             if (!$b) {
                 LogApi::notify("订单支付失败", $orderNo);
+                return false;
             }
         } else {
             $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPayed);
             if (!$b) {
                 LogApi::notify("订单支付失败", $orderNo);
+                return false;
             }
-             $orderInfo = OrderRepository::getOrderInfo(['order_no' => $orderNo]);
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
@@ -73,6 +74,8 @@ class OrderPayNotify
             //
             //        //发送邮件------end
         }
+        LogApi::notify("订单支付成功", $orderNo);
+        return true;
 
     }
 }

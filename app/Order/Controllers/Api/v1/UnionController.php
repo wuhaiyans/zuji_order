@@ -41,7 +41,6 @@ class UnionController extends Controller
     
     //银联开通银行卡接口
     public function openBankCard(Request $request){
-        var_dump("银联开通银行卡接口");die;
         //接收请求参数
         $params = $request->all();
         $appid =$params['appid'];
