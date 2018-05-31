@@ -101,7 +101,7 @@ class OrderReturnCreater
                 DB::rollBack();
                 return ApiStatus::CODE_33008;//更新审核状态失败
             }
-            if($params['business_key']==ReturnStatus::OrderHuanHuo){
+            //if($params['business_key']==ReturnStatus::OrderHuanHuo){
                 //获取商品信息
                 $goods_info= $this->orderReturnRepository->get_goods_info($params_data[$k]);
                 if(!$goods_info){
@@ -109,8 +109,9 @@ class OrderReturnCreater
                     DB::rollBack();
                     return ApiStatus::CODE_34005;//商品信息错误
                 }
-            }
+           // }
           /*  if($params['business_key']==ReturnStatus::OrderTuiHuo){
+
                 //创建退款清单
                 $create_data['order_no']=$params['order_no'];
 
@@ -153,28 +154,24 @@ class OrderReturnCreater
 
 
         }
-        if(isset($goods_info)){
-            foreach($goods_info as $k=>$v){
-                $receive_data[$k] =[
-                    'goods_no' => $goods_info[$k]->goods_no,
-                    'serial_no' => $goods_info[$k]->serial_number,
-                    'quantity' => $goods_info[$k]->quantity,
-                    'imei1'     =>$goods_info[$k]->imei1,
-                    'imei2'     =>$goods_info[$k]->imei2,
-                    'imei3'     =>$goods_info[$k]->imei3,
 
-                ];
-            }
+        foreach($goods_info as $k=>$v){
+            $receive_data[$k] =[
+                'goods_no' => $goods_info[$k]->goods_no,
+                'serial_no' => $goods_info[$k]->serial_number,
+                'quantity' => $goods_info[$k]->quantity,
+                'imei1'     =>$goods_info[$k]->imei1,
+                'imei2'     =>$goods_info[$k]->imei2,
+                'imei3'     =>$goods_info[$k]->imei3,
+
+            ];
             $create_receive= Receive::create($params['order_no'],$params['business_key'],$receive_data);//创建待收货单
             if(!$create_receive){
                 //事务回滚
                 DB::rollBack();
                 return ApiStatus::CODE_34003;//创建待收货单失败
             }
-
         }
-
-
         //申请退货同意发送短信
         /*$b =SmsApi::sendMessage($order_info['user_mobile'],'SMS_113455999',[
                'realName' =>$order_info['realname'],
@@ -572,7 +569,7 @@ if(!$create_receive){
         if(empty($params['goods_no'])){
             return ApiStatus::CODE_20001;
         }
-        $OrderRepository=new OrderRepository();
+        //$OrderRepository=new OrderRepository();
         //查询是否存在此退货单，存在判断退货单状态是否允许取消
         $return_result = $this->orderReturnRepository->get_info_by_order_no($params);
         if($return_result){
