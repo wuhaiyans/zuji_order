@@ -141,6 +141,7 @@ class OrderCreater
             'user_id'=>$data['user_id'],
             'time' => time(),
         ],time()+7200,"");
+        var_dump($b);die;
 
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
