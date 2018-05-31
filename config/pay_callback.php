@@ -33,7 +33,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET=>'',
 
 		// 提前还款业务回调
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderInstalment::repaymentNotify',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderWithhold::repaymentNotify',
 	],
 
 	'refund' => [
