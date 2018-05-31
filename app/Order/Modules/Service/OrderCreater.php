@@ -140,7 +140,7 @@ class OrderCreater
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => time(),
-        ],time()+7200,"");
+        ],time()+10,"");
         var_dump($b);die;
 
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
