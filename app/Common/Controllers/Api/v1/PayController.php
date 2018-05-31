@@ -16,6 +16,12 @@ class PayController extends Controller
     public function __construct()
     {
     }
+	public function testPost(){
+		
+		$url = 'https://dev-pay-zuji.huishoubao.com/jdpay/Payment/paymentNotify';
+		$res = Curl::post($url, ['__test'=>'test']);
+		var_dump( $res );exit;
+	}
 	
 	// 模拟支付成功异步通知
 	public function alipayPaymentNotify(){
@@ -58,7 +64,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093808';
+		$business_no = 'FA522834027093809';
 		$pay = null;
 		try {
 			// 查询
