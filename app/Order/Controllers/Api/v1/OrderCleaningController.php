@@ -188,7 +188,7 @@ class OrderCleaningController extends Controller
     {
 
         $business_type = 1;
-        $business_no = 'TA53135870325557';
+        $business_no = 'A528100728283349';
         $pay = null;
         try {
             // 查询
@@ -259,8 +259,8 @@ class OrderCleaningController extends Controller
         try {
 
 
-            $this->testPay();
-            exit;
+//            $this->testPay();
+//            exit;
 
             $params = $request->all();
 
@@ -274,7 +274,8 @@ class OrderCleaningController extends Controller
             }
 
             $res = OrderCleaning::orderCleanOperate($params['params']);
-            if (!$res) return apiResponse($res,ApiStatus::CODE_0,"success");
+            p($res);
+            if ($res) return apiResponse($res,ApiStatus::CODE_0,"success");
             return apiResponse([],ApiStatus::CODE_31202);
 
         } catch(\Exception $e)

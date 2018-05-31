@@ -193,6 +193,8 @@ class OrderCleaning
                 ];
                 $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
 
+
+
                 LogApi::info('预授权转支付接口返回', [$succss,$freezePayParams]);
 
             }
@@ -226,6 +228,7 @@ class OrderCleaning
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
+                p($succss);
                 LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
             return true;
