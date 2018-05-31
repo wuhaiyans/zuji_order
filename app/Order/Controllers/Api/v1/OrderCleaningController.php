@@ -194,9 +194,9 @@ class OrderCleaningController extends Controller
             // 查询
             $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
             // 取消
-            $pay->cancel();
-            // 恢复
-            $pay->resume();
+//            $pay->cancel();
+//            // 恢复
+//            $pay->resume();
 
         } catch (\App\Lib\NotFoundException $exc) {
 
@@ -259,8 +259,8 @@ class OrderCleaningController extends Controller
         try {
 
 
-//            $this->testPay();
-//            exit;
+            $this->testPay();
+            exit;
 
             $params = $request->all();
 
