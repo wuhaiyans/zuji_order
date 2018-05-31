@@ -56,7 +56,7 @@ class PayCreater {
 			throw new \Exception( '创建支付记录失败' );
 		}
 		LogApi::debug('[支付阶段]P创建成功');
-		return new Pay($params);
+		return new Pay($data);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ class PayCreater {
 			throw new \Exception( '创建支付记录失败' );
 		}
 		LogApi::debug('[支付阶段]W创建成功');
-		return new Pay($params);
+		return new Pay($data);
 	}
 	
 	/**
@@ -129,7 +129,7 @@ class PayCreater {
 			throw new \Exception( '创建资金预授权记录失败' );
 		}
 		LogApi::debug('[支付阶段]F创建成功');
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -173,7 +173,7 @@ class PayCreater {
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]WF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -222,7 +222,7 @@ class PayCreater {
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]PF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -272,13 +272,14 @@ class PayCreater {
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
 		];
+		//sql_profiler();
 		$b = $payModel->insert( $data );
 		if( !$b ){
 			LogApi::error('[支付阶段]PWF创建失败',$data);
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]PWF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	
