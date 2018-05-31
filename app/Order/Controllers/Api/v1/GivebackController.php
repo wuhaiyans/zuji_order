@@ -820,13 +820,18 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderPayment( $paramsArr ) {
-		$payData = [
-			'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
-			'businessNo' => $paramsArr['giveback_no'],// 业务编号
-			'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
-			'paymentFenqi' => 0,//不分期
-		];
-		$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+		try{
+			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
+			\App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$paramsArr['giveback_no'] );
+		} catch (\App\Lib\NotFoundException $ex) {
+			$payData = [
+				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
+				'businessNo' => $paramsArr['giveback_no'],// 业务编号
+				'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
+				'paymentFenqi' => 0,//不分期
+			];
+			\App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+		}
 		return true;
 	}
 	

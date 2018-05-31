@@ -27,31 +27,50 @@ class AlipayController extends Controller
 
     public function withholdFundAuth(Request $request){
         $params =$request->all();
-//        $params['params']=[
-//            'return_url' =>'http://www.baidu.com',
-//            'order_no' =>'A528100728283349',
-//            'user_id' =>'18',
-//        ];
         $rules = [
-            'return_url'  => 'required',
+            'callback_url'  => 'required',
             'order_no'  => 'required',
-            'user_id'=>'required',
+            'fundauth_amount'  => 'required',
+            'channel_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
-
         if (empty($validateParams) || $validateParams['code']!=0) {
-
             return apiResponse([],$validateParams['code']);
         }
         $params =$params['params'];
-        $res= $this->orderTrade->alipayInitialize($params);
-        if(!$res){
+		
+		//-+--------------------------------------------------------------------
+		// | 查询支付单，查询失败则创建
+		//-+--------------------------------------------------------------------
+		try{
+			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$params['order_no'] );
+			
+		} catch (\App\Lib\NotFoundException $e) {
+			$payData = [
+				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
+				'businessNo' => $params['order_no'],// 业务编号
+				'fundauthAmount' => $params['fundauth_amount'],
+			];
+			try{
+				$pay = \App\Order\Modules\Repository\Pay\PayCreater::createWithholdFundauth($payData);
+			} catch (\Exception $e) {
+				return apiResponse([],ApiStatus::CODE_50004);
+			}
+		} 
+		
+		//-+--------------------------------------------------------------------
+		// | 获取并返回url
+		//-+--------------------------------------------------------------------
+		try{
+			$paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
+					'name'=>'订单' .$params['order_no']. '支付',
+					'front_url' => $params['callback_url'],
+			]);
+			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
+		} catch (\Exception $exs) {
             return apiResponse([],ApiStatus::CODE_50004);
-        }
-        return apiResponse($res,ApiStatus::CODE_0);
-        die;
-
-
+		}
     }
 
     /**
