@@ -168,16 +168,22 @@ class OrderTrade
             $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderInfo['trade_no']);
         } catch (\App\Lib\NotFoundException $exc) {
             // 创建支付
-            $pay = PayCreater::createPayment([
-                'user_id'		=> $data['user_id'],
-                'businessType'	=> OrderStatus::BUSINESS_ZUJI,
-                'businessNo'	=> $data['order_no'],
+            try{
+                $pay = PayCreater::createPayment([
+                    'user_id'		=> $data['user_id'],
+                    'businessType'	=> OrderStatus::BUSINESS_ZUJI,
+                    'businessNo'	=> $data['order_no'],
 
-                'paymentNo' => $orderInfo['trade_no'],
-                'paymentAmount' => 0.01,
-                'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                'paymentFenqi'	=> $fenqi,
-            ]);
+                    'paymentNo' => $orderInfo['trade_no'],
+                    'paymentAmount' => 0.01,
+                    'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                    'paymentFenqi'	=> $fenqi,
+                ]);
+            }catch (\Exception $exc){
+                DB::rollBack();
+                echo $exc->getMessage();
+                die;
+            }
         }
         try{
             $_params = [

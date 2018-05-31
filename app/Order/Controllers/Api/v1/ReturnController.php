@@ -57,7 +57,7 @@ class ReturnController extends Controller
         }
         $res = $this->OrderCreate->get_order_info($params);//获取订单信息
         if(empty($res)){
-            return apiResponse([],ApiStatus::CODE_20001,"没有找到该订单");
+            return apiResponse([],ApiStatus::CODE_34005,"没有找到该订单");
         }
         $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
         if($return_info){
@@ -175,10 +175,10 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         if(empty($params['order_no'])){
-            return apiResponse( [], ApiStatus::CODE_33003,'订单编号不能为空' );
+            return apiResponse( [], ApiStatus::CODE_20001,'订单编号不能为空' );
         }
         if(empty($params['goods_no'])){
-            return apiResponse( [], ApiStatus::CODE_40000,'商品编号不能为空' );
+            return apiResponse( [], ApiStatus::CODE_20001,'商品编号不能为空' );
         }
         $ret = $this->OrderReturnCreater->returnResult($params);
         if($ret){

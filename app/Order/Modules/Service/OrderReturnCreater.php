@@ -11,9 +11,11 @@ use \App\Order\Modules\Inc\OrderStatus;
 use \App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\ReturnLogRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\Warehouse\Delivery;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use App\Lib\Warehouse\Logistics;
 class OrderReturnCreater
 {
@@ -31,10 +33,20 @@ class OrderReturnCreater
      */
     public function add($params){
         if(empty($params['goods_no'])){
-            return ApiStatus::CODE_40000;//商品编号不能为空
+            return ApiStatus::CODE_20001;//商品编号不能为空
         }
         if(empty($params['order_no'])){
-            return ApiStatus::CODE_33003;
+            return ApiStatus::CODE_20001;
+        }
+        //查询此订单是否有未完成的退换货单操作
+        $where[]=['order_no','=',$params['order_no']];
+        $return_info=$this->orderReturnRepository->getReturnInfo($where);
+        if($return_info){
+           foreach($return_info as $k=>$v){
+               if($return_info[$k]['status']==ReturnStatus::ReturnInvalid || $return_info[$k]['status']==ReturnStatus::ReturnCreated || $return_info[$k]['status']==ReturnStatus::ReturnAgreed || $return_info[$k]['status']==ReturnStatus::ReturnReceive ||$return_info[$k]['status']==ReturnStatus::ReturnTui){
+                   return ApiStatus::CODE_33003;
+               }
+           }
         }
         $OrderRepository=new OrderRepository();
         foreach($params['goods_no'] as $k=>$v){
@@ -71,6 +83,17 @@ class OrderReturnCreater
             DB::rollBack();
             return ApiStatus::CODE_33009;//修改商品状态失败
         }
+        //短信
+       /* $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY);
+        $orderNoticeObj->notify();
+        if($params['business_key']==ReturnStatus::OrderTuiHuo){
+            $params['business_type']="退货业务";
+        }
+        if($params['business_key']==ReturnStatus::OrderHuanHuo){
+            $params['business_type']="换货业务";
+        }
+        //日志
+        ReturnLogRepository::add($params['business_type'],"申请".$params['business_type']);*/
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -611,7 +634,7 @@ if(!$create_receive){
     //获取退款单信息
     public function get_info_by_order_no($params){
         if(empty($params['order_no'])){
-            return ApiStatus::CODE_33003;//const CODE_33008 = '33003'; //[退换货]订单编号不能为空
+            return ApiStatus::CODE_20001;// //[退换货]订单编号不能为空
         }
         if(empty($params['user_id'])){
             return ApiStatus::CODE_20001;
@@ -867,24 +890,36 @@ if(!$create_receive){
         }
         //（退款、退机、换机）状态
         if($result['status']==ReturnStatus::ReturnCreated){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnCreated);//提交申请
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnCreated);//提交申请
 
         }elseif($result['status']==ReturnStatus::ReturnAgreed){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnAgreed);//同意
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnAgreed);//同意
+
         }elseif($result['status']==ReturnStatus::ReturnDenied){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnDenied);//拒绝
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnDenied);//拒绝
         }elseif($result['status']==ReturnStatus::ReturnCanceled){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
         }elseif($result['status']==ReturnStatus::ReturnReceive){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnReceive);//已收货
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnReceive);//已收货
         }elseif($result['status']==ReturnStatus::ReturnTuiHuo){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiHuo);//已退货
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiHuo);//已退货
         }elseif($result['status']==ReturnStatus::ReturnHuanHuo){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnHuanHuo);//已换货
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnHuanHuo);//已换货
         }elseif($result['status']==ReturnStatus::ReturnTuiKuan){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiKuan);//已退款
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiKuan);//已退款
         }elseif($result['status']==ReturnStatus::ReturnTui){
-            $result['status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
+            $result['return_status']=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
+        }
+        if(!empty($result['evaluation_status'])){
+           if($result['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
+               $result['check_status']="检测合格";
+           }
+            if($result['evaluation_status']==ReturnStatus::OrderGoodsIncomplete){
+                $result['check_status']="检测不合格";
+            }
+            if($result['evaluation_status']==ReturnStatus::ReturnEvaluation){
+                $result['check_status']="待检测";
+            }
         }
         return $result;
     }
@@ -1143,7 +1178,7 @@ if(!$create_receive){
             return ApiStatus::CODE_34005;//未找到此订单
         }
         if($order_result['order_status'] !=OrderStatus::BUSINESS_RETURN && $order_result['order_status'] !=OrderStatus::OrderPayed){
-            return ApiStatus::CODE_34001;//此订单不符合规则
+            return ApiStatus::CODE_33002;//此订单不符合规则
         }
         $data['business_key']=$params['business_key'];
         $data['order_no']=$order_result['order_no'];
