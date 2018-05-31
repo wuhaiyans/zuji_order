@@ -19,7 +19,8 @@ class User{
      * @return string or array
      */
 
-    public static function getUser($data,$user_id,$address_id=0){
+    public static function getUser($user_id,$address_id=0){
+        $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.goods.user.get';
         $data['params'] = [
             'user_id'=>$user_id,

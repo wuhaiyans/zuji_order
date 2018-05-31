@@ -16,5 +16,18 @@ class OrderCouponRepository
         return $info->getQueueableId();
     }
 
+    // 查询优惠券
+    public static function find($where){
+        if(!$where){
+            return [];
+        }
 
+        $info = OrderCoupon::query()
+            ->where($where)
+            ->get();
+        if(!$info){
+            return [];
+        }
+        return $info->toArray();
+    }
 }

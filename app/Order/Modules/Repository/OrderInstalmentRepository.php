@@ -158,7 +158,15 @@ class OrderInstalmentRepository
         if (!$result) return false;
         return $result->toArray();
     }
-
+    /**
+     * 查询分期统计应付金额
+     */
+    public static function getSumAmount($params){
+        if (empty($params)) return false;
+        $result =  OrderInstalment::query()->where($params)->sum("amount");
+        if (!$result) return false;
+        return $result->toArray();
+    }
     /**
      * 查询总数
      */
@@ -326,6 +334,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['trade_no']        = createNo();
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
@@ -373,6 +383,8 @@ class OrderInstalmentRepository
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
             $_data['agreement_no']    = $this->withholding_no;
+            //业务编号
+            $_data['trade_no']        = createNo();
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
