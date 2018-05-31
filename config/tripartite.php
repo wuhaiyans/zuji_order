@@ -9,7 +9,7 @@
 //只有订单内部接收的接口appid =1;
 return [
 
-    'Interior_Goods_Url' =>env("GOODS_API","https://admin-zuji.huishoubao.com/api.php"),
+    'Interior_Goods_Url' =>env("GOODS_API","https://dev-api-zuji.huishoubao.com/api.php"),
     'Interior_Goods_Request_data'=>[
         'appid'=>1,
         'sign_type'=>'MD5',
