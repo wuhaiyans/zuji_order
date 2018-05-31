@@ -31,7 +31,8 @@ class JobQueueApi {
 	 * @return bool
 	 */
 	public static function addScheduleOnce( string $key, string $url, array $data,int $timestamp, string $callback='' ):bool{
-		$start = '@at '.date('Y-m-dTH:i:s',$timestamp).'+08:00';
+	    $timestamp =$timestamp+3600*8;
+		$start = '@at '.date('Y-m-d',$timestamp)."T".date('H:i:s',$timestamp).'+00:00';
 		return self::push($key, $url, $data, $callback, 'scheduled',$start);
 	}
 	/**
@@ -88,6 +89,7 @@ class JobQueueApi {
 			'cron' => $cron,
 			'retries' => 3, // 错误重试次数
 		];
+		p($_config);
 		LogApi::info('[任务]'.$key,$_config);
 		// 请求
 		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
