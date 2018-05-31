@@ -33,7 +33,7 @@ class ReletController extends Controller
      * @return [
      *      订单商品数据,
      *      list=>['zuqi'=>租期单位(短租日长租月),'zujin'=>租金]
-     *      pay=>[]['pay_type'=>支付方式,'pay_name'=>支付方式名] 短租只有一次性结清,长租代扣或分期
+     *      pay=>[]['pay_type'=>支付方式,'pay_name'=>支付方式名] 短租只有一次性结清,长租可选择代扣或分期或一次性支付
      * ]
      */
     public function pageRelet(Request $request){
@@ -77,8 +77,9 @@ class ReletController extends Controller
      *  'pay_type'      => 'required', //支付方式
      *  'relet_amount'  => 'required',//续租金额
      *  'user_name'     => 'required',//用户名(手机号)
+     *  'return_url'    => 'required',//前端回调地址
      *
-     * @return apiResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function createRelet(Request $request){
         try {
@@ -94,14 +95,15 @@ class ReletController extends Controller
                 'pay_type'      => 'required', //支付方式
                 'relet_amount'  => 'required',//续租金额
                 'user_name'     => 'required',//用户名(手机号)
+                'return_url'    => 'required'//前端回调地址
             ]);
-            if(count($params) < 5){
-
+            if(count($params) < 7){
                 return apiResponse([], ApiStatus::CODE_20001, "参数错误");
             }
 
-            if($this->relet->createRelet($params)){
-                return apiResponse([],ApiStatus::CODE_0);
+            $res = $this->relet->createRelet($params);
+            if($res){
+                return apiResponse($res,ApiStatus::CODE_0);
 
             }else{
                 return apiResponse([],ApiStatus::CODE_50000,get_msg());

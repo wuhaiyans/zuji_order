@@ -11,7 +11,7 @@ class OrderGoods
 	 */
 	protected $orderGoodsRepository;
 	public function __construct(  ) {
-		$this->orderGoodsRepository = new OrderGoodsRepository(new \App\Order\Models\OrderGoods());
+		$this->orderGoodsRepository = new OrderGoodsRepository();
 	}
 	/**
 	 * 获取一条商品信息
@@ -71,8 +71,8 @@ class OrderGoods
 	 * ]<br/>
 	 * @param array $data 需要更新的数据 【至少含有一项数据】
 	 * $data = [<br/>
-	 *		'bussiness_key'=>'',//业务key<br/>
-	 *		'bussiness_no'=>'',//业务唯一编号<br/>
+	 *		'business_key'=>'',//业务key<br/>
+	 *		'business_no'=>'',//业务唯一编号<br/>
 	 *		'goods_status'=>'',//业务key下的商品状态<br/>
 	 * ]
 	 */
@@ -81,8 +81,8 @@ class OrderGoods
 			'goods_no' => 'required',
 		]);
 		$data = filter_array($data, [
-			'bussiness_key' => 'required',
-			'bussiness_no' => 'required',
+			'business_key' => 'required',
+			'business_no' => 'required',
 			'goods_status' => 'required',
 		]);
 		if( count( $where ) < 1 ){

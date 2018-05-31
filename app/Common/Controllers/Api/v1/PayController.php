@@ -16,6 +16,12 @@ class PayController extends Controller
     public function __construct()
     {
     }
+	public function testPost(){
+		
+		$url = 'https://dev-pay-zuji.huishoubao.com/jdpay/Payment/paymentNotify';
+		$res = Curl::post($url, ['__test'=>'test']);
+		var_dump( $res );exit;
+	}
 	
 	// 模拟支付成功异步通知
 	public function alipayPaymentNotify(){
@@ -58,7 +64,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093802';
+		$business_no = 'FA522834027093812';
 		$pay = null;
 		try {
 			// 查询
@@ -69,15 +75,14 @@ class PayController extends Controller
 			$pay->resume();
 
 		} catch (\App\Lib\NotFoundException $exc) {
-
 			// 创建支付
-			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPayment([
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
 				'user_id'		=> '5',
 				'businessType'	=> $business_type,
 				'businessNo'	=> $business_no,
 				
 				'paymentAmount' => '0.01',
-				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Jdpay,
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'paymentFenqi'	=> 0,
 				
 				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
@@ -86,7 +91,7 @@ class PayController extends Controller
 				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 			]);
 		} catch (\Exception $exc) {
-			exit('error');
+			echo $exc->getMessage();exit;
 		}
 		
 		try {
@@ -98,7 +103,7 @@ class PayController extends Controller
 				'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
 			];
 			
-			$pay->setPaymentAmount(0.02);
+			$pay->setPaymentAmount(0.01);
 			
 			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
 			header( 'Location: '.$url_info['url'] ); 

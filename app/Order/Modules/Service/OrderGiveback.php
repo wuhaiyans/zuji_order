@@ -108,6 +108,7 @@ class OrderGiveback
 	public function update( $where, $data ) {
 		$where = filter_array($where, [
 			'goods_no' => 'required',
+			'giveback_no' => 'required',
 		]);
 		$data = filter_array($data, [
 			'status' => 'required',
@@ -289,7 +290,7 @@ class OrderGiveback
 					return false;
 				}
 			}
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> $status]);
+			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
 			if( !$orderGoodsResult ){
 				return false;
 			}

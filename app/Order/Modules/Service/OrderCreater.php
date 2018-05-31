@@ -55,7 +55,6 @@ class OrderCreater
         $orderType =OrderStatus::orderOnlineService;
         try{
             DB::beginTransaction();
-            //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
@@ -103,7 +102,7 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            var_dump($schemaData);
+            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -132,16 +131,17 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
-            //创建订单后 发送支付短信。;
+           // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce("OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
-            'time' => date('Y-m-d H:i:s'),
+            'time' => time(),
         ],time()+7200,"");
+
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
             return $result;
