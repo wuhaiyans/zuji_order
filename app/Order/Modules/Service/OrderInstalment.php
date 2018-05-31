@@ -622,7 +622,7 @@ class OrderInstalment
                     'user_id'       => $instalmentInfo['user_id'],
                     'coupon_id'     => $couponInfo['coupon_id'],
                 ];
-                \App\Lib\Coupon\Coupon::setCoupon([],$arr);
+                \App\Lib\Coupon\Coupon::setCoupon($arr);
 
             }
 
