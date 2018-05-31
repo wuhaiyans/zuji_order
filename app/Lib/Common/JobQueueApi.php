@@ -108,7 +108,7 @@ class JobQueueApi {
 		if( $res['status']=='ok'){
 			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	public static function disable( string $key):bool{
