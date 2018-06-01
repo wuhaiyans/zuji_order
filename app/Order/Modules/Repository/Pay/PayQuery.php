@@ -118,7 +118,7 @@ class PayQuery {
      * @throws \App\Lib\NotFoundException
      */
     public static function getAuthInfoByAuthNo( string $authNo ){
-        $info = \App\Order\Models\OrderPayModel::where([
+        $info = \App\Order\Models\OrderPayFundauthModel::where([
             'fundauth_no'	=> $authNo,
         ])->first();
         if( $info ){

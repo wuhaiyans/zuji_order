@@ -25,6 +25,7 @@ class PayCreater {
 	 * <p>普通支付</p>
 	 * @param	array	$params		普通支付参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型 
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
@@ -39,6 +40,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -64,6 +66,7 @@ class PayCreater {
 	 * <p>代扣签约</p>
 	 * @param	array	$params		签约参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * ]
@@ -76,6 +79,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -99,6 +103,7 @@ class PayCreater {
 	 * <p>资金预授权</p>
 	 * @param	array	$params		资金预授权参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
@@ -113,6 +118,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -137,6 +143,7 @@ class PayCreater {
 	 * <p>代扣签约+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -153,6 +160,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]WF创建');
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -181,6 +189,7 @@ class PayCreater {
 	 * <p>普通支付+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
+	 *		'user_id'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -201,6 +210,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]PF创建');
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['user_id'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
