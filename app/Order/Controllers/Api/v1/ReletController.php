@@ -145,38 +145,6 @@ class ReletController extends Controller
     }
 
     /**
-     * 支付续租费用
-     *
-     * 1.代扣
-     * 2.分期一次性结清
-     */
-    public function paymentRelet(){
-        //接收参数
-
-        //拼接支付参数
-
-        //调用支付接口
-
-        //返回处理成功或失败
-    }
-
-    /**
-     * 回调支付接口
-     */
-    public function backPaymentRelet(){
-        //接收参数
-
-        //判断成功或失败
-        if(1){
-            //修改订单状态
-
-        }else{
-            //返回错误信息
-
-        }
-    }
-
-    /**
      * 续租列表(后台)
      */
     public function listRelet(Request $request){

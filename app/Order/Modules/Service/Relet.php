@@ -10,6 +10,11 @@ namespace App\Order\Modules\Service;
 
 
 
+use App\Lib\Common\LogApi;
+use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderGoodsUnit;
+use App\Order\Models\OrderRelet;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
@@ -104,22 +109,22 @@ class Relet
                     set_msg('租期错误');
                     return false;
                 }
-                $fundauthNo = \createNo(3);
             }else{
                 if( !publicInc::getCangzuRow($params['zuqi']) ){
                     DB::rollBack();
                     set_msg('租期错误');
                     return false;
                 }
-                $fundauthNo = \createNo();
             }
             $amount = $row['zujin']*$params['zuqi'];
+
             if($amount == $params['relet_amount']){
                 $data = [
                     'user_id'=>$params['user_id'],
                     'zuqi_type'=>$row['zuqi_type'],
                     'zuqi'=>$row['zuqi'],
                     'order_no'=>$params['order_no'],
+                    'relet_no'=>createNo(9),
                     'create_time'=>time(),
                     'pay_type'=>$params['pay_type'],
                     'user_name'=>$params['user_name'],
@@ -129,25 +134,41 @@ class Relet
                 ];
 
                 if($this->reletRepository->createRelet($data)){
+                    //修改设备状态 续租中
+                    $rse = OrderGoods::where(['id'],'=',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
+                    if( !$rse ){
+                        DB::rollBack();
+                        set_msg('修改设备状态续租中失败');
+                        return false;
+                    }
 
+                    //创建支付
                     if(PayInc::FlowerStagePay){
                         // 创建支付 一次性结清
                         $pay = PayCreater::createPayment([
-//                        'user_id'		=> $data['user_id'],
+                            'user_id'		=> $data['user_id'],
                             'businessType'	=> OrderStatus::BUSINESS_RELET,
-                            'businessNo'	=> $data['order_no'],
+                            'businessNo'	=> $data['relet_no'],
 
 //                        'paymentNo' => $orderInfo['trade_no'],
                             'paymentAmount' => $data['relet_amount'],
 //                        'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                            'paymentFenqi'	=> 0,
+                            'paymentFenqi'	=> $params['zuqi'],
                         ]);
+
+                        //创建分期
+                        if($params['zuqi']!=0){
+                            OrderInstalment::create($params);
+                        }
+
                     }else{
                         // 创建支付 代扣签约
                         $pay = PayCreater::createWithhold([
+                            'user_id'		=> $data['user_id'],
                             'businessType'	=> OrderStatus::BUSINESS_RELET,
-                            'businessNo'	=> $data['order_no'],
+                            'businessNo'	=> $data['relet_no'],
                         ]);
+
                     }
                     $step = $pay->getCurrentStep();
                     //echo '当前阶段：'.$step."\n";
@@ -180,34 +201,81 @@ class Relet
     }
 
     /**
-     * 创建支付
+     * 支付阶段完成时业务的回调
+     *      业务类型为【续租】6的支付回调通知
      *
-     * @param $data
-     * @return mixed
+     * @param $params
+     * @return bool
      */
-    public function createPay($data){
-        // 创建支付
-        $pay = PayCreater::createFundauth([
-            'user_id'		=> $data['user_id'],
-            'businessType'	=> OrderStatus::BUSINESS_RELET,
-            'businessNo'	=> $data['order_no'],
+    public static function callback($params)
+    {
+        $businessType = $params['business_type'];
+        $reletNo = $params['business_no']; //续租支付也就是续租编号
+        $status = $params['status'];
 
-            'fundauthNo' => \createNo($data['noType']),
-            'fundauthAmount' => $data['amount'],
-            'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-        ]);
-        $step = $pay->getCurrentStep();
-        //echo '当前阶段：'.$step."\n";
+        if ($status == "processing") {
+            //续租创建的同时就会去支付,所以不需要支付中状态处理(创建=支付中)
+        } else {
 
-        $_params = [
-            'name'			=> '订单续租',					//【必选】string 交易名称
-            'front_url'		=> $data['return_url'],	//【必选】string 前端回跳地址
-        ];
-        $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-        return $urlInfo;
+            DB::beginTransaction();
+            $b = ReletRepository::reletPayStatus($reletNo, ReletStatus::STATUS2);
+            if (!$b) {
+                DB::rollBack();
+                LogApi::notify("续租修改支付状态失败", $reletNo);
+                return false;
+            }
+            //查询
+            // 续租表
+            $reletRow = OrderRelet::where(['relet_no','=',$reletNo])->get(['goods_id'])->toArray();
+            // 设备表
+            $goodsObj = OrderGoods::where(['id'],'=',$reletRow['goods_id'])->first();
+            // 设备周期表
+            $goodsUnitRow = OrderGoodsUnit::where(
+                ['order_no','=',$goodsObj->order_no],
+                ['goods_no','=',$goodsObj->goods_no]
+            )->orderBy('id','desc')->fresh()->toArray();
+            //判断租期类型
+            if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
+                $t = $reletRow['zuqi']*(60*60*24);
+            }else{
+                $t = $reletRow['zuqi']*30*(60*60*24);
+            }
+            $data = [
+                'order_no'=>$goodsObj->order_no,
+                'goods_no'=>$goodsObj->goods_no,
+                'user_id'=>$goodsObj->user_id,
+                'unit'=>$reletRow['zuqi_type'],
+                'unit_value'=>$reletRow['zuqi'],
+                'begin_time'=>$goodsUnitRow['begin_time'],
+                'end_time'=>$goodsUnitRow['begin_time']+$t,
+            ];
+
+            //修改订单商品状态
+            if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+                DB::rollBack();
+                LogApi::notify("续租修改设备状态失败", $reletNo);
+                return false;
+            }
+//            OrderGoods::where(['id'],'=',$reletRow['goods_id'])->update(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]);
+            //添加设备周期表
+            if( !OrderGoodsUnit::insert($data) ){
+                DB::rollBack();
+                LogApi::notify("续租添加设备周期表失败", $reletNo);
+                return false;
+            }
+            DB::commit();
+
+        }
+        LogApi::notify("续租支付成功", $reletNo);
+        return true;
+
     }
 
+
+
     /**
+     * 拼接去续租页数据
+     *
      * @param $params
      * @return array|bool
      */
