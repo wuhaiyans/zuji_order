@@ -10,7 +10,7 @@ use App\Order\Modules\Repository\Pay\Channel;
  *
  * @author Administrator
  */
-class OrderCreate implements ShortMessage {
+class ReturnUnqualified implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -27,11 +27,10 @@ class OrderCreate implements ShortMessage {
 	    $class =basename(str_replace('\\', '/', __CLASS__));
 		return Config::getCode($channel_id, $class);
 	}
-
 	
 	public function notify($data=[]){
 		// 根据业务，获取短息需要的数据
-
+		
 		// 查询订单
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
 		if( !$orderInfo ){
@@ -46,22 +45,21 @@ class OrderCreate implements ShortMessage {
 		if(!$goods){
 		    return false;
         }
-        $goodsName ="";
-        foreach ($goods as $k=>$v){
-            $goodsName.=$v['goods_name']." ";
+        //获取商品信息
+        $where[] = ['goods_no', '=', $data];
+        $where[] = ['order_no', '=', $this->business_no];
+        $goodsInfo = OrderReturnRepository::getGoodsInfo($where);
+        if (!$goodsInfo) {
+            return false;
         }
+        // 发送短息
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName' => $orderInfo['realname'],
+            'orderNo' => $this->business_no,
+            'goodsName' => $goodsInfo['goods_name'],
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+        ],$this->business_no);
 
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'goodsName'=>$goodsName,
-		]);
 	}
-
-
-//	public function notify($data=[]){
-//		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
-//		var_dump($result);exit;
-//	}
-
 	
 }

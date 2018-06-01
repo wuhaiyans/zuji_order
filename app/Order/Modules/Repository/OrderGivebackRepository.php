@@ -10,14 +10,12 @@ class OrderGivebackRepository
 	 * @var obj OrderGiveback
 	 */
 	protected $order_giveback_model;
-	protected $fillable;
 	
 	/**
 	 * 构造方法
 	 */
 	public function __construct(  ){
 		$this->order_giveback_model = new OrderGiveback();
-		$this->fillable = $this->order_giveback_model->fillable;
 	}
     public function create( $data ){
 		return $this->order_giveback_model->insertGetId( $data );
@@ -29,7 +27,7 @@ class OrderGivebackRepository
 	 */
 	public function getInfoByGoodsNo( $goodsNo ) {
 		$where['goods_no'] = $goodsNo;
-		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->first();
+		$result = $this->order_giveback_model->where($where)->first();
 		if( $result ) {
 			return $result->toArray();
 		}
@@ -43,7 +41,7 @@ class OrderGivebackRepository
 	 */
 	public function getInfoByGivabackNo( $givebackNo ) {
 		$where['giveback_no'] = $givebackNo;
-		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->first();
+		$result = $this->order_giveback_model->where($where)->first();
 		if( $result ) {
 			return $result->toArray();
 		}
@@ -64,7 +62,7 @@ class OrderGivebackRepository
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_IN_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI,
 		];
-		$result = $this->order_giveback_model->fillable($this->fillable)->where($where)->get();
+		$result = $this->order_giveback_model->where($where)->get();
 		if( $result ) {
 			return $result->toArray();
 		}

@@ -105,8 +105,25 @@ class PayQuery {
 			'payment_no'	=> $payment_no,
 		])->first();
 		if( $info ){
-			return new Pay( $info->toArray() );
+			return $info->toArray();
 		}
 		throw new \App\Lib\NotFoundException('支付系统支付信息不存在');
 	}
+
+    /**
+     * 根据预授权编号，获取支付系统预授权信息
+     * Author: heaven
+     * @param string $authNo
+     * @return array
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getAuthInfoByAuthNo( string $authNo ){
+        $info = \App\Order\Models\OrderPayFundauthModel::where([
+            'fundauth_no'	=> $authNo,
+        ])->first();
+        if( $info ){
+            return $info->toArray();
+        }
+        throw new \App\Lib\NotFoundException('支付系统预授权不存在');
+    }
 }

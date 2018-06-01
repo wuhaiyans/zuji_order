@@ -28,6 +28,7 @@ $api->version('v1', [
         $apiMap = config('apimap');
 
         $method = request()->input('method');
+
         if (isset($apiMap[$method])) {
             $api->post('/',  $apiMap[$method]);
         }
@@ -37,6 +38,8 @@ $api->version('v1', [
         // 支付测试
         $api->get('testpay', 'AlipayController@test');
 
+        // 订单清算测试预授权
+        $api->get('testCleanPay', 'OrderCleaningController@testPay');
 
         // 代扣扣款回调
         $api->post('createpayNotify', 'WithholdController@createpayNotify');

@@ -6,6 +6,8 @@
  */
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\Pay\Channel;
+use App\Order\Modules\Repository\Pay\PayCreater;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Support\Facades\Log;
@@ -177,6 +179,68 @@ class OrderCleaningController extends Controller
     }
 
 
+    /**
+     * 支付测试
+     * Author: heaven
+     * @throws \ErrorException
+     */
+    public function testPay()
+    {
+
+        $business_type = 1;
+        $business_no = 'A530177589116734';
+        $pay = null;
+        try {
+            // 查询
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+            // 取消
+//            $pay->cancel();
+//            // 恢复
+//            $pay->resume();
+
+        } catch (\App\Lib\NotFoundException $exc) {
+
+            // 创建支付
+            $pay = \App\Order\Modules\Repository\Pay\PayCreater::createPayment([
+                'user_id'		=> '5',
+                'businessType'	=> $business_type,
+                'businessNo'	=> $business_no,
+
+                'paymentAmount' => '0.01',
+                'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Jdpay,
+                'paymentFenqi'	=> 0,
+
+                'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+
+                'fundauthAmount' => '1.00',
+                'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+            ]);
+        } catch (\Exception $exc) {
+            exit('error');
+        }
+
+        try {
+            $step = $pay->getCurrentStep();
+            // echo '当前阶段：'.$step."\n";
+
+            $_params = [
+                'name'			=> '测试支付',					//【必选】string 交易名称
+                'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+            ];
+
+            $pay->setPaymentAmount(0.01);
+
+            $url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+            header( 'Location: '.$url_info['url'] );
+//			var_dump( $url_info );
+
+        } catch (\Exception $exc) {
+            echo $exc->getMessage()."\n";
+            echo $exc->getTraceAsString();
+        }
+
+
+    }
 
     /**
      * 订单清算出帐
@@ -194,6 +258,10 @@ class OrderCleaningController extends Controller
 
         try {
 
+
+//            $this->testPay();
+//            exit;
+
             $params = $request->all();
 
             $rules = [
@@ -206,7 +274,8 @@ class OrderCleaningController extends Controller
             }
 
             $res = OrderCleaning::orderCleanOperate($params['params']);
-            if (!$res) return apiResponse($res,ApiStatus::CODE_0,"success");
+            p($res);
+            if ($res) return apiResponse($res,ApiStatus::CODE_0,"success");
             return apiResponse([],ApiStatus::CODE_31202);
 
         } catch(\Exception $e)

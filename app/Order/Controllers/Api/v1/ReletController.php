@@ -33,7 +33,7 @@ class ReletController extends Controller
      * @return [
      *      订单商品数据,
      *      list=>['zuqi'=>租期单位(短租日长租月),'zujin'=>租金]
-     *      pay=>[]['pay_type'=>支付方式,'pay_name'=>支付方式名] 短租只有一次性结清,长租代扣或分期
+     *      pay=>[]['pay_type'=>支付方式,'pay_name'=>支付方式名] 短租只有一次性结清,长租可选择代扣或分期或一次性支付
      * ]
      */
     public function pageRelet(Request $request){
@@ -72,14 +72,14 @@ class ReletController extends Controller
      *
      * @params
      *  'user_id'       => 'required', //用户ID
-     *  //'zuqi_type'     => 'required', //租期类型
      *  'zuqi'          => 'required', //租期
      *  'order_no'      => 'required', //订单编号
      *  'pay_type'      => 'required', //支付方式
      *  'relet_amount'  => 'required',//续租金额
      *  'user_name'     => 'required',//用户名(手机号)
+     *  'return_url'    => 'required',//前端回调地址
      *
-     * @return apiResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function createRelet(Request $request){
         try {
@@ -95,13 +95,15 @@ class ReletController extends Controller
                 'pay_type'      => 'required', //支付方式
                 'relet_amount'  => 'required',//续租金额
                 'user_name'     => 'required',//用户名(手机号)
+                'return_url'    => 'required'//前端回调地址
             ]);
-            if(count($params) < 5){
+            if(count($params) < 7){
                 return apiResponse([], ApiStatus::CODE_20001, "参数错误");
             }
 
-            if($this->relet->createRelet($params)){
-                return apiResponse([],ApiStatus::CODE_0);
+            $res = $this->relet->createRelet($params);
+            if($res){
+                return apiResponse($res,ApiStatus::CODE_0);
 
             }else{
                 return apiResponse([],ApiStatus::CODE_50000,get_msg());
@@ -138,38 +140,6 @@ class ReletController extends Controller
 
         }catch(\Exception $e){
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
-
-        }
-    }
-
-    /**
-     * 支付续租费用
-     *
-     * 1.代扣
-     * 2.分期一次性结清
-     */
-    public function paymentRelet(){
-        //接收参数
-
-        //拼接支付参数
-
-        //调用支付接口
-
-        //返回处理成功或失败
-    }
-
-    /**
-     * 回调支付接口
-     */
-    public function backPaymentRelet(){
-        //接收参数
-
-        //判断成功或失败
-        if(1){
-            //修改订单状态
-
-        }else{
-            //返回错误信息
 
         }
     }

@@ -98,7 +98,7 @@ class Receive
      * @return bool
      *
      */
-    public function updateLogistics($params){
+    public static function updateLogistics($params){
 
         try {
             $result = [

@@ -28,6 +28,8 @@ return [
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
     //支付宝资金预授权接口
     'api.alipay.fundauth'=>'AlipayController@alipayFundAuth',
+    //支付宝代扣+资金预授权接口
+    'api.alipay.withhold.fundauth'=>'AlipayController@withholdFundAuth',
     //通用支付URL地址接口，满足url跳转支付
     'api.pay.payment.url'=>'PayController@getPaymentUrl',
     //银联已开通银行卡列表查询接口
@@ -204,7 +206,21 @@ return [
     'api.Test.test'       => 'TestController@test',
     'api.test.send.sms'       => 'TestController@sendSms',
 
-
+    //-+------------------------------------------------------------------------
+    // | 小程序相关接口
+    //-+------------------------------------------------------------------------
+    //小程序获取临时订单号
+    'mini.order.gettemporaryorderno' => 'MiniOrderController@getTemporaryOrderNo',
+    //小程序确认订单查询接口
+    'mini.order.confirmation' => 'MiniOrderController@confirmationQuery',
+    //小程序下单接口
+    'mini.order.create' => 'MiniOrderController@create',
+    //小程序订单同步接口
+    'mini.order.fronttransition' => 'MiniOrderController@frontTransition',
+    //取消订单接口
+    'mini.order.miniordercancel' => 'MiniOrderController@miniOrderCancel',
+//    //小程序订单完成接口
+//    'mini.order.close' => 'MiniOrderController@cancelOrder',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************

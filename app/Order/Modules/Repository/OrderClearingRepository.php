@@ -87,7 +87,7 @@ class OrderClearingRepository
         $whereArray = array();
         if (isset($param['clean_no'])){
             $whereArray[] = ['clean_no', '=', $param['clean_no']];
-            $orderData =  OrderClearing::where($whereArray)->first()->toArray();
+            $orderData =  OrderClearing::where($whereArray)->first();
             return $orderData;
         }
         return false;
@@ -201,7 +201,7 @@ class OrderClearingRepository
             if ($param['refund_status']==OrderCleaningStatus::refundPayd) {
 
                 $orderData->refund_time  = time();
-                $orderData->refund_no   = $param['refund_no'];
+                $orderData->out_refund_no   = $param['out_refund_no'];
 
             }
         }

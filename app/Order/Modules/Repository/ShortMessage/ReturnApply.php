@@ -4,21 +4,22 @@ namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
+use App\Order\Modules\Repository\OrderReturnRepository;
 
 /**
- * OrderCreated
+ * ReturnApply
  *
  * @author Administrator
  */
-class OrderCreate implements ShortMessage {
-	
+class ReturnApply implements ShortMessage {
+
 	private $business_type;
 	private $business_no;
-	
+
 	public function setBusinessType( int $business_type ){
 		$this->business_type = $business_type;
 	}
-	
+
 	public function setBusinessNo( string $business_no ){
 		$this->business_no = $business_no;
 	}
@@ -28,7 +29,6 @@ class OrderCreate implements ShortMessage {
 		return Config::getCode($channel_id, $class);
 	}
 
-	
 	public function notify($data=[]){
 		// 根据业务，获取短息需要的数据
 
@@ -42,26 +42,23 @@ class OrderCreate implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
-        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
-		if(!$goods){
-		    return false;
-        }
-        $goodsName ="";
-        foreach ($goods as $k=>$v){
-            $goodsName.=$v['goods_name']." ";
+		//获取商品信息
+        foreach($data as $k=>$v){
+		    $where[]=['goods_no','=',$data[$k]['goods_no']];
+            $where[]=['order_no','=',$this->business_no];
+		    $goodsInfo=OrderReturnRepository::getGoodsInfo($where);
+            if(!$goodsInfo) {
+                return false;
+            }
+            // 发送短息
+            return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+                'realName' => $orderInfo['realname'],
+                'orderNo' => $orderInfo['order_no'],
+                'goodsName' => $goodsInfo['goods_name'],
+                'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+            ],$orderInfo['order_no']);
         }
 
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'goodsName'=>$goodsName,
-		]);
 	}
 
-
-//	public function notify($data=[]){
-//		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
-//		var_dump($result);exit;
-//	}
-
-	
 }

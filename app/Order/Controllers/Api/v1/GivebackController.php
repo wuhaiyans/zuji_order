@@ -8,6 +8,7 @@ use App\Order\Modules\Service\OrderGiveback;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Service\OrderGoods;
 use App\Order\Modules\Service\OrderInstalment;
+use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 
 class GivebackController extends Controller
@@ -201,7 +202,7 @@ class GivebackController extends Controller
 			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					OrderInstalment::instalment_withhold($instalmentInfo['id']);
+					OrderWithhold::instalment_withhold($instalmentInfo['id']);
 				}
 				//代扣已执行
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
@@ -786,11 +787,11 @@ class GivebackController extends Controller
 			'user_id' => $paramsArr['user_id'],
 			'order_no' => $paramsArr['order_no'],
 			'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'bussiness_no' => $paramsArr['giveback_no'],
+			'business_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
 			'payment_no' => $payObj->getPaymentNo(),//payment_no
-			'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
+			'out_auth_no' => $payObj->getFundauthNo(),//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){
@@ -820,13 +821,19 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderPayment( $paramsArr ) {
-		$payData = [
-			'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
-			'businessNo' => $paramsArr['giveback_no'],// 业务编号
-			'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
-			'paymentFenqi' => 0,//不分期
-		];
-		$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+		try{
+			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
+			\App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$paramsArr['giveback_no'] );
+		} catch (\App\Lib\NotFoundException $ex) {
+			$payData = [
+				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
+				'businessNo' => $paramsArr['giveback_no'],// 业务编号
+				'userId' => $params['user_id'],// 用户id
+				'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
+				'paymentFenqi' => 0,//不分期
+			];
+			\App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+		}
 		return true;
 	}
 	
