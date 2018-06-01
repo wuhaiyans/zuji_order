@@ -312,10 +312,11 @@ class WithholdController extends Controller
 
             try{
                 // 请求代扣接口
-                $withholding->deduct($withholding_data);
+                $result = $withholding->deduct($withholding_data);
 
             }catch(\Exception $exc){
                 DB::rollBack();
+                p($result,1);
                 p($withholding_data,1);
                 p($exc->getMessage());
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
