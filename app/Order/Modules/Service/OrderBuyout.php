@@ -17,14 +17,14 @@ class OrderBuyout
 	 * @param $data
 	 * @return id
 	 */
-	public static function getInfo($goodsNo,$userId=0){
-		if(!$goodsNo){
+	public static function getInfo($buyout_no,$userId=0){
+		if(!$buyout_no){
 			return false;
 		}
 		if($userId>0){
 			$where['user_id'] = $userId;
 		}
-		$where['goods_no'] = $goodsNo;
+		$where['buyout_no'] = $buyout_no;
 
 		return OrderBuyoutRepository::getInfo($where);
 	}
@@ -67,14 +67,14 @@ class OrderBuyout
     public static function create($array)
 	{
 		$data = filter_array($array,[
+				'buyout_no'=>'required',
 				'order_no'=>'required',
 				'goods_no'=>'required',
 				'user_id'=>'required',
+				'plat_id'=>'required',
 				'buyout_price'=>'required',
+				'create_time'=>'required',
 		]);
-		if(count($data)!=4){
-			return false;
-		}
 		return OrderBuyoutRepository::create($data);
 	}
 	/**
@@ -86,7 +86,7 @@ class OrderBuyout
 	public static function cancel($id,$userId){
 		$id = intval($id);
 		$userId = intval($userId);
-		if(!$id || $userId){
+		if(!$id || !$userId){
 			return false;
 		}
 		return OrderBuyoutRepository::setOrderBuyoutCancel($id,$userId);

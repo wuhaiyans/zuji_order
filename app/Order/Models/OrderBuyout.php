@@ -12,6 +12,15 @@ class OrderBuyout extends Model
 
     protected $primaryKey='id';
 
+	const CREATED_AT = "create_time";
+
+	const UPDATED_AT = "update_time";
+	/**
+	 * 默认使用时间戳戳功能
+	 * @var bool
+	 */
+	public $timestamps = true;
+
     // create()时可以被赋值的属性。
     public $fillable = [
 		'id', //主键id
@@ -26,10 +35,5 @@ class OrderBuyout extends Model
 		'create_time', //创建时间
 		'update_time', //修改时间
 	];
-	/**
-	 * 默认使用时间戳戳功能
-	 * @var bool
-	 */
-	public $timestamps = true;
-	
+
 }
