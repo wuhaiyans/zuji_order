@@ -682,6 +682,7 @@ class WithholdController extends Controller
 
         // 创建支付单
         $payData = [
+            'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
             'businessNo'		=> $instalmentInfo['trade_no'],	// 业务编号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
