@@ -86,8 +86,9 @@ class OrderReturnCreater
             return ApiStatus::CODE_33009;//修改商品状态失败
         }
         //短信
-        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY);
-        $b=$orderNoticeObj->notify($goodsInfo);
+     //   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY);
+    //    $b=$orderNoticeObj->notify($goodsInfo);
+    //    Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
         if($params['business_key']==ReturnStatus::OrderTuiHuo){
             $params['business_type']="退货业务";
         }
@@ -96,7 +97,7 @@ class OrderReturnCreater
         }
         //日志
        // ReturnLogRepository::add($params['business_type'],"申请".$params['business_type']);
-        Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -117,6 +118,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         foreach($params['agree'] as $k=>$v){
+            $agreeData[$k]['goods_no']=$v['goods_no'];
             $params_data[$k]['order_no']=$params['order_no'];
             $params_data[$k]['goods_no']=$v['goods_no'];
             $params_data[$k]['remark']=$v['remark'];
@@ -127,7 +129,7 @@ class OrderReturnCreater
                 DB::rollBack();
                 return ApiStatus::CODE_33008;//更新审核状态失败
             }
-            //if($params['business_key']==ReturnStatus::OrderHuanHuo){
+            if($params['business_key']==ReturnStatus::OrderHuanHuo){
                 //获取商品信息
                 $goods_info= $this->orderReturnRepository->get_goods_info($params_data[$k]);
                 if(!$goods_info){
@@ -135,7 +137,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return ApiStatus::CODE_34005;//商品信息错误
                 }
-           // }
+            }
           /*  if($params['business_key']==ReturnStatus::OrderTuiHuo){
 
                 //创建退款清单
@@ -180,33 +182,32 @@ class OrderReturnCreater
 
 
         }
+        if($params['business_key']==ReturnStatus::OrderHuanHuo) {
+            foreach ($goods_info as $k => $v) {
+                $receive_data[$k] = [
+                    'goods_no' => $goods_info[$k]->goods_no,
+                    'serial_no' => $goods_info[$k]->serial_number,
+                    'quantity' => $goods_info[$k]->quantity,
+                    'imei1' => $goods_info[$k]->imei1,
+                    'imei2' => $goods_info[$k]->imei2,
+                    'imei3' => $goods_info[$k]->imei3,
 
-        foreach($goods_info as $k=>$v){
-            $receive_data[$k] =[
-                'goods_no' => $goods_info[$k]->goods_no,
-                'serial_no' => $goods_info[$k]->serial_number,
-                'quantity' => $goods_info[$k]->quantity,
-                'imei1'     =>$goods_info[$k]->imei1,
-                'imei2'     =>$goods_info[$k]->imei2,
-                'imei3'     =>$goods_info[$k]->imei3,
-
-            ];
-            $create_receive= Receive::create($params['order_no'],$params['business_key'],$receive_data);//创建待收货单
-            if(!$create_receive){
-                //事务回滚
-                DB::rollBack();
-                return ApiStatus::CODE_34003;//创建待收货单失败
+                ];
+                $create_receive = Receive::create($params['order_no'], $params['business_key'], $receive_data);//创建待收货单
+                if (!$create_receive) {
+                    //事务回滚
+                    DB::rollBack();
+                    return ApiStatus::CODE_34003;//创建待收货单失败
+                }
             }
         }
-        //申请退货同意发送短信
-        /*$b =SmsApi::sendMessage($order_info['user_mobile'],'SMS_113455999',[
-               'realName' =>$order_info['realname'],
-               'orderNo' => $params['order_no'],
-               'goodsName' => ,
-               'shoujianrenName' =>$order_info['name'],
-               'returnAddress' => "test",
-               'serviceTel'=>OldInc::Customer_Service_Phone,
-           ],$params['order_no']);*/
+      /*  if($params['business_key']==ReturnStatus::OrderTuiHuo){
+            //短信
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY_AGREE);
+            $b=$orderNoticeObj->notify($agreeData);
+            Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+        }*/
+
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;//成功
@@ -376,6 +377,7 @@ if(!$create_receive){
         //开启事务
         DB::beginTransaction();
         foreach($params['disagree'] as $k=>$v) {
+            $disagree[$k]['goods_no']=$v['goods_no'];
             $params_data[$k]['order_no'] = $params['order_no'];
             $params_data[$k]['goods_no'] = $v['goods_no'];
             $params_data[$k]['remark'] = $v['remark'];
@@ -421,14 +423,12 @@ if(!$create_receive){
        //     return ApiStatus::CODE_40000;//商品信息错误
       //  }
 
-        //申请退货拒绝发送短信
-        // SmsApi::sendMessage($user_info['mobile'],1,array());
-        /* $b = SmsApi::sendMessage('13020059043','hsb_sms_d284d',[
-             'realName' =>$order_info[0]->realname,
-             'orderNo' =>$params['order_no'],
-             'goodsName' => $goods_info[0]['good_name'],
-             'serviceTel'=>OldInc::Customer_Service_Phone,
-         ],$params['order_no']);*/
+      /*  if($params['business_key']==ReturnStatus::OrderTuiHuo){
+            //短信
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY_DISAGREE);
+            $b=$orderNoticeObj->notify($disagree);
+            Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+        }*/
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;//成功
@@ -539,15 +539,6 @@ if(!$create_receive){
             DB::rollBack();
             return ApiStatus::CODE_33008;
         }
-
-        /*$b =SmsApi::sendMessage($order_info['user_mobile'],'SMS_113455999',[
-             'realName' =>$order_info['realname'],
-             'orderNo' => $params['order_no'],
-             'goodsName' => ,
-             'shoujianrenName' =>$order_info['name'],
-             'returnAddress' => "test",
-             'serviceTel'=>OldInc::Customer_Service_Phone,
-         ],$params['order_no']);*/
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
@@ -1019,7 +1010,6 @@ if(!$create_receive){
      */
     public function is_qualified($order_no,$business_key,$data)
     {
-
         if (empty($order_no)){
             return ApiStatus::CODE_20001;//参数错误
         }
@@ -1135,10 +1125,16 @@ if(!$create_receive){
                   }
                  $deliveray_data['goods'][$k]['goods_no']=$data[$k]['goods_no'];
               }
-
+              /* if($business_key==ReturnStatus::OrderTuiHuo){
+                   //短信
+                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$order_no,SceneConfig::RETURN_CHECK_OUT);
+                   $b=$orderNoticeObj->notify($data[$k]['goods_no']);
+                   Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+               }*/
            }
            if ($data[$k]['check_result'] == 'false') {
                $params['evaluation_status'] = ReturnStatus::ReturnEvaluationFalse;
+               /****判断此订单是否还有操作代操作的商品,如果有不修改订单冻结状态***/
                //修改订单冻结状态
                $freeze_type = OrderFreezeStatus::Non;
                $freeze_result = $this->orderReturnRepository->update_freeze($params, $freeze_type);
@@ -1153,6 +1149,12 @@ if(!$create_receive){
                   DB::rollBack();
                   return ApiStatus::CODE_33008;//修改退货单信息失败
               }
+              /* if($business_key==ReturnStatus::OrderTuiHuo){
+                   //短信
+                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$order_no,SceneConfig::RETURN_UNQUALIFIED);
+                   $b=$orderNoticeObj->notify($data[$k]['goods_no']);
+                   Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+               }*/
            }
         }
         //如果业务类型是换货并且有检测合格的数据，创建换货记录

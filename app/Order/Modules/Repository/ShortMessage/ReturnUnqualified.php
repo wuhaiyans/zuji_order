@@ -45,14 +45,21 @@ class ReturnUnqualified implements ShortMessage {
 		if(!$goods){
 		    return false;
         }
+        //获取商品信息
+        $where[] = ['goods_no', '=', $data];
+        $where[] = ['order_no', '=', $this->business_no];
+        $goodsInfo = OrderReturnRepository::getGoodsInfo($where);
+        if (!$goodsInfo) {
+            return false;
+        }
+        // 发送短息
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName' => $orderInfo['realname'],
+            'orderNo' => $this->business_no,
+            'goodsName' => $goodsInfo['goods_name'],
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+        ],$this->business_no);
 
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'realName' => $data['realName'],
-            'orderNo' => $data['orderNo'],
-            'goodsName' => $data['goodsName'],
-            'serviceTel'=>Config::Customer_Service_Phone,
-        ],$data['orderNo']);
 	}
 	
 }
