@@ -56,8 +56,8 @@ class WithholdController extends Controller
         }
         try{
             $data = [
-                'agreement_no'		=> $payWithhold['withhold_no'], //【必选】string 支付系统签约编号
-                'out_agreement_no'	=> $payWithhold['out_withhold_no'], //【必选】string 业务系统签约编号
+                'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
+                'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
                 'user_id'			=> $userId, //【必选】string 业务系统用户ID
             ];
             $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
@@ -124,13 +124,12 @@ class WithholdController extends Controller
             Log::error("[代扣解约]不允许解除代扣");
             return apiResponse( [], ApiStatus::CODE_71010, '不允许解除代扣');
         }
-//        try {
+        try {
             $data = [
-                'user_id'           => 18,//$userId, //租机平台用户IDwithhold_no
+                'user_id'           => $userId, //租机平台用户IDwithhold_no
                 'agreement_no'      => $withholdInfo['out_withhold_no'], //支付平台签约协议号
                 'out_agreement_no'  => $withholdInfo['withhold_no'],    //业务平台签约协议号
-                'back_url'          => "order.com", //回调地址
-//                'back_url'          => env("API_INNER_URL") . "/unSignNotify", //回调地址
+                'back_url'          => env("API_INNER_URL") . "/unSignNotify", //回调地址
             ];
 
             $b = \App\Lib\Payment\CommonWithholdingApi::unSign( $data );
@@ -140,10 +139,10 @@ class WithholdController extends Controller
             }
 
             return apiResponse([], ApiStatus::CODE_0, "success");
-//        } catch (\Exception $exc) {
-//            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
-//
-//        }
+        } catch (\Exception $exc) {
+            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+
+        }
     }
 
     /**
