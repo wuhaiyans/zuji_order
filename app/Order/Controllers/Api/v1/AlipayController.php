@@ -31,6 +31,13 @@ class AlipayController extends Controller
      */
 
     public function withholdFundAuth(Request $request){
+//		\App\Lib\Payment\CommonWithholdingApi::unSign([
+//			'user_id' => 0,
+//			'agreement_no'=>'30A53164270253292',
+//			'out_agreement_no'=>'WPA53164269848775',
+//			'back_url' => 'zuji-order.com',
+//		]);exit;
+		
         $params =$request->all();
         $rules = [
             'callback_url'  => 'required',
