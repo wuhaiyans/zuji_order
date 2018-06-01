@@ -390,9 +390,9 @@ class OrderReturnRepository
         }
         $where[]=['order_no','=',$params['order_no']];
         $where[]=['user_id','=',$params['user_id']];
-        $orderData=Order::where($where)->first()->toArray();
+        $orderData=Order::where($where)->first();
         if($orderData){
-            return $orderData;
+            return $orderData->toArray();
         }else{
             return false;
         }
@@ -424,9 +424,9 @@ class OrderReturnRepository
         }
         $where[]=['order_no','=',$params['order_no']];
         $where[]=['user_id','=',$params['user_id']];
-        $orderData=Order::where($where)->first()->toArray();
+        $orderData=Order::where($where)->first();
         if($orderData){
-            return $orderData;
+            return $orderData->toArray();
         }else{
             return false;
         }
@@ -553,9 +553,9 @@ class OrderReturnRepository
         if(empty($where)){
             return false;
         }
-        $orderData=OrderReturn::where($where)->first()->toArray();
+        $orderData=OrderReturn::where($where)->first();
         if($orderData){
-            return $orderData;
+            return $orderData->toArray();
         }else{
             return false;
         }
@@ -581,11 +581,10 @@ class OrderReturnRepository
             return false;//订单编号不能为空
         }
         $userData=OrderGoods::where([['order_no','=',$order_no],['goods_no','=',$goods_no]])->first();
-        if($userData){
-            return $userData->toArray();
-        }else{
-            return [];
+        if(!$userData){
+            return false;
         }
+        return $userData->toArray();
     }
     //获取付款编码
     public static function get_pay_no($business_key,$order_no){
@@ -596,11 +595,11 @@ class OrderReturnRepository
             return false;//订单编号不能为空
         }
         $Data=OrderPayModel::where([['business_type','=',$business_key],['business_no','=',$order_no]])->first();
-        if($Data){
-            return $Data->toArray();
-        }else{
+        if(!$Data){
             return false;
+
         }
+        return $Data->toArray();
     }
 
     /**
@@ -641,11 +640,11 @@ class OrderReturnRepository
         $where[]=['business_no','=',$params['order_no']];
         $where[]=['business_type','=','1'];
         $OrderPayModel = new OrderPayModel();
-        $pay_result= $OrderPayModel::where($where)->first()->toArray();
+        $pay_result= $OrderPayModel::where($where)->first();
         if(!$pay_result){
             return false;
         }
-        return $pay_result;
+        return $pay_result->toArray();
 
     }
 
@@ -676,11 +675,11 @@ class OrderReturnRepository
         if(empty($params['order_no'])){
             return false;
         }
-        $user_result= OrderUserInfo::where('order_no','=',$params['order_no'])->first()->toArray();
+        $user_result= OrderUserInfo::where('order_no','=',$params['order_no'])->first();
         if(!$user_result){
             return false;
         }
-        return $user_result;
+        return $user_result->toArray();
     }
 
     /**
@@ -733,11 +732,9 @@ class OrderReturnRepository
      *
      */
     public static function getGoodsInfo($where){
-        $goods_result= OrderGoods::where($where)->first()->toArray();
-        if(!$goods_result){
-            return false;
-        }
-        return $goods_result;
+        $goods_result= OrderGoods::where($where)->first();
+        return !empty($goods_result)?objectToArray($goods_result):false;
+
     }
 
 

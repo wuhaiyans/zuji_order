@@ -17,6 +17,7 @@ use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use App\Lib\Warehouse\Logistics;
+use Illuminate\Support\Facades\Log;
 class OrderReturnCreater
 {
     protected $orderReturnRepository;
@@ -62,6 +63,7 @@ class OrderReturnCreater
             $data[$k]['status']=ReturnStatus::ReturnCreated;
             $data[$k]['refund_no']=createNo('2');
             $data[$k]['create_time']=time();
+            $goodsInfo[$k]['goods_no']=$v;
         }
         //开启事务
         DB::beginTransaction();
@@ -84,8 +86,8 @@ class OrderReturnCreater
             return ApiStatus::CODE_33009;//修改商品状态失败
         }
         //短信
-       /* $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY);
-        $orderNoticeObj->notify();
+        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$params['order_no'],SceneConfig::RETURN_APPLY);
+        $b=$orderNoticeObj->notify($goodsInfo);
         if($params['business_key']==ReturnStatus::OrderTuiHuo){
             $params['business_type']="退货业务";
         }
@@ -93,7 +95,8 @@ class OrderReturnCreater
             $params['business_type']="换货业务";
         }
         //日志
-        ReturnLogRepository::add($params['business_type'],"申请".$params['business_type']);*/
+       // ReturnLogRepository::add($params['business_type'],"申请".$params['business_type']);
+        Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
