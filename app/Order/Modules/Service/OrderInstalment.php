@@ -21,24 +21,23 @@ class OrderInstalment
      * @return array
      *  $array = [
             'order'=>[
-                'order_no'=>1,
+                'order_no'=>1,//订单编号
             ],
             'sku'=>[
-                'zuqi'=>1,
-                'zuqi_type'=>1,
-                'all_amount'=>1,
-                'amount'=>1,
-                'yiwaixian'=>1,
-                'zujin'=>1,
-                'yiwaixian'=>1,
-                'payment_type_id'=>1,
+                'zuqi'=>1,//租期
+                'zuqi_type'=>1,//租期类型
+                'all_amount'=>1,//总金额
+                'amount'=>1,//实际支付金额
+                'yiwaixian'=>1,//意外险
+                'zujin'=>1,//租金
+                'payment_type_id'=>1,//支付类型
             ],
-            'coupon'=>[
-                'discount_amount'=>1,
-                'coupon_type'=>1,
+            'coupon'=>[非必须
+                'discount_amount'=>1,//优惠金额
+                'coupon_type'=>1,//优惠券类型
             ],
             'user'=>[
-                'withholding_no'=>1,
+                'withholding_no'=>1,//用户代扣协议号
         ],
     ];
      */

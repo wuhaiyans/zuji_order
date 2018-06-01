@@ -152,15 +152,15 @@ class OrderBuyout
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+			return false;
 		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
 		if(!$buyout){
-			return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-			return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+			return false;
 		}
 		$data = [
 				'order_no'=>$buyout['order_no'],
@@ -168,7 +168,7 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
-			return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
+			//return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);

@@ -37,7 +37,6 @@ class OrderPayNotify
 // 格式： 键：业务类型；值：可调用的函数，类静态方法
     public static function callback($params)
     {
-		var_dump($params);exit;
         $businessType = $params['business_type'];
         $orderNo = $params['business_no']; //订单支付也就是订单编号
         $status = $params['status'];
