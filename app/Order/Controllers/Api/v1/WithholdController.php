@@ -140,6 +140,7 @@ class WithholdController extends Controller
 
             return apiResponse([], ApiStatus::CODE_0, "success");
         } catch (\Exception $exc) {
+            p($exc->getMessage());
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
 
         }

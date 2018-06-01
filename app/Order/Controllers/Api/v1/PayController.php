@@ -329,7 +329,7 @@ class PayController extends Controller
 			
 			// 代扣签约处理
 			$pay->fundauthSuccess([
-				'out_fundauth_no' => $params['out_fundauth_no'],	// 支付系统资金预授权编码
+				'out_fundauth_no' => $params['fundauth_no'],	// 支付系统资金预授权编码
 				'total_amount' => sprintf('%0.2f',$params['total_freeze_amount']/100),
 			]);
 			

@@ -20,6 +20,7 @@ use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderPayWithholdRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\PayCreater;
 use App\Order\Modules\Repository\ReletRepository;
@@ -155,31 +156,48 @@ class Relet
 //                        'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
                             'paymentFenqi'	=> $params['zuqi'],
                         ]);
+                        $step = $pay->getCurrentStep();
+                        //echo '当前阶段：'.$step."\n";
 
-                        //创建分期
-                        if($params['zuqi']!=0){
-                            OrderInstalment::create($params);
-                        }
+                        $_params = [
+                            'name'			=> '订单设备续租',				//【必选】string 交易名称
+                            'front_url'		=> $params['return_url'],	    //【必选】string 前端回跳地址
+                        ];
+                        $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+                        DB::commit();
+                        return $urlInfo;
 
                     }else{
-                        // 创建支付 代扣签约
-                        $pay = PayCreater::createWithhold([
-                            'user_id'		=> $data['user_id'],
-                            'businessType'	=> OrderStatus::BUSINESS_RELET,
-                            'businessNo'	=> $data['relet_no'],
-                        ]);
+                        //代扣
+                        // 创建分期
+                        $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
+                        $fenqiData = [
+                            'order'=>[
+                                'order_no'=>$data['order_no'],//订单编号
+                            ],
+                            'sku'=>[
+                                'zuqi'              =>  $row['zuqi'],//租期
+                                'zuqi_type'         =>  $row['zuqi_type'],//租期类型
+                                'all_amount'        =>  $amount,//总金额
+                                'amount'            =>  $amount,//实际支付金额
+                                'yiwaixian'         =>  0,//意外险
+                                'zujin'             =>  $row['zujin'],//租金
+                                'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                            ],
+                            'user'=>[
+                                'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
+                            ],
+                        ];
+                        if( OrderInstalment::create($fenqiData) ){
+                            DB::commit();
+                            return [];
+                        }else{
+                            DB::rollBack();
+                            set_msg('创建分期失败');
+                            return false;
+                        }
 
                     }
-                    $step = $pay->getCurrentStep();
-                    //echo '当前阶段：'.$step."\n";
-
-                    $_params = [
-                        'name'			=> '订单续租',				//【必选】string 交易名称
-                        'front_url'		=> $params['return_url'],	//【必选】string 前端回跳地址
-                    ];
-                    $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-                    DB::commit();
-                    return $urlInfo;
 
                 }else{
                     DB::rollBack();

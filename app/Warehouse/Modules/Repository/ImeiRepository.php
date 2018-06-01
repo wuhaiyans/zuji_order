@@ -7,9 +7,8 @@
 
 namespace App\Warehouse\Modules\Repository;
 
-use App\Warehouse\Modules\Inc\Imei;
 use Illuminate\Support\Facades\DB;
-
+use App\Warehouse\Models\Imei;
 class ImeiRepository
 {
 
@@ -69,6 +68,8 @@ class ImeiRepository
     public static function list($params, $limit, $page=null)
     {
         $query = \App\Warehouse\Models\Imei::where($params);
+
+        $query->whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);
 
         return $query->paginate($limit,
             [
