@@ -18,6 +18,7 @@ use App\Lib\Warehouse\Delivery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use App\Lib\Warehouse\Logistics;
 use Illuminate\Support\Facades\Log;
+use App\Lib\Goods\Goods;
 class OrderReturnCreater
 {
     protected $orderReturnRepository;
@@ -542,8 +543,6 @@ if(!$create_receive){
         //提交事务
         DB::commit();
         return ApiStatus::CODE_0;
-
-
     }
     /**
      * 订单退款审核拒绝
@@ -812,11 +811,18 @@ if(!$create_receive){
     /** 查询条件过滤
      * @param array $where	【可选】查询条件
      * [
-     *      'return_id' => '',	//【可选】mixed 退货申请单ID，string|array （string：多个','分割）（array：ID数组）多个只支持
-     *      'case_id' => '',	//【可选】string；退货原因ID
+     *      'user_id' => '',	//【可选】用户id
+     *      'business_key' => '',	//【必选】string；业务类型
      *      'status'=>''      //【可选】int；阶段
      *      'begin_time'=>''      //【可选】int；开始时间戳
      *      'end_time'=>''      //【可选】int；  截止时间戳
+     *      'goods_name' => '',	//【可选】设备名称
+     *      'order_no' => '',	//【可选】string；订单编号
+     *      'reason_key'=>''      //【可选】int；退货问题
+     *      'user_mobile'=>''      //【可选】int；下单用户手机号
+     *      'order_status'=>''      //【可选】int；  订单状态
+     *      'appid'=>''      //【可选】int；应用来源
+     *
      * ]
      * @return array	查询条件
      */
@@ -831,7 +837,7 @@ if(!$create_receive){
         if( !isset($where['end_time']) ){
             $where['end_time'] = time();
         }
-        if( isset($where['user_id']) ){
+        if( isset($where['user_id'])){
             $where1[] = ['order_return.user_id', '=', $where['user_id']];
         }
         // 开始时间（可选）
@@ -866,9 +872,7 @@ if(!$create_receive){
         if( isset($where['order_status']) ){
             $where1[] = ['order_info.status', '=', $where['order_status']];
         }
-
         if(isset($where['appid']) ){
-
             $where1[] = ['order_info.appid', '=', $where['appid']];
         }
         if( isset($where['business_key']) ){
@@ -1046,7 +1050,7 @@ if(!$create_receive){
                   }
                   //创建退款清单
                   $create_data['order_no']=$order_no;
-                  $pay_result=$this->orderReturnRepository->get_pay_no('1',$order_no);
+                  $pay_result=$this->orderReturnRepository->getPayNo('1',$order_no);
                   if(!$pay_result){
                       return ApiStatus::CODE_50004;//订单未支付
                   }
@@ -1396,6 +1400,47 @@ if(!$create_receive){
             //事务回滚
             DB::rollBack();
             return ApiStatus::CODE_33007;//修改订单状态失败
+        }
+        //释放库存
+        //查询商品的信息
+        $orderGoods = OrderRepository::getGoodsListByGoodsId($params['order_no']);
+        if ($orderGoods){
+            foreach ($orderGoods as $orderGoodsValues){
+                //暂时一对一
+                $goods_arr[] = [
+                    'sku_id'=>$orderGoodsValues['zuji_goods_id'],
+                    'spu_id'=>$orderGoodsValues['prod_id'],
+                    'num'=>$orderGoodsValues['quantity']
+                ];
+            }
+            $success =Goods::addStock($goods_arr);
+        }
+        //分期关闭
+        //查询分期
+        //根据订单退和商品退走不同的地方
+        if(isset($params['goods_no'])){
+            if ($orderGoods['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
+                $success =  OrderInstalment::close($params);
+                if (!$success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31004;
+                }
+
+            }
+        }else{
+            //查询订单的状态
+            $orderInfoData =  OrderRepository::getInfoById($params['order_no'],$return_info['user_id']);
+            if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
+                $success =  OrderInstalment::close($params['order_no']);
+                if (!$success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31004;
+                }
+            }
+        }
+        if (!$success || empty($orderGoods)) {
+            DB::rollBack();
+            return ApiStatus::CODE_31003;
         }
         //提交事务
         DB::commit();
