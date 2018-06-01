@@ -47,8 +47,11 @@ class ReturnApply implements ShortMessage {
 		    $where[]=['goods_no','=',$data[$k]['goods_no']];
             $where[]=['order_no','=',$this->business_no];
 		    $goodsInfo=OrderReturnRepository::getGoodsInfo($where);
+            if(!$goodsInfo) {
+                return false;
+            }
             // 发送短息
-            return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
+            return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
                 'realName' => $orderInfo['realname'],
                 'orderNo' => $orderInfo['order_no'],
                 'goodsName' => $goodsInfo['goods_name'],

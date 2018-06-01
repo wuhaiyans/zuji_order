@@ -58,7 +58,6 @@ class AlipayController extends Controller
 		try{
 			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$params['order_no'] );
-			
 		} catch (\App\Lib\NotFoundException $e) {
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,// 业务类型 
@@ -83,7 +82,7 @@ class AlipayController extends Controller
 			]);
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
-            return apiResponse([],ApiStatus::CODE_50004);
+            return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
 		}
     }
 
