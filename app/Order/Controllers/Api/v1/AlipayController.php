@@ -83,6 +83,7 @@ class AlipayController extends Controller
 			var_dump($paymentUrl);exit;
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
+			var_dump($exs);exit;
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
 		}
     }
