@@ -9,6 +9,8 @@
 //只有订单内部接收的接口appid =1;
 return [
     'Customer_Service_Phone' =>"400-080-9966",
+    'Customer_Service_Address' =>"深圳市南山区高新南九道威新软件园8号楼7层",
+    'Customer_Service_Name' =>"拿趣用",
     'Fengkong_Score'=>env("ORDER_SCORE",50),
     'Interior_Goods_Url' =>env("GOODS_API","https://dev-api-zuji.huishoubao.com/api.php"),
     'Interior_Goods_Request_data'=>[

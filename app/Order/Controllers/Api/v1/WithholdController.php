@@ -54,18 +54,23 @@ class WithholdController extends Controller
         if(empty($payWithhold)){
             return apiResponse([],ApiStatus::CODE_20001, "参数错误");
         }
+        try{
+            $data = [
+                'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
+                'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
+                'user_id'			=> $userId, //【必选】string 业务系统用户ID
+            ];
+            $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
+            if(!$withholdInfo){
+                return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
+            }
 
-        $data = [
-            'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
-            'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
-            'user_id'			=> $userId, //【必选】string 业务系统用户ID
-        ];
-        $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
-        if(!$withholdInfo){
+            return apiResponse($withholdInfo,ApiStatus::CODE_0);
+
+        }catch(\Exception $exc){
             return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
         }
 
-        return apiResponse($withholdInfo['data'],ApiStatus::CODE_0);
     }
 
 
@@ -115,10 +120,13 @@ class WithholdController extends Controller
             return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
         }
 
-
+        if($withholdInfo['counter'] != 0){
+            Log::error("[代扣解约]不允许解除代扣");
+            return apiResponse( [], ApiStatus::CODE_71010, '不允许解除代扣');
+        }
         try {
             $data = [
-                'user_id'           => $userId, //租机平台用户ID
+                'user_id'           => $userId, //租机平台用户IDwithhold_no
                 'agreement_no'      => $withholdInfo['out_withhold_no'], //支付平台签约协议号
                 'out_agreement_no'  => $withholdInfo['withhold_no'],    //业务平台签约协议号
                 'back_url'          => env("API_INNER_URL") . "/unSignNotify", //回调地址
@@ -302,11 +310,11 @@ class WithholdController extends Controller
             $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
             $withholding_data = [
-                'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
+                'out_trade_no'  => $agreementNo,        //业务系统授权码
                 'amount'        => $amount,              //交易金额；单位：分
                 'back_url'      => $backUrl,             //后台通知地址
                 'name'          => $subject,             //交易备注
-                'agreement_no'  => $agreementNo,         //支付平台代扣协议号
+                'agreement_no'  => $alipayUserId,         //支付平台代扣协议号
                 'user_id'       => $orderInfo['user_id'],//业务平台用户id
             ];
 
@@ -316,9 +324,8 @@ class WithholdController extends Controller
 
             }catch(\Exception $exc){
                 DB::rollBack();
-                p($withholding_data,1);
-                p($exc->getMessage());
-                \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
+                // p($exc->getMessage());
+                \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     OrderInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term'], $dataSms);
@@ -539,11 +546,11 @@ class WithholdController extends Controller
                 $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
                 $withholding_data = [
-                    'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
+                    'out_trade_no'  => $agreementNo,         //业务系统授权码
                     'amount'        => $amount,              //交易金额；单位：分
                     'back_url'      => $backUrl,             //后台通知地址
                     'name'          => $subject,             //交易备注
-                    'agreement_no'  => $agreementNo,         //支付平台代扣协议号
+                    'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
                     'user_id'       => $orderInfo['user_id'],//业务平台用户id
                 ];
 
