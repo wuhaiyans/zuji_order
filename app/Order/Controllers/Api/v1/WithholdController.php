@@ -125,7 +125,7 @@ class WithholdController extends Controller
             return apiResponse( [], ApiStatus::CODE_71010, '不允许解除代扣');
         }
 
-        try {
+//        try {
             $data = [
                 'user_id'           => $userId, //租机平台用户IDwithhold_no
                 'agreement_no'      => $withholdInfo['withhold_no'], //支付平台签约协议号
@@ -140,10 +140,10 @@ class WithholdController extends Controller
             }
 
             return apiResponse([], ApiStatus::CODE_0, "success");
-        } catch (\Exception $exc) {
-            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
-
-        }
+//        } catch (\Exception $exc) {
+//            return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
+//
+//        }
     }
 
     /**
