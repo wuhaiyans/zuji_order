@@ -80,10 +80,8 @@ class AlipayController extends Controller
 					'name'=>'订单' .$params['order_no']. '支付',
 					'front_url' => $params['callback_url'],
 			]);
-			var_dump($paymentUrl);exit;
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
-			var_dump($exs);exit;
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
 		}
     }
