@@ -28,9 +28,10 @@ return [
 		// 业务类型为【还机】4的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackPayment',
 		// 业务类型为1的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => 'var_dump',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackPaid',
 
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET=>'',
+        // 业务类型为【续租】6的支付回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET => '\App\Order\Modules\Service\Relet::callback',
 
 		// 提前还款业务回调
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderWithhold::repaymentNotify',
@@ -41,6 +42,7 @@ return [
 		'2' => '\App\Lib\Refund\Refund\refundUpdate',
 		// 业务类型为【还机】4的清算回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackClearing',
-
+		// 业务类型为【还机】4的清算回调通知
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackOver',
 	],
 ];

@@ -31,12 +31,20 @@ class AlipayController extends Controller
      */
 
     public function withholdFundAuth(Request $request){
+//		\App\Lib\Payment\CommonWithholdingApi::unSign([
+//			'user_id' => 0,
+//			'agreement_no'=>'30A53164270253292',
+//			'out_agreement_no'=>'WPA53164269848775',
+//			'back_url' => 'zuji-order.com',
+//		]);exit;
+		
         $params =$request->all();
         $rules = [
             'callback_url'  => 'required',
             'order_no'  => 'required',
             'fundauth_amount'  => 'required',
             'channel_id'  => 'required',
+            'user_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
@@ -50,11 +58,11 @@ class AlipayController extends Controller
 		try{
 			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$params['order_no'] );
-			
 		} catch (\App\Lib\NotFoundException $e) {
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,// 业务类型 
 				'businessNo' => $params['order_no'],// 业务编号
+				'userId' => $params['user_id'],// 用户id
 				'fundauthAmount' => $params['fundauth_amount'],
 			];
 			try{
@@ -74,7 +82,7 @@ class AlipayController extends Controller
 			]);
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
-            return apiResponse([],ApiStatus::CODE_50004);
+            return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
 		}
     }
 

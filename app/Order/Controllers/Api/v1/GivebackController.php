@@ -828,6 +828,7 @@ class GivebackController extends Controller
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
 				'businessNo' => $paramsArr['giveback_no'],// 业务编号
+				'userId' => $params['user_id'],// 用户id
 				'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
 				'paymentFenqi' => 0,//不分期
 			];

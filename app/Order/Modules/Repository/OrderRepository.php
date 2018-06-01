@@ -176,7 +176,25 @@ class OrderRepository
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
+    /**
+     * 根据订单id和商品id查询设备列表
+     * heaven
+     * @param $order_no 订单编号
+     * @param $goods_no 商品编号  可选
+     * @return array|bool
+     *
+     */
 
+    public static function getGoodsListByGoodsId($params){
+        if (empty($params['order_no'])) return false;
+        $where[]=['order_no', '=', $params['order_no']];
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no', '=', $params['goods_no']];
+        }
+        $orderGoodData =  OrderGoods::query()->where($where)->get();
+        if (!$orderGoodData) return false;
+        return $orderGoodData->toArray();
+    }
 
 
     /**
@@ -370,7 +388,7 @@ class OrderRepository
 
     public static function orderFreezeUpdate($orderNo, $freezeStatus){
 
-        if (empty($orderNo) || empty($freezeStatus)) {
+        if (empty($orderNo) || !isset($freezeStatus)) {
             return false;
         }
 
