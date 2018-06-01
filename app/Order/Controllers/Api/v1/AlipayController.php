@@ -44,6 +44,7 @@ class AlipayController extends Controller
             'order_no'  => 'required',
             'fundauth_amount'  => 'required',
             'channel_id'  => 'required',
+            'user_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
@@ -62,6 +63,7 @@ class AlipayController extends Controller
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,// 业务类型 
 				'businessNo' => $params['order_no'],// 业务编号
+				'userId' => $params['user_id'],// 用户id
 				'fundauthAmount' => $params['fundauth_amount'],
 			];
 			try{
