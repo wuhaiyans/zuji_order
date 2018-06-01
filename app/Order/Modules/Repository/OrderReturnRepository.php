@@ -587,7 +587,7 @@ class OrderReturnRepository
         return $userData->toArray();
     }
     //获取付款编码
-    public static function get_pay_no($business_key,$order_no){
+    public static function getPayNo($business_key,$order_no){
         if(empty($business_key)){
             return false;//业务类型不能为空
         }

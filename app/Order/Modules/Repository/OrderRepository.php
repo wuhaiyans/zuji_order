@@ -176,7 +176,25 @@ class OrderRepository
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
+    /**
+     * 根据订单id和商品id查询设备列表
+     * heaven
+     * @param $order_no 订单编号
+     * @param $goods_no 商品编号  可选
+     * @return array|bool
+     *
+     */
 
+    public static function getGoodsListByGoodsId($params){
+        if (empty($params['order_no'])) return false;
+        $where[]=['order_no', '=', $params['order_no']];
+        if(isset($params['goods_no'])){
+            $where[]=['goods_no', '=', $params['goods_no']];
+        }
+        $orderGoodData =  OrderGoods::query()->where($where)->get();
+        if (!$orderGoodData) return false;
+        return $orderGoodData->toArray();
+    }
 
 
     /**
@@ -436,13 +454,13 @@ class OrderRepository
 
         //下单时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
-            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
         }
 
         //下单时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
-            $whereArray[] = ['order_info.create_time', '>=', $param['begin_time']];
-            $whereArray[] = ['order_info.create_time', '<=', $param['end_time']];
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_info.create_time', '<=', strtotime($param['end_time'])];
         }
 
         if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
