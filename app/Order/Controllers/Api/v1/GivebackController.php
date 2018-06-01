@@ -791,7 +791,7 @@ class GivebackController extends Controller
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
 			'payment_no' => $payObj->getPaymentNo(),//payment_no
-			'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
+			'out_auth_no' => $payObj->getFundauthNo(),//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){
