@@ -1357,7 +1357,8 @@ if(!$create_receive){
         if($params['status']=="success"){
             $return_data['status']=ReturnStatus::ReturnTuiKuan;//退货/退款单状态
             $goods_data['goods_status']=OrderGoodStatus::REFUNDED;//商品状态
-            $order_data['order_status']=OrderStatus::OrderRefunded;//订单状态
+            $order_data['order_status']=OrderStatus::OrderClosedRefunded;//订单状态
+            $order_data['freeze_type']=OrderFreezeStatus::Non;//订单状态
         }
         //获取退货单信息
         $where[]=['refund_no','=',$params['business_no']];
