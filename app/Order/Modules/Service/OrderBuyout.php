@@ -3,6 +3,8 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
+use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\OrderGoodsRepository;
 
 class OrderBuyout
 {
@@ -12,6 +14,47 @@ class OrderBuyout
  */
 	public function __construct(  ) {
 	}
+
+
+	/** 查询条件过滤
+	 * @param array $where	【可选】查询条件
+	 * [
+	 *      'order_no' => '',	//【可选】订单号
+	 *      'goods_name' => '',	//【可选】string；商品名称
+	 *      'user_mobile'=>''      //【可选】int；用户手机号
+	 * 		status'=>''      		//【可选】int；买断单状态
+	 *      'begin_time'=>''      //【可选】int；开始时间
+	 *      'end_time'=>''      //【可选】int；  截止时间
+	 * ]
+	 * @return array	查询条件
+	 */
+	public static function _where_filter($params){
+		if ($params['begin_time']||$params['end_time']) {
+			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
+			$end_time = $params['end_time']?strtotime($params['end_time']):time();
+			$where[] = ['order_buyout.create_time', '>=', $begin_time];
+			$where[] = ['order_buyout.create_time', '<=', $end_time];
+		}
+
+		if($params['order_no']){
+			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
+		}
+		// order_no 订单编号查询，使用前缀模糊查询
+		if($params['goods_name']){
+			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
+		}
+		if($params['user_mobile']){
+			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
+		}
+		if($params['status']){
+			$where[] = ['order_buyout.status', '=', $params['status']];
+		}
+		if ($params['appid']) {
+			$where[] =  ['order_info.appid', '=', $params['appid']];
+		}
+		return $where;
+	}
+
 	/**
 	 * 查询单条买断单
 	 * @param $data
@@ -91,71 +134,103 @@ class OrderBuyout
 		}
 		return OrderBuyoutRepository::setOrderBuyoutCancel($id,$userId);
 	}
-	/**
-	 * 买断已支付
-	 * @param int $id 买断单主键id
-	 * @param int $userId 操作人id
-	 * @return id
-	 */
-	public static function paid($id,$userId){
-		$id = intval($id);
-		$userId = intval($userId);
-		if(!$id || $userId){
+
+	/*
+     * 支付完成
+     * @param array $params 【必选】
+     * [
+     *      "user_id"=>"", 用户id
+     *      "goods_no"=>"",商品编号
+     * ]
+     * @return json
+     */
+	public function callbackPaid($params){
+		//过滤参数
+		$rule= [
+				'buyout_no'=>'required',
+				'user_id'=>'required',
+		];
+		$validator = app('validator')->make($params, $rule);
+		if ($validator->fails()) {
+			return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+		}
+		//获取买断单
+		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		if(!$buyout){
+			return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+		}
+		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
+			return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+		}
+		$data = [
+				'order_no'=>$buyout['order_no'],
+				'goods_no'=>$buyout['goods_no'],
+		];
+		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
+		if(!$ret){
+			return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
+		}
+		//更新买断单
+		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);
+		if(!$ret){
 			return false;
 		}
-		return OrderBuyoutRepository::setOrderPaid($id,$userId);
+		return true;
 	}
-	/**
-	 * 买断完成
-	 * @param int $id 买断单主键id
-	 * @param int $userId 操作人id
-	 * @return id
-	 */
-	public static function over($id,$userId){
-		$id = intval($id);
-		$userId = intval($userId);
-		if(!$id || $userId){
+	/*
+     * 买断完成
+     * @param array $params 【必选】
+     * [
+     *      "user_id"=>"", 用户id
+     *      "goods_no"=>"",商品编号
+     * ]
+     * @return json
+     */
+	public function callbackOver($params){
+		//过滤参数
+		$rule = [
+				'buyout_no'=>'required',
+				'user_id'=>'required',
+		];
+		$validator = app('validator')->make($params, $rule);
+		if ($validator->fails()) {
 			return false;
 		}
-		return OrderBuyoutRepository::setOrderRelease($id,$userId);
+		//获取买断单
+		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		if(!$buyout){
+			return false;
+		}
+		if($buyout['status']==OrderBuyoutStatus::OrderRelease){
+			return false;
+		}
+		//获取订单商品信息
+		$this->OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		if(empty($goodsInfo)){
+			return false;
+		}
+		//解冻订单
+		$this->OrderRepository= new OrderRepository;
+		$ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		if(!$ret){
+			return false;
+		}
+		//更新订单商品
+		$goods = [
+				'goods_status' => OrderGoodStatus::BUY_OUT,
+				'business_no' => $buyout['buyout_no'],
+		];
+		$ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+		if(!$ret){
+			return false;
+		}
+		//更新买断单
+		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$params['user_id']);
+		if(!$ret){
+			return false;
+		}
+		return true;
 	}
 
-	/** 查询条件过滤
-	 * @param array $where	【可选】查询条件
-	 * [
-	 *      'order_no' => '',	//【可选】订单号
-	 *      'goods_name' => '',	//【可选】string；商品名称
-	 *      'user_mobile'=>''      //【可选】int；用户手机号
-	 * 		status'=>''      		//【可选】int；买断单状态
-	 *      'begin_time'=>''      //【可选】int；开始时间
-	 *      'end_time'=>''      //【可选】int；  截止时间
-	 * ]
-	 * @return array	查询条件
-	 */
-	public static function _where_filter($params){
-		if ($params['begin_time']||$params['end_time']) {
-			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
-			$end_time = $params['end_time']?strtotime($params['end_time']):time();
-			$where[] = ['order_buyout.create_time', '>=', $begin_time];
-			$where[] = ['order_buyout.create_time', '<=', $end_time];
-		}
-
-		if($params['order_no']){
-			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
-		}
-		// order_no 订单编号查询，使用前缀模糊查询
-		if($params['goods_name']){
-			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
-		}
-		if($params['user_mobile']){
-			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
-		}
-		if($params['status']){
-			$where[] = ['order_buyout.status', '=', $params['status']];
-		}
-		if ($params['appid']) {
-			$where[] =  ['order_info.appid', '=', $params['appid']];
-		}
-		return $where;
-	}
 }
