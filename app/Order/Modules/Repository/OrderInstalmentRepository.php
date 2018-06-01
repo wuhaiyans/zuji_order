@@ -165,7 +165,7 @@ class OrderInstalmentRepository
         if (empty($params)) return false;
         $result =  OrderInstalment::query()->where($params)->sum("amount");
         if (!$result) return false;
-        return $result->toArray();
+        return $result;
     }
     /**
      * 查询总数

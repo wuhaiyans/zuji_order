@@ -366,7 +366,7 @@ class OrderRepository
 
     public static function orderFreezeUpdate($orderNo, $freezeStatus){
 
-        if (empty($orderNo) || empty($freezeStatus)) {
+        if (empty($orderNo) || !isset($freezeStatus)) {
             return false;
         }
 

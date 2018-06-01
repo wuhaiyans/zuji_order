@@ -87,7 +87,7 @@ class OrderBuyoutRepository
 	 * @return int|bool
 	 */
 	public static function create(array $data){
-		return OrderBuyout::insertGetId($data);
+		return OrderBuyout::insert($data);
 	}
 
 	/**
