@@ -86,6 +86,11 @@ class OrderOperate
         }
 
     }
+
+    public static function orderLog($orderNo)
+    {
+        if(empty($orderNo)){return false;}
+    }
     /**
      * 确认收货接口
      * @param int $orderNo 订单编号

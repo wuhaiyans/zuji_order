@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
+use App\Order\Modules\Repository\OrderReturnRepository;
 
 /**
  * ReturnApply
@@ -41,17 +42,20 @@ class ReturnApply implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
-       //获取此订单所有为待审核的goods_no
+		//获取商品信息
+        foreach($data as $k=>$v){
+		    $where[]=['goods_no','=',$data[$k]['goods_no']];
+            $where[]=['order_no','=',$this->business_no];
+		    $goodsInfo=OrderReturnRepository::getGoodsInfo($where);
+            // 发送短息
+            return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
+                'realName' => $orderInfo['realname'],
+                'orderNo' => $orderInfo['order_no'],
+                'goodsName' => $goodsInfo['goods_name'],
+                'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+            ],$orderInfo['order_no']);
+        }
 
-        //获取商品名称和用户真实名字
-
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'realName' => $data['realName'],
-            'orderNo' => $data['orderNo'],
-            'goodsName' => $data['goodsName'],
-            'serviceTel'=>Config::Customer_Service_Phone,
-        ],$data['orderNo']);
 	}
 
 }

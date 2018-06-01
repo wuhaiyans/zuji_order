@@ -25,15 +25,18 @@ class InnerServiceController extends Controller
         $input = file_get_contents("php://input");
         LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
         $params = json_decode($input,true);
+
         $rules = [
             'order_no'  => 'required',
             'user_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
+
         if ($validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
         }
+
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($params['order_no'], $params['user_id']);
         if ($success) {
 
