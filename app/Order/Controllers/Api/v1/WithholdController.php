@@ -302,7 +302,7 @@ class WithholdController extends Controller
             $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
             $withholding_data = [
-                'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
+                'out_trade_no'  => $alipayUserId,        //业务系统授权码
                 'amount'        => $amount,              //交易金额；单位：分
                 'back_url'      => $backUrl,             //后台通知地址
                 'name'          => $subject,             //交易备注
@@ -539,7 +539,7 @@ class WithholdController extends Controller
                 $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
                 $withholding_data = [
-                    'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
+                    'out_trade_no'  => $alipayUserId,        //业务系统授权码
                     'amount'        => $amount,              //交易金额；单位：分
                     'back_url'      => $backUrl,             //后台通知地址
                     'name'          => $subject,             //交易备注
