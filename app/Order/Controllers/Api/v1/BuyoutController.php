@@ -234,7 +234,7 @@ class BuyoutController extends Controller
         }
         //获取订单信息
         $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->get_order_info(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
+        $orderInfo = $this->OrderRepository->getInfoById(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
         if(empty($orderInfo)){
             return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
         }
@@ -351,6 +351,7 @@ class BuyoutController extends Controller
         //接收请求参数
         $orders =$request->all();
         $params = $orders['params'];
+        $params['channel_id'] = 2;
         //过滤参数
         $rule= [
             'buyout_no'=>'required',
@@ -374,10 +375,11 @@ class BuyoutController extends Controller
         }
 
         $payInfo = [
-            'businessType'=>''.OrderStatus::BUSINESS_BUYOUT,
-            'businessNo'=>$buyout['buyout_no'],
-            'paymentAmount'=>$buyout['buyout_price'],
-            'paymentFenqi'=>0,
+            'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
+            'userId' => $buyout['user_id'],
+            'businessNo' => $buyout['buyout_no'],
+            'paymentAmount' => $buyout['buyout_price'],
+            'paymentFenqi' => 0,
         ];
         \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
 
@@ -389,108 +391,5 @@ class BuyoutController extends Controller
         ]);
         return apiResponse($paymentUrl,ApiStatus::CODE_0);
     }
-    /*
-     * 支付完成
-     * @param array $params 【必选】
-     * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
-     * ]
-     * @return json
-     */
-    public function paid(Request $request){
-        //接收请求参数
-        $orders =$request->all();
-        $params = $orders['params'];
-        //过滤参数
-        $rule= [
-            'buyout_no'=>'required',
-            'user_id'=>'required',
-        ];
-        $validator = app('validator')->make($params, $rule);
-        if ($validator->fails()) {
-            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
-        }
-        //获取买断单
-        $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
-        if(!$buyout){
-            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
-        }
-        if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-            return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
-        }
-        $data = [
-            'order_no'=>$buyout['order_no'],
-            'goods_no'=>$buyout['goods_no'],
-        ];
-        $ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
-        if(!$ret){
-            return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
-        }
-        //更新买断单
-        $ret = OrderBuyout::paid($buyout['id'],$params['user_id']);
-        if(!$ret){
-            return apiResponse([],ApiStatus::CODE_50001,"更新买断单为已支付失败！");
-        }
-        return apiResponse([],ApiStatus::CODE_0);
-    }
-    /*
-     * 买断完成
-     * @param array $params 【必选】
-     * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
-     * ]
-     * @return json
-     */
-    public function over(Request $request){
-        //接收请求参数
-        $orders =$request->all();
-        $params = $orders['params'];
-        //过滤参数
-        $params= filter_array($params,[
-            'buyout_no'=>'required',
-            'user_id'=>'required',
-        ]);
-        if (empty($params['goods_no'])){
-            return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
-        }
-        if (empty($params['user_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"user_id必须");
-        }
-        //获取买断单
-        $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
-        if(!$buyout){
-            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
-        }
-        if($buyout['status']==OrderBuyoutStatus::OrderRelease){
-            return apiResponse([],ApiStatus::CODE_0,"该订单已完成");
-        }
-        //获取订单商品信息
-        $this->OrderGoodsRepository = new OrderGoodsRepository;
-        $goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
-        if(empty($goodsInfo)){
-            return apiResponse([],ApiStatus::CODE_50002,"没有找到该订单商品");
-        }
-        //解冻订单
-        $ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
-        if(!$ret){
-            return apiResponse([],ApiStatus::CODE_50001,"订单解冻失败");
-        }
-        //更新订单商品
-        $goods = [
-            'goods_status' => OrderGoodStatus::BUY_OUT,
-            'business_no' => $buyout['buyout_no'],
-        ];
-        $ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
-        if(!$ret){
-            return apiResponse([],ApiStatus::CODE_50001,"更新订单商品状态为买断完成失败！");
-        }
-        //更新买断单
-        $ret = OrderBuyout::over($buyout['id'],$params['user_id']);
-        if(!$ret){
-            return apiResponse([],ApiStatus::CODE_50001,"更新买断单为已解押失败！");
-        }
-        return apiResponse([],ApiStatus::CODE_0);
-    }
+
 }

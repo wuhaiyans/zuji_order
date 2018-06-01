@@ -49,7 +49,7 @@ class ReturnController extends Controller
             $params['reason_text'] = "";
         }
         if (empty($params['reason_id']) && empty($params['reason_text'])){
-            return apiResponse([],ApiStatus::CODE_20001,"退货原因不能为空");
+            return apiResponse([],ApiStatus::CODE_20001,"退换货原因不能为空");
         }
         //验证是全新未拆封还是已拆封已使用
         if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
@@ -62,7 +62,7 @@ class ReturnController extends Controller
         $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
         if($return_info){
            if($return_info[0]['status'] ==ReturnStatus::ReturnCreated) {
-              return apiResponse([],ApiStatus::CODE_20001,"已提交退货申请,请等待审核");
+              return apiResponse([],ApiStatus::CODE_20001,"已提交退换货申请,请等待审核");
            }
         }
         $return = $this->OrderReturnCreater->add($params);
@@ -72,7 +72,7 @@ class ReturnController extends Controller
     /*
      *
      *
-     * 用户已付款，备货中时使用
+     * 用户支付中，已支付使用
      * order_no订单编号  必选
      * user_id用户id      必选
      *
@@ -153,8 +153,10 @@ class ReturnController extends Controller
         if($return_info[0]->user_id!=$params['user_id']){
            return apiResponse([], ApiStatus::CODE_20001,'非当前用户');
         }
-        if($return_info[0]->status != ReturnStatus::ReturnAgreed){
-            return apiResponse([], ApiStatus::CODE_20001,'该订单未通过审核,不能上传物流单号');
+        if($return_info[0]->business_key==ReturnStatus::OrderTuiHuo){
+            if($return_info[0]->status != ReturnStatus::ReturnAgreed){
+                return apiResponse([], ApiStatus::CODE_20001,'该订单未通过审核,不能上传物流单号');
+            }
         }
         if($return_info[0]->logistics_no){
             return apiResponse([], ApiStatus::CODE_20001,'已上传物流单号');
@@ -214,7 +216,7 @@ class ReturnController extends Controller
     }
 
     /**
-     * 退货结果检测
+     * 退换货结果检测
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      *
@@ -465,6 +467,11 @@ class ReturnController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
 
 
+    }
+    public function createchange(Request $request){
+        $params = $request->all();
+        $res=$this->OrderReturnCreater->createchange($params['params']);
+        p($res);
     }
 
 }
