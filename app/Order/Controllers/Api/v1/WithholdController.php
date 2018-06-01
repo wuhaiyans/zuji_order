@@ -64,7 +64,7 @@ class WithholdController extends Controller
             if(!$withholdInfo){
                 return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
             }
-
+            p($withholdInfo);
             return apiResponse($withholdInfo['data'],ApiStatus::CODE_0);
 //
 //        }catch(\Exception $exc){
