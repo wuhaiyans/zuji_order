@@ -112,7 +112,9 @@ class OrderCleaning
     public static function orderCleanOperate($param)
     {
         //查询清算表根据业务平台退款码out_refund_no
+
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+
         if (empty($orderCleanData)) return false;
         /**
          * 退款申请接口
@@ -228,7 +230,6 @@ class OrderCleaning
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                p($succss);
                 LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
             return true;
