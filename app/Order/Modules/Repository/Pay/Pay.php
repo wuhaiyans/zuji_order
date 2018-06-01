@@ -248,8 +248,12 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function getCurrentUrl( int $channel, array $params ){
 		if( $this->isSuccess() ){
+			var_dump(123);exit;
 			throw new \Exception('支付单已完成');
 		}
+		var_dump($this->needPayment());
+		var_dump($this->needWithhold());
+		var_dump($this->needFundauth());exit;
 		if( $this->needPayment() ){
 			return $this->getPaymentUrl($channel,$params);
 		}elseif( $this->needWithhold() ){
