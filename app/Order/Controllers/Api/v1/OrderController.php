@@ -209,6 +209,22 @@ class OrderController extends Controller
         }
     }
 
+    public function orderLog(Request $request)
+    {
+        $params =$request->all();
+        $params =$params['params'];
+        if(empty($params['order_no'])){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+
+        $res = OrderOperate::orderLog($params['order_no']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_60001);
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+
+    }
+
     /**
      *  发货接口
      * @param $order_no string  订单编号 【必须】
