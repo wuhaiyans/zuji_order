@@ -35,8 +35,8 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * @param string $appid		应用ID
      * @param array $params
      * [
-     *		'auth_no'		=> '', //支付系统授权码
-     *		'out_auth_no'	=> '', //业务系统授权码
+     *		'fundauth_no'		=> '', //支付系统授权码
+     *		'out_fundauth_no'	=> '', //业务系统授权码
      *		'user_id'		=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
@@ -61,15 +61,15 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * @param array $params
      * [
      *		'name'		=> '', //交易名称
-     *		'trade_no'	=> '', //支付系统授权码
-     *		'user_id'	=> '', //支付系统授权码
+     *		'trade_no'	=> '', //业务系统授权码
+     *		'user_id'	=> '', //业务系统授权码
      *		'type'		=> '', //支付系统授权码
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'out_trade_no' => '',//支付系统交易码
-     *		'trade_no' => '',//订单系统交易码
-     *		'out_auth_no' => '',//支付系统授权码
+     *		'trade_no' => '',//支付系统交易码
+     *		'out_trade_no' => '',//订单系统交易码
+     *		'fundauth_no' => '',//支付系统授权码
      *		'amount' => '',//交易金额；单位：分
      *		'status' => '',//状态；0：初始化；1：授权完成；2：授权失败；3：关闭；4：完成
      *		'user_id' => '',//用户id
@@ -78,6 +78,8 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function unfreezeAndPayStatus( array $params ){
+		
+		
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
@@ -129,22 +131,24 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * 预授权转支付接口
      * @param array $params
      * [
-     *		'name'		=> '', //交易名称
-     *		'out_trade_no' => '', //业务系统授权码
-     *		'auth_no' => '', //支付系统授权码
-     *		'amount' => '', //交易金额；单位：分
-     *		'back_url' => '', //后台通知地址
-     *		'user_id' => '', //用户id
-     *		'remark' => '', //业务描述
+     *		'name'			=> '', //交易名称
+     *		'out_trade_no'	=> '', //业务系统授权码
+     *		'fundauth_no'	=> '', //支付系统授权码
+     *		'amount'		=> '', //交易金额；单位：分
+     *		'back_url'		=> '', //后台通知地址
+     *		'user_id'		=> '', //用户id
+     *		'remark'		=> '', //业务描述
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'out_trade_no' => '',//支付系统交易码
-     *		'trade_no' => '',//业务系统交易码
-     *		'out_auth_no' => '',//支付系统授权码
+     *		'trade_no'		=> '',//支付系统交易码
+     *		'out_trade_no'	=> '',//业务系统交易码
+     *		'fundauth_no'	=> '',//支付系统授权码
      * ]
      */
     public static function unfreezeAndPay( array $params ){
+		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.topay.apply', '1.0', $params);
+		
         $ApiRequest = new ApiRequest();
         $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
         $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID

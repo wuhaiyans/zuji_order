@@ -112,7 +112,9 @@ class OrderCleaning
     public static function orderCleanOperate($param)
     {
         //查询清算表根据业务平台退款码out_refund_no
+
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+
         if (empty($orderCleanData)) return false;
         /**
          * 退款申请接口
@@ -185,7 +187,7 @@ class OrderCleaning
 
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //业务系统授权码
-                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
                     'user_id' => $orderCleanData['user_id'], //用户id
@@ -222,13 +224,12 @@ class OrderCleaning
                 $unFreezeParams = [
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
-                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                p($succss);
                 LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
             return true;
