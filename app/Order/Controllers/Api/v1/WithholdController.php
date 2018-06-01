@@ -316,7 +316,7 @@ class WithholdController extends Controller
 
             }catch(\Exception $exc){
                 DB::rollBack();
-                p($result,1);
+                v($exc,1);
                 p($withholding_data,1);
                 p($exc->getMessage());
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
