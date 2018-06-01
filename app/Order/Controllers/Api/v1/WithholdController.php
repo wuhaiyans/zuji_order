@@ -54,7 +54,7 @@ class WithholdController extends Controller
         if(empty($payWithhold)){
             return apiResponse([],ApiStatus::CODE_20001, "参数错误");
         }
-        try{
+//        try{
             $data = [
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
                 'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
@@ -66,10 +66,10 @@ class WithholdController extends Controller
             }
 
             return apiResponse($withholdInfo['data'],ApiStatus::CODE_0);
-
-        }catch(\Exception $exc){
-            return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
-        }
+//
+//        }catch(\Exception $exc){
+//            return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
+//        }
 
     }
 
