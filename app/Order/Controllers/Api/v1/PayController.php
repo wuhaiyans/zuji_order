@@ -281,7 +281,7 @@ class PayController extends Controller
 	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
 	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
-	 *		'total_amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 *		'total_freeze_amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
@@ -330,7 +330,7 @@ class PayController extends Controller
 			// 代扣签约处理
 			$pay->fundauthSuccess([
 				'out_fundauth_no' => $params['out_fundauth_no'],	// 支付系统资金预授权编码
-				'total_amount' => sprintf('%0.2f',$params['total_amount']/100),
+				'total_amount' => sprintf('%0.2f',$params['total_freeze_amount']/100),
 			]);
 			
 			// 提交事务
