@@ -120,6 +120,10 @@ class WithholdController extends Controller
             return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
         }
 
+        if($withholdInfo['counter'] != 0){
+            Log::error("[代扣解约]不允许解除代扣");
+            return apiResponse( [], ApiStatus::CODE_71010, '不允许解除代扣');
+        }
 
         try {
             $data = [
