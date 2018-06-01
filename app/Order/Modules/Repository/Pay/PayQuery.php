@@ -27,10 +27,14 @@ class PayQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getPayByBusiness( int $business_type, string $business_no ){
+		var_dump($business_type);
+		var_dump($business_no);
+		
 		$info = \App\Order\Models\OrderPayModel::where([
 			'business_type'	=> $business_type,
 			'business_no'	=> $business_no,
 		])->first();
+var_dump($info);exit;
 		if( $info ){
 			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
