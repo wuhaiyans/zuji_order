@@ -64,6 +64,7 @@ class SkuComponnet implements OrderCreater
             $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])?$sku[$i]['begin_time']:"";
             $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])?$sku[$i]['end_time']:"";
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
+            $goodsArr[$skuId]['sku_info']['goods_no'] = createNo(6);
             $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
             if ($this->zuqiType == 1) {
                 $this->zuqiTypeName = "day";
@@ -198,7 +199,7 @@ class SkuComponnet implements OrderCreater
                     'spu_name' => $spuInfo['name'],
                     'sku_no' => $skuInfo['sn'],
                     'spu_no' => $spuInfo['sn'],
-                    'goods_no'=>createNo(6),
+                    'goods_no'=>$skuInfo['goods_no'],
                     'weight' => $skuInfo['weight'],
                     'edition' => $skuInfo['edition'],
                     'sku_num' => intval($skuInfo['sku_num']),

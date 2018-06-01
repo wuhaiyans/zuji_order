@@ -302,11 +302,11 @@ class WithholdController extends Controller
             $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
             $withholding_data = [
-                'out_trade_no'  => $agreementNo,         //业务系统授权码
+                'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
                 'amount'        => $amount,              //交易金额；单位：分
                 'back_url'      => $backUrl,             //后台通知地址
                 'name'          => $subject,             //交易备注
-                'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
+                'agreement_no'  => $agreementNo,         //支付平台代扣协议号
                 'user_id'       => $orderInfo['user_id'],//业务平台用户id
             ];
 
@@ -316,6 +316,8 @@ class WithholdController extends Controller
 
             }catch(\Exception $exc){
                 DB::rollBack();
+                p($withholding_data,1);
+                p($exc->getMessage());
                 \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -537,11 +539,11 @@ class WithholdController extends Controller
                 $backUrl = env("API_INNER_URL") . "/createpayNotify";
 
                 $withholding_data = [
-                    'out_trade_no'  => $agreementNo,         //业务系统授权码
+                    'out_trade_no'  => $instalmentInfo['trade_no'],//业务系统授权码
                     'amount'        => $amount,              //交易金额；单位：分
                     'back_url'      => $backUrl,             //后台通知地址
                     'name'          => $subject,             //交易备注
-                    'agreement_no'  => $alipayUserId,        //支付平台代扣协议号
+                    'agreement_no'  => $agreementNo,         //支付平台代扣协议号
                     'user_id'       => $orderInfo['user_id'],//业务平台用户id
                 ];
 

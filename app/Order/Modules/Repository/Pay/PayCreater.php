@@ -25,6 +25,7 @@ class PayCreater {
 	 * <p>普通支付</p>
 	 * @param	array	$params		普通支付参数
 	 * [
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型 
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
@@ -39,6 +40,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -56,7 +58,7 @@ class PayCreater {
 			throw new \Exception( '创建支付记录失败' );
 		}
 		LogApi::debug('[支付阶段]P创建成功');
-		return new Pay($params);
+		return new Pay($data);
 	}
 	
 	/**
@@ -64,6 +66,7 @@ class PayCreater {
 	 * <p>代扣签约</p>
 	 * @param	array	$params		签约参数
 	 * [
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * ]
@@ -76,6 +79,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -91,7 +95,7 @@ class PayCreater {
 			throw new \Exception( '创建支付记录失败' );
 		}
 		LogApi::debug('[支付阶段]W创建成功');
-		return new Pay($params);
+		return new Pay($data);
 	}
 	
 	/**
@@ -99,6 +103,7 @@ class PayCreater {
 	 * <p>资金预授权</p>
 	 * @param	array	$params		资金预授权参数
 	 * [
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
@@ -113,6 +118,7 @@ class PayCreater {
 		
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -129,7 +135,7 @@ class PayCreater {
 			throw new \Exception( '创建资金预授权记录失败' );
 		}
 		LogApi::debug('[支付阶段]F创建成功');
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -137,6 +143,7 @@ class PayCreater {
 	 * <p>代扣签约+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -153,6 +160,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]WF创建');
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -166,14 +174,14 @@ class PayCreater {
 			'fundauth_amount'	=> $params['fundauthAmount'],
 		];
 		//sql_profiler();
-		$b = $payModel->insert();
+		$b = $payModel->insert($data);
 		if( !$b )
 		{
 			LogApi::debug('[支付阶段]WF创建失败',$data);
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]WF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -181,6 +189,7 @@ class PayCreater {
 	 * <p>普通支付+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -201,6 +210,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]PF创建');
 		$payModel = new OrderPayModel();
 		$data = [
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -222,7 +232,7 @@ class PayCreater {
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]PF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	/**
@@ -230,7 +240,7 @@ class PayCreater {
 	 * <p>普通支付+代扣签约+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
-	 *		'user_id'			=> '',	// 业务用户ID
+	 *		'userId'			=> '',	// 业务用户ID
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -254,7 +264,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		//sql_profiler();
 		$data = [
-			'user_id'		=> $params['user_id'],
+			'user_id'		=> $params['userId'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -272,13 +282,14 @@ class PayCreater {
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
 		];
+		//sql_profiler();
 		$b = $payModel->insert( $data );
 		if( !$b ){
 			LogApi::error('[支付阶段]PWF创建失败',$data);
 			throw new \Exception( '创建失败' );
 		}
 		LogApi::debug('[支付阶段]PWF创建成功',$data);
-		return new Pay( $params );
+		return new Pay( $data );
 	}
 	
 	

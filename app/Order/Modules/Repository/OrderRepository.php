@@ -270,12 +270,16 @@ class OrderRepository
     }
 
 
-//获取订单信息
+    /**
+     * @param $where
+     * @return array|bool
+     * 获取订单信息
+     */
     public function get_order_info($where){
         $orderNo=$where['order_no'];
         $order =  Order::where([
             ['order_no', '=', $orderNo],
-        ])->first()->toArray();
+        ])->get()->toArray();
         if (!$order){
             return false;
         }else{

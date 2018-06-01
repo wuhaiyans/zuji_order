@@ -149,8 +149,7 @@ class OrderCleaning
                     'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
                 ];
                 $succss =  CommonRefundApi::apply($params);
-                LogApi::info('退款申请接口返回', $succss);
-
+                LogApi::info('退款申请接口返回', [$succss, $params]);
 
             }
 
@@ -194,7 +193,9 @@ class OrderCleaning
                 ];
                 $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
 
-                LogApi::info('预授权转支付接口返回', $succss);
+
+
+                LogApi::info('预授权转支付接口返回', [$succss,$freezePayParams]);
 
             }
 
@@ -227,7 +228,8 @@ class OrderCleaning
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info('预授权解冻接口返回', $succss);
+                p($succss);
+                LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
             return true;
 
@@ -249,14 +251,12 @@ class OrderCleaning
                 'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
             ];
 
-           $succss =  $miniApi::OrderClose($params);
-           LogApi::info('支付小程序解冻押金', $succss);
+           $succss =  miniApi::OrderClose($params);
+           LogApi::info('支付小程序解冻押金', [$succss,  $params]);
 
         }
 
-
         return true;
-
 
     }
 

@@ -20,7 +20,7 @@ return [
 
 	'payment' => [
 		// 业务类型为租机的支付回调通知
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\Service\OrderPayNotify\callback',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI => '\App\Order\Modules\Service\OrderPayNotify::callback',
 		// 业务类型为1的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => 'var_dump',
 		// 业务类型为1的支付回调通知
@@ -33,7 +33,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET=>'',
 
 		// 提前还款业务回调
-		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderInstalment::repaymentNotify',
+		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderWithhold::repaymentNotify',
 	],
 
 	'refund' => [

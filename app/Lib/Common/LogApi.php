@@ -9,44 +9,94 @@ use App\Lib\Curl;
  */
 class LogApi {
 		
+	private static $instance;
+	public static function getInstace(){
+		if( self::$instance ){
+			return self::$instance;
+		} 
+		return new self();
+	}
+	
+	private static $source = '';
+	public static function setSource( string $source ){
+		self::$source = $source;
+		return self::getInstace();
+	}
+
+	/**
+	 * 类型
+	 * @var string
+	 */
+	private static $type = '';
+	public static function type( string $type )
+	{
+		self::$type = $type;
+		return self::getInstace();
+	}
+	
+	/**
+	 * key
+	 * @var string
+	 */
+	private static $key = '';
+	public static function key( string $key )
+	{
+		self::$key = $key;
+		return self::getInstace();
+	}
+	/**
+	 * 程序调试日志
+	 * @param string	$msg
+	 * @param mixed		$data
+	 * @return LogApi
+	 */
+	public static function debug( string $msg, $data=[] )
+	{
+		return self::log('Debug', $msg, $data);
+	}
+	
 	/**
 	 * 业务数据日志
 	 * @param string	$msg
 	 * @param mixed		$data
+	 * @return LogApi
 	 */
 	public static function info( string $msg, $data=[] )
 	{
-		self::log('Info', $msg, $data);
+		return self::log('Info', $msg, $data);
 	}
 	
 	/**
 	 * 业务通知日志
 	 * @param string	$msg
 	 * @param mixed		$data
+	 * @return LogApi
 	 */
 	public static function notify( string $msg, $data=[] )
 	{
-		self::log('Notify', $msg, $data);
+		return self::log('Notify', $msg, $data);
 	}
 	
 	/**
-	 * 程序调试日志
+	 * 警告日志
 	 * @param string	$msg
 	 * @param mixed		$data
+	 * @return LogApi
 	 */
-	public static function debug( string $msg, $data=[] )
+	public static function warn( string $msg, $data=[] )
 	{
-		self::log('Debug', $msg, $data);
+		return self::log('Warning', $msg, $data);
 	}
 	
 	/**
 	 * 错误日志
 	 * @param string	$msg
 	 * @param mixed		$data
+	 * @return LogApi
 	 */
 	public static function error( string $msg, $data=[] )
 	{
-		self::log('Error', $msg, $data);
+		return self::log('Error', $msg, $data);
 	}
 	
 	/**
@@ -57,7 +107,16 @@ class LogApi {
 	 */
 	private static function log( string $level, string $msg, $data=[] )
 	{
-		if( is_array( $data ) || is_object( $data ) )
+		// 异常
+		if( $data instanceof \Exception ){
+			$data = json_encode([
+				'Code'		=> $data->getCode(),
+				'Message'	=> $data->getMessage(),
+				'File' => $data->getFile(),
+				'Line' => $data->getLine(),
+			]);
+		}
+		elseif( is_array( $data ) || is_object( $data ) )
 		{
 			$data = json_encode($data);
 		}
@@ -114,7 +173,7 @@ class LogApi {
 //		}
 
 		
-		return true;
+		return self::getInstace();
 	}
 	
 	// 自增

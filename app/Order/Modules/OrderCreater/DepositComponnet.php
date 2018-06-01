@@ -72,7 +72,7 @@ class DepositComponnet implements OrderCreater
             $this->deposit = false;
         }
         //未通过信用分
-        if($this->schema['user']['score'] <env("ORDER_SCORE")){
+        if($this->schema['user']['score'] <config("tripartite.Fengkong_Score")){
             $this->deposit = false;
         }
 

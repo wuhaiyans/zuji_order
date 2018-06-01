@@ -62,7 +62,7 @@ class OrderInstalmentRepository
         $this->zujin            = $this->componnet['sku']['zujin'];
         $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
         $this->payment_type_id  = $this->componnet['sku']['pay_type'];
-        $this->buyout_price     = !empty($this->componnet['sku']['buyout_price']) ? $this->componnet['sku']['buyout_price'] : 0;
+        $this->goods_discount_price     = !empty($this->componnet['sku']['discount_amount']) ? $this->componnet['sku']['discount_amount'] : 0;
 
 
         $this->all_amount       = $this->componnet['sku']['all_amount'];
@@ -99,11 +99,11 @@ class OrderInstalmentRepository
 
 
         // 下单立减
-        if($this->buyout_price > 0){
+        if($this->goods_discount_price > 0){
             $this->coupon_type = 1;
             //优惠金额等于 商品优惠
 
-            $first = $this->fenqi_amount - $this->buyout_price;
+            $first = $this->fenqi_amount - $this->goods_discount_price;
             $this->first_amount = $first >= 0 ? $first + $this->yiwaixian : $this->yiwaixian;
         }
 
@@ -378,7 +378,7 @@ class OrderInstalmentRepository
         // 租期数组
         $date  = $this->get_terms($this->zuqi);
         //优惠金额
-        $discount_amount = $this->buyout_price;
+        $discount_amount = $this->goods_discount_price;
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
             //代扣协议号
