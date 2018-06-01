@@ -10,6 +10,7 @@ namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderRelet;
 use App\Order\Modules\Inc\ReletStatus;
+use App\Order\Modules\Service\Relet;
 use Illuminate\Support\Facades\DB;
 
 class ReletRepository
@@ -151,6 +152,18 @@ class ReletRepository
      */
     public function createRelet($data){
         return $this->orderRelet->save($data);
+    }
+
+    /**
+     * 通过续租编号修改支付完成状态
+     */
+    public static function reletPayStatus(string $reletNo,int $payStatus){
+        if(empty($reletNo) || empty($payStatus)){
+            return false;
+        }
+        $data['status'] = $payStatus;
+        $data['pay_time'] =time();
+        return OrderRelet::where('relet_no','=',$reletNo)->update($data);
     }
 
 }
