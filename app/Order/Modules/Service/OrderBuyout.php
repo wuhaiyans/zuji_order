@@ -155,21 +155,17 @@ class OrderBuyout
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			echo 1;die;
 			return false;
 		}
 		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
-			echo 2;die;
 			return false;
 		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
-			echo 3;die;
 			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-			echo 4;die;
 			return false;
 		}
 		$data = [
@@ -178,13 +174,11 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
-			echo 5;die;
-			return false;
+			//return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
-			echo 6;die;
 			return false;
 		}
 		//获取订单商品信息
