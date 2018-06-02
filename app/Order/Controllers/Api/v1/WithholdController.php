@@ -299,7 +299,7 @@ class WithholdController extends Controller
             }
 
             // 代扣协议编号
-            $agreementNo = $withholdInfo['withhold_no'];
+            $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
