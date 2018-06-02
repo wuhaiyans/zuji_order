@@ -10,6 +10,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
+use App\Order\Models\OrderExtend;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
@@ -85,6 +86,22 @@ class OrderOperate
 
         }
 
+    }
+    /**
+     * 保存回访标识
+     * @param $params
+     * [
+     *  'order_no'  => '',//订单编号
+     *  'visit_id'=>'',//回访标识ID
+     *  'visit_text'=>'',//回访备注
+     * ]
+     * @return array|bool
+     */
+
+    public static function orderVistSave($params)
+    {
+        $order =OrderExtend::updateOrCreate(['order_no'=>$params['order_no']],$params);
+        return $order->getQueueableId();
     }
 
     /**

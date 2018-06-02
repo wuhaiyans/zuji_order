@@ -30,4 +30,30 @@ class OrderUserInfoRepository
         }
     }
 
+    /**
+     * 获取用户信息
+     * @param array $params
+     * [
+     *      'user_id'=>''//用戶ID
+     *      'order_no'=>''//订单编号
+     * ]
+     * @return bool
+     */
+
+    public static function getUserInfo($params){
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+        $data = OrderUserInfo::query()->where($whereArray)->get()->toArray();
+        return !empty($orderData) ?? false;
+    }
+
 }
