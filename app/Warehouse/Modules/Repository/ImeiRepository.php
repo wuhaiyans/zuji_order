@@ -91,12 +91,12 @@ class ImeiRepository
             ->limit($limit)
             ->get()->toArray();
 
-        $result = [];
-        foreach ($list as $v) {
-            $result[$v['imei']] = $v;
-        }
+//        $result = [];
+//        foreach ($list as $v) {
+//            $result[$v['imei']] = $v;
+//        }
 
-        return $result;
+        return $list;
     }
 
 }

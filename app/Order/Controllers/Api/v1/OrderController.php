@@ -210,6 +210,36 @@ class OrderController extends Controller
     }
 
     /**
+     *  增加联系备注
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function saveOrderVisit(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'visit_id'=>'required',
+            'visit_text'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderVistSave($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
      * 获取订单操作日志
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

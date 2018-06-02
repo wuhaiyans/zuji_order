@@ -299,7 +299,7 @@ class WithholdController extends Controller
             }
 
             // 代扣协议编号
-            $agreementNo = $withholdInfo['withhold_no'];
+            $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
@@ -324,7 +324,8 @@ class WithholdController extends Controller
 
             }catch(\Exception $exc){
                 DB::rollBack();
-                 p($exc->getMessage());
+                p($withholding_data,1);
+                p($exc->getMessage());
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
