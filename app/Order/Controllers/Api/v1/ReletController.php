@@ -80,6 +80,13 @@ class ReletController extends Controller
      *  'return_url'    => 'required',//前端回调地址
      *
      * @return \Illuminate\Http\JsonResponse
+     * 成功时data:
+     * 代扣返回空数组[];
+     * 一次性分期支付返回array
+     * [
+     *		'url'		=> '',	// 跳转地址
+     *		'params'	=> '',	// 跳转附件参数
+     * ]
      */
     public function createRelet(Request $request){
         try {

@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
@@ -139,28 +140,33 @@ class OrderBuyout
      * 支付完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
-	public function callbackPaid($params){
+	public static function callbackPaid($params){
 		//过滤参数
-		$rule= [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+		$rule = [
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+			return false;
+		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			return false;
 		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
-			return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-			return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+			return false;
 		}
 		$data = [
 				'order_no'=>$buyout['order_no'],
@@ -168,36 +174,70 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
-			return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
+			//return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			return false;
 		}
+		//获取订单商品信息
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
+
+		//清算开始
+
+		//获取支付单信息
+		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout_no'] );
+		//清算处理数据拼接
+		$clearData = [
+				'order_no' => $buyout['order_no'],
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				'bussiness_no' => $buyout['buyout_no'],
+				'out_auth_no' => $payObj->getFundauthNo(),
+				'out_payment_no'=> $payObj->getFundauthNo(),
+				'auth_unfreeze_amount' => $goodsInfo['yajin'],//扣除押金金额
+				'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusUnpayed,
+				'status'=>OrderCleaningStatus::orderCleaningUnfreeze
+		];
+		echo json_encode($clearData);die;
+		//进入清算处理
+		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+		if(!$orderCleanResult){
+			echo "插入清算失败！";
+			die;
+		}
+		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
+		if(!$result){
+			echo "退押金失败！";
+			die;
+		}
+
 		return true;
 	}
 	/*
      * 买断完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
-	public function callbackOver($params){
+	public static function callbackOver($params){
 		//过滤参数
 		$rule = [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
 			return false;
 		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
 			return false;
 		}
@@ -205,14 +245,14 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单商品信息
-		$this->OrderGoodsRepository = new OrderGoodsRepository;
-		$goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
 		if(empty($goodsInfo)){
 			return false;
 		}
 		//解冻订单
-		$this->OrderRepository= new OrderRepository;
-		$ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$OrderRepository= new OrderRepository;
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
@@ -221,12 +261,12 @@ class OrderBuyout
 				'goods_status' => OrderGoodStatus::BUY_OUT,
 				'business_no' => $buyout['buyout_no'],
 		];
-		$ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
 			return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			return false;
 		}

@@ -86,6 +86,22 @@ class OrderCleaning
 
 
     /**
+     * 传参注释：
+     * [
+     *
+     *      order_no  订单编号  ：必填
+     *      business_type 业务类型：必填
+     *      business_no 业务编号：必填
+     *      order_type   1线上订单2门店订单 3小程序订单：必填
+     *      out_auth_no  1.需要退预授权的钱或者预授权的钱转支付必填 ,2，没有预授权或者预授权金额为0，此参数不用传    ：选填
+     *      out_payment_no 需要退款必填       2，退款金额为0，此参数不用传 ：选填
+     *      auth_deduction_amount  预授权转支付金额：如果为0不用传 ：选填
+     *      auth_unfreeze_amount   解除预授权的金额: 如果为0不用传    ：选填
+     *      refund_amount          退款金额：如果为0:不用传    ：选填
+     *
+     *  ]
+     *
+     *
      * 插入订单清算
      * Author: heaven
      * @param $param
@@ -112,7 +128,9 @@ class OrderCleaning
     public static function orderCleanOperate($param)
     {
         //查询清算表根据业务平台退款码out_refund_no
+
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+
         if (empty($orderCleanData)) return false;
         /**
          * 退款申请接口
@@ -185,7 +203,7 @@ class OrderCleaning
 
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //业务系统授权码
-                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
                     'user_id' => $orderCleanData['user_id'], //用户id
@@ -222,13 +240,12 @@ class OrderCleaning
                 $unFreezeParams = [
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
-                    'auth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
                     'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                p($succss);
                 LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
             return true;

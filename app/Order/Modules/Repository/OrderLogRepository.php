@@ -52,28 +52,16 @@ class OrderLogRepository
     /**
      * heaven
      * 获取订单日志
-     * @param array $param  orderNo 订单号
+     * @param $orderNo 订单号
      * @return array|bool
      */
-    public static function getOrderLog($param = array())
+    public static function getOrderLog($orderNo)
     {
-        if (empty($param)) {
-            return false;
-        }
-        if (isset($param['order_no']) && !empty($param['order_no']))
-        {
-            $orderData = DB::table('order_log')
-                ->leftJoin('order_userinfo', function ($join) {
-                    $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
-                })
-                ->where('order_info.order_no', '=', $param['order_no'])
-                ->select('order_info.*','order_userinfo.*')
-                ->first();
-
-            return !empty($orderData)?objectToArray($orderData):false;
-        }
-        return false;
-
+        if (empty($orderNo)) return false;
+        $orderLogData = OrderLog::query()->where([
+            ['order_no', '=', $orderNo],
+        ])->get()->toArray();
+        return $orderLogData ?? false;
     }
 
 

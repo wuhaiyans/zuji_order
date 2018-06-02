@@ -37,6 +37,7 @@ class ImeiController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
+
         $list = $this->imei->list($params);
         return \apiResponse($list);
     }
@@ -55,7 +56,7 @@ class ImeiController extends Controller
             return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $limit = isset($params['limit']) ? $params['limit'] : 10;
+        $limit = isset($params['size']) ? $params['size'] : 10;
         $limit = $limit > 50 ? 50 : $limit;//最大50
 
         try {

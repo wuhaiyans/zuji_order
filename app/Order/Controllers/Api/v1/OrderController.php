@@ -209,6 +209,42 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     *  增加联系备注
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function saveOrderVisit(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'visit_id'=>'required',
+            'visit_text'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderVistSave($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
+     * 获取订单操作日志
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function orderLog(Request $request)
     {
         $params =$request->all();
@@ -218,7 +254,7 @@ class OrderController extends Controller
         }
 
         $res = OrderOperate::orderLog($params['order_no']);
-        if(!$res){
+        if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60001);
         }
         return apiResponse($res,ApiStatus::CODE_0);
@@ -434,6 +470,33 @@ class OrderController extends Controller
         $res = \App\Order\Modules\Inc\OrderListFiler::orderInc();
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
+
+    }
+
+
+    /**
+     * 修改收货地址信息
+     * Author: heaven
+     * @param Request $request
+     */
+    public function modifyAddress(Request $request)
+    {
+
+        $params = $request->all();
+        $rule = [
+            'order_address_id' => 'required',
+            'order_no'=> 'required',
+
+        ];
+
+        $validateParams = $this->validateParams($rule,  $params);
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code'], $validateParams['msg']);
+        }
+
+
+        $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']);
 
     }
 
