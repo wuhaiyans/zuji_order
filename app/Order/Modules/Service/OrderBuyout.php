@@ -155,17 +155,21 @@ class OrderBuyout
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
+			echo 1;die;
 			return false;
 		}
 		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			echo 2;die;
 			return false;
 		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
+			echo 3;die;
 			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
+			echo 4;die;
 			return false;
 		}
 		$data = [
@@ -174,17 +178,18 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
+			echo 5;die;
 			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
+			echo 6;die;
 			return false;
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
-		echo json_encode($goodsInfo);die;
 		//清算开始
 		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout'] );
