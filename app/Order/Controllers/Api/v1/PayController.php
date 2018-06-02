@@ -479,6 +479,7 @@ class PayController extends Controller
             //更新查看清算表的状态
 
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
+
             if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
@@ -525,13 +526,14 @@ class PayController extends Controller
 
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param}订单清算退款状态无效");
             }
             $this->innerOkMsg();
 
 
         } catch (\Exception $e) {
 
+            $this->innerOkMsg();
             LogApi::info(__METHOD__ . "()订单清算退押金回调接口异常 " .$e->getMessage(),$param);
 
         }
