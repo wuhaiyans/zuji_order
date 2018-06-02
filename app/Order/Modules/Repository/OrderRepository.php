@@ -68,7 +68,7 @@ class OrderRepository
             return false;
         }
         $data['order_status'] =OrderStatus::OrderInService;
-        $data['confirm_time'] =time();
+        $data['receive_time'] =time();
         return Order::where('order_no','=',$orderNo)->update($data);
 
     }
