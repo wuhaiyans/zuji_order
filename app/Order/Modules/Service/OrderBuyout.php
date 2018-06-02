@@ -204,7 +204,6 @@ class OrderBuyout
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 		}
-		echo json_encode($clearData);die;
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
@@ -229,8 +228,6 @@ class OrderBuyout
 				die;
 			}
 		}
-		echo "解押成功";
-		die;
 		return true;
 	}
 	/*
