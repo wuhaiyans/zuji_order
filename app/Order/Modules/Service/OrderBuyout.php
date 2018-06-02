@@ -198,7 +198,7 @@ class OrderBuyout
 
 		if($goodsInfo['yajin']>0){
 			//获取支付单信息
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$buyout['buyout_no'] );
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
 			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
