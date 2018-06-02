@@ -228,6 +228,8 @@ class OrderBuyout
 				die;
 			}
 		}
+		echo "解押成功";
+		die;
 		return true;
 	}
 	/*
