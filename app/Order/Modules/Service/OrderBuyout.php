@@ -152,14 +152,17 @@ class OrderBuyout
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
+			echo 1;die;
 			return false;
 		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
 		if(!$buyout){
+			echo 2;die;
 			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
+			echo 3;die;
 			return false;
 		}
 		$data = [
@@ -173,6 +176,7 @@ class OrderBuyout
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);
 		if(!$ret){
+			echo 4;die;
 			return false;
 		}
 		return true;
