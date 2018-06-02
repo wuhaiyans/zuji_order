@@ -193,7 +193,7 @@ class OrderBuyout
 				'order_type'=> $orderInfo['order_type'],
 				'order_no' => $buyout['order_no'],
 				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				'bussiness_no' => $buyout['buyout_no']
+				'business_no' => $buyout['buyout_no']
 		];
 
 		if($goodsInfo['yajin']>0){
@@ -204,7 +204,6 @@ class OrderBuyout
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 		}
-		echo json_encode($clearData);die;
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
