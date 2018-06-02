@@ -209,24 +209,14 @@ class OrderBuyout
 		if(!$orderCleanResult){
 			return false;
 		}
-		if($goodsInfo['yajin']>0){
-			$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
-			echo json_encode(['1'=>$result,"2"=>"123"]);die;
-			if(!$result){
-				echo "退押金失败！";
-				die;
-			}
-		}
-		else{
+		if($goodsInfo['yajin']==0){
 			$params = [
 					'business_type'     => $clearData['business_type'],
 					'business_no'     => $clearData['business_no'],
 					'status'     => 'success',//支付状态
 			];
 			$result = self::callbackOver($params);
-			if(!$result){
-				echo "更新买断单为完成失败！";
-				die;
+			if(!$result){return false;
 			}
 		}
 		return true;
