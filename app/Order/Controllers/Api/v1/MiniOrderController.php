@@ -63,7 +63,7 @@ class MiniOrderController extends Controller
             'sku_id' => intval($params['sku_id'])
         ];
         //redis 存储数据
-        $values = Redis::command($orderNo, $data);
+        $values = Redis::command('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
@@ -95,7 +95,7 @@ class MiniOrderController extends Controller
             return apiResponse([],ApiStatus::CODE_50005,'小程序支付状态错误');
         }
         //判断当前是否有临时订单
-        $data = Redis::get($params['out_order_no']);
+        $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$params['out_order_no']);
         if(!$data){
             \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
