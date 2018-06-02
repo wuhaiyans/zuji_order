@@ -34,7 +34,7 @@ class Delivery
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'api.order.deliveryReceive',//模拟
-            'data' => json_encode(['params'=>$params])
+            'params' => $params
         ]);
 
         return $response;
@@ -50,7 +50,7 @@ class Delivery
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'api.Return.userReceive',//模拟
-            'data' => json_encode(['params'=>$params])
+            'params' => $params
         ]);
 
         return $response;
@@ -79,11 +79,12 @@ class Delivery
         $params['order_no'] =$orderNo;
         $params['goods_info'] =$goodsInfo;
 
+
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'api.order.delivery',//模拟
-            'data' => json_encode(['params'=>$params])
+            'params' => $params
         ]);
 
         return $response;
