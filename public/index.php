@@ -37,7 +37,6 @@ require __DIR__.'/../app/Lib/PublicFunc.php';
 */
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
-echo 12312;die;
 /*
 |--------------------------------------------------------------------------
 | Run The Application
