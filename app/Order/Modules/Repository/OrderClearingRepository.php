@@ -35,9 +35,9 @@ class OrderClearingRepository
 
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
 
-        if ($param['auth_deduction_amount']>0) $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-        if ($param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-        if ($param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
 
 
         if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && empty($param['refund_amount']))
