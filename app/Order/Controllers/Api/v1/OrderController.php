@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Order\OrderInfo;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
@@ -438,8 +439,7 @@ class OrderController extends Controller
 
 
                 $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
-
-
+                p($orderData);
                 if ($orderData['code']===ApiStatus::CODE_0) {
 
                     return apiResponse($orderData['data'],ApiStatus::CODE_0);
@@ -486,6 +486,9 @@ class OrderController extends Controller
         $rule = [
             'order_address_id' => 'required',
             'order_no'=> 'required',
+            'mobile'  => 'required',
+            'name'=> 'required',
+            'address_info'=> 'required',
 
         ];
 
@@ -496,7 +499,11 @@ class OrderController extends Controller
         }
 
 
-        $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']);
+        $succss = OrderUserInfoRepository::modifyAddress($validateParams['data']);
+        if(!$succss){
+            return apiResponse([],ApiStatus::CODE_30013);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
 
     }
 

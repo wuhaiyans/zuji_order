@@ -343,6 +343,7 @@ class OrderOperate
      */
     public static function getOrderInfo($orderNo)
     {
+
         $order = array();
 
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
@@ -361,6 +362,7 @@ class OrderOperate
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
+
             foreach ($goodsExtendData as $values) {
 
                 if ($values['status']==Inc\OrderInstalmentStatus::UNPAID)

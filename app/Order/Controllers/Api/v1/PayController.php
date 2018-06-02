@@ -472,7 +472,7 @@ class PayController extends Controller
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
                 "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
-                "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
+                "fundauth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
                 "user_id"=>'required'                //类型：String  必有字段  备注：用户id
             ];
 
@@ -560,7 +560,7 @@ class PayController extends Controller
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
                 "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
-                "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
+                "fundauth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
                 "user_id"=>'required'                //类型：String  必有字段  备注：用户id
             ];
 

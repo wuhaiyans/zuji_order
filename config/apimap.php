@@ -19,6 +19,8 @@ return [
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
 
+    //订单确认修改收货地址信息
+    'api.order.modifyAddress'=>'OrderController@modifyAddress',
 
     //确认订单接口
     'api.order.confirmOrder'=>'OrderController@confirmOrder',
