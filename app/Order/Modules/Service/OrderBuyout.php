@@ -181,26 +181,29 @@ class OrderBuyout
 		if(!$ret){
 			return false;
 		}
+		//获取订单信息
+		$OrderRepository= new OrderRepository;
+		$orderInfo = $OrderRepository->getInfoById($buyout['order_no']);
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
 
-		//清算开始
-
-		//获取支付单信息
-		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout_no'] );
 		//清算处理数据拼接
 		$clearData = [
+				'order_type'=> $orderInfo['order_type'],
 				'order_no' => $buyout['order_no'],
 				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				'bussiness_no' => $buyout['buyout_no'],
-				'out_auth_no' => $payObj->getFundauthNo(),
-				'out_payment_no'=> $payObj->getFundauthNo(),
-				'auth_unfreeze_amount' => $goodsInfo['yajin'],//扣除押金金额
-				'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusUnpayed,
-				'status'=>OrderCleaningStatus::orderCleaningUnfreeze
+				'bussiness_no' => $buyout['buyout_no']
 		];
-		echo json_encode($clearData);die;
+
+		if($goodsInfo['yajin']>0){
+			//获取支付单信息
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout_no'] );
+			$clearData['out_auth_no'] = $payObj->getFundauthNo();
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+		}
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
