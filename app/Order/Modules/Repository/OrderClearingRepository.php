@@ -69,7 +69,7 @@ class OrderClearingRepository
         if(!$success){
             return false;
         }
-        return true;
+        return $order_data['clean_no'];
 }
 
     /**
