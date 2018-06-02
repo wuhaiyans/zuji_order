@@ -184,8 +184,10 @@ class OrderBuyout
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
+
 		//清算开始
-		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+
+		//获取支付单信息
 		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout_no'] );
 		//清算处理数据拼接
 		$clearData = [
@@ -193,11 +195,11 @@ class OrderBuyout
 				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				'bussiness_no' => $buyout['buyout_no'],
 				'out_auth_no' => $payObj->getFundauthNo(),
+				'out_payment_no'=> $payObj->getFundauthNo(),
 				'auth_unfreeze_amount' => $goodsInfo['yajin'],//扣除押金金额
 				'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusUnpayed,
 				'status'=>OrderCleaningStatus::orderCleaningUnfreeze
 		];
-		echo json_encode($clearData);die;
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
@@ -209,6 +211,7 @@ class OrderBuyout
 			echo "退押金失败！";
 			die;
 		}
+
 		return true;
 	}
 	/*
