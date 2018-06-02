@@ -298,8 +298,8 @@ class WithholdController extends Controller
                 return apiResponse([], ApiStatus::CODE_71009, '支付宝用户的user_id错误');
             }
 
-            // 代扣协议编号
-            $agreementNo = $withholdInfo['withhold_no'];
+            // 支付平台代扣协议号
+            $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
