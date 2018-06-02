@@ -228,8 +228,6 @@ class OrderBuyout
 				die;
 			}
 		}
-		echo "成功了！";
-		die;
 		return true;
 	}
 	/*
@@ -251,35 +249,29 @@ class OrderBuyout
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			echo 1;die;
 			return false;
 		}
 		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
-			echo 2;die;
 			return false;
 		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
-			echo 3;die;
 			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderRelease){
-			echo 4;die;
 			return false;
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
 		if(empty($goodsInfo)){
-			echo 5;die;
 			return false;
 		}
 		//解冻订单
 		$OrderRepository= new OrderRepository;
 		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if(!$ret){
-			echo 6;die;
 			return false;
 		}
 		//更新订单商品
@@ -289,13 +281,11 @@ class OrderBuyout
 		];
 		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
-			echo 7;die;
 			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$buyout['user_id']);
 		if(!$ret){
-			echo 8;die;
 			return false;
 		}
 		return true;
