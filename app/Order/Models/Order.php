@@ -39,5 +39,16 @@ class Order extends Model
     public function fromDateTime($value) {
         return $value;
     }
-
+//    public function save(array $options = [])
+//    {
+//        $query = $this->newQueryWithoutScopes();
+//        if ($this->fireModelEvent('saving') === false) {
+//            return false;
+//        }
+//        $dirty = $this->getDirty();
+//        if(!empty($dirty['order_status'])){
+//
+//        }
+//        return true;
+//    }
 }

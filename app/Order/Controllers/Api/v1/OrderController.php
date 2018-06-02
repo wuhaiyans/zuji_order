@@ -209,6 +209,12 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * 获取订单操作日志
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function orderLog(Request $request)
     {
         $params =$request->all();
@@ -218,7 +224,7 @@ class OrderController extends Controller
         }
 
         $res = OrderOperate::orderLog($params['order_no']);
-        if(!$res){
+        if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60001);
         }
         return apiResponse($res,ApiStatus::CODE_0);

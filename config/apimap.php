@@ -14,6 +14,8 @@ return [
     'api.order.cancel' => 'OrderController@cancelOrder',
     //订单详情接口
     'api.order.orderdetail'=>'OrderController@orderInfo',
+    //订单操作日志接口
+    'api.order.orderLog'=>'OrderController@orderLog',
 
 
     //确认订单接口
