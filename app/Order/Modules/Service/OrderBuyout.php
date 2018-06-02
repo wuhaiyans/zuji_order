@@ -146,17 +146,20 @@ class OrderBuyout
      */
 	public static function callbackPaid($params){
 		//过滤参数
-		$rule= [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+		$rule = [
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			echo 1;die;
+			return false;
+		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
 			return false;
 		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
 			echo 2;die;
 			return false;
@@ -209,14 +212,14 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单商品信息
-		$this->OrderGoodsRepository = new OrderGoodsRepository;
-		$goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
 		if(empty($goodsInfo)){
 			return false;
 		}
 		//解冻订单
-		$this->OrderRepository= new OrderRepository;
-		$ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$OrderRepository= new OrderRepository;
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
@@ -225,7 +228,7 @@ class OrderBuyout
 				'goods_status' => OrderGoodStatus::BUY_OUT,
 				'business_no' => $buyout['buyout_no'],
 		];
-		$ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
 			return false;
 		}
