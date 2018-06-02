@@ -477,8 +477,9 @@ class PayController extends Controller
             $validateParams = $this->validateParams($rule,$param);
             if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
             //更新查看清算表的状态
+
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
-            if ($orderCleanInfo['code']) {
+            if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
             }

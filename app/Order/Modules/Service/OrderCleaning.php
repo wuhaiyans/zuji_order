@@ -33,6 +33,7 @@ class OrderCleaning
     public static function getOrderCleanInfo($param)
     {
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+       p($orderCleanData);
        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_10101,$orderCleanData);
         return apiResponseArray(ApiStatus::CODE_0,$orderCleanData);
 

@@ -109,8 +109,11 @@ class OrderClearingRepository
         $whereArray = array();
         if (isset($param['clean_no'])){
             $whereArray[] = ['clean_no', '=', $param['clean_no']];
-            $orderData =  OrderClearing::where($whereArray)->first()->toArray();
-            return $orderData;
+            $orderData =  OrderClearing::where($whereArray)->first();
+            if ($orderData) {
+              return  $orderData->toArray();
+            }
+            return false;
         }
         return false;
 
