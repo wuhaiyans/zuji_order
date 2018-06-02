@@ -177,7 +177,7 @@ class OrderBuyout
 			//return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			echo 4;die;
 			return false;
