@@ -192,7 +192,7 @@ class OrderBuyout
 		$clearData = [
 				'order_type'=> $orderInfo['order_type'],
 				'order_no' => $buyout['order_no'],
-				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
 
