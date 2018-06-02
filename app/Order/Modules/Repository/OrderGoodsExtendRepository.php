@@ -1,18 +1,9 @@
 <?php
 namespace App\Order\Modules\Repository;
-use App\Lib\ApiStatus;
-use App\Lib\Common\SmsApi;
-use App\Lib\Goods\Goods;
-use App\Order\Models\Order;
+
 use App\Order\Models\OrderGoodsExtend;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderLog;
-use App\Order\Models\OrderUserInfo;
-use App\Order\Models\OrderYidun;
-use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Inc\OrderFreezeStatus;
-use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderGoodsExtendRepository
 {
@@ -24,22 +15,20 @@ class OrderGoodsExtendRepository
         foreach ($goodsInfo as $k=>$v){
             $data =[
                 'order_no'=>$orderNo,
-                'goods_id'=>$v['goods_id'],
                 'goods_no'=>$v['goods_no'],
                 'imei1'=>isset($v['imei1'])?$v['imei1']:"",
                 'imei2'=>isset($v['imei2'])?$v['imei2']:"",
                 'imei3'=>isset($v['imei3'])?$v['imei3']:"",
-                'serial_number'=>$v['serial_number'],
+                'serial_number'=>$v['serial_number'] ? $v['serial_number'] : '',
                 'status'=>0,
             ];
-            $res =OrderLog::create($data);
+            $res =OrderGoodsExtend::create($data);
             $id =$res->getQueueableId();
             if(!$id){
                 return false;
             }
         }
         return true;
-
     }
 
     /**
