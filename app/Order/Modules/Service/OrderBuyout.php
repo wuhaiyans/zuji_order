@@ -206,6 +206,7 @@ class OrderBuyout
 		}
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+		echo json_encode(['1'=>$orderCleanResult,"2"=>"123"]);die;
 		if(!$orderCleanResult){
 			return false;
 		}
