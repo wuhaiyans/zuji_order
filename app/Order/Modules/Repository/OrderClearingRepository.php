@@ -51,7 +51,7 @@ class OrderClearingRepository
 
             $status    =   OrderCleaningStatus::orderCleaningUnfreeze;
 
-        }   else if (mpty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && !empty($param['refund_amount'])){
+        }   else if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && !empty($param['refund_amount'])){
 
             $status    =   OrderCleaningStatus::orderCleaningUnRefund;
         }
