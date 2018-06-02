@@ -147,7 +147,6 @@ class OrderBuyout
      * @return json
      */
 	public static function callbackPaid($params){
-		echo 12312312;die;
 		//过滤参数
 		$rule = [
 				'business_type'     => 'required',//业务类型
@@ -185,6 +184,7 @@ class OrderBuyout
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		echo json_encode($goodsInfo);die;
 		//清算开始
 		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout'] );
