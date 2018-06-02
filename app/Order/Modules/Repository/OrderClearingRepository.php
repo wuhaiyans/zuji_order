@@ -34,6 +34,28 @@ class OrderClearingRepository
         //根据订单号查询订单信息
 
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+
+        if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+
+
+        if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && empty($param['refund_amount']))
+        {
+            $status    =   OrderCleaningStatus::orderCleaningComplete;
+        } else if (!empty($param['auth_deduction_amount'])){
+
+            $status    =   OrderCleaningStatus::orderCleaningDeposit;
+
+        }   else if (empty($param['auth_deduction_amount']) && !empty($param['auth_unfreeze_amount'])){
+
+            $status    =   OrderCleaningStatus::orderCleaningUnfreeze;
+
+        }   else if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && !empty($param['refund_amount'])){
+
+            $status    =   OrderCleaningStatus::orderCleaningUnRefund;
+        }
+
         if (empty($orderInfo)) return false;
         // 创建结算清单
         $order_data = [
@@ -47,14 +69,14 @@ class OrderClearingRepository
             'payment_no'=> $param['out_payment_no'] ??  '',
             'auth_deduction_amount'=>    $param['auth_deduction_amount'] ?? 0.00 ,
             'auth_deduction_time'=>  $param['auth_deduction_time'] ??  0 ,
-            'auth_deduction_status'=>    $param['auth_deduction_status'] ?? 0 ,
+            'auth_deduction_status'=>    $authDeductionStatus ?? 0 ,
             'auth_unfreeze_amount'=>    $param['auth_unfreeze_amount']   ??  0.00 ,
             'auth_unfreeze_time'=>   $param['auth_unfreeze_time']   ??  0 ,
-            'auth_unfreeze_status'=> $param['auth_unfreeze_status']  ??  0 ,
+            'auth_unfreeze_status'=> $authUnfreezeStatus  ??  0 ,
             'refund_amount'=>   $param['refund_amount']  ??  0.00 ,
             'refund_time'=>     $param['refund_time']  ??  0 ,
-            'refund_status'=>   $param['refund_status']  ??  0 ,
-            'status'=>  $param['status']   ??  0 ,
+            'refund_status'=>   $authRefundStatus  ??  0 ,
+            'status'=>  $status  ??  0 ,
             'create_time'=>time(),
             'update_time'=>time(),
             'app_id' => $orderInfo['appid'],

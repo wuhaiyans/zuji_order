@@ -58,7 +58,15 @@ class User{
         return $info['data'];
     }
 
+    /**
+     * 获取用户id生成用户
+     *  @param $data
+     * @param $user_id
+     * @return string or array
+     */
+    public function getUserId(){
 
+    }
 }
 
 

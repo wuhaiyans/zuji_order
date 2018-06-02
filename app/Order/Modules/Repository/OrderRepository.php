@@ -13,6 +13,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class OrderRepository
 {
@@ -67,7 +68,7 @@ class OrderRepository
             return false;
         }
         $data['order_status'] =OrderStatus::OrderInService;
-        $data['confirm_time'] =time();
+        $data['receive_time'] =time();
         return Order::where('order_no','=',$orderNo)->update($data);
 
     }
@@ -355,6 +356,7 @@ class OrderRepository
      */
     public static function getOrderInfo($param = array())
     {
+
         if (empty($param)) {
             return false;
         }

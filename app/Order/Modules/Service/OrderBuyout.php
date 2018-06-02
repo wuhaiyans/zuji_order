@@ -181,33 +181,53 @@ class OrderBuyout
 		if(!$ret){
 			return false;
 		}
+		//获取订单信息
+		$OrderRepository= new OrderRepository;
+		$orderInfo = $OrderRepository->getInfoById($buyout['order_no']);
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
-		//清算开始
-		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
-		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['buyout_no'] );
+
 		//清算处理数据拼接
 		$clearData = [
+				'order_type'=> $orderInfo['order_type'],
 				'order_no' => $buyout['order_no'],
-				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				'bussiness_no' => $buyout['buyout_no'],
-				'out_auth_no' => $payObj->getFundauthNo(),
-				'auth_unfreeze_amount' => $goodsInfo['yajin'],//扣除押金金额
-				'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusUnpayed,
-				'status'=>OrderCleaningStatus::orderCleaningUnfreeze
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,
+				'business_no' => $buyout['buyout_no']
 		];
-		echo json_encode($clearData);die;
+
+		if($goodsInfo['yajin']>0){
+			//获取支付单信息
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+			$clearData['out_auth_no'] = $payObj->getFundauthNo();
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+		}
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
-			echo "插入清算失败！";
-			die;
+			return false;
 		}
-		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
-		if(!$result){
-			echo "退押金失败！";
-			die;
+		if($goodsInfo['yajin']>0){
+			$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
+			echo json_encode(['1'=>$result,"2"=>"123"]);die;
+			if(!$result){
+				echo "退押金失败！";
+				die;
+			}
+		}
+		else{
+			$params = [
+					'business_type'     => $clearData['business_type'],
+					'business_no'     => $clearData['business_no'],
+					'status'     => 'success',//支付状态
+			];
+			$result = self::callbackOver($params);
+			if(!$result){
+				echo "更新买断单为完成失败！";
+				die;
+			}
 		}
 		return true;
 	}
@@ -232,6 +252,9 @@ class OrderBuyout
 		if ($validator->fails()) {
 			return false;
 		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			return false;
+		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
@@ -242,19 +265,19 @@ class OrderBuyout
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
-		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
 		if(empty($goodsInfo)){
 			return false;
 		}
 		//解冻订单
 		$OrderRepository= new OrderRepository;
-		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
 		//更新订单商品
 		$goods = [
-				'goods_status' => OrderGoodStatus::BUY_OUT,
+				'goods_status' => \App\Order\Modules\Inc\OrderGoodStatus::BUY_OUT,
 				'business_no' => $buyout['buyout_no'],
 		];
 		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);

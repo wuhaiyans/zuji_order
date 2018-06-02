@@ -217,7 +217,9 @@ class OrderOperate
                 return false;
             }
 
-            $delivery =Delivery::apply($data['order_no']);
+            $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+            $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
                 return false;

@@ -9,6 +9,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Service\OrderInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
+use Illuminate\Support\Facades\Redis;
 use App\Order\Modules\Repository\OrderRepository;
 
 class MiniNotifyController extends Controller
@@ -51,7 +52,7 @@ class MiniNotifyController extends Controller
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$result);
             }
-            $redis_order = Redis::get($_POST['out_order_no']);
+            $redis_order = Redis::get('dev:zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
             if( $redis_order == 'MiniWithhold' ){
                 $this->withholdingNotify();
             }else if( $redis_order == 'MiniOrderClose' ){

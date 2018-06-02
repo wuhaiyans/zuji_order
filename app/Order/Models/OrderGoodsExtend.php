@@ -25,5 +25,5 @@ class OrderGoodsExtend extends Model
 
 
     // 可以被批量赋值的属性。
-    protected $fillable = ['order_no','goods_id','goods_no','imei1','imei2','imei3','serial_number','status'];
+    protected $fillable = ['order_no','goods_no','imei1','imei2','imei3','serial_number','status'];
 }

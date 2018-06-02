@@ -396,7 +396,7 @@ class OrderCreater
             $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
-            $orderCreater = new YidunComponnet($orderCreater);
+            $orderCreater = new YidunComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
