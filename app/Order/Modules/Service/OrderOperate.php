@@ -87,9 +87,20 @@ class OrderOperate
 
     }
 
+    /**
+     * 获取订单日志接口
+     * @param $orderNo
+     * @return array|bool
+     */
+
     public static function orderLog($orderNo)
     {
         if(empty($orderNo)){return false;}
+        $logData = OrderLogRepository::getOrderLog($orderNo);
+        if(!$logData){
+            return false;
+        }
+        return $logData;
     }
     /**
      * 确认收货接口

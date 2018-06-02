@@ -121,7 +121,7 @@ class OrderBuyoutRepository
 			'status'=>OrderBuyoutStatus::OrderPaid,
 			'update_time'=>time()
 		];
-		$ret = Order::where('id', '=', $id)->update($data);
+		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){
 			return true;
 		}else{
@@ -140,7 +140,7 @@ class OrderBuyoutRepository
 				'status'=>OrderBuyoutStatus::OrderRelease,
 				'update_time'=>time()
 		];
-		$ret = Order::where('id', '=', $id)->update($data);
+		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){
 			return true;
 		}else{
