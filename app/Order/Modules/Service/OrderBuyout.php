@@ -207,16 +207,29 @@ class OrderBuyout
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
-			echo "插入清算失败！";
-			die;
+			return false;
 		}
-		echo $orderCleanResult;die;
-		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
-		if(!$result){
-			echo "退押金失败！";
-			die;
+		if($goodsInfo['yajin']>0){
+			$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
+			if(!$result){
+				echo "退押金失败！";
+				die;
+			}
 		}
-		echo 321;die;
+		else{
+			$params = [
+					'business_type'     => $clearData['business_type'],
+					'business_no'     => $clearData['business_no'],
+					'status'     => 'success',//支付状态
+			];
+			$result = self::callbackOver($params);
+			if(!$result){
+				echo "更新买断单为完成失败！";
+				die;
+			}
+		}
+		echo "成功了！";
+		die;
 		return true;
 	}
 	/*
@@ -240,6 +253,9 @@ class OrderBuyout
 		if ($validator->fails()) {
 			return false;
 		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			return false;
+		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
@@ -250,7 +266,7 @@ class OrderBuyout
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
-		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
 		if(empty($goodsInfo)){
 			return false;
 		}
