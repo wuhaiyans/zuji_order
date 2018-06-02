@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
@@ -139,8 +140,9 @@ class OrderBuyout
      * 支付完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
@@ -161,11 +163,9 @@ class OrderBuyout
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
-			echo 2;die;
 			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-			echo 3;die;
 			return false;
 		}
 		$data = [
@@ -174,12 +174,38 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
-			//return false;
+			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
-			echo 4;die;
+			return false;
+		}
+		//获取订单商品信息
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		//清算开始
+		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,$buyout['order_no'] );
+		//清算处理数据拼接
+		$clearData = [
+				'order_no' => $buyout['order_no'],
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				'bussiness_no' => $buyout['buyout_no'],
+				'out_auth_no' => $payObj->getFundauthNo(),
+				'auth_unfreeze_amount' => $goodsInfo['yajin'],//扣除押金金额
+				'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusUnpayed,
+				'status'=>OrderCleaningStatus::orderCleaningUnfreeze
+		];
+		//进入清算处理
+		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+		if(!$orderCleanResult){
+			echo "插入清算失败！";
+			return false;
+		}
+		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
+		if(!$result){
+			echo "退押金失败！";
 			return false;
 		}
 		return true;
@@ -188,23 +214,25 @@ class OrderBuyout
      * 买断完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
 	public static function callbackOver($params){
 		//过滤参数
 		$rule = [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
 			return false;
 		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
 			return false;
 		}
@@ -233,7 +261,7 @@ class OrderBuyout
 			return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			return false;
 		}

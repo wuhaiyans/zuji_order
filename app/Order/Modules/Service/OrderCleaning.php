@@ -97,7 +97,7 @@ class OrderCleaning
      *      out_payment_no 需要退款必填
      *      auth_deduction_amount  预授权转支付金额：注：如果为0，这一项和下面的auth_deduction_status不用传
      *      auth_deduction_status  预授权转支付的状态：   如果auth_deduction_amount>0  这一项初始状态为2        1：已取消；2：待扣押金；3：已扣押金；4：无需扣押金
-     *      auth_unfreeze_amount   解除预授权的金额：注：如果为0，这一项和下面的auth_unfreeze_status 参数不用传
+     *       auth_unfreeze_amount  解除预授权的金额：注：如果为0，这一项和下面的auth_unfreeze_status 参数不用传
      *      auth_unfreeze_status    解除预授权的状态 ：auth_unfreeze_amount>0  这一项初始状态为2        1：已取消；2：待退还押金；3：已退还押金；4：无需退还
      *      refund_amount           退款金额：如果为0，这一项和下面的refund_status可以不用传
      *      refund_status           退款状态：refund_amount>0  这一项初始状态为2   1：已取消；2：待退款；3：已退款；4：无需退款
