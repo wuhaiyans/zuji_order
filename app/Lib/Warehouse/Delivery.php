@@ -11,6 +11,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Delivery
@@ -98,14 +99,19 @@ class Delivery
      * @param string $order_no 订单号, 根据订单号获取商品数据
      * @return boolean
      */
-    public static function apply($order_no)
+    public static function apply($orderInfo,$goodsInfo)
     {
         $base_api = config('tripartite.warehouse_api_uri');
-        $info = self::getOrderInfo($order_no);
-
+        $result = [
+            'order_no'  => $orderInfo['order_no'],
+            'realname'  => $orderInfo['name'],
+            'mobile'    => $orderInfo['user_mobile'],
+            'address_info' => $orderInfo['address_info'],
+            'delivery_detail' => $goodsInfo
+        ];
         $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.deliveryCreate',//模拟
-            'params' => json_encode($info)
+            'params' => json_encode($result)
         ]));
 
         $res = json_decode($res, true);

@@ -281,11 +281,12 @@ class OrderController extends Controller
     public function delivery(Request $request)
     {
         $params =$request->all();
+
         $params =$params['params'];
         if(empty($params['order_no'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(count($params['goods_info'] <1)){
+        if(count($params['goods_info']) <1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
