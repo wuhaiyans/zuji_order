@@ -217,7 +217,9 @@ class OrderOperate
                 return false;
             }
 
-            $delivery =Delivery::apply($data['order_no']);
+            $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+            $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
                 return false;
@@ -343,6 +345,7 @@ class OrderOperate
      */
     public static function getOrderInfo($orderNo)
     {
+
         $order = array();
 
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
@@ -361,6 +364,7 @@ class OrderOperate
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
+
             foreach ($goodsExtendData as $values) {
 
                 if ($values['status']==Inc\OrderInstalmentStatus::UNPAID)

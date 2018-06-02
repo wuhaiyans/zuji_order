@@ -189,8 +189,16 @@ class Relet
                             ],
                         ];
                         if( OrderInstalment::create($fenqiData) ){
-                            DB::commit();
-                            return [];
+                            //修改设备表状态续租完成,新建设备周期数据
+                            if( $this->reletRepository->setGoods($data['relet_no']) ){
+                                DB::commit();
+                                return [];
+                            }else{
+                                DB::rollBack();
+                                set_msg('修改设备表状态,新建设备周期数据失败');
+                                return false;
+                            }
+
                         }else{
                             DB::rollBack();
                             set_msg('创建分期失败');
