@@ -206,12 +206,12 @@ class OrderBuyout
 		}
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-		echo json_encode(['1'=>$orderCleanResult,"2"=>"123"]);die;
 		if(!$orderCleanResult){
 			return false;
 		}
 		if($goodsInfo['yajin']>0){
 			$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
+			echo json_encode(['1'=>$result,"2"=>"123"]);die;
 			if(!$result){
 				echo "退押金失败！";
 				die;
