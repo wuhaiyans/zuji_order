@@ -204,7 +204,6 @@ class OrderBuyout
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 		}
-		echo 12312;die;
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
@@ -216,7 +215,7 @@ class OrderBuyout
 			echo "退押金失败！";
 			die;
 		}
-
+		echo 321;die;
 		return true;
 	}
 	/*
