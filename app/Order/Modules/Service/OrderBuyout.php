@@ -210,6 +210,7 @@ class OrderBuyout
 			echo "插入清算失败！";
 			die;
 		}
+		echo $orderCleanResult;die;
 		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
 		if(!$result){
 			echo "退押金失败！";
