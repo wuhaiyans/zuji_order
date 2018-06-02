@@ -201,12 +201,12 @@ class OrderBuyout
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
 			echo "插入清算失败！";
-			return false;
+			die;
 		}
 		$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
 		if(!$result){
 			echo "退押金失败！";
-			return false;
+			die;
 		}
 		return true;
 	}
