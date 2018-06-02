@@ -13,6 +13,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Service\OrderInstalment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class OrderRepository
 {
@@ -330,6 +331,7 @@ class OrderRepository
      */
     public static function getOrderInfo($param = array())
     {
+
         if (empty($param)) {
             return false;
         }

@@ -89,20 +89,15 @@ class OrderCleaning
      * 传参注释：
      * [
      *
-     *      order_no  订单编号
-     *      business_type 业务类型
-     *      business_no 业务编号
-     *      order_type   1线上订单2门店订单 3小程序订单
-     *      out_auth_no  需要退预授权的钱或者预授权的钱转支付，必填
-     *      out_payment_no 需要退款必填
-     *      auth_deduction_amount  预授权转支付金额：注：如果为0，这一项和下面的auth_deduction_status不用传
-     *      auth_deduction_status  预授权转支付的状态：   如果auth_deduction_amount>0  这一项初始状态为2        1：已取消；2：待扣押金；3：已扣押金；4：无需扣押金
-     *      auth_unfreeze_amount   解除预授权的金额：注：如果为0，这一项和下面的auth_unfreeze_status 参数不用传
-     *      auth_unfreeze_status    解除预授权的状态 ：auth_unfreeze_amount>0  这一项初始状态为2        1：已取消；2：待退还押金；3：已退还押金；4：无需退还
-     *      refund_amount           退款金额：如果为0，这一项和下面的refund_status可以不用传
-     *      refund_status           退款状态：refund_amount>0  这一项初始状态为2   1：已取消；2：待退款；3：已退款；4：无需退款
-     *      status                  整体清算状态：根据情况填对应的状态         状态；1：已取消；2：待扣押金；3：待退还押金；4：待退款；5：清算已完成
-     *
+     *      order_no  订单编号  ：必填
+     *      business_type 业务类型：必填
+     *      business_no 业务编号：必填
+     *      order_type   1线上订单2门店订单 3小程序订单：必填
+     *      out_auth_no  1.需要退预授权的钱或者预授权的钱转支付必填 ,2，没有预授权或者预授权金额为0，此参数不用传    ：选填
+     *      out_payment_no 需要退款必填       2，退款金额为0，此参数不用传 ：选填
+     *      auth_deduction_amount  预授权转支付金额：如果为0不用传 ：选填
+     *      auth_unfreeze_amount   解除预授权的金额: 如果为0不用传    ：选填
+     *      refund_amount          退款金额：如果为0:不用传    ：选填
      *
      *  ]
      *
