@@ -120,6 +120,31 @@ class OrderRepository
         }
 
     }
+    /**
+     * 查询近两天匹配度查询
+     * @param $data
+     *      'order_id'=>'' //【必须】当前订单ID
+     *      'user_id' =>'' //【必须】下单用户
+     *      'order_no' =>'' //【必须】下单订单编号
+     *      'create_time'=>''//【必须】下单时间
+     */
+
+    public function similarOrderAddress($data){
+        //查询近7天 订单地址相似度匹配>70% 的
+        $this->district_service = $this->load->service('admin/district');
+        $this->order2_similar_address = $this->load->table('order2/order2_similar_address');
+        $start = $data['create_time']-2*86400;
+        $end   = $data['create_time'];
+
+        $whereArray['user_id'] =['<>', $data['user_id']];
+        $whereArray['create_time'] =[ 'BETWEEN', array($start ,$end)];
+        $whereArray['status'] =['in', [OrderStatus::OrderPaying,OrderStatus::OrderPayed,OrderStatus::OrderInStock]];
+
+        $orderList = DB::table('order_info')
+            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->where($whereArray)
+            ->select('order_info.*','order_userinfo.*');
+    }
 
 
     /**

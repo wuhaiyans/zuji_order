@@ -170,7 +170,7 @@ class UserComponnet implements OrderCreater
             'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
             'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
             'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
-            'address_info'=>$data['address']['address']?$data['address']['address']:"",
+            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"",
             'certified'=>$data['user']['certified'],
             'cretified_platform'=>$data['user']['certified_platform'],
             'credit'=>$data['user']['credit'],
