@@ -288,7 +288,7 @@ class OrderGiveback
 				'user_id' => $orderGivebackInfo['user_id'],
 				'order_no' => $orderGivebackInfo['order_no'],
 				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				'bussiness_no' => $orderGivebackInfo['giveback_no'],
+				'business_no' => $orderGivebackInfo['giveback_no'],
 				'auth_deduction_amount' => 0,//扣除押金金额
 				'auth_unfreeze_amount' => $orderGoodsInfo['yajin'],//退还押金金额
 				'payment_no' => $paymentNo,//payment_no
