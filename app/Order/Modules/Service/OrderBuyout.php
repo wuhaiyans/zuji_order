@@ -144,7 +144,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public function callbackPaid($params){
+	public static function callbackPaid($params){
 		//过滤参数
 		$rule= [
 				'buyout_no'=>'required',
@@ -186,7 +186,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public function callbackOver($params){
+	public static function callbackOver($params){
 		//过滤参数
 		$rule = [
 				'buyout_no'=>'required',
