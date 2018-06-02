@@ -277,14 +277,14 @@ class OrderBuyout
 		}
 		//解冻订单
 		$OrderRepository= new OrderRepository;
-		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if(!$ret){
 			echo 6;die;
 			return false;
 		}
 		//更新订单商品
 		$goods = [
-				'goods_status' => OrderGoodStatus::BUY_OUT,
+				'goods_status' => \App\Order\Modules\Inc\OrderGoodStatus::BUY_OUT,
 				'business_no' => $buyout['buyout_no'],
 		];
 		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
