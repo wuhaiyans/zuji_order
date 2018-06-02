@@ -188,6 +188,10 @@ class OrderGiveback
 //				DB::rollBack();
 				return false;
 			}
+			//解冻订单
+			if(!self::__unfreeze($params['business_no'])){
+				return false;
+			}
 			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
 			if( !$orderGoodsResult ){
 //				//事务回滚
@@ -253,9 +257,13 @@ class OrderGiveback
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
-				if( !$orderGivebackResult ){
+				
+				//解冻订单
+				if(!self::__unfreeze($params['business_no'])){
 					return false;
 				}
+				//需要记录清算，清算数据为空即可
+				$paymentNo = $fundauthNo = '';
 			}
 			//-+--------------------------------------------------------------------
 			// | 生成=>更新订单状态（处理中，待清算）
@@ -267,34 +275,52 @@ class OrderGiveback
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_IN_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 				]);
-				if( !$orderGivebackResult ){
-					return false;
-				}
 				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
-				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderGoodsInfo['order_no'] );
-				//清算处理数据拼接
-				$clearData = [
-					'user_id' => $orderGivebackInfo['user_id'],
-					'order_no' => $orderGivebackInfo['order_no'],
-					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-					'bussiness_no' => $orderGivebackInfo['giveback_no'],
-					'auth_deduction_amount' => 0,//扣除押金金额
-					'auth_unfreeze_amount' => $orderGoodsInfo['yajin'],//退还押金金额
-					'payment_no' => $payObj->getPaymentNo(),//payment_no
-					'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
-				];
-				//进入清算处理
-				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-				if( !$orderCleanResult ){
-					set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
-					return false;
-				}
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
+				$paymentNo = $payObj->getPaymentNo();
+				$fundauthNo = $payObj->getFundauthNo();
 			}
+			if( !$orderGivebackResult ){
+				return false;
+			}
+			//清算处理数据拼接
+			$clearData = [
+				'user_id' => $orderGivebackInfo['user_id'],
+				'order_no' => $orderGivebackInfo['order_no'],
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				'bussiness_no' => $orderGivebackInfo['giveback_no'],
+				'auth_deduction_amount' => 0,//扣除押金金额
+				'auth_unfreeze_amount' => $orderGoodsInfo['yajin'],//退还押金金额
+				'payment_no' => $paymentNo,//payment_no
+				'fundauth_no' => $fundauthNo,//和funath_no
+			];
+			//进入清算处理
+			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+			if( !$orderCleanResult ){
+				set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
+				return false;
+			}
+			//同步到商品状态
 			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
 			if( !$orderGoodsResult ){
 				return false;
 			}
 		} catch (\Exception $ex) {
+			return false;
+		}
+		return true;
+	}
+	public static function __unfreeze($givebackNo) {
+		$orderGivebackService = new OrderGiveback();
+		//解冻订单
+		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
+		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($givebackNo);
+		if( count($givebackUnfinshedList) != 1 ){
+				return false;
+		} 
+		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($givebackNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+		if( !$orderFreezeResult ){
+			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
 			return false;
 		}
 		return true;
