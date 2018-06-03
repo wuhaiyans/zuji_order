@@ -16,6 +16,20 @@ class PayController extends Controller
     public function __construct()
     {
     }
+	
+	public function testW(){
+		$data = [
+			'withhold_no' => 'WPA60233627831980',
+			'out_withhold_no' => '30A60233627873622',
+			'withhold_status' => '1',
+			'counter' => 0,
+			'user_id' => 1,
+		];
+		$abc = new \App\Order\Modules\Repository\Pay\Withhold( $data );
+		$b = $abc->increase();
+		var_dump( $b, $abc );
+	}
+	
 	public function testPost(){
 		
 		$url = 'https://dev-pay-zuji.huishoubao.com/jdpay/Payment/paymentNotify';
