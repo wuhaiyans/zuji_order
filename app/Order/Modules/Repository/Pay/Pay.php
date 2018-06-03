@@ -452,6 +452,7 @@ class Pay extends \App\Lib\Configurable
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
 			'payment_channel' => $params['payment_channel'],
 			'payment_amount' => $params['payment_amount'],
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
@@ -493,6 +494,7 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function withholdSuccess( array $params ):bool
 	{
+		$update_time = time();
 		LogApi::debug('[支付阶段]代扣签约环节处理');
 		// 待签约时才允许
 		if( $this->status != PayStatus::WAIT_WHITHHOLD
@@ -514,6 +516,7 @@ class Pay extends \App\Lib\Configurable
 			'status' => $status,
 			'withhold_status' => WithholdStatus::SIGNED,// 已签约
 			'withhold_channel' => $params['withhold_channel'],//
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]代扣签约环节处理保存失败1');
@@ -527,7 +530,8 @@ class Pay extends \App\Lib\Configurable
 			'out_withhold_no'	=> $params['out_withhold_no'],
 			'user_id'			=> $this->user_id,
 			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
-			'sign_time'			=> time(),
+			'sign_time'			=> $update_time,
+			'update_time'		=> $update_time,
 			'counter'			=> 1, // 计数
 		]);
 		if( !$b ){
@@ -582,6 +586,7 @@ class Pay extends \App\Lib\Configurable
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
 			'fundauth_channel' => $params['fundauth_channel'],
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );

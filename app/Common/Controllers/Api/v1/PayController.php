@@ -18,16 +18,27 @@ class PayController extends Controller
     }
 	
 	public function testW(){
-		$data = [
-			'withhold_no' => 'WPA60233627831980',
-			'out_withhold_no' => '30A60233627873622',
-			'withhold_status' => '1',
-			'counter' => 0,
-			'user_id' => 1,
-		];
-		$abc = new \App\Order\Modules\Repository\Pay\Withhold( $data );
-		$b = $abc->increase();
-		var_dump( $b, $abc );
+		
+		\DB::beginTransaction();
+		
+//		$data = [
+//			'withhold_no' => 'WPA60233627831980',
+//			'out_withhold_no' => '30A60233627873622',
+//			'withhold_status' => '1',
+//			'counter' => 0,
+//			'user_id' => 1,
+//		];
+//		$withhold = new \App\Order\Modules\Repository\Pay\Withhold( $data );
+		
+		$user_id = '5';
+		$channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;
+		
+		$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByUserChannel($user_id, $channel);
+		
+		$b = $withhold->increase();
+		var_dump( $b, $withhold->getCounter() );
+		$b = $withhold->decrease();
+		var_dump( $b, $withhold->getCounter() );
 	}
 	
 	public function testPost(){
