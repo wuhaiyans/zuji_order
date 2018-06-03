@@ -98,8 +98,9 @@ class PayController extends Controller
 	 * 支付异步通知处理
 	 * @param array $_POST
 	 * [
-	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
-	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
+	 *		'channel'		=> '',  //【必选】int 支付渠道
+	 *		'payment_no'	=> '',	//【必选】string 支付系统支付编号
+	 *		'out_payment_no'=> '',	//【必选】string 业务系统支付编号
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 *		'reason'		=> '',	//【必选】stirng 失败原因
@@ -133,6 +134,9 @@ class PayController extends Controller
 				echo 'payment status not success';exit;
 			}
 			
+			// 开启事务
+			DB::beginTransaction();
+			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
 			
@@ -145,14 +149,11 @@ class PayController extends Controller
 				echo 'payment not need ';exit;
 			}
 			
-			// 提交事务
-			DB::beginTransaction();
-			
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
 				'payment_amount'	=> sprintf('%0.2f',$params['amount']/100),	// 支付金额；单位元
-				'payment_channel'	=> \App\Order\Modules\Repository\Pay\Channel::Alipay,	// 支付渠道
+				'payment_channel'	=> $params['channel'],	// 支付渠道
 				'payment_time' => time(),
 			]);
 			
@@ -174,6 +175,7 @@ class PayController extends Controller
 	 * 代扣签约异步通知处理
 	 * @param array $_POST
 	 * [
+	 *		'channel'			=> '',	//【必选】int 支付渠道
 	 *		'agreement_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_agreement_no'	=> '',	//【必选】string 业务系统编号
 	 *		'user_id'			=> '',	//【必选】string 业务系统用户ID
@@ -230,6 +232,7 @@ class PayController extends Controller
 			// 代扣签约处理
 			$pay->withholdSuccess([
 				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
+				'withhold_channel' => $params['channel'],
 			]);
 			
 			// 提交事务
@@ -278,6 +281,7 @@ class PayController extends Controller
 	 * 预授权冻结异步通知处理
 	 * @param array $_POST
 	 * [
+	 *		'channel'			=> '',	//【必选】int 支付渠道
 	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
 	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
@@ -299,7 +303,7 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
-//		try {
+		try {
 			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByFundauthNo( $params['out_fundauth_no'] );
@@ -331,17 +335,18 @@ class PayController extends Controller
 			$pay->fundauthSuccess([
 				'out_fundauth_no' => $params['fundauth_no'],	// 支付系统资金预授权编码
 				'total_amount' => sprintf('%0.2f',$params['total_freeze_amount']/100),
+				'fundauth_channel' => $params['channel'],
 			]);
 			
 			// 提交事务
             DB::commit();	
 			echo '{"status":"ok"}';exit;
 			
-//		} catch (\App\Lib\NotFoundException $exc) {
-//			echo $exc->getMessage();
-//		} catch (\Exception $exc) {
-//			echo $exc->getMessage();
-//		}
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();
+		}
 		
 		DB::rollBack();
 		exit;

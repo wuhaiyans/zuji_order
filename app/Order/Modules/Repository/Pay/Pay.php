@@ -513,6 +513,7 @@ class Pay extends \App\Lib\Configurable
 		])->update([
 			'status' => $status,
 			'withhold_status' => WithholdStatus::SIGNED,// 已签约
+			'withhold_channel' => $params['withhold_channel'],//
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]代扣签约环节处理保存失败1');
@@ -522,6 +523,7 @@ class Pay extends \App\Lib\Configurable
 		$withholdModel = new OrderPayWithhold();
 		$b = $withholdModel->insert([
 			'withhold_no'		=> $this->withholdNo,
+			'withhold_channel'	=> $params['withhold_channel'],
 			'out_withhold_no'	=> $params['out_withhold_no'],
 			'user_id'			=> $this->user_id,
 			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
@@ -550,6 +552,7 @@ class Pay extends \App\Lib\Configurable
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param array		$params		支付成功参数
 	 * [
+	 *		'fundauth_channel'	=> '',	// 支付渠道
 	 *		'out_fundauth_no'	=> '',	// 支付系统授权码
 	 *		'total_amount'		=> '',	// 预授权金额；单位：元
 	 * ]
@@ -578,6 +581,7 @@ class Pay extends \App\Lib\Configurable
 		])->update([
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
+			'fundauth_channel' => $params['fundauth_channel'],
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );
