@@ -273,7 +273,11 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
+		
+		
 		echo '{"status":"ok"}';exit;
+		
+		
 	}
 	
 	

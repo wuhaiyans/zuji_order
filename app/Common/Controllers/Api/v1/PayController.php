@@ -35,10 +35,16 @@ class PayController extends Controller
 		
 		$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByUserChannel($user_id, $channel);
 		
-		$b = $withhold->increase();
-		var_dump( $b, $withhold->getCounter() );
-		$b = $withhold->decrease();
-		var_dump( $b, $withhold->getCounter() );
+//		$b = $withhold->increase();
+//		var_dump( $b, $withhold->getCounter() );
+//		$b = $withhold->decrease();
+//		var_dump( $b, $withhold->getCounter() );
+		
+		var_dump( $withhold );
+		$b = $withhold->unsignApply();
+		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		$b = $withhold->unsignSuccess();
+		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
 	}
 	
 	public function testPost(){
