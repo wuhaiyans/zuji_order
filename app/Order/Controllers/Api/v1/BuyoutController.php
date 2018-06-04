@@ -88,8 +88,8 @@ class BuyoutController extends Controller
             $where['appid'] = $params['appid'];
         }
         $sumCount = OrderBuyout::getCount($where);
-        $where['page'] = $params['page']?$params['page']:0;
-        $where['size'] = $params['size']<=config('web.pre_page_size')?$params['size']:config('web.pre_page_size');
+        $where['page'] = $params['page']>0?$params['page']-1:0;
+        $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
         return apiResponse(['size'=>$sumCount,'list'=>$orderList],ApiStatus::CODE_0);
     }

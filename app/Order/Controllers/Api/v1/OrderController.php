@@ -26,6 +26,7 @@ class OrderController extends Controller
 	 * 
 	 * @param Request $request
 	 * [
+	 *		// 【注：】下单时不再支持[支付方式]参数，下单成功后，由用户选择
 	 *		'pay_type'	=> '',	//【必选】string 支付方式
 	 *		'sku_info'	=> [	//【必选】string	SKU信息
 	 *			[
@@ -50,26 +51,26 @@ class OrderController extends Controller
 
         //判断参数是否设置
         if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
         }
         if(empty($payType)){
-            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式]");
         }
         if(empty($userId)){
-            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户标识]");
         }
         if(count($sku)<1){
-            return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         }
 
         $data =[
-            'appid'=>$appid,
-            'pay_type'=>$payType,
-            'sku'=>$sku,
-            'coupon'=>$coupon,
-            'user_id'=>$userId,  //增加用户ID
+            'appid'		=> $appid,
+            'pay_type'	=> $payType,
+            'sku'		=> $sku,
+            'coupon'	=> $coupon,
+            'user_id'	=> $userId,  //增加用户ID
         ];
-        $res = $this->OrderCreate->confirmation($data);
+        $res = $this->OrderCreate->confirmation( $data );
         if(!is_array($res)){
             return apiResponse([],$res,ApiStatus::$errCodes[$res]);
         }

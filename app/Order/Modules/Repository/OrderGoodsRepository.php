@@ -45,10 +45,7 @@ class OrderGoodsRepository
      * @return array|bool
      */
     public static function getGoodsRow($where = [['1','=','1']]){
-        if (empty($goods_no)) return false;
         $result =  orderGoods::query()->where($where)->first();
-        dd($result);
-        die;
         if (!$result) return false;
         return $result->toArray();
     }

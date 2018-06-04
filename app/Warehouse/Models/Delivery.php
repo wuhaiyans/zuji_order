@@ -6,7 +6,7 @@ namespace App\Warehouse\Models;
 class Delivery extends Warehouse
 {
     //状态
-    const STATUS_NONE = 0;
+    const STATUS_NONE = 0;//已删除
     const STATUS_INIT = 1;//待配货
     const STATUS_WAIT_SEND  = 2;//已配货 待发货
     const STATUS_SEND       = 3;//已发货 待签收
@@ -131,7 +131,7 @@ class Delivery extends Warehouse
     public static function sta($status=null)
     {
         $st = [
-            self::STATUS_NONE   => '已删除',
+//            self::STATUS_NONE   => '已删除',
             self::STATUS_INIT   => '待配货',
             self::STATUS_WAIT_SEND  => '已配货 待发货',
             self::STATUS_SEND       => '已发货 待签收',

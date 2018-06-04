@@ -155,7 +155,7 @@ class ReletRepository
      * @return bool
      */
     public function createRelet($data){
-        return $this->orderRelet->save($data);
+        return OrderRelet::insert($data);
     }
 
     /**

@@ -33,8 +33,9 @@ class OrderCleaningController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function list(Request $request){
-
+        LogApi::info('订单清算列表接口调用参数：', $request->all());
         $params = $request->input('params');
+
         $res = OrderCleaning::getOrderCleaningList($params);
 
         if(!is_array($res)){
@@ -57,9 +58,8 @@ class OrderCleaningController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function detail(Request $request){
-
         $params = $request->all();
-
+        LogApi::info('订单详情接口调用参数：', $params);
         $rules = [
             'clean_no'  => 'required',
         ];
@@ -75,7 +75,7 @@ class OrderCleaningController extends Controller
         $res = OrderCleaning::getOrderCleanInfo($params['params']);
 
 
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+        return $res;
 
     }
 

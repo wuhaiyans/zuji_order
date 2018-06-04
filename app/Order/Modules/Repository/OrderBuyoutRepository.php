@@ -36,15 +36,11 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getCount(array $where){
-		if(!$where){
-			return false;
-		}
 		$count = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
 				->count();
 		return $count;
 	}
@@ -59,23 +55,21 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getList(array $where,array $additional){
-		if(!$where){
+
+		if(!isset($additional['offset'])){
 			return false;
 		}
-		if(!isset($additional['page'])){
+		if(!isset($additional['limit'])){
 			return false;
 		}
-		if(!isset($additional['size'])){
-			return false;
-		}
-		$additional['page'] = ($additional['page'] - 1) * $additional['size'];
+		$additional['offset'] = $additional['offset']* $additional['limit'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
-				->paginate($additional['page'],$columns = ['*'], $pageName = '', $additional['size']);
+				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
+				->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['offset']);
 		if($parcels){
 			return $parcels->toArray();
 		}

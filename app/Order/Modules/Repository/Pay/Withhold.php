@@ -211,7 +211,7 @@ class Withhold extends \App\Lib\Configurable {
 		}
 		$time = time();
 		try {
-//			var_dump( config('app.url').'/order/pay/withholdUnsignNotify' );
+			
 			// 申请解约
 			\App\Lib\Payment\CommonWithholdingApi::unSign([
 				'agreement_no'		=> $this->out_withhold_no,	// 支付系统代扣协议编号
@@ -219,8 +219,8 @@ class Withhold extends \App\Lib\Configurable {
 				'user_id'			=> $this->user_id,
 				'back_url'			=> config('app.url').'/order/pay/withholdUnsignNotify',
 			]);
-
-			sql_profiler();
+			
+			// 更新协议状态
 			$n = \App\Order\Models\OrderPayWithholdModel::where([
 				'withhold_no'	=> $this->withhold_no,
 			])->limit(1)->update([
@@ -228,15 +228,17 @@ class Withhold extends \App\Lib\Configurable {
 				'update_time' => $time,
 			]);
 			if( !$n ){
-				Error::setError('[代扣协议][解约中]状态更新失败');
-				LogApi::type('data-save')::error('[代扣协议][解约中]状态更新失败');
+				Error::setError('[代扣协议][解约申请]状态更新失败');
+				LogApi::type('data-save')::error('[代扣协议][解约申请]状态更新失败');
 				return false;
 			};
 			$this->withhold_status = WithholdStatus::UNSIGNING;
 			$this->update_time = $time;
 			return true;
-		} catch (\Exception $exc) {
+		} catch (\App\Lib\ApiException $exc) {
 			Error::exception( $exc );
+		} finally {
+			LogApi::error('[代扣协议][解约申请]操作失败');
 			return false;
 		}
 

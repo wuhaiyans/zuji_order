@@ -6,6 +6,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderPayWithhold;
+use App\Order\Models\OrderPayWithholdModel;
 use App\Order\Modules\Inc\OrderPayWithholdStatus;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
@@ -23,7 +24,7 @@ class OrderPayWithholdRepository
             return [];
         }
 
-        $withholdInfo = OrderPayWithhold::query()
+        $withholdInfo = OrderPayWithholdModel::query()
             ->where(['user_id'=>$userId])
             ->first();
         if(!$withholdInfo){

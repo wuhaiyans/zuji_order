@@ -105,7 +105,11 @@ class OrderReturnRepository
                 $order_return=OrderReturn::where($where[$k])->first()->toArray();
                 $data['business_key']=$params['business_key'];
                 $data['business_no']=$order_return['refund_no'];
-                $data['goods_status']=OrderGoodStatus::REFUNDS;
+                if($params['business_key']==ReturnStatus::OrderTuiHuo){
+                    $data['goods_status']=OrderGoodStatus::REFUNDS;
+                }else{
+                    $data['goods_status']=OrderGoodStatus::EXCHANGE_GOODS;
+                }
                 $update_result=ordergoods::where($where[$k])->update($data);
                 if(!$update_result){
                     return false;
@@ -127,6 +131,7 @@ class OrderReturnRepository
         return true;
 
     }
+
     //更新商品状态-退货-审核同意
     public static function goods_update($params){
         if(isset($params['goods_no'])){
@@ -314,6 +319,7 @@ class OrderReturnRepository
                 $params['logistics_id']=$data['logistics_id'];
                 $params['logistics_no']=$data['logistics_no'];
                 $params['logistics_name']=$data['logistics_name'];
+                $params['evaluation_status']=ReturnStatus::ReturnEvaluation;
                 $update_result=OrderReturn::where($where[$k])->update($params);
             }
         if($update_result){
@@ -483,17 +489,25 @@ class OrderReturnRepository
     public static function createchange($params){
         $param = filter_array($params,[
             'order_no'  =>'required',
-            'goods_id'    =>'required',
             'goods_no'          =>'required',
             'serial_number'        =>'required',
         ]);
-        if(count($param)<4){
+        if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $data['status']=1;
         $return_result= OrderGoodsExtend::where([['goods_no','=',$params['goods_no']],['order_no','=',$params['order_no']]])->update($data);
         if(!$return_result){
             return false;
+        }
+        if(!$params['imei1']){
+            $params['imei1']='';
+        }
+        if(!$params['imei2']){
+            $params['imei2']='';
+        }
+        if(!$params['imei3']){
+            $params['imei3']='';
         }
         $create_result=OrderGoodsExtend::query()->insert($params);
         if($create_result){

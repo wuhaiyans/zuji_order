@@ -111,7 +111,7 @@ class Relet
                     return false;
                 }
             }else{
-                if( !publicInc::getCangzuRow($params['zuqi']) ){
+                if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
                     DB::rollBack();
                     set_msg('租期错误');
                     return false;
@@ -136,7 +136,7 @@ class Relet
 
                 if($this->reletRepository->createRelet($data)){
                     //修改设备状态 续租中
-                    $rse = OrderGoods::where(['id'],'=',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
+                    $rse = OrderGoods::where('id',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
                     if( !$rse ){
                         DB::rollBack();
                         set_msg('修改设备状态续租中失败');
@@ -144,7 +144,7 @@ class Relet
                     }
 
                     //创建支付
-                    if(PayInc::FlowerStagePay){
+                    if($params['pay_type'] == PayInc::FlowerStagePay){
                         // 创建支付 一次性结清
                         $pay = PayCreater::createPayment([
                             'user_id'		=> $data['user_id'],
@@ -170,24 +170,27 @@ class Relet
                     }else{
                         //代扣
                         // 创建分期
-                        $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
                         $fenqiData = [
                             'order'=>[
                                 'order_no'=>$data['order_no'],//订单编号
                             ],
                             'sku'=>[
-                                'zuqi'              =>  $row['zuqi'],//租期
-                                'zuqi_type'         =>  $row['zuqi_type'],//租期类型
-                                'all_amount'        =>  $amount,//总金额
-                                'amount'            =>  $amount,//实际支付金额
-                                'yiwaixian'         =>  0,//意外险
-                                'zujin'             =>  $row['zujin'],//租金
-                                'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                [
+                                    'zuqi'              =>  $row['zuqi'],//租期
+                                    'zuqi_type'         =>  $row['zuqi_type'],//租期类型
+                                    'all_amount'        =>  $amount,//总金额
+                                    'amount'            =>  $amount,//实际支付金额
+                                    'yiwaixian'         =>  0,//意外险
+                                    'zujin'             =>  $row['zujin'],//租金
+                                    'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                ]
                             ],
                             'user'=>[
-                                'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
+                                'user_id'=>$params['user_id'],//用户代扣协议号
                             ],
                         ];
+
+                        dd($fenqiData);
                         if( OrderInstalment::create($fenqiData) ){
                             //修改设备表状态续租完成,新建设备周期数据
                             if( $this->reletRepository->setGoods($data['relet_no']) ){
@@ -277,7 +280,9 @@ class Relet
             ];
 
             //修改订单商品状态
-            if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+            $goodsObj->goods_status=OrderGoodStatus::RENEWAL_OF_RENT;
+            $goodsObj->update_time=time();
+            if( !$goodsObj->save() ){
                 DB::rollBack();
                 LogApi::notify("续租修改设备状态失败", $reletNo);
                 return false;
@@ -318,13 +323,13 @@ class Relet
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
-                $row['pay'][] = ['pay_type'=>PayInc::WithhodingPay,'pay_name'=>PayInc::getPayName(PayInc::WithhodingPay)];
                 $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
             }else{
                 $list = publicInc::getCangzulist();
                 foreach ($list as $item){
                     $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
                 }
+                $row['pay'][] = ['pay_type'=>PayInc::WithhodingPay,'pay_name'=>PayInc::getPayName(PayInc::WithhodingPay)];
                 $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
             }
             $row['list'] = $list;
