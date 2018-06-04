@@ -7,6 +7,7 @@
 
 namespace App\Lib\Order;
 use App\Lib\Curl;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Delivery
@@ -36,7 +37,7 @@ class Delivery
             'method'=> 'api.order.deliveryReceive',//模拟
             'params' => $params
         ]);
-
+        Log::error($response);
         return $response;
 
     }

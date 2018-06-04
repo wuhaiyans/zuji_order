@@ -22,6 +22,7 @@ use App\Order\Modules\Repository\OrderReturnRepository;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Log;
 
 
 class OrderOperate
@@ -140,7 +141,6 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-
             $b =OrderRepository::deliveryReceive($orderNo);
             if(!$b){
                 DB::rollBack();
@@ -166,7 +166,7 @@ class OrderOperate
                     'goods_no'=>$goodsInfo[0]['goods_no'],
                     'user_id'=>$orderInfo['user_id'],
                     'unit'=>2,
-                    'unit_value'=>$goodsInfo[0]['goods_no'],
+                    'unit_value'=>$goodsInfo[0]['zuqi'],
                     'begin_time'=>$goodsData['begin_time'],
                     'end_time'=>$goodsData['end_time'],
                 ];
@@ -177,11 +177,11 @@ class OrderOperate
                 }
             }
 
-            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
-            if(!$id){
-                DB::rollBack();
-                return false;
-            }
+//            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
+//            if(!$id){
+//                DB::rollBack();
+//                return false;
+//            }
 
             DB::commit();
             return true;

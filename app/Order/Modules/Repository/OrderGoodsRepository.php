@@ -27,8 +27,8 @@ class OrderGoodsRepository
      */
     public function updateServiceTime( $goodsNo, $data ) {
         $data =filter_array($data,[
-            'begin_time'=>'required|int',
-            'end_time'=>'required|int',
+            'begin_time'=>'required',
+            'end_time'=>'required',
         ]);
         if(count($data)!=2){
             return false;

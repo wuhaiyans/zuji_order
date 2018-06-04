@@ -43,7 +43,7 @@ class AlipayController extends Controller
             'callback_url'  => 'required',
             'order_no'  => 'required',
             'fundauth_amount'  => 'required',
-            'channel_id'  => 'required',
+            'pay_channel_id'  => 'required',
             'user_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
@@ -76,7 +76,7 @@ class AlipayController extends Controller
 		// | 获取并返回url
 		//-+--------------------------------------------------------------------
 		try{
-			$paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
+			$paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
 					'name'=>'订单' .$params['order_no']. '支付',
 					'front_url' => $params['callback_url'],
 			]);
