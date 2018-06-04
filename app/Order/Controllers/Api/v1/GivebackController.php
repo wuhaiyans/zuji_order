@@ -460,7 +460,7 @@ class GivebackController extends Controller
         $rules = [
             'goods_no'     => 'required',//还机单编号
             'callback_url'     => 'required',//回调地址
-            'channel_id'     => 'required',//支付的渠道id
+            'pay_channel_id'     => 'required',//支付的渠道id
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
@@ -482,7 +482,7 @@ class GivebackController extends Controller
 		try{
 			//获取支付的url
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
-			$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
+			$paymentUrl = $payObj->getCurrentUrl($paramsArr['pay_channel_id'], [
 				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
 				'front_url' => $paramsArr['callback_url'],
 			]);
@@ -602,15 +602,10 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		else{
 			//解冻订单
-			//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-			$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderGivevbackInfo['order_no']);
-			if( count($givebackUnfinshedList) == 1 ){
-				$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
-				if( !$orderFreezeResult ){
-					set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
-					return false;
-				}
-			} 
+			if(!OrderGiveback::__unfreeze($orderGivevbackInfo['order_no'])){
+				set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
+				return false;
+			}
 			//拼接需要更新还机单状态
 			$data['status'] = $status = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
@@ -780,18 +775,24 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
-		//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
-		$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
+		if( $paramsArr['yajin'] ){
+			//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
+			$paymentNo = $payObj->getPaymentNo();
+			$fundauthNo = $payObj->getFundauthNo();
+		}else{
+			$paymentNo = $fundauthNo = '';
+		}
 		//清算处理数据拼接
 		$clearData = [
 			'user_id' => $paramsArr['user_id'],
 			'order_no' => $paramsArr['order_no'],
 			'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'bussiness_no' => $paramsArr['giveback_no'],
+			'business_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
-			'payment_no' => $payObj->getPaymentNo(),//payment_no
-			'fundauth_no' => $payObj->getFundauthNo(),//和funath_no
+			'payment_no' => $paymentNo,//payment_no
+			'out_auth_no' => $fundauthNo,//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if( !$orderCleanResult ){

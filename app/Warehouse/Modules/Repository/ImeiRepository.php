@@ -7,9 +7,8 @@
 
 namespace App\Warehouse\Modules\Repository;
 
-use App\Warehouse\Modules\Inc\Imei;
 use Illuminate\Support\Facades\DB;
-
+use App\Warehouse\Models\Imei;
 class ImeiRepository
 {
 
@@ -70,6 +69,8 @@ class ImeiRepository
     {
         $query = \App\Warehouse\Models\Imei::where($params);
 
+        $query->whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);
+
         return $query->paginate($limit,
             [
                 'imei','price'
@@ -90,12 +91,12 @@ class ImeiRepository
             ->limit($limit)
             ->get()->toArray();
 
-        $result = [];
-        foreach ($list as $v) {
-            $result[$v['imei']] = $v;
-        }
+//        $result = [];
+//        foreach ($list as $v) {
+//            $result[$v['imei']] = $v;
+//        }
 
-        return $result;
+        return $list;
     }
 
 }

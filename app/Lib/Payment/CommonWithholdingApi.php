@@ -59,7 +59,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
      * @param array $params
      * [
      *		'agreement_no'	=> '', //支付平台代扣协议号
-     *		'out_trade_no'	=> '', //业务系统授权码
+     *		'out_trade_no'	=> '', //业务系统业务码
      *		'amount'		=> '', //交易金额；单位：分
      *		'back_url'		=> '', //后台通知地址
      *		'name'			=> '', //交易名称

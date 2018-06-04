@@ -311,14 +311,31 @@ class DeliveryRepository
         }
 
         $result = $model->toArray();
+        $goods = $model->goods->toArray();
 
         if ($model->imeis) {
             $result['imeis'] = $model->imeis;
+
+
+
+            foreach ($goods as &$g) {
+                foreach ($model->imeis as $i) {
+                    if ($i->goods_no == $g['goods_no']) {
+                        $g['imei'] = $i->imei;
+                        $g['price'] = $i->price;
+                        $g['apple_serial'] = $i->apple_serial;
+                    }
+                }
+            }unset($g);
+
         }
 
-        if ($model->goods) {
-            $result['goods'] = $model->goods;
-        }
+        $result['goods'] = $goods;
+
+
+//        if ($model->goods) {
+//            $result['goods'] = $model->goods;
+//        }
 
         return $result;
     }

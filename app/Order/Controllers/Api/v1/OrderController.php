@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Order\OrderInfo;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
@@ -209,6 +210,42 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     *  增加联系备注
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function saveOrderVisit(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'visit_id'=>'required',
+            'visit_text'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderVistSave($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
+     * 获取订单操作日志
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function orderLog(Request $request)
     {
         $params =$request->all();
@@ -218,7 +255,7 @@ class OrderController extends Controller
         }
 
         $res = OrderOperate::orderLog($params['order_no']);
-        if(!$res){
+        if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60001);
         }
         return apiResponse($res,ApiStatus::CODE_0);
@@ -244,11 +281,12 @@ class OrderController extends Controller
     public function delivery(Request $request)
     {
         $params =$request->all();
+
         $params =$params['params'];
         if(empty($params['order_no'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(count($params['goods_info'] <1)){
+        if(count($params['goods_info']) <1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
@@ -266,17 +304,11 @@ class OrderController extends Controller
     public function deliveryReceive(Request $request)
     {
         $params =$request->all();
-        $rules = [
-            'order_no'  => 'required',
-            'role'=>'required',
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-
-        if (empty($validateParams) || $validateParams['code']!=0) {
-
-            return apiResponse([],$validateParams['code']);
-        }
         $params =$params['params'];
+
+        if(empty($params['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
 
         $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
         if(!$res){
@@ -402,8 +434,7 @@ class OrderController extends Controller
 
 
                 $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
-
-
+                p($orderData);
                 if ($orderData['code']===ApiStatus::CODE_0) {
 
                     return apiResponse($orderData['data'],ApiStatus::CODE_0);
@@ -434,6 +465,40 @@ class OrderController extends Controller
         $res = \App\Order\Modules\Inc\OrderListFiler::orderInc();
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
+
+    }
+
+
+    /**
+     * 修改收货地址信息
+     * Author: heaven
+     * @param Request $request
+     */
+    public function modifyAddress(Request $request)
+    {
+
+        $params = $request->all();
+        $rule = [
+            'order_address_id' => 'required',
+            'order_no'=> 'required',
+            'mobile'  => 'required',
+            'name'=> 'required',
+            'address_info'=> 'required',
+
+        ];
+
+        $validateParams = $this->validateParams($rule,  $params);
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code'], $validateParams['msg']);
+        }
+
+
+        $succss = OrderUserInfoRepository::modifyAddress($validateParams['data']);
+        if(!$succss){
+            return apiResponse([],ApiStatus::CODE_30013);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
 
     }
 

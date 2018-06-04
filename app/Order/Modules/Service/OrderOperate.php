@@ -10,6 +10,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
+use App\Order\Models\OrderExtend;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
@@ -21,6 +22,7 @@ use App\Order\Modules\Repository\OrderReturnRepository;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Log;
 
 
 class OrderOperate
@@ -86,10 +88,37 @@ class OrderOperate
         }
 
     }
+    /**
+     * 保存回访标识
+     * @param $params
+     * [
+     *  'order_no'  => '',//订单编号
+     *  'visit_id'=>'',//回访标识ID
+     *  'visit_text'=>'',//回访备注
+     * ]
+     * @return array|bool
+     */
+
+    public static function orderVistSave($params)
+    {
+        $order =OrderExtend::updateOrCreate(['order_no'=>$params['order_no']],$params);
+        return $order->getQueueableId();
+    }
+
+    /**
+     * 获取订单日志接口
+     * @param $orderNo
+     * @return array|bool
+     */
 
     public static function orderLog($orderNo)
     {
         if(empty($orderNo)){return false;}
+        $logData = OrderLogRepository::getOrderLog($orderNo);
+        if(!$logData){
+            return false;
+        }
+        return $logData;
     }
     /**
      * 确认收货接口
@@ -112,7 +141,6 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-
             $b =OrderRepository::deliveryReceive($orderNo);
             if(!$b){
                 DB::rollBack();
@@ -138,7 +166,7 @@ class OrderOperate
                     'goods_no'=>$goodsInfo[0]['goods_no'],
                     'user_id'=>$orderInfo['user_id'],
                     'unit'=>2,
-                    'unit_value'=>$goodsInfo[0]['goods_no'],
+                    'unit_value'=>$goodsInfo[0]['zuqi'],
                     'begin_time'=>$goodsData['begin_time'],
                     'end_time'=>$goodsData['end_time'],
                 ];
@@ -149,11 +177,11 @@ class OrderOperate
                 }
             }
 
-            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
-            if(!$id){
-                DB::rollBack();
-                return false;
-            }
+//            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
+//            if(!$id){
+//                DB::rollBack();
+//                return false;
+//            }
 
             DB::commit();
             return true;
@@ -189,7 +217,9 @@ class OrderOperate
                 return false;
             }
 
-            $delivery =Delivery::apply($data['order_no']);
+            $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
+            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+            $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
                 return false;
@@ -315,6 +345,7 @@ class OrderOperate
      */
     public static function getOrderInfo($orderNo)
     {
+
         $order = array();
 
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
@@ -322,6 +353,44 @@ class OrderOperate
         $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
 
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+
+        //分期数据表
+        $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
+        $order['instalment_info'] = $goodsExtendData;
+
+
+        $orderData['instalment_unpay_amount'] = 0.00;
+        $orderData['instalment_payed_amount'] = 0.00;
+        if ($goodsExtendData) {
+            $instalmentUnpayAmount  = 0.00;
+            $instalmentPayedAmount  = 0.00;
+
+            foreach ($goodsExtendData as $values) {
+
+                if ($values['status']==Inc\OrderInstalmentStatus::UNPAID)
+                {
+
+                    $instalmentUnpayAmount+=$values['amount'];
+                }
+
+                if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
+                {
+
+                    $instalmentPayedAmount+=$values['amount'];
+                } else {
+
+                    $instalmentUnpayAmount+=$values['amount'];
+
+                }
+
+            }
+            //未支付总金额
+            $orderData['instalment_unpay_amount'] = $instalmentUnpayAmount;
+            //已支付总金额
+            $orderData['instalment_payed_amount'] = $instalmentPayedAmount;
+
+        }
+
         //订单状态名称
         $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);
 
@@ -330,6 +399,18 @@ class OrderOperate
 
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+
+
+        //订单金额
+        $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
+        //支付金额
+        $orderData['pay_amount']  = $orderData['order_amount']+$orderData['order_insurance'];
+        //总租金
+        $orderData['zujin_amount']  =   $orderData['order_amount'];
+        //碎屏意外险
+        $orderData['order_insurance_amount']  =   $orderData['order_insurance'];
+        //授权总金额
+        $orderData['zujin_amount']  =   $orderData['order_yajin'];
 
 
         $order['order_info'] = $orderData;
@@ -344,9 +425,7 @@ class OrderOperate
         //设备扩展信息表
         $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
         $order['goods_extend_info'] = $goodsExtendData;
-        //分期数据表
-        $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
-        $order['instalment_info'] = $goodsExtendData;
+
         return apiResponseArray(ApiStatus::CODE_0,$order);
 //        return $orderData;
 
@@ -367,7 +446,6 @@ class OrderOperate
 
         $orderList = OrderRepository::getOrderList($param);
         $orderListArray = objectToArray($orderList);
-
 
         if (!empty($orderListArray['data'])) {
 
@@ -390,7 +468,7 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 

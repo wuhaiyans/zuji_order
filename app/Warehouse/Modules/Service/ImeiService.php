@@ -30,8 +30,8 @@ class ImeiService
     {
         $limit = 20;
 
-        if (isset($params['limit']) && $params['limit']) {
-            $limit = $params['limit'];
+        if (isset($params['size']) && $params['size']) {
+            $limit = $params['size'];
         }
         $whereParams = [];
 
@@ -39,9 +39,8 @@ class ImeiService
             $whereParams['imei'] = $params['imei'];
         }
 
-        $page = isset($params['page']) ? $params['page'] : null;
 
-        $whereParams['status'] = [Imei::STATUS_OUT, Imei::STATUS_IN];
+        $page = isset($params['page']) ? $params['page'] : 1;
 
         $collect = ImeiRepository::list($whereParams, $limit, $page);
         $items = $collect->items();

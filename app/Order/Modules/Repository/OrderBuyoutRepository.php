@@ -36,15 +36,11 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getCount(array $where){
-		if(!$where){
-			return false;
-		}
 		$count = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
 				->count();
 		return $count;
 	}
@@ -59,23 +55,21 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getList(array $where,array $additional){
-		if(!$where){
+
+		if(!isset($additional['page'])){
 			return false;
 		}
-		if(!isset($additional['offset'])){
+		if(!isset($additional['size'])){
 			return false;
 		}
-		if(!isset($additional['limit'])){
-			return false;
-		}
-		$additional['page'] = ($additional['page'] - 1) * $additional['limit'];
+		$additional['page'] = ($additional['page'] - 1) * $additional['size'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_return.create_time as c_time','order_buyout.*','order_userinfo.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
-				->paginate($additional['offset'],$columns = ['*'], $pageName = '', $additional['limit']);
+				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
+				->paginate($additional['page'],$columns = ['*'], $pageName = '', $additional['size']);
 		if($parcels){
 			return $parcels->toArray();
 		}
@@ -121,7 +115,7 @@ class OrderBuyoutRepository
 			'status'=>OrderBuyoutStatus::OrderPaid,
 			'update_time'=>time()
 		];
-		$ret = Order::where('id', '=', $id)->update($data);
+		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){
 			return true;
 		}else{
@@ -140,7 +134,7 @@ class OrderBuyoutRepository
 				'status'=>OrderBuyoutStatus::OrderRelease,
 				'update_time'=>time()
 		];
-		$ret = Order::where('id', '=', $id)->update($data);
+		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){
 			return true;
 		}else{
