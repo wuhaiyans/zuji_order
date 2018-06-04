@@ -63,18 +63,18 @@ class BuyoutController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $where = [];
-        if($params['word']){
-            if($params['type'] == 1){
-                $where['order_no'] = $params['word'];
+        if($params['keywords']){
+            if($params['kw_type'] == 1){
+                $where['order_no'] = $params['keywords'];
             }
-            elseif($params['type'] == 2){
-                $where['goods_name'] = $params['word'];
+            elseif($params['kw_type'] == 2){
+                $where['goods_name'] = $params['keywords'];
             }
-            elseif($params['type'] == 3){
-                $where['user_mobile'] = $params['word'];
+            elseif($params['kw_type'] == 3){
+                $where['user_mobile'] = $params['keywords'];
             }
             else{
-                $where['order_no'] = $params['word'];
+                $where['order_no'] = $params['keywords'];
             }
         }
         if($params['begin_time']||$params['end_time']){
@@ -88,8 +88,8 @@ class BuyoutController extends Controller
             $where['appid'] = $params['appid'];
         }
         $sumCount = OrderBuyout::getCount($where);
-        $where['offset'] = $params['offset']?$params['offset']:0;
-        $where['limit'] = $params['limit']<=config('web.pre_page_size')?$params['limit']:config('web.pre_page_size');
+        $where['page'] = $params['page']?$params['page']:0;
+        $where['size'] = $params['size']<=config('web.pre_page_size')?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
         return apiResponse(['size'=>$sumCount,'list'=>$orderList],ApiStatus::CODE_0);
     }

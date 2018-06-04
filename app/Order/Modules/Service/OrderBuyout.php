@@ -92,7 +92,7 @@ class OrderBuyout
 	 */
 	public static function getList($params){
 		$additional['page'] = $params['page']?$params['page']:0;
-		$additional['limit'] = $params['limit']?$params['limit']:0;
+		$additional['size'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
 		foreach($data['data'] as $k=>$v){
