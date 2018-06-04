@@ -63,14 +63,14 @@ class OrderBuyoutRepository
 			return false;
 		}
 		$additional['offset'] = $additional['offset']* $additional['limit'];
-		echo json_encode($additional);die;
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
-				->paginate($additional['offset'],$columns = ['*'], $pageName = '', $additional['limit']);
+				->skip($additional['offset'])
+				->limit($additional['limit']);
 		if($parcels){
 			return $parcels->toArray();
 		}
