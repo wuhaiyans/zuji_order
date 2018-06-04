@@ -70,6 +70,7 @@ class OrderBuyoutRepository
 				->skip($additional['offset'])
 				->take($additional['limit'])
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
+		echo sql_profiler();die;
 		if($parcels){
 			return $parcels->toArray();
 		}
