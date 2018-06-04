@@ -1089,7 +1089,7 @@ if(!$create_receive){
                    //短信
                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$order_no,SceneConfig::RETURN_CHECK_OUT);
                    $b=$orderNoticeObj->notify($data[$k]['goods_no']);
-                   Log::error($b?"Order :".$params['order_no']." IS OK":"IS error");
+                   Log::error($b?"Order :".$order_no." IS OK":"IS error");
                }
            }
            if ($data[$k]['check_result'] == 'false') {

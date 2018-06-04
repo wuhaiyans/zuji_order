@@ -319,6 +319,7 @@ class OrderReturnRepository
                 $params['logistics_id']=$data['logistics_id'];
                 $params['logistics_no']=$data['logistics_no'];
                 $params['logistics_name']=$data['logistics_name'];
+                $params['evaluation_status']=ReturnStatus::ReturnEvaluation;
                 $update_result=OrderReturn::where($where[$k])->update($params);
             }
         if($update_result){
