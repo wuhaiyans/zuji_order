@@ -63,6 +63,7 @@ class OrderBuyoutRepository
 			return false;
 		}
 		$additional['offset'] = $additional['offset']* $additional['limit'];
+		echo json_encode($where);die;
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
