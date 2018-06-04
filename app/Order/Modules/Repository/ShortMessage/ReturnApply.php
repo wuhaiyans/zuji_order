@@ -51,7 +51,7 @@ class ReturnApply implements ShortMessage {
                 return false;
             }
             // 发送短息
-            return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
                 'realName' => $orderInfo['realname'],
                 'orderNo' => $orderInfo['order_no'],
                 'goodsName' => $goodsInfo['goods_name'],
