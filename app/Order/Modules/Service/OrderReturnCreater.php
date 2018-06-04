@@ -1172,6 +1172,13 @@ if(!$create_receive){
         if($order_result['order_status'] !=OrderStatus::BUSINESS_RETURN && $order_result['order_status'] !=OrderStatus::OrderPayed){
             return ApiStatus::CODE_33002;//此订单不符合规则
         }
+        //如果订单是已确认，待发货状态，通知收发货系统取消发货
+        if($order_result['order_status']==OrderStatus::OrderInStock){
+            $cancel=Delivery::cancel($params['order_no']);
+            if(!$cancel){
+                return ApiStatus::CODE_33006;//取消发货失败
+            }
+        }
         $data['business_key']=$params['business_key'];
         $data['order_no']=$order_result['order_no'];
         $data['user_id']=$order_result['user_id'];
