@@ -69,6 +69,7 @@ class OrderBuyoutRepository
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
+		echo json_encode($parcels);die;
 		if($parcels){
 			return $parcels->toArray();
 		}
