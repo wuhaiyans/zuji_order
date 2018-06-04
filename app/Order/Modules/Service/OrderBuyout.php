@@ -30,6 +30,7 @@ class OrderBuyout
 	 * @return array	查询条件
 	 */
 	public static function _where_filter($params){
+		$where = [];
 		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
