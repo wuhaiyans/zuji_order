@@ -30,14 +30,14 @@ class OrderBuyout
 	 * @return array	查询条件
 	 */
 	public static function _where_filter($params){
-		if ($params['begin_time']||$params['end_time']) {
+		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
 			$where[] = ['order_buyout.create_time', '>=', $begin_time];
 			$where[] = ['order_buyout.create_time', '<=', $end_time];
 		}
 
-		if($params['order_no']){
+		if(isset($params['order_no'])){
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
 		// order_no 订单编号查询，使用前缀模糊查询
