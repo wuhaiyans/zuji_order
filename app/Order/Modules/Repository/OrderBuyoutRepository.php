@@ -70,6 +70,7 @@ class OrderBuyoutRepository
 				->offset($additional['offset'])
 				->limit($additional['limit'])
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
+		echo json_encode($parcels);die;
 		if($parcels){
 			return $parcels->toArray();
 		}
