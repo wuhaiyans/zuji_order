@@ -71,6 +71,7 @@ class OrderBuyoutRepository
 				->take($additional['limit'])
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
 		if($parcels){
+			print_r($parcels);die;
 			return $parcels->toArray();
 		}
 		return [];
