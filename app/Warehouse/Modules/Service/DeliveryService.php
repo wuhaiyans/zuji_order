@@ -204,10 +204,12 @@ class DeliveryService
         }
         $whereParams = [];
 
-
+        $logic_params = [];
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
         if (isset($params['status']) && $params['status']) {
             $whereParams['status'] = $params['status'];
+        } else {
+            array_push($logic_params, ['status', '>', Delivery::STATUS_NONE]);
         }
 
 //        if (isset($params['order_no']) && $params['order_no']) {
@@ -226,7 +228,7 @@ class DeliveryService
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
-        $logic_params = [];
+
         if ($time_type != 'none') {
             if (!isset($params['begin_time']) || !$params['begin_time']) {
                 throw new \Exception('请填写开始时间');
@@ -292,7 +294,16 @@ class DeliveryService
             array_push($result, $it);
         }
 
-        return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
+//        p(Delivery::sta());die;
+
+        $status_list = Delivery::sta();
+        return [
+            'data'=>$result,
+            'per_page'=>$limit,
+            'total'=>$collect->total(),
+            'current_page'=>$collect->currentPage(),
+            'status_list' => $status_list
+        ];
 
     }
 
