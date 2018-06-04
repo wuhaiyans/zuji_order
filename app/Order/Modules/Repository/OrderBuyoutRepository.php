@@ -64,13 +64,13 @@ class OrderBuyoutRepository
 		}
 		$additional['offset'] = $additional['offset']* $additional['limit'];
 		$parcels = OrderBuyout::query()
-				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
-				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
-				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
+				//->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
+				//->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
+				//->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
-				->skip($additional['offset'])
-				->take($additional['limit']);
+				->select()->skip($additional['offset'])->take($additional['limit']);
+				//->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
+
 		if($parcels){
 			return $parcels->toArray();
 		}
