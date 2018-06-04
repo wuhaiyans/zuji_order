@@ -190,6 +190,7 @@ class Relet
                             ],
                         ];
 
+                        dd($fenqiData);
                         if( OrderInstalment::create($fenqiData) ){
                             //修改设备表状态续租完成,新建设备周期数据
                             if( $this->reletRepository->setGoods($data['relet_no']) ){
