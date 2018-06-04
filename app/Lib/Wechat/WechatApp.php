@@ -16,7 +16,7 @@ class WechatApp{
 	
 	/**
 	 * 应用存储
-	 * @var WechatConfig 
+	 * @var WechatStorage 
 	 */
 	private $storage;
 	
@@ -42,6 +42,7 @@ class WechatApp{
 	 */
 	public function getAccessToken():string{
 		$key = '__wechat_token_'.$this->config->getAppId();
+		
 		// 读缓存
 		if( ($data = $this->storage->get($key)) ){
 			return $data['access_token'];

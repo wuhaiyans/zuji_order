@@ -78,7 +78,7 @@ class WechatApi {
      * @param type $url
      * @return type
      */
-    private function _curl_get($url){
+    private static function _curl_get($url){
         try {
                 $ch = curl_init();
 //    		$header = "Accept-Charset: utf-8";

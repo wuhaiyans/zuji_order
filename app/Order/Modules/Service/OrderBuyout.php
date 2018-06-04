@@ -30,27 +30,28 @@ class OrderBuyout
 	 * @return array	查询条件
 	 */
 	public static function _where_filter($params){
-		if ($params['begin_time']||$params['end_time']) {
+		$where = [];
+		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
 			$where[] = ['order_buyout.create_time', '>=', $begin_time];
 			$where[] = ['order_buyout.create_time', '<=', $end_time];
 		}
 
-		if($params['order_no']){
+		if(isset($params['order_no'])){
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
 		// order_no 订单编号查询，使用前缀模糊查询
-		if($params['goods_name']){
+		if(isset($params['goods_name'])){
 			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
 		}
-		if($params['user_mobile']){
+		if(isset($params['user_mobile'])){
 			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
 		}
-		if($params['status']){
+		if(isset($params['status'])){
 			$where[] = ['order_buyout.status', '=', $params['status']];
 		}
-		if ($params['appid']) {
+		if (isset($params['appid'])) {
 			$where[] =  ['order_info.appid', '=', $params['appid']];
 		}
 		return $where;
@@ -78,9 +79,6 @@ class OrderBuyout
 	 * @return int
 	 */
 	public static function getCount($where){
-		if(!$where){
-			return false;
-		}
 		$where = self::_where_filter($where);
 		$result = OrderBuyoutRepository::getCount($where);
 		return $result;
@@ -95,12 +93,6 @@ class OrderBuyout
 		$additional['size'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
-		foreach($data['data'] as $k=>$v){
-			$data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
-			$data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
-			$data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
-			$data['data'][$k]->wuliu_channel_name=Logistics::info($data['data'][$k]->wuliu_channel_id);//物流渠道
-		}
 		return $data;
 	}
     /**

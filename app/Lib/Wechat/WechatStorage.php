@@ -2,6 +2,7 @@
 
 namespace App\Lib\Wechat;
 
+use Illuminate\Support\Facades\Redis;
 
 class WechatStorage{
 	
@@ -10,15 +11,19 @@ class WechatStorage{
 	 * @param array
 	 */
 	public function get( string $key ){
+		
 		// 读缓存
-		if( isset($_SESSION[$key]) && time()<$_SESSION[$key]['expires_time'] ){
-			return $_SESSION[$key];
+		$data = Redis::get($key);
+		$data = json_decode($data,true);
+		if( $data && isset($data['expires_time']) && time()<$data['expires_time'] ){
+			return $data;
 		}
+		return null;
 	}
 	
 	public function set( string $key, array $data, int $expires_time ){
 		$data['expires_time'] = $expires_time;
-		$_SESSION[$key] = $data;
+		Redis::set($key, json_encode($data));
 	}
 	
 }

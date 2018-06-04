@@ -11,7 +11,8 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Service\Relet;
-use Illuminate\Support\Facades\Request;
+//use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class ReletController extends Controller
 {
@@ -75,8 +76,9 @@ class ReletController extends Controller
      *  'zuqi'          => 'required', //租期
      *  'order_no'      => 'required', //订单编号
      *  'pay_type'      => 'required', //支付方式
-     *  'relet_amount'  => 'required',//续租金额
      *  'user_name'     => 'required',//用户名(手机号)
+     *  'goods_id'      => 'required', //设备ID
+     *  'relet_amount'  => 'required',//续租金额
      *  'return_url'    => 'required',//前端回调地址
      *
      * @return \Illuminate\Http\JsonResponse
@@ -96,7 +98,7 @@ class ReletController extends Controller
             //整理参数
             $params = filter_array($params, [
                 'user_id'       => 'required', //用户ID
-                //'zuqi_type'     => 'required', //租期类型
+                'goods_id'      => 'required', //设备ID
                 'zuqi'          => 'required', //租期
                 'order_no'      => 'required', //订单编号
                 'pay_type'      => 'required', //支付方式
