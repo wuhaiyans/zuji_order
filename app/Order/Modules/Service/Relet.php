@@ -177,13 +177,15 @@ class Relet
                                 'order_no'=>$data['order_no'],//订单编号
                             ],
                             'sku'=>[
-                                'zuqi'              =>  $row['zuqi'],//租期
-                                'zuqi_type'         =>  $row['zuqi_type'],//租期类型
-                                'all_amount'        =>  $amount,//总金额
-                                'amount'            =>  $amount,//实际支付金额
-                                'yiwaixian'         =>  0,//意外险
-                                'zujin'             =>  $row['zujin'],//租金
-                                'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                [
+                                    'zuqi'              =>  $row['zuqi'],//租期
+                                    'zuqi_type'         =>  $row['zuqi_type'],//租期类型
+                                    'all_amount'        =>  $amount,//总金额
+                                    'amount'            =>  $amount,//实际支付金额
+                                    'yiwaixian'         =>  0,//意外险
+                                    'zujin'             =>  $row['zujin'],//租金
+                                    'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                ]
                             ],
                             'user'=>[
                                 'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
