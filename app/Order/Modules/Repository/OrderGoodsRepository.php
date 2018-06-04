@@ -48,6 +48,7 @@ class OrderGoodsRepository
         if (empty($goods_no)) return false;
         $result =  orderGoods::query()->where($where)->first();
         dd($result);
+        die;
         if (!$result) return false;
         return $result->toArray();
     }
