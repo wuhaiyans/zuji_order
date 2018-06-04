@@ -36,9 +36,6 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getCount(array $where){
-		if(!$where){
-			return false;
-		}
 		$count = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
