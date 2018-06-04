@@ -81,7 +81,7 @@ class OrderUserInfoRepository
         }
 
 
-        if(OrderUserInfo::where(['order_no', '=', $params['order_no']],['id', '=', $params['order_address_id']])->update($data)){
+        if(OrderUserInfo::where('order_no','=', $params['order_no'])->update($data)){
             return true;
         }else{
             return false;

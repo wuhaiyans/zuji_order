@@ -49,7 +49,8 @@ class OrderCleaning
     {
 
         $orderCleanList = OrderClearingRepository::getOrderCleanList($param);
-        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
+        return $orderCleanList;
+//        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
 
     }
 

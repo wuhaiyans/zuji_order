@@ -165,6 +165,10 @@ class OrderClearingRepository
         }
         $query = OrderClearing::where($whereArray);
 
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
         return $query->paginate($limit,
             ['*'], 'page', $param['page'])->toArray();
     }
