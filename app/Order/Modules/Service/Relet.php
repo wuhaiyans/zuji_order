@@ -144,8 +144,7 @@ class Relet
                     }
 
                     //创建支付
-                    if(PayInc::FlowerStagePay){
-                        dd(11);
+                    if($params['pay_type'] == PayInc::FlowerStagePay){
                         // 创建支付 一次性结清
                         $pay = PayCreater::createPayment([
                             'user_id'		=> $data['user_id'],
@@ -169,7 +168,6 @@ class Relet
                         return $urlInfo;
 
                     }else{
-                        dd(22);
                         //代扣
                         // 创建分期
                         $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
