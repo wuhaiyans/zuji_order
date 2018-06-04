@@ -3,6 +3,7 @@ namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderBuyout;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
+use Illuminate\Support\Facades\DB;
 /**
  * 订单买断单数据处理仓库
  * @var obj OrderBuyoutRepository
@@ -62,6 +63,7 @@ class OrderBuyoutRepository
 		if(!isset($additional['limit'])){
 			return false;
 		}
+		DB::enableQueryLog();
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
@@ -70,7 +72,7 @@ class OrderBuyoutRepository
 				->skip($additional['offset'])
 				->take($additional['limit'])
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
-		echo sql_profiler();die;
+		echo json_encode(DB::getQueryLog());die;
 		if($parcels){
 			return $parcels->toArray();
 		}
