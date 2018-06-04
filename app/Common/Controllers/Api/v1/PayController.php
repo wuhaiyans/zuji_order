@@ -17,6 +17,29 @@ class PayController extends Controller
     {
     }
 	
+	
+	public function testWechat(){
+		
+		try {
+		$config = new \App\Lib\Wechat\WechatConfig();
+		$app = new \App\Lib\Wechat\WechatApp( $config );
+
+		$token = $app->getAccessToken();
+		$ticket = $app->getJsapiTicket();
+
+		var_dump( $token, $ticket );exit;
+
+		} catch (WechatApiException $exc) {
+			var_dump($exc);exit;
+		} catch (WechatErrorException $exc) {
+			var_dump($exc);exit;
+		} catch (\Exception $exc) {
+			var_dump($exc);exit;
+		}
+
+
+	}
+	
 	public function testW(){
 		
 		\DB::beginTransaction();
