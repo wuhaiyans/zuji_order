@@ -145,6 +145,7 @@ class Relet
 
                     //创建支付
                     if(PayInc::FlowerStagePay){
+                        dd(11);
                         // 创建支付 一次性结清
                         $pay = PayCreater::createPayment([
                             'user_id'		=> $data['user_id'],
@@ -168,11 +169,10 @@ class Relet
                         return $urlInfo;
 
                     }else{
+                        dd(22);
                         //代扣
                         // 创建分期
-                        dd($params['user_id']);
                         $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
-
                         $fenqiData = [
                             'order'=>[
                                 'order_no'=>$data['order_no'],//订单编号
