@@ -51,13 +51,14 @@ class ReturnApply implements ShortMessage {
                 return false;
             }
             // 发送短息
-            return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
+           $res=\App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
                 'realName' => $orderInfo['realname'],
                 'orderNo' => $orderInfo['order_no'],
                 'goodsName' => $goodsInfo['goods_name'],
                 'serviceTel'=>config('tripartite.Customer_Service_Phone'),
             ],$orderInfo['order_no']);
         }
+        return $res;
 
 	}
 
