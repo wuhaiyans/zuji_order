@@ -63,14 +63,12 @@ class OrderBuyoutRepository
 		if(!isset($additional['limit'])){
 			return false;
 		}
-		DB::enableQueryLog();
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
-		echo json_encode(DB::getQueryLog());die;
 		if($parcels){
 			return $parcels->toArray();
 		}
