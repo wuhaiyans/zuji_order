@@ -89,8 +89,8 @@ class OrderBuyout
 	 * @return id
 	 */
 	public static function getList($params){
-		$additional['page'] = $params['page']?$params['page']:0;
-		$additional['size'] = $params['size']?$params['size']:0;
+		$additional['offset'] = $params['page']>1?($params['page']-1)*$params['size']:0;
+		$additional['limit'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
 		return $data;
