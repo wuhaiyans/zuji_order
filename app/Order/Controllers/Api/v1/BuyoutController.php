@@ -89,7 +89,7 @@ class BuyoutController extends Controller
         }
         $sumCount = OrderBuyout::getCount($where);
         $where['page'] = $params['page']>0?$params['page']-1:0;
-        $where['size'] = $params['size']<=config('web.pre_page_size')?$params['size']:config('web.pre_page_size');
+        $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         DB::enableQueryLog();
         $orderList = OrderBuyout::getList($where);
         echo json_encode(DB::getQueryLog());die;
