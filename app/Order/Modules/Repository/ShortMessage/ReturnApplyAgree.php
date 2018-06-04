@@ -50,7 +50,7 @@ class ReturnApplyAgree implements ShortMessage {
                 return false;
             }
             // 发送短息
-            return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
                 'realName' => $orderInfo['realname'],
                 'orderNo' => $this->business_no,
                 'goodsName' => $goodsInfo['goods_name'],
