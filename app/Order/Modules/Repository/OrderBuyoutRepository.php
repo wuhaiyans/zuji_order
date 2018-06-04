@@ -54,7 +54,7 @@ class OrderBuyoutRepository
 	 * ]
 	 * @return array|bool
 	 */
-	public static function getList(array $where,array ){
+	public static function getList(array $where,array $additional){
 
 		if(!isset($additional['offset'])){
 			return false;
