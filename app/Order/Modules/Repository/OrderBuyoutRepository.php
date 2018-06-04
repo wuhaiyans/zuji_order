@@ -56,20 +56,21 @@ class OrderBuyoutRepository
 	 */
 	public static function getList(array $where,array $additional){
 
-		if(!isset($additional['page'])){
+		if(!isset($additional['offset'])){
 			return false;
 		}
-		if(!isset($additional['size'])){
+		if(!isset($additional['limit'])){
 			return false;
 		}
-		$additional['page'] = $additional['page']* $additional['size'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
-				->paginate($additional['page'],$columns = ['*'], $pageName = '', $additional['size']);
+				->offset($additional['offset'])
+				->limit($additional['limit'])
+				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
+		var_dump($parcels);die;
 		if($parcels){
 			return $parcels->toArray();
 		}
