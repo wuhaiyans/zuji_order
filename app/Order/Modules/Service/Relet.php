@@ -170,8 +170,6 @@ class Relet
                     }else{
                         //代扣
                         // 创建分期
-                        $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
-
                         $fenqiData = [
                             'order'=>[
                                 'order_no'=>$data['order_no'],//订单编号
@@ -188,7 +186,7 @@ class Relet
                                 ]
                             ],
                             'user'=>[
-                                'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
+                                'user_id'=>$params['user_id'],//用户代扣协议号
                             ],
                         ];
 
