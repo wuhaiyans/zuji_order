@@ -79,9 +79,6 @@ class OrderBuyout
 	 * @return int
 	 */
 	public static function getCount($where){
-		if(!$where){
-			return false;
-		}
 		$where = self::_where_filter($where);
 		$result = OrderBuyoutRepository::getCount($where);
 		return $result;
