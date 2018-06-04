@@ -304,17 +304,11 @@ class OrderController extends Controller
     public function deliveryReceive(Request $request)
     {
         $params =$request->all();
-        $rules = [
-            'order_no'  => 'required',
-            'role'=>'required',
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-
-        if (empty($validateParams) || $validateParams['code']!=0) {
-
-            return apiResponse([],$validateParams['code']);
-        }
         $params =$params['params'];
+
+        if(empty($params['order_no'])){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
 
         $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
         if(!$res){

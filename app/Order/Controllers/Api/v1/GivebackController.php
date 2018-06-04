@@ -460,7 +460,7 @@ class GivebackController extends Controller
         $rules = [
             'goods_no'     => 'required',//还机单编号
             'callback_url'     => 'required',//回调地址
-            'channel_id'     => 'required',//支付的渠道id
+            'pay_channel_id'     => 'required',//支付的渠道id
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()) {
@@ -482,7 +482,7 @@ class GivebackController extends Controller
 		try{
 			//获取支付的url
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
-			$paymentUrl = $payObj->getCurrentUrl($paramsArr['channel_id'], [
+			$paymentUrl = $payObj->getCurrentUrl($paramsArr['pay_channel_id'], [
 				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
 				'front_url' => $paramsArr['callback_url'],
 			]);

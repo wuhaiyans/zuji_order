@@ -62,45 +62,34 @@ class BuyoutController extends Controller
     public function getBuyoutList(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        //过滤参数
-        $params = filter_array($params, [
-            'type'  => 'required',
-            'word'  => 'required',
-            'status'  => 'required',
-            'appid'  => 'required',
-            'begin_time' => 'required',
-            'end_time' => 'required',
-            'offset'    => 'required',
-            'limit'     => 'required',
-        ]);
         $where = [];
-        if($params['word']){
-            if($params['type'] == 1){
-                $where['order_no'] = $params['word'];
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $where['order_no'] = $params['keywords'];
             }
-            elseif($params['type'] == 2){
-                $where['goods_name'] = $params['word'];
+            elseif($params['kw_type'] == 2){
+                $where['goods_name'] = $params['keywords'];
             }
-            elseif($params['type'] == 3){
-                $where['user_mobile'] = $params['word'];
+            elseif($params['kw_type'] == 3){
+                $where['user_mobile'] = $params['keywords'];
             }
             else{
-                $where['order_no'] = $params['word'];
+                $where['order_no'] = $params['keywords'];
             }
         }
-        if($params['begin_time']||$params['end_time']){
+        if(isset($params['begin_time'])||isset($params['end_time'])){
             $where['begin_time'] = $params['begin_time'];
             $where['end_time'] = $params['end_time'];
         }
-        if($params['status']){
+        if(isset($params['status'])){
             $where['status'] = $params['status'];
         }
-        if($params['appid']){
+        if(isset($params['appid'])){
             $where['appid'] = $params['appid'];
         }
         $sumCount = OrderBuyout::getCount($where);
-        $where['offset'] = $params['offset']?$params['offset']:0;
-        $where['limit'] = $params['limit']<=config('web.pre_page_size')?$params['limit']:config('web.pre_page_size');
+        $where['page'] = $params['page']?$params['page']:0;
+        $where['size'] = $params['size']<=config('web.pre_page_size')?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
         return apiResponse(['size'=>$sumCount,'list'=>$orderList],ApiStatus::CODE_0);
     }
