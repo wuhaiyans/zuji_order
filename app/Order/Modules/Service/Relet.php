@@ -137,6 +137,7 @@ class Relet
                 if($this->reletRepository->createRelet($data)){
                     //修改设备状态 续租中
                     $rse = OrderGoods::where('id',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
+                    dd($rse);
                     if( !$rse ){
                         DB::rollBack();
                         set_msg('修改设备状态续租中失败');
@@ -170,9 +171,7 @@ class Relet
                     }else{
                         //代扣
                         // 创建分期
-                        dd($params['user_id']);
                         $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
-
                         $fenqiData = [
                             'order'=>[
                                 'order_no'=>$data['order_no'],//订单编号
