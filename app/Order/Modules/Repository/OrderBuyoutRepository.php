@@ -44,7 +44,6 @@ class OrderBuyoutRepository
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
 				->count();
 		return $count;
 	}
