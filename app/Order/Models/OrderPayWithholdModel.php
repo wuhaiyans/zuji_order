@@ -8,11 +8,14 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderPayWithhold extends Model
+class OrderPayWithholdModel extends Model
 {
 
     protected $table = 'order_pay_withhold';
 
+	protected $primaryKey = 'withhold_no';
+	protected $keyType = 'varchar';
+	public $incrementing = false;
 
     /**
      * 默认使用时间戳戳功能

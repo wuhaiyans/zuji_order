@@ -615,10 +615,10 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
-        $appid      = $request['appid'];
         $rules = [
             'return_url'        => 'required',
             'instalment_id'     => 'required|int',
+            'channel'           => 'required|int',
         ];
 
         // 参数过滤
@@ -629,6 +629,10 @@ class WithholdController extends Controller
         $params = $params['params'];
         // 判断分期状态
         $instalmentId   = $params['instalment_id'];
+        // 渠道
+        $channelId      = $params['channel'];
+
+
 
         // 查询分期信息
         $instalmentInfo = OrderInstalment::queryByInstalmentId($instalmentId);
@@ -636,6 +640,7 @@ class WithholdController extends Controller
             // 提交事务
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
+
         //分期状态
         if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
             return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
@@ -647,18 +652,11 @@ class WithholdController extends Controller
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
+
         // 订单状态
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
             return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
         }
-
-        // 渠道
-        $ChannelInfo = \App\Lib\Channel\Channel::getChannel($appid);
-        if (!is_array($ChannelInfo)) {
-            return apiResponse([], ApiStatus::CODE_10102, "channel_id 错误");
-        }
-        $channelId = intval($ChannelInfo['_channel']['id']);
-
 
         $youhui = 0;
         // 租金抵用券
@@ -704,7 +702,7 @@ class WithholdController extends Controller
             'front_url' => $params['return_url'], //回调URL
         ]);
 
-        return apiResponse(['url'=>$url['payment_url']],ApiStatus::CODE_0);
+        return apiResponse($url,ApiStatus::CODE_0);
 
 
     }

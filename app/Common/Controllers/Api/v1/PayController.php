@@ -16,6 +16,51 @@ class PayController extends Controller
     public function __construct()
     {
     }
+	
+	public function testW(){
+		
+		\DB::beginTransaction();
+		
+//		$data = [
+//			'withhold_no' => 'WPA60233627831980',
+//			'out_withhold_no' => '30A60233627873622',
+//			'withhold_status' => '1',
+//			'counter' => 0,
+//			'user_id' => 1,
+//		];
+//		$withhold = new \App\Order\Modules\Repository\Pay\Withhold( $data );
+		
+		$user_id = '5';
+		$channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;
+		
+		$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByUserChannel($user_id, $channel);
+		$_params = [
+			'business_type' => 1,
+			'business_no' => '123456',
+		];
+		
+		// 绑
+		$b = $withhold->bind( $_params);
+		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		if( !$b ){
+			\DB::rollBack();exit;
+		}
+		
+		// 解
+		$b = $withhold->unbind( $_params );
+		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		if( !$b ){
+			\DB::rollBack();exit;
+		}
+		
+//		var_dump( $withhold );
+//		$b = $withhold->unsignApply();
+//		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+//		$b = $withhold->unsignSuccess();
+//		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		\DB::commit();
+	}
+	
 	public function testPost(){
 		
 		$url = 'https://dev-pay-zuji.huishoubao.com/jdpay/Payment/paymentNotify';

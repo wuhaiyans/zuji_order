@@ -49,7 +49,8 @@ class OrderCleaning
     {
 
         $orderCleanList = OrderClearingRepository::getOrderCleanList($param);
-        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
+        return $orderCleanList;
+//        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
 
     }
 
@@ -192,6 +193,7 @@ class OrderCleaning
              * ]
              */
             //根据预授权编号查找预授权相关数据
+            if (empty($orderCleanData['auth_no'])) return true;
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 

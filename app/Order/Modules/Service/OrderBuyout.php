@@ -41,16 +41,16 @@ class OrderBuyout
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
 		// order_no 订单编号查询，使用前缀模糊查询
-		if($params['goods_name']){
+		if(isset($params['goods_name'])){
 			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
 		}
-		if($params['user_mobile']){
+		if(isset($params['user_mobile'])){
 			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
 		}
-		if($params['status']){
+		if(isset($params['status'])){
 			$where[] = ['order_buyout.status', '=', $params['status']];
 		}
-		if ($params['appid']) {
+		if (isset($params['appid'])) {
 			$where[] =  ['order_info.appid', '=', $params['appid']];
 		}
 		return $where;
@@ -92,7 +92,7 @@ class OrderBuyout
 	 */
 	public static function getList($params){
 		$additional['page'] = $params['page']?$params['page']:0;
-		$additional['limit'] = $params['limit']?$params['limit']:0;
+		$additional['size'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
 		foreach($data['data'] as $k=>$v){
@@ -209,24 +209,14 @@ class OrderBuyout
 		if(!$orderCleanResult){
 			return false;
 		}
-		if($goodsInfo['yajin']>0){
-			$result= OrderCleaning::orderCleanOperate(['clean_no'=>$orderCleanResult]);
-			echo json_encode(['1'=>$result,"2"=>"123"]);die;
-			if(!$result){
-				echo "退押金失败！";
-				die;
-			}
-		}
-		else{
+		if($goodsInfo['yajin']==0){
 			$params = [
 					'business_type'     => $clearData['business_type'],
 					'business_no'     => $clearData['business_no'],
 					'status'     => 'success',//支付状态
 			];
 			$result = self::callbackOver($params);
-			if(!$result){
-				echo "更新买断单为完成失败！";
-				die;
+			if(!$result){return false;
 			}
 		}
 		return true;
