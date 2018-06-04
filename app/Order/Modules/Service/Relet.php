@@ -189,8 +189,8 @@ class Relet
                                 'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
                             ],
                         ];
+                        dd($fenqiData);
                         if( OrderInstalment::create($fenqiData) ){
-                            dd(444);
                             //修改设备表状态续租完成,新建设备周期数据
                             if( $this->reletRepository->setGoods($data['relet_no']) ){
                                 DB::commit();
