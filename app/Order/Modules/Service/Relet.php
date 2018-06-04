@@ -136,7 +136,7 @@ class Relet
 
                 if($this->reletRepository->createRelet($data)){
                     //修改设备状态 续租中
-                    $rse = OrderGoods::where(['id'],'=',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
+                    $rse = OrderGoods::where('id',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
                     if( !$rse ){
                         DB::rollBack();
                         set_msg('修改设备状态续租中失败');
@@ -145,6 +145,7 @@ class Relet
 
                     //创建支付
                     if(PayInc::FlowerStagePay){
+                        dd(11);
                         // 创建支付 一次性结清
                         $pay = PayCreater::createPayment([
                             'user_id'		=> $data['user_id'],
@@ -168,6 +169,7 @@ class Relet
                         return $urlInfo;
 
                     }else{
+                        dd(22);
                         //代扣
                         // 创建分期
                         $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
@@ -277,7 +279,9 @@ class Relet
             ];
 
             //修改订单商品状态
-            if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+            $goodsObj->goods_status=OrderGoodStatus::RENEWAL_OF_RENT;
+            $goodsObj->update_time=time();
+            if( !$goodsObj->save() ){
                 DB::rollBack();
                 LogApi::notify("续租修改设备状态失败", $reletNo);
                 return false;

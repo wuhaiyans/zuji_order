@@ -47,7 +47,7 @@ class ReturnDelivery implements ShortMessage {
         }
 
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+		return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
             'realName' => $data['realName'],
             'orderNo' => $data['orderNo'],
             'goodsName' => $data['goodsName'],
