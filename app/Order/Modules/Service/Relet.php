@@ -182,7 +182,7 @@ class Relet
                                     'amount'            =>  $amount,//实际支付金额
                                     'yiwaixian'         =>  0,//意外险
                                     'zujin'             =>  $row['zujin'],//租金
-                                    'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                    'pay_type'          =>  PayInc::WithhodingPay,//支付类型
                                 ]
                             ],
                             'user'=>[
