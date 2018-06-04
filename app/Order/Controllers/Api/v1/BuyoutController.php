@@ -63,7 +63,7 @@ class BuyoutController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $where = [];
-        if($params['keywords']){
+        if(isset($params['keywords'])){
             if($params['kw_type'] == 1){
                 $where['order_no'] = $params['keywords'];
             }
@@ -77,14 +77,14 @@ class BuyoutController extends Controller
                 $where['order_no'] = $params['keywords'];
             }
         }
-        if($params['begin_time']||$params['end_time']){
+        if(isset($params['begin_time'])||isset($params['end_time'])){
             $where['begin_time'] = $params['begin_time'];
             $where['end_time'] = $params['end_time'];
         }
-        if($params['status']){
+        if(isset($params['status'])){
             $where['status'] = $params['status'];
         }
-        if($params['appid']){
+        if(isset($params['appid'])){
             $where['appid'] = $params['appid'];
         }
         $sumCount = OrderBuyout::getCount($where);
