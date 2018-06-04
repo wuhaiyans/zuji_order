@@ -55,6 +55,7 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getList(array $where,array $additional){
+		var_dump($additional);die;
 
 		if(!isset($additional['offset'])){
 			return false;
@@ -71,7 +72,6 @@ class OrderBuyoutRepository
 				->take($additional['limit'])
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
 		if($parcels){
-			print_r($parcels);die;
 			return $parcels->toArray();
 		}
 		return [];
