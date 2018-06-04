@@ -27,7 +27,9 @@ class PayController extends Controller
 		$token = $app->getAccessToken();
 		$ticket = $app->getJsapiTicket();
 
-		var_dump( $token, $ticket );exit;
+		$sign = $app->createJsapiSignature('https://abc.html',time(), rand(10000, 99999));
+		
+		var_dump( $token, $ticket, $sign );exit;
 
 		} catch (WechatApiException $exc) {
 			var_dump($exc);exit;
