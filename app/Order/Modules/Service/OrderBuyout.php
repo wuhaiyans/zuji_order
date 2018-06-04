@@ -41,16 +41,16 @@ class OrderBuyout
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
 		// order_no 订单编号查询，使用前缀模糊查询
-		if($params['goods_name']){
+		if(isset($params['goods_name'])){
 			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
 		}
-		if($params['user_mobile']){
+		if(isset($params['user_mobile'])){
 			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
 		}
-		if($params['status']){
+		if(isset($params['status'])){
 			$where[] = ['order_buyout.status', '=', $params['status']];
 		}
-		if ($params['appid']) {
+		if (isset($params['appid'])) {
 			$where[] =  ['order_info.appid', '=', $params['appid']];
 		}
 		return $where;
