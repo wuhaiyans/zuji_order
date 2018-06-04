@@ -11,7 +11,8 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Service\Relet;
-use Illuminate\Support\Facades\Request;
+//use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class ReletController extends Controller
 {
