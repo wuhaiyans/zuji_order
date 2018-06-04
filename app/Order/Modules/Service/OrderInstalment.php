@@ -81,7 +81,7 @@ class OrderInstalment
         $user = filter_array($user, [
             'user_id'        => 'required',
         ]);
-        if(count($user) < 2){
+        if(count($user) < 1){
             return false;
         }
 
