@@ -12,16 +12,16 @@ namespace App\Lib\Wechat;
 class WechatConfig{
 	
 	/**
-	 * 应用ID
+	 * 应用ID 
 	 * @var string
 	 */
-	private $app_id = 'wx22df96cbe31ad9f7';
+	private $app_id = 'wxfec4a90720b093ed';
 	
 	/**
-	 * 应用密钥
+	 * 应用密钥 
 	 * @var string
 	 */
-	private $secret = 'b230d18c8dd69807d0e8ebcd4008ae05';
+	private $secret = 'd62b5f9df0e19e2f0503a75941faed10';
 	
 	/**
 	 * 校验字符串

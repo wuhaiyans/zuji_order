@@ -131,7 +131,7 @@ class ReletRepository
      * ]
      */
     public function getRowId($params){
-        return $this->orderRelet->find($params['id'])->toArray();
+        return $this->orderRelet->find($params['id']);
 
     }
 

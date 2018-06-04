@@ -40,7 +40,7 @@ class OrderUserInfoRepository
      * @return bool
      */
 
-    public static function getUserInfo($params){
+    public static function getUserInfo($param){
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
 
