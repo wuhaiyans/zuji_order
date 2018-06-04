@@ -12,6 +12,7 @@ use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Support\Facades\Log;
+use Mockery\Exception;
 
 /**
  * Class Delivery
@@ -202,7 +203,12 @@ class Delivery
      */
     public static function receive($orderNo, $role)
     {
-        return \App\Lib\Order\Delivery::receive($orderNo, $role);
+        $response = \App\Lib\Order\Delivery::receive($orderNo, $role);
+        $response =json_decode($response,true);
+        if($response['code']!=ApiStatus::CODE_0){
+            throw new \Exception(ApiStatus::$errCodes[$response['code']]);
+        }
+        return $response;
     }
 
 
@@ -225,7 +231,12 @@ class Delivery
      */
     public static function delivery($order_no, $goods_info)
     {
-      return \App\Lib\Order\Delivery::delivery($order_no, $goods_info);
+      $response =\App\Lib\Order\Delivery::delivery($order_no, $goods_info);
+      $response =json_decode($response,true);
+      if($response['code']!=ApiStatus::CODE_0){
+          throw new \Exception(ApiStatus::$errCodes[$response['code']]);
+      }
+      return $response;
     }
 
 
