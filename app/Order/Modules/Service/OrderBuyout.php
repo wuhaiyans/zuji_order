@@ -30,6 +30,7 @@ class OrderBuyout
 	 * @return array	查询条件
 	 */
 	public static function _where_filter($params){
+		$where = [];
 		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
@@ -78,9 +79,6 @@ class OrderBuyout
 	 * @return int
 	 */
 	public static function getCount($where){
-		if(!$where){
-			return false;
-		}
 		$where = self::_where_filter($where);
 		$result = OrderBuyoutRepository::getCount($where);
 		return $result;
@@ -91,16 +89,10 @@ class OrderBuyout
 	 * @return id
 	 */
 	public static function getList($params){
-		$additional['page'] = $params['page']?$params['page']:0;
-		$additional['size'] = $params['size']?$params['size']:0;
+		$additional['offset'] = $params['page']>1?($params['page']-1)*$params['size']:0;
+		$additional['limit'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
-		foreach($data['data'] as $k=>$v){
-			$data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
-			$data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
-			$data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
-			$data['data'][$k]->wuliu_channel_name=Logistics::info($data['data'][$k]->wuliu_channel_id);//物流渠道
-		}
 		return $data;
 	}
     /**
