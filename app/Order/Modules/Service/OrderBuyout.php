@@ -96,12 +96,6 @@ class OrderBuyout
 		$additional['size'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
-		foreach($data['data'] as $k=>$v){
-			$data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
-			$data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
-			$data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
-			$data['data'][$k]->wuliu_channel_name=Logistics::info($data['data'][$k]->wuliu_channel_id);//物流渠道
-		}
 		return $data;
 	}
     /**
