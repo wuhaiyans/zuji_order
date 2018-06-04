@@ -74,12 +74,43 @@ class Withhold extends \App\Lib\Configurable {
 	 * 使用
 	 * 增加代扣协议业务数
 	 * 当前协议必须是已签约状态，是有效的
+	 * @param array $params 业务标记
+	 * [
+	 *		'business_type' => '',	// 【必须】int		业务类型
+	 *		'business_no'	=> '',	// 【必须】string	业务编码
+	 * ]
 	 * @return bool true：成功；false：失败
 	 */
-	public function increase(){
+	public function increase( array $params ){
 		if( $this->withhold_status != WithholdStatus::SIGNED ){
 			return false;
 		}
+		
+		$bwModel = new \App\Order\Models\OrderPayWithholdBusinessModel();
+		
+		// 查找 业务是否绑定了协议
+		$wb_info = $bwModel->where([
+			'business_type'	=> $params['business_type'],
+			'business_no'	=> $params['business_no'],
+			'unbind_time'	=> 0,// 未解绑的协议
+		])->first();
+		// 存在，禁止重复创建
+		if( $wb_info ){
+			return false;
+		}
+		
+		// 创建 业务绑定协议
+		$id = $bwModel->insert([
+			'withhold_no'	=> $this->withhold_no,
+			'business_type'	=> $params['business_type'],
+			'business_no'	=> $params['business_no'],
+			'bind_time'		=> time(),// 绑定时间
+			'unbind_time'	=> 0,// 
+		]);
+		if( !$id ){
+			return false;
+		}
+		
 		$n = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $this->withhold_no,
 		])->limit(1)->increment('counter');
@@ -87,6 +118,8 @@ class Withhold extends \App\Lib\Configurable {
 			++$this->counter;
 			return true;
 		};
+		
+		
 		return false;
 	}
 	
@@ -94,15 +127,41 @@ class Withhold extends \App\Lib\Configurable {
 	 * 释放
 	 * 减少代扣协议业务数
 	 * 当前协议必须是已签约状态，是有效的
+	 * @param array $params 业务标记
+	 * [
+	 *		'business_type' => '',	// 【必须】int		业务类型
+	 *		'business_no'	=> '',	// 【必须】string	业务编码
+	 * ]
 	 * @return bool true：成功；false：失败
 	 */
-	public function decrease(){
+	public function decrease( array $params ){
 		if( $this->withhold_status != WithholdStatus::SIGNED ){
 			return false;
 		}
 		if( $this->counter==0 ){
 			return false;
 		}
+		
+		$bwModel = new \App\Order\Models\OrderPayWithholdBusinessModel();
+		
+		// 查找 业务是否绑定了协议
+		$wb_info = $bwModel->where([
+			'business_type'	=> $params['business_type'],
+			'business_no'	=> $params['business_no'],
+			'unbind_time'	=> 0,// 未解绑的协议
+		])->first();
+		// 不存在
+		if( !$wb_info ){
+			return false;
+		}
+		
+		// 解绑
+		$bwModel->limit(1)
+				->where(['id' =>$wb_info['id']])
+				->update([
+					'unbind_time' => time()
+				]);
+		
 		$n = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $this->withhold_no,
 		])->limit(1)->decrement('counter');
