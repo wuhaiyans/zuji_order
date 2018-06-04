@@ -8,9 +8,14 @@
 
 namespace App\Order\Modules\Repository;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderRelet;
+use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReletStatus;
 use Illuminate\Support\Facades\DB;
+use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderGoodsUnit;
 
 class ReletRepository
 {
@@ -126,7 +131,7 @@ class ReletRepository
      * ]
      */
     public function getRowId($params){
-        return $this->orderRelet->find($params['id'])->toArray();
+        return $this->orderRelet->find($params['id']);
 
     }
 
@@ -151,6 +156,71 @@ class ReletRepository
      */
     public function createRelet($data){
         return $this->orderRelet->save($data);
+    }
+
+    /**
+     * 通过续租编号修改支付完成状态
+     */
+    public static function reletPayStatus(string $reletNo,int $payStatus){
+        if(empty($reletNo) || empty($payStatus)){
+            return false;
+        }
+        $data['status'] = $payStatus;
+        $data['pay_time'] =time();
+        return OrderRelet::where('relet_no','=',$reletNo)->update($data);
+    }
+
+    /**
+     * 修改设备表状态续租完成,新建设备周期数据
+     *
+     * @param $reletNo
+     * @return bool
+     */
+    public function setGoods($reletNo){
+        $b = ReletRepository::reletPayStatus($reletNo, ReletStatus::STATUS2);
+        if (!$b) {
+            LogApi::notify("续租修改支付状态失败", $reletNo);
+            return false;
+        }
+        //查询
+        // 续租表
+        $reletRow = OrderRelet::where(['relet_no','=',$reletNo])->get(['goods_id'])->toArray();
+        // 设备表
+        $goodsObj = OrderGoods::where(['id'],'=',$reletRow['goods_id'])->first();
+        // 设备周期表
+        $goodsUnitRow = OrderGoodsUnit::where(
+            ['order_no','=',$goodsObj->order_no],
+            ['goods_no','=',$goodsObj->goods_no]
+        )->orderBy('id','desc')->fresh()->toArray();
+        //判断租期类型
+        if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
+            $t = $reletRow['zuqi']*(60*60*24);
+        }else{
+            $t = $reletRow['zuqi']*30*(60*60*24);
+        }
+        $data = [
+            'order_no'=>$goodsObj->order_no,
+            'goods_no'=>$goodsObj->goods_no,
+            'user_id'=>$goodsObj->user_id,
+            'unit'=>$reletRow['zuqi_type'],
+            'unit_value'=>$reletRow['zuqi'],
+            'begin_time'=>$goodsUnitRow['begin_time'],
+            'end_time'=>$goodsUnitRow['begin_time']+$t,
+        ];
+
+        //修改订单商品状态
+        if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+            LogApi::notify("续租修改设备状态失败", $reletNo);
+            return false;
+        }
+        //添加设备周期表
+        if( !OrderGoodsUnit::insert($data) ){
+            LogApi::notify("续租添加设备周期表失败", $reletNo);
+            return false;
+        }
+
+        LogApi::notify("续租支付成功", $reletNo);
+        return true;
     }
 
 }

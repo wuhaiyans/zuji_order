@@ -23,6 +23,7 @@ use App\Order\Modules\OrderCreater\YidunComponnet;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Repository\ShortMessage\OrderCreate;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
@@ -251,6 +252,8 @@ class OrderCreater
                 'method' => 'api.inner.cancelOrder',
                 'order_no'=>$orderNo,
                 'user_id'=>$data['user_id'],
+
+
                 'time' => date('Y-m-d H:i:s'),
             ],time()+7200,"");
             Log::error($b?"Order :".$orderNo." IS OK":"IS error");
@@ -396,7 +399,7 @@ class OrderCreater
             $orderCreater = new CreditComponnet($orderCreater);
 
             //蚁盾数据
-            $orderCreater = new YidunComponnet($orderCreater);
+            $orderCreater = new YidunComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);

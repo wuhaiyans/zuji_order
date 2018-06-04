@@ -14,7 +14,13 @@ return [
     'api.order.cancel' => 'OrderController@cancelOrder',
     //订单详情接口
     'api.order.orderdetail'=>'OrderController@orderInfo',
+    //订单操作日志接口
+    'api.order.orderLog'=>'OrderController@orderLog',
+    //保存回访备注信息
+    'api.order.savevisit'=>'OrderController@saveOrderVisit',
 
+    //订单确认修改收货地址信息
+    'api.order.modifyAddress'=>'OrderController@modifyAddress',
 
     //确认订单接口
     'api.order.confirmOrder'=>'OrderController@confirmOrder',

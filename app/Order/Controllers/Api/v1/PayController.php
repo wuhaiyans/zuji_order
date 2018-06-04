@@ -98,8 +98,9 @@ class PayController extends Controller
 	 * 支付异步通知处理
 	 * @param array $_POST
 	 * [
-	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
-	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
+	 *		'channel'		=> '',  //【必选】int 支付渠道
+	 *		'payment_no'	=> '',	//【必选】string 支付系统支付编号
+	 *		'out_payment_no'=> '',	//【必选】string 业务系统支付编号
 	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
 	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 *		'reason'		=> '',	//【必选】stirng 失败原因
@@ -133,6 +134,9 @@ class PayController extends Controller
 				echo 'payment status not success';exit;
 			}
 			
+			// 开启事务
+			DB::beginTransaction();
+			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
 			
@@ -145,14 +149,11 @@ class PayController extends Controller
 				echo 'payment not need ';exit;
 			}
 			
-			// 提交事务
-			DB::beginTransaction();
-			
 			// 支付处理
 			$pay->paymentSuccess([
 				'out_payment_no' => $params['payment_no'],
 				'payment_amount'	=> sprintf('%0.2f',$params['amount']/100),	// 支付金额；单位元
-				'payment_channel'	=> \App\Order\Modules\Repository\Pay\Channel::Alipay,	// 支付渠道
+				'payment_channel'	=> $params['channel'],	// 支付渠道
 				'payment_time' => time(),
 			]);
 			
@@ -174,6 +175,7 @@ class PayController extends Controller
 	 * 代扣签约异步通知处理
 	 * @param array $_POST
 	 * [
+	 *		'channel'			=> '',	//【必选】int 支付渠道
 	 *		'agreement_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_agreement_no'	=> '',	//【必选】string 业务系统编号
 	 *		'user_id'			=> '',	//【必选】string 业务系统用户ID
@@ -230,6 +232,7 @@ class PayController extends Controller
 			// 代扣签约处理
 			$pay->withholdSuccess([
 				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
+				'withhold_channel' => $params['channel'],
 			]);
 			
 			// 提交事务
@@ -270,7 +273,11 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
+		
+		
 		echo '{"status":"ok"}';exit;
+		
+		
 	}
 	
 	
@@ -278,10 +285,11 @@ class PayController extends Controller
 	 * 预授权冻结异步通知处理
 	 * @param array $_POST
 	 * [
+	 *		'channel'			=> '',	//【必选】int 支付渠道
 	 *		'fundauth_no'		=> '',	//【必选】string 支付系统编号
 	 *		'out_fundauth_no'	=> '',	//【必选】string 业务系统编号
 	 *		'status'		=> '',	//【必选】string 状态； init：初始化； processing：处理中；success：支付成功；failed：支付失败
-	 *		'total_amount'		=> '',	//【必选】int 交易金额； 单位：分
+	 *		'total_freeze_amount'		=> '',	//【必选】int 交易金额； 单位：分
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
@@ -299,7 +307,7 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 		
-//		try {
+		try {
 			
 			// 查询本地支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByFundauthNo( $params['out_fundauth_no'] );
@@ -329,19 +337,20 @@ class PayController extends Controller
 			
 			// 代扣签约处理
 			$pay->fundauthSuccess([
-				'out_fundauth_no' => $params['out_fundauth_no'],	// 支付系统资金预授权编码
-				'total_amount' => sprintf('%0.2f',$params['total_amount']/100),
+				'out_fundauth_no' => $params['fundauth_no'],	// 支付系统资金预授权编码
+				'total_amount' => sprintf('%0.2f',$params['total_freeze_amount']/100),
+				'fundauth_channel' => $params['channel'],
 			]);
 			
 			// 提交事务
             DB::commit();	
 			echo '{"status":"ok"}';exit;
 			
-//		} catch (\App\Lib\NotFoundException $exc) {
-//			echo $exc->getMessage();
-//		} catch (\Exception $exc) {
-//			echo $exc->getMessage();
-//		}
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();
+		}
 		
 		DB::rollBack();
 		exit;
@@ -468,19 +477,19 @@ class PayController extends Controller
             LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
             $rule = [
-                "reason"=>'required',                //类型：String  必有字段  备注：错误原因
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
                 "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
-                "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
-                "user_id"=>'required'                //类型：String  必有字段  备注：用户id
+                "fundauth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
             ];
 
             $validateParams = $this->validateParams($rule,$param);
             if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
             //更新查看清算表的状态
+
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
-            if ($orderCleanInfo['code']) {
+
+            if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
 
             }
@@ -526,13 +535,14 @@ class PayController extends Controller
 
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param}订单清算退款状态无效");
             }
             $this->innerOkMsg();
 
 
         } catch (\Exception $e) {
 
+            $this->innerOkMsg();
             LogApi::info(__METHOD__ . "()订单清算退押金回调接口异常 " .$e->getMessage(),$param);
 
         }
@@ -556,12 +566,10 @@ class PayController extends Controller
             LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
             $rule = [
-                "reason"=>'required',                //类型：String  必有字段  备注：错误原因
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
                 "out_trade_no"=>'required',                //类型：String  必有字段  备注：业务系统交易码
-                "auth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
-                "user_id"=>'required'                //类型：String  必有字段  备注：用户id
+                "fundauth_no"=>'required',                //类型：String  必有字段  备注：支付平台授权
             ];
 
             $validateParams = $this->validateParams($rule,$param);

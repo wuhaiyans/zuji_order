@@ -18,10 +18,6 @@ class OrderInstalmentRepository
     private $order_no = null;
     //租期
     private $zuqi = 0;
-    //租期类型
-    private $zuqi_type = 0;
-    //代扣协议号
-    private $withholding_no = null;
     //订单原始金额
     private $all_amount = 0;
     //订单实际金额
@@ -54,7 +50,6 @@ class OrderInstalmentRepository
     public function instalment_init(){
         $this->goods_no         = !empty($this->componnet['sku']['goods_no']) ? $this->componnet['sku']['goods_no'] : "";
 
-        $this->withholding_no   = $this->componnet['user']['withholding_no'];
         $this->user_id          = $this->componnet['user']['user_id'];
 
 
@@ -332,8 +327,6 @@ class OrderInstalmentRepository
         $date  = $this->get_terms($this->zuqi);
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
-            //代扣协议号
-            $_data['agreement_no']    = $this->withholding_no;
             //业务编号
             $_data['trade_no']        = createNo();
             //用户id
@@ -381,8 +374,6 @@ class OrderInstalmentRepository
         $discount_amount = $this->goods_discount_price;
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
-            //代扣协议号
-            $_data['agreement_no']    = $this->withholding_no;
             //业务编号
             $_data['trade_no']        = createNo();
             //用户id
@@ -442,7 +433,6 @@ class OrderInstalmentRepository
         }
         for($i = 1; $i <= intval($times); $i++){
             // 首月从下个月开始
-
             if($month > 12){
                 $year += 1;
                 $month = 1;
@@ -465,15 +455,12 @@ class OrderInstalmentRepository
      * return bool
      */
     public static function save($where, $data){
-
         if ( empty($where )) {
             return false;
         }
-
         if ( empty($data )) {
             return false;
         }
-
 
         $result =  OrderInstalment::where($where)->update($data);
         if (!$result) return false;

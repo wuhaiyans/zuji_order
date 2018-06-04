@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
@@ -29,27 +30,28 @@ class OrderBuyout
 	 * @return array	查询条件
 	 */
 	public static function _where_filter($params){
-		if ($params['begin_time']||$params['end_time']) {
+		$where = [];
+		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
 			$where[] = ['order_buyout.create_time', '>=', $begin_time];
 			$where[] = ['order_buyout.create_time', '<=', $end_time];
 		}
 
-		if($params['order_no']){
+		if(isset($params['order_no'])){
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
 		// order_no 订单编号查询，使用前缀模糊查询
-		if($params['goods_name']){
+		if(isset($params['goods_name'])){
 			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
 		}
-		if($params['user_mobile']){
+		if(isset($params['user_mobile'])){
 			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
 		}
-		if($params['status']){
+		if(isset($params['status'])){
 			$where[] = ['order_buyout.status', '=', $params['status']];
 		}
-		if ($params['appid']) {
+		if (isset($params['appid'])) {
 			$where[] =  ['order_info.appid', '=', $params['appid']];
 		}
 		return $where;
@@ -77,9 +79,6 @@ class OrderBuyout
 	 * @return int
 	 */
 	public static function getCount($where){
-		if(!$where){
-			return false;
-		}
 		$where = self::_where_filter($where);
 		$result = OrderBuyoutRepository::getCount($where);
 		return $result;
@@ -91,15 +90,9 @@ class OrderBuyout
 	 */
 	public static function getList($params){
 		$additional['page'] = $params['page']?$params['page']:0;
-		$additional['limit'] = $params['limit']?$params['limit']:0;
+		$additional['size'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
-		foreach($data['data'] as $k=>$v){
-			$data['data'][$k]->c_time=date('Y-m-d H:i:s',$data['data'][$k]->c_time);
-			$data['data'][$k]->create_time=date('Y-m-d H:i:s',$data['data'][$k]->create_time);
-			$data['data'][$k]->complete_time=date('Y-m-d H:i:s',$data['data'][$k]->complete_time);
-			$data['data'][$k]->wuliu_channel_name=Logistics::info($data['data'][$k]->wuliu_channel_id);//物流渠道
-		}
 		return $data;
 	}
     /**
@@ -139,28 +132,33 @@ class OrderBuyout
      * 支付完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
-	public function callbackPaid($params){
+	public static function callbackPaid($params){
 		//过滤参数
-		$rule= [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+		$rule = [
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
-			return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+			return false;
+		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			return false;
 		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
-			return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+			return false;
 		}
 		if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-			return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+			return false;
 		}
 		$data = [
 				'order_no'=>$buyout['order_no'],
@@ -168,12 +166,50 @@ class OrderBuyout
 		];
 		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
 		if(!$ret){
-			return apiResponse([],ApiStatus::CODE_50001,"关闭分期单失败");
+			//return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			return false;
+		}
+		//获取订单信息
+		$OrderRepository= new OrderRepository;
+		$orderInfo = $OrderRepository->getInfoById($buyout['order_no']);
+		//获取订单商品信息
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
+
+		//清算处理数据拼接
+		$clearData = [
+				'order_type'=> $orderInfo['order_type'],
+				'order_no' => $buyout['order_no'],
+				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,
+				'business_no' => $buyout['buyout_no']
+		];
+
+		if($goodsInfo['yajin']>0){
+			//获取支付单信息
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+			$clearData['out_auth_no'] = $payObj->getFundauthNo();
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+		}
+		//进入清算处理
+		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+		if(!$orderCleanResult){
+			return false;
+		}
+		if($goodsInfo['yajin']==0){
+			$params = [
+					'business_type'     => $clearData['business_type'],
+					'business_no'     => $clearData['business_no'],
+					'status'     => 'success',//支付状态
+			];
+			$result = self::callbackOver($params);
+			if(!$result){return false;
+			}
 		}
 		return true;
 	}
@@ -181,23 +217,28 @@ class OrderBuyout
      * 买断完成
      * @param array $params 【必选】
      * [
-     *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "business_type"=>"", 业务类型
+     *      "business_no"=>"",业务编号
+	 * 		"status"=>"",支付状态
      * ]
      * @return json
      */
-	public function callbackOver($params){
+	public static function callbackOver($params){
 		//过滤参数
 		$rule = [
-				'buyout_no'=>'required',
-				'user_id'=>'required',
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
 		];
 		$validator = app('validator')->make($params, $rule);
 		if ($validator->fails()) {
 			return false;
 		}
+		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+			return false;
+		}
 		//获取买断单
-		$buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+		$buyout = OrderBuyout::getInfo($params['business_no']);
 		if(!$buyout){
 			return false;
 		}
@@ -205,28 +246,28 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单商品信息
-		$this->OrderGoodsRepository = new OrderGoodsRepository;
-		$goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
 		if(empty($goodsInfo)){
 			return false;
 		}
 		//解冻订单
-		$this->OrderRepository= new OrderRepository;
-		$ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$OrderRepository= new OrderRepository;
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
 		//更新订单商品
 		$goods = [
-				'goods_status' => OrderGoodStatus::BUY_OUT,
+				'goods_status' => \App\Order\Modules\Inc\OrderGoodStatus::BUY_OUT,
 				'business_no' => $buyout['buyout_no'],
 		];
-		$ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
 			return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$params['user_id']);
+		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$buyout['user_id']);
 		if(!$ret){
 			return false;
 		}
