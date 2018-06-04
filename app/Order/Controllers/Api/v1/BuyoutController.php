@@ -62,17 +62,6 @@ class BuyoutController extends Controller
     public function getBuyoutList(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        //过滤参数
-        $params = filter_array($params, [
-            'type'  => 'required',
-            'word'  => 'required',
-            'status'  => 'required',
-            'appid'  => 'required',
-            'begin_time' => 'required',
-            'end_time' => 'required',
-            'offset'    => 'required',
-            'limit'     => 'required',
-        ]);
         $where = [];
         if($params['word']){
             if($params['type'] == 1){
