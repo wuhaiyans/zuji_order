@@ -62,7 +62,7 @@ class OrderBuyoutRepository
 		if(!isset($additional['size'])){
 			return false;
 		}
-		$additional['page'] = ($additional['page'] - 1) * $additional['size'];
+		$additional['page'] = $additional['page']* $additional['size'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
