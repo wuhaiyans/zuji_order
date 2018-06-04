@@ -34,17 +34,31 @@ class PayController extends Controller
 		$channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;
 		
 		$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByUserChannel($user_id, $channel);
+		$_params = [
+			'business_type' => 1,
+			'business_no' => '123456',
+		];
 		
-//		$b = $withhold->increase();
-//		var_dump( $b, $withhold->getCounter() );
-//		$b = $withhold->decrease();
-//		var_dump( $b, $withhold->getCounter() );
+		// 绑
+		$b = $withhold->bind( $_params);
+		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		if( !$b ){
+			\DB::rollBack();exit;
+		}
 		
-		var_dump( $withhold );
-		$b = $withhold->unsignApply();
+		// 解
+		$b = $withhold->unbind( $_params );
 		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
-		$b = $withhold->unsignSuccess();
-		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		if( !$b ){
+			\DB::rollBack();exit;
+		}
+		
+//		var_dump( $withhold );
+//		$b = $withhold->unsignApply();
+//		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+//		$b = $withhold->unsignSuccess();
+//		var_dump( $b, $withhold, \App\Lib\Common\Error::getError() );
+		\DB::commit();
 	}
 	
 	public function testPost(){
