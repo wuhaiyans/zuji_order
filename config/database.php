@@ -41,17 +41,46 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => true,
-            'engine' => null,
+			'read' => [
+				'host' => '119.29.141.207',
+				'port' => env('DB_PORT_READ', '3306'),
+				'database' => env('DB_DATABASE_READ', 'zuji_order'),
+				'username' => env('DB_USERNAME_READ', 'hjx'),
+				'password' => env('DB_PASSWORD_READ', '123456'),
+				'unix_socket' => env('DB_SOCKET_READ', ''),
+				'charset' => 'utf8mb4',
+				'collation' => 'utf8mb4_unicode_ci',
+			],
+			'write' => [
+				'host' => '119.29.141.207',
+				'port' => env('DB_PORT', '3306'),
+				'database' => env('DB_DATABASE', 'zuji_order'),
+				'username' => env('DB_USERNAME', 'hjx'),
+				'password' => env('DB_PASSWORD', '123456'),
+				'unix_socket' => env('DB_SOCKET', ''),
+				'charset' => 'utf8mb4',
+				'collation' => 'utf8mb4_unicode_ci',
+			],
+			'prefix' => '',
+			'strict' => true,
+			'engine' => null,
+			'options' => [
+				PDO::ATTR_EMULATE_PREPARES => false,
+			]
+//            'host' => env('DB_HOST', '127.0.0.1'),
+//            'port' => env('DB_PORT', '3306'),
+//            'database' => env('DB_DATABASE', 'forge'),
+//            'username' => env('DB_USERNAME', 'forge'),
+//            'password' => env('DB_PASSWORD', ''),
+//            'unix_socket' => env('DB_SOCKET', ''),
+//            'charset' => 'utf8mb4',
+//            'collation' => 'utf8mb4_unicode_ci',
+//            'prefix' => '',
+//            'strict' => true,
+//            'engine' => null,
+//			'options' => [
+//				PDO::ATTR_EMULATE_PREPARES => false,
+//			]
         ],
 
         'warehouse' => [

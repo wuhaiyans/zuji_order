@@ -452,6 +452,7 @@ class Pay extends \App\Lib\Configurable
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
 			'payment_channel' => $params['payment_channel'],
 			'payment_amount' => $params['payment_amount'],
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
@@ -486,12 +487,14 @@ class Pay extends \App\Lib\Configurable
 	 * @param array		$params		签约成功参数
 	 * [
 	 *		'out_withhold_no'	=> '',	// 支付系统代扣码
+	 *		'withhold_channel'	=> '',	// 支付渠道
 	 * ]
 	 * @return bool
 	 * @throws \Exception
 	 */
 	public function withholdSuccess( array $params ):bool
 	{
+		$update_time = time();
 		LogApi::debug('[支付阶段]代扣签约环节处理');
 		// 待签约时才允许
 		if( $this->status != PayStatus::WAIT_WHITHHOLD
@@ -512,6 +515,8 @@ class Pay extends \App\Lib\Configurable
 		])->update([
 			'status' => $status,
 			'withhold_status' => WithholdStatus::SIGNED,// 已签约
+			'withhold_channel' => $params['withhold_channel'],//
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]代扣签约环节处理保存失败1');
@@ -521,10 +526,12 @@ class Pay extends \App\Lib\Configurable
 		$withholdModel = new OrderPayWithhold();
 		$b = $withholdModel->insert([
 			'withhold_no'		=> $this->withholdNo,
+			'withhold_channel'	=> $params['withhold_channel'],
 			'out_withhold_no'	=> $params['out_withhold_no'],
 			'user_id'			=> $this->user_id,
 			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
-			'sign_time'			=> time(),
+			'sign_time'			=> $update_time,
+			'update_time'		=> $update_time,
 			'counter'			=> 1, // 计数
 		]);
 		if( !$b ){
@@ -549,6 +556,7 @@ class Pay extends \App\Lib\Configurable
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @param array		$params		支付成功参数
 	 * [
+	 *		'fundauth_channel'	=> '',	// 支付渠道
 	 *		'out_fundauth_no'	=> '',	// 支付系统授权码
 	 *		'total_amount'		=> '',	// 预授权金额；单位：元
 	 * ]
@@ -577,6 +585,8 @@ class Pay extends \App\Lib\Configurable
 		])->update([
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
+			'fundauth_channel' => $params['fundauth_channel'],
+			'update_time'		=> $update_time,
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );
@@ -628,20 +638,31 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function getPaymentUrl( int $channel,array $params ){
 		
-				// 获取支付
-				$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
-					'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-					'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
-					'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
-					'channel_type'	=> $channel,						//【必选】int 支付渠道
-					'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
-					'name'			=> $params['name'],				//【必选】string 交易名称
-					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-					//【必选】string 后台通知地址
-//					'back_url'		=> $params['back_url'],			
-					'back_url'		=> env('APP_URL').'/order/pay/paymentNotify',
-				]);
-				return $url_info;
+		// 设置支付渠道
+		$payModel = new OrderPayModel( );
+		$b = $payModel->limit(1)->where([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		])->update([
+			'payment_channel' => $channel,
+			'update_time' => time(),
+		]);
+		if( !$b ){
+			throw new \Exception( '支付环节支付渠道设置失败' );
+		}
+		// 获取url
+		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
+			'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
+			'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
+			'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
+			'channel_type'	=> $channel,						//【必选】int 支付渠道
+			'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
+			'name'			=> $params['name'],				//【必选】string 交易名称
+			'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+			//【必选】string 后台通知地址		
+			'back_url'		=> env('APP_URL').'/order/pay/paymentNotify',
+		]);
+		return $url_info;
 	}
 	
 	/**
@@ -661,17 +682,31 @@ class Pay extends \App\Lib\Configurable
 	 * @throws \Exception	失败时抛出异常
 	 */
 	public function getFundauthUrl( int $channel,array $params ){
-				$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
-					'out_fundauth_no'	=> $this->getFundauthNo(),
-					'channel_type'	=> $channel,						//【必选】int 支付渠道
-					'amount'		=> $this->getFundauthAmount()*100,	//【必选】int 预授权金额；单位：分
-					'user_id'		=> $this->getUserId(),				//【可选】int 业务平台yonghID
-					'name'			=> $params['name'],					//【必选】string 交易名称
-					'front_url'		=> $params['front_url'],			//【必选】string 前端回跳地址
-					//【必选】string 后台通知地址	
-					'back_url'		=> env('APP_URL').'/order/pay/fundauthNotify',
-				]);
-				return $url_info;
+		
+		// 设置 预授权渠道
+		$payModel = new OrderPayModel( );
+		$b = $payModel->limit(1)->where([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		])->update([
+			'fundauth_channel' => $channel,
+			'update_time' => time(),
+		]);
+		if( !$b ){
+			throw new \Exception( '预授权环节支付渠道设置失败' );
+		}
+		// 获取url
+		$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
+			'out_fundauth_no'	=> $this->getFundauthNo(),
+			'channel_type'	=> $channel,						//【必选】int 支付渠道
+			'amount'		=> $this->getFundauthAmount()*100,	//【必选】int 预授权金额；单位：分
+			'user_id'		=> $this->getUserId(),				//【可选】int 业务平台yonghID
+			'name'			=> $params['name'],					//【必选】string 交易名称
+			'front_url'		=> $params['front_url'],			//【必选】string 前端回跳地址
+			//【必选】string 后台通知地址	
+			'back_url'		=> env('APP_URL').'/order/pay/fundauthNotify',
+		]);
+		return $url_info;
 	}
 	
 	/**
@@ -692,17 +727,29 @@ class Pay extends \App\Lib\Configurable
 	 */
 	public function getWithholdSignUrl( int $channel,array $params ){
 		
-				// 获取支付
-				$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
-					'out_agreement_no'	=> $this->getWithholdNo(),
-					'channel_type'	=> $channel,					//【必选】int 支付渠道
-					'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
-					'name'			=> $params['name'],				//【必选】string 交易名称
-					'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-					//【必选】string 后台通知地址		
-					'back_url'		=> env('APP_URL').'/order/pay/withholdSignNotify',
-				]);
-				return $url_info;
+		// 设置 代扣渠道
+		$payModel = new OrderPayModel( );
+		$b = $payModel->limit(1)->where([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		])->update([
+			'withhold_channel' => $channel,
+			'update_time' => time(),
+		]);
+		if( !$b ){
+			throw new \Exception( '代扣签约环节支付渠道设置失败' );
+		}
+		// 获取url
+		$url_info = \App\Lib\Payment\CommonWithholdingApi::getSignUrl([
+			'out_agreement_no'	=> $this->getWithholdNo(),
+			'channel_type'	=> $channel,					//【必选】int 支付渠道
+			'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
+			'name'			=> $params['name'],				//【必选】string 交易名称
+			'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+			//【必选】string 后台通知地址		
+			'back_url'		=> env('APP_URL').'/order/pay/withholdSignNotify',
+		]);
+		return $url_info;
 	}
 	
 	//-+------------------------------------------------------------------------
