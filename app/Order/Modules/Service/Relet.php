@@ -311,6 +311,7 @@ class Relet
             ['user_id', '=', $params['user_id']],
             ['order_no', '=', $params['order_no']]
         ];
+        return $where;
         $row = OrderGoodsRepository::getGoodsRow($where);
         if($row){
             if($row['zuqi_type']==OrderStatus::ZUQI_TYPE1){
