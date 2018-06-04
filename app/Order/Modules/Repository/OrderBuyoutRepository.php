@@ -69,8 +69,8 @@ class OrderBuyoutRepository
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->skip($additional['offset'])
-				->take($additional['limit'])
+				->skip(0)
+				->take(2)
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
 		echo json_encode(DB::getQueryLog());die;
 		if($parcels){
