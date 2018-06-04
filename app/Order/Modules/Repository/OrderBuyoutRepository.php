@@ -70,7 +70,7 @@ class OrderBuyoutRepository
 				->where($where)
 				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
 				->skip($additional['offset'])
-				->limit($additional['limit']);
+				->take($additional['limit']);
 		if($parcels){
 			return $parcels->toArray();
 		}
