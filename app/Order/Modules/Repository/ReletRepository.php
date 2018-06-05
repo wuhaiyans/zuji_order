@@ -67,13 +67,13 @@ class ReletRepository
             $whereArray[] = ['order_relet.status', '=', $params['status']];
         }
         // 页数
-        if ($params['page']) {
+        if (isset($params['page']) && $params['page']>0) {
             $page = $params['page'];
         } else {
             $page = 1;
         }
         // 每页显示条数
-        if ($params['pagesize']) {
+        if (isset($params['pagesize']) && $params['pagesize']>0) {
             $pagesize = $params['pagesize'];
         } else {
             $pagesize = 20;
