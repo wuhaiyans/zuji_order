@@ -122,7 +122,6 @@ class UserComponnet implements OrderCreater
 
         return $this->flag;
     }
-
     /**
      * 获取数据结构
      * @return array
