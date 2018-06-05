@@ -108,6 +108,7 @@ class BuyoutController extends Controller
         $userList = OrderUserInfoRepository::getUserColumn($orderNos);
 
         foreach($orderList['data'] as &$item){
+            $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
             $item['realname'] = $userList[$item['order_no']]['realname'];
             $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
             $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];

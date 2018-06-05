@@ -15,4 +15,13 @@ namespace App\Order\Modules\Repository\Order;
  */
 class ServicePeriod {
 	//put your code here
+    /**
+     * 生成服务周期
+     * @return bool
+     */
+
+    public function createService():bool {
+
+        return true;
+    }
 }

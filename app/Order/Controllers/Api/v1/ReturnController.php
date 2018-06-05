@@ -401,6 +401,31 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->returnApplyList($params['params']);
         return apiResponse($res,ApiStatus::CODE_0);
     }
+    /**
+     *params[
+     * 'order_no'
+     * 'business_key'
+     * ]
+     * 获取订单检测不合格的数据
+     */
+    public function returnCheckList(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'business_key'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        if($params['params']['business_key']!=ReturnStatus::OrderTuiHuo){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationFalse;
+        $res=$this->OrderReturnCreater->returnCheckList($params['params']);
+        return apiResponse($res,ApiStatus::CODE_0);
+    }
 
 
 }
