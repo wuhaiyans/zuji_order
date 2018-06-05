@@ -136,4 +136,10 @@ class Goods {
     public function barterFinish( ):bool{
         return true;
     }
+    //-+------------------------------------------------------------------------
+    // | 插入Imei
+    //-+------------------------------------------------------------------------
+    public function createGoodsExtends():bool {
+        return true;
+    }
 }
