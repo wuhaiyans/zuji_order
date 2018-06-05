@@ -45,7 +45,6 @@ class MiniOrderController extends Controller
      *      sku_id      子商品ID
      */
     public function getTemporaryOrderNo(Request $request){
-        echo 1;die;
         $params     = $request->all();
         // 验证参数
         $rules = [
@@ -59,7 +58,7 @@ class MiniOrderController extends Controller
         //获取订单号
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
-        $goods_info = \App\Lib\Goods\Goods::getSku($params['sku_id']);
+        $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
         if( $goods_info['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
             $new_data = date('Y-m-d H:i:s');
             $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+1).' month'));
@@ -74,6 +73,7 @@ class MiniOrderController extends Controller
         ];
         //redis 存储数据
         $values = Redis::command('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
+        var_dump($values);die;
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
