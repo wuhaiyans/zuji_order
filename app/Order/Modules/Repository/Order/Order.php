@@ -143,19 +143,6 @@ class Order {
 	
 	
 	
-	
-	/**
-	 * 获取订单
-	 * <p>当订单不存在时，抛出异常</p>
-	 * @param string $order_no		订单编号
-	 * @param int		$lock			锁
-	 * @return \App\Order\Modules\Repository\Order\Order
-	 * @throws \App\Lib\NotFoundException
-	 */
-	public static function getByNo( string $order_no, int $lock=0 ) {
-		return new Order();
-		throw new App\Lib\NotFoundException('');
-	}
     //-+------------------------------------------------------------------------
     // | 退货
     //-+------------------------------------------------------------------------
@@ -210,4 +197,26 @@ class Order {
     }
 
 
+	
+	/**
+	 * 获取订单
+	 * <p>当订单不存在时，抛出异常</p>
+	 * @param string $order_no		订单编号
+	 * @param int		$lock			锁
+	 * @return \App\Order\Modules\Repository\Order\Order
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getByNo( string $order_no, int $lock=0 ) {
+        $builder = \App\Order\Models\Order::where([
+            ['order_no', '=', $order_no],
+        ])->limit(1);
+		if( $lock ){
+			$builder->lockForUpdate();
+		}
+		$order_info = $builder->first();
+		if( !$order_info ){
+			throw new App\Lib\NotFoundException('订单未找到');
+		}
+		return new self( $order_info->toArray() );
+	}
 }

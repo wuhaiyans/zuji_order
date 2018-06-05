@@ -15,11 +15,6 @@ namespace App\Order\Modules\Repository\Order;
  */
 class Goods {
 	
-	
-	public function tuihuoOpen(){
-		
-	}
-	
 	/**
 	 * 获取商品列表
 	 * @param string	$order_no		订单编号
@@ -64,7 +59,7 @@ class Goods {
 		if( !$goods_info ){
 			throw new App\Lib\NotFoundException('商品未找到');
 		}
-		return new Goods( $goods_info );
+		return new Goods( $goods_info->toArray() );
 	}
 
 	/**
