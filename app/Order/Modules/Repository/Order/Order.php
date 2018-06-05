@@ -141,6 +141,7 @@ class Order {
 	 * 获取订单
 	 * <p>当订单不存在时，抛出异常</p>
 	 * @param string $order_no		订单编号
+	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
 	 * @throws \App\Lib\NotFoundException
 	 */
