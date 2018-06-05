@@ -402,3 +402,12 @@ function get_msg( ){
 function set_apistatus( $code, $msg ){
 	return get_instance()->setCode(strval($code))->setMsg(strval($msg));
 }
+
+//以数组指定一列值为数组key
+function array_keys_arrange($array,$value){
+    $list = [];
+    foreach($array as $key=>$v){
+        $list[$v[$value]] = $v;
+    }
+    return $list;
+}

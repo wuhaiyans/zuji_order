@@ -191,6 +191,10 @@ return [
     'api.giveback.get.paymentinfo'       => 'GivebackController@getPaymentInfo',
 	//还机同步支付的状态
     'api.giveback.sync.paymentstatus'       => 'GivebackController@syncPaymentStatus',
+	//还机获取所有状态
+    'api.giveback.get.status.list'       => 'GivebackController@getStatusList',
+	//还机获取列表
+    'api.giveback.get.list'       => 'GivebackController@getList',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口

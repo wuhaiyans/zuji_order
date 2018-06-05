@@ -115,6 +115,15 @@ class OrderGoodsRepository
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;
 	}
+	//多个商品信息in条件获取
+	public static function getGoodsColumn($goodsNos){
+		if (!is_array($goodsNos)) return false;
+		array_unique($goodsNos);
+		$result =  orderGoods::query()->wherein('goods_no', $goodsNos)->get()->toArray();
+		if (!$result) return false;
+		//指定goods_no为数组下标
+		return array_keys_arrange($result,"goods_no");
+	}
 	/**
 	 * 根据条件更新数据
 	 * @param array $where
