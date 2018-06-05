@@ -58,6 +58,7 @@ class ReletRepository
         //拼接 页数 搜索参数 每页显示数
         $whereArray = [];
 
+        dd(22);
         //根据用户id
         if (isset($params['user_id']) && !empty($params['user_id'])) {
             $whereArray[] = ['order_relet.user_id', '=', $params['user_id']];
@@ -79,7 +80,6 @@ class ReletRepository
             $pagesize = 20;
         }
 
-        dd($page);
         //查询
         $orderList = DB::table('order_relet')
             ->where($whereArray)
