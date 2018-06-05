@@ -256,14 +256,14 @@ class Relet
             }
             //查询
             // 续租表
-            $reletRow = OrderRelet::where(['relet_no','=',$reletNo])->get(['goods_id'])->toArray();
+            $reletRow = OrderRelet::where('relet_no','=',$reletNo)->get(['goods_id'])->toArray();
             // 设备表
-            $goodsObj = OrderGoods::where(['id'],'=',$reletRow['goods_id'])->first();
+            $goodsObj = OrderGoods::where('id','=',$reletRow['goods_id'])->first();
             // 设备周期表
-            $goodsUnitRow = OrderGoodsUnit::where(
+            $goodsUnitRow = OrderGoodsUnit::where([
                 ['order_no','=',$goodsObj->order_no],
                 ['goods_no','=',$goodsObj->goods_no]
-            )->orderBy('id','desc')->fresh()->toArray();
+            ])->orderBy('id','desc')->fresh()->toArray();
             //判断租期类型
             if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
                 $t = $reletRow['zuqi']*(60*60*24);
