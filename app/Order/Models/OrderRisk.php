@@ -8,10 +8,10 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderYidun extends Model
+class OrderRisk extends Model
 {
 
-    protected $table = 'order_yidun';
+    protected $table = 'order_risk';
 
     protected $primaryKey='id';
     /**
@@ -26,6 +26,6 @@ class OrderYidun extends Model
      *
      * @var array
      */
-    protected $fillable = ['decision','order_no','score','strategies'];
+    protected $fillable = ['decision','order_no','score','strategies','type'];
 
 }

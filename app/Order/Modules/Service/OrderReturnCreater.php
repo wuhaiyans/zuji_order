@@ -373,6 +373,24 @@ class OrderReturnCreater
         if(empty($params['goods_no'])){
             return ApiStatus::CODE_20001;
         }
+
+        // 查询退货业务
+        $data = [
+            'id' => '123',
+        ];
+
+
+        $GoodsReturn = new \App\Order\Modules\Repository\GoodsReturn\GoodsReturn( $data );
+        $b = $GoodsReturn->close();
+        if(!$b) {
+            //事务回滚
+            DB::rollBack();
+            return ApiStatus::CODE_33008;//更新退货单状态失败
+        }
+        //提交事务
+        DB::commit();
+        return true;
+
         //查询是否存在此退货单，存在判断退货单状态是否允许取消
         $return_result = $this->orderReturnRepository->get_info_by_order_no($params);
         if($return_result){
@@ -1230,5 +1248,23 @@ class OrderReturnCreater
         $where[]=['order_no','=',$params['order_no']];
         $return_list= $this->orderReturnRepository->get_type($where);
         return $return_list;
+    }
+    /**
+     * 退换货除已取消外的检测不合格的数据
+     * @param $params
+     */
+    public function returnCheckList($params){
+        $where[]=['order_return.order_no','=',$params['order_no']];
+        $where[]=['order_return.business_key','=',$params['business_key']];
+        $where[]=['order_return.evaluation_status','=',$params['evaluation_status']];
+        $return_list= $this->orderReturnRepository->returnApplyList($where);//待审核的退换货列表
+        $data=[];
+        foreach($return_list as $k=>$v){
+            if($return_list[$k]->status==ReturnStatus::ReturnCreated || $return_list[$k]->status==ReturnStatus::ReturnAgreed||$return_list[$k]->status==ReturnStatus::ReturnDenied ){
+                $data[$k]['goods_name']=$return_list[$k]->goods_name;
+            }
+
+        }
+        return $data;
     }
 }
