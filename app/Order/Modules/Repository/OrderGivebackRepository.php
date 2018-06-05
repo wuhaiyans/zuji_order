@@ -26,6 +26,7 @@ class OrderGivebackRepository
 	 * @var string filed order_no
 	 */
 	const KWTYPE_GOODSNAME = 'goods_name';
+	/**
 	 * 构造方法
 	 */
 	public function __construct(  ){
