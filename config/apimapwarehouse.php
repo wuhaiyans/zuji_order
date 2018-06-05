@@ -31,6 +31,9 @@ return [
     'warehouse.delivery.delImei' => 'DeliveryController@delImei', //删除imei
     'warehouse.delivery.list' => 'DeliveryController@list', //列表
     'warehouse.delivery.refuse' => 'DeliveryController@refuse', //拒签   待完成
+    'warehouse.delivery.publics' => 'DeliveryController@publics', //发货公用参数
+
+
 
 
     //收货 待完成

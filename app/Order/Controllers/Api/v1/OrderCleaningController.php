@@ -6,6 +6,7 @@
  */
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\PayCreater;
 use Illuminate\Http\Request;

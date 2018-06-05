@@ -409,13 +409,17 @@ class DeliveryRepository
      * @param $order_no
      * 发货
      */
-    public static function send($delivery_no)
+    public static function send($params)
     {
-        $model = Delivery::where(['delivery_no'=> $delivery_no, 'status'=>Delivery::STATUS_WAIT_SEND])->first();
+        $model = Delivery::where(['delivery_no'=> $params['delivery_no']])->first();
 
         if (!$model) {
-            throw new NotFoundResourceException($delivery_no . '号待发货单未找到');
+            throw new NotFoundResourceException($params['delivery_no'] . '号待发货单未找到');
         }
+
+        $model->logistics_id = $params['logistics_id'];
+        $model->logistics_no =  $params['logistics_no'];
+        $model->status_remark =  $model->status_remark .';物流备注'. $params['logistics_note'];
 
         $model->status = Delivery::STATUS_SEND;
         $model->delivery_time = $model->status_time = time();

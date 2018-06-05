@@ -33,16 +33,18 @@ class OrderCleaning
      */
     public static function getOrderCleanInfo($param)
     {
+
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+
        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
 
         $orderInfo = OrderUserInfoRepository::getUserInfo(array('order_no'=>$orderCleanData['order_no'],'user_id'=>$orderCleanData['user_id']));
         if (empty($orderInfo))  return apiResponseArray(ApiStatus::CODE_31205,$orderInfo);
         $orderCleanData['order_info']   = [
-            'order_no'=> $orderInfo['order_no'],
-            'mobile' => $orderInfo['mobile'],
-            'name' => $orderInfo['name'],
+            'order_no'=> $orderInfo[0]['order_no'],
+            'mobile' => $orderInfo[0]['mobile'],
+            'name' => $orderInfo[0]['name'],
 
         ];
         return apiResponseArray(ApiStatus::CODE_0,$orderCleanData);
