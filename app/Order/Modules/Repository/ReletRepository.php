@@ -58,7 +58,6 @@ class ReletRepository
         //拼接 页数 搜索参数 每页显示数
         $whereArray = [];
 
-        dd(22);
         //根据用户id
         if (isset($params['user_id']) && !empty($params['user_id'])) {
             $whereArray[] = ['order_relet.user_id', '=', $params['user_id']];
@@ -68,13 +67,13 @@ class ReletRepository
             $whereArray[] = ['order_relet.status', '=', $params['status']];
         }
         // 页数
-        if ($params['page']) {
+        if (isset($params['page']) && $params['page']>0) {
             $page = $params['page'];
         } else {
             $page = 1;
         }
         // 每页显示条数
-        if ($params['pagesize']) {
+        if (isset($params['pagesize']) && $params['pagesize']>0) {
             $pagesize = $params['pagesize'];
         } else {
             $pagesize = 20;
