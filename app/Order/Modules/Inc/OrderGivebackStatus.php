@@ -14,11 +14,15 @@ class OrderGivebackStatus{
 	//-+------------------------------------------------------------------------
     /**
 	 * 申请中【只给前端展示使用，数据库不会存储当前字段】
-     * @var int 0
+     * @var int -1
      */
-    const STATUS_APPLYING = 0;
+    const STATUS_APPLYING = -1;
     /**
-	 * 处理中【待收货】
+    /**
+	 * 全部状态
+     */
+    const STATUS_ALL = 0;
+    /**	 * 处理中【待收货】
      * @var int 1
      */
     const STATUS_DEAL_WAIT_DELIVERY = 1;
@@ -60,7 +64,7 @@ class OrderGivebackStatus{
      */
     public static function getStatusList(){
         return [
-            self::STATUS_APPLYING => '申请中',
+			self::STATUS_ALL => '全部',
             self::STATUS_DEAL_WAIT_DELIVERY => '处理中|待收货',
             self::STATUS_DEAL_WAIT_CHECK => '处理中|待检测',
             self::STATUS_DEAL_WAIT_PAY => '处理中|待支付',
