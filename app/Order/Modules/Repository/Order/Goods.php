@@ -15,6 +15,11 @@ namespace App\Order\Modules\Repository\Order;
  */
 class Goods {
 	
+	
+	public function tuihuoOpen(){
+		
+	}
+	
 	/**
 	 * 获取商品列表
 	 * @param string $good_no		商品编号

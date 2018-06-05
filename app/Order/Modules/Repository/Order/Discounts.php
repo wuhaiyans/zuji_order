@@ -14,5 +14,21 @@ namespace App\Order\Modules\Repository\Order;
  * <p>商品优惠</p>
  */
 class Discounts {
-	//put your code here
+	
+	
+	/**
+	 * 读取 订单中的优惠信息列表
+	 * 
+	 */
+	public static function getGoodsDiscounts( string $goods_no ){
+		
+	}
+	
+	/**
+	 * 读取 订单中的优惠信息列表
+	 */
+	public static function getOrderDiscounts( string $order_no ){
+		
+	}
+	
 }

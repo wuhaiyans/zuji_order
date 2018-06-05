@@ -9,10 +9,47 @@
 namespace App\Order\Modules\Repository\Order;
 
 /**
- * Description of Instalment
+ * 商品分期
  *
  * @author Administrator
  */
 class Instalment {
-	//put your code here
+	
+	/**
+	 * 创建商品分期
+	 * @param array	商品分期二维数组
+	 * [
+	 *		[
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *		]
+	 * ]
+	 * @return bool true：成功；false：失败
+	 */
+	public static function create( array $data ):bool{
+		
+	}
+	
+	/**
+	 * 读取商品分期
+	 * @param string $goods_no	商品编号
+	 * @return array	商品分期二维数组
+	 * [
+	 *		[
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *			'' => '',
+	 *		]
+	 * ]
+	 */
+	public static function getList( string $goods_no ){
+		
+	}
+	
+	
 }
