@@ -171,6 +171,10 @@ class Order {
      * 取消退货
      */
     public function returnClose( ):bool{
+        // 校验自己状态
+
+        // 更新状态
+
         return true;
     }
     /**

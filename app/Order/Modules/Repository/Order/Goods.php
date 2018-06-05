@@ -96,7 +96,6 @@ class Goods {
      * @return bool
      */
     public function returnOpen( ):bool{
-
         return true;
     }
     /**
@@ -104,7 +103,21 @@ class Goods {
      * @return bool
      */
     public function returnClose( ):bool{
-        return true;
+        // 校验自己状态
+        if( 0 ){
+            return false;
+        }
+
+        // 更新状态
+        if( 0 ){
+            return false;
+        }
+
+        // 获取当前订单
+        $order = \App\Order\Modules\Repository\Order\Order::getByNo($this->data['order_no'] );
+        $b = $order->returnClose();
+        // 更新订单状态
+        return $order->returnClose( );
     }
     /**
      * 完成退货
@@ -135,6 +148,12 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
+        return true;
+    }
+    //-+------------------------------------------------------------------------
+    // | 插入Imei
+    //-+------------------------------------------------------------------------
+    public function createGoodsExtends():bool {
         return true;
     }
 }
