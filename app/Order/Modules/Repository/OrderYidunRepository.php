@@ -10,8 +10,20 @@ class OrderYidunRepository
     public function __construct()
     {
     }
+
     public static function add($data){
         $info =OrderYidun::create($data);
         return $info->getQueueableId();
+    }
+
+
+    public static function getYidunInfoByOrderNo($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        $order =  OrderYidun::query()->where($whereArray)->first();
+        if (!$order) return false;
+        return $order->toArray();
     }
 }
