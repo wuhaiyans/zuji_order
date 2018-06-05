@@ -131,8 +131,7 @@ class Goods {
         }
 
         // 获取当前订单
-        $order = \App\Order\Modules\Repository\Order\Order::getByNo($this->data['order_no'] );
-        $b = $order->returnClose();
+        $order = Order::getByNo($this->data['order_no'] );
         // 更新订单状态
         return $order->returnClose( );
     }
