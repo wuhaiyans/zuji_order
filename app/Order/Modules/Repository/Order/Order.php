@@ -83,32 +83,6 @@ class Order {
 	}
 	
 	//-+------------------------------------------------------------------------
-	// | 退款
-	//-+------------------------------------------------------------------------
-	
-	/**
-	 * 申请退款
-	 * @return bool
-	 */
-	public function refundOpen( ):bool{
-		return true;
-	}
-	/**
-	 * 取消退款
-	 * @return bool
-	 */
-	public function refundClose( ):bool{
-		return true;
-	}
-	/**
-	 * 完成退款
-	 * @return bool
-	 */
-	public function refundFinish( ):bool{
-		return true;
-	}
-	
-	//-+------------------------------------------------------------------------
 	// | 发货
 	//-+------------------------------------------------------------------------
     /**
@@ -141,6 +115,31 @@ class Order {
 	}
 	
 	
+	//-+------------------------------------------------------------------------
+	// | 退款
+	//-+------------------------------------------------------------------------
+	
+	/**
+	 * 申请退款
+	 * @return bool
+	 */
+	public function refundOpen( ):bool{
+		return true;
+	}
+	/**
+	 * 取消退款
+	 * @return bool
+	 */
+	public function refundClose( ):bool{
+		return true;
+	}
+	/**
+	 * 完成退款
+	 * @return bool
+	 */
+	public function refundFinish( ):bool{
+		return true;
+	}
 	
 	
     //-+------------------------------------------------------------------------
@@ -171,6 +170,7 @@ class Order {
     public function returnFinish( ):bool{
         return true;
     }
+	
     //-+------------------------------------------------------------------------
     // | 换货
     //-+------------------------------------------------------------------------
@@ -196,6 +196,57 @@ class Order {
         return true;
     }
 
+	
+    //-+------------------------------------------------------------------------
+    // | 还机
+    //-+------------------------------------------------------------------------
+	/**
+	 * 还机开始
+	 * @return bool
+	 */
+    public function givebackOpen():bool {
+        return true;
+    }
+	/**
+	 * 还机关闭
+	 * @return bool
+	 */
+    public function givebackClose():bool {
+        return true;
+    }
+	/**
+	 * 还机完成
+	 * @return bool
+	 */
+    public function givebackFinish():bool {
+        return true;
+    }
+	
+    //-+------------------------------------------------------------------------
+    // | 买断
+    //-+------------------------------------------------------------------------
+	/**
+	 * 买断开始
+	 * @return bool
+	 */
+    public function buyoutOpen():bool {
+        return true;
+    }
+	/**
+	 * 买断关闭
+	 * @return bool
+	 */
+    public function buyoutClose():bool {
+        return true;
+    }
+	/**
+	 * 买断完成
+	 * @return bool
+	 */
+    public function buyoutFinish():bool {
+        return true;
+    }
+	
 
     //-+------------------------------------------------------------------------
     // | 续租
