@@ -12,7 +12,7 @@ class Relet
      * 读商品数据
      *      长租短租信息
      */
-    public static function get(){}
+    public static function getGoodsInfo(){}
 
     /**
      * 创建分期
@@ -24,6 +24,7 @@ class Relet
      *
      *
      */
+    public static function getPayUrl(){}
 
     /**
      * 支付成功回调
