@@ -55,16 +55,7 @@ class ReturnController extends Controller
         if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
             return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
         }
-        $res = $this->OrderCreate->get_order_info($params);//获取订单信息
-        if(empty($res)){
-            return apiResponse([],ApiStatus::CODE_34005,"没有找到该订单");
-        }
-        $return_info= $this->OrderReturnCreater->get_return_info($params);//获取退货单信息
-        if($return_info){
-           if($return_info[0]['status'] ==ReturnStatus::ReturnCreated) {
-              return apiResponse([],ApiStatus::CODE_20001,"已提交退换货申请,请等待审核");
-           }
-        }
+
         $return = $this->OrderReturnCreater->add($params);
         return apiResponse([],$return);
 
@@ -92,6 +83,74 @@ class ReturnController extends Controller
         $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
         return apiResponse([],$return);
 
+    }
+    /**
+     *   退换货审核
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * 选中即同意
+     * [
+     * order_no
+     * 'agree'=>[
+     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
+     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
+     * ]
+     * 'disagree'=>[
+     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
+     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
+     * ]
+     *business_key
+     * ]
+     *
+     */
+
+    public function returnReply(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',
+            'business_key'=> 'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        if(isset($params['agree'])){
+            $res=$this->OrderReturnCreater->agree_return($params);//审核同意
+            if($res!=0){
+                return  apiResponse([],$res);
+            }
+
+        }
+        if(isset($params['disagree'])){
+            $res=$this->OrderReturnCreater->deny_return($params);
+            if($res!=0){
+                return  apiResponse([],$res);
+            }
+        }
+        return  apiResponse([],$res);;
+    }
+    /**
+     * 订单退款审核
+     * @param Request $request
+     *
+     */
+    public function refundReply(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',
+            'remark'=> 'required',
+            'status'=> 'required',
+        ]);
+        if(count($param)<3){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        if($params['status']==0){
+            $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
+        }else{
+            $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核同意
+        }
+        return apiResponse([],$res);
     }
     // 退货/换货/退款记录列表接口
     /*
@@ -235,25 +294,6 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
     /**
-     * 换货用户收货通知
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateOrder(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'           => 'required',
-            'goods_no'             =>'required',
-        ]);
-        if(count($param)<2){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->updateorder($params);
-        return apiResponse([],$res);
-    }
-
-    /**
      * 客户发货后通知
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -272,6 +312,25 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->user_receive($params);
         return apiResponse([],$res);
     }
+    /**
+     * 换货用户收货通知
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateOrder(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'           => 'required',
+            'goods_no'             =>'required',
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->updateorder($params);
+        return apiResponse([],$res);
+    }
+
 
     /**
      * 退款成功更新退款状态
@@ -293,74 +352,7 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->refundUpdate($params);
         return apiResponse([],$res);
     }
-    /**
-     *   退换货审核
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * 选中即同意
-     * [
-     * order_no
-     * 'agree'=>[
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     * ]
-     * 'disagree'=>[
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     * ]
-     *business_key
-     * ]
-     *
-     */
 
-    public function returnReply(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-            'business_key'=> 'required',
-        ]);
-        if(count($param)<2){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        if(isset($params['agree'])){
-            $res=$this->OrderReturnCreater->agree_return($params);//审核同意
-            if($res!=0){
-                return  apiResponse([],$res);
-            }
-
-        }
-        if(isset($params['disagree'])){
-            $res=$this->OrderReturnCreater->deny_return($params);
-            if($res!=0){
-                return  apiResponse([],$res);
-            }
-        }
-        return  apiResponse([],$res);;
-    }
-    /**
-     * 订单退款审核
-     * @param Request $request
-     *
-     */
-    public function refundReply(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-            'remark'=> 'required',
-            'status'=> 'required',
-        ]);
-        if(count($param)<3){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        if($params['status']==0){
-            $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
-        }else{
-            $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核同意
-        }
-        return apiResponse([],$res);
-    }
     /**
      * 换货
      * @param Request $request
@@ -386,44 +378,7 @@ class ReturnController extends Controller
         return apiResponse([],$res);
     }
 
-    /**
-     * 退货检测合格之后退款
-     * @param Request $request
-     */
-    public function refundMoney(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-            'goods_no'  => 'required',
-        ]);
-        if(count($param)<2){
-            return  apiResponse([],ApiStatus::CODE_20001,'参数错误');
-        }
-        $res=$this->OrderReturnCreater->goodsRefund($params);
-        return apiResponse([$res],ApiStatus::CODE_0);
-    }
 
-    /**
-     * 退货退款创建清单
-     * @param Request $request
-     */
-    public function refundTo(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-            'goods_no'  => 'required',
-            'refund_price'=>'required',
-            'business_type'=>'required',
-            'business_no'=>'required',
-        ]);
-        if(count($param)<5){
-            return  apiResponse([],ApiStatus::CODE_20001,'参数错误');
-        }
-        $res=$this->OrderReturnCreater->refundTo($params);
-       return apiResponse([],$res);
-    }
     /**
      *params[
      * 'order_no'
@@ -447,31 +402,5 @@ class ReturnController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
-    /**
-     * 点击换货获取此订单检测合格的数据
-     */
-    public function getExchange(Request $request){
-        $params = $request->all();
-        $rules = [
-            'order_no'  => 'required',
-            'business_key'  => 'required',
-        ];
-        $validateParams = $this->validateParams($rules,$params);
-
-        if (empty($validateParams) || $validateParams['code']!=0) {
-
-            return apiResponse([],$validateParams['code']);
-        }
-        $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationSuccess;
-        $res=$this->OrderReturnCreater->returnApplyList($params['params']);
-        return apiResponse($res,ApiStatus::CODE_0);
-
-
-    }
-    public function createchange(Request $request){
-        $params = $request->all();
-        $res=$this->OrderReturnCreater->createchange($params['params']);
-        p($res);
-    }
 
 }
