@@ -170,26 +170,27 @@ class Relet
                     }else{
                         //代扣
                         // 创建分期
-                        $withholdRow = OrderPayWithholdRepository::find($params['user_id']);
-
                         $fenqiData = [
                             'order'=>[
                                 'order_no'=>$data['order_no'],//订单编号
                             ],
                             'sku'=>[
-                                'zuqi'              =>  $row['zuqi'],//租期
-                                'zuqi_type'         =>  $row['zuqi_type'],//租期类型
-                                'all_amount'        =>  $amount,//总金额
-                                'amount'            =>  $amount,//实际支付金额
-                                'yiwaixian'         =>  0,//意外险
-                                'zujin'             =>  $row['zujin'],//租金
-                                'payment_type_id'   =>  PayInc::WithhodingPay,//支付类型
+                                [
+                                    'zuqi'              =>  $row['zuqi'],//租期
+                                    'zuqi_type'         =>  $row['zuqi_type'],//租期类型
+                                    'all_amount'        =>  $amount,//总金额
+                                    'amount'            =>  $amount,//实际支付金额
+                                    'yiwaixian'         =>  0,//意外险
+                                    'zujin'             =>  $row['zujin'],//租金
+                                    'pay_type'          =>  PayInc::WithhodingPay,//支付类型
+                                ]
                             ],
                             'user'=>[
-                                'withholding_no'=>$withholdRow['withhold_no'],//用户代扣协议号
+                                'user_id'=>$params['user_id'],//用户代扣协议号
                             ],
                         ];
-                        dd($fenqiData);
+
+//                        dd($fenqiData);
                         if( OrderInstalment::create($fenqiData) ){
                             //修改设备表状态续租完成,新建设备周期数据
                             if( $this->reletRepository->setGoods($data['relet_no']) ){

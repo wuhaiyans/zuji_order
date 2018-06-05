@@ -54,6 +54,31 @@ class OrderBuyoutRepository
 	 * ]
 	 * @return array|bool
 	 */
+	public static function getLists(array $where,array $additional){
+
+		if(!isset($additional['offset'])){
+			return false;
+		}
+		if(!isset($additional['limit'])){
+			return false;
+		}
+		$additional['offset'] = $additional['offset']* $additional['limit'];
+		$parcels = OrderBuyout::query()->where($where)->select();
+		if($parcels){
+			return $parcels->toArray();
+		}
+		return [];
+	}
+	/**
+	 * 查询统计数
+	 * @param array $data 【必须】 查询条件
+	 * [
+	 * 		"id" =>"", 主键id
+	 * 		"offset" =>"", 分页偏移
+	 * 		"size" =>"", 显示条数
+	 * ]
+	 * @return array|bool
+	 */
 	public static function getList(array $where,array $additional){
 
 		if(!isset($additional['offset'])){

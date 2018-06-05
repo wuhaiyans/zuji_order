@@ -160,14 +160,8 @@ class ReletController extends Controller
         try {
             //接收参数
             $params = $request->input('params');
-            if(isset($params['user_id']) && !empty($params['user_id'])){
-                $req = $this->relet->getList($params);
-                return apiResponse($req,ApiStatus::CODE_0);
-
-            }else{
-                return apiResponse([],ApiStatus::CODE_50000, '用户ID不能为空');
-
-            }
+            $req = $this->relet->getList($params);
+            return apiResponse($req,ApiStatus::CODE_0);
 
         }catch(\Exception $e){
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
