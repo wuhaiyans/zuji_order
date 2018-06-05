@@ -25,16 +25,35 @@ class DeliveryService
 
 
     //查找类型
-    const SEARCH_MOBILE = 'mobile';//手机
+    const SEARCH_MOBILE = 'customer_mobile';//手机
     const SEARCH_ORDER_NO = 'order_no';//订单号
     const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
+    const SEARCH_LOGISTIC_NO = 'logistic_no';
 
 
     static $searchs = [
         self::SEARCH_MOBILE => 'customer_mobile',
         self::SEARCH_ORDER_NO => 'order_no',
-        self::SEARCH_DELIVERY_NO => 'delivery_no'
+        self::SEARCH_DELIVERY_NO => 'delivery_no',
+        self::SEARCH_LOGISTIC_NO => 'logistic_no'
     ];
+
+
+
+    public static function searchKws()
+    {
+        $ks = [
+            self::SEARCH_MOBILE => '手机号',
+            self::SEARCH_DELIVERY_NO => '发货单号',
+            self::SEARCH_ORDER_NO => '订单号',
+            self::SEARCH_LOGISTIC_NO => '发货单号'
+        ];
+
+        return $ks;
+    }
+
+
+
 
     /**
      * @param $order_no
@@ -302,7 +321,8 @@ class DeliveryService
             'per_page'=>$limit,
             'total'=>$collect->total(),
             'current_page'=>$collect->currentPage(),
-            'status_list' => $status_list
+            'status_list' => $status_list,
+            'kw_types' => self::searchKws()
         ];
 
     }
