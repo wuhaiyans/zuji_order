@@ -31,6 +31,7 @@ class OrderInstalment
      *          'yiwaixian'         => 1,//意外险
      *          'zujin'             => 1,//租金
      *          'pay_type'          => 1,//支付类型
+     *          'goods_no'          => 1,//商品编号
      *      ],
      *      'coupon'=>[非必须
      *          'discount_amount'   => 1,//优惠金额
