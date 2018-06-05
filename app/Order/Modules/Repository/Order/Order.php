@@ -90,21 +90,21 @@ class Order {
 	 * 申请退款
 	 * @return bool
 	 */
-	public function openRefund( ):bool{
+	public function refundOpen( ):bool{
 		return true;
 	}
 	/**
 	 * 取消退款
 	 * @return bool
 	 */
-	public function closeRefund( ):bool{
+	public function refundClose( ):bool{
 		return true;
 	}
 	/**
 	 * 完成退款
 	 * @return bool
 	 */
-	public function finishRefund( ):bool{
+	public function refundFinish( ):bool{
 		return true;
 	}
 	
@@ -148,6 +148,54 @@ class Order {
 		return new Order();
 		throw new App\Lib\NotFoundException('');
 	}
-	
-	
+    //-+------------------------------------------------------------------------
+    // | 退货
+    //-+------------------------------------------------------------------------
+    /**
+     * @return bool
+     * 申请退货
+     */
+    public function returnOpen( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 取消退货
+     */
+    public function returnClose( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 完成退货
+     */
+    public function returnFinish( ):bool{
+        return true;
+    }
+    //-+------------------------------------------------------------------------
+    // | 换货
+    //-+------------------------------------------------------------------------
+    /**
+     * @return bool
+     * 申请换货
+     */
+    public function barterOpen( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 取消换货
+     */
+    public function barterClose( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 完成换货
+     */
+    public function barterFinish( ):bool{
+        return true;
+    }
+
+
 }
