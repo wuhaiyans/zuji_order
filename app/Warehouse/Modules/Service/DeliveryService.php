@@ -25,16 +25,35 @@ class DeliveryService
 
 
     //查找类型
-    const SEARCH_MOBILE = 'mobile';//手机
+    const SEARCH_MOBILE = 'customer_mobile';//手机
     const SEARCH_ORDER_NO = 'order_no';//订单号
     const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
+    const SEARCH_LOGISTIC_NO = 'logistic_no';
 
 
     static $searchs = [
         self::SEARCH_MOBILE => 'customer_mobile',
         self::SEARCH_ORDER_NO => 'order_no',
-        self::SEARCH_DELIVERY_NO => 'delivery_no'
+        self::SEARCH_DELIVERY_NO => 'delivery_no',
+        self::SEARCH_LOGISTIC_NO => 'logistic_no'
     ];
+
+
+
+    public static function searchKws()
+    {
+        $ks = [
+            self::SEARCH_MOBILE => '手机号',
+            self::SEARCH_DELIVERY_NO => '发货单号',
+            self::SEARCH_ORDER_NO => '订单号',
+            self::SEARCH_LOGISTIC_NO => '发货单号'
+        ];
+
+        return $ks;
+    }
+
+
+
 
     /**
      * @param $order_no
@@ -139,9 +158,9 @@ class DeliveryService
      * @throws \Exception
      * 发货操作
      */
-    public function send($delivery_no)
+    public function send($params)
     {
-        if (!DeliveryRepository::send($delivery_no)) {
+        if (!DeliveryRepository::send($params)) {
             throw new \Exception('发货操作失败');
         }
     }
@@ -204,10 +223,12 @@ class DeliveryService
         }
         $whereParams = [];
 
-
+        $logic_params = [];
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
         if (isset($params['status']) && $params['status']) {
             $whereParams['status'] = $params['status'];
+        } else {
+            array_push($logic_params, ['status', '>', Delivery::STATUS_NONE]);
         }
 
 //        if (isset($params['order_no']) && $params['order_no']) {
@@ -226,7 +247,7 @@ class DeliveryService
 
         $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
 
-        $logic_params = [];
+
         if ($time_type != 'none') {
             if (!isset($params['begin_time']) || !$params['begin_time']) {
                 throw new \Exception('请填写开始时间');
@@ -292,7 +313,17 @@ class DeliveryService
             array_push($result, $it);
         }
 
-        return ['data'=>$result, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
+//        p(Delivery::sta());die;
+
+        $status_list = Delivery::sta();
+        return [
+            'data'=>$result,
+            'per_page'=>$limit,
+            'total'=>$collect->total(),
+            'current_page'=>$collect->currentPage(),
+            'status_list' => $status_list,
+            'kw_types' => self::searchKws()
+        ];
 
     }
 

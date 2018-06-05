@@ -39,20 +39,18 @@ class YidunComponnet implements OrderCreater
         $this->userInfo =$schema['user'];
 
         //获取蚁盾信息
-//        $yidun =Fengkong::getYidun([
-//            'user_id'=>$schema['user']['user_id'],
-//            'user_name'=>$schema['user']['realname'],
-//            'cert_no'=>$schema['user']['cert_no'],
-//            'mobile'=>$schema['user']['user_mobile'],
-//            'channel_appid'=>$appId,
-//        ]);
-//        var_dump($yidun);die;
-
+        $yidun =Fengkong::getYidun([
+            'user_id'=>$schema['user']['user_id'],
+            'user_name'=>$schema['user']['realname'],
+            'cert_no'=>$schema['user']['cert_no'],
+            'mobile'=>$schema['user']['user_mobile'],
+            'channel_appid'=>$appId,
+        ]);
         $yidun_data =[
             'yidun'=>[
-                'decision' => "0",
-                'score' => "0",
-                'strategies' =>"111",
+                'decision' => $yidun['decision'],
+                'score' => $yidun['score'],
+                'strategies' =>$yidun['strategies'],
             ]
         ];
         $this->yidun =$yidun_data;

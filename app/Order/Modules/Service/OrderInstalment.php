@@ -30,7 +30,7 @@ class OrderInstalment
      *          'amount'            => 1,//实际支付金额
      *          'yiwaixian'         => 1,//意外险
      *          'zujin'             => 1,//租金
-     *          'payment_type_id'   => 1,//支付类型
+     *          'pay_type'          => 1,//支付类型
      *      ],
      *      'coupon'=>[非必须
      *          'discount_amount'   => 1,//优惠金额
@@ -81,7 +81,7 @@ class OrderInstalment
         $user = filter_array($user, [
             'user_id'        => 'required',
         ]);
-        if(count($user) < 2){
+        if(count($user) < 1){
             return false;
         }
 

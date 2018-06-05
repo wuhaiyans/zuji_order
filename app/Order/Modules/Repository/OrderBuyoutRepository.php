@@ -3,7 +3,6 @@ namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderBuyout;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
-use Illuminate\Support\Facades\DB;
 /**
  * 订单买断单数据处理仓库
  * @var obj OrderBuyoutRepository
@@ -55,6 +54,31 @@ class OrderBuyoutRepository
 	 * ]
 	 * @return array|bool
 	 */
+	public static function getLists(array $where,array $additional){
+
+		if(!isset($additional['offset'])){
+			return false;
+		}
+		if(!isset($additional['limit'])){
+			return false;
+		}
+		$additional['offset'] = $additional['offset']* $additional['limit'];
+		$parcels = OrderBuyout::query()->where($where)->select();
+		if($parcels){
+			return $parcels->toArray();
+		}
+		return [];
+	}
+	/**
+	 * 查询统计数
+	 * @param array $data 【必须】 查询条件
+	 * [
+	 * 		"id" =>"", 主键id
+	 * 		"offset" =>"", 分页偏移
+	 * 		"size" =>"", 显示条数
+	 * ]
+	 * @return array|bool
+	 */
 	public static function getList(array $where,array $additional){
 
 		if(!isset($additional['offset'])){
@@ -63,16 +87,14 @@ class OrderBuyoutRepository
 		if(!isset($additional['limit'])){
 			return false;
 		}
-		DB::enableQueryLog();
+		$additional['offset'] = $additional['offset']* $additional['limit'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_userinfo', 'order_buyout.order_no', '=', 'order_userinfo.order_no')
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->leftJoin('order_goods',[['order_buyout.order_no', '=', 'order_goods.order_no'],['order_buyout.goods_no', '=', 'order_goods.goods_no']])
 				->where($where)
-				->skip(0)
-				->take(2)
-				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*');
-		echo json_encode(DB::getQueryLog());die;
+				->select('order_buyout.*','order_userinfo.*','order_info.*','order_goods.*')
+				->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['offset']);
 		if($parcels){
 			return $parcels->toArray();
 		}

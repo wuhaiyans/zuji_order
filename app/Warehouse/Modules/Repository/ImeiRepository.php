@@ -73,7 +73,7 @@ class ImeiRepository
 
         return $query->paginate($limit,
             [
-                'imei','price'
+                '*'
             ],
             'page', $page);
     }

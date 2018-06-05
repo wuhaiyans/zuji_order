@@ -19,6 +19,15 @@ use App\Lib\Common\LogApi;
 class WithholdController extends Controller
 {
 
+    // 异步回调 状态
+    protected $NotifyStatus = [
+        'init'          => OrderInstalmentStatus::UNPAID,
+        'success'       => OrderInstalmentStatus::SUCCESS,
+        'failed'        => OrderInstalmentStatus::FAIL,
+        'finished'      => OrderInstalmentStatus::CANCEL,
+        'closed'        => OrderInstalmentStatus::CANCEL,
+        'processing'    => OrderInstalmentStatus::PAYING,
+    ];
     /*
      * 代扣协议查询
      * @param array $request
@@ -740,10 +749,32 @@ class WithholdController extends Controller
 
         // 扣款成功 修改分期状态
         $params = $params['params'];
+
         if($params['status'] == "success"){
             $trade_no = $params['out_trade_no'];
             //修改分期状态
-            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
+
+            // 查询分期信息
+            $instalmentInfo = OrderInstalment::queryInfo(['trade_no'=>$params['out_no']]);
+            if( !is_array($instalmentInfo)){
+                // 提交事务
+                echo "FAIL";exit;
+            }
+
+            // 分期数据
+            if(!isset($this->status[$params['status']])){
+                echo "FAIL";exit;
+            }
+
+            $data = [
+                'status'        => $this->status[$params['status']],
+                'trade_no'      => $params['out_trade_no'],
+                'out_trade_no'  => $params['trade_no'],
+                'update_time'   => time(),
+                'remark'        => '提前还款',
+            ];
+
+            $b = OrderInstalment::save(['trade_no'=>$params['out_trade_no']], $data);
             if(!$b){
                 echo "FAIL";exit;
             }
@@ -827,23 +858,18 @@ class WithholdController extends Controller
         $params = $params['params'];
 
         // 查询分期信息
-        $instalmentInfo = OrderInstalment::queryInfo(['trade_no'=>$params['trade_no']]);
+        $instalmentInfo = OrderInstalment::queryInfo(['trade_no'=>$params['out_no']]);
         if( !is_array($instalmentInfo)){
             // 提交事务
             echo "FAIL";exit;
         }
 
-        $status = [
-            'init'          => OrderInstalmentStatus::UNPAID,
-            'success'       => OrderInstalmentStatus::SUCCESS,
-            'failed'        => OrderInstalmentStatus::FAIL,
-            'finished'      => OrderInstalmentStatus::CANCEL,
-            'closed'        => OrderInstalmentStatus::CANCEL,
-            'processing'    => OrderInstalmentStatus::PAYING,
-        ];
+        if(!isset($this->status[$params['status']])){
+            echo "FAIL";exit;
+        }
 
         $data = [
-            'status'        => $status[$params['status']],
+            'status'        => $this->status[$params['status']],
             'trade_no'      => $params['out_no'],
             'out_trade_no'  => $params['payment_no'],
             'update_time'   => time(),
@@ -851,7 +877,7 @@ class WithholdController extends Controller
         ];
 
         // 修改分期状态
-        $result = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['trade_no']],$data);
+        $result = \App\Order\Modules\Service\OrderInstalment::save(['trade_no'=>$params['out_no']],$data);
         if(!$result){
             echo "FAIL";exit;
         }
