@@ -91,7 +91,7 @@ class BuyoutController extends Controller
         $where['page'] = $params['page']>0?$params['page']-1:0;
         $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
-        return apiResponse(['size'=>$sumCount,'list'=>$orderList],ApiStatus::CODE_0);
+        return apiResponse($orderList,ApiStatus::CODE_0);
     }
     /*
      * 用户买断
@@ -163,6 +163,7 @@ class BuyoutController extends Controller
             'order_no'=>$goodsInfo['order_no'],
             'goods_no'=>$goodsInfo['goods_no'],
             'user_id'=>$goodsInfo['user_id'],
+            'goods_name'=>$goodsInfo['goods_name'],
             'buyout_price'=>$goodsInfo['buyout_price'],
             'create_time'=>time(),
         ];

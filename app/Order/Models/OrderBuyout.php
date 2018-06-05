@@ -28,6 +28,7 @@ class OrderBuyout extends Model
 		'order_no', //订单编号
 		'goods_no', //商品编号
 		'user_id', //用户ID
+		'goods_name',//设备名称
 		'buyout_price', //买断价格
 		'status', //买断状态
 		'plat_id', //操作人员id
