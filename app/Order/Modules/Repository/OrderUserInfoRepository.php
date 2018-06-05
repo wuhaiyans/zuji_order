@@ -56,7 +56,22 @@ class OrderUserInfoRepository
         return !empty($orderData) ?? false;
     }
 
+    /**
+     * 根据手机号
+     * 获取用户信息
+     * @param string $mobile
+     * @return bool
+     */
 
+    public static function getUser($mobile){
+        //根据用户手机号
+        if (empty($mobile)) {
+
+            return false;
+        }
+        $data = OrderUserInfo::query()->where(['user_mobile'=>$mobile])->first()->toArray();
+        return $data;
+    }
     /**
      * 获取用户信息
      * @param array $params

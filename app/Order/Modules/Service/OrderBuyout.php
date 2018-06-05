@@ -34,19 +34,21 @@ class OrderBuyout
 		if (isset($params['begin_time'])||isset($params['end_time'])) {
 			$begin_time = $params['begin_time']?strtotime($params['begin_time']):strtotime(date("Y-m-d",time()));
 			$end_time = $params['end_time']?strtotime($params['end_time']):time();
-			$where[] = ['order_buyout.create_time', '>=', $begin_time];
-			$where[] = ['order_buyout.create_time', '<=', $end_time];
+			$where[] = ['order_info.create_time', '>=', $begin_time];
+			$where[] = ['order_info.create_time', '<=', $end_time];
 		}
 
 		if(isset($params['order_no'])){
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
-		// order_no 订单编号查询，使用前缀模糊查询
-		if(isset($params['goods_name'])){
-			$where[] = ['order_goods.goods_name', '=', $params['goods_name']];
+		if(isset($params['user_id'])){
+			$where[] = ['order_buyout.user_id', '=', $params['user_id']];
 		}
-		if(isset($params['user_mobile'])){
-			$where[] = ['order_userinfo.user_mobile', '=', $params['user_mobile']];
+		if(isset($params['app_id'])){
+			$where[] = ['order_info.appid', '=', $params['app_id']];
+		}
+		if(isset($params['goods_name'])){
+			$where[] = ['order_buyout.goods_name', '=', $params['goods_name']];
 		}
 		if(isset($params['status'])){
 			$where[] = ['order_buyout.status', '=', $params['status']];
@@ -93,17 +95,6 @@ class OrderBuyout
 		$additional['limit'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
-		return $data;
-	}
-	/**
-	 * 查询多条买断单
-	 * @param $data
-	 * @return id
-	 */
-	public static function getLists(array $where,array $additional){
-		$additional['offset'] = $additional['page']>1?($additional['page']-1)*$additional['size']:0;
-		$additional['limit'] = $additional['size']?$additional['size']:0;
-		$data = OrderBuyoutRepository::getLists($where, $additional);
 		return $data;
 	}
     /**

@@ -13,6 +13,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
+use App\Order\Modules\Repository\OrderUserInfoRepository;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -71,6 +72,66 @@ class BuyoutController extends Controller
                 $where['goods_name'] = $params['keywords'];
             }
             elseif($params['kw_type'] == 3){
+                $user = OrderUserInfoRepository::getUser($params['keywords']);
+                if(!$user){
+                    return apiResponse([],ApiStatus::CODE_0);
+                }
+                $where['user_id'] = $user['user_id'];
+            }
+            else{
+                $where['order_no'] = $params['keywords'];
+            }
+        }
+        if(isset($params['begin_time'])||isset($params['end_time'])){
+            $where['begin_time'] = $params['begin_time'];
+            $where['end_time'] = $params['end_time'];
+        }
+        if(isset($params['status'])){
+            $where['status'] = $params['status'];
+        }
+        if(isset($params['appid'])){
+            $where['appid'] = $params['appid'];
+        }
+        //$sumCount = OrderBuyout::getCount($where);
+        $where['page'] = $params['page']>0?$params['page']-1:0;
+        $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
+        $orderList = OrderBuyout::getList($where);
+
+        if(!$orderList){
+            return apiResponse([],ApiStatus::CODE_0);
+        }
+        //获取订单商品信息
+        $goodsNos = array_column($orderList['data'],"goods_no");
+        $goodsList= OrderGoodsRepository::getGoodsColumn($goodsNos);
+        foreach($orderList['data'] as &$item){
+            $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
+            $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];
+            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
+        }
+
+        return apiResponse($orderList,ApiStatus::CODE_0);
+    }
+    /*
+     * 订单买断列表
+     * @param array $params 【必选】
+     * [
+     *      "id"=>"",买断单id
+     * ]
+     * @return json
+     */
+    /*public function getBuyoutList(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        $where = [];
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $where['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $where['goods_name'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 3){
                 $where['user_mobile'] = $params['keywords'];
             }
             else{
@@ -92,7 +153,7 @@ class BuyoutController extends Controller
         $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
         return apiResponse($orderList,ApiStatus::CODE_0);
-    }
+    }*/
     /*
      * 用户买断
      * @param array $params 【必选】
