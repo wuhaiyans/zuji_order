@@ -22,7 +22,6 @@ class Relet
     /**
      * 获取支付链接
      *
-     *
      */
     public static function getPayUrl(){}
 

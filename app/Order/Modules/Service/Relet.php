@@ -19,6 +19,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
+use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderPayWithholdRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -103,6 +104,7 @@ class Relet
             ['order_no', '=', $params['order_no']]
         ];
         $row = OrderGoodsRepository::getGoodsRow($where);
+        $goods = Goods::getByGoodsId($params['goods_id']);
         if( $row ){
             if( $row['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
                 if( !publicInc::getDuanzuRow($params['zuqi']) ){
