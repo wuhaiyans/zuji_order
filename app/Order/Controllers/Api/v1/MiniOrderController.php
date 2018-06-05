@@ -45,6 +45,7 @@ class MiniOrderController extends Controller
      *      sku_id      子商品ID
      */
     public function getTemporaryOrderNo(Request $request){
+        echo 1;die;
         $params     = $request->all();
         // 验证参数
         $rules = [
@@ -57,10 +58,19 @@ class MiniOrderController extends Controller
         $params = $params['params'];
         //获取订单号
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
-
+        //获取商品信息
+        $goods_info = \App\Lib\Goods\Goods::getSku($params['sku_id']);
+        if( $goods_info['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+            $new_data = date('Y-m-d H:i:s');
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+1).' month'));
+        }else{
+            $new_data = date('Y-m-d H:i:s');
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+30).' day'));
+        }
         $data = [
             'order_no' => $orderNo,
-            'sku_id' => intval($params['sku_id'])
+            'sku_id' => intval($params['sku_id']),
+            'overdue_time' => $overdue_time
         ];
         //redis 存储数据
         $values = Redis::command('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
@@ -68,7 +78,7 @@ class MiniOrderController extends Controller
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
         //返回订单号
-        return apiResponse([],ApiStatus::CODE_0,'保存临时订单号失败');
+        return apiResponse($data,ApiStatus::CODE_0,'临时订单号创建成功');
     }
 
 
@@ -117,6 +127,8 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('芝麻接口请求错误',$miniParams);
             return apiResponse( [], ApiStatus::CODE_35003, '查询芝麻订单确认结果失败');
         }
+        //添加逾期时间
+        $miniData['overdue_time'] = $data['overdue_time'];
         //查询成功记录表
         $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
         if( !$res ){
@@ -163,11 +175,12 @@ class MiniOrderController extends Controller
 
         //商品信息处理
         $goods = \App\Lib\Goods\Goods::getSku( $data['sku_id']  );
+
         //小程序订单
         $orderType =OrderStatus::orderMiniService;
         try{
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$userInfo['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($data['order_no'],$userInfo['user_id'],$data['pay_type'],$params['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$userInfo['user_id'],$address_info['address_id']);
@@ -204,7 +217,7 @@ class MiniOrderController extends Controller
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
-                $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                $userRemark =User::setRemark($userInfo['user_id'],$orderCreater->getOrderCreater()->getError());
 
             }
             $schemaData = $orderCreater->getDataSchema();
