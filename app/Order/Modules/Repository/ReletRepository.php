@@ -186,7 +186,7 @@ class ReletRepository
         }
         //查询
         // 续租表
-        $reletRow = OrderRelet::where('relet_no','=',$reletNo)->first(['goods_id'])->fresh()->toArray();
+        $reletRow = OrderRelet::where('relet_no','=',$reletNo)->first(['goods_id'])->toArray();
         dd($reletRow);
 
         // 设备表
