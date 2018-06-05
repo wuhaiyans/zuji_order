@@ -11,6 +11,7 @@ use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
@@ -101,7 +102,7 @@ class OrderOperate
 
     public static function orderVistSave($params)
     {
-        $order =OrderExtend::updateOrCreate(['order_no'=>$params['order_no']],$params);
+        $order =OrderVisit::updateOrCreate($params);
         return $order->getQueueableId();
     }
 
