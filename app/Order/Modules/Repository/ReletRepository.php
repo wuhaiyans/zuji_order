@@ -67,13 +67,13 @@ class ReletRepository
             $whereArray[] = ['order_relet.status', '=', $params['status']];
         }
         // 页数
-        if ($params['page']) {
+        if (isset($params['page']) && $params['page']>0) {
             $page = $params['page'];
         } else {
             $page = 1;
         }
         // 每页显示条数
-        if ($params['pagesize']) {
+        if (isset($params['pagesize']) && $params['pagesize']>0) {
             $pagesize = $params['pagesize'];
         } else {
             $pagesize = 20;
@@ -83,7 +83,9 @@ class ReletRepository
         $orderList = DB::table('order_relet')
             ->where($whereArray)
             ->select('order_relet.*')
-            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+            ->offset($pagesize)
+            ->limit($page)
+            ->get();
 
         //返回
         return $orderList;
