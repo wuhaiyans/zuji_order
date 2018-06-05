@@ -244,6 +244,8 @@ class DeliveryController extends Controller
     {
         $rules = [//delivery_no 发货单号
             'delivery_no' => 'required',
+            'logistics_id' => 'required',//物流渠道
+            'logistics_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -252,7 +254,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $this->delivery->send($params['delivery_no']);
+            $this->delivery->send($params);
             $result = $this->_info($params['delivery_no']);
 
             //通知订单接口
@@ -449,6 +451,19 @@ class DeliveryController extends Controller
     {
         $list = $this->delivery->getLogistics();
         return apiResponse(['list'=>$list]);
+    }
+
+
+    /**
+     *
+     */
+    public function publics()
+    {
+        $data = [
+            'status_list' => Delivery::sta(),
+            'kw_types'    => DeliveryService::searchKws()
+        ];
+        return apiResponse($data);
     }
 
 
