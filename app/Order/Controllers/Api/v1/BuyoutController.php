@@ -103,7 +103,12 @@ class BuyoutController extends Controller
         //获取订单商品信息
         $goodsNos = array_column($orderList['data'],"goods_no");
         $goodsList= OrderGoodsRepository::getGoodsColumn($goodsNos);
+        //获取订单用户信息
+        $orderNos = array_column($orderList['data'],"order_no");
+        $userList = OrderUserInfoRepository::getUserColumn($orderNos);
+
         foreach($orderList['data'] as &$item){
+            $item['realname'] = $userList[$item['order_no']]['realname'];
             $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
             $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];
             $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
