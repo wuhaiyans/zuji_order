@@ -115,7 +115,7 @@ class Order {
      * 申请发货
      * @return bool
      */
-    public static function applyDelivery():bool{
+    public function applyDelivery():bool{
         return true;
     }
 	/**
@@ -129,14 +129,14 @@ class Order {
 	 * 发货完成
 	 * @return bool
 	 */
-	public static function finishDelivery( ):bool{
+	public function finishDelivery( ):bool{
 		return true;
 	}
 	/**
 	 * 签收
 	 * @return bool
 	 */
-	public static function signDelivery( ):bool{
+	public function signDelivery( ):bool{
 		return true;
 	}
 	
@@ -171,6 +171,10 @@ class Order {
      * 取消退货
      */
     public function returnClose( ):bool{
+        // 校验自己状态
+
+        // 更新状态
+
         return true;
     }
     /**
