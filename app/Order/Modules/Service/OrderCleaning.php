@@ -11,6 +11,7 @@ use App\Lib\Payment\CommonRefundApi;
 use App\Lib\Payment\mini\MiniApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\MiniOrderRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
@@ -60,8 +61,16 @@ class OrderCleaning
      */
     public static function getOrderCleaningList($param = array())
     {
-
         $orderCleanList = OrderClearingRepository::getOrderCleanList($param);
+        if (!empty($orderCleanList['data'])) {
+
+            foreach($orderCleanList['data'] as $keys=>$values){
+                $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
+                $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
+            }
+
+
+        }
         return $orderCleanList;
 //        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
 

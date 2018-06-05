@@ -80,100 +80,6 @@ class OrderGiveback
 		return $this->order_giveback_repository->getUnfinishedListByOrderNo( $orderNo );
 	}
 	
-	/**
-	 * 获取还机单列表
-	 * @param array $where 查询条件
-	 * $where = [<br\>
-	 *     'begin_time' => '',//还机单创建的开始时间<br\>
-	 *     'end_time' => '',//还机单创建的结束时间<br\>
-	 *     'status' => '',//还机单状态<br\>
-	 *     'kw_type' => '',//搜索关键字类型<br\>
-	 *     'keywords' => '',//搜索关键字<br\>
-	 * ]<br\>
-	 * @param array $additional 附加条件
-	 * $additonal = [<br\>
-	 *		'page' => '',//页数<br\>
-	 *		'size' => '',//每页大小<br\>
-	 * ]<br\>
-	 * @return array $result 返回的数据
-	 * $result = [<br\>
-	 *		'current_page'=>'',//当前页<br\>
-	 *		'first_page_url'=>'',//第一页url<br\>
-	 *		'from'=>'',//从第几条数据<br\>
-	 *		'last_page'=>'',//最终页<br\>
-	 *		'last_page_url'=>'',//最终页url<br\>
-	 *		'next_page_url'=>'',//下一页<br\>
-	 *		'path'=>'',//当前域名路径<br\>
-	 *		'per_page'=>'',//每页大小<br\>
-	 *		'prev_page_url'=>'',//上一页<br\>
-	 *		'to'=>'',//到第几条数据<br\>
-	 *		'total'=>'',//一共几条数据<br\>
-	 *      'data' => [ //数据详情<br\>
-	 *			'id' => ''//主键id<br\>
-	 *			'giveback_no' => ''//还机编号（业务编号）<br\>
-	 *			'order_no' => ''//订单编号<br\>
-	 *			'goods_no' => ''//商品编号<br\>
-	 *			'goods_name' => ''//设备名称<br\>
-	 *			'amount_after_discount' => ''//设备优惠后总金额<br\>
-	 *			'zuqi' => ''//商品租期<br\>
-	 *			'zuqi_type' => ''//商品租期类型<br\>
-	 *			'user_id' => ''//用户id<br\>
-	 *			'username' => ''//用户名<br\>
-	 *			'mobile' => ''//用户手机号<br\>
-	 *			'status' => ''//状态值<br\>
-	 *			'status_name' => ''//状态名称<br\>
-	 *			'instalment_num' => ''//剩余分期数<br\>
-	 *			'instalment_amount' => ''//剩余分期支付金额<br\>
-	 *			'payment_status' => ''//支付状态值<br\>
-	 *			'payment_status_name' => ''//支付状态名称<br\>
-	 *			'payment_time' => ''//支付时间<br\>
-	 *			'logistics_id' => ''//物流id<br\>
-	 *			'logistics_name' => ''//物流名称<br\>
-	 *			'logistics_no' => ''//物流编号<br\>
-	 *			'evaluation_status' => ''//检测状态值<br\>
-	 *			'evaluation_status_name' => ''//检测状态名称<br\>
-	 *			'evaluation_remark' => ''//检测备注<br\>
-	 *			'evaluation_time' => ''//检测时间<br\>
-	 *			'yajin_status' => ''//押金状态值<br\>
-	 *			'yajin_status_name' => ''//押金状态名称<br\>
-	 *			'compensate_amount' => ''//赔偿金额<br\>
-	 *			'create_time' => ''//创建时间<br\>
-	 *			'update_time' => ''//最后更新时间<br\>
-	 *			'remark' => ''//备注<br\>
-	 *      ]
-	 * ]
-	 */
-	public function getList( $where = [], $additional = [] ) {
-		$this->__parseWhere( $where );
-		$this->__parseAddition( $additional );
-        $orderList = DB::table('order_giveback')
-            ->leftJoin('order_goods', 'order_goods.goods_no', '=', 'order_giveback.goods_no')
-            ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
-            ->where($where)
-            ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_info.mobile')
-//			paginate: 参数
-//			perPage:表示每页显示的条目数量
-//			columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
-//			pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
-//			page:表示查询第几页及查询页码
-            ->paginate($additional['size'],['*'], 'p', $additional['page']);
-		$orderList = json_decode(json_encode($orderList),true);
-		if( $orderList ){
-			foreach ($orderList['data'] as  &$value) {
-				$value['username'] = $value['mobile'];
-				$value['status_name'] = OrderGivebackStatus::getStatusName($value['status']);
-				$value['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($value['payment_status']);
-				$value['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($value['evaluation_status']);
-				$value['yajin_status_name'] = OrderGivebackStatus::getYajinStatusName($value['yajin_status']);
-				$value['create_time'] = date('Y-m-d H:i:s',$value['create_time']);
-				$value['evaluation_time'] = date('Y-m-d H:i:s',$value['evaluation_time']);
-				$value['update_time'] = date('Y-m-d H:i:s',$value['update_time']);
-				$value['payment_time'] = date('Y-m-d H:i:s',$value['payment_time']);
-			}
-		}
-        return $orderList;
-	}
-	
     /**
      * 根据条件更新数据
 	 * @param array $where 更新条件【至少含有一项条件】
@@ -350,7 +256,6 @@ class OrderGiveback
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
-					'payment_time'=> time(),
 				]);
 				
 				//解冻订单
@@ -369,7 +274,6 @@ class OrderGiveback
 					'status'=> $status,
 					'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_IN_RETURN,
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
-					'payment_time'=> time(),
 				]);
 				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
@@ -419,47 +323,6 @@ class OrderGiveback
 			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
 			return false;
 		}
-		return true;
-	}
-	
-	private function __parseWhere( &$where ) {
-		$whereArray = [];
-        //根据还机单状态
-        if (isset($where['status']) && $where['status']!= OrderGivebackStatus::STATUS_ALL) {
-            $whereArray[] = ['order_giveback.status', '=', $where['status']];
-        }
-
-        //应用来源ID
-        if (isset($where['order_appid']) && !empty($where['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $where['order_appid']];
-        }
-        //还机单创建开始时间
-        if ( isset($where['begin_time']) && !empty($where['begin_time']) ) {
-            $whereArray[] = ['order_giveback.create_time', '>=', strtotime($where['begin_time'])];
-        }
-        //还机单创建结束时间
-        if ( isset($where['end_time']) && !empty($where['end_time'])) {
-            $whereArray[] = ['order_giveback.create_time', '<=', strtotime($where['end_time'])];
-        }
-
-        //根据订单编号
-        if (isset($where['kw_type']) && $where['kw_type'] == OrderGivebackRepository::KWTYPE_ORDERNO && !empty($where['keywords']) ) {
-            $whereArray[] = ['order_giveback.order_no', '=', $where['keywords']];
-        }
-        //根手机号
-        if (isset($where['kw_type']) && $where['kw_type'] == OrderGivebackRepository::KWTYPE_MOBILE && !empty($where['keywords']) ) {
-            $whereArray[] = ['order_info.mobile', '=', $where['keywords']];
-        }
-        //根据设备名称
-        if (isset($where['kw_type']) && $where['kw_type'] == OrderGivebackRepository::KWTYPE_GOODSNAME && !empty($where['keywords']) ) {
-            $whereArray[] = ['order_goods.goods_name', 'like', '%'.$where['keywords']];
-        }
-		$where = $whereArray;
-		return true;
-	}
-	private function __parseAddition( &$addition ) {
-		$addition['page'] = isset($addition['page']) && $addition['page'] ? $addition['page'] : 1;
-		$addition['size'] = isset($addition['size']) && $addition['size'] ? max($addition['size'],20) : 20;
 		return true;
 	}
 }
