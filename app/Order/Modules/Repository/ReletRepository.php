@@ -196,6 +196,12 @@ class ReletRepository
             ['goods_no','=',$goodsObj->goods_no]
         ])->orderBy('id','desc')->first();
         dd($goodsUnitRow);
+        if($goodsUnitRow){
+            $goodsUnitRow->toArray();
+        }else{
+            LogApi::notify("周期表数据错误", $reletNo);
+            return false;
+        }
         //判断租期类型
         if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
             $t = $reletRow['zuqi']*(60*60*24);
