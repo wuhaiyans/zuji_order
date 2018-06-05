@@ -183,6 +183,7 @@ class Relet
                                     'yiwaixian'         =>  0,//意外险
                                     'zujin'             =>  $row['zujin'],//租金
                                     'pay_type'          =>  PayInc::WithhodingPay,//支付类型
+                                    'goods_no'          =>  $row['goods_no'],//商品编号
                                 ]
                             ],
                             'user'=>[
@@ -190,7 +191,7 @@ class Relet
                             ],
                         ];
 
-                        dd($fenqiData);
+//                        dd($fenqiData);
                         if( OrderInstalment::create($fenqiData) ){
                             //修改设备表状态续租完成,新建设备周期数据
                             if( $this->reletRepository->setGoods($data['relet_no']) ){
