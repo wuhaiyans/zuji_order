@@ -22,27 +22,49 @@ class Goods {
 	
 	/**
 	 * 获取商品列表
-	 * @param string $good_no		商品编号
+	 * @param string	$order_no		订单编号
 	 * @param int		$lock			锁
-	 * @return \App\Order\Modules\Repository\Order\Order
+	 * @return array
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getByOrderNo( string $good_no, int $lock=0 ) {
-		return [];
+	public static function getByOrderNo( string $order_no, int $lock=0 ) {
+		
+        $builder = \App\Order\Models\OrderGoods::where([
+            ['order_no', '=', $order_no],
+        ])->limit(1);
+		if( $lock ){
+			$builder->lockForUpdate();
+		}
+        $orderGoodData = $builder->get();
+		$list = [];
+		foreach( $orderGoodData as $it ) {
+			$list[] = new Goods( $it->toArray() );
+		}
+		return $list;
 	}
 	
 	/**
 	 * 获取商品
 	 * <p>当订单不存在时，抛出异常</p>
 	 * @param string	$order_no		订单编号
-	 * @param string	$good_no		商品编号
+	 * @param string	$goods_no		商品编号
 	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getByGoodsNo( string $order_no, string $good_no, int $lock=0 ) {
-		return new Goods();
-		throw new App\Lib\NotFoundException('');
+	public static function getByGoodsNo( string $order_no, string $goods_no, int $lock=0 ) {
+        $builder = \App\Order\Models\OrderGoods::where([
+            ['order_no', '=', $order_no],
+            ['goods_no', '=', $goods_no],
+        ])->limit(1);
+		if( $lock ){
+			$builder->lockForUpdate();
+		}
+		$goods_info = $builder->first();
+		if( !$goods_info ){
+			throw new App\Lib\NotFoundException('商品未找到');
+		}
+		return new Goods( $goods_info );
 	}
 
 	/**
