@@ -21,6 +21,7 @@ class InstalmentController extends Controller
         $sku        = $request['params']['sku'];
         $coupon     = !empty($request['params']['coupon']) ? $request['params']['coupon'] : "";
         $user       = $request['params']['user'];
+
         //获取goods_no
         $order = filter_array($order, [
             'order_no'=>'required',
