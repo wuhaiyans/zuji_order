@@ -96,7 +96,6 @@ class Goods {
      * @return bool
      */
     public function returnOpen( ):bool{
-
         return true;
     }
     /**
