@@ -5,7 +5,6 @@
  *    date : 2018-05-04
  */
 namespace App\Order\Modules\Service;
-
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
@@ -478,7 +477,6 @@ class OrderOperate
             }
 
         }
-
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
 
