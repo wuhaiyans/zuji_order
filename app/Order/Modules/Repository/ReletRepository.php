@@ -83,7 +83,9 @@ class ReletRepository
         $orderList = DB::table('order_relet')
             ->where($whereArray)
             ->select('order_relet.*')
-            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+            ->offset($pagesize)
+            ->limit($page)
+            ->get();
 
         //返回
         return $orderList;
