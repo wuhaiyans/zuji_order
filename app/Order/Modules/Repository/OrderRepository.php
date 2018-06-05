@@ -491,14 +491,14 @@ class OrderRepository
         }
 
         if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
-            $whereArray[] = ['order_info_extend.visit_id', '=', $param['visit_id']];
+            $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
         
         $orderList = DB::table('order_info')
             ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
-            ->leftJoin('order_info_extend','order_info.order_no', '=', 'order_info_extend.order_no')
+            ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
             ->where($whereArray)
-            ->select('order_info.*','order_userinfo.*','order_info_extend.visit_id')
+            ->select('order_info.*','order_userinfo.*','order_info_visit.visit_id')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 

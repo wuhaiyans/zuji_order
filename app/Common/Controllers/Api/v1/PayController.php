@@ -18,6 +18,19 @@ class PayController extends Controller
     }
 	
 	
+	public function testOrder(){
+		
+		$order = new \App\Order\Modules\Repository\Order\Order( [] );
+		
+		$goods = new \App\Order\Modules\Repository\Order\Goods( [] );
+		
+		$b = $goods->tuihuoOpen();
+		$b = $order->tuihuoOpen();
+	}
+	
+	
+	
+	
 	public function testWechat(){
 		
 		try {

@@ -6,58 +6,58 @@ use App\Order\Models\OrderGoods;
 class OrderGoodsRepository
 {
 
-    private $orderGoods;
+	private $orderGoods;
 
-    public function __construct()
-    {
-        $this->orderGoods = new OrderGoods();
-    }
-    public function add($data){
-        return $this->orderGoods->insertGetId($data);
-    }
-    /**
-     *  更新服务时间
-     * @param array $goodsNo //商品编号
-     * @param array $data
-     * [
-     *      'begin_time'=>''// int 服务开始时间
-     *      'end_time'=>''// int 服务结束时间
-     * ]
-     * @return boolen
-     */
-    public function updateServiceTime( $goodsNo, $data ) {
-        $data =filter_array($data,[
-            'begin_time'=>'required',
-            'end_time'=>'required',
-        ]);
-        if(count($data)!=2){
-            return false;
-        }
-        $data['update_time'] = time();
-        return $this->orderGoods->where('goods_no','=',$goodsNo)->update($data);
-    }
+	public function __construct()
+	{
+		$this->orderGoods = new OrderGoods();
+	}
+	public function add($data){
+		return $this->orderGoods->insertGetId($data);
+	}
+	/**
+	 *  更新服务时间
+	 * @param array $goodsNo //商品编号
+	 * @param array $data
+	 * [
+	 *      'begin_time'=>''// int 服务开始时间
+	 *      'end_time'=>''// int 服务结束时间
+	 * ]
+	 * @return boolen
+	 */
+	public function updateServiceTime( $goodsNo, $data ) {
+		$data =filter_array($data,[
+				'begin_time'=>'required',
+				'end_time'=>'required',
+		]);
+		if(count($data)!=2){
+			return false;
+		}
+		$data['update_time'] = time();
+		return $this->orderGoods->where('goods_no','=',$goodsNo)->update($data);
+	}
 
-    /**
-     * 执行where查询并获得第一个结果。
-     *
-     * @author jinlin wang
-     * @param array $where
-     * @return array|bool
-     */
-    public static function getGoodsRow($where = [['1','=','1']]){
-        $result =  orderGoods::query()->where($where)->first();
-        if (!$result) return false;
-        return $result->toArray();
-    }
-    //获取商品信息
-    public static function getgoodsList($goods_no){
-        if (empty($goods_no)) return false;
-        $result =  orderGoods::query()->where([
-            ['goods_no', '=', $goods_no],
-        ])->first();
-        if (!$result) return false;
-        return $result->toArray();
-    }
+	/**
+	 * 执行where查询并获得第一个结果。
+	 *
+	 * @author jinlin wang
+	 * @param array $where
+	 * @return array|bool
+	 */
+	public static function getGoodsRow($where = [['1','=','1']]){
+		$result =  orderGoods::query()->where($where)->first();
+		if (!$result) return false;
+		return $result->toArray();
+	}
+	//获取商品信息
+	public static function getgoodsList($goods_no){
+		if (empty($goods_no)) return false;
+		$result =  orderGoods::query()->where([
+				['goods_no', '=', $goods_no],
+		])->first();
+		if (!$result) return false;
+		return $result->toArray();
+	}
 	/**
 	 * 根据商品编号获取单条商品信息
 	 * @param string $goodsNo 商品编号
@@ -102,18 +102,27 @@ class OrderGoodsRepository
 	 * ]
 	 */
 	public function getGoodsInfo( $goodsNo ) {
-        $result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
-        if (!$result) {
+		$result =  $this->orderGoods->where(['goods_no'=> $goodsNo])->first();
+		if (!$result) {
 			get_instance()->setCode(\App\Lib\ApiStatus::CODE_92400)->setMsg('商品信息未获取成功!');
 			return [];
 		}
-        $goodsInfo = $result->toArray();
+		$goodsInfo = $result->toArray();
 //		var_dump($goodsInfo);exit;
 //		$goodsInfo['update_time'] = date('Y-m-d H:i:s',$goodsInfo['update_time']);
 //		$goodsInfo['create_time'] = date('Y-m-d H:i:s',$goodsInfo['create_time']);
 		$goodsInfo['begin_time'] = date('Y-m-d H:i:s',$goodsInfo['begin_time']);
 		$goodsInfo['end_time'] = date('Y-m-d H:i:s',$goodsInfo['end_time']);
 		return $goodsInfo;
+	}
+	//多个商品信息in条件获取
+	public static function getGoodsColumn($goodsNos){
+		if (!is_array($goodsNos)) return false;
+		array_unique($goodsNos);
+		$result =  orderGoods::query()->wherein('goods_no', $goodsNos)->get()->toArray();
+		if (!$result) return false;
+		//指定goods_no为数组下标
+		return array_keys_arrange($result,"goods_no");
 	}
 	/**
 	 * 根据条件更新数据

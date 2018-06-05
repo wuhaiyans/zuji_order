@@ -13,5 +13,27 @@ namespace App\Order\Modules\Repository\Order;
  *
  */
 class DeliveryDetail {
-	//put your code here
+	
+	/**
+	 * 发货明细
+	 * @param string $goods_no
+	 * @return array|bool	array：发货明细（一维数组）；false：不存在
+	 * [
+	 * ]
+	 */
+	public static function getDetail( string $goods_no ){
+		return false;
+	}
+	
+	/**
+	 * 发货明细列表
+	 * @param string $order_no
+	 * @return array	发货明细列表（二维数组）
+	 * [
+	 * ]
+	 */
+	public static function getDetailList( string $order_no ){
+		return [];
+	}
+	
 }

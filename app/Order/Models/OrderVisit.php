@@ -4,12 +4,12 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderExtend extends Model
+class OrderVisit extends Model
 {
 
     // Rest omitted for brevity
 
-    protected $table = 'order_info_extend';
+    protected $table = 'order_info_visit';
     /**
      * 默认使用时间戳戳功能
      *
@@ -21,6 +21,6 @@ class OrderExtend extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no'];
+    protected $fillable = ['order_no','visit_id','visit_text'];
 
 }
