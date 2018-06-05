@@ -7,6 +7,8 @@
  */
 
 namespace App\Order\Modules\Repository\Order;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\publicInc;
 
 /**
  * 
@@ -41,16 +43,14 @@ class Goods {
 	/**
 	 * 获取商品
 	 * <p>当订单不存在时，抛出异常</p>
-	 * @param string	$order_no		订单编号
-	 * @param string	$goods_no		商品编号
-	 * @param int		$lock			锁
+	 * @param int   	$id		    订单编号
+	 * @param int		$lock		锁
 	 * @return \App\Order\Modules\Repository\Order\Order
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getByGoodsNo( string $order_no, string $goods_no, int $lock=0 ) {
+	public static function getByGoodsId( int $id, int $lock=0 ) {
         $builder = \App\Order\Models\OrderGoods::where([
-            ['order_no', '=', $order_no],
-            ['goods_no', '=', $goods_no],
+            ['id', '=', $id],
         ])->limit(1);
 		if( $lock ){
 			$builder->lockForUpdate();
@@ -61,6 +61,44 @@ class Goods {
 		}
 		return new Goods( $goods_info->toArray() );
 	}
+
+    /**
+     * 续租开始
+     *
+     * @param array
+     * [
+     *      'zuqi'  =>  '', // 【必选】int 租期
+     * ]
+     */
+    public function reletOpen($params){
+        //校验 时间格式
+        if( $this->data['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
+            if( $params['zuqi']<3 || $params['zuqi']<30 ){
+                set_msg('租期错误');
+                return false;
+            }
+        }else{
+            if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
+                set_msg('租期错误');
+                return false;
+            }
+        }
+
+        $amount = $this->data['zujin']*$params['zuqi'];
+
+        // 更新goods状态
+
+        // 订单续租
+        $order = Order::getByNo($this->data['order_no']);
+        return $order->reletOpen();
+    }
+
+    /**
+     * 续租关闭
+     */
+    public function reletClose(){
+
+    }
 
 	/**
      * 续租完成
@@ -131,8 +169,7 @@ class Goods {
         }
 
         // 获取当前订单
-        $order = \App\Order\Modules\Repository\Order\Order::getByNo($this->data['order_no'] );
-        $b = $order->returnClose();
+        $order = Order::getByNo($this->data['order_no'] );
         // 更新订单状态
         return $order->returnClose( );
     }
