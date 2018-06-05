@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Order\OrderInfo;
+use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
@@ -524,12 +525,12 @@ class OrderController extends Controller
 
 
     /**
-     * 获取Yidun信息
+     * 获取风控信息
      * Author: heaven
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getYidunInfo(Request $request)
+    public function getRiskInfo(Request $request)
     {
 
         try{
@@ -546,15 +547,14 @@ class OrderController extends Controller
                 return apiResponse([],$validateParams['code']);
             }
 
+            $orderData = OrderRiskRepository::getRisknfoByOrderNo($validateParams['data']['order_no']);
 
-            $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
+            if ($orderData) {
 
-            if ($orderData['code']===ApiStatus::CODE_0) {
-
-                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+                return apiResponse($orderData,ApiStatus::CODE_0);
             } else {
 
-                return apiResponse([],ApiStatus::CODE_32002);
+                return apiResponse([],ApiStatus::CODE_30034);
             }
 
         }catch (\Exception $e) {
