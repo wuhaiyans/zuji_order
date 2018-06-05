@@ -53,7 +53,7 @@ class OrderUserInfoRepository
         }
 
         $data = OrderUserInfo::query()->where($whereArray)->get()->toArray();
-        return !empty($orderData) ?? false;
+        return $data ?? false;
     }
 
 

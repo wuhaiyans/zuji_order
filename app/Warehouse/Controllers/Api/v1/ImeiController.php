@@ -113,11 +113,6 @@ class ImeiController extends Controller
         exit ();
 
 
-
-
-
-
-
         return response()->download($filePath,'imei数据导入模板.xls');
     }
 

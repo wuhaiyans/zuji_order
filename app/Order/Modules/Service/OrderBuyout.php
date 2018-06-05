@@ -95,6 +95,17 @@ class OrderBuyout
 		$data = OrderBuyoutRepository::getList($where, $additional);
 		return $data;
 	}
+	/**
+	 * 查询多条买断单
+	 * @param $data
+	 * @return id
+	 */
+	public static function getLists(array $where,array $additional){
+		$additional['offset'] = $additional['page']>1?($additional['page']-1)*$additional['size']:0;
+		$additional['limit'] = $additional['size']?$additional['size']:0;
+		$data = OrderBuyoutRepository::getLists($where, $additional);
+		return $data;
+	}
     /**
      * 创建买断单
      * @param $data
@@ -108,6 +119,7 @@ class OrderBuyout
 				'goods_no'=>'required',
 				'user_id'=>'required',
 				'plat_id'=>'required',
+				'goods_name'=>'required',
 				'buyout_price'=>'required',
 				'create_time'=>'required',
 		]);
