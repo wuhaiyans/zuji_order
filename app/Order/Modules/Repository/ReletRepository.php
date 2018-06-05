@@ -195,9 +195,8 @@ class ReletRepository
             ['order_no','=',$goodsObj->order_no],
             ['goods_no','=',$goodsObj->goods_no]
         ])->orderBy('id','desc')->first();
-        dd($goodsUnitRow);
         if($goodsUnitRow){
-            $goodsUnitRow->toArray();
+            $goodsUnitRow = $goodsUnitRow->toArray();
         }else{
             LogApi::notify("周期表数据错误", $reletNo);
             return false;
