@@ -12,12 +12,37 @@ class OrderGivebackRepository
 	protected $order_giveback_model;
 	
 	/**
+	 *搜索关键字类型：订单编号
+	 * @var string filed order_no
+	 */
+	const  KWTYPE_ORDERNO = 'order_no';
+	/**
+	 *搜索关键字类型：手机号
+	 * @var string filed mobile
+	 */
+	const KWTYPE_MOBILE = 'mobile';
+	/**
+	 *搜索关键字类型：设备名称
+	 * @var string filed order_no
+	 */
+	const KWTYPE_GOODSNAME = 'goods_name';
 	 * 构造方法
 	 */
 	public function __construct(  ){
 		$this->order_giveback_model = new OrderGiveback();
 	}
-    public function create( $data ){
+
+	/**
+	 * 获取支持搜索的字段列表
+	 */
+	public static function getKwtypeList(  ) {
+		return [
+			self::KWTYPE_ORDERNO => '订单编号',
+			self::KWTYPE_MOBILE => '手机号',
+			self::KWTYPE_GOODSNAME => '设备名称',
+		];
+	}
+	    public function create( $data ){
 		return $this->order_giveback_model->insertGetId( $data );
 	}
     /**
