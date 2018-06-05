@@ -211,7 +211,9 @@ class ReletRepository
         ];
 
         //修改订单商品状态
-        if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+        $goodsObj->goods_status=OrderGoodStatus::RENEWAL_OF_RENT;
+        $goodsObj->update_time=time();
+        if( !$goodsObj->save() ){
             LogApi::notify("续租修改设备状态失败", $reletNo);
             return false;
         }
