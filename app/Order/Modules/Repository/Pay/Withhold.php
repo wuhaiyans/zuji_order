@@ -211,7 +211,7 @@ class Withhold extends \App\Lib\Configurable {
 		}
 		$time = time();
 		try {
-			
+
 			// 申请解约
 			\App\Lib\Payment\CommonWithholdingApi::unSign([
 				'agreement_no'		=> $this->out_withhold_no,	// 支付系统代扣协议编号
@@ -219,7 +219,7 @@ class Withhold extends \App\Lib\Configurable {
 				'user_id'			=> $this->user_id,
 				'back_url'			=> config('app.url').'/order/pay/withholdUnsignNotify',
 			]);
-			
+
 			// 更新协议状态
 			$n = \App\Order\Models\OrderPayWithholdModel::where([
 				'withhold_no'	=> $this->withhold_no,
@@ -252,7 +252,7 @@ class Withhold extends \App\Lib\Configurable {
 		}
 		$time = time();
 		// 修改状态
-		sql_profiler();
+		//sql_profiler();
 		$n = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $this->withhold_no,
 		])->limit(1)->update([
@@ -283,6 +283,14 @@ class Withhold extends \App\Lib\Configurable {
 			return false;
 		}
 		return true;
+	}
+
+
+	public function get_data(){
+		return [
+			'withhold_no'		=> $this->withhold_no,
+			'out_withhold_no'	=> $this->out_withhold_no,
+		];
 	}
 	
 }
