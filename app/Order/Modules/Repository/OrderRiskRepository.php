@@ -18,12 +18,12 @@ class OrderRiskRepository
     }
 
 
-    public static function getYidunInfoByOrderNo($orderNo)
+    public static function getRisknfoByOrderNo($orderNo)
     {
         if (empty($orderNo)) return false;
         $whereArray = array();
         $whereArray[] = ['order_no', '=', $orderNo];
-        $order =  OrderYidun::query()->where($whereArray)->first();
+        $order =  OrderRisk::query()->where($whereArray)->first();
         if (!$order) return false;
         return $order->toArray();
     }

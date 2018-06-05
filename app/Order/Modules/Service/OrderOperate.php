@@ -344,44 +344,39 @@ class OrderOperate
      */
     public static function getOrderInfo($orderNo)
     {
-
         $order = array();
-
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
         //查询订单和用户发货的数据
         $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
 
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-
         //分期数据表
         $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
         $order['instalment_info'] = $goodsExtendData;
-
-
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
 
-            foreach ($goodsExtendData as $values) {
+            foreach ($goodsExtendData as $keys=> $goodsValues) {
+                if (is_array($goodsValues)) {
+                    foreach($goodsValues as $values) {
 
-                if ($values['status']==Inc\OrderInstalmentStatus::UNPAID)
-                {
 
-                    $instalmentUnpayAmount+=$values['amount'];
+                        if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
+                        {
+
+                            $instalmentPayedAmount+=$values['amount'];
+                        } else {
+
+                            $instalmentUnpayAmount+=$values['amount'];
+
+                        }
+
+                    }
+
                 }
-
-                if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
-                {
-
-                    $instalmentPayedAmount+=$values['amount'];
-                } else {
-
-                    $instalmentUnpayAmount+=$values['amount'];
-
-                }
-
             }
             //未支付总金额
             $orderData['instalment_unpay_amount'] = $instalmentUnpayAmount;
@@ -389,6 +384,7 @@ class OrderOperate
             $orderData['instalment_payed_amount'] = $instalmentPayedAmount;
 
         }
+
 
         //订单状态名称
         $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);

@@ -56,6 +56,8 @@ return [
 
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
+    'api.order.getRiskInfo'=>'OrderController@getRiskInfo',
+
 
 
     //订单结算清单列表接口
