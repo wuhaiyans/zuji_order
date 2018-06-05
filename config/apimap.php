@@ -54,6 +54,9 @@ return [
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
 
+    //订单操作日志接口
+    'api.order.orderLog'=>'OrderController@orderLog',
+
 
     //订单结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@list',

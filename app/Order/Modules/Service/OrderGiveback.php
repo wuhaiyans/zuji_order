@@ -450,7 +450,7 @@ class OrderGiveback
         }
         //根据设备名称
         if (isset($where['kw_type']) && $where['kw_type'] == OrderGivebackRepository::KWTYPE_GOODSNAME && !empty($where['keywords']) ) {
-            $whereArray[] = ['order_goods.goods_name', 'like', '%'.$where['keywords']];
+            $whereArray[] = ['order_goods.goods_name', 'like', $where['keywords'].'%'];
         }
 		$where = $whereArray;
 		return true;
