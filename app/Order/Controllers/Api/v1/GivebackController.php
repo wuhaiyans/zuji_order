@@ -560,6 +560,27 @@ class GivebackController extends Controller
 	}
 	
 	/**
+	 * 获取还机搜索条件
+	 * @param Request $request
+	 */
+	public function getStatusList(Request $request) {
+		return apiResponse(['status'=>OrderGivebackStatus::getStatusList(),'kw_type'=> \App\Order\Modules\Repository\OrderGivebackRepository::getKwtypeList()]);
+	}
+	/**
+	 * 获取还机列表
+	 * @param Request $request
+	 */
+	public function getList(Request $request) {
+		$params = $request->input();
+		$whereArr = $additionArr = isset($params['params'])? $params['params'] :'';
+		
+		$orderGivebackService = new OrderGiveback( );
+		$orderGivebackList = $orderGivebackService->getList( $whereArr, $additionArr );
+		return apiResponse($orderGivebackList);
+		
+	}
+	
+	/**
 	 * 检测结果处理【检测合格-代扣成功(无剩余分期)】
 	 * @param OrderGiveback $orderGivebackService 还机单服务对象
 	 * @param array $paramsArr 业务处理的必要参数数组

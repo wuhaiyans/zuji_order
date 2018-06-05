@@ -90,27 +90,34 @@ class Order {
 	 * 申请退款
 	 * @return bool
 	 */
-	public function openRefund( ):bool{
+	public function refundOpen( ):bool{
 		return true;
 	}
 	/**
 	 * 取消退款
 	 * @return bool
 	 */
-	public function closeRefund( ):bool{
+	public function refundClose( ):bool{
 		return true;
 	}
 	/**
 	 * 完成退款
 	 * @return bool
 	 */
-	public function finishRefund( ):bool{
+	public function refundFinish( ):bool{
 		return true;
 	}
 	
 	//-+------------------------------------------------------------------------
 	// | 发货
 	//-+------------------------------------------------------------------------
+    /**
+     * 申请发货
+     * @return bool
+     */
+    public function applyDelivery():bool{
+        return true;
+    }
 	/**
 	 * 取消发货
 	 * @return bool
@@ -141,6 +148,7 @@ class Order {
 	 * 获取订单
 	 * <p>当订单不存在时，抛出异常</p>
 	 * @param string $order_no		订单编号
+	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
 	 * @throws \App\Lib\NotFoundException
 	 */
@@ -148,6 +156,54 @@ class Order {
 		return new Order();
 		throw new App\Lib\NotFoundException('');
 	}
-	
-	
+    //-+------------------------------------------------------------------------
+    // | 退货
+    //-+------------------------------------------------------------------------
+    /**
+     * @return bool
+     * 申请退货
+     */
+    public function returnOpen( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 取消退货
+     */
+    public function returnClose( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 完成退货
+     */
+    public function returnFinish( ):bool{
+        return true;
+    }
+    //-+------------------------------------------------------------------------
+    // | 换货
+    //-+------------------------------------------------------------------------
+    /**
+     * @return bool
+     * 申请换货
+     */
+    public function barterOpen( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 取消换货
+     */
+    public function barterClose( ):bool{
+        return true;
+    }
+    /**
+     * @return bool
+     * 完成换货
+     */
+    public function barterFinish( ):bool{
+        return true;
+    }
+
+
 }
