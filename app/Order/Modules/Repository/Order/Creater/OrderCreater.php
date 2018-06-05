@@ -45,7 +45,7 @@ class OrderCreater implements OrderCreaterInterface
 
     /**
      * 设置 Sku组件
-     * @param SkuComponnet $sku_componnet
+     * @param SkuComponnet $skuComponnet
      * @return OrderCreater
      */
     public function setSkuComponnet(SkuComponnet $skuComponnet){

@@ -54,6 +54,9 @@ return [
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
 
+    //订单操作日志接口
+    'api.order.orderLog'=>'OrderController@orderLog',
+
 
     //订单结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@list',
@@ -156,8 +159,8 @@ return [
     'api.Return.isQualified'       => 'ReturnController@isQualified',
    //获取订单所有待审核的退换货信息
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
-    //获取订单检测合格的数据
-    'api.Return.getExchange'       =>'ReturnController@getExchange',
+    //获取订单检测不合格的数据
+    'api.Return.returnCheckList'       =>'ReturnController@returnCheckList',
 
 
     //续租接口
