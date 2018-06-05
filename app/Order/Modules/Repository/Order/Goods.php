@@ -15,6 +15,11 @@ namespace App\Order\Modules\Repository\Order;
  */
 class Goods {
 	
+	
+	public function tuihuoOpen(){
+		
+	}
+	
 	/**
 	 * 获取商品列表
 	 * @param string $good_no		商品编号
@@ -39,6 +44,28 @@ class Goods {
 		return new Goods();
 		throw new App\Lib\NotFoundException('');
 	}
+
+	/**
+     * 续租完成
+     *      支付完成或创建分期成功执行
+     *
+     * 步骤:
+     *  1.修改商品状态
+     *  2.添加新周期
+     *  3.修改订单状态
+     *  4.解锁订单
+     *
+     * @author jinlin wang
+     * @param array
+     * @return boolean
+     */
+	public static function reletFinish(){
+	    //修改商品状态
+        //添加新周期
+        //修改订单状态
+        //解锁订单
+        return true;
+    }
 	
     /**
      *
