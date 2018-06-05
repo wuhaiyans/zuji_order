@@ -158,9 +158,9 @@ class DeliveryService
      * @throws \Exception
      * 发货操作
      */
-    public function send($delivery_no)
+    public function send($params)
     {
-        if (!DeliveryRepository::send($delivery_no)) {
+        if (!DeliveryRepository::send($params)) {
             throw new \Exception('发货操作失败');
         }
     }
