@@ -64,7 +64,7 @@ class OrderBuyoutRepository
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->where($where)
-				->select('order_buyout.*','order_info.order_amount','order_info.appid','order_info.create_time as order_time')
+				->select('order_buyout.*','order_info.order_amount','order_info.appid','order_info.create_time as order_time',"order_info.mobile")
 				->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['offset']);
 		if($parcels){
 			return $parcels->toArray();
@@ -108,8 +108,8 @@ class OrderBuyoutRepository
 	public static function setOrderPaid($id){
 		if (!$id) return false;
 		$data =[
-			'status'=>OrderBuyoutStatus::OrderPaid,
-			'update_time'=>time()
+				'status'=>OrderBuyoutStatus::OrderPaid,
+				'update_time'=>time()
 		];
 		$ret = OrderBuyout::where('id', '=', $id)->update($data);
 		if($ret){

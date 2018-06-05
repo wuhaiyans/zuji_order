@@ -79,7 +79,6 @@ class Goods  extends \App\Lib\BaseApi{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-
         //var_dump($info);
         if(!is_array($info)){
             return false;

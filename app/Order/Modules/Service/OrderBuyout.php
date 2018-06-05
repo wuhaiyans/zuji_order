@@ -10,9 +10,9 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 class OrderBuyout
 {
 	/**
- * 订单还机数据处理仓库
- * @var obj
- */
+	 * 订单还机数据处理仓库
+	 * @var obj
+	 */
 	public function __construct(  ) {
 	}
 
@@ -97,12 +97,12 @@ class OrderBuyout
 		$data = OrderBuyoutRepository::getList($where, $additional);
 		return $data;
 	}
-    /**
-     * 创建买断单
-     * @param $data
-     * @return id
-     */
-    public static function create($array)
+	/**
+	 * 创建买断单
+	 * @param $data
+	 * @return id
+	 */
+	public static function create($array)
 	{
 		$data = filter_array($array,[
 				'buyout_no'=>'required',
