@@ -75,16 +75,7 @@ class DepositComponnet implements OrderCreater
         if($this->schema['user']['score'] <config("tripartite.Fengkong_Score")){
             $this->deposit = false;
         }
-
-
-        //未通过蚁盾验证
-        if($this->schema['yidun']['decision'] ==YidunComponnet::RISK_REJECT){
-            $this->deposit = false;
-        }
-        //京东小白信用押金全免设置（配合银联支付）
-        if( $this->schema['user']['certified_platform']== Certification::JdXiaoBai) {
-            $this->deposit = true;
-        }
+        
         if($this->deposit && $this->payType >0){
             //支付押金规则
             foreach ($this->schema['sku'] as $k=>$v)
