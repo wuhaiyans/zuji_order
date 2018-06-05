@@ -194,7 +194,8 @@ class ReletRepository
         $goodsUnitRow = OrderGoodsUnit::where([
             ['order_no','=',$goodsObj->order_no],
             ['goods_no','=',$goodsObj->goods_no]
-        ])->orderBy('id','desc')->first()->toArray();
+        ])->orderBy('id','desc')->first();
+        dd($goodsUnitRow);
         //判断租期类型
         if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
             $t = $reletRow['zuqi']*(60*60*24);
