@@ -9,7 +9,7 @@
 namespace App\Order\Modules\Repository\Order;
 
 /**
- * Description of Address
+ * Address
  *
  * @author Administrator
  */

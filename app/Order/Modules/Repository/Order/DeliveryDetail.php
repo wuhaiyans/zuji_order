@@ -10,7 +10,7 @@ namespace App\Order\Modules\Repository\Order;
 
 /**
  * 发货明细
- *
+ * （IMEI，合同）
  */
 class DeliveryDetail {
 	
