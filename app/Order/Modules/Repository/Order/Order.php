@@ -428,12 +428,22 @@ class Order {
     }
 
     /**
-     * 订单续租开始
+     * 订单续租关闭
      *
      * 1.验证订单是否冻结
      * 2.解冻订单
      */
     public function reletClose(){
+        $this->data;
+    }
+
+    /**
+     * 订单续租完成
+     *
+     * 1.验证订单是否冻结
+     * 2.解冻订单
+     */
+    public function reletFinish(){
         $this->data;
     }
 
