@@ -123,7 +123,7 @@ class MiniOrderController extends Controller
         $b = $miniApi->orderConfirm($miniParams);
         if($b === false){
             \App\Lib\Common\LogApi::notify('芝麻接口请求错误',$miniParams);
-            return apiResponse( [], ApiStatus::CODE_35003, '查询芝麻订单确认结果失败');
+            return apiResponse( [], ApiStatus::CODE_35003, $miniApi->getError());
         }
         $miniData = $miniApi->getResult();
         //添加逾期时间

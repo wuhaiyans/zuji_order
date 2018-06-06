@@ -106,7 +106,10 @@ class CommonMiniApi extends BaseApi {
 		$request = new \ZhimaMerchantOrderConfirmRequest();
 		$request->setBizContent(json_encode($biz_content));
 		$result = $this->execute ( $request);
-		var_dump($result);
+		if(!$result){
+			$this->error = $this->getError();
+			return false;
+		}
 		$debug_data = [
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
