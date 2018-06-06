@@ -112,6 +112,7 @@ class CommonMiniApi extends BaseApi {
 		];
 		\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
 		$responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
+		print_r($responseNode);die;
 		$resultCode = $result->$responseNode->code;
 		if(!empty($resultCode)&&$resultCode == 10000){
 			$result = json_decode(json_encode($result),true);
