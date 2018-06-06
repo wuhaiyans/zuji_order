@@ -106,7 +106,7 @@ class Delivery
         $result = [
             'order_no'  => $orderInfo['order_no'],
             'realname'  => $orderInfo['name'],
-            'mobile'    => $orderInfo['user_mobile'],
+            'mobile'    => $orderInfo['consignee_mobile'],
             'address_info' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
@@ -215,7 +215,12 @@ class Delivery
 
     /**
      * 发货反馈 ok
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [

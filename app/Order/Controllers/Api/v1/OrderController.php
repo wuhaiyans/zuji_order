@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
+use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
@@ -202,6 +203,30 @@ class OrderController extends Controller
             $orderData = Service\OrderOperate::getOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
+
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称', '租期','金额'];
+                $excel = new \App\Lib\Excel();
+
+                foreach ($orderData['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_status_name'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
+                        $item['quality'],
+                        $item['color'],
+                        $item['business'],
+                        $item['storage'],
+                        $item['status'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['status']
+                    ];
+                }
+
+                return $excel->write($data, $headers,'imei数据导出');
+
+                Excel::write($orderData);
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 
@@ -219,18 +244,17 @@ class OrderController extends Controller
     public function orderListExport() {
 
 
-        header("Content-type:text/html;charset=utf-8");
-        header("Content-Type:application/vnd.ms-excel");
-        header("Content-Disposition:attachment;filename=test.xlsx");
-        ob_end_clean();
-//        header('Cache-Control: max-age=0');//禁止缓存
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Hello World !');
+        $params = $request->input('params');
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        //                $writer->save('hello world.xlsx');
-        $writer->save('php://output');
+        $orderData = Service\OrderOperate::getOrderList($params);
+
+        if ($orderData['code']===ApiStatus::CODE_0) {
+
+            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+        } else {
+
+            return apiResponse([],ApiStatus::CODE_33001);
+        }
 
     }
 
@@ -288,7 +312,12 @@ class OrderController extends Controller
 
     /**
      *  发货接口
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
@@ -307,13 +336,13 @@ class OrderController extends Controller
         $params =$request->all();
 
         $params =$params['params'];
-        if(empty($params['order_no'])){
+        if(count($params['order_info']) <3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }

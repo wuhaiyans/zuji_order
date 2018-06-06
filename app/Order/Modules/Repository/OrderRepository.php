@@ -364,11 +364,11 @@ class OrderRepository
         if (isset($param['order_no']) && !empty($param['order_no']))
         {
             $orderData = DB::table('order_info')
-                ->leftJoin('order_userinfo', function ($join) {
-                    $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
+                ->leftJoin('order_user_address', function ($join) {
+                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 })
                 ->where('order_info.order_no', '=', $param['order_no'])
-                ->select('order_info.*','order_userinfo.*')
+                ->select('order_info.*','order_user_address.*')
                 ->first();
 
             return !empty($orderData)?objectToArray($orderData):false;
@@ -462,7 +462,7 @@ class OrderRepository
 
         //根据手机号
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_user_address.mobile', '=', $param['mobile']];
         }
 
         //应用来源ID
@@ -496,10 +496,10 @@ class OrderRepository
         }
         
         $orderList = DB::table('order_info')
-            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
             ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
             ->where($whereArray)
-            ->select('order_info.*','order_userinfo.*','order_info_visit.visit_id')
+            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 

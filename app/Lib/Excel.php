@@ -14,15 +14,16 @@ class Excel
 {
 
     /**
+     * 改造成静态方法类
      * 数字转字母 （类似于Excel列标）
      * @param Int $index 索引值
      * @param Int $start 字母起始值
      * @return String 返回字母
      */
-    function intToChr($index, $start = 65) {
+    private static function intToChr($index, $start = 65) {
         $str = '';
         if (floor($index / 26) > 0) {
-            $str .= $this->IntToChr(floor($index / 26)-1);
+            $str .= self::IntToChr(floor($index / 26)-1);
         }
         return $str . chr($index % 26 + $start);
     }
@@ -30,15 +31,15 @@ class Excel
 
     /**
      * @param string $title
-     * @param $headers
-     * @param $body
+     * @param $headers 标题 【可选】
+     * @param $body 主体内容 【必须】二维数组
      * @return bool
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      *
      * 写文件
      */
-    public function write($title='数据导出', $headers, $body)
+    public static function write($body, $headers=[] , $title='数据导出')
     {
         if (!$headers || !$body) {
             return false;
@@ -46,14 +47,17 @@ class Excel
 
         $data = [];
         $rows = 1;
-        foreach ($headers as $k => $v) {
-            $data[$this->intToChr($k) . $rows] = $v;
+
+        if ($headers) {
+            foreach ($headers as $k => $v) {
+                $data[self::intToChr($k) . $rows] = $v;
+            }
         }
 
         foreach ($body as $k => $items) {
             $rows++;
             foreach ($items as $key => $item) {
-                $data[$this->intToChr($key) . $rows] = $item;
+                $data[self::intToChr($key) . $rows] = $item;
             }
         }
 

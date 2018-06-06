@@ -95,7 +95,8 @@ class ReturnController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * 选中即同意
      * [
-     *    [
+     *   'detail'=>[
+     * [
      *      'refund_no'=>'',
      *      'remark'=>'',
      *      'reason_key'=>''
@@ -108,16 +109,19 @@ class ReturnController extends Controller
      *      'audit_state'=>''
      *    ]
      * ]
+     *   'business_key'=>''
+     * ]
      *
      */
 
     public function returnReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        if(empty($params)){
+        if(empty($params['business_key'])){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
         $res=$this->OrderReturnCreater->returnOfGoods($params);//审核同意
+        p($res);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_34007,"审核失败");
         }

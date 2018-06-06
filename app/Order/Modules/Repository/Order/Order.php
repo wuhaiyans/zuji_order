@@ -233,7 +233,7 @@ class Order {
      * @return bool
      */
     public function deliveryOpen(string $remark):bool{
-        if($this->model->order_status!=OrderStatus::OrderPayed){
+        if($this->model->order_status!=OrderStatus::OrderPayed && $this->model->freeze_type == OrderFreezeStatus::Non){
             return false;
         }
         $this->model->order_status =OrderStatus::OrderInStock;
@@ -254,7 +254,11 @@ class Order {
 	 * @return bool
 	 */
 	public function deliveryFinish( ):bool{
-		$this->model->order_status = OrderStatus::OrderDeliveryed; 
+        if($this->model->order_status!=OrderStatus::OrderInStock && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+		$this->model->order_status = OrderStatus::OrderDeliveryed;
+		$this->model->delivery_time = time();
 		return $this->model->save();
 	}
 	/**
@@ -320,18 +324,12 @@ class Order {
      * @return bool
      */
     public function returnClose( ):bool{
-        // 校验自己状态
-        if(!$this->model){
+        //订单必须是冻结
+        if( $this->model->freeze_type ==0 ){
             return false;
         }
-        // 更新订单状态
-        $where[]=['order_no','=',$this->data['order_no']];
-        $data['freeze_type']=OrderFreezeStatus::Non;
-        $updateOrderStatus=$this->model::where($where)->update($data);
-        if(!$updateOrderStatus){
-            return false;
-        }
-        return true;
+        $this->model->freeze_type = OrderFreezeStatus::Non;
+        return $this->model->save();
     }
     /**
      * 完成退货
@@ -437,12 +435,22 @@ class Order {
     }
 
     /**
-     * 订单续租开始
+     * 订单续租关闭
      *
      * 1.验证订单是否冻结
      * 2.解冻订单
      */
     public function reletClose(){
+        $this->data;
+    }
+
+    /**
+     * 订单续租完成
+     *
+     * 1.验证订单是否冻结
+     * 2.解冻订单
+     */
+    public function reletFinish(){
         $this->data;
     }
 

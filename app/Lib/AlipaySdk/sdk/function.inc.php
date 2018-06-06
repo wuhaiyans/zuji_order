@@ -7,7 +7,7 @@ use App\Lib\Payment\mini\sdk\aop\AopClient;
 function writeLog($text) {
 	// $text=iconv("GBK", "UTF-8//IGNORE", $text);
 	$text = characet ( $text );
-	file_put_contents ( "./data/alipay-log.txt", date ( "Y-m-d H:i:s" ) . "  " . $text . "\r\n", FILE_APPEND|LOCK_EX );
+//	file_put_contents ( "./data/alipay-log.txt", date ( "Y-m-d H:i:s" ) . "  " . $text . "\r\n", FILE_APPEND|LOCK_EX );
 }
 
 //转换编码

@@ -64,8 +64,26 @@ class User{
      * @param $user_id
      * @return string or array
      */
-    public function getUserId(){
-
+    public static function getUserId($params){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.mini.user.id.get';
+        $data['params'] = [
+            'mobile'=>$params['mobile'],
+            'realname'=>$params['name'],
+            'zm_face '=>$params['zm_face'],
+            'cert_no'=>$params['cert_no'],
+        ];
+        //var_dump($data);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        var_dump($info);die;
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
     }
 }
 

@@ -46,7 +46,7 @@ class DeliveryService
             self::SEARCH_MOBILE => '手机号',
             self::SEARCH_DELIVERY_NO => '发货单号',
             self::SEARCH_ORDER_NO => '订单号',
-            self::SEARCH_LOGISTIC_NO => '发货单号'
+            self::SEARCH_LOGISTIC_NO => '物流单号'
         ];
 
         return $ks;

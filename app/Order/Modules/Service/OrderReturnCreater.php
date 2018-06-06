@@ -208,44 +208,137 @@ class OrderReturnCreater
      * 审核同意
      * @param $params
      * [
+     * 'business_key'=>'',
+     *     [
      *      'refund_no'=>'',
-     *      'remark'=>'',
+     *     'remark'=>'',
      *      'reason_key'=>''
      *      'audit_state'=>''
+     *     ]
      * ]
      */
     public function returnOfGoods($params){
         //开启事务
         DB::beginTransaction();
         try {
+            //审核同意的编号
+            $yes_list = [];
+            //审核拒绝的编号
             $no_list = [];
-            foreach ($params as $k => $v) {
+            foreach ($params['detail'] as $k => $v) {
+                $param= filter_array($params['detail'][$k],[
+                    'refund_no'=>'required',
+                    'remark'=>'required',
+                    'reason_key'=>'required',
+                    'audit_state'=>'required',
+                ]);
+                if(count($param)<4){
+                    return  false;
+                }
                 //获取退换货单的信息
-                $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['refund_no']);
+                $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['detail'][$k]['refund_no']);
                 if (!$return) {
                     return false;
                 }
-                if ($params[$k]['audit_state'] == true) {
+                $returnInfo[$k]=$return->getData();
+                //获取商品信息
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo[$k]['goods_no']);
+                if(!$goods){
+                    return false;
+                }
+               $goods_info= $goods->getData();
+                //审核同意
+                if ($params['detail'][$k]['audit_state'] == 'true'){
                     //更新审核状态为同意
-                    $accept = $return->accept($params[$k]);
+                    $accept = $return->accept($params['detail'][$k]);
                     if (!$accept) {
                         //事务回滚
                         DB::rollBack();
                         return false;
                     }
-
+                    $order=$returnInfo[$k]['order_no'];
+                    $data[$k]['goods_no']=$returnInfo[$k]['goods_no'];
+                    //获取商品扩展信息
+                    $goodsDelivery[$k]=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
+                    if(!$goodsDelivery){
+                        return false;
+                    }
+                    $goodsDeliveryInfo[$k]=$goodsDelivery[$k]->getData();
+                    $goodsDeliveryInfo[$k]['quantity']=$goods_info['quantity'];
+                    $yes_list[] = $params['detail'][$k]['refund_no'];
                 } else {
                     //更新审核状态为拒绝
-                    $refuse = $return->refuse($params[$k]);
-                    if (!$refuse) {
+                    $refuse = $return->refuse($params['detail'][$k]);
+                    if (!$refuse){
+                        //事务回滚
+                        DB::rollBack();
+                        return false;
+                    }
+                    $no_list[] = $params['detail'][$k]['refund_no'];
+                    //更新商品状态
+                    $returnClose=$goods->returnClose();
+                    if (!$returnClose){
                         //事务回滚
                         DB::rollBack();
                         return false;
                     }
                 }
-                $no_list[] = $params[$k]['refund_no'];
-
             }
+            //获取订单信息
+            $order=\App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no']);
+            foreach($returnInfo as $k=>$v){
+                $status[$k]=$returnInfo[$k]['status'];
+            }
+            if(!in_array(ReturnStatus::ReturnCreated,$status) && !in_array(ReturnStatus::ReturnAgreed,$status)&& !in_array(ReturnStatus::ReturnReceive,$status) && !in_array(ReturnStatus::ReturnTui,$status) && !in_array(ReturnStatus::ReturnTuiHuo,$status) && !in_array(ReturnStatus::ReturnTuiKuan,$status)){
+                //如果部分审核同意，订单为冻结状态
+                $order_result= $order->returnClose();
+                if(!$order_result) {
+                    //事务回滚
+                    DB::rollBack();
+                    return ApiStatus::CODE_33007;//更新订单冻结状态失败
+                }
+            }
+            //事务提交
+            DB::commit();
+            //存在审核同意商品
+            if($goodsDeliveryInfo){
+                foreach($goodsDeliveryInfo as $k=>$v){
+                    $receive_data[$k] =[
+                        'goods_no' => $goodsDeliveryInfo[$k]['goods_no'],
+                        'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
+                        'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
+                        'imei1'     =>$goodsDeliveryInfo[$k]['imei1'],
+                        'imei2'     =>$goodsDeliveryInfo[$k]['imei2'],
+                        'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
+                    ];
+                }
+                $create_receive= Receive::create($order,$params['business_key'],$receive_data);//创建待收货单
+                if(!$create_receive){
+                    return false;//创建待收货单失败
+                }
+            }
+            //审核发送短信
+          /*  if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                if($yes_list){
+                    foreach( $yes_list as $no ) {
+                        //短信
+                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_AGREE);
+                        $b=$orderNoticeObj->notify();
+                        Log::debug($b?"Order :".$params['order_no']." IS OK":"IS error");
+                    }
+                }
+                if($no_list){
+                    foreach( $no_list as $no ){
+                            //短信
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_DISAGREE);
+                            $b=$orderNoticeObj->notify();
+                            Log::debug($b?"Order :".$params['order_no']." IS OK":"IS error");
+                    }
+                }
+            }*/
+
+            return true;
+
         }catch( \Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
