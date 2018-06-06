@@ -30,15 +30,15 @@ class Excel
 
     /**
      * @param string $title
-     * @param $headers
-     * @param $body
+     * @param $headers 标题 【可选】
+     * @param $body 主体内容 【必须】二维数组
      * @return bool
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      *
      * 写文件
      */
-    public function write($title='数据导出', $headers, $body)
+    public function write($body, $headers=[] , $title='数据导出')
     {
         if (!$headers || !$body) {
             return false;
@@ -46,8 +46,11 @@ class Excel
 
         $data = [];
         $rows = 1;
-        foreach ($headers as $k => $v) {
-            $data[$this->intToChr($k) . $rows] = $v;
+
+        if ($headers) {
+            foreach ($headers as $k => $v) {
+                $data[$this->intToChr($k) . $rows] = $v;
+            }
         }
 
         foreach ($body as $k => $items) {
