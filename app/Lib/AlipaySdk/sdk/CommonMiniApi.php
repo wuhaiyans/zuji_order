@@ -114,8 +114,19 @@ class CommonMiniApi extends BaseApi {
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
 		];
-		print_r($debug_data);die;
 		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
+		return [
+			'name'=>'张三',
+			'cert_no'=>'110101200010012568',
+			'mobile'=>'18820881688',
+			'house'=>'西湖区文三路168号',
+			'zm_grade'=>'较差',
+			'credit_amount'=>'100.00',
+			'user_id'=>'2088202873665353',
+			'channel_id'=>'app',
+			'zm_risk'=>'Y',
+			'zm_face'=>'Y',
+		];
 		if( !isset($result['zhima_merchant_order_confirm_response']) ){
 			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
 			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
