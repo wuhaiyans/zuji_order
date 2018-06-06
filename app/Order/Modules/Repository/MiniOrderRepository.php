@@ -36,7 +36,6 @@ class MiniOrderRepository
             'overdue_time'=>$data['overdue_time'],
             'create_time'=>time(),
         ];
-        print_r($arr);die;
         $info =MiniOrder::create($arr);
         return $info->getQueueableId();
     }
