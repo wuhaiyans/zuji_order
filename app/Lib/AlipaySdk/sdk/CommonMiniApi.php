@@ -112,6 +112,7 @@ class CommonMiniApi extends BaseApi {
 			return false;
 		}
 		$params['appid'] = $this->appid;
+		print_r($this->appid);die;
 		$debug_data = [
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
