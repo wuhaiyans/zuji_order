@@ -356,8 +356,8 @@ class OrderOperate
         $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
 
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-        //分期数据表
-        $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
+        //分期数据
+        $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
 
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
