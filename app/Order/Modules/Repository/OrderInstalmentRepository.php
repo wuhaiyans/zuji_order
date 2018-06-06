@@ -337,6 +337,8 @@ class OrderInstalmentRepository
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
             $_data['term']            = $date[$i];
+            // 日期 天
+            $_data['day']             = intval(date('d'));
             //第几期
             $_data['times']           = $i;
             if($i==1){
@@ -384,6 +386,8 @@ class OrderInstalmentRepository
             $_data['order_no']        = $this->order_no;
             //还款日期(yyyymm)
             $_data['term']            = $date[$i];
+            // 日期 天
+            $_data['day']             = intval(date('d'));
             //第几期
             $_data['times']           = $i;
 
