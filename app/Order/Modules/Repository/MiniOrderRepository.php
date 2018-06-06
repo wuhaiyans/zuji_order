@@ -28,7 +28,6 @@ class MiniOrderRepository
             'house'=>$data['house'],
             'zm_grade'=>$data['zm_grade'],
             'credit_amount'=>$data['credit_amount'],
-            'zm_score'=>$data['zm_score'],
             'zm_risk'=>$data['zm_risk'],
             'zm_face'=>$data['zm_face'],
             'app_id'=>$data['appid'],
