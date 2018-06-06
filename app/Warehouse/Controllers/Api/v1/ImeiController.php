@@ -91,30 +91,44 @@ class ImeiController extends Controller
         return \apiResponse([]);
     }
 
+    /**
+     * 导出excel数据
+     */
+    public function export()
+    {
+        $params = $this->_dealParams([]);
+        $list = $this->imei->export($params);
+
+
+
+        return redirect()->action('UserController@profile', ['id'=>1]);
+        return \apiResponse($list);
+    }
+
 
     /**
      * 下载 imei 导入模板文件
      */
-    public function downTpl()
-    {
-
-        $filePath = storage_path('/app/download/imei_data_tpl.xlsx');
-
-        $file = fopen ( $filePath, "r" );
-
-        Header ( "Content-type: application/octet-stream" );
-        Header ( "Accept-Ranges: bytes" );
-        Header ( "Accept-Length: " . filesize ( $filePath ) );
-        Header ( "Content-Disposition: attachment; filename=" . $filePath );
-        //输出文件内容
-        //读取文件内容并直接输出到浏览器
-        echo fread ( $file, filesize ( $filePath ) );
-        fclose ( $file );
-        exit ();
-
-
-        return response()->download($filePath,'imei数据导入模板.xls');
-    }
+//    public function downTpl()
+//    {
+//
+//        $filePath = storage_path('/app/download/imei_data_tpl.xlsx');
+//
+//        $file = fopen ( $filePath, "r" );
+//
+//        Header ( "Content-type: application/octet-stream" );
+//        Header ( "Accept-Ranges: bytes" );
+//        Header ( "Accept-Length: " . filesize ( $filePath ) );
+//        Header ( "Content-Disposition: attachment; filename=" . $filePath );
+//        //输出文件内容
+//        //读取文件内容并直接输出到浏览器
+//        echo fread ( $file, filesize ( $filePath ) );
+//        fclose ( $file );
+//        exit ();
+//
+//
+//        return response()->download($filePath,'imei数据导入模板.xls');
+//    }
 
     /**
      * 上传文件

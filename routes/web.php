@@ -43,6 +43,6 @@ Route::any('order/giveback/{action}', function(App\Order\Controllers\Api\v1\Give
 });
 
 //下载文件 imeitpl imei模板文件
-Route::get('download/{action}', function(App\Http\Controllers\DownloadController $controller, $action){
+Route::any('download/{action}', function(App\Warehouse\Controllers\DownloadController $controller, $action){
     return $controller->$action();
 });
