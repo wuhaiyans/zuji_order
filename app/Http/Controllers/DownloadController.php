@@ -25,4 +25,13 @@ class DownloadController extends \App\Http\Controllers\Controller
         ob_end_clean();
         return response()->download($filePath, 'imei导入模板文件.xls');
     }
+
+
+    /**
+     * 导出excel
+     */
+    public function excel($headers, $body)
+    {
+
+    }
 }

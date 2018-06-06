@@ -28,7 +28,7 @@ class OrderPay implements ShortMessage {
         return Config::getCode($channel_id, $class);
     }
 	
-	public function notify($data=[]){
+	public function notify(){
 		// 根据业务，获取短息需要的数据
 		
 		// 查询订单

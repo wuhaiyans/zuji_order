@@ -3,6 +3,7 @@
 return [
 
     //imei导入
+    'warehouse.imei.export' => 'ImeiController@export', //导出
     'warehouse.imei.search' => 'ImeiController@search', //列表
     'warehouse.imei.import' => 'ImeiController@import', //导入imei
     'warehouse.imei.list' => 'ImeiController@list', //列表
