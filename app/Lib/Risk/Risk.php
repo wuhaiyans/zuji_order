@@ -7,14 +7,17 @@
  * Time: 16:32
  */
 
-namespace App\Lib\Fengkong;
+namespace App\Lib\Risk;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
-class Fengkong{
+class Risk{
+
+    //风控类型
+    const RiskYidun ="yidun";
 
 
-    public static function getYidun($arr){
+    public static function getRisk($arr){
         $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='yidun.get.user.yiduninfo';
         $data['params'] = [

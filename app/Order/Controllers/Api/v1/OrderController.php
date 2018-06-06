@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Order\OrderInfo;
+use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
@@ -11,6 +12,10 @@ use App\Order\Models\OrderGoodExtend;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Order\Modules\Service\OrderOperate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+
 
 
 class OrderController extends Controller
@@ -196,9 +201,7 @@ class OrderController extends Controller
 
             $orderData = Service\OrderOperate::getOrderList($params);
 
-
             if ($orderData['code']===ApiStatus::CODE_0) {
-
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 
@@ -209,6 +212,24 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
         }
+    }
+
+
+
+    public function orderListExport() {
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');//告诉浏览器输出07Excel文件
+        header('Content-Type:application/vnd.ms-excel');//告诉浏览器将要输出Excel03版本文件
+        header('Content-Disposition: attachment;filename="01simple.xlsx"');//告诉浏览器输出浏览器名称
+        header('Cache-Control: max-age=0');//禁止缓存
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Hello World !');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        //                $writer->save('hello world.xlsx');
+        $writer->save('php://output');
+
     }
 
     /**
@@ -435,7 +456,6 @@ class OrderController extends Controller
 
 
                 $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
-                p($orderData);
                 if ($orderData['code']===ApiStatus::CODE_0) {
 
                     return apiResponse($orderData['data'],ApiStatus::CODE_0);
@@ -500,6 +520,47 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_30013);
         }
         return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+
+    /**
+     * 获取风控信息
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getRiskInfo(Request $request)
+    {
+
+        try{
+            $params = $request->all();
+            $rule = [
+                'order_no'=> 'required'
+            ];
+
+            $validateParams = $this->validateParams($rule,  $params);
+
+
+            if ($validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $orderData = OrderRiskRepository::getRisknfoByOrderNo($validateParams['data']['order_no']);
+
+            if ($orderData) {
+
+                return apiResponse($orderData,ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_30034);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
 
     }
 
