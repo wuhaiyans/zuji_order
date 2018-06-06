@@ -18,14 +18,16 @@ namespace App\Order\Modules\Service;
  */
 class OrderNotice{
 	
-	const SM			= 1;		// 短信
-	const Email			= 1<<1;		// 邮件
-	const Message		= 1<<2;		// 消息
+	const SM				= 1;		// 短信
+	const Email				= 1<<1;		// 邮件
+	const Message			= 1<<2;		// 消息
+	const AlipayMessage		= 1<<3;		// 支付宝消息
 	
 	// 所有
 	const All = self::SM
 			| self::Email
-			| self::Message;
+			| self::Message
+			| self::AlipayMessage;
 	
 	
 	/**
@@ -99,7 +101,7 @@ class OrderNotice{
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @throws \Exception	发生错误时抛出异常
 	 */
-	public function notify($data = []){
+	public function notify(){
 				
 		if( $this->channel & self::SM ){
 			// 短信
@@ -113,18 +115,44 @@ class OrderNotice{
 			}
 			
 			// 通知
-			$b = $short_message->notify($data);
+			$b = $short_message->notify();
 			\App\Lib\Common\LogApi::debug('短信通知',[
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,
 					'status' => $b?'success':'failed',
 			]);
-		} 
-		
+		}
 		return true;
 	}
-	
+
+	/**
+	 * alipay同步通知
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @throws \Exception	发生错误时抛出异常
+	 */
+	public function alipay_notify(){
+
+		// 支付宝
+		if( $this->channel & self::AlipayMessage ){
+			// alipay
+			$alipay_message = $this->getAlipayMessage( );
+			if( !$alipay_message ){
+				\App\Lib\Common\LogApi::error('订单短息模板不存在', [
+					'business_type' => $this->business_type,
+					'business_no' => $this->business_no,
+					'scene' => $this->scene,
+				]);
+			}
+			// 通知
+			$alipay_message->alipay_notify();
+		}
+
+		return true;
+	}
+
+
 	/**
 	 * 根据场景获取短息
 	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage
@@ -139,6 +167,22 @@ class OrderNotice{
 //		}
 //		$short_message = new $arr[$this->scene]( );
 		
+		$className = '\App\Order\Modules\Repository\ShortMessage\\' . $this->scene;
+		if(!class_exists($className) ){
+			return false;
+		}
+		$short_message = new $className;
+		$short_message->setBusinessType( $this->business_type );
+		$short_message->setBusinessNo( $this->business_no );
+		return $short_message;
+	}
+
+	/**
+	 * 获取aplipay信息发送对象
+	 * @return \App\Order\Modules\Repository\ShortMessage\ShortMessage
+	 */
+	private function getAlipayMessage( ){
+
 		$className = '\App\Order\Modules\Repository\ShortMessage\\' . $this->scene;
 		if(!class_exists($className) ){
 			return false;

@@ -26,5 +26,10 @@ interface ShortMessage {
 	 * @return false
 	 */
 	public function notify();
-	
+
+	/**
+	 * 支付宝内部消息通知
+	 * @return false
+	 */
+	public function alipay_notify();
 }

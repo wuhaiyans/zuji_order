@@ -54,5 +54,9 @@ class ReturnDelivery implements ShortMessage {
             'serviceTel'=>Config::Customer_Service_Phone,
         ],$data['orderNo']);
 	}
-	
+
+	// 支付宝 短信通知
+	public function alipay_notify(){
+		return true;
+	}
 }

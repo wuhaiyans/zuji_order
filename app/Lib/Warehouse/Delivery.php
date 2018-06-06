@@ -229,9 +229,9 @@ class Delivery
      *
      *
      */
-    public static function delivery($order_no, $goods_info)
+    public static function delivery($orderDetail, $goods_info)
     {
-      $response =\App\Lib\Order\Delivery::delivery($order_no, $goods_info);
+      $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           throw new \Exception(ApiStatus::$errCodes[$response['code']]);

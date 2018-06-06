@@ -19,6 +19,19 @@ class SceneConfig {
 	 * 场景:<b>【分期扣款】</b>
 	 */
 	const INSTALMENT_WITHHOLD = 'InstalmentWithhold';
+    /**
+     * 场景:<b>【扣款失败】</b>
+     */
+    const WITHHOLD_FAIL = 'WithholdFail';
+    /**
+     * 场景:<b>【即将逾期】</b>
+     */
+    const WITHHOLD_WARMED = 'WithholdWarmed';
+    /**
+     * 场景:<b>【扣款失败生成逾期】</b>
+     */
+    const WITHHOLD_OVERDUE = 'WithholdOverdue';
+
 	/**
      * 场景：<b>【申请退货】</b>
      */

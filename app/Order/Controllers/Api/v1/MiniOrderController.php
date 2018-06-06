@@ -59,13 +59,12 @@ class MiniOrderController extends Controller
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
         $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
-        var_dump($goods_info);die;
-        if( $goods_info['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+        if( $goods_info[$params['sku_id']]['sku_info']['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+1).' month'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+1).' month'));
         }else{
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+30).' day'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+30).' day'));
         }
         $data = [
             'order_no' => $orderNo,
@@ -73,8 +72,7 @@ class MiniOrderController extends Controller
             'overdue_time' => $overdue_time
         ];
         //redis 存储数据
-        $values = Redis::command('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
-        var_dump($values);die;
+        $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
@@ -111,6 +109,7 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
+        $data = json_decode($data,true);
         $data['pay_type'] = \App\Order\Modules\Inc\PayInc::MiniAlipay;
         $data['sku'] = [
             'sku_id'=>$data['sku_id']
@@ -130,6 +129,9 @@ class MiniOrderController extends Controller
         }
         //添加逾期时间
         $miniData['overdue_time'] = $data['overdue_time'];
+        print_r($miniData);
+        print_r($params);
+        print_r($data);die;
         //查询成功记录表
         $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
         if( !$res ){

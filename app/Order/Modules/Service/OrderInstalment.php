@@ -3,12 +3,8 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
-use App\Order\Modules\Inc\OrderFreezeStatus;
-
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-use App\Order\Modules\Repository\OrderRepository;
 use App\Lib\ApiStatus;
-use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -255,24 +251,13 @@ class OrderInstalment
 
         $status = $instalment_info['status'];
 
-        $year   = date("Y");
-        $month  = intval(date("m"));
-        if($month < 10 ){
-            $month = "0".$month;
-        }
-        $term 	= $year.$month;
+        $term 	= date("Ym");
         $day 	= intval(date("d"));
-
-        //查询订单记录
-        $order_info = OrderRepository::getInfoById($instalment_info['order_no']);
 
         if($status == OrderInstalmentStatus::UNPAID || $status == OrderInstalmentStatus::FAIL){
             // 本月15后以后 可扣当月 之前没有扣款的可扣款
-            if(($term == $instalment_info['term'] && $day >= 15) || $term > $instalment_info['term']){
-                //判断订单状态 必须是租用中 或者完成关闭的状态 才允许扣款
-                if($order_info['order_status'] == OrderStatus::OrderInService && $order_info['freeze_type'] == OrderFreezeStatus::Non){
-                    $alllow = true;
-                }
+            if(($term == $instalment_info['term'] && $day >= $instalment_info['day']) || $term > $instalment_info['term']){
+                $alllow = true;
             }
         }
         return $alllow;
@@ -304,35 +289,30 @@ class OrderInstalment
      * @param string $trade_no	交易码
      * @return mixed  false：更新失败；int：受影响记录数
      */
-    public static function instalment_failed($fail_num,$instalment_id,$term,$data_sms){
+    public static function instalment_failed($fail_num,$instalment_id,$term){
 
-        $data_sms = filter_array($data_sms, [
-            'mobile' => 'required',
-            'orderNo' => 'required',
-            'realName' =>'required',
-            'goodsName' =>'required',
-            'zuJin' =>'required',
-        ]);
-        if( count($data_sms) != 5 ){
-            Log::error('短信参数错误');
+        //发送通知
+        if ($fail_num == 0) {
+            $model = 'WithholdFail';
+        } elseif ($fail_num > 0 && $term == date("Ym")) {
+            $model = 'WithholdWarmed';
+        } elseif ($fail_num > 0 && $term <= date("Ym") - 1) {
+            $model = 'WithholdOverdue';
+        }
+
+        // 查询分期信息
+        $instalmentInfo = \APp\Order\Modules\Service\OrderInstalment::queryByInstalmentId($instalment_id);
+        if( !is_array($instalmentInfo)){
+            // 提交事务
             return false;
         }
 
-        if ($fail_num == 0) {
-            $model = 'hsb_sms_99a6f';
-        } elseif ($fail_num > 0 && $term == date("Ym")) {
-            $model = 'hsb_sms_16f75';
-        } elseif ($fail_num > 0 && $term <= date("Ym") - 1) {
-            $model = 'hsb_sms_7326b';
-        }
-
-        SmsApi::sendMessage($data_sms['mobile'], $model, [
-            'realName'      => $data_sms['realName'],
-            'orderNo'       => $data_sms['orderNo'],
-            'goodsName'     => $data_sms['goodsName'],
-            'zuJin'         => $data_sms['zuJin'],
-            'serviceTel'    =>env("CUSTOMER_SERVICE_PHONE"),
-        ]);
+        // 发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(
+            OrderStatus::BUSINESS_FENQI,
+            $instalmentInfo['trade_no'],
+            $model);
+        $notice->notify();
 
         $fail_num = intval($fail_num) + 1;
 
