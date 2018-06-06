@@ -12,7 +12,9 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Lib\User\User;
 use App\Order\Models\OrderUserInfo;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
+use App\Order\Modules\Repository\OrderUserRiskRepository;
 use Mockery\Exception;
 
 class UserComponnet implements OrderCreater
@@ -152,25 +154,17 @@ class UserComponnet implements OrderCreater
     }
 
     /**
-     * 创建数据
+     * 创建用户认证数据
      * @return bool
      */
     public function create(): bool
     {
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
-        // 写入用户信息
-        $userData = [
+        $RiskData = [
             'order_no'=>$orderNo,
-            'user_id' =>$data['user']['user_id'],
-            'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
-            'name'=>$data['address']['name']?$data['address']['name']:"",
-            'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
-            'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
-            'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
-            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"",
             'certified'=>$data['user']['certified'],
-            'cretified_platform'=>$data['user']['certified_platform'],
+            'certified_platform'=>$data['user']['certified_platform'],
             'credit'=>$data['user']['credit'],
             'face'=>$data['user']['face'],
             'risk'=>$data['user']['risk'],
@@ -179,11 +173,9 @@ class UserComponnet implements OrderCreater
             'score'=>$this->score,
             'create_time'=>time(),
         ];
-        //var_dump($userData);die;
-        $userRepository = new OrderUserInfoRepository();
-        $user_id =$userRepository->add($userData);
-        if(!$user_id){
-            $this->getOrderCreater()->setError("保存用户信息失败");
+        $id = OrderUserCertifiedRepository::add($RiskData);
+        if(!$id){
+            $this->getOrderCreater()->setError("保存用户认证信息失败");
             return false;
         }
         return true;
