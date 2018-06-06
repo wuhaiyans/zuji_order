@@ -59,13 +59,12 @@ class MiniOrderController extends Controller
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
         $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
-        print_r($goods_info);die;
-        if( $goods_info[$params['sku_id']]['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+        if( $goods_info[$params['sku_id']]['sku_info']['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+1).' month'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+1).' month'));
         }else{
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info['zuqi'])+30).' day'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+30).' day'));
         }
         $data = [
             'order_no' => $orderNo,
