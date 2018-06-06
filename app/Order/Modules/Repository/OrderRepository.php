@@ -5,7 +5,7 @@ use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
 use App\Order\Models\OrderCoupon;
-use App\Order\Models\OrderGoodsExtend;
+use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
@@ -230,13 +230,13 @@ class OrderRepository
      * @return bool
      */
 
-    public static function getGoodsExtendInfo($orderNo){
+    public static function getGoodsDeliverInfo($orderNo){
         if (empty($orderNo)) return false;
-        $orderGoodExtendData =  OrderGoodsExtend::query()->where([
+        $orderGoodsDeliveryData =  OrderGoodsDelivery::query()->where([
             ['order_no', '=', $orderNo],
         ])->get();
-        if (!$orderGoodExtendData) return false;
-        return $orderGoodExtendData->toArray();
+        if (!$orderGoodsDeliveryData) return false;
+        return $orderGoodsDeliveryData->toArray();
     }
     /**
      *
@@ -363,11 +363,11 @@ class OrderRepository
         if (isset($param['order_no']) && !empty($param['order_no']))
         {
             $orderData = DB::table('order_info')
-                ->leftJoin('order_userinfo', function ($join) {
-                    $join->on('order_info.order_no', '=', 'order_userinfo.order_no');
+                ->leftJoin('order_user_address', function ($join) {
+                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 })
                 ->where('order_info.order_no', '=', $param['order_no'])
-                ->select('order_info.*','order_userinfo.*')
+                ->select('order_info.*','order_user_address.*')
                 ->first();
 
             return !empty($orderData)?objectToArray($orderData):false;
@@ -461,7 +461,7 @@ class OrderRepository
 
         //根据手机号
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_user_address.mobile', '=', $param['mobile']];
         }
 
         //应用来源ID
@@ -495,10 +495,10 @@ class OrderRepository
         }
         
         $orderList = DB::table('order_info')
-            ->leftJoin('order_userinfo', 'order_info.order_no', '=', 'order_userinfo.order_no')
+            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
             ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
             ->where($whereArray)
-            ->select('order_info.*','order_userinfo.*','order_info_visit.visit_id')
+            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
         return $orderList;
 

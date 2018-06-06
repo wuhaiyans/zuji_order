@@ -9,6 +9,8 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Repository\OrderUserAddressRepository;
+
 class AddressComponnet implements OrderCreater
 {
     //组件
@@ -72,24 +74,21 @@ class AddressComponnet implements OrderCreater
             return false;
         }
         $data =$this->getDataSchema();
-        $Data = [
+        $addressData = [
             'order_no'=>$data['order']['order_no'],
-            'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
+            'consignee_mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
             'name'=>$data['address']['name']?$data['address']['name']:"",
             'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
             'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
             'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
-            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"",
+            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"".$data['address']['address'],
             'create_time'=>time(),
         ];
-        //var_dump($userData);die;
-        $userRepository = new OrderUserInfoRepository();
-        $user_id =$userRepository->add($userData);
-        if(!$user_id){
-            $this->getOrderCreater()->setError("保存用户信息失败");
+        $id =OrderUserAddressRepository::add($addressData);
+        if(!$id){
+            $this->getOrderCreater()->setError("保存用户地址信息失败");
             return false;
         }
-        return true;
         return true;
     }
 }

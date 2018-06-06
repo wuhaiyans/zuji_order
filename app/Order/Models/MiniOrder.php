@@ -37,12 +37,13 @@ class MiniOrder extends Model
         'house',
         'zm_grade',
         'credit_amount',
-        'zm_score',
         'zm_risk',
         'zm_face',
         'create_time',
         'user_id',
         'channel_id',
+        'overdue_time',
+        'app_id',
     ];
 
 

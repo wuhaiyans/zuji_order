@@ -156,7 +156,7 @@ class ReletRepository
      * @param $params
      * @return bool
      */
-    public function createRelet($data){
+    public static function createRelet($data){
         return OrderRelet::insert($data);
     }
 

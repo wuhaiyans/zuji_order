@@ -26,8 +26,6 @@ class BaseApi {
 	protected $Aop = NULL;
 
 	public function __construct($appid) {
-		echo 11;die;
-
 		$config_file = __DIR__ . '/' . $appid . '-config.php';
 		if (!file_exists($config_file) && !is_readable($config_file)) {
 			throw new \Exception('支付宝应用配置未找到:' . $config_file);

@@ -3,8 +3,11 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
+use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
+use App\Order\Models\OrderUserAddress;
 use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
@@ -202,6 +205,7 @@ class OrderController extends Controller
             $orderData = Service\OrderOperate::getOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
+
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 
@@ -216,21 +220,42 @@ class OrderController extends Controller
 
 
 
-    public function orderListExport() {
+    public function orderListExport(Request $request) {
+
+        $params = $request->input('params');
+
+        $orderData = Service\OrderOperate::getOrderList($params);
+
+        if ($orderData['code']===ApiStatus::CODE_0) {
+
+            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
+                '订单实际总租金','订单总押金','意外险总金额'];
+
+            foreach ($orderData['data']['data'] as $item) {
+                $data[] = [
+                    $item['order_no'],
+                    date('Y-m-d H:i:s', $item['create_time']),
+                    $item['order_status_name'],
+                    $item['appid_name'],
+                    $item['pay_type_name'],
+                    $item['visit_name'],
+                    $item['name'],
+                    $item['mobile'],
+                    $item['address_info'],
+                    implode(",",array_column($item['goodsInfo'],"goods_name")),
+                    $item['order_amount'],
+                    $item['order_yajin'],
+                    $item['order_insurance'],
+                ];
+            }
 
 
-        header("Content-type:text/html;charset=utf-8");
-        header("Content-Type:application/vnd.ms-excel");
-        header("Content-Disposition:attachment;filename=test.xlsx");
-        ob_end_clean();
-//        header('Cache-Control: max-age=0');//禁止缓存
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Hello World !');
+            return Excel::write($data, $headers,'后台订单列表数据导出');
+//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+        } else {
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        //                $writer->save('hello world.xlsx');
-        $writer->save('php://output');
+            return apiResponse([],ApiStatus::CODE_33001);
+        }
 
     }
 
@@ -288,7 +313,12 @@ class OrderController extends Controller
 
     /**
      *  发货接口
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
@@ -307,13 +337,13 @@ class OrderController extends Controller
         $params =$request->all();
 
         $params =$params['params'];
-        if(empty($params['order_no'])){
+        if(count($params['order_info']) <3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
@@ -517,7 +547,7 @@ class OrderController extends Controller
         }
 
 
-        $succss = OrderUserInfoRepository::modifyAddress($validateParams['data']);
+        $succss = OrderUserAddressRepository::modifyAddress($validateParams['data']);
         if(!$succss){
             return apiResponse([],ApiStatus::CODE_30013);
         }

@@ -1,16 +1,16 @@
 <?php
 namespace App\Order\Modules\Repository;
 
-use App\Order\Models\OrderInstalment;
+use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
 
-class OrderInstalmentRepository
+class OrderGoodsInstalmentRepository
 {
-    private $OrderInstalment;
+    private $OrderGoodsInstalment;
 
     private $componnet = null;
 
@@ -42,7 +42,7 @@ class OrderInstalmentRepository
     private $user_id = 0;
 
     public function __construct($componnet) {
-        $this->OrderInstalment = new OrderInstalment();
+        $this->OrderGoodsInstalment = new OrderGoodsInstalment();
         $this->componnet = $componnet;
         $this->instalment_init();
     }
@@ -137,7 +137,7 @@ class OrderInstalmentRepository
      */
     public static function getInfoById($id){
         if (empty($id)) return false;
-        $result =  OrderInstalment::query()->where([
+        $result =  OrderGoodsInstalment::query()->where([
             ['id', '=', $id],
         ])->first();
         if (!$result) return false;
@@ -149,7 +149,7 @@ class OrderInstalmentRepository
      */
     public static function getInfo($params){
         if (empty($params)) return false;
-        $result =  OrderInstalment::query()->where($params)->first();
+        $result =  OrderGoodsInstalment::query()->where($params)->first();
         if (!$result) return false;
         return $result->toArray();
     }
@@ -158,7 +158,7 @@ class OrderInstalmentRepository
      */
     public static function getSumAmount($params){
         if (empty($params)) return false;
-        $result =  OrderInstalment::query()->where($params)->sum("amount");
+        $result =  OrderGoodsInstalment::query()->where($params)->sum("amount");
         if (!$result) return false;
         return $result;
     }
@@ -169,32 +169,31 @@ class OrderInstalmentRepository
         $whereArray = [];
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
-            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+            $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
         }
 
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
-            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+            $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
         //根据用户mobile
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
-        $result = OrderInstalment::query()->where($whereArray)
-            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
-            ->select('order_userinfo.user_id','order_instalment.*')
-            ->distinct()
+        $result = OrderGoodsInstalment::query()->where($whereArray)
+            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
+            ->select('order_info.user_id','order_goods_instalment.*')
             ->get();
         return count($result);
     }
@@ -209,38 +208,36 @@ class OrderInstalmentRepository
         $whereArray = [];
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
-            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+            $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
         }
 
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
-            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+            $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
         //根据用户mobile
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        $result =  OrderInstalment::query()
-            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
+        $result =  OrderGoodsInstalment::query()
+            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
             ->where($whereArray)
-            ->select('order_userinfo.user_id','order_instalment.*','order_userinfo.mobile')
+            ->select('order_info.user_id','order_goods_instalment.*','order_info.mobile')
             ->offset($offset)
             ->limit($pageSize)
-            ->distinct()
             ->get();
-
         if (!$result) return false;
         return $result->toArray();
     }
@@ -270,7 +267,7 @@ class OrderInstalmentRepository
         }
 
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
-        $result =  OrderInstalment::where($where)->update($status);
+        $result =  OrderGoodsInstalment::where($where)->update($status);
         if (!$result) return false;
 
         return true;
@@ -293,7 +290,7 @@ class OrderInstalmentRepository
         $data = [
             'trade_no'=>$trade_no
         ];
-        $result =  OrderInstalment::where(
+        $result =  OrderGoodsInstalment::where(
             ['id'=>$id]
         )->update($data);
 
@@ -327,8 +324,6 @@ class OrderInstalmentRepository
         $date  = $this->get_terms($this->zuqi);
         // 默认分期
         for($i = 1; $i <= $this->zuqi; $i++){
-            //业务编号
-            $_data['trade_no']        = createNo();
             //用户id
             $_data['user_id']         = $this->user_id;
             //商品编号
@@ -341,6 +336,9 @@ class OrderInstalmentRepository
             $_data['day']             = intval(date('d'));
             //第几期
             $_data['times']           = $i;
+            //原始金额
+            $_data['original_amount'] = $this->zujin;
+
             if($i==1){
                 //首期应付金额（分）
                 $_data['amount']          = $this->first_amount;
@@ -357,7 +355,7 @@ class OrderInstalmentRepository
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
 
-            $ret = $this->OrderInstalment->insertGetId($_data);
+            $ret = $this->OrderGoodsInstalment->insertGetId($_data);
             if(!$ret){
                 return false;
             }
@@ -390,6 +388,8 @@ class OrderInstalmentRepository
             $_data['day']             = intval(date('d'));
             //第几期
             $_data['times']           = $i;
+            //原始金额
+            $_data['original_amount'] = $this->zujin;
 
             if($discount_amount > $this->fenqi_amount){
                 $discount_amount            = $discount_amount - $this->fenqi_amount;
@@ -408,7 +408,7 @@ class OrderInstalmentRepository
             $_data['unfreeze_status'] = 2;
             //支付状态 金额为0则为支付成功状态
             $_data['status']          = $_data['amount'] > 0 ? OrderInstalmentStatus::UNPAID : OrderInstalmentStatus::SUCCESS;
-            $ret = $this->OrderInstalment->insertGetId($_data);
+            $ret = $this->OrderGoodsInstalment->insertGetId($_data);
 
             if(!$ret){
                 return false;
@@ -466,7 +466,7 @@ class OrderInstalmentRepository
             return false;
         }
 
-        $result =  OrderInstalment::where($where)->update($data);
+        $result =  OrderGoodsInstalment::where($where)->update($data);
         if (!$result) return false;
 
         return true;

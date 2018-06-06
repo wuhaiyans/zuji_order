@@ -10,6 +10,7 @@ namespace App\Warehouse\Modules\Service;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 use Dotenv\Exception\InvalidFileException;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Illuminate\Support\Facades\Storage;
 
@@ -49,10 +50,12 @@ class ImeiService
         $items = $collect->items();
 
         if (!$items) {
-            return [];
+            return [
+                'data'=>[], 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()
+            ];
         }
 
-        return ['data'=>$items, 'size'=>$limit, 'page'=>$page];
+        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()];
     }
 
 
@@ -95,6 +98,11 @@ class ImeiService
     public static function upload()
     {
         $request = request();
+
+
+        Log::error($request->input());
+        Log::error($_FILES);
+
 
         if (!$request->isMethod('post')) {
             throw new MethodNotAllowedHttpException('请使用post方法上传文件');
