@@ -262,6 +262,15 @@ function createNo($noType=1){
 }
 
 /**
+ * 生成 退货编号
+ * @return string
+ */
+function create_return_no(){
+    return 'P'.createNo(2);
+}
+
+
+/**
  * 生成 支付单
  * @return string
  */
