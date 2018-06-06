@@ -57,5 +57,10 @@ class ReturnCheckOut implements ShortMessage {
             'serviceTel'=>config('tripartite.Customer_Service_Phone'),
         ],$this->business_no);
 	}
-	
+
+
+	// 支付宝 短信通知
+	public function alipay_notify(){
+		return true;
+	}
 }

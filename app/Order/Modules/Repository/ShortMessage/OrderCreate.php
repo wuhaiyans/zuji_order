@@ -57,7 +57,10 @@ class OrderCreate implements ShortMessage {
 		]);
 	}
 
-
+	// 支付宝 短信通知
+	public function alipay_notify(){
+		return true;
+	}
 //	public function notify($data=[]){
 //		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
 //		var_dump($result);exit;
