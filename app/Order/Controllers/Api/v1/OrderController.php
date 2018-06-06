@@ -311,7 +311,12 @@ class OrderController extends Controller
 
     /**
      *  发货接口
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
@@ -330,13 +335,13 @@ class OrderController extends Controller
         $params =$request->all();
 
         $params =$params['params'];
-        if(empty($params['order_no'])){
+        if(count($params['order_info']) <3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_no'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }

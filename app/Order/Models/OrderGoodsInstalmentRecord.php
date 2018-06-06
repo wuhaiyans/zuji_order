@@ -8,7 +8,7 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderGoodsInstalment extends Model
+class OrderGoodsInstalmentRecord extends Model
 {
 
     protected $table = 'order_goods_instalment_record';

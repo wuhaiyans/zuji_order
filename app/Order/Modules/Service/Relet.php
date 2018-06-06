@@ -136,7 +136,7 @@ class Relet
                     'status'=>ReletStatus::STATUS1,
                 ];
 
-                if($this->reletRepository->createRelet($data)){
+                if(ReletRepository::createRelet($data)){
                     //修改设备状态 续租中
                     $rse = OrderGoods::where('id',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
                     if( !$rse ){

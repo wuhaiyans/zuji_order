@@ -367,7 +367,6 @@ class SkuComponnet implements OrderCreater
                         return false;
                     }
                 }
-
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
                     $this->getOrderCreater()->setError("保存商品信息失败");

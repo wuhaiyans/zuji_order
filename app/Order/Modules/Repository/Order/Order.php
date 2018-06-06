@@ -233,7 +233,7 @@ class Order {
      * @return bool
      */
     public function deliveryOpen(string $remark):bool{
-        if($this->model->order_status!=OrderStatus::OrderPayed){
+        if($this->model->order_status!=OrderStatus::OrderPayed && $this->model->freeze_type == OrderFreezeStatus::Non){
             return false;
         }
         $this->model->order_status =OrderStatus::OrderInStock;
@@ -254,7 +254,11 @@ class Order {
 	 * @return bool
 	 */
 	public function deliveryFinish( ):bool{
-		$this->model->order_status = OrderStatus::OrderDeliveryed; 
+        if($this->model->order_status!=OrderStatus::OrderInStock && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+		$this->model->order_status = OrderStatus::OrderDeliveryed;
+		$this->model->delivery_time = time();
 		return $this->model->save();
 	}
 	/**
@@ -428,12 +432,22 @@ class Order {
     }
 
     /**
-     * 订单续租开始
+     * 订单续租关闭
      *
      * 1.验证订单是否冻结
      * 2.解冻订单
      */
     public function reletClose(){
+        $this->data;
+    }
+
+    /**
+     * 订单续租完成
+     *
+     * 1.验证订单是否冻结
+     * 2.解冻订单
+     */
+    public function reletFinish(){
         $this->data;
     }
 
