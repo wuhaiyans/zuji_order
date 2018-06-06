@@ -4,7 +4,6 @@
 			'zuqi' => 12,
 			'insurance' => 99,
 		];
-
 		// 商品优惠金额
 		$discount_amount = 100;
 		
@@ -26,20 +25,15 @@
 		$discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter( $discount_amount );
 		$computer->addDiscounter( $discounter_serialize );
 		
-		
 		$computer->setBeginTime( strtotime('2018-02-29') );
 		
 		$fenqi_list = $computer->compute();
 		var_dump( $fenqi_list );exit;
-
 使用规则：
-
 1）
 	获取商品的分期相关数据： zujin：每期租金， zuqi：租期， zuqi_type：租期类型（天，月）, insurance：保险
 	获取商品的  discount_amount:优惠金额， 优惠计算方式
-
 2）更具 zuqi_type 选择合适的 分期计算器（MonthComputer：月租，DayComputer：日租）
-
 3）更具 优惠计算方式 选择合适的 优惠计算器
 	SimpleDiscounter：简单优惠计算器，将优惠金额平均分配到每一期
 	FirstDiscounter：首期优惠计算器，只在第一期的租金上优惠指定的金额
