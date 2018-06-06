@@ -257,8 +257,14 @@ class DeliveryController extends Controller
             $this->delivery->send($params);
             $result = $this->_info($params['delivery_no']);
 
+            $orderDetail = [
+                'order_no' => $result['order_no'],
+                'logistics_id' => $params['logistics_id'],
+                'logistics_no' => $params['logistics_no'],
+            ];
+
             //通知订单接口
-            \App\Lib\Warehouse\Delivery::delivery($result['order_no'], $result['goods_info']);
+            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info']);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
