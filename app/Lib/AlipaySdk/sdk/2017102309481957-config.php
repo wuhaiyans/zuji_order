@@ -23,4 +23,6 @@ return array(
     
     // 允许的支付方式：(balance：余额；moneyFund：余额宝；pcredit：花呗；pcreditpayInstallment：花呗分期；creditCard：信用卡；debitCardExpress：借记卡快捷)
     'enable_pay_channels' => 'balance,moneyFund,pcredit,pcreditpayInstallment,creditCard,debitCardExpress',
+    // debug输出开启
+    'debug_info' => true,
 );
