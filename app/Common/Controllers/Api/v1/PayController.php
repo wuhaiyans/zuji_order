@@ -26,7 +26,7 @@ class PayController extends Controller
 		
 		$params = [
 			'zujin' => 100,
-			'zuqi' => 12,
+			'zuqi' => 3,
 			'insurance' => 99,
 		];
 //		var_dump( $params );
@@ -38,17 +38,17 @@ class PayController extends Controller
 		// 日租，分期计算器
 //		$computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $params );
 		
-//		// 平均优惠
-//		$discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( 100 );
-//		$computer->addDiscounter( $discounter_simple );
+		// 平均优惠
+		$discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( 100 );
+		$computer->addDiscounter( $discounter_simple );
 		
-		// 首月优惠
-		$discounter_first = new \App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter( 300 );
-		$computer->addDiscounter( $discounter_first );
-//		
-		// 分期顺序优惠
-		$discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter( 199 );
-		$computer->addDiscounter( $discounter_serialize );
+//		// 首月优惠
+//		$discounter_first = new \App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter( 300 );
+//		$computer->addDiscounter( $discounter_first );
+////		
+//		// 分期顺序优惠
+//		$discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter( 199 );
+//		$computer->addDiscounter( $discounter_serialize );
 		
 		
 		$computer->setBeginTime( strtotime('2018-02-29') );
