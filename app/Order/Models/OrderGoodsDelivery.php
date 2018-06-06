@@ -8,10 +8,10 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderGoodsExtend extends Model
+class OrderGoodsDelivery extends Model
 {
 
-    protected $table = 'order_goods_extend';
+    protected $table = 'order_goods_delivery';
 
     protected $primaryKey='id';
 
