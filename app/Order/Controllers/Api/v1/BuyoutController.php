@@ -13,7 +13,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
-use App\Order\Modules\Repository\OrderUserInfoRepository;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -72,11 +72,7 @@ class BuyoutController extends Controller
                 $where['goods_name'] = $params['keywords'];
             }
             elseif($params['kw_type'] == 3){
-                $user = OrderUserInfoRepository::getUser($params['keywords']);
-                if(!$user){
-                    return apiResponse([],ApiStatus::CODE_0);
-                }
-                $where['user_id'] = $user['user_id'];
+                $where['mobile'] = $params['keywords'];
             }
             else{
                 $where['order_no'] = $params['keywords'];
@@ -105,7 +101,7 @@ class BuyoutController extends Controller
         $goodsList= OrderGoodsRepository::getGoodsColumn($goodsNos);
         //获取订单用户信息
         $orderNos = array_column($orderList['data'],"order_no");
-        $userList = OrderUserInfoRepository::getUserColumn($orderNos);
+        $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
 
         foreach($orderList['data'] as &$item){
             $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
