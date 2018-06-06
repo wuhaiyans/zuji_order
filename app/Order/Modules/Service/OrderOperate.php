@@ -222,10 +222,9 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            $orderinfo =$order->getData();
-
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+            var_dump($orderInfo);die;
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
