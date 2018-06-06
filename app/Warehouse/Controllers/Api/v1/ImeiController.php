@@ -141,10 +141,6 @@ class ImeiController extends Controller
         unset($data[1]);//第一行文档名
         unset($data[2]);//第二行标题
 
-
-
-        p($data);die;
-
         if (count($data) == 0) {
             return ;
         }
