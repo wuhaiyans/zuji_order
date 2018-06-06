@@ -359,6 +359,7 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据表
         $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
+
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
@@ -447,6 +448,7 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderList = OrderRepository::getOrderList($param);
+
         $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
@@ -477,9 +479,11 @@ class OrderOperate
                 $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
 
+
             }
 
         }
+
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
 
