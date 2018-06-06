@@ -119,6 +119,8 @@ class MiniOrderController extends Controller
         $miniParams = [
             'transaction_id'=>$transactionNo,
             'order_no'=>$params['zm_order_no'],
+            'out_order_no'=>$params['out_order_no'],
+            'overdue_time'=>$data['overdue_time'],
         ];
         $b = $miniApi->orderConfirm($miniParams);
         if($b === false){
@@ -127,12 +129,6 @@ class MiniOrderController extends Controller
         }
         $miniData = $miniApi->getResult();
         //添加逾期时间
-        $miniData['overdue_time'] = $data['overdue_time'];
-        //查询成功记录表
-        $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
-        if( !$res ){
-            \App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
-        }
         print_r($miniData);
         print_r($params);
         print_r($data);
