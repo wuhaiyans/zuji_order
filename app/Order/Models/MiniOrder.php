@@ -43,6 +43,8 @@ class MiniOrder extends Model
         'create_time',
         'user_id',
         'channel_id',
+        'overdue_time',
+        'create_time',
     ];
 
 

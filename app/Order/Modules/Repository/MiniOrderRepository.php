@@ -19,7 +19,25 @@ class MiniOrderRepository
      * @return $last_id
      */
     public static function add($data){
-        $info =MiniOrder::create($data);
+        $arr = [
+            'order_no'=>$data['out_order_no'],
+            'zm_order_no'=>$data['order_no'],
+            'transaction_id'=>$data['transaction_id'],
+            'cert_no'=>$data['cert_no'],
+            'mobile'=>$data['mobile'],
+            'house'=>$data['house'],
+            'zm_grade'=>$data['zm_grade'],
+            'credit_amount'=>$data['credit_amount'],
+            'zm_score'=>$data['zm_score'],
+            'zm_risk'=>$data['zm_risk'],
+            'zm_face'=>$data['zm_face'],
+            'app_id'=>$data['appid'],
+            'channel_id'=>$data['channel_id'],
+            'user_id'=>$data['user_id'],
+            'overdue_time'=>$data['overdue_time'],
+            'create_time'=>time(),
+        ];
+        $info =MiniOrder::create($arr);
         return $info->getQueueableId();
     }
 

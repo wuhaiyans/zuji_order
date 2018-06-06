@@ -14,6 +14,7 @@ require_once __DIR__ . '/aop/request/ZhimaMerchantOrderCreditPayRequest.php';
 class CommonMiniApi extends BaseApi {
 
 	public function __construct($appid) {
+		$this->appid = $appid;
 		parent::__construct($appid);
 	}
 
@@ -110,10 +111,12 @@ class CommonMiniApi extends BaseApi {
 			$this->error = $this->getError();
 			return false;
 		}
+		$params['appid'] = $this->appid;
 		$debug_data = [
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
 		];
+
 		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
 		$this->result = [
 			'name'=>'张三',
@@ -127,6 +130,11 @@ class CommonMiniApi extends BaseApi {
 			'zm_risk'=>'Y',
 			'zm_face'=>'Y',
 		];
+		//查询成功记录表
+		$res = \App\Order\Modules\Repository\MiniOrderRepository::add(array_merge($params,$this->result));
+		if( !$res ){
+			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
+		}
 		return true;
 		if( !isset($result['zhima_merchant_order_confirm_response']) ){
 			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
@@ -138,6 +146,7 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
 			return false;
 		}
+
 		$this->result = $result;
 		return true;
 	}
