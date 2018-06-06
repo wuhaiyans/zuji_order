@@ -8,7 +8,7 @@ use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
 
-class OrderInstalmentRepository
+class OrderGoodsInstalmentRepository
 {
     private $OrderGoodsInstalment;
 
@@ -169,32 +169,31 @@ class OrderInstalmentRepository
         $whereArray = [];
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
-            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+            $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
         }
 
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
-            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+            $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
         //根据用户mobile
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
         $result = OrderGoodsInstalment::query()->where($whereArray)
-            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
-            ->select('order_userinfo.user_id','order_instalment.*')
-            ->distinct()
+            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
+            ->select('order_info.user_id','order_goods_instalment.*')
             ->get();
         return count($result);
     }
@@ -209,38 +208,36 @@ class OrderInstalmentRepository
         $whereArray = [];
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
-            $whereArray[] = ['order_instalment.goods_no', '=', $param['goods_no']];
+            $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_instalment.order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
         }
 
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_instalment.status', '=', $param['status']];
+            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
-            $whereArray[] = ['order_instalment.term', '=', $param['term']];
+            $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
         //根据用户mobile
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_userinfo.mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
         $result =  OrderGoodsInstalment::query()
-            ->leftJoin('order_userinfo', 'order_instalment.user_id', '=', 'order_userinfo.user_id')
+            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
             ->where($whereArray)
-            ->select('order_userinfo.user_id','order_instalment.*','order_userinfo.mobile')
+            ->select('order_info.user_id','order_goods_instalment.*','order_info.mobile')
             ->offset($offset)
             ->limit($pageSize)
-            ->distinct()
             ->get();
-
         if (!$result) return false;
         return $result->toArray();
     }

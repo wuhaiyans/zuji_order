@@ -3,7 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
-use App\Order\Modules\Repository\OrderInstalmentRepository;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -81,7 +81,7 @@ class OrderInstalment
             return false;
         }
 
-        $res = new OrderInstalmentRepository($params);
+        $res = new OrderGoodsInstalmentRepository($params);
         return $res->create();
 
     }
@@ -144,7 +144,7 @@ class OrderInstalment
             return false;
         }
 
-        $res = new OrderInstalmentRepository($params);
+        $res = new OrderGoodsInstalmentRepository($params);
         return $res->get_data_schema();
 
 
@@ -160,7 +160,7 @@ class OrderInstalment
             return ApiStatus::CODE_20001;
         }
 
-        $result =  OrderInstalmentRepository::getInfo($params);
+        $result =  OrderGoodsInstalmentRepository::getInfo($params);
         if(!$result){
             return ApiStatus::CODE_71001;
         }
@@ -176,7 +176,7 @@ class OrderInstalment
             return ApiStatus::CODE_20001;
         }
 
-        $result =  OrderInstalmentRepository::getInfoById($id);
+        $result =  OrderGoodsInstalmentRepository::getInfoById($id);
         if(!$result){
             return ApiStatus::CODE_71001;
         }
@@ -206,12 +206,12 @@ class OrderInstalment
             'limit'  =>'required',
         ]);
 
-        $total = OrderInstalmentRepository::queryCount($params);
+        $total = OrderGoodsInstalmentRepository::queryCount($params);
         if($total == 0){
             return [];
         }
 
-        $result =  OrderInstalmentRepository::queryList($params, $additional);
+        $result =  OrderGoodsInstalmentRepository::queryList($params, $additional);
         $result = array_group_by($result,'goods_no');
         $result['total'] = $total;
 
@@ -233,7 +233,7 @@ class OrderInstalment
         if (!is_array($data) || $data == [] ) {
             return false;
         }
-        $result =  OrderInstalmentRepository::closeInstalment($data);
+        $result =  OrderGoodsInstalmentRepository::closeInstalment($data);
         return $result;
     }
 
@@ -247,7 +247,7 @@ class OrderInstalment
             return false;
         }
         $alllow = false;
-        $instalment_info = OrderInstalmentRepository::getInfoById($instalment_id);
+        $instalment_info = OrderGoodsInstalmentRepository::getInfoById($instalment_id);
 
         $status = $instalment_info['status'];
 
@@ -279,7 +279,7 @@ class OrderInstalment
             return ApiStatus::CODE_20001;
         }
 
-        return OrderInstalmentRepository::setTradeNo($id, $trade_no);
+        return OrderGoodsInstalmentRepository::setTradeNo($id, $trade_no);
 
     }
 
@@ -317,7 +317,7 @@ class OrderInstalment
         $fail_num = intval($fail_num) + 1;
 
         //修改失败次数
-        $b = OrderInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num]);
+        $b = OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num]);
         Log::error('更新失败次数失败');
         return $b;
     }
@@ -333,7 +333,7 @@ class OrderInstalment
         if (!is_array($params) || $data == [] ) {
             return false;
         }
-        $result =  OrderInstalmentRepository::save($params, $data);
+        $result =  OrderGoodsInstalmentRepository::save($params, $data);
         return $result;
     }
 
@@ -349,7 +349,7 @@ class OrderInstalment
         $where = [
             'goods_no' => $goods_no,
         ];
-        $result =  OrderInstalmentRepository::save($where, ['unfreeze_status'=>0,'status'=>OrderInstalmentStatus::CANCEL]);
+        $result =  OrderGoodsInstalmentRepository::save($where, ['unfreeze_status'=>0,'status'=>OrderInstalmentStatus::CANCEL]);
         return $result;
     }
 
