@@ -164,7 +164,6 @@ class UserComponnet implements OrderCreater
             'order_no'=>$orderNo,
             'user_id' =>$data['user']['user_id'],
             'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
-            'user_mobile' =>$data['user']['user_mobile'],
             'name'=>$data['address']['name']?$data['address']['name']:"",
             'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
             'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",

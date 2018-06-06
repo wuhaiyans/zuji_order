@@ -18,6 +18,12 @@ class OrderRiskRepository
     }
 
 
+    /**
+     * 获取风控信息接口
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
     public static function getRisknfoByOrderNo($orderNo)
     {
         if (empty($orderNo)) return false;

@@ -254,21 +254,18 @@ class ReturnController extends Controller
      * 取消退货申请
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|string
+     * 'id'=>['111','222'] 退货单id
+     * user_id
      */
     public function cancelApply(Request $request)
     {
         $orders = $request->all();
         $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no' => 'required',
-            'user_id'  => 'required',
-        ]);
-
-        if(count($param)<2){
-            return  ApiStatus::CODE_20001;
+        if(empty($params['id'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
         }
-        if(empty($params['goods_no'])){
-            return ApiStatus::CODE_20001;
+        if(empty($params['user_id'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
         }
         $ret = $this->OrderReturnCreater->cancel_apply($params);
         return apiResponse( [], $ret);

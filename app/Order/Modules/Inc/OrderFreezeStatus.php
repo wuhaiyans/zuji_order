@@ -15,7 +15,7 @@ class OrderFreezeStatus{
     /**
      * @var int 退款
      */
-    const Refund = 1;
+    const GoodsReturn = 1;
     /**
      * @var int 还货
      */
@@ -32,10 +32,6 @@ class OrderFreezeStatus{
      * @var int 续租
      */
     const Renewal = 5;
-    /**
-     * @var int 退货
-     */
-    const GoodsReturn = 6;
 
 
     //--------------------------------------------------------------------------------------------
