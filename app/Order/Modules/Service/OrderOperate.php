@@ -219,7 +219,7 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            $order->getData();
+            $orderinfo =$order->getData();
 
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
