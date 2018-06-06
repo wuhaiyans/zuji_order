@@ -20,7 +20,7 @@ class OrderReturnRepository
     }
 
     /**
-     * 获取退货单信息
+     * 获取退货单信息,根据退货单id
      * @param $params
      *
      */
@@ -29,6 +29,19 @@ class OrderReturnRepository
         $res=orderReturn::where($where)->first();
         if(!$res){
            return false;
+        }
+        return $res->toArray();
+    }
+    /**
+     * 获取退货单信息,根据退货单refund_no
+     * @param $params
+     *
+     */
+    public static function getReturnInfoByRefundNo($refund_no){
+        $where[]=['refund_no','=',$refund_no];
+        $res=orderReturn::where($where)->first();
+        if(!$res){
+            return false;
         }
         return $res->toArray();
     }

@@ -63,18 +63,13 @@ class Goods {
      * @return bool
      */
     public function returnOpen( ):bool{
-        //
+        //商品必须为租用中
         if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
             return false;
         }
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
-
-        // 获取订单
-        $order = $this->getOrder( );
-        // 订单冻结 退货中
-        return $order->returnOpen();
     }
     /**
      * 取消退货

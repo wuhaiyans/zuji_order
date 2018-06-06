@@ -9,16 +9,23 @@ use App\Order\Modules\Inc\ReturnStatus;
  */
 class GoodsReturn {
 
-    protected $data;
+    protected $OrderReturn;
 
-    public function __construct($data)
+    public function __construct(OrderReturn $OrderReturn)
     {
-        $this->data = $data;
+        $this->model = $OrderReturn;
     }
 
     //-+------------------------------------------------------------------------
     // | 退货
     //-+------------------------------------------------------------------------
+    /**
+     * 读取退换货单原始数据
+     * @return array
+     */
+    public function getData():array{
+        return $this->model->toArray();
+    }
     /**
      * 取消退货
      * @return bool
@@ -130,6 +137,27 @@ class GoodsReturn {
      */
     public function barterFinish( ):bool{
         return true;
+    }
+    /**
+     * 获取订单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $refund_no		退换货编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnByRefundNo( string $refund_no, int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['refund_no', '=', $refund_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            throw new \App\Lib\NotFoundException('退换货单未找到');
+        }
+        return new self( $order_info );
     }
 
 

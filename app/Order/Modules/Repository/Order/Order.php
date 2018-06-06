@@ -228,14 +228,19 @@ class Order {
 	// | 发货
 	//-+------------------------------------------------------------------------
     /**
-	 * 【去确认：申请发货和确认订单 是一个还是两个操作】
-     * 申请发货
+     *  申请发货
+	 * 【申请发货和确认订单 是一个操作】
      * @return bool
      */
-//    public function deliveryOpen():bool{
-//		$this->model->order_status = OrderStatus::OrderPaying; 
-//		return $this->model->save();
-//    }
+    public function deliveryOpen(string $remark):bool{
+        if($this->model->order_status!=OrderStatus::OrderPayed){
+            return false;
+        }
+        $this->model->order_status =OrderStatus::OrderInStock;
+        $this->model->confirm_time =time();
+        $this->model->remark =$remark;
+        return $this->model->save();
+    }
 	/**
 	 * 取消发货，状态切回到 已支付，待确认
 	 * @return bool
@@ -299,7 +304,7 @@ class Order {
      * @return bool
      */
     public function returnOpen( ):bool{
-        //
+        //订单必须是租用中
         if( $this->model->freeze_type !=0 ){
             return false;
         }
@@ -340,7 +345,12 @@ class Order {
      * 申请换货
      */
     public function barterOpen( ):bool{
-        return true;
+        //订单必须是租用中
+        if( $this->model->freeze_type !=0 ){
+            return false;
+        }
+        $this->model->freeze_type = OrderFreezeStatus::Exchange;
+        return $this->model->save();
     }
     /**
      * @return bool

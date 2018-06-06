@@ -20,26 +20,27 @@ class ReturnController extends Controller
     }
     /*
      * 用户收到货退货时调用
-     *order_no订单编号   必选
-     * user_id用户id     必选
-     * business_key业务类型  必选
-     * loss_type商品损耗    必选
-     * reason_id退货原因id   必选
-     * reason_text退货原因   可选
-     * goods_no=array('12312300','23123123')商品编号 必选
+     * 申请退货
+     * @param array $params 业务参数
+     * [
+     *      user_id用户id     必选
+     *      business_key业务类型  必选
+     *      loss_type商品损耗    必选
+     *      reason_id退货原因id   必选
+     *      reason_text退货原因   可选
+     *      'goods_no'=>[]商品编号 必选
+     * ]
      */
-    // 申请退换货接口
     public function returnApply(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
         $data= filter_array($params,[
-            'order_no'=>'required',
             'user_id'=>'required',
             'business_key'=>'required',
             'loss_type'=>'required',
         ]);
-        if(count($data)< 4){
+        if(count($data)<3){
             return ApiStatus::CODE_20001;
         }
         if(empty($params['goods_no'])){
@@ -57,8 +58,11 @@ class ReturnController extends Controller
         }
 
         $return = $this->OrderReturnCreater->add($params);
-        return apiResponse([],$return);
-
+        p($return);
+        if(!$return){
+            return apiResponse([],ApiStatus::CODE_34007,"创建失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
     /*
      *

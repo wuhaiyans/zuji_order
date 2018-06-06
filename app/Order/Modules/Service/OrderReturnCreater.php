@@ -37,82 +37,93 @@ class OrderReturnCreater
      * 申请退货
      * @param array $params 业务参数
      * [
-     *      'goods_no'      => [],   // 【必选】array 商品编号数组
-     *      'business_key'  => '',
-     *      'loss_type'     => '',
-     *      'reason_id'     => '',
-     *      'reason_text'   => '',
-     *      'user_id'   => '',
+     *       'order_no'      => '',   【必选】 商品编号
+     *      'goods_no'      => [],   【必选】array 商品编号数组
+     *      'business_key'  => '',   【必选】业务类型
+     *      'loss_type'     => '',   【必选】商品损耗
+     *      'reason_id'     => '',   【必选】退货原因id
+     *      'reason_text'   => '',   【可选】退货原因备注
+     *      'user_id'   => '',       【必选】用户id
      * ]
      * @return bool true：退货成功；false：退货失败
      */
     public function add(array $params){
-
         //开启事务
         DB::beginTransaction();
-
         try{
             $no_list = [];
-
             foreach( $params['goods_no'] as $k => $goods_no ){
-
                 // 查商品
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no, true);
                 // 订单
                 $order = $goods->getOrder();
                 $order_info = $order->getData();
-                if( $order_info['user_id'] !== $params['user_id'] ){
+                if( $order_info['user_id'] != $params['user_id'] ){
                     return false;
                 }
 
+                //用户必须在收货后天内才可以申请退换货
+                $nowdata=time();
+                if($nowdata/$order_info['delivery_time']>7){
+                    return false;
+                }
                 // 商品退货
-                if( !$goods->returnOpen() ){
+                if( !$goods->returnOpen() ) {
+                    //事务回滚
+                    DB::rollBack();
                     return false;
                 }
-
-                // 创建退货单
+                //获取商品数组
                 $goods_info = $goods->getData();
+                // 创建退货单
                 $data = [
                     'goods_no'      => $goods_info['goods_no'],
                     'order_no'      => $goods_info['order_no'],
                     'business_key' => $params['business_key'],
-                    'loss_type'     => $goods_info['loss_type'],
-                    'reason_id'     => $goods_info['reason_id'],
-                    'reason_text'   => $goods_info['reason_text'],
-                    'user_id'       => $goods_info['user_id'],
+                    'loss_type'     => $params['loss_type'],
+                    'reason_id'     => $params['reason_id'],
+                    'reason_text'   => $params['reason_text'],
+                    'user_id'       => $params['user_id'],
                     'status'        => ReturnStatus::ReturnCreated,
                     'refund_no'     => create_return_no(),
                     'create_time'  => time(),
                 ];
-                $b = OrderReturn::query()->insert( $data );
-                if(!$b){
+                $create = OrderReturn::query()->insert( $data );
+                if(!$create){
                     //事务回滚
                     DB::rollBack();
                     return false;//创建失败
                 }
-
                 $no_list[] = $data['refund_no'];
             }
-
+            //修改冻结状态为退货中
+            if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
+                $orderStaus=$order->returnOpen();
+            }
+            //修改冻结状态为换货中
+            if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ){
+                $orderStaus=$order->barterOpen();
+            }
+            if(!$orderStaus){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
             DB::commit();
-
             foreach( $no_list as $no ){
                 //短信
                 if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
                     $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN, $no ,SceneConfig::RETURN_APPLY);
                     $b=$orderNoticeObj->notify();
+                    p($b);
                     Log::debug($b?"Order :".$params['order_no']." IS OK":"IS error");
                 }
             }
-
-
             return true;
-        }catch( NotFoundException $exc){
-            return false;
-            var_dump($exc->getMessage());exit;
         }catch( \Exception $exc){
-            return false;
-            var_dump($exc->getMessage());exit;
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
         }
 
 //
