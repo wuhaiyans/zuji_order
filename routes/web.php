@@ -12,8 +12,10 @@
 */
 
 Route::get('/', function () {
+
     return view('welcome');
 });
+
 
 Route::get('test/{action}', function(App\Http\Controllers\TestController $controller, $action){
     return $controller->$action();

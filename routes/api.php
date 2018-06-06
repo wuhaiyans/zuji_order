@@ -69,6 +69,8 @@ $api->version('v1', [
         //订单清算退押金回调接口
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
+        $api->any('orderListExport', 'OrderController@orderListExport');
+
 
 });
    

@@ -218,10 +218,12 @@ class OrderController extends Controller
 
     public function orderListExport() {
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');//告诉浏览器输出07Excel文件
-        header('Content-Type:application/vnd.ms-excel');//告诉浏览器将要输出Excel03版本文件
-        header('Content-Disposition: attachment;filename="01simple.xlsx"');//告诉浏览器输出浏览器名称
-        header('Cache-Control: max-age=0');//禁止缓存
+
+        header("Content-type:text/html;charset=utf-8");
+        header("Content-Type:application/vnd.ms-excel");
+        header("Content-Disposition:attachment;filename=test.xlsx");
+        ob_end_clean();
+//        header('Cache-Control: max-age=0');//禁止缓存
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'Hello World !');
