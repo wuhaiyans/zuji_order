@@ -9,6 +9,8 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Modules\Repository\OrderUserAddressRepository;
+
 class AddressComponnet implements OrderCreater
 {
     //组件
@@ -69,6 +71,22 @@ class AddressComponnet implements OrderCreater
     {
         $b = $this->componnet->create();
         if( !$b ){
+            return false;
+        }
+        $data =$this->getDataSchema();
+        $addressData = [
+            'order_no'=>$data['order']['order_no'],
+            'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
+            'name'=>$data['address']['name']?$data['address']['name']:"",
+            'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
+            'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
+            'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
+            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"",
+            'create_time'=>time(),
+        ];
+        $id =OrderUserAddressRepository::add($addressData);
+        if(!$id){
+            $this->getOrderCreater()->setError("保存用户地址信息失败");
             return false;
         }
         return true;

@@ -454,7 +454,7 @@ class Order {
 	 * @param string $order_no		订单编号
 	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
-	 * @throws \App\Lib\NotFoundException
+	 * @return  bool
 	 */
 	public static function getByNo( string $order_no, int $lock=0 ) {
         $builder = \App\Order\Models\Order::where([
@@ -465,7 +465,7 @@ class Order {
 		}
 		$order_info = $builder->first();
 		if( !$order_info ){
-			throw new \App\Lib\NotFoundException('订单未找到');
+			return false;
 		}
 		return new self( $order_info );
 	}

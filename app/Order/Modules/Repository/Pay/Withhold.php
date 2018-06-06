@@ -286,7 +286,7 @@ class Withhold extends \App\Lib\Configurable {
 	}
 
 
-	public function get_data(){
+	public function getData(){
 		return [
 			'withhold_no'		=> $this->withhold_no,
 			'out_withhold_no'	=> $this->out_withhold_no,
