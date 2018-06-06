@@ -5,11 +5,11 @@ namespace App\Order\Modules\Repository\ShortMessage;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * InstalmentWithhold
+ * WithholdOverdue
  *
  * @author maxiaoyu
  */
-class InstalmentWithhold implements ShortMessage {
+class WithholdOverdue implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -77,4 +77,8 @@ class InstalmentWithhold implements ShortMessage {
         return \App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
     }
 
+    // 支付宝 短信通知
+    public function alipay_notify(){
+        return true;
+    }
 }
