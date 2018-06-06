@@ -141,6 +141,10 @@ class ImeiController extends Controller
         unset($data[1]);//第一行文档名
         unset($data[2]);//第二行标题
 
+
+
+        p($data);die;
+
         if (count($data) == 0) {
             return ;
         }
@@ -152,15 +156,15 @@ class ImeiController extends Controller
             foreach ($data as $cel) {
                 if (!isset($cel['A']) || !isset($cel['B'])) continue;
                 $result[] = [
-                    'imei'      => $cel['A'],
-                    'price'     => (float)$cel['B'],
-                    'apple_serial'  => $cel['C'],
-                    'brand'         => $cel['D'],
-                    'name'          => $cel['E'],
-                    'quality'       => intval($cel['F']),
-                    'color'         => $cel['G'],
-                    'business'      => $cel['H'],
-                    'storage'       => intval($cel['I'])
+                    'imei'          => isset($cel['A']) ? $cel['A'] :'',
+                    'price'         => isset($cel['B']) ? (float)$cel['B'] : 0,
+                    'apple_serial'  => isset($cel['C']) ? $cel['C'] : '',
+                    'brand'         => isset($cel['D']) ? $cel['D'] : '',
+                    'name'          => isset($cel['E']) ? $cel['E']:'',
+                    'quality'       => isset($cel['F']) ? intval($cel['F']):100,
+                    'color'         => isset($cel['G']) ? $cel['G']:'',
+                    'business'      => isset($cel['H']) ? $cel['H']:'',
+                    'storage'       => isset($cel['I']) ? intval($cel['I']):0
                 ];
             }
             $this->imei->import($result);
