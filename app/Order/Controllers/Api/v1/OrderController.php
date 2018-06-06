@@ -207,19 +207,20 @@ class OrderController extends Controller
                 $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称', '租期','金额'];
                 $excel = new \App\Lib\Excel();
 
-                foreach ($items as $item) {
+                foreach ($orderData['data'] as $item) {
                     $data[] = [
-                        $item['imei'],
-                        $item['brand'],
-                        $item['name'],
-                        $item['price'],
-                        $item['apple_serial'],
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_status_name'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
                         $item['quality'],
                         $item['color'],
                         $item['business'],
                         $item['storage'],
                         $item['status'],
-                        date('Y-m-d H:i:s', $item['create_time'])
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['status']
                     ];
                 }
 
