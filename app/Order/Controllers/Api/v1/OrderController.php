@@ -228,7 +228,6 @@ class OrderController extends Controller
 
             $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
                 '订单实际总租金','订单总押金','意外险总金额'];
-            $excel = new \App\Lib\Excel();
 
             foreach ($orderData['data']['data'] as $item) {
                 $data[] = [
@@ -248,8 +247,9 @@ class OrderController extends Controller
                 ];
             }
 
-            return $excel->write($data, $headers,'后台订单列表数据导出');
-            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+
+            return Excel::write($data, $headers,'后台订单列表数据导出');
+//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
         } else {
 
             return apiResponse([],ApiStatus::CODE_33001);
