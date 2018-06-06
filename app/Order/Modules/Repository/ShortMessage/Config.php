@@ -37,15 +37,18 @@ class Config {
 		$arr = [
 			// 机市短息模板配置
 			self::CHANNELID_OFFICAL => [
-				SceneConfig::ORDER_CREATE => 'SMS_113461042',  //用户下单
-                SceneConfig::ORDER_PAY =>'SMS_113461043',//用户支付或授权 成功
-				SceneConfig::INSTALMENT_WITHHOLD => 'hsb_sms_b427f',
-                SceneConfig::RETURN_APPLY => 'hsb_sms_771f7',//申请退货
-                SceneConfig::RETURN_APPLY_AGREE => 'SMS_113455999',//退货审核通过
-                SceneConfig::RETURN_APPLY_DISAGREE => 'hsb_sms_d284d',//退货审核不通过
-                SceneConfig::RETURN_CHECK_OUT => 'hsb_sms_1607a',//退货检测合格
-                SceneConfig::RETURN_UNQUALIFIED => 'hsb_sms_1c8bf',//退货检测不合格
-                SceneConfig::RETURN_DELIVERY => 'hsb_sms_e36c8',//退货收到客户手机
+				SceneConfig::ORDER_CREATE 			=> 'SMS_113461042', //用户下单
+                SceneConfig::ORDER_PAY 				=> 'SMS_113461043', //用户支付或授权 成功
+				SceneConfig::INSTALMENT_WITHHOLD 	=> 'hsb_sms_b427f', //代扣扣款短信
+                SceneConfig::RETURN_APPLY 			=> 'hsb_sms_771f7', //申请退货
+                SceneConfig::RETURN_APPLY_AGREE 	=> 'SMS_113455999', //退货审核通过
+                SceneConfig::RETURN_APPLY_DISAGREE 	=> 'hsb_sms_d284d', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		=> 'hsb_sms_1607a', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	=> 'hsb_sms_1c8bf', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		=> 'hsb_sms_e36c8', //退货收到客户手机
+				SceneConfig::WITHHOLD_FAIL 			=> 'hsb_sms_1607a', //扣款失败
+				SceneConfig::WITHHOLD_WARMED	 	=> 'hsb_sms_1c8bf', //即将逾期
+				SceneConfig::WITHHOLD_OVERDUE 		=> 'hsb_sms_e36c8', //扣款失败生成逾期
 
 
 			],
