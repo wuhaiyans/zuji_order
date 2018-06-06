@@ -85,7 +85,6 @@ class MiniOrderController extends Controller
      * 订单确认（查询订单信息 获取免押金额）
      */
     public function confirmationQuery(Request $request){
-        echo 1;die;
         $params     = $request->all();
         // 验证参数
         $rules = [
@@ -129,6 +128,9 @@ class MiniOrderController extends Controller
         }
         //添加逾期时间
         $miniData['overdue_time'] = $data['overdue_time'];
+        print_r($miniData);
+        print_r($params);
+        print_r($data);die;
         //查询成功记录表
         $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
         if( !$res ){
