@@ -62,7 +62,12 @@ class Delivery
      * 发货更新请求
      * 判断是订单发货还是换货发货
      * 换货发货新商品反馈到此方法 order_good_extend
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
@@ -74,10 +79,10 @@ class Delivery
      * ]
      * 需要写成curl形式 供发货系统使用
      */
-    public static function delivery($orderNo,$goodsInfo)
+    public static function delivery($orderDetail,$goodsInfo)
     {
         $base_api = config('tripartite.API_INNER_URL');
-        $params['order_no'] =$orderNo;
+        $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
 
 

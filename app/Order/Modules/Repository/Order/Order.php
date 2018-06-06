@@ -233,7 +233,7 @@ class Order {
      * @return bool
      */
     public function deliveryOpen(string $remark):bool{
-        if($this->model->order_status!=OrderStatus::OrderPayed){
+        if($this->model->order_status!=OrderStatus::OrderPayed && $this->model->freeze_type == OrderFreezeStatus::Non){
             return false;
         }
         $this->model->order_status =OrderStatus::OrderInStock;
@@ -254,7 +254,11 @@ class Order {
 	 * @return bool
 	 */
 	public function deliveryFinish( ):bool{
-		$this->model->order_status = OrderStatus::OrderDeliveryed; 
+        if($this->model->order_status!=OrderStatus::OrderInStock && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+		$this->model->order_status = OrderStatus::OrderDeliveryed;
+		$this->model->delivery_time = time();
 		return $this->model->save();
 	}
 	/**
