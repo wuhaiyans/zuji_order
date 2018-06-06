@@ -113,8 +113,7 @@ class MiniOrderController extends Controller
             'sku_id'=>$data['sku_id']
         ];
         //查询芝麻订单确认结果
-        print_r(config('miniappid.ALIPAY_MINI_APP_ID'));die;
-        $miniApi = new CommonMiniApi(config('ALIPAY_MINI_APP_ID'));
+        $miniApi = new CommonMiniApi(config('miniappid.ALIPAY_MINI_APP_ID'));
         //获取请求流水号
         $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         $miniParams = [
@@ -156,7 +155,7 @@ class MiniOrderController extends Controller
 
         //优惠券处理
 
-//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('ALIPAY_MINI_APP_ID'));
+//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('miniappid.ALIPAY_MINI_APP_ID'));
 //        //100元全场通用优惠券
 //        $app_ids = [
 //            1,5,9,11,12,13,14,15,16,21,22,24,27
