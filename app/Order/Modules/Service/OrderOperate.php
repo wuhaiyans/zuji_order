@@ -213,7 +213,10 @@ class OrderOperate
         try{
             //更新订单状态
             $order = Order::getByNo($data['order_no']);
-
+            if(!$order){
+                DB::rollBack();
+                return false;
+            }
             $b =$order->deliveryOpen($data['remark']);
             if(!$b){
                 DB::rollBack();
