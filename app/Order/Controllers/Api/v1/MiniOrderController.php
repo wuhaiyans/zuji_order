@@ -128,17 +128,16 @@ class MiniOrderController extends Controller
         $miniData = $miniApi->getResult();
         //添加逾期时间
         $miniData['overdue_time'] = $data['overdue_time'];
-        print_r($miniData);
-        print_r($params);
-        print_r($data);die;
         //查询成功记录表
         $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
         if( !$res ){
             \App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
         }
-
+        print_r($miniData);
+        print_r($params);
+        print_r($data);
         //用户处理
-        $userInfo = [];
+        $userid = \App\Lib\User\User::getUserId($miniData);
 
         //处理用户收货地址
         $address_info = [];
@@ -148,11 +147,6 @@ class MiniOrderController extends Controller
 //            'mobile' => $data['mobile'],
 //            'address' => $data['house'],
 //        ];
-//        $member_address_table = $load->table('member/member_address');
-//        $member_address_service = $load->service('member/member_address');
-//        $address_id = $member_address_table->edit_address($address_data);
-//        $address_info = $member_address_service->user_address_default($user_id);
-//        $address_info['address_id'] = $address_id;
 
         //优惠券处理
 
@@ -182,10 +176,10 @@ class MiniOrderController extends Controller
         $orderType =OrderStatus::orderMiniService;
         try{
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$userInfo['user_id'],$data['pay_type'],$params['appid'],$orderType);
+            $orderCreater = new OrderComponnet($data['order_no'],$userid,$data['pay_type'],$params['appid'],$orderType);
 
             // 用户
-            $userComponnet = new UserComponnet($orderCreater,$userInfo['user_id'],$address_info['address_id']);
+            $userComponnet = new UserComponnet($orderCreater,$userid,$address_info['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
@@ -202,7 +196,7 @@ class MiniOrderController extends Controller
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$userInfo['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$userid);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -219,7 +213,7 @@ class MiniOrderController extends Controller
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
-                $userRemark =User::setRemark($userInfo['user_id'],$orderCreater->getOrderCreater()->getError());
+                $userRemark =User::setRemark($userid,$orderCreater->getOrderCreater()->getError());
 
             }
             $schemaData = $orderCreater->getDataSchema();
