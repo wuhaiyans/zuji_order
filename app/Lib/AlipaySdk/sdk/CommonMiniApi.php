@@ -110,18 +110,19 @@ class CommonMiniApi extends BaseApi {
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
 		];
-		\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
-//		$responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
-		$resultCode = $result->zhima_merchant_order_confirm_response->code;
-		var_dump($resultCode);die;
-		if(!empty($resultCode)&&$resultCode == 10000){
-			$result = json_decode(json_encode($result),true);
-			return $result['zhima_merchant_order_confirm_response'];
-		} else {
-			$msg = $result->zhima_merchant_order_confirm_response->sub_msg;
-			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$msg);
+		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
+		if( !isset($result['zhima_merchant_order_confirm_response']) ){
+			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
+			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
 			return false;
 		}
+		if( $result['zhima_merchant_order_confirm_response']['code']!=10000 ){
+			$this->error = $result['zhima_merchant_order_confirm_response']['sub_code'].$result['zhima_merchant_order_confirm_response']['sub_msg'];
+			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
+			return false;
+		}
+		$this->result = $result;
+		return true;
 	}
 
 }
