@@ -113,6 +113,8 @@ class MiniOrderController extends Controller
             'sku_id'=>$data['sku_id']
         ];
         //查询芝麻订单确认结果
+        print_r(config('ALIPAY_MINI_APP_ID'));
+        print_r(config('tripartite.Interior_Goods_Request_data'));die;
         $miniApi = new CommonMiniApi(config('ALIPAY_MINI_APP_ID'));
         //获取请求流水号
         $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
