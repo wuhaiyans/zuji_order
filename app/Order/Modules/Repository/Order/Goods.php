@@ -38,6 +38,23 @@ class Goods {
     public function getData():array{
         return $this->data;
     }
+
+    /**
+     *  更新goods开始结束时间
+     * @return bool
+     */
+    public function updateServiceTime():bool {
+        return true;
+    }
+
+    /**
+     *  新增服务周期表
+     * @return bool
+     */
+    public function addService():bool {
+        return true;
+    }
+
 	
     //-+------------------------------------------------------------------------
     // | 退款

@@ -228,14 +228,17 @@ class Order {
 	// | 发货
 	//-+------------------------------------------------------------------------
     /**
-	 * 【去确认：申请发货和确认订单 是一个还是两个操作】
+	 * 【去确认：申请发货和确认订单 是一个操作】
      * 申请发货
+     * @param $remark 发货备注
      * @return bool
      */
-//    public function deliveryOpen():bool{
-//		$this->model->order_status = OrderStatus::OrderPaying; 
-//		return $this->model->save();
-//    }
+    public function deliveryOpen(string $remark):bool{
+        $this->model->order_status =OrderStatus::OrderInStock;
+        $this->model->confirm_time =time();
+        $this->model->remark =$remark;
+        return $this->model->save();
+    }
 	/**
 	 * 取消发货，状态切回到 已支付，待确认
 	 * @return bool
