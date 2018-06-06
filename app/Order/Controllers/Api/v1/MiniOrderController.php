@@ -72,7 +72,7 @@ class MiniOrderController extends Controller
             'overdue_time' => $overdue_time
         ];
         //redis 存储数据
-        $values = Redis::command('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
+        $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, $data);
         var_dump($values);die;
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
