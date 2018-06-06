@@ -2,62 +2,57 @@
 /**
  * 订单创建器
  * @access public
- * @author  <>
+ * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  * @copyright (c) 2017, Huishoubao
  */
 
 namespace App\Order\Modules\Repository\Order\Creater;
 
 
+use App\Order\Modules\Repository\Order\Creater\Component\NullComponent;
+
 class OrderCreater implements OrderCreaterInterface
 {
-	
-	/**
-	 * 用户组件
-	 * @var OrderCreaterComponnet
-	 */
-	private $userComponnet;
-	
-	/**
-	 * 商品组件
-	 * @var OrderCreaterComponnet
-	 */
-	private $skuComponnet;
 
-
-	/**
-     *
-     * 设置  组件
-     * @param UserComponnet $userComponnet
-     * @return OrderCreater
+    /**
+     * 组件列表
+     * @var array
      */
-    public function setUserComponnet(UserComponnet $userComponnet){
-        $this->userComponnet = $userComponnet;
+    private $components = [];
+
+    /**
+     * @var OrderCreaterInterface
+     */
+    private $component;
+
+    public function __construct()
+    {
+        $this->component = new NullComponent( $this );
+    }
+
+    /**
+     * 注册组件
+     * @param OrderCreaterInterface $componnet
+     * @return OrderCreater
+     * @access public
+     * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+     */
+    public function registerComponent( OrderCreaterComponent $component):OrderCreater {
+        $this->components[] = $component;
+        $component->setComponent( $this->component );
+        $this->component = $component;
         return $this;
     }
-    /**
-     * 获取 User组件
-     * @return UserComponnet
-     */
-    public function getUserComponnet(){
-        return $this->userComponnet;
-    }
 
     /**
-     * 设置 Sku组件
-     * @param SkuComponnet $skuComponnet
-     * @return OrderCreater
+     * 获取组件
+     * @param string $name
+     * @return OrderCreaterInterface
+     * @access public
+     * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      */
-    public function setSkuComponnet(SkuComponnet $skuComponnet){
-        $this->skuComponnet = $skuComponnet;
-        return $this;
-    }
-    /**
-     * 获取 Sku组件
-     * @return SkuComponnet
-     */
-    public function getSkuComponnet(): SkuComponnet{
-        return $this->skuComponnet;
+    public function getComponent( string $name ): OrderCreaterInterface{
+        return $this->skuComponent;
     }
 
 	
@@ -75,15 +70,10 @@ class OrderCreater implements OrderCreaterInterface
 	
     /**
      * 过滤
-     * <p>注意：</p>
-     * <p>在过滤过程中，可以修改下单需要的元数据</p>
-     * <p>组件之间的过滤操作互不影响</p>
-     * <p>先执行内部组件的filter()，然后再执行组件本身的过滤</p>
      * @return bool
      */
-	public function filter(): bool{
-		
-		return true;
+	public function filter( array $params ): bool{
+		return $this->component->filter();
 	}
 
     /**
@@ -92,7 +82,7 @@ class OrderCreater implements OrderCreaterInterface
 	 * []
      */
 	public function getDataSchema(): array{
-		return [];
+        return $this->component->getDataSchema();
 	}
 
     /**
@@ -100,8 +90,7 @@ class OrderCreater implements OrderCreaterInterface
      * @return bool
      */
 	public function create(): bool{
-		 
-		return true;
+        return $this->component->create();
 	}
 	
 }

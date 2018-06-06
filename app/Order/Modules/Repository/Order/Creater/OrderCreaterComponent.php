@@ -9,23 +9,28 @@
 namespace App\Order\Modules\Repository\Order\Creater;
 
 
-abstract class OrderCreaterComponnet implements OrderCreaterInterface
+abstract class OrderCreaterComponent implements OrderCreaterInterface
 {
 	
 	/**
 	 *
-	 * @var OrderCreaterComponnet 
+	 * @var OrderCreaterComponent
 	 */
-	protected $componnet;
+	protected $component;
 
 
 	/**
 	 * 构造函数
-	 * @param OrderCreaterComponnet $componnet	订单创建器组件
 	 */
-	public function __construct( OrderCreaterInterface $componnet )
-    {
-        $this->componnet = $componnet;
+	public function __construct( ){ }
+
+
+    /**
+     * 设置组件
+     * @param OrderCreaterInterface $componnet	订单创建器组件
+     */
+    public function setComponent(OrderCreaterInterface $component ){
+        $this->component = $component;
     }
 	
     /**
@@ -33,7 +38,7 @@ abstract class OrderCreaterComponnet implements OrderCreaterInterface
      * @return OrderCreater
      */
 	public function getOrderCreater():OrderCreater{
-		return $this->componnet->getOrderCreater();
+		return $this->component->getOrderCreater();
 	}
 	
     /**
@@ -44,8 +49,8 @@ abstract class OrderCreaterComponnet implements OrderCreaterInterface
      * <p>先执行内部组件的filter()，然后再执行组件本身的过滤</p>
      * @return bool
      */
-	public function filter(): bool{
-		return $this->componnet->filter(); 
+	public function filter( array $params ): bool{
+		return $this->component->filter( $params );
 	}
 
     /**
@@ -54,7 +59,7 @@ abstract class OrderCreaterComponnet implements OrderCreaterInterface
 	 * []
      */
 	public function getDataSchema(): array{
-		return $this->componnet->getDataSchema();
+		return $this->component->getDataSchema();
 	}
 
     /**
@@ -62,7 +67,7 @@ abstract class OrderCreaterComponnet implements OrderCreaterInterface
      * @return bool
      */
 	public function create(): bool{
-		return $this->componnet->create();
+		return $this->component->create();
 	}
 
 

@@ -152,8 +152,15 @@ class ImeiController extends Controller
             foreach ($data as $cel) {
                 if (!isset($cel['A']) || !isset($cel['B'])) continue;
                 $result[] = [
-                    'imei' => $cel['A'],
-                    'price' => $cel['B']
+                    'imei'      => $cel['A'],
+                    'price'     => (float)$cel['B'],
+                    'apple_serial'  => $cel['C'],
+                    'brand'         => $cel['D'],
+                    'name'          => $cel['E'],
+                    'quality'       => intval($cel['F']),
+                    'color'         => $cel['G'],
+                    'business'      => $cel['H'],
+                    'storage'       => intval($cel['I'])
                 ];
             }
             $this->imei->import($result);
