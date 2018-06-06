@@ -90,19 +90,19 @@ class CommonMiniApi extends BaseApi {
 	 */
 	public function orderConfirm( $params ){
 
-		$params = filter_array($params, [
+		$param = filter_array($params, [
 			'order_no' => 'required',		    // 【必须】芝麻信用订单号
 			'transaction_id' => 'required'		// 【必须】一笔请求的唯一标志
 		]);
 
-		if( count($params)!=2 ){
+		if( count($param)!=2 ){
 			$this->error = '信用套餐产品订单确认接口业务参数错误';
 			return false;
 		}
 
 		//请求业务参数
-		$biz_content['order_no'] = $params['order_no'];
-		$biz_content['transaction_id'] = $params['transaction_id'];
+		$biz_content['order_no'] = $param['order_no'];
+		$biz_content['transaction_id'] = $param['transaction_id'];
 
 		$request = new \ZhimaMerchantOrderConfirmRequest();
 		$request->setBizContent(json_encode($biz_content));
