@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
+use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
@@ -202,6 +203,29 @@ class OrderController extends Controller
             $orderData = Service\OrderOperate::getOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
+
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称', '租期','金额'];
+                $excel = new \App\Lib\Excel();
+
+                foreach ($items as $item) {
+                    $data[] = [
+                        $item['imei'],
+                        $item['brand'],
+                        $item['name'],
+                        $item['price'],
+                        $item['apple_serial'],
+                        $item['quality'],
+                        $item['color'],
+                        $item['business'],
+                        $item['storage'],
+                        $item['status'],
+                        date('Y-m-d H:i:s', $item['create_time'])
+                    ];
+                }
+
+                return $excel->write($data, $headers,'imei数据导出');
+
+                Excel::write($orderData);
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 
@@ -219,18 +243,17 @@ class OrderController extends Controller
     public function orderListExport() {
 
 
-        header("Content-type:text/html;charset=utf-8");
-        header("Content-Type:application/vnd.ms-excel");
-        header("Content-Disposition:attachment;filename=test.xlsx");
-        ob_end_clean();
-//        header('Cache-Control: max-age=0');//禁止缓存
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Hello World !');
+        $params = $request->input('params');
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        //                $writer->save('hello world.xlsx');
-        $writer->save('php://output');
+        $orderData = Service\OrderOperate::getOrderList($params);
+
+        if ($orderData['code']===ApiStatus::CODE_0) {
+
+            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+        } else {
+
+            return apiResponse([],ApiStatus::CODE_33001);
+        }
 
     }
 
