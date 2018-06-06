@@ -3,7 +3,7 @@ namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderGoodsInstalmentRecord;
 
-class OrderGoodsInstalmentRepository
+class OrderGoodsInstalmentRecordRepository
 {
 
 
@@ -12,6 +12,7 @@ class OrderGoodsInstalmentRepository
     }
 
      /**
+     * 创建记录
      * @param $data
      * [
      *     'instalment_id'              => 'required', //分期ID
@@ -26,7 +27,7 @@ class OrderGoodsInstalmentRepository
      * @return bool|mixed
      */
 
-    public function create($data){
+    public static function create($data){
 
         $data =filter_array($data,[
             'instalment_id'             => 'required',
@@ -44,6 +45,19 @@ class OrderGoodsInstalmentRepository
 
         $info = OrderGoodsInstalmentRecord::create($data);
         return $info->getQueueableId();
+    }
+
+
+    /**
+     * 修改方法
+     * @param  array $params
+     * @param  array $data
+     * @return bool|mixed
+     */
+
+    public static function save($params, $data){
+
+        return OrderGoodsInstalmentRecord::save($params, $data);
     }
 
 
