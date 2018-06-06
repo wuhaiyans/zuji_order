@@ -49,10 +49,12 @@ class ImeiService
         $items = $collect->items();
 
         if (!$items) {
-            return [];
+            return [
+                'data'=>[], 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()
+            ];
         }
 
-        return ['data'=>$items, 'size'=>$limit, 'page'=>$page];
+        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()];
     }
 
 

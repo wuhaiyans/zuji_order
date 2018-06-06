@@ -215,8 +215,7 @@ class AopClient {
 			$errorCode,
 			str_replace("\n", "", $responseTxt)
 		);
-		\app\alipay\sdk\writeLog(var_export($logData,true)."\n");
-
+		\App\Lib\AlipaySdk\sdk\writeLog(var_export($logData,true)."\n");
 //		$localIp = isset($_SERVER["SERVER_ADDR"]) ? $_SERVER["SERVER_ADDR"] : "CLI";
 //		$logger = new \LtLogger;
 //		$logger->conf["log_file"] = rtrim(AOP_SDK_WORK_DIR, '\\/') . '/' . "logs/aop_comm_err_" . $this->appId . "_" . date("Y-m-d") . ".log";
@@ -466,8 +465,8 @@ class AopClient {
 
 		//发起HTTP请求
 		try {
-			\app\alipay\sdk\writeLog('request: $sysParams: ' . var_export($sysParams, true));
-			\app\alipay\sdk\writeLog('request: $apiParams: ' . var_export($apiParams, true));
+			\App\Lib\AlipaySdk\sdk\writeLog('request: $sysParams: ' . var_export($sysParams, true));
+			\App\Lib\AlipaySdk\sdk\writeLog('request: $apiParams: ' . var_export($apiParams, true));
 			$resp = $this->curl($requestUrl, $apiParams);
 		} catch (\Exception $e) {
 
