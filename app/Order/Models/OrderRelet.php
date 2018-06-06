@@ -15,4 +15,11 @@ class OrderRelet extends Model
 
     protected $primaryKey='id';
 
+    /**
+     * 指定是否模型应该被戳记时间。
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
 }

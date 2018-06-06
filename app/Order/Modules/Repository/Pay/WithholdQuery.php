@@ -31,5 +31,44 @@ class WithholdQuery {
 		}
 		throw new \App\Lib\NotFoundException('代扣协议不存在');
 	}
-	
+
+	/**
+	 * 根据代扣协议编号 ，查询代扣协议
+	 * @param string		$withhold_no		代扣协议编号
+	 * @return \App\Order\Modules\Repository\Pay\Withhold
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getByWithholdNo( string $withhold_no ){
+
+		$info = \App\Order\Models\OrderPayWithholdModel::where([
+			'withhold_no'	=> $withhold_no,
+			'withhold_status'	=> WithholdStatus::SIGNED,
+		])->first();
+		if( $info ){
+			return new Withhold( $info->toArray() );
+		}
+		throw new \App\Lib\NotFoundException('代扣协议不存在');
+	}
+
+	/**
+	 * 根据 业务 ，查询代扣协议
+	 * @param int			$bu_type
+	 * @param string		$bu_no
+	 * @return \App\Order\Modules\Repository\Pay\Withhold
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getByBusinessNo( int $bu_type, string $bu_no ){
+
+		$info = \App\Order\Models\OrderPayWithholdBusinessModel::where([
+			'business_type'	=> $bu_type,
+			'business_no'	=> $bu_no,
+			'bind_time'		=> ['>',0],
+			'unbind_time'	=> 0,
+		])->first();
+		if( $info ){
+			return self::getByWithholdNo( $info->withhold_no );
+		}
+		throw new \App\Lib\NotFoundException('代扣协议不存在');
+	}
+
 }

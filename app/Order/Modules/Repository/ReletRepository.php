@@ -186,14 +186,21 @@ class ReletRepository
         }
         //查询
         // 续租表
-        $reletRow = OrderRelet::where(['relet_no','=',$reletNo])->get(['goods_id'])->toArray();
+        $reletRow = OrderRelet::where('relet_no','=',$reletNo)->first(['goods_id'])->toArray();
+
         // 设备表
-        $goodsObj = OrderGoods::where(['id'],'=',$reletRow['goods_id'])->first();
+        $goodsObj = OrderGoods::where('id','=',$reletRow['goods_id'])->first();
         // 设备周期表
-        $goodsUnitRow = OrderGoodsUnit::where(
+        $goodsUnitRow = OrderGoodsUnit::where([
             ['order_no','=',$goodsObj->order_no],
             ['goods_no','=',$goodsObj->goods_no]
-        )->orderBy('id','desc')->fresh()->toArray();
+        ])->orderBy('id','desc')->first();
+        if($goodsUnitRow){
+            $goodsUnitRow = $goodsUnitRow->toArray();
+        }else{
+            LogApi::notify("周期表数据错误", $reletNo);
+            return false;
+        }
         //判断租期类型
         if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
             $t = $reletRow['zuqi']*(60*60*24);
@@ -211,7 +218,9 @@ class ReletRepository
         ];
 
         //修改订单商品状态
-        if( !$goodsObj->save(['goods_status'=>OrderGoodStatus::RENEWAL_OF_RENT,'update_time'=>time()]) ){
+        $goodsObj->goods_status=OrderGoodStatus::RENEWAL_OF_RENT;
+        $goodsObj->update_time=time();
+        if( !$goodsObj->save() ){
             LogApi::notify("续租修改设备状态失败", $reletNo);
             return false;
         }

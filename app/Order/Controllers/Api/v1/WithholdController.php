@@ -15,6 +15,7 @@ use App\Lib\Common\SmsApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Repository\Pay\WithholdQuery;
 
 class WithholdController extends Controller
 {
@@ -46,29 +47,31 @@ class WithholdController extends Controller
 	 * ]
      */
     public function query(Request $request){
-        $request    = $request->all();
-        $appid      = $request['appid'];
-        $params     = $request['params'];
-
-        if(!$appid){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        $params    = $request->all();
+        // 参数过滤
+        $rules = [
+            'user_id'         => 'required|int',  //前端跳转地址
+            'channel'         => 'required|int',  //签约渠道
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
         }
 
-        $userId = $params['user_id'];
-        if(!$userId){
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
-        }
+        $userId         = $params['params']['user_id'];
+        $channel        = $params['params']['channel'];
 
-        $payWithhold = \App\Order\Modules\Repository\OrderPayWithholdRepository::find($userId);
-        if(empty($payWithhold)){
-            return apiResponse([],ApiStatus::CODE_20001, "参数错误");
-        }
         try{
+            // 查询用户协议
+            $withhold = WithholdQuery::getByUserChannel($userId,$channel);
+            $payWithhold = $withhold->get_data();
+
             $data = [
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
                 'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
                 'user_id'			=> $userId, //【必选】string 业务系统用户ID
             ];
+
             $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
             if(!$withholdInfo){
                 return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
@@ -94,64 +97,56 @@ class WithholdController extends Controller
      */
     public function unsign(Request $request){
         $params     = $request->all();
-        $appid      = $request['appid'];
+
         // 参数过滤
         $rules = [
             'user_id'         => 'required|int',  //前端跳转地址
+            'channel'         => 'required|int',  //签约渠道
         ];
         $validateParams = $this->validateParams($rules,$params);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
-        $userId     = $params['params']['user_id'];
 
-        // 查询用户协议
-        $withholdInfo = OrderPayWithhold::find($userId);
-        if( !$withholdInfo ){
-            Log::error("[代扣解约]查询用户信息失败");
-            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
-        }
+        $userId         = $params['params']['user_id'];
+        $channel        = $params['params']['channel'];
 
-        if( !$withholdInfo['withhold_status'] == OrderPayWithholdStatus::UNSIGN ){
-            Log::error("用户未签约该协议");
-            return apiResponse( [], ApiStatus::CODE_71004, '用户未签约该协议');
-        }
+        try{
 
-        // 查看用户是否有未扣款的分期
-        /* 如果有未扣款的分期信息，则不允许解约 */
-        $n = \App\Order\Models\OrderInstalment::query()->where([
-            'user_id'=> $userId])
-            ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL]
-            )->get()->count();
+            //开启事务
+            DB::beginTransaction();
 
-        if( $n > 0 ){
-            Log::error("[代扣解约]订单分期查询错误");
-            return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
-        }
+            // 查看用户是否有未扣款的分期
+            /* 如果有未扣款的分期信息，则不允许解约 */
+            $n = \App\Order\Models\OrderInstalment::query()->where([
+                'user_id'=> $userId])
+                ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL]
+                )->get()->count();
 
-        if($withholdInfo['counter'] != 0){
-            Log::error("[代扣解约]不允许解除代扣");
-            return apiResponse( [], ApiStatus::CODE_71010, '不允许解除代扣');
-        }
-        try {
-            $data = [
-                'user_id'           => $userId, //租机平台用户IDwithhold_no
-                'agreement_no'      => $withholdInfo['out_withhold_no'], //支付平台签约协议号
-                'out_agreement_no'  => $withholdInfo['withhold_no'],    //业务平台签约协议号
-                'back_url'          => env("API_INNER_URL") . "/unSignNotify", //回调地址
-            ];
+            if( $n > 0 ){
+                DB::rollBack();
+                Error::setError('[代扣解约]解约失败，有未完成分期');
+                return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
+            }
 
-            $b = \App\Lib\Payment\CommonWithholdingApi::unSign( $data );
-            if( !$b ){
-                Log::error("[代扣解约]调用支付宝解约接口失败");
+            // 查询用户协议
+            $withhold = WithholdQuery::getByUserChannel($userId,$channel);
+            $result  = $withhold->unsignApply();
+            if(!$result){
+                DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
             }
 
-            return apiResponse([], ApiStatus::CODE_0, "success");
+            return apiResponse( [], ApiStatus::CODE_0);
+
+            // 提交事务
+            DB::commit();
+            return apiResponse([],ApiStatus::CODE_0,"success");
         } catch (\Exception $exc) {
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
 
         }
+
     }
 
     /**
@@ -183,13 +178,24 @@ class WithholdController extends Controller
 
         // 查询分期信息
         $instalmentInfo = OrderInstalment::queryByInstalmentId($instalmentId);
-
         if( !is_array($instalmentInfo)){
             DB::rollBack();
             // 提交事务
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
+        // 订单
+        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+        if( !$orderInfo ){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+        if($orderInfo['status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中");
+        }
+
+        //判断是否允许扣款
         $allow = OrderInstalment::allowWithhold($instalmentId);
         if(!$allow){
             DB::rollBack();
@@ -199,11 +205,6 @@ class WithholdController extends Controller
         // 生成交易码
         $tradeNo = createNo();
 
-        // 状态在支付中或已支付时，直接返回成功
-        if( $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS && $instalmentInfo['status'] = OrderInstalmentStatus::PAYING ){
-            return apiResponse($instalmentInfo,ApiStatus::CODE_0,"success");
-        }
-
         // 扣款交易码
         if( $instalmentInfo['trade_no']=='' ){
             // 1)记录租机交易码
@@ -212,18 +213,11 @@ class WithholdController extends Controller
                 DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71002, "租机交易码错误");
             }
-            $instalmentInfo['trade_no'] = $tradeNo;
-        }
-        $tradeNo = $instalmentInfo['trade_no'];
-
-        // 订单
-        //查询订单记录
-        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
-        if( !$orderInfo ){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
 
+        $channel =
+        // 查询用户协议
+        $withhold = WithholdQuery::getByUserChannel($instalmentInfo['user_id'], $channel);
         // 查询用户协议
         $withholdInfo = OrderPayWithhold::find($orderInfo['user_id']);
         if(empty($withholdInfo)){
@@ -666,6 +660,18 @@ class WithholdController extends Controller
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
             return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
         }
+        // 生成交易码
+        $tradeNo = createNo();
+
+        // 扣款交易码
+        if( $instalmentInfo['trade_no'] == '' ){
+            // 1)记录租机交易码
+            $b = OrderInstalment::set_trade_no($instalmentId, $tradeNo);
+            if( $b === false ){
+                DB::rollBack();
+                return apiResponse([], ApiStatus::CODE_71002, "租机交易码错误");
+            }
+        }
 
         $youhui = 0;
         // 租金抵用券
@@ -699,7 +705,7 @@ class WithholdController extends Controller
         $payData = [
             'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $instalmentInfo['trade_no'],	// 业务编号
+            'businessNo'		=> $tradeNo,	// 业务编号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
             'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
         ];
@@ -816,13 +822,15 @@ class WithholdController extends Controller
         $params = $params['params'];
 
         if($params['status'] == "success"){
-            $userId = $params['user_id'];
-            // 解除代扣协议
-            $b = \App\Order\Modules\Service\OrderPayWithhold::unsign_withhold($userId);
-            if(!$b){
+
+            try{
+                // 查询用户协议
+                $withhold = WithholdQuery::getByWithholdNo( $params['out_agreement_no'] );
+                $withhold->unsignSuccess();
+            } catch(\Exception $exc){
+
                 echo "FAIL";exit;
             }
-
         }
 
         echo "SUCCESS";

@@ -56,7 +56,38 @@ class OrderUserInfoRepository
         return $data ?? false;
     }
 
+    /**
+     * 根据手机号
+     * 获取用户信息
+     * @param string $mobile
+     * @return bool
+     */
 
+    public static function getUser($mobile){
+        //根据用户手机号
+        if (empty($mobile)) {
+
+            return false;
+        }
+        $data = OrderUserInfo::query()->where(['user_mobile'=>$mobile])->first()->toArray();
+        return $data;
+    }
+    /**
+     * 根据多个订单号
+     * 获取用户信息
+     * @param string $mobile
+     * @return bool
+     */
+
+    public static function getUserColumn($orderNos){
+        //根据订单号
+        if (!is_array($orderNos)) return false;
+        array_unique($orderNos);
+        $result =  OrderUserInfo::query()->wherein('order_no', $orderNos)->get()->toArray();
+        if (!$result) return false;
+        //指定order_no为数组下标
+        return array_keys_arrange($result,"order_no");
+    }
     /**
      * 获取用户信息
      * @param array $params

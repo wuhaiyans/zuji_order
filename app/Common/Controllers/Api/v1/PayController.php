@@ -18,6 +18,31 @@ class PayController extends Controller
     }
 	
 	
+	public function testOrder(){
+		
+		try {
+			$order_no = 'A531154912432416';
+			$order = \App\Order\Modules\Repository\Order\Order::getByNo($order_no);
+			
+			//
+			$b = $order->tryFinish() ;
+		var_dump( $b );exit;
+			
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+			var_dump( '未找到' );
+		}catch (\Exception $exc) {
+			echo $exc->getMessage();
+			echo $exc->getTraceAsString();
+		}
+
+		
+		
+	}
+	
+	
+	
+	
 	public function testWechat(){
 		
 		try {

@@ -26,15 +26,13 @@ class OrderGivebackRepository
 	 * @var string filed order_no
 	 */
 	const KWTYPE_GOODSNAME = 'goods_name';
-
-
 	/**
 	 * 构造方法
 	 */
 	public function __construct(  ){
 		$this->order_giveback_model = new OrderGiveback();
 	}
-	
+
 	/**
 	 * 获取支持搜索的字段列表
 	 */
@@ -45,8 +43,7 @@ class OrderGivebackRepository
 			self::KWTYPE_GOODSNAME => '设备名称',
 		];
 	}
-	
-    public function create( $data ){
+	    public function create( $data ){
 		return $this->order_giveback_model->insertGetId( $data );
 	}
     /**

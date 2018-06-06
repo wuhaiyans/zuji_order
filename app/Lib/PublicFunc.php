@@ -266,7 +266,7 @@ function createNo($noType=1){
  * @return string
  */
 function creage_payment_no(){
-	return 'P'.createNo(3);
+    return 'P'.createNo(3);
 }
 
 /**
@@ -274,7 +274,7 @@ function creage_payment_no(){
  * @return string
  */
 function creage_fundauth_no(){
-	return 'F'.createNo(3);
+    return 'F'.createNo(3);
 }
 
 /**
@@ -282,7 +282,7 @@ function creage_fundauth_no(){
  * @return string
  */
 function creage_withhold_no(){
-	return 'W'.createNo(3);
+    return 'W'.createNo(3);
 }
 
 
@@ -317,21 +317,21 @@ function array_group_by($arr, $key)
 function sql_profiler()
 {
     //sql调试
-        DB::listen(function ($sql) {
-            foreach ($sql->bindings as $i => $binding) {
-                if ($binding instanceof \DateTime) {
-                    $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
-                } else {
-                    if (is_string($binding)) {
-                        $sql->bindings[$i] = "'$binding'";
-                    }
+    DB::listen(function ($sql) {
+        foreach ($sql->bindings as $i => $binding) {
+            if ($binding instanceof \DateTime) {
+                $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+            } else {
+                if (is_string($binding)) {
+                    $sql->bindings[$i] = "'$binding'";
                 }
             }
-            $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
-            $query = vsprintf($query, $sql->bindings);
-            print_r($query);
-            echo '<br />';
-        });
+        }
+        $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
+        $query = vsprintf($query, $sql->bindings);
+        print_r($query);
+        echo '<br />';
+    });
 
 }
 
@@ -369,36 +369,45 @@ function objectToArray($object)
  * @return obj|false
  */
 function get_instance( $class='ApiStatus',$namespace='\App\Lib' ){
-	return \App\Lib\Single::getInstance( $class,$namespace );
+    return \App\Lib\Single::getInstance( $class,$namespace );
 }
 /**
  * 设置全局apiStatus的Code码
  * @param string $code code码
  */
 function set_code( $code ){
-	return get_instance()->setCode(strval($code));
+    return get_instance()->setCode(strval($code));
 }
 /**
  * 获取被set_code设置的全局apiStatus的Code码
  * @return string $code code码
  */
 function get_code( ){
-	return ''.get_instance()->getCode();
+    return ''.get_instance()->getCode();
 }
 /**
  * 设置全局apiStatus的Msg信息
  * @param string $msg Msg信息
  */
 function set_msg( $msg ){
-	return get_instance()->setMsg(strval($msg));
+    return get_instance()->setMsg(strval($msg));
 }
 /**
  * 获取被set_msg设置的全局apiStatus的Msg信息
  * @return string $msg 信息
  */
 function get_msg( ){
-	return ''.get_instance()->getMsg();
+    return ''.get_instance()->getMsg();
 }
 function set_apistatus( $code, $msg ){
-	return get_instance()->setCode(strval($code))->setMsg(strval($msg));
+    return get_instance()->setCode(strval($code))->setMsg(strval($msg));
+}
+
+//以数组指定一列值为数组key
+function array_keys_arrange($array,$value){
+    $list = [];
+    foreach($array as $key=>$v){
+        $list[$v[$value]] = $v;
+    }
+    return $list;
 }

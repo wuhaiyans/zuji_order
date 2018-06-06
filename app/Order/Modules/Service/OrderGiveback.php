@@ -79,7 +79,6 @@ class OrderGiveback
 		}
 		return $this->order_giveback_repository->getUnfinishedListByOrderNo( $orderNo );
 	}
-	
 	/**
 	 * 获取还机单列表
 	 * @param array $where 查询条件
@@ -421,7 +420,6 @@ class OrderGiveback
 		}
 		return true;
 	}
-	
 	private function __parseWhere( &$where ) {
 		$whereArray = [];
         //根据还机单状态
@@ -452,7 +450,7 @@ class OrderGiveback
         }
         //根据设备名称
         if (isset($where['kw_type']) && $where['kw_type'] == OrderGivebackRepository::KWTYPE_GOODSNAME && !empty($where['keywords']) ) {
-            $whereArray[] = ['order_goods.goods_name', 'like', '%'.$where['keywords']];
+            $whereArray[] = ['order_goods.goods_name', 'like', $where['keywords'].'%'];
         }
 		$where = $whereArray;
 		return true;

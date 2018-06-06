@@ -19,6 +19,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
+use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderPayWithholdRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -103,6 +104,7 @@ class Relet
             ['order_no', '=', $params['order_no']]
         ];
         $row = OrderGoodsRepository::getGoodsRow($where);
+        $goods = Goods::getByGoodsId($params['goods_id']);
         if( $row ){
             if( $row['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
                 if( !publicInc::getDuanzuRow($params['zuqi']) ){
@@ -183,6 +185,7 @@ class Relet
                                     'yiwaixian'         =>  0,//意外险
                                     'zujin'             =>  $row['zujin'],//租金
                                     'pay_type'          =>  PayInc::WithhodingPay,//支付类型
+                                    'goods_no'          =>  $row['goods_no'],//商品编号
                                 ]
                             ],
                             'user'=>[
@@ -255,14 +258,14 @@ class Relet
             }
             //查询
             // 续租表
-            $reletRow = OrderRelet::where(['relet_no','=',$reletNo])->get(['goods_id'])->toArray();
+            $reletRow = OrderRelet::where('relet_no','=',$reletNo)->get(['goods_id'])->toArray();
             // 设备表
-            $goodsObj = OrderGoods::where(['id'],'=',$reletRow['goods_id'])->first();
+            $goodsObj = OrderGoods::where('id','=',$reletRow['goods_id'])->first();
             // 设备周期表
-            $goodsUnitRow = OrderGoodsUnit::where(
+            $goodsUnitRow = OrderGoodsUnit::where([
                 ['order_no','=',$goodsObj->order_no],
                 ['goods_no','=',$goodsObj->goods_no]
-            )->orderBy('id','desc')->fresh()->toArray();
+            ])->orderBy('id','desc')->fresh()->toArray();
             //判断租期类型
             if($reletRow['zuqi_type']==OrderStatus::ZUQI_TYPE1){
                 $t = $reletRow['zuqi']*(60*60*24);

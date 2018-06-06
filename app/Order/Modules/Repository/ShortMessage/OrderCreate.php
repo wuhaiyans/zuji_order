@@ -29,7 +29,7 @@ class OrderCreate implements ShortMessage {
 	}
 
 	
-	public function notify($data=[]){
+	public function notify(){
 		// 根据业务，获取短息需要的数据
 
 		// 查询订单

@@ -14,14 +14,15 @@ class OrderGivebackStatus{
 	//-+------------------------------------------------------------------------
     /**
 	 * 申请中【只给前端展示使用，数据库不会存储当前字段】
+     * @var int -1
      */
     const STATUS_APPLYING = -1;
+    /**
     /**
 	 * 全部状态
      */
     const STATUS_ALL = 0;
-    /**
-	 * 处理中【待收货】
+    /**	 * 处理中【待收货】
      * @var int 1
      */
     const STATUS_DEAL_WAIT_DELIVERY = 1;
