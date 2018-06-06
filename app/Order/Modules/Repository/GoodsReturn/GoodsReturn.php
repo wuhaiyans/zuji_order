@@ -1,5 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository\GoodsReturn;
+use App\Order\Models\OrderReturn;
+use App\Order\Modules\Inc\ReturnStatus;
 
 /**
  *
@@ -7,9 +9,9 @@ namespace App\Order\Modules\Repository\GoodsReturn;
  */
 class GoodsReturn {
 
-    private $data;
+    protected $data;
 
-    public function __construct( $data )
+    public function __construct($data)
     {
         $this->data = $data;
     }
@@ -21,29 +23,32 @@ class GoodsReturn {
      * 取消退货
      * @return bool
      */
-    public function close( ):bool{
-
+    public function close(){
         // 校验状态
-        if( 0 ){
+        if(!$this->data){
             return false;
         }
-
-        // 更新状态
-        if( 0 ){
-            return false;
-        }
-
-
-        try{
-            // goods_no
-            $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo( $this->data['goods_no'] );
-            $b = $goods->returnClose();
-
-            //
-            if( !$b ){
+        //修改退货单状态
+        foreach($this->data as $k=>$v){
+            $where[$k][]=['id','=',$this->data[$k]['id']];
+            $data['status']=ReturnStatus::ReturnCanceled;
+            $updateReturnStatus=OrderReturn::where($where[$k])->update($data);
+            if(!$updateReturnStatus){
                 return false;
             }
-
+        }
+        try{
+            foreach($this->data as $k=>$v){
+                //修改商品状态
+                $goodsInfo =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($this->data[$k]['goods_no'] );
+                $goods=new \App\Order\Modules\Repository\Order\Goods($goodsInfo);
+                p($goods);
+                $b = $goods->returnClose();
+                p($b);
+                if( !$b ){
+                    return false;
+                }
+            }
             return true;
 
         }catch(\Exception $exc){
@@ -104,6 +109,12 @@ class GoodsReturn {
      * @return bool
      */
     public function returnFinish( ):bool{
+        return true;
+    }
+    /**
+     * 拒绝退款
+     */
+    public function refundRefuse( ):bool{
         return true;
     }
     /**

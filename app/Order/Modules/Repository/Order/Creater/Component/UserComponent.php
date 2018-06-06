@@ -6,10 +6,11 @@
  * @copyright (c) 2018, Huishoubao
  */
 
-namespace App\Order\Modules\Repository\Order\Creater;
+namespace App\Order\Modules\Repository\Order\Creater\Component;
 
+use App\Order\Modules\Repository\Order\Creater\OrderCreaterComponent;
 
-class UserComponnet extends OrderCreaterComponnet
+class UserComponent extends OrderCreaterComponent
 {
 
     /**
@@ -19,26 +20,13 @@ class UserComponnet extends OrderCreaterComponnet
     private $user_id;
 
 
-	/**
-	 * 
-	 * @param \App\Order\Modules\Repository\OrderCreater\OrderCreaterInterface $componnet
-	 * @param int $user_id
-	 * @throws \Exception
-	 */
-    public function __construct( OrderCreaterInterface $componnet, int $user_id ){
-		parent::__construct($componnet);
-		if( $user_id < 1 ){
-			throw new \Exception('[用户ID]错误');
-		}
-		$this->user_id = $user_id;
-	}
 
     /**
      * 过滤
 	 * 判断用户是否满足下单条件
      * @return bool
      */
-    public function filter(): bool
+    public function filter( array $params ): bool
     {
         return true;
     }

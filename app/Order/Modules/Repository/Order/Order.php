@@ -228,14 +228,19 @@ class Order {
 	// | 发货
 	//-+------------------------------------------------------------------------
     /**
-	 * 【去确认：申请发货和确认订单 是一个还是两个操作】
-     * 申请发货
+     *  申请发货
+	 * 【申请发货和确认订单 是一个操作】
      * @return bool
      */
-//    public function deliveryOpen():bool{
-//		$this->model->order_status = OrderStatus::OrderPaying; 
-//		return $this->model->save();
-//    }
+    public function deliveryOpen(string $remark):bool{
+        if($this->model->order_status!=OrderStatus::OrderPayed){
+            return false;
+        }
+        $this->model->order_status =OrderStatus::OrderInStock;
+        $this->model->confirm_time =time();
+        $this->model->remark =$remark;
+        return $this->model->save();
+    }
 	/**
 	 * 取消发货，状态切回到 已支付，待确认
 	 * @return bool
@@ -299,7 +304,12 @@ class Order {
      * @return bool
      */
     public function returnOpen( ):bool{
-        return true;
+        //
+        if( $this->model->freeze_type !=0 ){
+            return false;
+        }
+        $this->model->freeze_type = OrderFreezeStatus::GoodsReturn;
+        return $this->model->save();
     }
     /**
      * 取消退货
@@ -307,9 +317,16 @@ class Order {
      */
     public function returnClose( ):bool{
         // 校验自己状态
-
-        // 更新状态
-
+        if(!$this->model){
+            return false;
+        }
+        // 更新订单状态
+        $where[]=['order_no','=',$this->data['order_no']];
+        $data['freeze_type']=OrderFreezeStatus::Non;
+        $updateOrderStatus=$this->model::where($where)->update($data);
+        if(!$updateOrderStatus){
+            return false;
+        }
         return true;
     }
     /**
@@ -427,7 +444,7 @@ class Order {
 	 * @param string $order_no		订单编号
 	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
-	 * @throws \App\Lib\NotFoundException
+	 * @return  bool
 	 */
 	public static function getByNo( string $order_no, int $lock=0 ) {
         $builder = \App\Order\Models\Order::where([
@@ -438,7 +455,7 @@ class Order {
 		}
 		$order_info = $builder->first();
 		if( !$order_info ){
-			throw new \App\Lib\NotFoundException('订单未找到');
+			return false;
 		}
 		return new self( $order_info );
 	}

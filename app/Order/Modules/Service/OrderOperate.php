@@ -12,6 +12,7 @@ use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
+use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
@@ -210,11 +211,18 @@ class OrderOperate
         if(empty($data)){return false;}
         DB::beginTransaction();
         try{
-            $b =OrderRepository::confirmOrder($data['order_no'],$data['remark']);
+            //更新订单状态
+            $order = Order::getByNo($data['order_no']);
+            if(!$order){
+                DB::rollBack();
+                return false;
+            }
+            $b =$order->deliveryOpen($data['remark']);
             if(!$b){
                 DB::rollBack();
                 return false;
             }
+            $orderinfo =$order->getData();
 
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
@@ -222,7 +230,6 @@ class OrderOperate
             if(!$delivery){
                 DB::rollBack();
                 return false;
-
             }
 
             DB::commit();

@@ -19,8 +19,6 @@ class CommonMiniApi extends BaseApi {
 
 	private $result;
 
-	private $error;
-
 	//請求返回值
 	public function getResult(){
 		return $this->result;

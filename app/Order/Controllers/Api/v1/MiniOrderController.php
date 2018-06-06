@@ -19,14 +19,12 @@ use Illuminate\Support\Facades\DB;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
 use App\Order\Modules\OrderCreater\CouponComponnet;
-use App\Order\Modules\OrderCreater\CreditComponnet;
 use App\Order\Modules\OrderCreater\DepositComponnet;
 use App\Order\Modules\OrderCreater\InstalmentComponnet;
 use App\Order\Modules\OrderCreater\OrderComponnet;
 use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
-use App\Order\Modules\OrderCreater\YidunComponnet;
 
 class MiniOrderController extends Controller
 {
@@ -73,7 +71,6 @@ class MiniOrderController extends Controller
         ];
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
-        var_dump($values);die;
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
@@ -110,12 +107,13 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
+        $data = json_decode($data,true);
         $data['pay_type'] = \App\Order\Modules\Inc\PayInc::MiniAlipay;
         $data['sku'] = [
             'sku_id'=>$data['sku_id']
         ];
         //查询芝麻订单确认结果
-        $miniApi = new CommonMiniApi(config('ALIPAY_MINI_APP_ID'));
+        $miniApi = new CommonMiniApi(config('miniappid.ALIPAY_MINI_APP_ID'));
         //获取请求流水号
         $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         $miniParams = [
@@ -129,6 +127,9 @@ class MiniOrderController extends Controller
         }
         //添加逾期时间
         $miniData['overdue_time'] = $data['overdue_time'];
+        print_r($miniData);
+        print_r($params);
+        print_r($data);die;
         //查询成功记录表
         $res = \App\Order\Modules\Repository\MiniOrderRepository::add($miniData);
         if( !$res ){
@@ -154,7 +155,7 @@ class MiniOrderController extends Controller
 
         //优惠券处理
 
-//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('ALIPAY_MINI_APP_ID'));
+//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('miniappid.ALIPAY_MINI_APP_ID'));
 //        //100元全场通用优惠券
 //        $app_ids = [
 //            1,5,9,11,12,13,14,15,16,21,22,24,27

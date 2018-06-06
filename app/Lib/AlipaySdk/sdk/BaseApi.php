@@ -1,7 +1,7 @@
 <?php
 namespace App\Lib\AlipaySdk\sdk;
 
-use App\Lib\Payment\mini\sdk\aop\AopClient;
+use App\Lib\AlipaySdk\sdk\aop\AopClient;
 
 /**
  * Description of BaseApi
@@ -21,12 +21,11 @@ class BaseApi {
 
 	/**
 	 *
-	 * @var \App\Lib\Payment\mini\sdk\aop\AopClient
+	 * @var \App\Lib\AlipaySdk\sdk\aop\AopClient
 	 */
 	protected $Aop = NULL;
 
 	public function __construct($appid) {
-
 		$config_file = __DIR__ . '/' . $appid . '-config.php';
 		if (!file_exists($config_file) && !is_readable($config_file)) {
 			throw new \Exception('支付宝应用配置未找到:' . $config_file);
