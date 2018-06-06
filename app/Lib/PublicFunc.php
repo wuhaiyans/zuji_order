@@ -412,6 +412,18 @@ function set_apistatus( $code, $msg ){
     return get_instance()->setCode(strval($code))->setMsg(strval($msg));
 }
 
+
+/**
+ * 格式化數字
+ * Author: heaven
+ * @param $num
+ * @return string
+ */
+function normalizeNum($num)
+{
+    return is_numeric($num) ? number_format($num, 2, '.', '') : '0.00';
+}
+
 //以数组指定一列值为数组key
 function array_keys_arrange($array,$value){
     $list = [];
@@ -420,3 +432,4 @@ function array_keys_arrange($array,$value){
     }
     return $list;
 }
+
