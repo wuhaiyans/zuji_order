@@ -111,9 +111,9 @@ class CommonMiniApi extends BaseApi {
 			'response' => json_decode(json_encode($result),true),
 		];
 		\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
-		$responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
-		print_r($responseNode);die;
-		$resultCode = $result->$responseNode->code;
+//		$responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
+		$resultCode = $result->zhima_merchant_order_confirm_response->code;
+		var_dump($resultCode);die;
 		if(!empty($resultCode)&&$resultCode == 10000){
 			$result = json_decode(json_encode($result),true);
 			return $result['zhima_merchant_order_confirm_response'];
