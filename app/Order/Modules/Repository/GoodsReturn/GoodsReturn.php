@@ -63,14 +63,21 @@ class GoodsReturn {
         }
     }
     /**
-     * 审核同意
+     * 退换货审核同意
      * @return bool
      */
-    public function accept( ):bool{
-        return true;
+    public function accept( array $data):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->status = ReturnStatus::ReturnAgreed;
+        $this->model->remark=$data['remark'];
+        $this->model->reason_key=$data['reason_key'];
+        return $this->model->save();
     }
     /**
-     * 审核拒绝
+     * 退换货审核拒绝
      * @return bool
      */
     public function refuse( ):bool{
@@ -155,7 +162,7 @@ class GoodsReturn {
         }
         $order_info = $builder->first();
         if( !$order_info ){
-            throw new \App\Lib\NotFoundException('退换货单未找到');
+           return false;
         }
         return new self( $order_info );
     }

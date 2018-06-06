@@ -7,6 +7,7 @@ use App\Order\Models\Order;
 use App\Order\Models\OrderCoupon;
 use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderUserCertified;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
 use App\Order\Modules\Inc\OrderStatus;
@@ -512,5 +513,21 @@ class OrderRepository
         }else{
             return false;
         }
+    }
+    /**
+     * 根据订单编号获取认证信息
+     *
+     */
+    public static function getUserCertified($order_no){
+        if(empty($order_no)){
+            return false;
+        }
+        $where[]=['order_no','=',$order_no];
+        $getUserCertified=OrderUserCertified::where($where)->first();
+        if(!$getUserCertified){
+            return false;
+        }
+        return $getUserCertified->toArray();
+
     }
 }

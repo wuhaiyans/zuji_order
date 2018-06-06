@@ -109,6 +109,7 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
+        $data = json_decode($data,true);
         $data['pay_type'] = \App\Order\Modules\Inc\PayInc::MiniAlipay;
         $data['sku'] = [
             'sku_id'=>$data['sku_id']

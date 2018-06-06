@@ -32,19 +32,33 @@ class OrderReturnRepository
         }
         return $res->toArray();
     }
+
     /**
-     * 获取退货单信息,根据退货单refund_no
-     * @param $params
+     * 创建退换货单
+     * @param array $data
      *
      */
-    public static function getReturnInfoByRefundNo($refund_no){
-        $where[]=['refund_no','=',$refund_no];
-        $res=orderReturn::where($where)->first();
-        if(!$res){
-            return false;
-        }
-        return $res->toArray();
-    }
+   public static function createReturn(array $data){
+       $createReturn=orderReturn::query()->insert($data);
+       if(!$createReturn){
+           return false;
+       }
+       return true;
+   }
+
+    /**
+     * 创建退款单
+     * @param array $data
+     * @return bool
+     */
+   public static function createRefund(array $data){
+       $createRefund=orderReturn::query()->insert($data);
+       if(!$createRefund){
+           return false;
+       }
+       return true;
+   }
+
 
 
 

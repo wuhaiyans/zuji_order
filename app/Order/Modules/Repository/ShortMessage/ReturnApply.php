@@ -32,16 +32,18 @@ class ReturnApply implements ShortMessage {
 	public function notify(){
         //获取退货单信息
        $return= \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($this->business_no);
-       $returnInfo=$return->getData();
-        if( !$returnInfo ){
+        if( !$return ){
             return false;
         }
+       $returnInfo=$return->getData();
+
 		// 查询订单
         $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
+        if( !$order ){
+            return false;
+        }
         $orderInfo=$order->getData();
-		if( !$orderInfo ){
-			return false;
-		}
+
 		// 短息模板
 		$code = $this->getCode($orderInfo['channel_id']);
 		if( !$code ){
@@ -49,17 +51,19 @@ class ReturnApply implements ShortMessage {
 		}
 		//获取商品信息
         $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo['goods_no']);
-		$goodsInfo=$goods->getData();
-        if(!$goodsInfo){
+        if(!$goods){
             return false;
         }
+		$goodsInfo=$goods->getData();
+        //获取用户认证信息
+        $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
         // 发送短息
        $res=\App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
-            'realName' => $orderInfo['realname'],
-            'orderNo' => $orderInfo['order_no'],
+            'realName' => $userInfo['realname'],
+            'orderNo' => $goodsInfo['order_no'],
             'goodsName' => $goodsInfo['goods_name'],
             'serviceTel'=>config('tripartite.Customer_Service_Phone'),
-        ],$returnInfo['order_no']);
+        ],$goodsInfo['order_no']);
         return $res;
 
 	}

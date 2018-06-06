@@ -119,7 +119,13 @@ class Goods {
      * @return bool
      */
     public function barterOpen( ):bool{
-        return true;
+        //商品必须为租用中
+        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
+            return false;
+        }
+        // 状态改为换货中
+        $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
+        return $this->model->save();
     }
     /**
      * 取消换货
@@ -258,13 +264,12 @@ class Goods {
 	 * @param string	$order_no		订单编号
 	 * @param int		$lock			锁
 	 * @return array
-	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getByOrderNo( string $order_no, int $lock=0 ) {
 		
         $builder = \App\Order\Models\OrderGoods::where([
             ['order_no', '=', $order_no],
-        ])->limit(1);
+        ]);
 		if( $lock ){
 			$builder->lockForUpdate();
 		}
@@ -282,7 +287,7 @@ class Goods {
 	 * @param int   	$id		    ID
 	 * @param int		$lock		锁
 	 * @return \App\Order\Modules\Repository\Order\Goods
-	 * @throws \App\Lib\NotFoundException
+	 * @return  bool
 	 */
 	public static function getByGoodsId( int $id, int $lock=0 ) {
         $builder = \App\Order\Models\OrderGoods::where([
@@ -293,7 +298,7 @@ class Goods {
 		}
 		$goods_info = $builder->first();
 		if( !$goods_info ){
-			throw new App\Lib\NotFoundException('商品未找到');
+			return false;
 		}
 		return new Goods( $goods_info );
 	}
@@ -303,7 +308,7 @@ class Goods {
     * @param int   	$goods_no		    商品编号
     * @param int		$lock		锁
     * @return \App\Order\Modules\Repository\Order\Goods
-    * @throws \App\Lib\NotFoundException
+    * @return  bool
     */
     public static function getByGoodsNo( $goods_no, int $lock=0 ) {
         $builder = \App\Order\Models\OrderGoods::where([
@@ -314,7 +319,7 @@ class Goods {
         }
         $goods_info = $builder->first();
         if( !$goods_info ){
-            throw new App\Lib\NotFoundException('商品未找到');
+            return false;
         }
         return new Goods( $goods_info );
     }

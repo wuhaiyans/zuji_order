@@ -58,7 +58,6 @@ class ReturnController extends Controller
         }
 
         $return = $this->OrderReturnCreater->add($params);
-        p($return);
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34007,"创建失败");
         }
@@ -79,13 +78,15 @@ class ReturnController extends Controller
         $data= filter_array($params,[
             'order_no'=>'required',
             'user_id'=>'required',
-            'business_key'=>'required',
         ]);
-        if(count($data)<3){
+        if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $return = $this->OrderReturnCreater->update_return_info($params);//修改信息
-        return apiResponse([],$return);
+        $return = $this->OrderReturnCreater->CreateRefund($params);//修改信息
+        if(!$return){
+            return apiResponse([],ApiStatus::CODE_34007,"创建失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0);
 
     }
     /**
@@ -94,16 +95,18 @@ class ReturnController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * 选中即同意
      * [
-     * order_no
-     * 'agree'=>[
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     * ]
-     * 'disagree'=>[
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     *    ['goods_no'=>'','remark'=>'','reason_key'=>'']
-     * ]
-     *business_key
+     *    [
+     *      'refund_no'=>'',
+     *      'remark'=>'',
+     *      'reason_key'=>''
+     *      'audit_state'=>''true 审核通过，false 审核不通过
+     *    ],
+     *   [
+     *      'refund_no'=>'',
+     *      'remark'=>'',
+     *      'reason_key'=>''
+     *      'audit_state'=>''
+     *    ]
      * ]
      *
      */
@@ -111,27 +114,15 @@ class ReturnController extends Controller
     public function returnReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-            'business_key'=> 'required',
-        ]);
-        if(count($param)<2){
-            return  apiResponse([],ApiStatus::CODE_20001);
+        if(empty($params)){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
-        if(isset($params['agree'])){
-            $res=$this->OrderReturnCreater->agree_return($params);//审核同意
-            if($res!=0){
-                return  apiResponse([],$res);
-            }
+        $res=$this->OrderReturnCreater->returnOfGoods($params);//审核同意
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_34007,"审核失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0);
 
-        }
-        if(isset($params['disagree'])){
-            $res=$this->OrderReturnCreater->deny_return($params);
-            if($res!=0){
-                return  apiResponse([],$res);
-            }
-        }
-        return  apiResponse([],$res);;
     }
     /**
      * 订单退款审核

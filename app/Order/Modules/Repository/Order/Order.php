@@ -274,6 +274,10 @@ class Order {
 	 * @return bool
 	 */
 	public function refundOpen( ):bool{
+        //订单必须是非冻结状态
+        if( $this->model->freeze_type !=0 ){
+            return false;
+        }
 		// 退款中
 		$this->model->freeze_type = OrderFreezeStatus::Refund;
 		return $this->model->save();
@@ -449,7 +453,7 @@ class Order {
 	 * @param string $order_no		订单编号
 	 * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Order\Order
-	 * @throws \App\Lib\NotFoundException
+	 * @return  bool
 	 */
 	public static function getByNo( string $order_no, int $lock=0 ) {
         $builder = \App\Order\Models\Order::where([
@@ -460,7 +464,7 @@ class Order {
 		}
 		$order_info = $builder->first();
 		if( !$order_info ){
-			throw new \App\Lib\NotFoundException('订单未找到');
+			return false;
 		}
 		return new self( $order_info );
 	}
