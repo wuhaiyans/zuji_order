@@ -5,7 +5,9 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
+use App\Order\Models\OrderUserAddress;
 use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
@@ -204,29 +206,6 @@ class OrderController extends Controller
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 
-                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称', '租期','金额'];
-                $excel = new \App\Lib\Excel();
-
-                foreach ($orderData['data'] as $item) {
-                    $data[] = [
-                        $item['order_no'],
-                        date('Y-m-d H:i:s', $item['create_time']),
-                        $item['order_status_name'],
-                        $item['appid_name'],
-                        $item['pay_type_name'],
-                        $item['quality'],
-                        $item['color'],
-                        $item['business'],
-                        $item['storage'],
-                        $item['status'],
-                        date('Y-m-d H:i:s', $item['create_time']),
-                        $item['status']
-                    ];
-                }
-
-                return $excel->write($data, $headers,'imei数据导出');
-
-                Excel::write($orderData);
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 
@@ -241,8 +220,7 @@ class OrderController extends Controller
 
 
 
-    public function orderListExport() {
-
+    public function orderListExport(Request $request) {
 
         $params = $request->input('params');
 
@@ -250,7 +228,30 @@ class OrderController extends Controller
 
         if ($orderData['code']===ApiStatus::CODE_0) {
 
-            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
+                '订单实际总租金','订单总押金','意外险总金额'];
+
+            foreach ($orderData['data']['data'] as $item) {
+                $data[] = [
+                    $item['order_no'],
+                    date('Y-m-d H:i:s', $item['create_time']),
+                    $item['order_status_name'],
+                    $item['appid_name'],
+                    $item['pay_type_name'],
+                    $item['visit_name'],
+                    $item['name'],
+                    $item['mobile'],
+                    $item['address_info'],
+                    implode(",",array_column($item['goodsInfo'],"goods_name")),
+                    $item['order_amount'],
+                    $item['order_yajin'],
+                    $item['order_insurance'],
+                ];
+            }
+
+
+            return Excel::write($data, $headers,'后台订单列表数据导出');
+//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
         } else {
 
             return apiResponse([],ApiStatus::CODE_33001);
@@ -546,7 +547,7 @@ class OrderController extends Controller
         }
 
 
-        $succss = OrderUserInfoRepository::modifyAddress($validateParams['data']);
+        $succss = OrderUserAddressRepository::modifyAddress($validateParams['data']);
         if(!$succss){
             return apiResponse([],ApiStatus::CODE_30013);
         }

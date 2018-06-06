@@ -151,7 +151,7 @@ class ReturnController extends Controller
         }
         return apiResponse([],$res);
     }
-    // 退货/换货/退款记录列表接口
+    // 换货/退款记录列表接口
     /*
      * business_key 业务类型  必选
      *
@@ -160,16 +160,12 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
-        $param = filter_array($params,[
-            'business_key'=> 'required',
-        ]);
-        if(count($param)<1){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
+       
         $return_list = $this->OrderReturnCreater->get_list($params);
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
     }
+
 
     // 退货物流单号上传接口
     /*

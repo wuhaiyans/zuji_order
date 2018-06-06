@@ -14,7 +14,6 @@ use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Order;
-use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
@@ -370,18 +369,15 @@ class OrderOperate
         if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
         //查询订单和用户发货的数据
         $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
-
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据
         $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
-
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
-
             foreach ($goodsExtendData as $keys=> $goodsValues) {
                 if (is_array($goodsValues)) {
                     foreach($goodsValues as $values) {
@@ -394,18 +390,15 @@ class OrderOperate
                         } else {
 
                             $instalmentUnpayAmount+=$values['amount'];
-
                         }
-
                     }
 
                 }
             }
             //未支付总金额
-            $orderData['instalment_unpay_amount'] = $instalmentUnpayAmount;
+            $orderData['instalment_unpay_amount'] = normalizeNum($instalmentUnpayAmount);
             //已支付总金额
-            $orderData['instalment_payed_amount'] = $instalmentPayedAmount;
-
+            $orderData['instalment_payed_amount'] = normalizeNum($instalmentPayedAmount);
         }
 
 
@@ -441,7 +434,8 @@ class OrderOperate
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
-        $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
+        $goodsExtendData =  OrderRepository::getGoodsDeliverInfo($orderNo);
+//        p($goodsExtendData);
         $order['goods_extend_info'] = $goodsExtendData;
 
         return apiResponseArray(ApiStatus::CODE_0,$order);
@@ -493,8 +487,6 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
-
-
             }
 
         }
@@ -531,7 +523,6 @@ class OrderOperate
                 unset($actArray['expiry_process']);
             }
 
-
         }
 
             return $actArray;
@@ -555,7 +546,7 @@ class OrderOperate
 
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
-
+               $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
                } else {
@@ -570,7 +561,7 @@ class OrderOperate
                    }
                    //无分期或者分期已全部还完不出现提前还款按钮
 
-                   $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                    if (empty($orderInstalmentData)){
                        unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
                    }
