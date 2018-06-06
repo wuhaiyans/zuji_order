@@ -33,10 +33,7 @@ class DownloadController extends Controller
             return false;
         }
 
-
         $headers = ['imei','品牌','产品型号', '价格','苹果序列号','成色','颜色','运营商','存储空间','状态', '入库时间'];
-        $excel = new \App\Lib\Excel();
-
         foreach ($items as $item) {
             $data[] = [
                 $item['imei'],
@@ -53,7 +50,7 @@ class DownloadController extends Controller
             ];
         }
 
-        return $excel->write($data, $headers,'imei数据导出');
+        return \App\Lib\Excel::write($data, $headers,'imei数据导出');
     }
 
 

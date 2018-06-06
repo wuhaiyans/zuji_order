@@ -12,6 +12,7 @@ use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
+use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -29,7 +30,12 @@ class OrderOperate
 {
     /**
      * 订单发货接口
-     * @param $order_no string  订单编号 【必须】
+     * @param $orderDetail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
+     * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
@@ -42,17 +48,42 @@ class OrderOperate
      * @return boolean
      */
 
-    public static function delivery($orderNo,$goodsInfo){
+    public static function delivery($orderDetail,$goodsInfo){
         if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
-            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
-            if(empty($orderInfo)){
+            //更新订单状态
+            $order = Order::getByNo($orderDetail['order_no']);
+            if(!$order){
                 DB::rollBack();
                 return false;
             }
-            //判断订单冻结类型 冻结就走换货发货
-            if($orderInfo['freeze_type']!=0){
+            $orderInfo =$order->getData();
+            //判断是否是订单发货
+            if($orderInfo['freeze_type'] == Inc\OrderFreezeStatus::Non){
+                //更新订单表状态
+                $b=$order->deliveryFinish();
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                //增加订单发货信息
+                $b =DeliveryDetail::addOrderDelivery($orderDetail);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                //增加发货详情
+                $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                DB::commit();
+                return true;
+
+            }else{
+                //判断订单冻结类型 冻结就走换货发货
                 foreach ($goodsInfo as $k=>$v){
                     $v['order_no']=$orderNo;
                     $b = OrderReturnRepository::createchange($v);
@@ -64,22 +95,7 @@ class OrderOperate
                 DB::commit();
                 return true;
             }
-            //订单未冻结 走订单发货
-            //更新订单状态
-            $b =OrderRepository::delivery($orderNo);
-            if(!$b){
-                DB::rollBack();
-                return false;
-            }
 
-            //增加商品扩展表信息
-            $b =OrderGoodsExtendRepository::add($orderNo,$goodsInfo);
-            if(!$b){
-                DB::rollBack();
-                return false;
-            }
-            DB::commit();
-            return true;
         }catch (\Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
@@ -224,7 +240,7 @@ class OrderOperate
             }
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
-            var_dump($orderInfo);die;
+
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
@@ -356,8 +372,8 @@ class OrderOperate
         $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
 
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
-        //分期数据表
-        $goodsExtendData =  OrderInstalment::queryList(array('order_no'=>$orderNo));
+        //分期数据
+        $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
 
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;

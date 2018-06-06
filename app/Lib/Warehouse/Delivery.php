@@ -106,7 +106,7 @@ class Delivery
         $result = [
             'order_no'  => $orderInfo['order_no'],
             'realname'  => $orderInfo['name'],
-            'mobile'    => $orderInfo['user_mobile'],
+            'mobile'    => $orderInfo['consignee_mobile'],
             'address_info' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
