@@ -14,7 +14,6 @@ use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Order;
-use App\Order\Modules\Repository\OrderGoodsExtendRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
@@ -441,7 +440,8 @@ class OrderOperate
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
-        $goodsExtendData =  OrderRepository::getGoodsExtendInfo($orderNo);
+        $goodsExtendData =  OrderRepository::getGoodsDeliverInfo($orderNo);
+//        p($goodsExtendData);
         $order['goods_extend_info'] = $goodsExtendData;
 
         return apiResponseArray(ApiStatus::CODE_0,$order);
@@ -492,8 +492,6 @@ class OrderOperate
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
                 $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
-
-
 
             }
 
@@ -570,7 +568,7 @@ class OrderOperate
                    }
                    //无分期或者分期已全部还完不出现提前还款按钮
 
-                   $orderInstalmentData = OrderInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                    if (empty($orderInstalmentData)){
                        unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
                    }

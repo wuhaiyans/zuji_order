@@ -230,7 +230,7 @@ class OrderRepository
      * @return bool
      */
 
-    public static function getGoodsExtendInfo($orderNo){
+    public static function getGoodsDeliverInfo($orderNo){
         if (empty($orderNo)) return false;
         $orderGoodsDeliveryData =  OrderGoodsDelivery::query()->where([
             ['order_no', '=', $orderNo],
