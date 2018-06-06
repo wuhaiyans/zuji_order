@@ -41,8 +41,8 @@ class OrderBuyout
 		if(isset($params['order_no'])){
 			$where[] = ['order_buyout.order_no', '=', $params['order_no']];
 		}
-		if(isset($params['user_id'])){
-			$where[] = ['order_buyout.user_id', '=', $params['user_id']];
+		if(isset($params['mobile'])){
+			$where[] = ['order_info.mobile', '=', $params['mobile']];
 		}
 		if(isset($params['app_id'])){
 			$where[] = ['order_info.appid', '=', $params['app_id']];
