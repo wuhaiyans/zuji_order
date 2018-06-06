@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ImeiService;
@@ -149,8 +150,10 @@ class ImeiController extends Controller
             DB::beginTransaction();
 
             $result = [];
+            $imeis = [];
             foreach ($data as $cel) {
                 if (!isset($cel['A']) || !isset($cel['B'])) continue;
+                array_push($imeis, $cel['A']);
                 $result[] = [
                     'imei'          => isset($cel['A']) ? $cel['A'] :'',
                     'price'         => isset($cel['B']) ? (float)$cel['B'] : 0,
@@ -163,6 +166,24 @@ class ImeiController extends Controller
                     'storage'       => isset($cel['I']) ? intval($cel['I']):0
                 ];
             }
+            $oldImeis = Imei::whereIn('imei', $imeis)->get();
+
+            if ($oldImeis) {
+                $oImeis = [];
+                foreach ($oldImeis as $oi) {
+                    array_push($oImeis, $oi->imei);
+                }
+                foreach ($result as $k => $r) {
+                    if (in_array($r['imei'], $oImeis)) {
+                        unset($result[$k]);
+                    }
+                }
+            }
+
+            if (!$result)
+                return \apiResponse([], ApiStatus::CODE_20001, '没有需要导入的数据');
+
+
             $this->imei->import($result);
             DB::commit();
         } catch (\Exception $e) {
@@ -174,6 +195,5 @@ class ImeiController extends Controller
 
         return \apiResponse();
     }
-
 
 }
