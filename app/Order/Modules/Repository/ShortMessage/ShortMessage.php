@@ -25,6 +25,6 @@ interface ShortMessage {
 	 * 发送短息通知
 	 * @return false
 	 */
-	public function notify($data = []);
+	public function notify();
 	
 }
