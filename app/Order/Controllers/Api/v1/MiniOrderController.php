@@ -114,7 +114,7 @@ class MiniOrderController extends Controller
         $data['pay_type'] = $params['payment_type_id'];
         $data['appid'] = $params['appid'];
         $data['coupon'] = [
-            'coupon_no'=>$params['coupon_no']
+            $params['coupon_no']
         ];
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.ALIPAY_MINI_APP_ID'));
