@@ -112,7 +112,8 @@ class Goods {
      * @return bool
      */
     public function returnFinish( ):bool{
-        return true;
+        $this->model->goods_status=OrderGoodStatus::REFUNDED;
+        $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------

@@ -174,7 +174,7 @@ class MiniOrderController extends Controller
         $sku		= $params['params']['sku_info'];
         $coupon		= $params['params']['coupon'];
         $userId		= $params['params']['user_id'];
-        $addressId		= $params['params']['address_id'];
+        $address		= $params['params']['address'];
 
         //判断参数是否设置
         if(empty($appid)){
@@ -186,8 +186,8 @@ class MiniOrderController extends Controller
         if(empty($userId)){
             return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
         }
-        if(empty($addressId)){
-            return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
+        if(empty($address)){
+            return apiResponse([],ApiStatus::CODE_20001,"address不能为空");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
@@ -197,7 +197,7 @@ class MiniOrderController extends Controller
             'appid'=>$appid,
             'pay_type'=>$payType,
             'order_no'=>$orderNo,
-            'address_id'=>$addressId,
+            'address_info'=>$address,
             'sku'=>$sku,
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID

@@ -332,10 +332,10 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'business_type'           =>'required',
+            'business_type'   =>'required',
             'business_no'     =>'required',
-            'status'     =>'required',
-            'order_no'     =>'required',
+            'status'           =>'required',
+            'order_no'        =>'required',
         ]);
         if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);

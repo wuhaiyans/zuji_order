@@ -165,8 +165,29 @@ class GoodsReturn {
      * 退货退款完成
      * @return bool
      */
-    public function returnFinish( ):bool{
-        return true;
+    public function returnFinish(array $data ):bool{
+        if($data['status']=="processing"){//退款处理中
+            $status=ReturnStatus::ReturnTui;//退货/退款单状态
+        }
+        if($data['status']=="success"){
+            $status=ReturnStatus::ReturnTuiHuo;//退货/退款单状态
+        }
+        $this->model->status=$status;
+        $this->model->save();
+    }
+    /**
+     * 退款完成
+     * @return bool
+     */
+    public function refundFinish(array $data ):bool{
+        if($data['status']=="processing"){//退款处理中
+            $status=ReturnStatus::ReturnTui;//退货/退款单状态
+        }
+        if($data['status']=="success"){
+            $status=ReturnStatus::ReturnTuiKuan;//退货/退款单状态
+        }
+        $this->model->status=$status;
+        $this->model->save();
     }
     /**
      * 拒绝退款
