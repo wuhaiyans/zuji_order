@@ -353,6 +353,15 @@ class OrderOperate
                     DB::rollBack();
                     LogApi::debug("更改订单状态失败:" . $v['order_no']);
                 }
+
+                //分期关闭
+                //查询分期
+                $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
+                if (!$success) {
+                    DB::rollBack();
+                    LogApi::debug("订单关闭分期失败:" . $v['order_no']);
+                }
+                DB::commit();
                 //释放库存
                 //查询商品的信息
                 $orderGoods = OrderRepository::getGoodsListByOrderId($v['order_no']);
@@ -384,14 +393,7 @@ class OrderOperate
                 }
 
             }
-            //分期关闭
-            //查询分期
-            $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
-            if (!$success) {
-                DB::rollBack();
-                LogApi::debug("订单关闭分期失败:" . $v['order_no']);
-            }
-            DB::commit();
+
         }
         return true;
 
@@ -427,6 +429,15 @@ class OrderOperate
                 DB::rollBack();
                 return ApiStatus::CODE_31002;
             }
+
+
+            //分期关闭
+            //查询分期
+            $success =  OrderGoodsInstalment::close(['order_no'=>$orderNo]);
+            if (!$success) {
+                DB::rollBack();
+                return ApiStatus::CODE_31004;
+            }
             //释放库存
             //查询商品的信息
             $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -440,8 +451,6 @@ class OrderOperate
                     ];
                 }
                 $success =Goods::addStock($goods_arr);
-
-
             }
 
             if (!$success || empty($orderGoods)) {
@@ -463,13 +472,6 @@ class OrderOperate
 
             }
 
-            //分期关闭
-            //查询分期
-                $success =  OrderGoodsInstalment::close(['order_no'=>$orderNo]);
-                if (!$success) {
-                    DB::rollBack();
-                    return ApiStatus::CODE_31004;
-                }
 
             DB::commit();
             return ApiStatus::CODE_0;
