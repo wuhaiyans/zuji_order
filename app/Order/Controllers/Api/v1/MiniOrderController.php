@@ -48,9 +48,12 @@ class MiniOrderController extends Controller
         // 验证参数
         $rules = [
             'sku_id' => 'required', //【必须】int；子商品ID
+            'sku_num' => 'required', //【必须】int；子商品ID
+            'begin_time' => 'required', //【必须】int；子商品ID
+            'end_time' => 'required', //【必须】int；子商品ID
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
-        if ($validateParams['code'] != 0) {
+        if ($validateParams['code'] != 2) {
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
@@ -67,7 +70,7 @@ class MiniOrderController extends Controller
         }
         $data = [
             'order_no' => $orderNo,
-            'sku_id' => intval($params['sku_id']),
+            'sku' => [$params],
             'overdue_time' => $overdue_time
         ];
         //redis 存储数据
@@ -112,9 +115,6 @@ class MiniOrderController extends Controller
         $data['pay_type'] = $params['payment_type_id'];
         $data['appid'] = $params['appid'];
         $data['coupon_no'] = $params['coupon_no'];
-        $data['sku'] = [
-            'sku_id'=>$data['sku_id']
-        ];
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.ALIPAY_MINI_APP_ID'));
         //获取请求流水号
