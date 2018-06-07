@@ -306,9 +306,9 @@ class Order {
 	 * @return bool
 	 */
 	public function refundFinish( ):bool{
-		$this->model->order_status = OrderStatus::OrderClosedRefunded; 
-		return $this->model->save();
-		return true;
+		$this->model->order_status = OrderStatus::OrderClosedRefunded;
+        $this->model->freeze_type = OrderFreezeStatus::Non;
+        return $this->model->save();
 	}
 	
 	
@@ -489,26 +489,6 @@ class Order {
     }
 
     /**
-     * 订单续租关闭
-     *
-     * 1.验证订单是否冻结
-     * 2.解冻订单
-     */
-    public function reletClose(){
-        $this->data;
-    }
-
-    /**
-     * 订单续租完成
-     *
-     * 1.验证订单是否冻结
-     * 2.解冻订单
-     */
-    public function reletFinish(){
-        $this->data;
-    }
-
-    /**
      * 验证订单是否冻结
      *
      * @return bool false未冻结,ture冻结
@@ -536,16 +516,16 @@ class Order {
     }
 
     /**
-     * 修改订单冻结状态 解冻
+     * 修改订单续租中的冻结状态 解冻
      *
      * @return bool
      */
-    public function relieveFreeze():bool {
-        if($this->model->freeze_type==OrderFreezeStatus::Non){
-            return false;
-        }else{
+    public function relieveReletFreeze():bool {
+        if($this->model->freeze_type==OrderFreezeStatus::Relet){
             $this->model->freeze_type = OrderFreezeStatus::Non;
             return $this->model->save();
+        }else{
+            return false;
         }
     }
 
