@@ -139,6 +139,11 @@ class OrderClearingRepository
             $whereArray[] = ['app_id', '=', $param['app_id']];
         }
 
+        //出账类型
+        if (isset($param['out_type']) && !empty($param['out_type'])) {
+            $whereArray[] = ['refund_amount', '>', 0];
+        }
+
         //出账方式
         if (isset($param['out_account']) && !empty($param['out_account'])) {
             $whereArray[] = ['out_account', '=', $param['out_account']];
@@ -161,9 +166,9 @@ class OrderClearingRepository
         }
         $query = OrderClearing::where($whereArray);
 
-        if (isset($param['order_no']) && !empty($param['order_no'])) {
+        if (isset($param['size']) && !empty($param['size'])) {
 
-            $whereArray[] = ['order_no', '=', $param['order_no']];
+            $limit  =    $param['size'];
         }
         return $query->paginate($limit,
             ['*'], 'page', $param['page'])->toArray();

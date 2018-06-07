@@ -13,6 +13,8 @@ use App\Order\Models\OrderRelet;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReletStatus;
+use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\Order\Order;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodsUnit;
@@ -170,6 +172,24 @@ class ReletRepository
         $data['status'] = $payStatus;
         $data['pay_time'] =time();
         return OrderRelet::where('relet_no','=',$reletNo)->update($data);
+    }
+
+    /**
+     * 续租完成
+     *      支付完成或创建分期成功执行
+     *
+     * 步骤:
+     *  1.修改商品状态
+     *  2.添加新周期
+     *  3.修改订单状态
+     *  4.解锁订单
+     *
+     * @author jinlin wang
+     * @param array
+     * @return boolean
+     */
+    public function reletFinish(Goods $goods, Order $order){
+
     }
 
     /**
