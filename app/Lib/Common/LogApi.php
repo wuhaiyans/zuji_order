@@ -135,9 +135,9 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-//		$job = new \App\Jobs\LogJob($str);
-//		//$job->delay(5);
-//		dispatch( $job );
+		$job = new \App\Jobs\LogJob($str);
+		//$job->delay(5);
+		dispatch( $job );
 		
 		$_data = [
 			'service' => gethostname(),					// 服务器名称
