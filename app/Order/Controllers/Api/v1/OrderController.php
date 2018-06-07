@@ -5,7 +5,9 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
+use App\Order\Models\OrderUserAddress;
 use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
@@ -545,7 +547,7 @@ class OrderController extends Controller
         }
 
 
-        $succss = OrderUserInfoRepository::modifyAddress($validateParams['data']);
+        $succss = OrderUserAddressRepository::modifyAddress($validateParams['data']);
         if(!$succss){
             return apiResponse([],ApiStatus::CODE_30013);
         }
