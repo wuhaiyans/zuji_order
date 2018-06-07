@@ -77,7 +77,7 @@ class Goods {
         return $this->model->save();
     }
     /**
-     * 退换货审核拒绝-取消退货--检测不合格拒绝退款共用
+     * 退换货审核拒绝-取消退货--检测不合格拒绝退款 --换货检测不合格  共用
      * @return bool
      */
     public function returnClose( ):bool{

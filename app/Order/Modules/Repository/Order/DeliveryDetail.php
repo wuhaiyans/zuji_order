@@ -9,6 +9,7 @@
 namespace App\Order\Modules\Repository\Order;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderGoodsDelivery;
+use App\Order\Modules\Inc\OrderGoodStatus;
 
 /**
  * 发货明细
@@ -59,6 +60,19 @@ class DeliveryDetail {
 		return [];
 	}
 
+    /**
+     * 换货更新原设备为无效
+     * @return bool
+     */
+    public function barterDelivery():bool{
+        //必须是有效状态
+	    if($this->model->status==1){
+	        return false;
+        }
+        $this->model->status=1;
+	    $this->model->save();
+
+    }
     /**
      * 生成订单发货单
      * @param array $deliveryData
@@ -129,6 +143,21 @@ class DeliveryDetail {
             }
             return new self( $goods_delivery_info );
         }
+    }
+
+    /**
+     * 获取信息
+     * @param string $order_no
+     * @param string $goods_no
+     * @return DeliveryDetail|bool
+     */
+    public static function getGoodsDeliveryInfo(string $order_no,string $goods_no){
+        $builder=OrderGoodsDelivery::where([['order_no','=',$order_no],['goods_no','=',$goods_no]])->limit(1);
+        $goods_delivery_info = $builder->first();
+        if( !$goods_delivery_info ){
+            return false;
+        }
+        return new self( $goods_delivery_info );
     }
 	
 }
