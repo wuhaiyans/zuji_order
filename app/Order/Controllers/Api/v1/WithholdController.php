@@ -506,6 +506,152 @@ class WithholdController extends Controller
 
     }
 
+
+    /**
+     * 定时任务扣款
+     */
+    public function crontab_createpay()
+    {
+        $whereArray =
+            [
+                ['term', '=', date('Ym')],
+                ['day', '<=', intval(date('d'))],
+            ];
+
+        // 查询数据
+        $result =  \App\Order\Models\OrderGoodsInstalment::query()
+            ->where($whereArray)
+            ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
+            ->get()
+            ->toArray();
+
+        if(empty($result)){
+            return;
+        }
+
+        foreach($result as $item) {
+            // 订单
+            $orderInfo = OrderRepository::getInfoById($item['order_no']);
+            if (!$orderInfo) {
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error("数据异常");
+                continue;
+            }
+            if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error("[代扣]订单状态不在服务中");
+                continue;
+            }
+
+            // 商品
+            $subject = '订单-' . $item['order_no'] . '-' . $item['goods_no'] . '-第' . $item['times'] . '期扣款';
+
+            // 价格
+            $amount = $item['amount'] * 100;
+            if ($amount < 0) {
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
+                continue;
+            }
+
+            //判断支付方式
+            if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
+                //获取订单的芝麻订单编号
+                $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($item['order_no']);
+                if (empty($miniOrderInfo)) {
+                    \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
+                    Log::error("本地小程序确认订单回调记录查询失败");
+                    continue;
+                }
+                //芝麻小程序扣款请求
+                $miniParams['out_order_no'] = $miniOrderInfo['out_order_no'];
+                $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+                //扣款交易号
+                $miniParams['out_trans_no'] = $item['id'];
+                $miniParams['pay_amount'] = $amount;
+                $miniParams['remark'] = $subject;
+                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+                //判断请求发送是否成功
+                if ($pay_status == 'PAY_SUCCESS') {
+                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+                } elseif ($pay_status == 'PAY_FAILED') {
+                    OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                } elseif ($pay_status == 'PAY_INPROGRESS') {
+                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                } else {
+                    return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
+                }
+            } else {
+                // 代扣协议编号
+                $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
+                // 查询用户协议
+                $withhold = WithholdQuery::getByUserChannel($item['user_id'], $channel);
+
+                $withholdInfo = $withhold->getData();
+
+                $agreementNo = $withholdInfo['out_withhold_no'];
+                if (!$agreementNo) {
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error("用户代扣协议编号错误");
+                    continue;
+                }
+                // 代扣接口
+                $withholding = new \App\Lib\Payment\CommonWithholdingApi;
+
+                $withholding_data = [
+                    'out_trade_no' => $item['id'], //业务系统业务吗
+                    'amount' => $amount,              //交易金额；单位：分
+                    'back_url' => env("API_INNER_URL") . "/createpayNotify",             //后台通知地址
+                    'name' => $subject,             //交易备注
+                    'agreement_no' => $agreementNo,         //支付平台代扣协议号
+                    'user_id' => $orderInfo['user_id'],//业务平台用户id
+                ];
+
+                try {
+                    // 请求代扣接口
+                    $withholding->deduct($withholding_data);
+
+                } catch (\Exception $exc) {
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                    //捕获异常 买家余额不足
+                    if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
+                        \App\Lib\Common\LogApi::error("扣款失败");
+                        continue;
+                    }
+                }
+
+                // 创建扣款记录
+                $instalmentRecord = [
+                    'instalment_id' => $item['id'],   // 分期ID
+                    'type' => 1,               // 类型 1：代扣；2：主动还款
+                    'payment_amount' => $amount,         // 实际支付金额
+                    'status' => OrderInstalmentStatus::PAYING, // 状态：
+                    'create_time' => time(),          // 创建时间
+                ];
+                $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
+                if (!$record) {
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error("创建扣款记录失败");
+                    continue;
+                }
+
+                //发送短信通知 支付宝内部通知
+                $notice = new \App\Order\Modules\Service\OrderNotice(
+                    OrderStatus::BUSINESS_FENQI,
+                    $item['id'],
+                    "InstalmentWithhold");
+                $notice->notify();
+
+                // 发送支付宝消息通知
+                $notice->alipay_notify();
+            }
+        }
+        return true;
+    }
+
     /**
      * 主动还款
      * @requwet Array

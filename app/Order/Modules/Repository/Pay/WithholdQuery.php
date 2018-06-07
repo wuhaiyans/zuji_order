@@ -19,13 +19,17 @@ class WithholdQuery {
 	 * @return \App\Order\Modules\Repository\Pay\Withhold
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getByUserChannel( int $user_id, int $channel ){
+	public static function getByUserChannel( int $user_id, int $channel, $lock=null ){
 		//sql_profiler();
-		$info = \App\Order\Models\OrderPayWithholdModel::where([
+		$builder = \App\Order\Models\OrderPayWithholdModel::where([
 			'user_id'	=> $user_id,
 			'withhold_channel'	=> $channel,
 			'withhold_status'	=> WithholdStatus::SIGNED,
-		])->first();
+		])->limit(1);
+		if( $lock ){
+			$builder->lockForUpdate();
+		}
+		$info = $builder->first();
 		if( $info ){
 			return new Withhold( $info->toArray() );
 		}
@@ -38,12 +42,16 @@ class WithholdQuery {
 	 * @return \App\Order\Modules\Repository\Pay\Withhold
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getByWithholdNo( string $withhold_no ){
+	public static function getByWithholdNo( string $withhold_no, $lock=null ){
 
-		$info = \App\Order\Models\OrderPayWithholdModel::where([
+		$builder = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $withhold_no,
 			'withhold_status'	=> WithholdStatus::SIGNED,
-		])->first();
+		])->limit(1);
+		if( $lock ){
+			$builder->lockForUpdate();
+		}
+		$info = $builder->first();
 		if( $info ){
 			return new Withhold( $info->toArray() );
 		}
