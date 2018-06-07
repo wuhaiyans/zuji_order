@@ -141,7 +141,7 @@ class LogApi {
 		
 		$_data = [
 			'service' => gethostname(),					// 服务器名称
-			'source' => env('LOG_SOURCE'),				// 日志来源
+			'source' => self::$source,					// 日志来源
 			'message' => $msg,
 			'host' => request()->server('HTTP_HOST'),	// 	Host名称
 			'data' => [
@@ -161,7 +161,7 @@ class LogApi {
 		// 日志系统接口
 		try {
 			// 请求
-			$res = Curl::post(env('LOG_API'), json_encode($_data));
+			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
 			if( !$res ){
 				return false;
 			}
