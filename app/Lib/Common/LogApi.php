@@ -174,6 +174,7 @@ class LogApi {
 			}
 			
 		} catch (\Exception $exc) {
+			var_dump( $exc->getMessage() );
 			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
 		}
 
