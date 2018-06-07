@@ -12,7 +12,7 @@ namespace App\Order\Modules\Repository\Pay;
 use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayModel;
 use App\Order\Models\OrderPayPaymentModel;
-use App\Order\Models\OrderPayWithhold;
+use App\Order\Models\OrderPayWithholdModel;
 use App\Order\Models\OrderPayFundauthModel;
 
 /**
@@ -523,7 +523,7 @@ class Pay extends \App\Lib\Configurable
 			throw new \Exception( '代扣签约环节完成保存失败' );
 		}
 		// 更新 代扣签约环节 表
-		$withholdModel = new OrderPayWithhold();
+		$withholdModel = new OrderPayWithholdModel();
 		$b = $withholdModel->insert([
 			'withhold_no'		=> $this->withholdNo,
 			'withhold_channel'	=> $params['withhold_channel'],
