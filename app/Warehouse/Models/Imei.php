@@ -41,6 +41,25 @@ class Imei extends Warehouse
         'quality', 'color', 'business', 'storage', 'create_time', 'update_time'
     ];
 
+
+    /**
+     * @param null $status 不传值或传null时，返回状态列表，否则返回对应状态值
+     * @return array|mixed|string
+     *
+     * 获取状态列表，或状态值
+     */
+    public static function sta($status=null)
+    {
+        $st = [
+            self::STATUS_IN   => '仓库中',
+            self::STATUS_OUT  => '出库',
+        ];
+
+        if ($status === null) return $st;
+
+        return isset($st[$status]) ? $st[$status] : '';
+    }
+
     /**
      * @param $imei
      * @return bool

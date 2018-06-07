@@ -14,12 +14,42 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Illuminate\Support\Facades\Storage;
 
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
 class ImeiService
 {
+
+    //查找类型
+    const SEARCH_NAME = 'name';//手机
+    const SEARCH_BRAND = 'brand';//订单号
+    const SEARCH_IMEI = 'imei';//订单号
+    const SEARCH_COLOR = 'color';
+    const SEARCH_BUSINESS = 'business'; //运营商
+    const SEARCH_STORAGE = 'storage'; //存储
+
+
+    public static function searchKws()
+    {
+        $ks = [
+            self::SEARCH_NAME => '手机型号',
+            self::SEARCH_BRAND => '手机品牌',
+            self::SEARCH_IMEI => '设备imei',
+            self::SEARCH_COLOR => '颜色',
+            self::SEARCH_BUSINESS => '运营商',
+            self::SEARCH_STORAGE => '存储'
+        ];
+
+        return $ks;
+    }
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 导入数据
      */
@@ -40,13 +70,42 @@ class ImeiService
         }
         $whereParams = [];
 
-        if (isset($params['imei']) && $params['imei']) {
-            $whereParams['imei'] = $params['imei'];
+
+        $search = $this->paramsSearch($params);
+
+        if ($search) {
+            $whereParams = array_merge($whereParams, $search);
         }
+
+
+
+        $logic_params = [];
+        if (isset($params['begin_time']) && $params['begin_time']) {
+            array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
+        }
+
+
+        if (isset($params['end_time']) && $params['end_time']) {
+            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         $page = isset($params['page']) ? $params['page'] : 1;
 
-        $collect = ImeiRepository::list($whereParams, $limit, $page);
+        $collect = ImeiRepository::list($whereParams,$logic_params , $limit, $page);
         $items = $collect->items();
 
         if (!$items) {
@@ -56,6 +115,23 @@ class ImeiService
         }
 
         return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()];
+    }
+
+
+    /**
+     * 查找类型
+     */
+    public function paramsSearch($params)
+    {
+        if (!isset($params['kw_type']) || !$params['kw_type']) {
+            return false;
+        }
+
+        if (!isset($params['keywords']) || !$params['keywords']) {
+            return false;
+        }
+
+        return [$params['kw_type'] => $params['keywords']];
     }
 
 
