@@ -330,8 +330,12 @@ class OrderCreater
     {
         try{
             $orderType =OrderStatus::orderMiniService;
+            intval($data['user_id']);
+            intval($data['pay_type']);
+            intval($data['appid']);
+            intval($orderType);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['pay_type']),($data['appid']),($orderType));
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
