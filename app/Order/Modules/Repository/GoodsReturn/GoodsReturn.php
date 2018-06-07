@@ -118,18 +118,41 @@ class GoodsReturn {
         return $this->model->save();
     }
     /**
-     * 退货检测合格
+     * 退货==换货检测合格  共用
      * @return bool
      */
-    public function returnCheckOut( ):bool{
-        return true;
+    public function returnCheckOut( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationSuccess;
+        $this->model->status=ReturnStatus::ReturnReceive;
+        return $this->model->save();
+
     }
     /**
-     * 检测不合格
+     * 退货检测不合格
      * @return bool
      */
-    public function Unqualified( ):bool{
-        return true;
+    public function returnUnqualified( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
+        $this->model->status=ReturnStatus::ReturnReceive;
+        return $this->model->save();
+    }
+    /**
+     * 换货检测不合格
+     * @return bool
+     */
+    public function barterUnqualified( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
+        $this->model->status=ReturnStatus::ReturnCanceled;//已取消
+        return $this->model->save();
     }
     /**
      * 退货完成，退款进行中
