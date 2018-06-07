@@ -170,11 +170,14 @@ class Order {
 		}
 		// 支付中
 		if( $data['status'] == 'processing' ){
-			$this->model->order_status = OrderStatus::OrderPaying; 
+			$this->model->order_status = OrderStatus::OrderPaying;
+			$this->model->update_time = time();
 		}
 		// 支付成功
 		elseif( $data['status'] == 'success' ){
-			$this->model->order_status = OrderStatus::OrderPayed; 
+			$this->model->order_status = OrderStatus::OrderPayed;
+            $this->model->pay_time = time();
+            $this->model->update_time = time();
 		}else{
 			return false;
 		}
@@ -266,7 +269,12 @@ class Order {
 	 * @return bool
 	 */
 	public function sign( ):bool{
-		return true;
+        if($this->model->order_status!=OrderStatus::OrderDeliveryed && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+        $this->model->order_status = OrderStatus::OrderInService;
+        $this->model->receive_time = time();
+        return $this->model->save();
 	}
 	
 	
@@ -278,6 +286,10 @@ class Order {
 	 * @return bool
 	 */
 	public function refundOpen( ):bool{
+        //订单必须是非冻结状态
+        if( $this->model->freeze_type !=0 ){
+            return false;
+        }
 		// 退款中
 		$this->model->freeze_type = OrderFreezeStatus::Refund;
 		return $this->model->save();
@@ -308,7 +320,7 @@ class Order {
      * @return bool
      */
     public function returnOpen( ):bool{
-        //
+        //订单必须是租用中
         if( $this->model->freeze_type !=0 ){
             return false;
         }
@@ -316,22 +328,16 @@ class Order {
         return $this->model->save();
     }
     /**
-     * 取消退货
+     * 取消退货-取消换货-取消退款-检测不合格拒绝退款 公用
      * @return bool
      */
     public function returnClose( ):bool{
-        // 校验自己状态
-        if(!$this->model){
+        //订单必须是冻结
+        if( $this->model->freeze_type ==0 ){
             return false;
         }
-        // 更新订单状态
-        $where[]=['order_no','=',$this->data['order_no']];
-        $data['freeze_type']=OrderFreezeStatus::Non;
-        $updateOrderStatus=$this->model::where($where)->update($data);
-        if(!$updateOrderStatus){
-            return false;
-        }
-        return true;
+        $this->model->freeze_type = OrderFreezeStatus::Non;
+        return $this->model->save();
     }
     /**
      * 完成退货
@@ -349,14 +355,12 @@ class Order {
      * 申请换货
      */
     public function barterOpen( ):bool{
-        return true;
-    }
-    /**
-     * @return bool
-     * 取消换货
-     */
-    public function barterClose( ):bool{
-        return true;
+        //订单必须是租用中
+        if( $this->model->freeze_type !=0 ){
+            return false;
+        }
+        $this->model->freeze_type = OrderFreezeStatus::Exchange;
+        return $this->model->save();
     }
     /**
      * @return bool

@@ -18,6 +18,8 @@ return [
     'api.order.orderLog'=>'OrderController@orderLog',
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+    //获取订单状态流信息
+    'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
     //订单确认修改收货地址信息
     'api.order.modifyAddress'=>'OrderController@modifyAddress',
@@ -134,7 +136,7 @@ return [
     // 退货记录列表接口
     'api.Return.returnList'         => 'ReturnController@returnList',
     // 退货物流单号上传接口
-    'api.Return.returnDeliverNo'    => 'ReturnController@returnDeliverNo',
+    'api.Return.updateDeliveryNo'    => 'ReturnController@updateDeliveryNo',
     // 退货结果查看接口
     'api.Return.returnResult'       => 'ReturnController@returnResult',
     // 取消退货接口
@@ -163,6 +165,12 @@ return [
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
     //获取订单检测不合格的数据
     'api.Return.returnCheckList'       =>'ReturnController@returnCheckList',
+    //退货检测不合格的数据，拒绝退款
+    'api.Return.refuseRefund'       =>'ReturnController@refuseRefund',
+    //退款--取消退款
+    'api.Return.cancelRefund'       =>'ReturnController@cancelRefund',
+
+
 
 
     //续租接口

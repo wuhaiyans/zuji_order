@@ -29,35 +29,41 @@ class ReturnApply implements ShortMessage {
 		return Config::getCode($channel_id, $class);
 	}
 
-	public function notify($data=[]){
-		// 根据业务，获取短息需要的数据
+	public function notify(){
+        //获取退货单信息
+       $return= \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($this->business_no);
+        if( !$return ){
+            return false;
+        }
+       $returnInfo=$return->getData();
 
 		// 查询订单
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
-		if( !$orderInfo ){
-			return false;
-		}
+        $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
+        if( !$order ){
+            return false;
+        }
+        $orderInfo=$order->getData();
+
 		// 短息模板
 		$code = $this->getCode($orderInfo['channel_id']);
 		if( !$code ){
 			return false;
 		}
 		//获取商品信息
-        foreach($data as $k=>$v){
-		    $where[]=['goods_no','=',$data[$k]['goods_no']];
-            $where[]=['order_no','=',$this->business_no];
-		    $goodsInfo=OrderReturnRepository::getGoodsInfo($where);
-            if(!$goodsInfo) {
-                return false;
-            }
-            // 发送短息
-           $res=\App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
-                'realName' => $orderInfo['realname'],
-                'orderNo' => $orderInfo['order_no'],
-                'goodsName' => $goodsInfo['goods_name'],
-                'serviceTel'=>config('tripartite.Customer_Service_Phone'),
-            ],$orderInfo['order_no']);
+        $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo['goods_no']);
+        if(!$goods){
+            return false;
         }
+		$goodsInfo=$goods->getData();
+        //获取用户认证信息
+        $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
+        // 发送短息
+       $res=\App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
+            'realName' => $userInfo['realname'],
+            'orderNo' => $goodsInfo['order_no'],
+            'goodsName' => $goodsInfo['goods_name'],
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+        ],$goodsInfo['order_no']);
         return $res;
 
 	}
