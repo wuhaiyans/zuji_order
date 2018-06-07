@@ -54,10 +54,10 @@ class OrderCleaningController extends Controller
      * @return \Illuminate\Http\JsonResponse
      *
      */
-    public function orderListFilter()
+    public function orderCleaningListFilter()
     {
 
-        $res = \App\Order\Modules\Inc\OrderListFiler::orderInc();
+        $res = \App\Order\Modules\Inc\OrderCleaningListFiler::orderCleanInc();
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
 

@@ -261,7 +261,7 @@ class OrderCleaningStatus{
             self::orderCleaningUnfreeze => '待退还押金',
             self::orderCleaningUnRefund => '待退款',
             self::orderCleaning => '出账中',
-            self::orderCleaningComplete => '清算已完成',
+            self::orderCleaningComplete => '已出账',
         ];
     }
 

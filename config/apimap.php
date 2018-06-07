@@ -76,6 +76,10 @@ return [
     //订单清算单操作退款
     'api.orderClean.opereate'=>'OrderCleaningController@orderCleanOperate',
 
+    //订单清算列表筛选项接口
+    'api.orderClean.listFilter'=>'OrderCleaningController@orderCleaningListFilter',
+
+
 
     // 订单发货修改imei号
     'api.order.orderDeliverImei' => 'OrderController@orderDeliverImei',
