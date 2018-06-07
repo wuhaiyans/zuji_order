@@ -52,7 +52,7 @@ class UserComponnet implements OrderCreater
     //用户信息
     private $userInfo;
 
-    public function __construct(OrderCreater $componnet, int $userId,$addressId =0)
+    public function __construct(OrderCreater $componnet, int $userId,$addressId =0,$addressInfo = [])
     {
         $this->componnet =$componnet;
         $this->userId =$userId;
@@ -62,7 +62,11 @@ class UserComponnet implements OrderCreater
         if (!is_array($userInfo)) {
             throw new Exception("获取用户接口失败");
         }
-        $this->address=$userInfo['address'];
+        if( empty($addressInfo) ){
+            $this->address = $userInfo['address'];
+        }else{
+            $this->address = $addressInfo;
+        }
         $this->mobile = $userInfo['username'];
         $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;
