@@ -68,49 +68,25 @@ class Goods {
      * @return bool
      */
     public function returnOpen( ):bool{
-        //
+        //商品必须为租用中
         if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
             return false;
         }
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
-
-        // 获取订单
-        $order = $this->getOrder( );
-        // 订单冻结 退货中
-        return $order->returnOpen();
     }
     /**
-     * 取消退货
+     * 退换货审核拒绝-取消退货--检测不合格拒绝退款共用
      * @return bool
      */
-    public function returnClose( ){
-        // 校验自己状态
-        if(!$this->data ){
+    public function returnClose( ):bool{
+        if( $this->model->goods_status== OrderGoodStatus::RENTING_MACHINE){
             return false;
         }
-
-        // 更新商品状态
-        $where[]=['id','=',$this->data['id']];
-        $data['goods_status']=OrderGoodStatus::RENTING_MACHINE;
-        $updateGoodsStatus=OrderGoods::where($where)->update($data);
-        if(!$updateGoodsStatus){
-            return false;
-        }
-        try{
-            // 获取当前订单
-            $orderInfo =Order::getByNo($this->data['order_no']);
-            $order=new \App\Order\Modules\Repository\Order\Order($orderInfo);
-            // 更新订单状态
-            $b = $order->returnClose($order);
-            if( !$b ){
-                return false;
-            }
-        }catch(\Exception $exc){
-            return false;
-        }
-
+        // 状态改为租用中
+        $this->model->goods_status = OrderGoodStatus::RENTING_MACHINE;
+        return $this->model->save();
 
     }
     /**
@@ -129,7 +105,13 @@ class Goods {
      * @return bool
      */
     public function barterOpen( ):bool{
-        return true;
+        //商品必须为租用中
+        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
+            return false;
+        }
+        // 状态改为换货中
+        $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
+        return $this->model->save();
     }
     /**
      * 取消换货

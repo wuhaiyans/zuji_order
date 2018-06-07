@@ -358,5 +358,18 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+
+    /**
+     * 共用的状态等统一接口
+     */
+    public function publics()
+    {
+        $data = [
+            'status_list' => \App\Warehouse\Models\Receive::status(),
+            'kw_types'    => DeliveryService::searchKws()
+        ];
+        return apiResponse($data);
+    }
+
 }
 

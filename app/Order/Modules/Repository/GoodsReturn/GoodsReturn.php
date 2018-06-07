@@ -9,61 +9,51 @@ use App\Order\Modules\Inc\ReturnStatus;
  */
 class GoodsReturn {
 
-    protected $data;
+    protected $OrderReturn;
 
-    public function __construct($data)
+    public function __construct(OrderReturn $OrderReturn)
     {
-        $this->data = $data;
+        $this->model = $OrderReturn;
     }
 
     //-+------------------------------------------------------------------------
     // | 退货
     //-+------------------------------------------------------------------------
     /**
+     * 读取退换货单原始数据
+     * @return array
+     */
+    public function getData():array{
+        return $this->model->toArray();
+    }
+    /**
      * 取消退货
      * @return bool
      */
     public function close(){
         // 校验状态
-        if(!$this->data){
+        if($this->model->status==ReturnStatus::ReturnCanceled){
             return false;
         }
-        //修改退货单状态
-        foreach($this->data as $k=>$v){
-            $where[$k][]=['id','=',$this->data[$k]['id']];
-            $data['status']=ReturnStatus::ReturnCanceled;
-            $updateReturnStatus=OrderReturn::where($where[$k])->update($data);
-            if(!$updateReturnStatus){
-                return false;
-            }
-        }
-        try{
-            foreach($this->data as $k=>$v){
-                //修改商品状态
-                $goodsInfo =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($this->data[$k]['goods_no'] );
-                $goods=new \App\Order\Modules\Repository\Order\Goods($goodsInfo);
-                p($goods);
-                $b = $goods->returnClose();
-                p($b);
-                if( !$b ){
-                    return false;
-                }
-            }
-            return true;
-
-        }catch(\Exception $exc){
-            return false;
-        }
+        $this->model->status = ReturnStatus::ReturnCanceled;
+        return $this->model->save();
     }
     /**
-     * 审核同意
+     * 退换货审核同意
      * @return bool
      */
-    public function accept( ):bool{
-        return true;
+    public function accept( array $data):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->status = ReturnStatus::ReturnAgreed;
+        $this->model->remark=$data['remark'];
+        $this->model->reason_key=$data['reason_key'];
+        return $this->model->save();
     }
     /**
-     * 审核拒绝
+     * 退换货审核拒绝
      * @return bool
      */
     public function refuse( ):bool{
@@ -77,11 +67,55 @@ class GoodsReturn {
         return true;
     }
     /**
+     * 退款审核同意
+     * @return bool
+     */
+    public function refundAgree(string $remark):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->remark = $remark;
+        $this->model->status = ReturnStatus::ReturnAgreed;
+        return $this->model->save();
+    }
+    /**
+     * 退款审核拒绝
+     * @return bool
+     */
+    public function refundAccept( string $remark):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->remark = $remark;
+        $this->model->status = ReturnStatus::ReturnDenied;
+        return $this->model->save();
+    }
+    /**
      * 取消退款
      *@return bool
      */
-    public function cancelRefund( ):bool{
-        return true;
+    public function cancelRefund():bool{
+        //退换货单必须未取消
+        if( $this->model->status =ReturnStatus::ReturnCanceled ){
+            return false;
+        }
+        $this->model->status = ReturnStatus::ReturnCanceled;
+        return $this->model->save();
+    }
+    /**
+     * 退货检测不合格拒绝退款
+     *@return bool
+     */
+    public function refuseRefund(string $remark){
+        //退换货单必须未取消
+        if( $this->model->status==ReturnStatus::ReturnCanceled ){
+            return false;
+        }
+        $this->model->refuse_refund_remark = $remark;
+        $this->model->status = ReturnStatus::ReturnCanceled;
+        return $this->model->save();
     }
     /**
      * 退货检测合格
@@ -130,6 +164,64 @@ class GoodsReturn {
      */
     public function barterFinish( ):bool{
         return true;
+    }
+    /**
+     *
+     * 更新物流单号
+     * @return bool
+     */
+    public function uploadLogistics(array $data){
+        if($this->model->logistics_no!=''){
+            return false;
+        }
+        $this->model->logistics_id=$data['logistics_id'];
+        $this->model->logistics_name=$data['logistics_name'];
+        $this->model->logistics_no=$data['logistics_no'];
+        return $this->model->save();
+
+    }
+
+    /**
+     * 获取订单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $refund_no		退换货编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnByRefundNo( string $refund_no, int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['refund_no', '=', $refund_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+           return false;
+        }
+        return new self( $order_info );
+    }
+    /**
+     * 获取退换货单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $order_no		退换货编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnByOrderNo( string $order_no, int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['order_no', '=', $order_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
+        }
+        return new self( $order_info );
     }
 
 

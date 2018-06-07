@@ -15,8 +15,29 @@ use App\Order\Models\OrderGoodsDelivery;
  * （IMEI，合同）
  */
 class DeliveryDetail {
-	
-	/**
+    /**
+     *
+     * @var OrderGoodsdelivery
+     */
+    private $model = [];
+
+    /**
+     * 构造函数
+     * @param array $data 商品扩展原始数据
+     */
+    public function __construct( OrderGoodsDelivery $OrderGoodsDelivery ) {
+        $this->model = $OrderGoodsDelivery;
+    }
+
+    /**
+     * 读取商品原始数据
+     * @return array
+     */
+    public function getData():array{
+        return $this->model->toArray();
+    }
+
+    /**
 	 * 发货明细
 	 * @param string $goods_no
 	 * @return array|bool	array：发货明细（一维数组）；false：不存在
@@ -91,6 +112,23 @@ class DeliveryDetail {
             }
         }
         return true;
+    }
+
+    /**
+     * 获取商品扩展表信息
+     * @param string $order_no
+     * @param array $goods_info
+     * return bool
+     */
+    public static function getGoodsDelivery(string $order_no,array $goods_info){
+        foreach ($goods_info as $k=>$v){
+            $builder=OrderGoodsDelivery::where([['order_no','=',$order_no],['goods_no','=',$goods_info[$k]['goods_no']]])->limit(1);
+            $goods_delivery_info = $builder->first();
+            if( !$goods_delivery_info ){
+                return false;
+            }
+            return new self( $goods_delivery_info );
+        }
     }
 	
 }

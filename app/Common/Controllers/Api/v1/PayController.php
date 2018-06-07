@@ -18,6 +18,10 @@ class PayController extends Controller
 		
     }
 	
+	public function testJob(){
+		LogApi::debug('test');
+		var_dump(123);exit;
+	}
 	
 	/**
 	 * 测试  分期计算 和 分期优惠计算
