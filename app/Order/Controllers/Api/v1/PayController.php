@@ -240,8 +240,10 @@ class PayController extends Controller
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('代扣签约异步通知处理失败', $exc);
 			echo $exc->getMessage();
 		} catch (\Exception $exc) {
+			LogApi::error('代扣签约异步通知处理失败', $exc);
 			echo $exc->getMessage();
 		}
 		
