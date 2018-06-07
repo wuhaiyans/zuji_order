@@ -372,7 +372,6 @@ class OrderCreater
 
             }
             $schemaData = $orderCreater->getDataSchema();
-            var_dump($schemaData);die;
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
