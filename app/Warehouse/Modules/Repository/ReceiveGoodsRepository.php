@@ -7,8 +7,17 @@
 
 namespace App\Warehouse\Modules\Repository;
 
+use App\Warehouse\Models\ReceiveGoods;
+use Illuminate\Support\Facades\Log;
+
 class ReceiveGoodsRepository
 {
+
+    const SEARCH_TYPE_MOBILE='customer_mobile';
+    const SEARCH_TYPE_ORDER_NO = 'order_no';
+    const SEARCH_TYPE_GOODS_NAME = 'name';
+
+
     /**
      * @param $params
      * @param $limit
@@ -19,29 +28,27 @@ class ReceiveGoodsRepository
      */
     public static function list($params,$logic_params, $limit, $page=null)
     {
-
-        $query = \App\Warehouse\Models\Imei::whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);
-
-        if (is_array($params)) {
-            foreach ($params as $k => $param) {
-                if (in_array($k, ['imei', 'brand', 'color', 'business'])) {
-                    $query->where($k, 'like', '%'.$param.'%');
-                } else {
-                    $query->where([$k=>$param]);
+        $query = ReceiveGoods::whereHas('receive', function ($query) use($params) {
+            if (is_array($params)) {
+                foreach ($params as $k => $v) {
+                    if (in_array($k, [self::SEARCH_TYPE_MOBILE, self::SEARCH_TYPE_ORDER_NO])) {
+                        $query->where('zuji_receive.' . $k,'like', '%'.$v.'%');
+                    }
                 }
             }
+        });
+
+        if (isset($params['name']) && $params['name'] == self::SEARCH_TYPE_GOODS_NAME) {
+            $query->where('name', 'like', '%'.$params['name'].'%');
         }
 
-        if (is_array($logic_params) && count($logic_params)>0) {
-            foreach ($logic_params as $logic) {
-                $query->where($logic[0], $logic[1] ,$logic[2]);
-            }
-        }
-
-        return $query->paginate($limit,
+        return $query->with(['receive'])->paginate($limit,
             [
                 '*'
             ],
             'page', $page);
     }
+
+
+
 }

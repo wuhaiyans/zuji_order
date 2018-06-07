@@ -138,39 +138,44 @@ class LogApi {
 		$job = new \App\Jobs\LogJob($str);
 		//$job->delay(5);
 		dispatch( $job );
-//		
-//		$_config = [
-//			'service' => gethostname(),					// 服务器名称
-//			'source' => env('LOG_SOURCE'),				// 日志来源
-//			'message' => $msg,
-//			'host' => request()->server('HTTP_HOST'),	// 	Host名称
-//			'data' => [
-//				'level' => $level,						// 级别
-//				'session_id' => session_id(),			// 回话
-//				'user_id' => '',						// 用户ID
-//				'serial_no' => self::_autoincrement(),	// 序号
-//				'content' => $data,						// 内容
-//			],
-//		];
-//		
-//		// 日志系统接口
-//		try {
-//			// 请求
-//			$res = Curl::post(env('LOG_API'), json_encode($_config));
-//			if( !$res ){
-//				return false;
-//			}
-//			$res = json_decode($res,true);
-//			if( !$res ){
-//				return false;
-//			}
-//			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
-//				dispatch(new \App\Jobs\LogJob( $str ));
-//			}
-//			
-//		} catch (\Exception $exc) {
-//			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_config) ));
-//		}
+		
+		$_data = [
+			'service' => gethostname(),					// 服务器名称
+			'source' => self::$source,					// 日志来源
+			'message' => $msg,
+			'host' => request()->server('HTTP_HOST'),	// 	Host名称
+			'data' => [
+				'level' => $level,						// 级别
+				'session_id' => session_id(),			// 回话
+				'user_id' => '',						// 用户ID
+				'serial_no' => self::_autoincrement(),	// 序号
+				'content' => $data,						// 内容
+			],
+		];
+		// Redis 发布
+		//$job = new \App\Jobs\Log2Job( $_data );
+		//dispatch( $job );
+		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
+		
+		
+		// 日志系统接口
+		try {
+			// 请求
+			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+			if( !$res ){
+				return false;
+			}
+			$res = json_decode($res,true);
+			if( !$res ){
+				return false;
+			}
+			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
+				dispatch(new \App\Jobs\LogJob( $str ));
+			}
+			
+		} catch (\Exception $exc) {
+			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
+		}
 
 		
 		return self::getInstace();

@@ -8,7 +8,9 @@
  */
 
 namespace App\Warehouse\Controllers\Api\v1;
-
+use App\Warehouse\Models\ReceiveGoods;
+use App\Warehouse\Modules\Service\ReceiveGoodsService;
+use App\Warehouse\Config;
 
 /**
  * Class ReceiveGoodsController
@@ -18,6 +20,15 @@ namespace App\Warehouse\Controllers\Api\v1;
  */
 class ReceiveGoodsController extends Controller
 {
+
+
+    protected $goods;
+
+    public function __construct(ReceiveGoodsService $receiveGoods)
+    {
+        $this->goods = $receiveGoods;
+    }
+
     /**
      * 列表查询
      *
@@ -25,7 +36,30 @@ class ReceiveGoodsController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
-        $list = $this->ReceiveGoodsService->list($params);
+        $list = $this->goods->list($params);
         return \apiResponse($list);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * 公共参数
+     */
+    public function publics()
+    {
+        $data = [
+            'kw_types'    => ReceiveGoodsService::searchKws()
+        ];
+
+        return apiResponse($data);
+    }
+
+
+    /**
+     * 获取检测项
+     */
+    public function checkItems()
+    {
+        return Config::$check_items;
     }
 }
