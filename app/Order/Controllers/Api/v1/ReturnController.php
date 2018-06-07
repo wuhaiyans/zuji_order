@@ -208,25 +208,19 @@ class ReturnController extends Controller
 
     // 退货结果查看接口
     /*
-     * order_no  订单编号  必选
-     * goods_no=array('3123123','21312312') 商品编号    必选
+     * [
+     *   ['refund_no'=>''] 必选
+     *   ['refund_no'=>''] 必选
+     * ]
+     *
      */
     public function returnResult(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
-        if(empty($params['order_no'])){
-            return apiResponse( [], ApiStatus::CODE_20001,'订单编号不能为空' );
-        }
-        if(empty($params['goods_no'])){
-            return apiResponse( [], ApiStatus::CODE_20001,'商品编号不能为空' );
-        }
         $ret = $this->OrderReturnCreater->returnResult($params);
-        if($ret){
-            return apiResponse([$ret],ApiStatus::CODE_0);
-        }else{
-            return apiResponse( [], $ret);
-        }
+        return apiResponse([$ret],ApiStatus::CODE_0);
+
 
     }
 
