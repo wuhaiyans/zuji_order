@@ -48,7 +48,6 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo){
-        if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -66,12 +65,14 @@ class OrderOperate
                     DB::rollBack();
                     return false;
                 }
+
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
                     DB::rollBack();
                     return false;
                 }
+
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
@@ -84,7 +85,7 @@ class OrderOperate
             }else{
                 //判断订单冻结类型 冻结就走换货发货
                 foreach ($goodsInfo as $k=>$v){
-                    $v['order_no']=$orderNo;
+                    $v['order_no']=$orderDetail['order_no'];
                     $b = OrderReturnRepository::createchange($v);
                     if(!$b){
                         DB::rollBack();
