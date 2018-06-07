@@ -19,7 +19,7 @@ class PayController extends Controller
     }
 	
 	public function testJob(){
-		LogApi::debug('test');
+//		LogApi::debug('test');
 		var_dump(123);exit;
 	}
 	
