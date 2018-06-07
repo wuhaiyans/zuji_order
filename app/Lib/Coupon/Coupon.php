@@ -28,10 +28,8 @@ class Coupon{
         $data['params'] = [
             'coupon'=>$coupon,
         ];
-        print_r($data);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info = json_decode($info,true);
-        print_r($info);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
