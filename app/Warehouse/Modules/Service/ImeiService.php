@@ -77,8 +77,6 @@ class ImeiService
             $whereParams = array_merge($whereParams, $search);
         }
 
-
-
         $logic_params = [];
         if (isset($params['begin_time']) && $params['begin_time']) {
             array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
@@ -88,20 +86,6 @@ class ImeiService
         if (isset($params['end_time']) && $params['end_time']) {
             array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         $page = isset($params['page']) ? $params['page'] : 1;
 
@@ -148,13 +132,26 @@ class ImeiService
         }
         $whereParams = [];
 
-        if (isset($params['imei']) && $params['imei']) {
-            $whereParams['imei'] = $params['imei'];
+        $search = $this->paramsSearch($params);
+
+        if ($search) {
+            $whereParams = array_merge($whereParams, $search);
+        }
+
+
+        $logic_params = [];
+        if (isset($params['begin_time']) && $params['begin_time']) {
+            array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
+        }
+
+
+        if (isset($params['end_time']) && $params['end_time']) {
+            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
         }
 
         $page = isset($params['page']) ? $params['page'] : 1;
 
-        $collect = ImeiRepository::list($whereParams, $limit, $page);
+        $collect = ImeiRepository::list($whereParams,$logic_params , $limit, $page);
         $items = $collect->items();
 
         if (!$items) {

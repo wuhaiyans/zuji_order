@@ -45,7 +45,7 @@ class ImeiRepository
             }unset($d);
 
 
-            DB::table('zuji_imei')->updateOrInsert($data);
+            DB::table('zuji_imei')->insert($data);
 
             DB::commit();
         } catch (\Exception $e) {

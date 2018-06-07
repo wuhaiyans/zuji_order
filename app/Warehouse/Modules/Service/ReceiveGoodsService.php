@@ -10,4 +10,11 @@ namespace App\Warehouse\Modules\Service;
 class ReceiveGoodsService
 {
 
+    /**
+     * 获取列表
+     */
+    public function list()
+    {
+
+    }
 }
