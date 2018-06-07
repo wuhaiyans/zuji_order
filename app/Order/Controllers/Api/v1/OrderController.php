@@ -267,6 +267,35 @@ class OrderController extends Controller
     }
 
     /**
+     * 获取订单状态流
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+
+    public function getOrderStatus(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::getOrderStatus($params['order_no']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+
+    }
+
+    /**
      *  增加联系备注
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -413,6 +442,14 @@ class OrderController extends Controller
 
 
     }
+    /**
+     * 定时任务取消订单
+     * @return bool
+     */
+    public function cronCancelOrder(){
+
+       return OrderOperate::cronCancelOrder();
+    }
 
     /**
      * 未支付用户取消接口
@@ -436,7 +473,7 @@ class OrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
-        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $params['user_id']=18);
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $params['user_id']);
 
         return apiResponse([],$code);
 

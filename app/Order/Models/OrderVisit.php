@@ -21,6 +21,6 @@ class OrderVisit extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','visit_id','visit_text'];
+    protected $fillable = ['order_no','visit_id','visit_text','create_time'];
 
 }
