@@ -44,6 +44,7 @@ class CouponComponnet implements OrderCreater
                 throw new Exception("优惠券信息错误");
             }
             $couponInfo =[];
+            print_r($coupon);
             foreach ($coupon as $key=>$value){
                 print_r($value);die;
                 foreach ($value as $k=>$v){
