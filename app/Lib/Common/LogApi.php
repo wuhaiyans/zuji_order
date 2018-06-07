@@ -17,7 +17,7 @@ class LogApi {
 		return new self();
 	}
 	
-	private static $source = '';
+	private static $source = 'default';
 	public static function setSource( string $source ){
 		self::$source = $source;
 		return self::getInstace();
@@ -156,7 +156,6 @@ class LogApi {
 		//$job = new \App\Jobs\Log2Job( $_data );
 		//dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
-		
 		
 		// 日志系统接口
 		try {

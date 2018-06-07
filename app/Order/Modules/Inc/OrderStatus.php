@@ -197,7 +197,7 @@ class OrderStatus{
      */
     public static function getStatusType(){
         return [
-            self::OrderWaitPaying => '待支付',
+            self::OrderWaitPaying => '已下单',
             self::OrderPaying => '支付中',
             self::OrderPayed => '已支付',
             self::OrderInStock => '备货中',
