@@ -198,7 +198,7 @@ class OrderCreater
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
             $schemaData = $orderCreater->getDataSchema();
-
+            echo 11;die;
             $b = $orderCreater->create();
             //var_dump($schemaData);
             //创建成功组装数据返回结果
