@@ -18,6 +18,8 @@ return [
     'api.order.orderLog'=>'OrderController@orderLog',
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+    //获取订单状态流信息
+    'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
     //订单确认修改收货地址信息
     'api.order.modifyAddress'=>'OrderController@modifyAddress',
@@ -110,6 +112,8 @@ return [
     'api.Withhold.createpay'            => 'WithholdController@createpay',
     // 多项扣款接口
     'api.Withhold.multi_createpay'      => 'WithholdController@multi_createpay',
+    // 定时任务扣款
+    'api.Withhold.crontab_createpay'      => 'WithholdController@crontab_createpay',
 
     //  预授权相关
     // 资金预授权接口

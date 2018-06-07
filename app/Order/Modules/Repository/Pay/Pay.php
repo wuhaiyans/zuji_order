@@ -737,6 +737,14 @@ class Pay extends \App\Lib\Configurable
 			'update_time' => time(),
 		]);
 		if( !$b ){
+			LogApi::type('data-save');
+			LogApi::error('代扣签约环节支付渠道设置失败',[
+				'sql' => $payModel->toSql(),
+				'data' => [
+					'withhold_channel' => $channel,
+					'update_time' => time(),
+				]
+			]);
 			throw new \Exception( '代扣签约环节支付渠道设置失败' );
 		}
 		// 获取url

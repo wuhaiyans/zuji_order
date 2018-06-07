@@ -18,6 +18,10 @@ class PayController extends Controller
 		
     }
 	
+	public function testJob(){
+		LogApi::debug('test');
+		var_dump(123);exit;
+	}
 	
 	/**
 	 * 测试  分期计算 和 分期优惠计算
@@ -211,7 +215,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093812';
+		$business_no = 'A602128482172832';
 		$pay = null;
 		try {
 			// 查询

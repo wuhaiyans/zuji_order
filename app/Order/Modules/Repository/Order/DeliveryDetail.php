@@ -60,6 +60,7 @@ class DeliveryDetail {
 		return [];
 	}
 
+
     /**
      * 换货更新原设备为无效
      * @return bool

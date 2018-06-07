@@ -21,6 +21,6 @@ class OrderExtend extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no'];
+    protected $fillable = ['order_no','field_name','field_value'];
 
 }

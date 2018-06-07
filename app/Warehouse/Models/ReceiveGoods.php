@@ -121,4 +121,15 @@ class ReceiveGoods extends Warehouse
     {
         return $this->belongsTo(\App\Warehouse\Models\Receive::class, 'receive_no');
     }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * delivery_imeis表关联
+     * 外键 delivery_no
+     */
+    public function imeis()
+    {
+        return $this->hasMany(\App\Warehouse\Models\ReceiveGoodsImei::class, 'goods_no');
+    }
 }

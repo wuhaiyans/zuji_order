@@ -156,6 +156,15 @@ class OrderCleaning
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
 
         if (empty($orderCleanData)) return false;
+
+        //更新清算状态为支付中
+        $orderParam = [
+            'clean_no' => $orderCleanData['clean_no'],
+            'status' => OrderCleaningStatus::orderCleaning
+        ];
+        $success = OrderCleaning::upOrderCleanStatus($orderParam);
+
+        if (!$success) return false;
         /**
          * 退款申请接口
          * @param array $params
@@ -273,7 +282,7 @@ class OrderCleaning
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
                 LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
             }
-            return true;
+
 
         } else {
 
@@ -297,6 +306,7 @@ class OrderCleaning
            LogApi::info('支付小程序解冻押金', [$succss,  $params]);
 
         }
+
 
         return true;
 

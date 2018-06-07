@@ -47,6 +47,23 @@ class OrderCleaningController extends Controller
     }
 
 
+    /**
+     *
+     * 清算列表过滤筛选列表接口
+     * Author: heaven
+     * @return \Illuminate\Http\JsonResponse
+     *
+     */
+    public function orderListFilter()
+    {
+
+        $res = \App\Order\Modules\Inc\OrderListFiler::orderInc();
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+
+    }
+
+
 
     /**
      * 订单结算详情查询

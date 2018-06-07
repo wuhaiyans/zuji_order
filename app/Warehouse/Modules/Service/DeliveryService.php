@@ -234,9 +234,9 @@ class DeliveryService
 //        if (isset($params['order_no']) && $params['order_no']) {
 //            $whereParams['order_no'] = $params['order_no'];
 //        }
-        if (isset($params['delivery_no']) && $params['delivery_no']) {
-            $whereParams['delivery_no'] = $params['delivery_no'];
-        }
+//        if (isset($params['delivery_no']) && $params['delivery_no']) {
+//            $whereParams['delivery_no'] = $params['delivery_no'];
+//        }
 
         $search = $this->paramsSearch($params);
         if ($search) {
