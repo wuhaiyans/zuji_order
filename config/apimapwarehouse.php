@@ -58,7 +58,9 @@ return [
 
 
     'warehouse.receiveGoods.list'=> 'ReceiveGoodsController@list',//设备列表
-    'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics'//公用参数
+    'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics',//公用参数
+    'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems'//取检测项
+
 
 
 ];

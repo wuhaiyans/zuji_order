@@ -10,7 +10,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Service\ReceiveGoodsService;
-
+use App\Warehouse\Config;
 
 /**
  * Class ReceiveGoodsController
@@ -29,7 +29,6 @@ class ReceiveGoodsController extends Controller
         $this->goods = $receiveGoods;
     }
 
-
     /**
      * 列表查询
      *
@@ -41,6 +40,11 @@ class ReceiveGoodsController extends Controller
         return \apiResponse($list);
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * 公共参数
+     */
     public function publics()
     {
         $data = [
@@ -48,5 +52,14 @@ class ReceiveGoodsController extends Controller
         ];
 
         return apiResponse($data);
+    }
+
+
+    /**
+     * 获取检测项
+     */
+    public function checkItems()
+    {
+        return Config::$check_items;
     }
 }
