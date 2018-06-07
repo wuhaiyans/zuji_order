@@ -219,6 +219,9 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $ret = $this->OrderReturnCreater->returnResult($params);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_34002);//未找到退货单信息
+        }
         return apiResponse([$ret],ApiStatus::CODE_0);
 
 
@@ -228,21 +231,44 @@ class ReturnController extends Controller
      * 取消退货申请
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|string
-     * 'id'=>['111','222'] 退货单id
+     * 'refund_no'=>['111','222'] 退货单id
      * user_id
      */
     public function cancelApply(Request $request)
     {
         $orders = $request->all();
         $params = $orders['params'];
-        if(empty($params['id'])){
+        if(empty($params['refund_no'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
         if(empty($params['user_id'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
-        $ret = $this->OrderReturnCreater->cancel_apply($params);
-        return apiResponse( [], $ret);
+        $ret = $this->OrderReturnCreater->cancelApply($params);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+        }
+        return apiResponse( [], ApiStatus::CODE_0);
+    }
+
+    /**
+     * 取消退款
+     * @param Request $request
+     */
+    public function cancelRefund(Request $request){
+        $orders = $request->all();
+        $params = $orders['params'];
+        if(empty($params['refund_no'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
+        }
+        if(empty($params['user_id'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
+        }
+        $ret = $this->OrderReturnCreater->cancelRefund($params);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+        }
+        return apiResponse( [], ApiStatus::CODE_0);
     }
 
     /**

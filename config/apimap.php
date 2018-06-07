@@ -165,6 +165,9 @@ return [
     'api.Return.returnCheckList'       =>'ReturnController@returnCheckList',
     //退货检测不合格的数据，拒绝退款
     'api.Return.refuseRefund'       =>'ReturnController@refuseRefund',
+    //退款--取消退款
+    'api.Return.cancelRefund'       =>'ReturnController@cancelRefund',
+
 
 
 

@@ -462,45 +462,94 @@ class OrderReturnCreater
      * @param $params
      * @return string
      * @throws \Exception
-     *  退货单id=>['111','222']
+     *  退货单号refund_no=>['111','222']
      */
-    public function cancel_apply($params){
+    public function cancelApply($params){
         //开启事务
         DB::beginTransaction();
-        //查询退货单信息
-        foreach($params['id'] as $k=>$v){
-            $returnInfo[$k]=$this->orderReturnRepository->getReturnInfo($v);
-            if(!$returnInfo[$k]){
-                return ApiStatus::CODE_34002;//未找到此退货单
+        try{
+            foreach($params['refund_no'] as $refund_no){
+                //查询退货单信息
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($refund_no);
+                $return_info[$refund_no]=$return->getData();
+                if($return_info[$refund_no]['user_id']!=$params['user_id']){
+                    return false;
+                }
+                //更新退换货状态为已取消
+                $cancelApply=$return->close();
+                if(!$cancelApply){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;
+                }
+                //修改商品状态为租用中
+                $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info[$refund_no]['goods_no'] );
+                if(!$goods->returnClose()){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;
+                }
+                $order_no=$return_info[$refund_no]['order_no'];
             }
-            if($returnInfo[$k]['status']==ReturnStatus::ReturnReceive || $returnInfo[$k]['status']==ReturnStatus::ReturnTuiHuo || $returnInfo[$k]['status']==ReturnStatus::ReturnHuanHuo || $returnInfo[$k]['status']==ReturnStatus::ReturnTuiKuan || $returnInfo[$k]['status']==ReturnStatus::ReturnTui){
-                return ApiStatus::CODE_34006;
+            //获取订单信息
+            $order =\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
+            //解冻订单
+            if(!$order->returnClose()){
+                //事务回滚
+                DB::rollBack();
+                return false;
             }
-            $order_no=$returnInfo[$k]['order_no'];
-            if($returnInfo[$k]['user_id']!=$params['user_id']){
-                return ApiStatus::CODE_34006;
-            }
-            if($returnInfo[$k]['status']==ReturnStatus::ReturnAgreed){
-                //通知收发货取消收货
-            }
-        }
-        //获取订单信息
-        $orderInfo=\App\Order\Modules\Repository\OrderRepository::getInfoById($order_no,$params['user_id']);
-        if($orderInfo['freeze_type']==OrderFreezeStatus::Non){
-            return ApiStatus::CODE_34006;
-        }
-        $goodsReturn = new GoodsReturn($returnInfo);
-        $b = $goodsReturn->close();
-        p($b);
-        if(!$b){
-            //事务回滚
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
             DB::rollBack();
-            return ApiStatus::CODE_33008;//更新退货单状态失败
-        }
-        //提交事务
-        DB::commit();
-        return ApiStatus::CODE_0;//成功
+            echo $exc->getMessage();
+            die;
+           }
 
+    }
+
+    /**
+     * 取消退款
+     * @param $params
+     */
+    public function cancelRefund($params){
+        //开启事务
+        DB::beginTransaction();
+        try{
+            //获取退款单信息
+            $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['refund_no']);
+            $return_info=$return->getData();
+            //获取订单信息
+            $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
+            if($return_info['user_id']!=$params['user_id']){
+                return false;
+            }
+            //退款中，已退款不允许取消
+            if($return_info['status']==ReturnStatus::ReturnTui || $return_info['status']==ReturnStatus::ReturnTuiKuan){
+                return false;
+            }
+            //更新退款单状态为已取消
+            $cancelApply=$return->close();
+            if(!$cancelApply){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //更新订单状态
+            $orderApply=$order->returnClose();
+            if(!$orderApply){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
     }
 
     /**
