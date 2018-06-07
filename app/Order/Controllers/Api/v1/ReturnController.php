@@ -281,51 +281,45 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'           => 'required',
             'business_key'             =>'required',
         ]);
-        if(count($param)<2){
+        if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->is_qualified($params['order_no'],$params['business_key'],$params['data']);
-        return apiResponse([],$res);
-    }
-    /**
-     * 客户发货后通知
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     *
-     */
-    public function userReceive(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'           => 'required',
-            'goods_no'             =>'required',
-        ]);
-        if(count($param)<2){
+        if(empty($params['data'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->user_receive($params);
-        return apiResponse([],$res);
+        $res=$this->OrderReturnCreater->isQualified($param['business_key'],$params['data']);
+        if(!$res){
+            return  apiResponse([],ApiStatus::CODE_33008);//修改失败
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
+
     /**
      * 换货用户收货通知
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
+     * [
+     * order_no
+     * [goods_no=>'']
+     * [goods_no=>'']
+     * ]
      */
     public function updateOrder(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
             'order_no'           => 'required',
-            'goods_no'             =>'required',
         ]);
-        if(count($param)<2){
+        if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->updateorder($params);
-        return apiResponse([],$res);
+        if(!$res){
+            return  apiResponse([],ApiStatus::CODE_33008);//更新失败
+        }
+        return  apiResponse([],ApiStatus::CODE_0);
     }
 
 
@@ -349,32 +343,6 @@ class ReturnController extends Controller
         $res=$this->OrderReturnCreater->refundUpdate($params);
         return apiResponse([],$res);
     }
-
-    /**
-     * 换货
-     * @param Request $request
-     * [
-     *   'order_no',
-     *   'goods_no'=['sdfsda','12123123'],
-     *
-     * ]
-     */
-    public function exchangeGoods(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'order_no'=> 'required',
-        ]);
-        if(count($param)<1){
-            return apiResponse([],ApiStatus::CODE_20001);
-        }
-        if(empty($params['goods'])){
-            return apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->exchangeGoods($params);
-        return apiResponse([],$res);
-    }
-
 
     /**
      *params[

@@ -95,7 +95,7 @@ class Goods {
         return $this->model->save();
     }
     /**
-     * 退换货审核拒绝-取消退货--检测不合格拒绝退款共用
+     * 退换货审核拒绝-取消退货--检测不合格拒绝退款 --换货检测不合格  共用
      * @return bool
      */
     public function returnClose( ):bool{
@@ -143,7 +143,11 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
-        return true;
+        if($this->model->goods_status==OrderGoodStatus::EXCHANGE_OF_GOODS){
+            return false;
+        }
+        $this->model->goods_status=OrderGoodStatus::EXCHANGE_OF_GOODS;
+        return $this->model->save();
     }
 	
 	

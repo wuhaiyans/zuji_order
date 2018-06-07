@@ -118,18 +118,41 @@ class GoodsReturn {
         return $this->model->save();
     }
     /**
-     * 退货检测合格
+     * 退货==换货检测合格  共用
      * @return bool
      */
-    public function returnCheckOut( ):bool{
-        return true;
+    public function returnCheckOut( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationSuccess;
+        $this->model->status=ReturnStatus::ReturnReceive;
+        return $this->model->save();
+
     }
     /**
-     * 检测不合格
+     * 退货检测不合格
      * @return bool
      */
-    public function Unqualified( ):bool{
-        return true;
+    public function returnUnqualified( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
+        $this->model->status=ReturnStatus::ReturnReceive;
+        return $this->model->save();
+    }
+    /**
+     * 换货检测不合格
+     * @return bool
+     */
+    public function barterUnqualified( array $data):bool{
+        $this->model->evaluation_remark=$data['evaluation_remark'];
+        $this->model->evaluation_amount=$data['evaluation_amount'];
+        $this->model->evaluation_time=$data['evaluation_time'];
+        $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
+        $this->model->status=ReturnStatus::ReturnCanceled;//已取消
+        return $this->model->save();
     }
     /**
      * 退货完成，退款进行中
@@ -163,7 +186,11 @@ class GoodsReturn {
      * @return bool
      */
     public function barterFinish( ):bool{
-        return true;
+        if($this->model->status==ReturnStatus::ReturnHuanHuo){
+            return false;
+        }
+        $this->model->status=ReturnStatus::ReturnHuanHuo;
+        return $this->model->save();
     }
     /**
      *
@@ -213,6 +240,28 @@ class GoodsReturn {
     public static function getReturnByOrderNo( string $order_no, int $lock=0 ) {
         $builder = \App\Order\Models\OrderReturn::where([
             ['order_no', '=', $order_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
+        }
+        return new self( $order_info );
+    }
+    /**
+     * 获取订单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $order_no		订单编号
+     * @param string $goods_no	商品编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnByInfo( string $order_no, string $goods_no,int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['order_no', '=', $order_no],['goods_no', '=', $goods_no]
         ])->limit(1);
         if( $lock ){
             $builder->lockForUpdate();
