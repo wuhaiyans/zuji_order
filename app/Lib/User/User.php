@@ -76,7 +76,31 @@ class User{
         //var_dump($data);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        var_dump($info);die;
+        return [
+            'user_id'=>'1',
+        ];
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+    }
+    /**
+     * 获取用户地址信息
+     *  @param $data
+     * @param $user_id
+     * @return string or array
+     */
+    public static function getAddressId($params){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.district.query.id';
+        $data['params'] = [
+            'house'=>$params['house'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
