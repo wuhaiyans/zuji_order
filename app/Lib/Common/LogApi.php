@@ -168,6 +168,7 @@ class LogApi {
 			if( !$res ){
 				return false;
 			}
+			var_dump( $res );
 			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
 				dispatch(new \App\Jobs\LogJob( $str ));
 			}
