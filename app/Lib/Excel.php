@@ -34,8 +34,6 @@ class Excel
      * @param $headers 标题 【可选】
      * @param $body 主体内容 【必须】二维数组
      * @return bool
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      *
      * 写文件
      */
