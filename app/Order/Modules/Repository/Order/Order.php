@@ -320,7 +320,7 @@ class Order {
         return $this->model->save();
     }
     /**
-     * 取消退货
+     * 取消退货->取消换货->取消退款公用
      * @return bool
      */
     public function returnClose( ):bool{
@@ -353,13 +353,6 @@ class Order {
         }
         $this->model->freeze_type = OrderFreezeStatus::Exchange;
         return $this->model->save();
-    }
-    /**
-     * @return bool
-     * 取消换货
-     */
-    public function barterClose( ):bool{
-        return true;
     }
     /**
      * @return bool

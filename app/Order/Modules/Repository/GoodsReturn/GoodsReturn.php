@@ -91,6 +91,32 @@ class GoodsReturn {
         return true;
     }
     /**
+     * 退款审核同意
+     * @return bool
+     */
+    public function refundAgree(string $remark):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->remark = $remark;
+        $this->model->status = ReturnStatus::ReturnAgreed;
+        return $this->model->save();
+    }
+    /**
+     * 退款审核拒绝
+     * @return bool
+     */
+    public function refundAccept( string $remark):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->remark = $remark;
+        $this->model->status = ReturnStatus::ReturnDenied;
+        return $this->model->save();
+    }
+    /**
      * 取消退款
      *@return bool
      */
@@ -163,6 +189,27 @@ class GoodsReturn {
         $order_info = $builder->first();
         if( !$order_info ){
            return false;
+        }
+        return new self( $order_info );
+    }
+    /**
+     * 获取退换货单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $order_no		退换货编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnByOrderNo( string $order_no, int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['order_no', '=', $order_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
         }
         return new self( $order_info );
     }

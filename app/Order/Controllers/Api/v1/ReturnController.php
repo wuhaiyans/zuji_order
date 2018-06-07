@@ -4,6 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\PublicFunc;
 use App\Lib\Warehouse\Receive;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderReturnCreater;
@@ -121,7 +122,6 @@ class ReturnController extends Controller
            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
         $res=$this->OrderReturnCreater->returnOfGoods($params);//审核同意
-        p($res);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_34007,"审核失败");
         }
@@ -144,12 +144,11 @@ class ReturnController extends Controller
         if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if($params['status']==0){
-            $res=$this->OrderReturnCreater->refundReplyAgree($params);//审核同意
-        }else{
-            $res=$this->OrderReturnCreater->refundReplyDisagree($params);//审核同意
+        $res= $this->OrderReturnCreater->refundApply($param);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_34007,"审核失败");
         }
-        return apiResponse([],$res);
+        return apiResponse([],ApiStatus::CODE_0);
     }
     // 换货/退款记录列表接口
     /*
@@ -160,7 +159,7 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
-       
+
         $return_list = $this->OrderReturnCreater->get_list($params);
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
@@ -411,7 +410,7 @@ class ReturnController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
-        if($params['params']['business_key']!=ReturnStatus::OrderTuiHuo){
+        if($params['params']['business_key']!=OrderStatus::BUSINESS_RETURN){
             return apiResponse([],ApiStatus::CODE_20001);
         }
         $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationFalse;

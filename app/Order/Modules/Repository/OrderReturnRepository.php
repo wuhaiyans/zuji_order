@@ -80,6 +80,35 @@ class OrderReturnRepository
         return [];
     }
 
+    /**
+     * 获取订单支付编号信息
+     * @param $business_type
+     * @param $business_no
+     */
+    public static function  getPayNo($business_type,$business_no){
+        $Data=OrderPayModel::where([['business_type','=',$business_type],['business_no','=',$business_no]])->first();
+        if(!$Data){
+            return false;
+        }
+        return $Data->toArray();
+    }
+    /**
+     * 获取退换货单数据
+     * @param $where
+     *
+     */
+    public static function returnApplyList($where){
+        $return_result= DB::table('order_return')
+            ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+            ->where($where)
+            ->select('order_goods.*','order_return.*')
+            ->get()->toArray();
+        if(!$return_result){
+            return [];
+        }
+        return $return_result;
+    }
+
 
 
 
