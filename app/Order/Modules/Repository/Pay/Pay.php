@@ -739,7 +739,8 @@ class Pay extends \App\Lib\Configurable
 		if( !$b ){
 			LogApi::type('data-save');
 			LogApi::error('代扣签约环节支付渠道设置失败',[
-				'sql' => $payModel->toSql(),
+				'business_type'	=> $this->businessType,
+				'business_no'	=> $this->businessNo,
 				'data' => [
 					'withhold_channel' => $channel,
 					'update_time' => time(),

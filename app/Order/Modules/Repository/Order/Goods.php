@@ -143,7 +143,11 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
-        return true;
+        if($this->model->goods_status==OrderGoodStatus::EXCHANGE_OF_GOODS){
+            return false;
+        }
+        $this->model->goods_status=OrderGoodStatus::EXCHANGE_OF_GOODS;
+        return $this->model->save();
     }
 	
 	
