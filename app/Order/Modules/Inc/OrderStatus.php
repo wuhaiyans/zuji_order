@@ -82,6 +82,8 @@ class OrderStatus{
     const BUSINESS_RETURN=2;
     //换货业务
     const BUSINESS_BARTER =3;
+    //退款业务
+    const BUSINESS_REFUND =8;
 	/**
 	 * 还机业务
 	 */
@@ -92,6 +94,7 @@ class OrderStatus{
     const BUSINESS_RELET =6;
     //分期业务
     const BUSINESS_FENQI =7;
+
     //--------------------------------------------------------------------------------------------
     //--+ 租期类型 --------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
@@ -142,6 +145,7 @@ class OrderStatus{
             self::BUSINESS_ZUJI => '租机业务',
             self::BUSINESS_RETURN => '退货业务',
             self::BUSINESS_BARTER => '换货业务',
+            self::BUSINESS_REFUND => '退款业务',
             self::BUSINESS_GIVEBACK => '还机业务',
             self::BUSINESS_BUYOUT => '买断业务',
             self::BUSINESS_RELET => '续租业务',
