@@ -516,16 +516,16 @@ class Order {
     }
 
     /**
-     * 修改订单冻结状态 解冻
+     * 修改订单续租中的冻结状态 解冻
      *
      * @return bool
      */
-    public function relieveFreeze():bool {
-        if($this->model->freeze_type==OrderFreezeStatus::Non){
-            return false;
-        }else{
+    public function relieveReletFreeze():bool {
+        if($this->model->freeze_type==OrderFreezeStatus::Relet){
             $this->model->freeze_type = OrderFreezeStatus::Non;
             return $this->model->save();
+        }else{
+            return false;
         }
     }
 

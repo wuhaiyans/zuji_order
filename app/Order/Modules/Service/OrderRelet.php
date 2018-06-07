@@ -75,17 +75,45 @@ class OrderRelet
     }
 
     /**
-     * 设置status状态
+     * 取消续租
+     *      只有创建状态才可取消续租
      *
      * @param $params
      * @return bool
      */
-    public function setStatus($params){
-        $row = $this->reletRepository->getRowId($params['id']);
-        if($row['status'] == ReletStatus::STATUS1){
-            return $this->reletRepository->setStatus($params);
-        }else{
-            set_msg('只允许创建续租取消');
+    public function setStatus($id){
+        DB::beginTransaction();
+        try {
+            //获取续租对象
+            $reletObj = Relet::getByReletId($id);
+            if($reletObj){
+                if($reletObj->setStatusOff()){
+                    //获取订单对象
+                    $orderObj = Order::getByNo($reletObj->order_no);
+                    if( $orderObj->relieveReletFreeze() ){
+                        //提交
+                        DB::commit();
+                        return true;
+                    }else{
+                        DB::rollBack();
+                        set_msg('修改订单续租中的冻结状态解冻失败');
+                        return false;
+                    }
+
+                }else{
+                    DB::rollBack();
+                    set_msg('只允许创建续租取消');
+                    return false;
+                }
+            }else{
+                DB::rollBack();
+                set_msg('未找到要取消的数据');
+                return false;
+            }
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            set_msg($e->getMessage());
             return false;
         }
     }
