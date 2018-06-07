@@ -133,7 +133,7 @@ class OrderCreater
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce("OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
             'method' => 'api.inner.cancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
@@ -176,17 +176,17 @@ class OrderCreater
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
-            // 信用
-            $orderCreater = new CreditComponnet($orderCreater);
-
-            //蚁盾数据
-            $orderCreater = new YidunComponnet($orderCreater);
+            //风控
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+
+            //收货地址
+            $orderCreater = new AddressComponnet($orderCreater);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
@@ -197,17 +197,10 @@ class OrderCreater
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
-            $b = $orderCreater->filter();
-            if(!$b){
-                DB::rollBack();
-                //把无法下单的原因放入到用户表中
-                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-                set_msg($orderCreater->getOrderCreater()->getError());
-              //  return false;
-            }
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
+            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -217,38 +210,35 @@ class OrderCreater
                 return false;
             }
             DB::commit();
-
-//            // 是否需要签署代扣协议
-//            $need_to_sign_withholding = 'N';
-//            if( $data['pay_type']== PayInc::WithhodingPay){
-//                if( !$schemaData['withholding']['withholding_no'] ){
-//                    $need_to_sign_withholding = 'Y';
-//                }
-//            }
+            // 是否需要签署代扣协议
+            $need_to_sign_withholding = 'N';
+            if( $data['pay_type']== PayInc::WithhodingPay){
+                if( !$schemaData['withholding']['withholding_no'] ){
+                    $need_to_sign_withholding = 'Y';
+                }
+            }
             $result = [
-                'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-//                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
-//                // 是否需要 签收代扣协议
-//                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+                // 是否需要 签收代扣协议
+                'need_to_sign_withholding'	 => $need_to_sign_withholding,
                 '_order_info' => $schemaData,
                 'order_no'=>$data['order_no'],
                 'pay_type'=>$data['pay_type'],
             ];
-//            //创建订单后 发送支付短信。;
-//            $b = SmsApi::sendMessage($schemaData['user']['user_mobile'],'SMS_113450944',[
-//                'goodsName' => $goods_name,    // 传递参数
-//            ]);
+            // 创建订单后 发送支付短信。;
+//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+//            $orderNoticeObj->notify();
             //发送取消订单队列
-            $b =JobQueueApi::addScheduleOnce(env("APP_ENV")."_OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
                 'order_no'=>$data['order_no'],
                 'user_id'=>$data['user_id'],
-                'time' => date('Y-m-d H:i:s'),
-            ],time()+1800,"");
-            Log::error($b?"Order :".$data['order_no']." IS OK":"IS error");
+                'time' => time(),
+            ],time()+7200,"");
+            OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
             return $result;
 
         } catch (\Exception $exc) {
@@ -257,6 +247,7 @@ class OrderCreater
             die;
         }
     }
+
     /**
      * 订单确认查询
      * 结构 同create()方法 少个地址组件
@@ -329,6 +320,139 @@ class OrderCreater
             echo $exc->getMessage();
             die;
         }
+    }
+
+    /**
+     * 订单确认查询
+     * 结构 同create()方法 少个地址组件
+     */
+    public function miniConfirmation($data)
+    {
+        try{
+            $orderType =OrderStatus::orderMiniService;
+            $data['user_id'] = intval($data['user_id']);
+            $data['pay_type'] = intval($data['pay_type']);
+            $data['appid'] = intval($data['appid']);
+            //订单创建构造器
+            $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['pay_type']),($data['appid']),($orderType));
+
+            // 用户
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
+            $orderCreater->setUserComponnet($userComponnet);
+
+            // 商品
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $orderCreater->setSkuComponnet($skuComponnet);
+
+            //风控
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+
+            //押金
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+
+            //代扣
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+
+            //收货地址
+            $orderCreater = new AddressComponnet($orderCreater);
+
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon_no'],$data['user_id']);
+
+            //分期
+            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+
+            $b = $orderCreater->filter();
+            if(!$b){
+                //把无法下单的原因放入到用户表中
+                $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+
+            }
+            $schemaData = $orderCreater->getDataSchema();
+            var_dump($schemaData);die;
+            $result = [
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['score'],
+                '_order_info' => $schemaData,
+                'order_no'=>$data['order_no'],
+                'pay_type'=>$data['pay_type'],
+            ];
+            return $result;
+        } catch (\Exception $exc) {
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
+//        try {
+//            //var_dump($data);die;
+//            $order_no = OrderOperate::createOrderNo(1);
+//            //订单创建构造器
+//            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type'],$data['appid'],OrderStatus::orderOnlineService);
+//
+//            // 用户
+//            $userComponnet = new UserComponnet($orderCreater,$data['user_id']);
+//            $orderCreater->setUserComponnet($userComponnet);
+//
+//            // 商品
+//            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+//            $orderCreater->setSkuComponnet($skuComponnet);
+//
+//            //风控
+//            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+//
+//            //押金
+//            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+//
+//            //代扣
+//            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+//
+//
+//            //渠道
+//            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+//
+//            //优惠券
+//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+//
+//            //分期
+//            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+//
+//            $b = $orderCreater->filter();
+//            if(!$b){
+//                //把无法下单的原因放入到用户表中
+//                $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+//
+//            }
+//            $schemaData = $orderCreater->getDataSchema();
+//            // 是否需要签署代扣协议
+//            $need_to_sign_withholding = 'N';
+//            if( $data['pay_type']== PayInc::WithhodingPay){
+//                if( !$schemaData['withholding']['withholding_no'] ){
+//                    $need_to_sign_withholding = 'Y';
+//                }
+//            }
+//
+//            $result = [
+//                'coupon'         => $data['coupon'],
+//                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+//                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+//                'credit'			=> ''.$schemaData['user']['score'],
+//                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+//                // 是否需要 签收代扣协议
+//                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+//                '_order_info' => $schemaData,
+//                'b' => $b,
+//                '_error' => $orderCreater->getOrderCreater()->getError(),
+//                'pay_type'=>$data['pay_type'],
+//            ];
+//            return $result;
+//        } catch (\Exception $exc) {
+//            echo $exc->getMessage();
+//            die;
+//        }
     }
 
     /*

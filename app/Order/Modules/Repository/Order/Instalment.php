@@ -8,10 +8,9 @@
 
 namespace App\Order\Modules\Repository\Order;
 
-use App\Order\Models\OrderInstalment;
+use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
-use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
 /**
@@ -20,13 +19,9 @@ use Symfony\Component\HttpKernel\Profiler;
  * @author Administrator
  */
 class Instalment {
-
-
-
-
 	/**
 	 * 统计商品分期数据
-	 * @param array 商品分期二维数组
+	 * @params array 商品分期二维数组
 	 *  [
 	 *      'order'=>[
 	 *          'order_no'          => 1,//订单编号
@@ -39,6 +34,7 @@ class Instalment {
 	 *          'yiwaixian'         => 1,//意外险
 	 *          'zujin'             => 1,//租金
 	 *          'pay_type'          => 1,//支付类型
+	 *          'pay_type'          => 1,//支付类型
 	 *      ],
 	 *      'coupon'=>[ 			  // 非必须
 	 *          'discount_amount'   => 1,//优惠金额
@@ -48,11 +44,68 @@ class Instalment {
 	 *          'user_id'           => 1,//用户ID
 	 *       ],
 	 *  ];
-	 * @return bool true：成功；false：失败
+	 * @return array 返回分期数据
 	 */
-	public static function instalmentData( array $data ):bool{
+	public function instalmentData( array $params ){
+
+		// 单商品分期的相关数据
+		$sku = [
+			'zujin' 	=> $params['sku']['zujin'],
+			'zuqi' 		=> $params['sku']['zuqi'],
+			'insurance' => $params['sku']['yiwaixian'],
+		];
+
+		// 租期类型 长租短租判断
+		$zuqi_type = $params['sku']['zuqi_type'];
+
+		// 优惠券
+		$coupon = !empty($params['coupon']) ? $params['coupon'] : "";
+
+		// 默认分期
+		$model = '\App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter';
+		$discount_amount = 0;
+
+		// 优惠券 优惠金额 计算
+		if($coupon != ""){
+			foreach ($coupon as $item) {
+				// 计算优惠金额
+				$discount_amount += $item['discount_amount'];
+
+				// 首月零租金判断
+				if ($item['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree) {
+					$model = '\App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter';
+				}
+			}
+		}
+		// 商品优惠金额 递减分期
+		$goods_discount_amount = $params['sku']['discount_amount'];
+		if($goods_discount_amount > 0){
+			// 递减分期
+			$model = '\App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter';
+		}
 
 
+		if($zuqi_type == 2){
+			// 月租，分期计算器
+			$computer = new \App\Order\Modules\Repository\Instalment\MonthComputer( $sku );
+		}elseif($zuqi_type == 1){
+			// 日租，分期计算器
+			$computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $sku );
+		}
+
+
+		// 分期顺序优惠
+		$discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter($discount_amount);
+		$computer->addDiscounter( $discounter_serialize );
+
+
+		// 优惠策略
+		$discounter = new $model($discount_amount);
+		$computer->addDiscounter( $discounter );
+
+		$fenqi_list = $computer->compute();
+
+		return $fenqi_list;
 	}
 
 	/**
@@ -81,33 +134,19 @@ class Instalment {
 	 *  ];
 	 * @return bool true：成功；false：失败
 	 */
-	public static function create( array $data ):bool{
+	public static function create( array $param ):bool{
+		if(!is_array($param)){
+			return false;
+		}
+
+		// 循环插入
+		foreach($param as $item){
+			OrderGoodsInstalment::create($item);
+		}
+		return true;
 
 	}
 	
-	/**
-	 * 读取商品分期
-	 * @param string $goods_no	商品编号
-	 * @return array	商品分期二维数组
-	 * [
-	 *		[
-	 *			'order_no' => '',		// 订单号
-	 *			'goods_no' => '',		// 商品编号
-	 *			'user_id' => '',		// 用户id
-	 *			'term' => '',			// 当前期数
-	 *			'times' => '',			// 分期日期
-	 * 			'amount' => '',			// 订单号
-	 *			'discount_amount' => '',// 优惠金额
-	 *			'status' => '',			// 状态： 0：无效；1：未支付；2：扣款成功；3：扣款失败；4：取消；5：扣款中'
-	 *			'trade_no' => '',		// 租机交易号
-	 *			'out_trade_no' => '',	// 第三方交易号
-	 *		]
-	 * ]
-	 */
-	public static function getList( string $goods_no ){
-		
-	}
-
 	/**
 	 * 根据用户id和订单号、商品编号，关闭用户的分期
 	 * @param data  array
@@ -135,21 +174,68 @@ class Instalment {
 		}
 
 		$status = ['status'=>OrderInstalmentStatus::CANCEL];
-		$result =  OrderInstalment::where($where)->update($status);
+		$result =  OrderGoodsInstalment::where($where)->update($status);
 		if (!$result) return false;
 
 		return true;
 	}
 
+	/**
+	 * 支付成功
+	 * @param data  array
+	 * [
+	 *      'reason'       			=> '', //原因
+	 *      'status' 				=> '', //状态
+	 *      'agreement_no' 			=> '', //支付平台签约协议号
+	 *      'out_agreement_no'      => '', //业务系统签约协议号
+	 *      'trade_no' 				=> '', //支付平台交易码
+	 *      'out_trade_no' 			=> '', //业务平台交易码
+	 * ]
+	 * @return String	SUCCESS成功、FAIL失败
+	 */
+	public function paySuccess( array $param){
 
-	public function paySuccess(){
+		if($param['status'] == "success"){
+
+			// 查询分期信息
+			$instalmentInfo = OrderGoodsInstalment::queryInfo(['id'=>$param['out_no']]);
+			if( !is_array($instalmentInfo)){
+				// 提交事务
+				echo "FAIL";exit;
+			}
+
+			// 分期数据
+			if(!isset($this->status[$param['status']])){
+				echo "FAIL";exit;
+			}
+
+			$data = [
+				'status'        => OrderInstalmentStatus::SUCCESS,
+				'update_time'   => time(),
+			];
+
+			$b = OrderGoodsInstalment::save(['id'=>$param['trade_no']], $data);
+			if(!$b){
+				echo "FAIL";exit;
+			}
+
+			// 修改扣款记录数据
+			$recordData = [
+				'status'        => OrderInstalmentStatus::SUCCESS,
+				'update_time'   => time(),
+			];
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['trade_no']],$recordData);
+			if(!$record){
+				echo "FAIL";exit;
+			}
+
+			echo "SUCCESS";
+		}
+
+		echo "FAIL";exit;
 
 	}
 
-
-	public function deSuccess(){
-
-	}
 	
-	
+
 }

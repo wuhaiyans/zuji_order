@@ -24,17 +24,13 @@ class OrderClearingRepository
      * @return bool
      */
     public static function createOrderClean($param){
-
-
         if (empty($param) || empty($param['order_no'])) {
             return false;
         }
 
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
-
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
-
         if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
         if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
         if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
@@ -86,7 +82,7 @@ class OrderClearingRepository
             'out_unfreeze_pay_trade_no'=> $param['out_unfreeze_pay_trade_no'] ??  '',
 
         ];
-//        sql_profiler();
+      // sql_profiler();
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;

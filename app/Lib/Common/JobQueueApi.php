@@ -81,9 +81,12 @@ class JobQueueApi {
 	 * @return bool
 	 */
 	private static function push( string $key, string $url, array $data, string $callback='', string $type='realTime', string $start='',string $cron='' ):bool{
+		if( $callback == '' ){
+			$callback = config('jobsystem.CALLBACK');
+		}
 		$_config = [
 			'interface' => 'jobAddAsync',
-			'auth' => env('JOB_AUTH'),
+			'auth' => config('jobsystem.JOB_AUTH'),
 			'name' => $key,
 			'desc' => '',
 			'type' => $type,
@@ -96,7 +99,7 @@ class JobQueueApi {
 		];
 		LogApi::info('[任务]'.$key,$_config);
 		// 请求
-		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
+		$res = Curl::post(config('jobsystem.JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}
