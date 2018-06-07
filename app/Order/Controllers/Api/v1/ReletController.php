@@ -123,27 +123,19 @@ class ReletController extends Controller
      * 取消续租
      */
     public function cancelRelet(Request $request){
-        try {
-            //接收参数
-            $params = $request->input('params');
-            if(isset($params['id']) && !empty($params['id'])){
-                $par['id'] = $params['id'];
-                $par['status'] = 3;
-                if($this->relet->setStatus($par)){
-
-                    return apiResponse([],ApiStatus::CODE_0);
-                }else{
-                    return apiResponse([],ApiStatus::CODE_50000, get_msg());
-                }
+        //接收参数
+        $params = $request->input('params');
+        if(isset($params['id']) && !empty($params['id'])){
+            if($this->relet->setStatus($params['id'])){
+                return apiResponse([],ApiStatus::CODE_0);
             }else{
-                return apiResponse([],ApiStatus::CODE_50000, 'id不能为空');
-
+                return apiResponse([],ApiStatus::CODE_50000, get_msg());
             }
-
-        }catch(\Exception $e){
-            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+        }else{
+            return apiResponse([],ApiStatus::CODE_50000, 'id不能为空');
 
         }
+
     }
 
     /**

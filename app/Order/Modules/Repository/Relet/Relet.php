@@ -60,25 +60,6 @@ class Relet
 
     }
 
-
-    /**
-     * 续租完成
-     *      支付完成或创建分期成功执行
-     *
-     * 步骤:
-     *  1.修改商品状态
-     *  2.添加新周期
-     *  3.修改订单状态
-     *  4.解锁订单
-     *
-     * @author jinlin wang
-     * @param array
-     * @return boolean
-     */
-    public function reletFinish(Goods $goods, Order $order){
-
-    }
-
     /**
      * 获取支付链接
      *

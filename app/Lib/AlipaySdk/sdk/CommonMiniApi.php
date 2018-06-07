@@ -119,13 +119,13 @@ class CommonMiniApi extends BaseApi {
 
 		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
 		$this->result = [
-			'name'=>'张三',
-			'cert_no'=>'110101200010012568',
-			'mobile'=>'18820881688',
-			'house'=>'西湖区文三路168号',
-			'zm_grade'=>'较差',
-			'credit_amount'=>'100.00',
-			'user_id'=>'2088202873665353',
+			'name'=>'张锦辉',
+			'cert_no'=>'150204199703070612',
+			'mobile'=>'15116906320',
+			'house'=>'北京 北京 顺义 吉祥花园17栋7单元303',
+			'zm_grade'=>'Z3',
+			'credit_amount'=>'1500',
+			'user_id'=>'2088122107771765',
 			'channel_id'=>'app',
 			'zm_risk'=>'Y',
 			'zm_face'=>'Y',

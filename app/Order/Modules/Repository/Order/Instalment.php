@@ -46,7 +46,7 @@ class Instalment {
 	 *  ];
 	 * @return array 返回分期数据
 	 */
-	public function instalmentData( array $params ){
+	public static function instalmentData( array $params ){
 
 		// 单商品分期的相关数据
 		$sku = [
@@ -78,7 +78,7 @@ class Instalment {
 			}
 		}
 		// 商品优惠金额 递减分期
-		$goods_discount_amount = $params['sku']['discount_amount'];
+		$goods_discount_amount = !empty($params['sku']['discount_amount']) ? $params['sku']['discount_amount'] : 0 ;
 		if($goods_discount_amount > 0){
 			// 递减分期
 			$model = '\App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter';
@@ -125,9 +125,9 @@ class Instalment {
 	 *          'pay_type'          => 1,//支付类型
 	 *      ],
 	 *      'coupon'=>[ 			  // 非必须
-	 *          'discount_amount'   => 1,//优惠金额
-	 *          'coupon_type'       => 1,//优惠券类型
-	 *      ],
+     *          'discount_amount'   => 1,//优惠金额
+     *          'coupon_type'       => 1,//优惠券类型
+     *      ],
 	 *      'user'=>[
 	 *          'user_id'           => 1,//用户ID
 	 *       ],
@@ -135,6 +135,7 @@ class Instalment {
 	 * @return bool true：成功；false：失败
 	 */
 	public static function create( array $param ):bool{
+		
 		if(!is_array($param)){
 			return false;
 		}
