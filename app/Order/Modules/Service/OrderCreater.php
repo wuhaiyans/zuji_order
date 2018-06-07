@@ -359,8 +359,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+//            //优惠券
+//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
