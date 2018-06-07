@@ -152,6 +152,7 @@ class LogApi {
 				'content' => $data,						// 内容
 			],
 		];
+		// Redis 发布
 		//$job = new \App\Jobs\Log2Job( $_data );
 		//dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
@@ -160,7 +161,7 @@ class LogApi {
 		// 日志系统接口
 		try {
 			// 请求
-			$res = Curl::post(env('LOG_API'), json_encode($_config));
+			$res = Curl::post(env('LOG_API'), json_encode($_data));
 			if( !$res ){
 				return false;
 			}
@@ -173,7 +174,7 @@ class LogApi {
 			}
 			
 		} catch (\Exception $exc) {
-			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_config) ));
+			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
 		}
 
 		
