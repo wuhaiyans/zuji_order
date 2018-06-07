@@ -161,6 +161,8 @@ class LogApi {
 		try {
 			// 请求
 			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+			
+			var_dump( $res );
 			if( !$res ){
 				return false;
 			}
@@ -168,7 +170,6 @@ class LogApi {
 			if( !$res ){
 				return false;
 			}
-			var_dump( $res );
 			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
 				dispatch(new \App\Jobs\LogJob( $str ));
 			}
