@@ -135,23 +135,27 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-		$job = new \App\Jobs\LogJob($str);
-		//$job->delay(5);
-		dispatch( $job );
-//		
-//		$_config = [
-//			'service' => gethostname(),					// 服务器名称
-//			'source' => env('LOG_SOURCE'),				// 日志来源
-//			'message' => $msg,
-//			'host' => request()->server('HTTP_HOST'),	// 	Host名称
-//			'data' => [
-//				'level' => $level,						// 级别
-//				'session_id' => session_id(),			// 回话
-//				'user_id' => '',						// 用户ID
-//				'serial_no' => self::_autoincrement(),	// 序号
-//				'content' => $data,						// 内容
-//			],
-//		];
+//		$job = new \App\Jobs\LogJob($str);
+//		//$job->delay(5);
+//		dispatch( $job );
+		
+		$_data = [
+			'service' => gethostname(),					// 服务器名称
+			'source' => env('LOG_SOURCE'),				// 日志来源
+			'message' => $msg,
+			'host' => request()->server('HTTP_HOST'),	// 	Host名称
+			'data' => [
+				'level' => $level,						// 级别
+				'session_id' => session_id(),			// 回话
+				'user_id' => '',						// 用户ID
+				'serial_no' => self::_autoincrement(),	// 序号
+				'content' => $data,						// 内容
+			],
+		];
+		//$job = new \App\Jobs\Log2Job( $_data );
+		//dispatch( $job );
+		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
+		
 //		
 //		// 日志系统接口
 //		try {
