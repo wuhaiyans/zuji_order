@@ -38,9 +38,8 @@ return [
 
 
 
-
     //收货 待完成
-    'warehouse.receive.checkItems'=> 'ReceiveController@checkItems', //取消收货
+    'warehouse.receive.checkItems'=> 'ReceiveController@checkItems', //检测项
     'warehouse.receive.cancelReceive'=> 'ReceiveController@cancelReceive', //取消收货
     'warehouse.receive.list'=> 'ReceiveController@list', //列表
     'warehouse.receive.create'=> 'ReceiveController@create', //创建
@@ -58,7 +57,9 @@ return [
 
 
     'warehouse.receiveGoods.list'=> 'ReceiveGoodsController@list',//设备列表
-    'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics'//公用参数
+    'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics',//公用参数
+    'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems'//取检测项
+
 
 
 ];

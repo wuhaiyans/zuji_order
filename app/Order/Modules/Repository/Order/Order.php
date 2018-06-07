@@ -170,11 +170,14 @@ class Order {
 		}
 		// 支付中
 		if( $data['status'] == 'processing' ){
-			$this->model->order_status = OrderStatus::OrderPaying; 
+			$this->model->order_status = OrderStatus::OrderPaying;
+			$this->model->update_time = time();
 		}
 		// 支付成功
 		elseif( $data['status'] == 'success' ){
-			$this->model->order_status = OrderStatus::OrderPayed; 
+			$this->model->order_status = OrderStatus::OrderPayed;
+            $this->model->pay_time = time();
+            $this->model->update_time = time();
 		}else{
 			return false;
 		}
@@ -266,7 +269,12 @@ class Order {
 	 * @return bool
 	 */
 	public function sign( ):bool{
-		return true;
+        if($this->model->order_status!=OrderStatus::OrderDeliveryed && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+        $this->model->order_status = OrderStatus::OrderInService;
+        $this->model->receive_time = time();
+        return $this->model->save();
 	}
 	
 	
@@ -503,13 +511,27 @@ class Order {
     /**
      * 验证订单是否冻结
      *
-     * @return bool false冻结,ture未冻结
+     * @return bool false未冻结,ture冻结
      */
     public function nonFreeze():bool {
         if($this->model->freeze_type==OrderFreezeStatus::Non){
-            return true;
-        }else{
             return false;
+        }else{
+            return true;
+        }
+    }
+
+    /**
+     * 修改订单冻结状态 续租
+     *
+     * @return bool
+     */
+    public function reletFreeze():bool {
+        if($this->model->freeze_type!=OrderFreezeStatus::Non){
+            return false;
+        }else{
+            $this->model->freeze_type = OrderFreezeStatus::Relet;
+            return $this->model->save();
         }
     }
 

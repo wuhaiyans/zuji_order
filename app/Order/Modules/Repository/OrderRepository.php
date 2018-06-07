@@ -5,6 +5,7 @@ use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
 use App\Order\Models\OrderCoupon;
+use App\Order\Models\OrderExtend;
 use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderUserCertified;
@@ -29,21 +30,7 @@ class OrderRepository
     public function add($data){
         return $this->order->insertGetId($data);
     }
-    /**
-     * 发货操作
-     * @param $orderNo
-     * @return boolean
-     */
-    public static function delivery($orderNo)
-    {
-        if (empty($orderNo)) {
-            return false;
-        }
-        $data['order_status'] =OrderStatus::OrderDeliveryed;
-        $data['delivery_time'] =time();
-        return Order::where('order_no','=',$orderNo)->update($data);
 
-    }
     /**
      * 保存渠道信息
      * @param $orderNo
@@ -58,41 +45,7 @@ class OrderRepository
         return Order::where('order_no','=',$orderNo)->update($data);
 
     }
-    /**
-     * 确认收货操作
-     * @param $orderNo
-     * @return boolean
-     */
-    public static function deliveryReceive($orderNo)
-    {
-        if (empty($orderNo)) {
-            return false;
-        }
-        $data['order_status'] =OrderStatus::OrderInService;
-        $data['receive_time'] =time();
-        return Order::where('order_no','=',$orderNo)->update($data);
 
-    }
-    /**
-     * 确认订单操作
-     * @param $orderNo
-     * @param $remark
-     * @return boolean
-     */
-    public static function confirmOrder($orderNo,$remark)
-    {
-        if (empty($orderNo)) {
-            return false;
-        }
-        if (empty($remark)) {
-            return false;
-        }
-        $data['order_status'] = OrderStatus::OrderInStock;
-        $data['remark'] =$remark;
-        $data['confirm_time'] =time();
-        return Order::where('order_no','=',$orderNo)->update($data);
-
-    }
 
     /**
      *  保存支付交易号
@@ -203,6 +156,24 @@ class OrderRepository
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
+
+    /**
+     * 获取订单扩展表状态
+     * @param $orderNo
+     * @return array|bool
+     */
+
+    public static function getOrderExtends($orderNo,$field_name=""){
+        if (empty($orderNo)) return false;
+        $whereArray[] = ['order_no', '=', $orderNo];
+
+        if($field_name !=""){
+            $whereArray[] = ['field_name', '=', $field_name];
+        }
+        $orderExtends = OrderExtend::query()->where($whereArray)->get();
+        if (!$orderExtends) return [];
+        return $orderExtends->toArray();
+    }
     /**
      * 根据订单id和商品id查询设备列表
      * heaven
@@ -305,6 +276,7 @@ class OrderRepository
         $order =  Order::where($whereArray)->first();
         if (!$order) return false;
         $order->order_status = OrderStatus::OrderCancel;
+        $order->complete_time = time();
         if ($order->save()) {
             return true;
         } else {
@@ -367,8 +339,11 @@ class OrderRepository
                 ->leftJoin('order_user_address', function ($join) {
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 })
+                ->leftJoin('order_user_certified', function ($join) {
+                    $join->on('order_info.order_no', '=', 'order_user_certified.order_no');
+                })
                 ->where('order_info.order_no', '=', $param['order_no'])
-                ->select('order_info.*','order_user_address.*')
+                ->select('order_info.*','order_user_address.*','order_user_certified.*')
                 ->first();
 
             return !empty($orderData)?objectToArray($orderData):false;
@@ -393,16 +368,6 @@ class OrderRepository
         }else{
             return false;
         }
-    }
-
-    public static function orderPayStatus(string $orderNo,int $payStatus){
-        if(empty($orderNo) || empty($payStatus)){
-            return false;
-        }
-        $data['order_status'] = $payStatus;
-        $data['pay_time'] =time();
-        $data['update_time'] = time();
-        return Order::where('order_no','=',$orderNo)->update($data);
     }
 
     /**
@@ -431,6 +396,31 @@ class OrderRepository
         }else{
             return false;
         }
+
+    }
+
+    /**
+     * 查询所有订单信息
+     * @param $param array
+     * [
+     *      'order_status' =>'',//订单状态
+     *      'now_time' =>'',//查找小于当前时间
+     * ]
+     * @return array|bool
+     */
+    public static function getOrderAll($param =[]){
+
+        $whereArray =[];
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_status', '=', $param['order_status']];
+        }
+        //订单创建时间
+        if (isset($param['now_time']) && !empty($param['now_time'])) {
+            $whereArray[] = ['create_time', '<=', $param['now_time']];
+        }
+        $orderData =Order::query()->where($whereArray)->get()->toArray();
+        return $orderData ?? false;
 
     }
 
@@ -477,7 +467,7 @@ class OrderRepository
 
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
-            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
         }
 
         //下单时间

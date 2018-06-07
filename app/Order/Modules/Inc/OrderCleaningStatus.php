@@ -62,7 +62,7 @@ class OrderCleaningStatus{
     /***************************************end  *****************************************************************************/
 
 
-    /**************************************start 清算的状态 1：已取消；2：待扣押金；3：待退还押金；4：待退款；5：清算已完成*************************************************/
+    /**************************************start 清算的状态 1：已取消；2：待扣押金；3：待退还押金；4：待退款；5：出账中；6：清算已完成*************************************************/
 
     const orderCleaningCancel = 1;
 
@@ -72,7 +72,9 @@ class OrderCleaningStatus{
 
     const orderCleaningUnRefund = 4;
 
-    const orderCleaningComplete= 5;
+    const orderCleaning= 5;
+
+    const orderCleaningComplete= 6;
 
     /***************************************end  *****************************************************************************/
 
@@ -258,6 +260,7 @@ class OrderCleaningStatus{
             self::orderCleaningDeposit => '待扣押金',
             self::orderCleaningUnfreeze => '待退还押金',
             self::orderCleaningUnRefund => '待退款',
+            self::orderCleaning => '出账中',
             self::orderCleaningComplete => '清算已完成',
         ];
     }

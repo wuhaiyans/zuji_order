@@ -17,7 +17,7 @@ class LogApi {
 		return new self();
 	}
 	
-	private static $source = '';
+	private static $source = 'default';
 	public static function setSource( string $source ){
 		self::$source = $source;
 		return self::getInstace();
@@ -135,9 +135,9 @@ class LogApi {
 				$level,
 				$msg,
 				trim($data));
-//		$job = new \App\Jobs\LogJob($str);
-//		//$job->delay(5);
-//		dispatch( $job );
+		$job = new \App\Jobs\LogJob($str);
+		//$job->delay(5);
+		dispatch( $job );
 		
 		$_data = [
 			'service' => gethostname(),					// 服务器名称
@@ -157,11 +157,11 @@ class LogApi {
 		//dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
 		
-		
 		// 日志系统接口
 		try {
 			// 请求
 			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+			
 			if( !$res ){
 				return false;
 			}

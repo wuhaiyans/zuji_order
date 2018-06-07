@@ -5,15 +5,18 @@
  *    date : 2018-05-04
  */
 namespace App\Order\Modules\Service;
+use App\Lib\Common\LogApi;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Order;
+use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
@@ -104,6 +107,46 @@ class OrderOperate
         }
 
     }
+
+    /**
+     * 获取订单状态流
+     * @param $orderNo 订单编号
+     * @return array
+     */
+
+
+    public static function getOrderStatus($orderNo){
+        $order = Order::getByNo($orderNo);
+        $orderInfo = $order->getData();
+        $res[] =[$orderInfo['create_time'] =>"已下单"];
+        if($orderInfo['pay_time']){
+           $res[] =[$orderInfo['create_time'] =>"已支付"];
+        }
+        if($orderInfo['confirm_time']){
+            $res[] =[$orderInfo['create_time'] =>"已确认"];
+        }
+        if($orderInfo['delivery_time']){
+            $res[] =[$orderInfo['create_time'] =>"已发货"];
+        }
+        if($orderInfo['receive_time']){
+            $res[] =[$orderInfo['create_time'] =>"租用中"];
+        }
+        if($orderInfo['order_status'] == Inc\OrderStatus::OrderCancel){
+            $res[] =[$orderInfo['complete_time'] =>"已取消（未支付）"];
+            return $res;
+        }
+        if($orderInfo['order_status'] == Inc\OrderStatus::OrderClosedRefunded){
+            $res[] =[$orderInfo['complete_time'] =>"已关闭（已退款）"];
+            return $res;
+        }
+        if($orderInfo['order_status'] == Inc\OrderStatus::OrderCompleted){
+            $res[] =[$orderInfo['complete_time'] =>"已完成"];
+            return $res;
+        }
+
+        return $res;
+    }
+
     /**
      * 保存回访标识
      * @param $params
@@ -117,7 +160,40 @@ class OrderOperate
 
     public static function orderVistSave($params)
     {
-        $order =OrderExtend::updateOrCreate(['order_no'=>$params['order_no']],$params);
+        DB::beginTransaction();
+        try{
+
+            $res=OrderRepository::getOrderExtends($params['order_no'],Inc\OrderExtendFieldName::FieldVisit);
+            if(empty($res)){
+                $extendData= [
+                    'order_no'=>$params['order_no'],
+                    'field_name'=>Inc\OrderExtendFieldName::FieldVisit,
+                    'field_value'=>1,
+                ];
+                $res =OrderExtend::create($extendData);
+                $id = $res->getQueueableId();
+                if(!$id){
+                    DB::rollBack();
+                    return false;
+                }
+            }
+            $params['create_time'] =time();
+            $order = OrderVisit::updateOrCreate($params);
+            $id =$order->getQueueableId();
+            if(!$id){
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
+        $order =OrderExtend::updateOrCreate($params);
         return $order->getQueueableId();
     }
 
@@ -152,16 +228,16 @@ class OrderOperate
         if(empty($orderNo) || empty($role)){return false;}
         DB::beginTransaction();
         try{
-            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
-            if(empty($orderInfo)){
+            //更新订单状态
+            $order = Order::getByNo($orderNo);
+            if(!$order){
                 DB::rollBack();
                 return false;
             }
-            $b =OrderRepository::deliveryReceive($orderNo);
-            if(!$b){
-                DB::rollBack();
-                return false;
-            }
+            $b =$order->sign();
+
+            $orderInfo = $order->getData();
+
             //查询订单 如果是长租 生成租期周期表 更新商品表
             if($orderInfo['zuqi_type'] ==2){
                 //查询商品信息
@@ -169,13 +245,12 @@ class OrderOperate
                 //更新商品表
                 $goodsData['begin_time'] = time();
                 $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[0]['zuqi']);
-                $orderGoodsRepository = new OrderGoodsRepository();
-                $b =$orderGoodsRepository->updateServiceTime($goodsInfo[0]['goods_no'],$goodsData);
+                $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[0]['goods_no']);
+                $b =$goods->updateGoodsServiceTime($goodsData);
                 if(!$b){
                     DB::rollBack();
                     return false;
                 }
-
                 //增加商品租期表
                 $unitData =[
                     'order_no'=>$orderNo,
@@ -186,19 +261,12 @@ class OrderOperate
                     'begin_time'=>$goodsData['begin_time'],
                     'end_time'=>$goodsData['end_time'],
                 ];
-                $b =OrderGoodsUnitRepository::add($unitData);
+                $b =ServicePeriod::createService($unitData);
                 if(!$b){
                     DB::rollBack();
                     return false;
                 }
             }
-
-//            $id =OrderLogRepository::add(0,"",$role,$orderNo,"确认收货","");
-//            if(!$id){
-//                DB::rollBack();
-//                return false;
-//            }
-
             DB::commit();
             return true;
         }catch (\Exception $exc){
@@ -259,6 +327,83 @@ class OrderOperate
     }
 
     /**
+     *  定时任务取消订单
+     * Author: heaven
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
+     */
+    public static function cronCancelOrder()
+    {
+        try {
+            $param = [
+                'order_status' => Inc\OrderStatus::OrderWaitPaying,
+                'now_time'=> time() - 7200,
+            ];
+            $orderData = OrderRepository::getOrderAll($param);
+            if (!$orderData) {
+                return false;
+            }
+            //var_dump($orderData);die;
+            foreach ($orderData as $k => $v) {
+                //开启事物
+                DB::beginTransaction();
+                $b = OrderRepository::closeOrder($v['order_no']);
+                if(!$b){
+                    DB::rollBack();
+                    LogApi::debug("更改订单状态失败:" . $v['order_no']);
+                }
+
+                //分期关闭
+                //查询分期
+                $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
+                if (!$success) {
+                    DB::rollBack();
+                    LogApi::debug("订单关闭分期失败:" . $v['order_no']);
+                }
+                DB::commit();
+                //释放库存
+                //查询商品的信息
+                $orderGoods = OrderRepository::getGoodsListByOrderId($v['order_no']);
+                if ($orderGoods) {
+                    foreach ($orderGoods as $orderGoodsValues) {
+                        //暂时一对一
+                        $goods_arr[] = [
+                            'sku_id' => $orderGoodsValues['zuji_goods_id'],
+                            'spu_id' => $orderGoodsValues['prod_id'],
+                            'num' => $orderGoodsValues['quantity']
+                        ];
+                    }
+                    $success = Goods::addStock($goods_arr);
+                    if (!$success)
+                        //DB::rollBack();
+                        LogApi::debug("订单恢复库存失败:" . $v['order_no']);
+                }
+
+            //优惠券归还
+            //通过订单号获取优惠券信息
+            $orderCouponData = OrderRepository::getCouponListByOrderId($v['order_no']);
+            if ($orderCouponData) {
+                $coupon_id = array_column($orderCouponData, 'coupon_id');
+                $success = Coupon::setCoupon(['user_id' => $v['user_id'], 'coupon_id' => $coupon_id]);
+
+                if ($success) {
+                    DB::rollBack();
+                    LogApi::debug("订单优惠券恢复失败:" . $v['order_no']);
+                }
+
+            }
+
+        }
+        return true;
+
+        } catch (\Exception $exc) {
+            DB::rollBack();
+            return  ApiStatus::CODE_31006;
+        }
+
+    }
+    /**
      * 取消订单
      * Author: heaven
      * @param $orderNo 订单编号
@@ -268,8 +413,8 @@ class OrderOperate
     public static function cancelOrder($orderNo,$userId='')
     {
         if (empty($orderNo)) {
-           return  ApiStatus::CODE_31001;
-            }
+            return  ApiStatus::CODE_31001;
+        }
         //查询订单的状态
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
 
@@ -282,7 +427,16 @@ class OrderOperate
             $orderData =  OrderRepository::closeOrder($orderNo,$userId);
             if (!$orderData) {
                 DB::rollBack();
-               return ApiStatus::CODE_31002;
+                return ApiStatus::CODE_31002;
+            }
+
+
+            //分期关闭
+            //查询分期
+            $success =  OrderGoodsInstalment::close(['order_no'=>$orderNo]);
+            if (!$success) {
+                DB::rollBack();
+                return ApiStatus::CODE_31004;
             }
             //释放库存
             //查询商品的信息
@@ -297,8 +451,6 @@ class OrderOperate
                     ];
                 }
                 $success =Goods::addStock($goods_arr);
-
-
             }
 
             if (!$success || empty($orderGoods)) {
@@ -320,17 +472,6 @@ class OrderOperate
 
             }
 
-            //分期关闭
-            //查询分期
-            if ($orderInfoData['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH) {
-
-                $success =  OrderInstalment::close(['order_no'=>$orderNo]);
-                if (!$success) {
-                    DB::rollBack();
-                    return ApiStatus::CODE_31004;
-                }
-
-            }
 
             DB::commit();
             return ApiStatus::CODE_0;

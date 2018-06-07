@@ -16,6 +16,7 @@ use App\Order\Modules\Service;
 use App\Lib\AlipaySdk\sdk\CommonMiniApi;
 use App\Order\Modules\Inc\OrderStatus;
 use Illuminate\Support\Facades\DB;
+use App\Order\Modules\OrderCreater\RiskComponnet;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
 use App\Order\Modules\OrderCreater\CouponComponnet;
@@ -47,9 +48,10 @@ class MiniOrderController extends Controller
         // 验证参数
         $rules = [
             'sku_id' => 'required', //【必须】int；子商品ID
+            'sku_num' => 'required', //【必须】int；子商品ID
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
-        if ($validateParams['code'] != 0) {
+        if ( $validateParams['code']!=0 ) {
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
@@ -66,11 +68,12 @@ class MiniOrderController extends Controller
         }
         $data = [
             'order_no' => $orderNo,
-            'sku_id' => intval($params['sku_id']),
+            'sku' => [$params],
             'overdue_time' => $overdue_time
         ];
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
+
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
@@ -108,14 +111,16 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
         $data = json_decode($data,true);
-        $data['pay_type'] = \App\Order\Modules\Inc\PayInc::MiniAlipay;
-        $data['sku'] = [
-            'sku_id'=>$data['sku_id']
+        $data['pay_type'] = $params['payment_type_id'];
+        $data['appid'] = $params['appid'];
+        $data['coupon'] = [
+            'coupon_no'=>$params['coupon_no']
         ];
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.ALIPAY_MINI_APP_ID'));
         //获取请求流水号
         $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+        //添加逾期时间
         $miniParams = [
             'transaction_id'=>$transactionNo,
             'order_no'=>$params['zm_order_no'],
@@ -128,109 +133,24 @@ class MiniOrderController extends Controller
             return apiResponse( [], ApiStatus::CODE_35003, $miniApi->getError());
         }
         $miniData = $miniApi->getResult();
-        //添加逾期时间
-        print_r($miniData);
-        print_r($params);
-        print_r($data);
         //用户处理
-        $userid = \App\Lib\User\User::getUserId($miniData);
-
+        $data['user_id'] = \App\Lib\User\User::getUserId($miniData);
         //处理用户收货地址
-        $address_info = [];
-//        $address_data = [
-//            'mid' => $user_id,
-//            'name' => $data['name'],
-//            'mobile' => $data['mobile'],
-//            'address' => $data['house'],
-//        ];
-
-        //优惠券处理
-
-//        $couponData = \App\Lib\Coupon\Coupon::getCoupon(config('miniappid.ALIPAY_MINI_APP_ID'));
-//        //100元全场通用优惠券
-//        $app_ids = [
-//            1,5,9,11,12,13,14,15,16,21,22,24,27
-//        ];
-//        if(in_array($appid,$app_ids)){
-//            $coupon = \zuji\coupon\Coupon::set_coupon_user(array("user_id"=>$this->member['id'],"only_id"=>'87da43c62f09a2c43f905ae05335c31c'));
-//            $params['coupon_no'] = $coupon['coupon_no']?$coupon['coupon_no']:$params['coupon_no'];
-//        }
-//        //首月0租金优惠券领取活动--(临时)--
-//        $sku_info = $this->load->service("goods2/goods_sku")->api_get_info($sku_id,"spu_id");
-//        $this->coupon = $this->load->table("coupon/coupon_type");
-//        $coupon_info = $this->coupon->where(['only_id'=>'4033f1cdfa5d835ea70cd07be787babc'])->find();
-//        $num = explode(",",substr($coupon_info['range_value'],0,-1));
-//        if(in_array($sku_info['spu_id'],$num)){
-//            $coupon = \zuji\coupon\Coupon::set_coupon_user(array("user_id"=>$this->member['id'],"only_id"=>$coupon_info['only_id']));
-//            $params['coupon_no'] = $coupon['coupon_no']?$coupon['coupon_no']:$params['coupon_no'];
-//        }
-
-        //商品信息处理
-        $goods = \App\Lib\Goods\Goods::getSku( $data['sku_id']  );
-
-        //小程序订单
-        $orderType =OrderStatus::orderMiniService;
-        try{
-            //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$userid,$data['pay_type'],$params['appid'],$orderType);
-
-            // 用户
-            $userComponnet = new UserComponnet($orderCreater,$userid,$address_info['address_id']);
-            $orderCreater->setUserComponnet($userComponnet);
-
-            // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
-            $orderCreater->setSkuComponnet($skuComponnet);
-
-            // 信用
-            $orderCreater = new CreditComponnet($orderCreater);
-
-            //蚁盾数据
-            $orderCreater = new YidunComponnet($orderCreater);
-
-            //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-            //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$userid);
-
-            //收货地址
-            $orderCreater = new AddressComponnet($orderCreater);
-
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$params['appid']);
-
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$params['coupon']);
-
-            //分期
-            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
-
-            $b = $orderCreater->filter();
-            if(!$b){
-                //把无法下单的原因放入到用户表中
-                $userRemark =User::setRemark($userid,$orderCreater->getOrderCreater()->getError());
-
-            }
-            $schemaData = $orderCreater->getDataSchema();
-            $result = [
-                'coupon'         => $params['coupon'],
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['score'],
-                '_order_info' => $schemaData,
-                'b' => $b,
-                '_error' => $orderCreater->getOrderCreater()->getError(),
-                'pay_type'=>$data['pay_type'],
-            ];
-            return apiResponse( $result, ApiStatus::CODE_0 );
-
-        } catch (\Exception $exc) {
-            DB::rollBack();
-            echo $exc->getMessage();
-            die;
+        $addressId = \App\Lib\User\User::getAddressId($miniData);
+        $data['address_info'] = [
+            'province_id'=>$addressId['provin_id'],
+            'city_id'=>$addressId['city_id'],
+            'district_id'=>$addressId['country_id'],
+            'mobile'=>$miniData['mobile'],
+            'name'=>$miniData['name'],
+            'address'=>$miniData['house'],
+        ];
+        //小程序订单确认
+        $res = $this->OrderCreate->miniConfirmation($data);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
         }
-
+        return apiResponse($res,ApiStatus::CODE_0);
     }
 
 
