@@ -157,12 +157,12 @@ class LogApi {
 		//dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
 		
+			var_dump( config('logsystem.LOG_API'), json_encode($_data));
 		// 日志系统接口
 		try {
 			// 请求
 			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
 			
-			var_dump( $res );
 			if( !$res ){
 				return false;
 			}
