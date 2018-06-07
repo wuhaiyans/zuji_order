@@ -45,19 +45,15 @@ class MiniOrderController extends Controller
      */
     public function getTemporaryOrderNo(Request $request){
         $params     = $request->all();
-        print_r($params);die;
         // 验证参数
         $rules = [
             'sku_id' => 'required', //【必须】int；子商品ID
             'sku_num' => 'required', //【必须】int；子商品ID
-            'begin_time' => 'required', //【必须】int；子商品ID
-            'end_time' => 'required', //【必须】int；子商品ID
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 2) {
             return apiResponse([],$validateParams['code']);
         }
-
         $params = $params['params'];
         //获取订单号
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
