@@ -448,7 +448,8 @@ class OrderController extends Controller
      */
     public function cronCancelOrder(){
 
-       return OrderOperate::cronCancelOrder();
+      OrderOperate::cronCancelOrder();
+      echo "complete";die;
     }
 
     /**
