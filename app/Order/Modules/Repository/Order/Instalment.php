@@ -125,9 +125,9 @@ class Instalment {
 	 *          'pay_type'          => 1,//支付类型
 	 *      ],
 	 *      'coupon'=>[ 			  // 非必须
-	 *          'discount_amount'   => 1,//优惠金额
-	 *          'coupon_type'       => 1,//优惠券类型
-	 *      ],
+     *          'discount_amount'   => 1,//优惠金额
+     *          'coupon_type'       => 1,//优惠券类型
+     *      ],
 	 *      'user'=>[
 	 *          'user_id'           => 1,//用户ID
 	 *       ],

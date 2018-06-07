@@ -77,7 +77,7 @@ class User{
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
         return [
-            'user_id'=>'0',
+            'user_id'=>'107',
         ];
         if(!is_array($info)){
             return ApiStatus::CODE_60000;

@@ -15,6 +15,7 @@ use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -433,7 +434,7 @@ class OrderOperate
 
             //分期关闭
             //查询分期
-            $success =  OrderGoodsInstalment::close(['order_no'=>$orderNo]);
+            $success =  Instalment::close(['order_no'=>$orderNo]);
             if (!$success) {
                 DB::rollBack();
                 return ApiStatus::CODE_31004;

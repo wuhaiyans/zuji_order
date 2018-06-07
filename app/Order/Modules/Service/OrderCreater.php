@@ -169,7 +169,7 @@ class OrderCreater
             $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
 
             // 用户
-            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
@@ -191,8 +191,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+//            //优惠券
+//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -210,20 +210,10 @@ class OrderCreater
                 return false;
             }
             DB::commit();
-            // 是否需要签署代扣协议
-            $need_to_sign_withholding = 'N';
-            if( $data['pay_type']== PayInc::WithhodingPay){
-                if( !$schemaData['withholding']['withholding_no'] ){
-                    $need_to_sign_withholding = 'Y';
-                }
-            }
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
-                // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $need_to_sign_withholding,
                 '_order_info' => $schemaData,
                 'order_no'=>$data['order_no'],
                 'pay_type'=>$data['pay_type'],

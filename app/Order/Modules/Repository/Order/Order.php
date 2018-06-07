@@ -328,7 +328,7 @@ class Order {
         return $this->model->save();
     }
     /**
-     * 取消退货-取消换货-取消退款-检测不合格拒绝退款 ---换货检测不合格  共用
+     * 取消退货-取消换货-取消退款-检测不合格拒绝退款 ---换货检测不合格 --换货完成 共用
      * @return bool
      */
     public function returnClose( ):bool{
@@ -531,6 +531,20 @@ class Order {
             return false;
         }else{
             $this->model->freeze_type = OrderFreezeStatus::Relet;
+            return $this->model->save();
+        }
+    }
+
+    /**
+     * 修改订单冻结状态 解冻
+     *
+     * @return bool
+     */
+    public function relieveFreeze():bool {
+        if($this->model->freeze_type==OrderFreezeStatus::Non){
+            return false;
+        }else{
+            $this->model->freeze_type = OrderFreezeStatus::Non;
             return $this->model->save();
         }
     }

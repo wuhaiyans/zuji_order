@@ -1182,42 +1182,51 @@ class OrderReturnCreater
      * ]
      */
     public function updateorder($params){
-        if (empty($params['order_no']) && empty($params['goods_no'])){
-            return ApiStatus::CODE_20001;//参数错误
-        }
-        $data['status']=ReturnStatus::ReturnHuanHuo;//已换货
         //开启事物
         DB::beginTransaction();
-        $where[] = ['order_no', '=', $params['order_no']];
-        foreach($params as $k=>$v){
-            $where[] = ['goods_no', '=', $params[$k]['goods_no']];
-            $result = $this->orderReturnRepository->is_qualified($where, $data);//修改退货单状态和原因
-            if(!$result){
-                //事务回滚
-                DB::rollBack();
-                return ApiStatus::CODE_33008;//修改退货单信息失败
+        try{
+            //获取订单信息
+            $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
+            if(!$order){
+                return false;
             }
-            //修改商品状态
-            $goodsdata['goods_status']=OrderGoodStatus::EXCHANGE_OF_GOODS;//已换货
-            $goods_result = $this->orderReturnRepository->updategoods($where, $goodsdata);
-            if (!$goods_result){
-                //事务回滚
-                DB::rollBack();
-                return ApiStatus::CODE_33009;//修改商品状态失败
+            foreach($params['goods_info'] as $goods_no){
+                //获取换货单信息
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByInfo($params['order_no'],$goods_no);
+                if(!$return){
+                    return false;
+                }
+                //更新退货单状态为已换货
+                $updateBarter=$return->barterFinish();
+                if(!$updateBarter){
+                    DB::rollBack();
+                    return false;
+                }
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
+                if(!$goods){
+                    return false;
+                }
+                //更新商品状态为已换货
+                $updateGoods=$goods->barterFinish();
+                if(!$updateGoods){
+                    DB::rollBack();
+                    return false;
+                }
             }
-        }
-        //更新订单冻结状态
-        $freeze_type=OrderFreezeStatus::Non;
-        $freeze = $this->orderReturnRepository->update_freeze($params, $freeze_type);
-        if (!$freeze){
-            //事务回滚
-            DB::rollBack();
-            return ApiStatus::CODE_33007;//修改订单状态失败
-        }
+            //订单解冻
+            $updateOrder=$order->returnClose();
+            if(!$updateOrder){
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
 
-        //提交事务
-        DB::commit();
-        return ApiStatus::CODE_0;
+        }catch (\Exception $exc) {
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
     }
     //用户退货收货
     public function user_receive($params){
