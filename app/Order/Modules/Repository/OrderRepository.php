@@ -401,14 +401,14 @@ class OrderRepository
 
     /**
      * 查询所有订单信息
-     * @param $params array
+     * @param $param array
      * [
      *      'order_status' =>'',//订单状态
      *      'now_time' =>'',//查找小于当前时间
      * ]
      * @return array|bool
      */
-    public static function getOrderAll($params =[]){
+    public static function getOrderAll($param =[]){
 
         $whereArray =[];
         //订单状态
@@ -417,7 +417,7 @@ class OrderRepository
         }
         //订单创建时间
         if (isset($param['now_time']) && !empty($param['now_time'])) {
-            $whereArray[] = ['create_time', '<= ', $param['now_time']];
+            $whereArray[] = ['create_time', '<=', $param['now_time']];
         }
         $orderData =Order::query()->where($whereArray)->get()->toArray();
         return $orderData ?? false;
