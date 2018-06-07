@@ -201,6 +201,28 @@ class Goods {
 	// | 续租
 	//-+------------------------------------------------------------------------
     /**
+     * 修改设备状态 续租中
+     *
+     * @return bool
+     */
+    public function setGoodsStatusReletOn(){
+        $this->model->goods_status = OrderGoodStatus::RELET;
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
+
+    /**
+     * 修改设备状态 续租完成
+     *
+     * @return bool
+     */
+    public function setGoodsStatusReletOff(){
+        $this->model->goods_status = OrderGoodStatus::RENEWAL_OF_RENT;
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
+
+    /**
      * 续租开始
      *
      * @param array
@@ -216,121 +238,6 @@ class Goods {
      * @return bool | array
      */
     public function reletOpen($params) {
-        $goodsData = $this->getData();
-        //校验 时间格式
-        if( $goodsData['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
-            if( $params['zuqi']<3 || $params['zuqi']<30 ){
-                set_msg('租期错误');
-                return false;
-            }
-        }else{
-            if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
-                set_msg('租期错误');
-                return false;
-            }
-        }
-        // 初始化订单
-        $order = Order::getByNo($goodsData['order_no']);
-        if( !$order->nonFreeze() ){
-            set_msg('订单冻结中,无法续租');
-            return false;
-        }
-
-        $amount = $goodsData['zujin']*$params['zuqi'];
-        if($amount == $params['relet_amount']){
-            $data = [
-                'user_id'=>$params['user_id'],
-                'zuqi_type'=>$goodsData['zuqi_type'],
-                'zuqi'=>$goodsData['zuqi'],
-                'order_no'=>$params['order_no'],
-                'relet_no'=>createNo(9),
-                'create_time'=>time(),
-                'pay_type'=>$params['pay_type'],
-                'user_name'=>$params['user_name'],
-                'goods_id'=>$params['goods_id'],
-                'relet_amount'=>$params['relet_amount'],
-                'status'=>ReletStatus::STATUS1,
-            ];
-
-            if(ReletRepository::createRelet($data)){
-                //修改设备状态 续租中
-                $rse = OrderGoods::where('id',$data['goods_id'])->update(['goods_status'=>OrderGoodStatus::RELET,'update_time'=>time()]);
-                if( !$rse ){
-                    set_msg('修改设备状态续租中失败');
-                    return false;
-                }
-
-                //创建支付
-                if($params['pay_type'] == PayInc::FlowerStagePay){
-                    // 创建支付 一次性结清 分期
-                    $pay = PayCreater::createPayment([
-                        'user_id'		=> $data['user_id'],
-                        'businessType'	=> OrderStatus::BUSINESS_RELET,
-                        'businessNo'	=> $data['relet_no'],
-
-                        'paymentAmount' => $data['relet_amount'],
-                        'paymentFenqi'	=> $params['zuqi'],
-                    ]);
-
-                    $step = $pay->getCurrentStep();
-                    //echo '当前阶段：'.$step."\n";
-
-                    $_params = [
-                        'name'			=> '订单设备续租',				//【必选】string 交易名称
-                        'front_url'		=> $params['return_url'],	    //【必选】string 前端回跳地址
-                    ];
-                    $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
-                    return $urlInfo;
-
-                }else{
-                    //代扣
-                    // 创建分期
-                    $fenqiData = [
-                        'order'=>[
-                            'order_no'=>$data['order_no'],//订单编号
-                        ],
-                        'sku'=>[
-                            [
-                                'zuqi'              =>  $goodsData['zuqi'],//租期
-                                'zuqi_type'         =>  $goodsData['zuqi_type'],//租期类型
-                                'all_amount'        =>  $amount,//总金额
-                                'amount'            =>  $amount,//实际支付金额
-                                'yiwaixian'         =>  0,//意外险
-                                'zujin'             =>  $goodsData['zujin'],//租金
-                                'pay_type'          =>  PayInc::WithhodingPay,//支付类型
-                                'goods_no'          =>  $goodsData['goods_no'],//商品编号
-                            ]
-                        ],
-                        'user'=>[
-                            'user_id'=>$params['user_id'],//用户代扣协议号
-                        ],
-                    ];
-
-                    if( OrderInstalment::create($fenqiData) ){
-                        //冻结订单,修改设备表状态续租完成,新建设备周期数据
-
-                        if( $this->reletRepository->setGoods($data['relet_no']) ){
-                            return true;
-                        }else{
-                            set_msg('修改设备表状态,新建设备周期数据失败');
-                            return false;
-                        }
-
-                    }else{
-                        set_msg('创建分期失败');
-                        return false;
-                    }
-
-                }
-
-            }else{
-                set_msg('创建续租失败');
-                return false;
-            }
-        }else{
-            set_msg('金额错误');
-            return false;
-        }
 
         // 更新goods状态
 

@@ -31,7 +31,7 @@ class OrderFreezeStatus{
     /**
      * @var int 续租
      */
-    const Renewal = 5;
+    const Relet = 5;
 
 
     //--------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ class OrderFreezeStatus{
             self::Reback => '还货',
             self::Buyout => '买断',
             self::Exchange => '换货',
-            self::Renewal => '续租',
+            self::Relet => '续租',
         ];
     }
 

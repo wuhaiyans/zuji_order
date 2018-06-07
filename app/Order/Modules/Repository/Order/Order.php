@@ -507,13 +507,27 @@ class Order {
     /**
      * 验证订单是否冻结
      *
-     * @return bool false冻结,ture未冻结
+     * @return bool false未冻结,ture冻结
      */
     public function nonFreeze():bool {
         if($this->model->freeze_type==OrderFreezeStatus::Non){
-            return true;
-        }else{
             return false;
+        }else{
+            return true;
+        }
+    }
+
+    /**
+     * 修改订单冻结状态 续租
+     *
+     * @return bool
+     */
+    public function reletFreeze():bool {
+        if($this->model->freeze_type!=OrderFreezeStatus::Non){
+            return false;
+        }else{
+            $this->model->freeze_type = OrderFreezeStatus::Relet;
+            return $this->model->save();
         }
     }
 
