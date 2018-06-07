@@ -165,58 +165,44 @@ class ReturnController extends Controller
 
     }
 
-
-    // 退货物流单号上传接口
-    /*
-     * order_no订单编号  必选
-     * logistics_id 物流类型  必选
-     * logistics_name 物流名称 必选
-     * logistics_no 物流编号  必选
-     * user_id  用户id  必选
-     * goods_no=array('sdada','adasdas')订单编号  可选
+    /**
+     * 物流单号上传
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|string
+     *[
      *
+     * logistics_id
+     * logistics_name
+     * logistics_no
+     * user_id
+     * refund_no=>[
+     *            ''
+     *            ''
+     *           ]
+     * ]
      */
-    public function returnDeliverNo(Request $request)
+    public function updateDeliveryNo(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'           => 'required',
             'logistics_id'  => 'required',
             'logistics_name'  => 'required',
             'logistics_no'       =>'required',
             'user_id'             =>'required',
         ]);
-        if(count($param)<5){
+        if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(empty($params['goods_no'])){
-            return ApiStatus::CODE_20001;
-        }
-        //获取订单详情
-        $order_info = $this->OrderCreate->get_order_detail($params);
-        if(!$order_info){
-            return apiResponse([], ApiStatus::CODE_20001,'未找到该订单');
-        }
-        //获取退货单信息
-        $return_info = $this->OrderReturnCreater->get_info_by_order_no($params);
-        if(!$return_info){
-            return apiResponse([], ApiStatus::CODE_34002,'无退货单信息');
-        }
-        if($return_info[0]->user_id!=$params['user_id']){
-           return apiResponse([], ApiStatus::CODE_20001,'非当前用户');
-        }
-        if($return_info[0]->business_key==ReturnStatus::OrderTuiHuo){
-            if($return_info[0]->status != ReturnStatus::ReturnAgreed){
-                return apiResponse([], ApiStatus::CODE_20001,'该订单未通过审核,不能上传物流单号');
-            }
-        }
-        if($return_info[0]->logistics_no){
-            return apiResponse([], ApiStatus::CODE_20001,'已上传物流单号');
-        }
-        $ret = $this->OrderReturnCreater->upload_wuliu($params);
 
-        return apiResponse([], $ret);
+        if (empty($params['goods_info'])) {
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res= $this->OrderReturnCreater->uploadWuliu($params);
+        if(!$res){
+            return apiResponse([], ApiStatus::CODE_34002,'上传物流失败');
+        }
+        return apiResponse([], ApiStatus::CODE_0);
 
     }
 
@@ -419,7 +405,7 @@ class ReturnController extends Controller
     }
 
     /**
-     * 检测不和拒绝退款
+     * 检测合格拒绝退款
      * @param Request $request
      */
     public function refuseRefund(Request $request){

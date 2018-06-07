@@ -1144,6 +1144,68 @@ class OrderReturnCreater
     }
 
     /**
+     * 退换货物流单号上传
+     * @param $params
+     * @return bool|string
+     * @throws \Exception
+     *
+     */
+    public function uploadWuliu($params){
+        //开启事务
+        DB::beginTransaction();
+        try{
+            $data=[];
+            foreach($params['goods_info'] as $k=>$v){
+                //获取退款单信息
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
+                if(!$return){
+                    return false;
+                }
+                $return_info=$return->getData();
+                //获取订单信息
+                $order=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
+                if(!$order){
+                    return false;
+                }
+
+                if($return_info['user_id']!=$params['user_id']){
+                    return false;
+                }
+                //订单未审核不能上传
+                if($return_info['status']!= ReturnStatus::ReturnAgreed){
+                    return false;
+                }
+
+                //更新物流单号
+                $uploadLogistics= $return->uploadLogistics($params);
+                if(!$uploadLogistics){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;
+                }
+                $data['order_no']=$return_info['order_no'];
+                $data['logistics_id']=$params['logistics_id'];
+                $data['logistics_no']=$params['logistics_no'];
+                $data['goods_info'][$k]['goods_no']=$return_info['goods_no'];
+                //提交事务
+                DB::commit();
+                return ApiStatus::CODE_0;
+            }
+            //上传物流单号到收货系统
+            $create_receive= Receive::updateLogistics($data);
+            if(!$create_receive){
+                return false;
+            }
+
+        }catch (\Exception $exc) {
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
+    }
+
+
+    /**
      * 换货用户收到货
      * @param $params
      * @return string
@@ -1489,7 +1551,6 @@ class OrderReturnCreater
                 }
                 //更新商品状态为租用中
                 $refuseGoods=$goods->returnClose();
-                p($refuseGoods);
                 if(!$refuseGoods){
                     //事务回滚
                     DB::rollBack();

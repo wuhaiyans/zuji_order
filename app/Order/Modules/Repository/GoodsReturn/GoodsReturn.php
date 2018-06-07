@@ -190,6 +190,22 @@ class GoodsReturn {
         return true;
     }
     /**
+     *
+     * 更新物流单号
+     * @return bool
+     */
+    public function uploadLogistics(array $data){
+        if($this->model->logistics_no!=''){
+            return false;
+        }
+        $this->model->logistics_id=$data['logistics_id'];
+        $this->model->logistics_name=$data['logistics_name'];
+        $this->model->logistics_no=$data['logistics_no'];
+        return $this->model->save();
+
+    }
+
+    /**
      * 获取订单
      * <p>当订单不存在时，抛出异常</p>
      * @param string $refund_no		退换货编号
