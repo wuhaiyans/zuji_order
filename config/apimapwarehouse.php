@@ -54,6 +54,11 @@ return [
     'warehouse.receive.show'=> 'ReceiveController@show',//清单查询，针对收货单
     'warehouse.receive.note'=> 'ReceiveController@note',//录入检测项，针对收货单
     'warehouse.receive.checkItemsFinish'=> 'ReceiveController@checkItemsFinish',//检测完成
-    'warehouse.receive.logistics'=> 'ReceiveController@logistics'//修改物流
+    'warehouse.receive.logistics'=> 'ReceiveController@logistics',//修改物流
+
+
+    'warehouse.receiveGoods.list'=> 'ReceiveGoodsController@list',//设备列表
+    'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics'//公用参数
+
 
 ];
