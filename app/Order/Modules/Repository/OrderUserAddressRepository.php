@@ -16,6 +16,17 @@ class OrderUserAddressRepository
     }
 
 
+    public static function getUserAddressInfo($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        $order =  OrderUserAddress::query()->where($whereArray)->first();
+        if (!$order) return false;
+        return $order->toArray();
+
+    }
+
     /**
      *
      * 修改地址信息

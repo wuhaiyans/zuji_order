@@ -219,7 +219,14 @@ class OrderController extends Controller
     }
 
 
-
+    /**
+     * 订单列表导出接口
+     * Author: heaven
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
     public function orderListExport(Request $request) {
 
         $params = $request->input('params');
