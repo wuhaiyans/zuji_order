@@ -31,7 +31,6 @@ class ReceiveGoodsService
         }
         $whereParams = [];
 
-
         $search = $this->paramsSearch($params);
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
@@ -48,7 +47,6 @@ class ReceiveGoodsService
         if (isset($params['end_time']) && $params['end_time']) {
             array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'])]);
         }
-
 
         $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
