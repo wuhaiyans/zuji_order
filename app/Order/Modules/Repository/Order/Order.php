@@ -170,11 +170,14 @@ class Order {
 		}
 		// 支付中
 		if( $data['status'] == 'processing' ){
-			$this->model->order_status = OrderStatus::OrderPaying; 
+			$this->model->order_status = OrderStatus::OrderPaying;
+			$this->model->update_time = time();
 		}
 		// 支付成功
 		elseif( $data['status'] == 'success' ){
-			$this->model->order_status = OrderStatus::OrderPayed; 
+			$this->model->order_status = OrderStatus::OrderPayed;
+            $this->model->pay_time = time();
+            $this->model->update_time = time();
 		}else{
 			return false;
 		}
@@ -266,7 +269,12 @@ class Order {
 	 * @return bool
 	 */
 	public function sign( ):bool{
-		return true;
+        if($this->model->order_status!=OrderStatus::OrderDeliveryed && $this->model->freeze_type == OrderFreezeStatus::Non){
+            return false;
+        }
+        $this->model->order_status = OrderStatus::OrderInService;
+        $this->model->receive_time = time();
+        return $this->model->save();
 	}
 	
 	

@@ -23,6 +23,9 @@ $api->version('v1', [
 
     $api->post('trade/notify', 'TradeController@notify'); //支付回调接口
 
+    // 订单取消接口
+    $api->get('cronCancelOrder', 'OrderController@cronCancelOrder');
+
    // $api->group(['middleware' => ['auth:api']], function($api) {
 
         $apiMap = config('apimap');
@@ -35,8 +38,7 @@ $api->version('v1', [
 
         $api->post('user', 'UserController@me') //获取用户信息接口
             ->name('api.user.show');
-        // 支付测试
-        $api->get('testpay', 'AlipayController@test');
+
 
         // 订单清算测试预授权
         $api->get('testCleanPay', 'OrderCleaningController@testPay');

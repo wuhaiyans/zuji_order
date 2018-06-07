@@ -9,6 +9,7 @@
 namespace App\Order\Modules\Repository\Order;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderGoodsDelivery;
+use App\Order\Models\OrderGoodsUnit;
 
 /**
  * 发货明细
@@ -58,6 +59,7 @@ class DeliveryDetail {
 	public static function getDetailList( string $order_no ){
 		return [];
 	}
+
 
     /**
      * 生成订单发货单

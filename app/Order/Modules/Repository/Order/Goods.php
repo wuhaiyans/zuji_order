@@ -59,6 +59,24 @@ class Goods {
         }
         return $this->order;
     }
+    //-+------------------------------------------------------------------------
+    // | 收货
+    //-+------------------------------------------------------------------------
+    /**
+     *  更新服务周期
+     * @param array $data
+     * [
+     *      'begin_time'=>''// int 服务开始时间
+     *      'end_time'=>''// int 服务结束时间
+     * ]
+     * @return bool
+     */
+    public function updateGoodsServiceTime($data):bool {
+        $this->model->begin_time =$data['begin_time'];
+        $this->model->end_time =$data['end_time'];
+        $this->model->update_time =time();
+        return $this->model->save();
+    }
 
     //-+------------------------------------------------------------------------
     // | 退货
