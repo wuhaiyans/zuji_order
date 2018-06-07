@@ -535,6 +535,20 @@ class Order {
         }
     }
 
+    /**
+     * 修改订单冻结状态 解冻
+     *
+     * @return bool
+     */
+    public function relieveFreeze():bool {
+        if($this->model->freeze_type==OrderFreezeStatus::Non){
+            return false;
+        }else{
+            $this->model->freeze_type = OrderFreezeStatus::Non;
+            return $this->model->save();
+        }
+    }
+
 	
 	/**
 	 * 获取订单
