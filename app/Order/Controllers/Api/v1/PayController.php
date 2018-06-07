@@ -234,7 +234,7 @@ class PayController extends Controller
 				'out_withhold_no' => $params['agreement_no'],	// 支付系统代扣协议编码
 				'withhold_channel' => $params['channel'],
 			]);
-			
+						
 			// 提交事务
             DB::commit();	
 			echo '{"status":"ok"}';exit;
