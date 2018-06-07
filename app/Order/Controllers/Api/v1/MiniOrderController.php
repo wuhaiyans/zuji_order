@@ -51,7 +51,7 @@ class MiniOrderController extends Controller
             'sku_num' => 'required', //【必须】int；子商品ID
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
-        if ($validateParams['code'] != 2) {
+        if ( $validateParams['code']!=0 ) {
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
@@ -73,7 +73,7 @@ class MiniOrderController extends Controller
         ];
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
-        echo 11;die;
+
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }
