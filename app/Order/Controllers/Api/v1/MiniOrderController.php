@@ -110,6 +110,7 @@ class MiniOrderController extends Controller
         }
         $data = json_decode($data,true);
         $data['pay_type'] = $params['payment_type_id'];
+        $data['appid'] = $params['appid'];
         $data['coupon_no'] = $params['coupon_no'];
         $data['sku'] = [
             'sku_id'=>$data['sku_id']
