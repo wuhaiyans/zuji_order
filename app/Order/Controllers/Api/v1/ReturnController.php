@@ -418,5 +418,19 @@ class ReturnController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
+    /**
+     * 检测不和拒绝退款
+     * @param Request $request
+     */
+    public function refuseRefund(Request $request){
+        $orders = $request->all();
+        $params = $orders['params'];
+        $res = $this->OrderReturnCreater->refuseRefund($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_33008);//拒绝退款失败
+        }
+         return apiResponse( [], ApiStatus::CODE_0);
+    }
+
 
 }

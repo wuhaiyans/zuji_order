@@ -77,10 +77,13 @@ class Goods {
         return $this->model->save();
     }
     /**
-     * 退换货审核拒绝-取消退货共用
+     * 退换货审核拒绝-取消退货--检测不合格拒绝退款共用
      * @return bool
      */
     public function returnClose( ):bool{
+        if( $this->model->goods_status== OrderGoodStatus::RENTING_MACHINE){
+            return false;
+        }
         // 状态改为租用中
         $this->model->goods_status = OrderGoodStatus::RENTING_MACHINE;
         return $this->model->save();

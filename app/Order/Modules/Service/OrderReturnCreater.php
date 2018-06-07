@@ -1450,4 +1450,75 @@ class OrderReturnCreater
         }
         return $data;
     }
+
+    /**
+     * 检测不合格拒绝退款
+     * @param $params
+     *
+     */
+    public function refuseRefund($params){
+        //开启事物
+        DB::beginTransaction();
+        try{
+            foreach($params as $k=>$v){
+                if(empty($params[$k]['refund_no'])){
+                    return false;//参数不能为空
+                }
+                if(empty($params[$k]['refuse_refund_remark'])){
+                    return false;//参数不能为空
+                }
+                //获取退货单的信息
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params[$k]['refund_no']);
+                if(!$return){
+                    return false;
+                }
+                $return_info[$k]=$return->getData();
+                $order=$return_info[$k]['order_no'];
+                //更新退货单状态为已取消
+                $refuseReturn=$return->refuseRefund($params[$k]['refuse_refund_remark']);
+                if(!$refuseReturn){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;
+                }
+                //获取商品信息
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info[$k]['goods_no']);
+
+                if(!$goods){
+                    return false;
+                }
+                //更新商品状态为租用中
+                $refuseGoods=$goods->returnClose();
+                p($refuseGoods);
+                if(!$refuseGoods){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;
+                }
+            }
+            //获取订单信息
+            $order=\App\Order\Modules\Repository\Order\Order::getByNo($order);
+            foreach($return_info as $k=>$v){
+                $status[$k]=$return_info[$k]['status'];
+            }
+            if(!in_array(ReturnStatus::ReturnCreated,$status) && !in_array(ReturnStatus::ReturnAgreed,$status)&& !in_array(ReturnStatus::ReturnReceive,$status) && !in_array(ReturnStatus::ReturnTui,$status) && !in_array(ReturnStatus::ReturnTuiHuo,$status) && !in_array(ReturnStatus::ReturnTuiKuan,$status)){
+                //修改订单为租用中
+                $order_result= $order->returnClose();
+                if(!$order_result) {
+                    //事务回滚
+                    DB::rollBack();
+                    return ApiStatus::CODE_33007;//更新订单冻结状态失败
+                }
+            }
+            //提交事务
+            DB::commit();
+            return true;
+
+        }catch( \Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
+
+    }
 }

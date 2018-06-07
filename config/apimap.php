@@ -163,6 +163,9 @@ return [
     'api.Return.returnApplyList'   =>'ReturnController@returnApplyList',
     //获取订单检测不合格的数据
     'api.Return.returnCheckList'       =>'ReturnController@returnCheckList',
+    //退货检测不合格的数据，拒绝退款
+    'api.Return.refuseRefund'       =>'ReturnController@refuseRefund',
+
 
 
     //续租接口

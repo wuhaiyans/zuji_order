@@ -120,8 +120,26 @@ class GoodsReturn {
      * 取消退款
      *@return bool
      */
-    public function cancelRefund( ):bool{
-        return true;
+    public function cancelRefund():bool{
+        //退换货单必须未取消
+        if( $this->model->status =ReturnStatus::ReturnCanceled ){
+            return false;
+        }
+        $this->model->status = ReturnStatus::ReturnCanceled;
+        return $this->model->save();
+    }
+    /**
+     * 退货检测不合格拒绝退款
+     *@return bool
+     */
+    public function refuseRefund(string $remark){
+        //退换货单必须未取消
+        if( $this->model->status==ReturnStatus::ReturnCanceled ){
+            return false;
+        }
+        $this->model->refuse_refund_remark = $remark;
+        $this->model->status = ReturnStatus::ReturnCanceled;
+        return $this->model->save();
     }
     /**
      * 退货检测合格
