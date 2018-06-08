@@ -82,7 +82,7 @@ class ReturnController extends Controller
         if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $return = $this->OrderReturnCreater->CreateRefund($params);//修改信息
+        $return = $this->OrderReturnCreater->createRefund($params);//修改信息
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34007,"创建失败");
         }
