@@ -301,9 +301,12 @@ class ReturnController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * [
      * order_no
-     * [goods_no=>'']
-     * [goods_no=>'']
+     * goods_info=>[
+     *   goods_no=>''
+     *  goods_no=>''
      * ]
+     *
+     *
      */
     public function updateOrder(Request $request){
         $orders =$request->all();
@@ -396,7 +399,7 @@ class ReturnController extends Controller
     }
 
     /**
-     * 检测合格拒绝退款
+     * 检测不合格拒绝退款
      * @param Request $request
      */
     public function refuseRefund(Request $request){
