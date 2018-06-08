@@ -102,8 +102,7 @@ class Receive
             ]);
 
             $res = json_decode($res);
-
-            if ($res['code'] != 0) {
+            if ($res->code != 0) {
                 return false;
             }
 

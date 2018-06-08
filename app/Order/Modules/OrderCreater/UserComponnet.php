@@ -62,13 +62,13 @@ class UserComponnet implements OrderCreater
         if (!is_array($userInfo)) {
             throw new Exception("获取用户接口失败");
         }
-        print_r($addressInfo);
         if( empty($addressInfo) ){
             $this->address = $userInfo['address'];
         }else{
             $this->address = $addressInfo;
+            $this->address['mobile'] = $userInfo['mobile'];
+            $this->address['name'] = $userInfo['name'];
         }
-        print_r($this->address);die;
         $this->mobile = $userInfo['username'];
         $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;

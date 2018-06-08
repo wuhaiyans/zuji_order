@@ -296,8 +296,6 @@ class OrderReturnCreater
                     }
                 }
             }
-            //事务提交
-            DB::commit();
             //存在审核同意商品
             if($goodsDeliveryInfo){
                 foreach($goodsDeliveryInfo as $k=>$v){
@@ -312,6 +310,8 @@ class OrderReturnCreater
                 }
                 $create_receive= Receive::create($order,$params['business_key'],$receive_data);//创建待收货单
                 if(!$create_receive){
+                    //事务回滚
+                    DB::rollBack();
                     return false;//创建待收货单失败
                 }
                 //更新退换货单的收货编号
@@ -319,12 +319,16 @@ class OrderReturnCreater
                     $getReturn=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
                     $updateReceive=$getReturn->updateReceive($create_receive);
                     if(!$updateReceive){
+                        //事务回滚
+                        DB::rollBack();
                        return false;
                     }
                  }
 
 
             }
+            //事务提交
+            DB::commit();
             //审核发送短信
           /*  if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                 if($yes_list){
@@ -1101,7 +1105,6 @@ class OrderReturnCreater
                 if(!$order){
                     return false;
                 }
-
                 if($return_info['user_id']!=$params['user_id']){
                     return false;
                 }
@@ -1117,20 +1120,19 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
-                $data[$k]['receive_no']=$return_info['receive_no'];
-                //提交事务
-                DB::commit();
-                return ApiStatus::CODE_0;
+                $receive_no=$return_info['receive_no'];
             }
             $data['logistics_id']=$params['logistics_id'];
             $data['logistics_no']=$params['logistics_no'];
-            $data['receive_no']= $data[0]['receive_no'];
+            $data['receive_no']= $receive_no;
             //上传物流单号到收货系统
             $create_receive= Receive::updateLogistics($data);
             if(!$create_receive){
                 return false;
             }
-
+            //提交事务
+            DB::commit();
+            return true;
         }catch (\Exception $exc) {
             DB::rollBack();
             echo $exc->getMessage();
