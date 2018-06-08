@@ -272,6 +272,7 @@ class OrderComponnet implements OrderCreater
             'order_type'=>$this->orderType,
             'mobile'=>$data['user']['user_mobile'],
         ];
+        var_dump($orderData);
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {

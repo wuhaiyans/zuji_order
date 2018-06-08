@@ -153,7 +153,7 @@ class OrderReturnCreater
      * ]
      * @return bool true：申请成功；false：盛情失败
      */
-    public function CreateRefund($params){
+    public function createRefund($params){
         //开启事务
         DB::beginTransaction();
         try {
@@ -408,7 +408,7 @@ class OrderReturnCreater
                 }
                 //退款：代扣+预授权
                 if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerDepositPay){
-                    $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                    $create_data['out_payment_no']=$pay_result['withhold_no'];//支付编号
                     $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                     $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
                     $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
@@ -421,7 +421,7 @@ class OrderReturnCreater
                 }
                 //退款：代扣
                 if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
-                    $create_data['out_auth_no']=$pay_result['payment_no'];
+                    $create_data['out_auth_no']=$pay_result['withhold_no'];
                     $create_data['refund_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
                     $create_data['auth_unfreeze_amount']=0;//订单实际支付押金
                     if($create_data['refund_amount']>0){
