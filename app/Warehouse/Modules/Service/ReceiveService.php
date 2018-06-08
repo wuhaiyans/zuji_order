@@ -150,9 +150,11 @@ class ReceiveService
      */
     public function create($data)
     {
-        if (!ReceiveRepository::create($data)) {
+        $receiveNo = ReceiveRepository::create($data);
+        if (!$data) {
             throw new \Exception('收货单创建失败');
         }
+        return $receiveNo;
     }
 
     /**
@@ -224,7 +226,7 @@ class ReceiveService
     public function logistics($params)
     {
         if (!ReceiveRepository::logistics($params)) {
-            throw new \Exception('订单'.$params['order_no'] . '设备:'.$params['goods_no'].'修改物流失败');
+            throw new \Exception('发货单'.$params['receive_no'] .'修改物流失败');
         }
     }
 
