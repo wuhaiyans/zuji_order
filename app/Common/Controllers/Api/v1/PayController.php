@@ -15,8 +15,51 @@ class PayController extends Controller
 
     public function __construct()
     {
+		
     }
 	
+	public function testJob(){
+		LogApi::debug('test');
+		var_dump(123);exit;
+	}
+	
+	/**
+	 * 测试  分期计算 和 分期优惠计算
+	 */
+	public function testFenqi(){
+		
+		$params = [
+			'zujin' => 100,
+			'zuqi' => 3,
+			'insurance' => 99,
+		];
+//		var_dump( $params );
+		
+		
+//		// 月租，分期计算器
+		$computer = new \App\Order\Modules\Repository\Instalment\MonthComputer( $params );
+		
+		// 日租，分期计算器
+//		$computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $params );
+		
+		// 平均优惠
+		$discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( 100 );
+		$computer->addDiscounter( $discounter_simple );
+		
+//		// 首月优惠
+//		$discounter_first = new \App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter( 300 );
+//		$computer->addDiscounter( $discounter_first );
+////		
+//		// 分期顺序优惠
+//		$discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter( 199 );
+//		$computer->addDiscounter( $discounter_serialize );
+		
+		
+		$computer->setBeginTime( strtotime('2018-02-29') );
+		
+		$fenqi_list = $computer->compute();
+		var_dump( $fenqi_list );exit;
+	}
 	
 	public function testOrder(){
 		
@@ -172,7 +215,7 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'FA522834027093812';
+		$business_no = 'A602128482172832';
 		$pay = null;
 		try {
 			// 查询

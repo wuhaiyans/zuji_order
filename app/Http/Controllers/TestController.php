@@ -24,6 +24,10 @@ class TestController extends Controller
     public function test()
     {
 
+
+        $a = Receive::updateLogistics(['receive_no'=>'201806081435393613','logistics_id'=>'1','logistics_no'=>'12323sdf']);
+
+//        $a = Receive::create(1,2,[['goods_no'=>'abcde']]);
 //        ImeiRepository::search('b');
 
 
@@ -31,7 +35,7 @@ class TestController extends Controller
 
 //        $this->testCreateReceive();
 
-        $this->testApply('A528100728283349');
+//        $this->testApply('A528100728283349');
 
 //        $this->testSend('201805281944493333');
 //        $this->testReceive();

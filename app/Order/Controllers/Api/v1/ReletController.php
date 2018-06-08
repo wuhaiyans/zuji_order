@@ -10,15 +10,14 @@ namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\PayInc;
-use App\Order\Modules\Service\Relet;
-//use Illuminate\Support\Facades\Request;
+use App\Order\Modules\Service\OrderRelet;
 use Illuminate\Http\Request;
 
 class ReletController extends Controller
 {
 
     protected $relet;
-    public function __construct(Relet $relet)
+    public function __construct(OrderRelet $relet)
     {
         $this->relet = $relet;
     }
@@ -91,36 +90,30 @@ class ReletController extends Controller
      * ]
      */
     public function createRelet(Request $request){
-        try {
-            //接收参数
-            $params = $request->input('params');
+        //接收参数
+        $params = $request->input('params');
 
-            //整理参数
-            $params = filter_array($params, [
-                'user_id'       => 'required', //用户ID
-                'goods_id'      => 'required', //设备ID
-                'zuqi'          => 'required', //租期
-                'order_no'      => 'required', //订单编号
-                'pay_type'      => 'required', //支付方式
-                'relet_amount'  => 'required',//续租金额
-                'user_name'     => 'required',//用户名(手机号)
-                'return_url'    => 'required'//前端回调地址
-            ]);
-            if(count($params) < 7){
-                return apiResponse([], ApiStatus::CODE_20001, "参数错误");
-            }
+        //整理参数
+        $params = filter_array($params, [
+            'user_id'       => 'required', //用户ID
+            'goods_id'      => 'required', //设备ID
+            'zuqi'          => 'required', //租期
+            'order_no'      => 'required', //订单编号
+            'pay_type'      => 'required', //支付方式
+            'relet_amount'  => 'required',//续租金额
+            'user_name'     => 'required',//用户名(手机号)
+            'return_url'    => 'required'//前端回调地址
+        ]);
+        if(count($params) < 7){
+            return apiResponse([], ApiStatus::CODE_20001, "参数错误");
+        }
 
-            $res = $this->relet->createRelet($params);
-            if($res){
-                return apiResponse($res,ApiStatus::CODE_0);
+        $res = $this->relet->createRelet($params);
+        if($res){
+            return apiResponse($res,ApiStatus::CODE_0);
 
-            }else{
-                return apiResponse([],ApiStatus::CODE_50000,get_msg());
-
-            }
-
-        }catch(\Exception $e){
-            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+        }else{
+            return apiResponse([],ApiStatus::CODE_50000,get_msg());
 
         }
 
@@ -130,27 +123,19 @@ class ReletController extends Controller
      * 取消续租
      */
     public function cancelRelet(Request $request){
-        try {
-            //接收参数
-            $params = $request->input('params');
-            if(isset($params['id']) && !empty($params['id'])){
-                $par['id'] = $params['id'];
-                $par['status'] = 3;
-                if($this->relet->setStatus($par)){
-
-                    return apiResponse([],ApiStatus::CODE_0);
-                }else{
-                    return apiResponse([],ApiStatus::CODE_50000, get_msg());
-                }
+        //接收参数
+        $params = $request->input('params');
+        if(isset($params['id']) && !empty($params['id'])){
+            if($this->relet->setStatus($params['id'])){
+                return apiResponse([],ApiStatus::CODE_0);
             }else{
-                return apiResponse([],ApiStatus::CODE_50000, 'id不能为空');
-
+                return apiResponse([],ApiStatus::CODE_50000, get_msg());
             }
-
-        }catch(\Exception $e){
-            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+        }else{
+            return apiResponse([],ApiStatus::CODE_50000, 'id不能为空');
 
         }
+
     }
 
     /**

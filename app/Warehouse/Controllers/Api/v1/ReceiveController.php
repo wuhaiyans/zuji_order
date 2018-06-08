@@ -73,12 +73,12 @@ class ReceiveController extends Controller
         }
 
         try {
-            $this->receive->create($params);
+            $receiveNo = $this->receive->create($params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
-        return apiResponse([]);
+        return apiResponse(['receive_no'=>$receiveNo]);
     }
 
     /**
@@ -141,10 +141,9 @@ class ReceiveController extends Controller
          * logistics_no 物流编号
          */
         $rules = [
-            'order_no'  => 'required',
+            'receive_no'  => 'required',
             'logistics_id' => 'required',//物流渠道
             'logistics_no' => 'required',
-            'goods_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -356,6 +355,19 @@ class ReceiveController extends Controller
         }
 
         return apiResponse([]);
+    }
+
+
+    /**
+     * 共用的状态等统一接口
+     */
+    public function publics()
+    {
+        $data = [
+            'status_list' => \App\Warehouse\Models\Receive::status(),
+            'kw_types'    => DeliveryService::searchKws()
+        ];
+        return apiResponse($data);
     }
 
 }

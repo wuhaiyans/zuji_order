@@ -64,8 +64,51 @@ class User{
      * @param $user_id
      * @return string or array
      */
-    public function getUserId(){
-
+    public static function getUserId($params){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.mini.user.id.get';
+        if($params['zm_face'] == 'Y'){
+            $zm_face = 1;
+        }else{
+            $zm_face = 0;
+        }
+        $data['params'] = [
+            'mobile'=>$params['mobile'],
+            'realname'=>$params['name'],
+            'zm_face'=>$zm_face,
+            'cert_no'=>$params['cert_no'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+    }
+    /**
+     * 获取用户地址信息
+     *  @param $data
+     * @param $user_id
+     * @return string or array
+     */
+    public static function getAddressId($params){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.district.query.id';
+        $data['params'] = [
+            'house'=>$params['house'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
     }
 }
 

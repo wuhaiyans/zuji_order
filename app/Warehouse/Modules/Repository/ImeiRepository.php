@@ -44,6 +44,7 @@ class ImeiRepository
                 $d['status'] = 1;
             }unset($d);
 
+
             DB::table('zuji_imei')->insert($data);
 
             DB::commit();
@@ -65,11 +66,26 @@ class ImeiRepository
      *
      * 列表
      */
-    public static function list($params, $limit, $page=null)
+    public static function list($params,$logic_params, $limit, $page=null)
     {
-        $query = \App\Warehouse\Models\Imei::where($params);
 
-        $query->whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);
+        $query = \App\Warehouse\Models\Imei::whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);
+
+        if (is_array($params)) {
+            foreach ($params as $k => $param) {
+                if (in_array($k, ['imei', 'brand', 'color', 'business'])) {
+                    $query->where($k, 'like', '%'.$param.'%');
+                } else {
+                    $query->where([$k=>$param]);
+                }
+            }
+        }
+
+        if (is_array($logic_params) && count($logic_params)>0) {
+            foreach ($logic_params as $logic) {
+                $query->where($logic[0], $logic[1] ,$logic[2]);
+            }
+        }
 
         return $query->paginate($limit,
             [

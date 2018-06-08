@@ -12,6 +12,8 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\Order\DeliveryDetail;
+use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use Mockery\Exception;
@@ -361,13 +363,12 @@ class SkuComponnet implements OrderCreater
                     $unitData['begin_time'] =$goodsData['begin_time'];
                     $unitData['end_time'] =$goodsData['end_time'];
 
-                    $unitId =OrderGoodsUnitRepository::add($unitData);
-                    if(!$unitId){
+                    $b =ServicePeriod::createService($unitData);
+                    if(!$b){
                         $this->getOrderCreater()->setError("保存设备周期表信息失败");
                         return false;
                     }
                 }
-
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
                     $this->getOrderCreater()->setError("保存商品信息失败");

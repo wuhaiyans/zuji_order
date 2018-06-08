@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Order\Controllers\Api\v1\InstalmentController;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Service\OrderInstalment;
 
 class InstalmentComponnet implements OrderCreater
@@ -56,12 +57,33 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
-        $instalment['instalment']="";
-        //分期单信息
-//        if($this->payType!=PayInc::FlowerStagePay && $schema['order']['zuqi_type'] ==2){
-//            $instalment =OrderInstalment::get_data_schema($schema);
-//        }
-        return array_merge($schema,['instalment'=>$instalment['instalment']]);
+//        $instalment = new Instalment();
+//        $instalmentData = $instalment->instalmentData($schema);
+//        var_dump($instalmentData);die;
+//        $instalmentData=[
+//            'order'=>[
+//                'order_no'=>'',
+//            ],
+//            'sku'=>[
+//	           'zuqi'              => 1,//租期
+//	           'zuqi_type'         => 1,//租期类型
+//	           'all_amount'        => 1,//总金额
+//	           'amount'            => 1,//实际支付金额
+//	           'yiwaixian'         => 1,//意外险
+//	           'zujin'             => 1,//租金
+//	           'pay_type'          => 1,//支付类型
+//	       ],
+//            'coupon'=>[ 			  // 非必须
+//	           'discount_amount'   => 1,//优惠金额
+//	           'coupon_type'       => 1,//优惠券类型
+//	       ],
+//	      'user'=>[
+//	           'user_id'           => 1,//用户ID
+//	        ],
+//        ];
+//
+
+        return array_merge($schema,['instalment'=>""]);
     }
 
     /**
@@ -70,17 +92,14 @@ class InstalmentComponnet implements OrderCreater
      */
     public function create(): bool
     {
-
         $schema =$this->componnet->getDataSchema();
         $b = $this->componnet->create();
         if( !$b ){
             return false;
         }
-//        if($this->payType!=PayInc::FlowerStagePay && $schema['order']['zuqi_type'] ==2) {
-//            $instalment = OrderInstalment::create($schema);
-//            if (!$instalment) {
-//                return false;
-//            }
+//        $instalment = OrderInstalment::create($schema);
+//        if (!$instalment) {
+//            return false;
 //        }
         return true;
     }

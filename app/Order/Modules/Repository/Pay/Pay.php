@@ -12,7 +12,7 @@ namespace App\Order\Modules\Repository\Pay;
 use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayModel;
 use App\Order\Models\OrderPayPaymentModel;
-use App\Order\Models\OrderPayWithhold;
+use App\Order\Models\OrderPayWithholdModel;
 use App\Order\Models\OrderPayFundauthModel;
 
 /**
@@ -523,7 +523,7 @@ class Pay extends \App\Lib\Configurable
 			throw new \Exception( '代扣签约环节完成保存失败' );
 		}
 		// 更新 代扣签约环节 表
-		$withholdModel = new OrderPayWithhold();
+		$withholdModel = new OrderPayWithholdModel();
 		$b = $withholdModel->insert([
 			'withhold_no'		=> $this->withholdNo,
 			'withhold_channel'	=> $params['withhold_channel'],
@@ -535,9 +535,23 @@ class Pay extends \App\Lib\Configurable
 			'counter'			=> 1, // 计数
 		]);
 		if( !$b ){
-			LogApi::error('[支付阶段]代扣签约环节处理保存失败2');
-			throw new \Exception( '代扣签约环节完成保存失败' );
+			LogApi::error('[支付阶段][代扣签约]保存失败');
+			throw new \Exception( '[支付阶段][代扣签约]保存失败' );
 		}
+		
+		// 代扣协议绑定业务
+		$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByWithholdNo(
+			$this->withholdNo
+		);
+		$withhold->bind([
+			'business_type'	=> $this->businessType,
+			'business_no'	=> $this->businessNo,
+		]);
+		if( !$b ){
+			LogApi::error('[支付阶段][代扣签约]业务绑定失败');
+			throw new \Exception( '[支付阶段][代扣签约]业务绑定失败' );
+		}
+
 		
 		$this->status = $status;
 		$this->withholdStatus = WithholdStatus::SIGNED;// 已签约
@@ -737,6 +751,15 @@ class Pay extends \App\Lib\Configurable
 			'update_time' => time(),
 		]);
 		if( !$b ){
+			LogApi::type('data-save');
+			LogApi::error('代扣签约环节支付渠道设置失败',[
+				'business_type'	=> $this->businessType,
+				'business_no'	=> $this->businessNo,
+				'data' => [
+					'withhold_channel' => $channel,
+					'update_time' => time(),
+				]
+			]);
 			throw new \Exception( '代扣签约环节支付渠道设置失败' );
 		}
 		// 获取url

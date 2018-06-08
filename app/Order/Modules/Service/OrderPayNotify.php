@@ -12,6 +12,7 @@ namespace App\Order\Modules\Service;
 use App\Http\Requests\Request;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Contracts\Logging\Log;
@@ -40,24 +41,22 @@ class OrderPayNotify
         $businessType = $params['business_type'];
         $orderNo = $params['business_no']; //订单支付也就是订单编号
         $status = $params['status'];
-
-
-        if ($status == "processing") {
-            $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPaying);
-            if (!$b) {
-                LogApi::notify("订单支付失败", $orderNo);
-                return false;
-            }
-        } else {
-            $b = OrderRepository::orderPayStatus($orderNo, OrderStatus::OrderPayed);
-            if (!$b) {
-                LogApi::notify("订单支付失败", $orderNo);
-                return false;
-            }
+        $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::notify("订单信息不存在：", $orderNo);
+            return false;
+        }
+        $b =$order->setPayStatus($params);
+        if(!$b){
+            LogApi::notify("订单支付失败", $orderNo);
+            return false;
+        }
+        if($status =="success"){
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
             //发送支付宝推送消息
+            $orderNoticeObj->alipay_notify();
             //发送邮件 -----begin
             //        $data =[
             //            'subject'=>'用户已付款',
@@ -74,8 +73,7 @@ class OrderPayNotify
             //
             //        //发送邮件------end
         }
-        LogApi::notify("订单支付成功", $orderNo);
+        LogApi::notify("订单支付成功：". $orderNo);
         return true;
-
     }
 }

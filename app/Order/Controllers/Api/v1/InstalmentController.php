@@ -4,7 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
-use App\Order\Modules\Service\OrderInstalment;
+use App\Order\Modules\Service\OrderGoodsInstalment;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -68,9 +68,12 @@ class InstalmentController extends Controller
             'user'      => $user,
         ];
 
-        $res = OrderInstalment::create($params);
+        $res        = new \App\Order\Modules\Repository\Order\Instalment();
+        $data       = $res->create($params);
 
-        if(!$res){
+        p($data);
+
+        if(!$data){
             return apiResponse([],ApiStatus::CODE_20001, "创建分期失败");
         }
 
@@ -92,7 +95,7 @@ class InstalmentController extends Controller
             'term'      => 'required',
         ]);
 
-        $code = new OrderInstalment();
+        $code = new OrderGoodsInstalment();
         $list = $code->queryList($params,$additional);
 
         if(!is_array($list)){

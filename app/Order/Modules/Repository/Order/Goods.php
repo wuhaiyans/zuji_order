@@ -9,9 +9,14 @@
 namespace App\Order\Modules\Repository\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\GoodStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
+use App\Order\Modules\Inc\ReletStatus;
+use App\Order\Modules\Repository\Pay\PayCreater;
+use App\Order\Modules\Repository\ReletRepository;
 
 /**
  * 
@@ -30,7 +35,7 @@ class Goods {
 
     /**
      * 构造函数
-     * @param array $data 订单原始数据
+     * @param array $data 商品原始数据
      */
     public function __construct( OrderGoods $model ) {
         $this->model = $model;
@@ -54,6 +59,24 @@ class Goods {
         }
         return $this->order;
     }
+    //-+------------------------------------------------------------------------
+    // | 收货
+    //-+------------------------------------------------------------------------
+    /**
+     *  更新服务周期
+     * @param array $data
+     * [
+     *      'begin_time'=>''// int 服务开始时间
+     *      'end_time'=>''// int 服务结束时间
+     * ]
+     * @return bool
+     */
+    public function updateGoodsServiceTime($data):bool {
+        $this->model->begin_time =$data['begin_time'];
+        $this->model->end_time =$data['end_time'];
+        $this->model->update_time =time();
+        return $this->model->save();
+    }
 
     //-+------------------------------------------------------------------------
     // | 退货
@@ -62,50 +85,26 @@ class Goods {
      * 申请退货
      * @return bool
      */
-    public function returnOpen( ):bool{
-        //
-        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
-            return false;
-        }
+    public function returnOpen( ){
+        //商品必须为租用中
+       // if( $this->model->goods_status!=OrderGoodStatus::RENTING_MACHINE ){
+        //    return false;
+       // }
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
-
-        // 获取订单
-        $order = $this->getOrder( );
-        // 订单冻结 退货中
-        return $order->returnOpen();
     }
     /**
-     * 取消退货
+     * 退换货审核拒绝-取消退货--检测不合格拒绝退款 --换货检测不合格  共用
      * @return bool
      */
-    public function returnClose( ){
-        // 校验自己状态
-        if(!$this->data ){
+    public function returnClose( ):bool{
+        if( $this->model->goods_status== OrderGoodStatus::RENTING_MACHINE){
             return false;
         }
-
-        // 更新商品状态
-        $where[]=['id','=',$this->data['id']];
-        $data['goods_status']=OrderGoodStatus::RENTING_MACHINE;
-        $updateGoodsStatus=OrderGoods::where($where)->update($data);
-        if(!$updateGoodsStatus){
-            return false;
-        }
-        try{
-            // 获取当前订单
-            $orderInfo =Order::getByNo($this->data['order_no']);
-            $order=new \App\Order\Modules\Repository\Order\Order($orderInfo);
-            // 更新订单状态
-            $b = $order->returnClose($order);
-            if( !$b ){
-                return false;
-            }
-        }catch(\Exception $exc){
-            return false;
-        }
-
+        // 状态改为租用中
+        $this->model->goods_status = OrderGoodStatus::RENTING_MACHINE;
+        return $this->model->save();
 
     }
     /**
@@ -113,7 +112,8 @@ class Goods {
      * @return bool
      */
     public function returnFinish( ):bool{
-        return true;
+        $this->model->goods_status=OrderGoodStatus::REFUNDED;
+        $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------
@@ -124,7 +124,9 @@ class Goods {
      * @return bool
      */
     public function barterOpen( ):bool{
-        return true;
+        // 状态改为换货中
+        $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
+        return $this->model->save();
     }
     /**
      * 取消换货
@@ -138,7 +140,11 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
-        return true;
+        if($this->model->goods_status==OrderGoodStatus::EXCHANGE_OF_GOODS){
+            return false;
+        }
+        $this->model->goods_status=OrderGoodStatus::EXCHANGE_OF_GOODS;
+        return $this->model->save();
     }
 	
 	
@@ -196,63 +202,25 @@ class Goods {
 	// | 续租
 	//-+------------------------------------------------------------------------
     /**
-     * 续租开始
+     * 修改设备状态 续租中
      *
-     * @param array
-     * [
-     *      'zuqi'  =>  '', // 【必选】int 租期
-     * ]
+     * @return bool
      */
-    public function reletOpen($params){
-        //校验 时间格式
-        if( $this->data['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
-            if( $params['zuqi']<3 || $params['zuqi']<30 ){
-                set_msg('租期错误');
-                return false;
-            }
-        }else{
-            if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
-                set_msg('租期错误');
-                return false;
-            }
-        }
-
-        $amount = $this->data['zujin']*$params['zuqi'];
-
-        // 更新goods状态
-
-        // 订单续租
-        $order = Order::getByNo($this->data['order_no']);
-        return $order->reletOpen();
+    public function setGoodsStatusReletOn(){
+        $this->model->goods_status = OrderGoodStatus::RELET;
+        $this->model->update_time = time();
+        return $this->model->save();
     }
 
     /**
-     * 续租关闭
-     */
-    public function reletClose(){
-
-    }
-
-	/**
-     * 续租完成
-     *      支付完成或创建分期成功执行
+     * 修改设备状态 续租完成
      *
-     * 步骤:
-     *  1.修改商品状态
-     *  2.添加新周期
-     *  3.修改订单状态
-     *  4.解锁订单
-     *
-     * @author jinlin wang
-     * @param array
-     * @return boolean
+     * @return bool
      */
-	public static function reletFinish(){
-	    //修改商品状态
-        //添加新周期
-        //修改订单状态
-        //解锁订单
-        return true;
+    public function setGoodsStatusReletOff(){
+        $this->model->goods_status = OrderGoodStatus::RENEWAL_OF_RENT;
+        $this->model->update_time = time();
+        return $this->model->save();
     }
 	
 	//-+------------------------------------------------------------------------

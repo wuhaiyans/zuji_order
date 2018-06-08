@@ -15,7 +15,7 @@ class OrderFreezeStatus{
     /**
      * @var int 退款
      */
-    const GoodsReturn = 1;
+    const Refund = 1;
     /**
      * @var int 还货
      */
@@ -31,7 +31,11 @@ class OrderFreezeStatus{
     /**
      * @var int 续租
      */
-    const Renewal = 5;
+    const Relet = 5;
+    /**
+     * @var int 退货
+     */
+    const GoodsReturn = 6;
 
 
     //--------------------------------------------------------------------------------------------
@@ -48,7 +52,7 @@ class OrderFreezeStatus{
             self::Reback => '还货',
             self::Buyout => '买断',
             self::Exchange => '换货',
-            self::Renewal => '续租',
+            self::Relet => '续租',
         ];
     }
 

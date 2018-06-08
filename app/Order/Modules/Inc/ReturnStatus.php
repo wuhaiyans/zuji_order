@@ -13,19 +13,7 @@ class ReturnStatus {
      * @var int 已拆封已使用
      */
     const OrderGoodsIncomplete = 2;
-    /***********业务类型******************/
-    /**
-     * @var int 退款业务
-     */
-    const  OrderTuiKuan = 1;
-    /**
-     * @var int 退货业务
-     */
-    const OrderTuiHuo = 2;
-    /**
-     * @var int 换货业务
-     */
-    const OrderHuanHuo = 3;
+
     /**
      * @var int 无效状态（为订单表的状态默认值设计）
      * 【注意：】绝对不允许出现出现状态为0的记录（要求程序控制）
@@ -97,7 +85,7 @@ class ReturnStatus {
     public static function getStatusList(){
         return [
             self::ReturnInvalid => '无效状态',
-            self::ReturnCreated => '提交申请',
+            self::ReturnCreated => '待审核',
             self::ReturnAgreed => '审核通过',
             self::ReturnDenied => '审核拒绝',
             self::ReturnCanceled => '取消退货申请',

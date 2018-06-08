@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
@@ -179,11 +180,13 @@ class OrderComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        //判断是否有其他活跃 未完成订单
-        $b =OrderRepository::unCompledOrder($this->userId);
-        if($b) {
-            $this->getOrderCreater()->setError('有未完成订单');
-            return false;
+        //判断是否有其他活跃 未完成订单(小程序不限制)
+        if( $this->payType !=  PayInc::MiniAlipay){
+            $b =OrderRepository::unCompledOrder($this->userId);
+            if($b) {
+                $this->getOrderCreater()->setError('有未完成订单');
+                return false;
+            }
         }
 
         $b = $this->userComponnet->filter();
@@ -269,6 +272,7 @@ class OrderComponnet implements OrderCreater
             'order_type'=>$this->orderType,
             'mobile'=>$data['user']['user_mobile'],
         ];
+        var_dump($orderData);
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {

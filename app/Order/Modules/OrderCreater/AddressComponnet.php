@@ -76,12 +76,12 @@ class AddressComponnet implements OrderCreater
         $data =$this->getDataSchema();
         $addressData = [
             'order_no'=>$data['order']['order_no'],
-            'mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
+            'consignee_mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
             'name'=>$data['address']['name']?$data['address']['name']:"",
             'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
             'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
             'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
-            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"",
+            'address_info'=>$data['address']['address']?$data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name']:"".$data['address']['address'],
             'create_time'=>time(),
         ];
         $id =OrderUserAddressRepository::add($addressData);

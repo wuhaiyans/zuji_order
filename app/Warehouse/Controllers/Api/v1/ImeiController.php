@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ImeiService;
@@ -145,24 +146,44 @@ class ImeiController extends Controller
             return ;
         }
 
+
         try {
             DB::beginTransaction();
 
             $result = [];
+            $imeis = [];
             foreach ($data as $cel) {
                 if (!isset($cel['A']) || !isset($cel['B'])) continue;
+                array_push($imeis, $cel['A']);
                 $result[] = [
-                    'imei'      => $cel['A'],
-                    'price'     => (float)$cel['B'],
-                    'apple_serial'  => $cel['C'],
-                    'brand'         => $cel['D'],
-                    'name'          => $cel['E'],
-                    'quality'       => intval($cel['F']),
-                    'color'         => $cel['G'],
-                    'business'      => $cel['H'],
-                    'storage'       => intval($cel['I'])
+                    'imei'          => isset($cel['A']) ? $cel['A'] :'',
+                    'price'         => isset($cel['B']) ? (float)$cel['B'] : 0,
+                    'apple_serial'  => isset($cel['C']) ? $cel['C'] : '',
+                    'brand'         => isset($cel['D']) ? $cel['D'] : '',
+                    'name'          => isset($cel['E']) ? $cel['E']:'',
+                    'quality'       => isset($cel['F']) ? intval($cel['F']):100,
+                    'color'         => isset($cel['G']) ? $cel['G']:'',
+                    'business'      => isset($cel['H']) ? $cel['H']:'',
+                    'storage'       => isset($cel['I']) ? intval($cel['I']):0
                 ];
             }
+            $oldImeis = Imei::whereIn('imei', $imeis)->get();
+
+            if ($oldImeis) {
+                $oImeis = [];
+                foreach ($oldImeis as $oi) {
+                    array_push($oImeis, $oi->imei);
+                }
+                foreach ($result as $k => $r) {
+                    if (in_array($r['imei'], $oImeis)) {
+                        unset($result[$k]);
+                    }
+                }
+            }
+
+            if (!$result)
+                return \apiResponse([], ApiStatus::CODE_20001, '没有需要导入的数据,可能是数据已经导入过');
+
             $this->imei->import($result);
             DB::commit();
         } catch (\Exception $e) {
@@ -175,5 +196,17 @@ class ImeiController extends Controller
         return \apiResponse();
     }
 
+
+    /**
+     * 共共数据
+     */
+    public function publics()
+    {
+        $data = [
+//            'status_list' => Imei::sta(),
+            'kw_types'    => ImeiService::searchKws()
+        ];
+        return apiResponse($data);
+    }
 
 }
