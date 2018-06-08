@@ -290,7 +290,7 @@ class Instalment {
 		if($param['status'] == "success"){
 
 			// 查询分期信息
-			$instalmentInfo = OrderGoodsInstalment::queryInfo(['id'=>$param['out_no']]);
+			$instalmentInfo = OrderGoodsInstalment::queryInfo(['id'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				// 提交事务
 				echo "FAIL";exit;
@@ -306,7 +306,7 @@ class Instalment {
 				'update_time'   => time(),
 			];
 
-			$b = OrderGoodsInstalment::save(['id'=>$param['trade_no']], $data);
+			$b = OrderGoodsInstalment::save(['id'=>$param['out_trade_no']], $data);
 			if(!$b){
 				echo "FAIL";exit;
 			}
@@ -316,7 +316,7 @@ class Instalment {
 				'status'        => OrderInstalmentStatus::SUCCESS,
 				'update_time'   => time(),
 			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['trade_no']],$recordData);
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['out_trade_no']],$recordData);
 			if(!$record){
 				echo "FAIL";exit;
 			}
