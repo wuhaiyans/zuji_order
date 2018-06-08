@@ -17,6 +17,7 @@ use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Monolog\Handler\IFTTTHandler;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
@@ -65,25 +66,12 @@ class ReceiveRepository
      */
     public static function logistics($params)
     {
-        $goods_list = ReceiveGoods::where(['goods_no'=>$params['goods_no']])->get();
-        if (!$goods_list) return false;
+        $receive = Receive::where(['receive_no'=>$params['receive_no']])->first();
 
-        $receives = [];
-        foreach ($goods_list as $g) {
-            array_push($receives, $g->receive_no);
+        if (!$receive) {
+            Log::error(__METHOD__ . '收货单未找到');
+            throw new NotFoundResourceException('收货单未找到');
         }
-
-        $receiveModels = Receive::where(['receive_no'=>$receives])->get();
-
-        $receive = null;
-        foreach ($receiveModels as $r) {
-            if ($r->order_no == $params['order_no']) {
-                $receive = $r;
-                break;
-            }
-        }
-
-        if (!$receive) return false;
 
         $receive->logistics_id = $params['logistics_id'];
         $receive->logistics_no = $params['logistics_no'];
@@ -146,7 +134,6 @@ class ReceiveRepository
                 throw new \Exception("缺少相关参数");
             }
 
-
             foreach ($details as $detail) {//存receiveGoods
                 $detail['receive_no'] = $receiveNo;
                 $detail['imei'] = isset($detail['imei']) ? $detail['imei'] : '';
@@ -167,7 +154,7 @@ class ReceiveRepository
             DB::rollBack();
         }
 
-        return true;
+        return $receiveNo;
     }
 
     /**
