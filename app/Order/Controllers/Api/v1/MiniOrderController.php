@@ -181,7 +181,7 @@ class MiniOrderController extends Controller
         $orderNo	= $params['params']['order_no'];//支付方式ID
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
-        $coupon		= $params['params']['coupon'];
+        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
         $userId		= $params['params']['user_id'];
         $address		= $params['params']['address'];
 
