@@ -205,9 +205,7 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
-
             $b = $orderCreater->create();
-            print_r($schemaData);die;
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -226,8 +224,8 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
             // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
             //发送取消订单队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
