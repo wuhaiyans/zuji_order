@@ -60,8 +60,8 @@ class Controller extends BaseController
      * @param int $type
      * @return string
      */
-    protected function innerErrMsg(){
-        $returnData = array('status'=>'error');
+    protected function innerErrMsg($msg=''){
+        $returnData = array('status'=>'error','msg'=>$msg);
         return response()->json($returnData)->send();
 
     }

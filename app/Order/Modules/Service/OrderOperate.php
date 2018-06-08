@@ -18,6 +18,7 @@ use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\Order\ServicePeriod;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
@@ -434,11 +435,15 @@ class OrderOperate
 
             //分期关闭
             //查询分期
-            $success =  Instalment::close(['order_no'=>$orderNo]);
-            if (!$success) {
-                DB::rollBack();
-                return ApiStatus::CODE_31004;
+            $isInstalment   =   OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderNo]);
+            if ($isInstalment) {
+                $success =  Instalment::close(['order_no'=>$orderNo]);
+                if (!$success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31004;
+                }
             }
+
             //释放库存
             //查询商品的信息
             $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -462,6 +467,7 @@ class OrderOperate
 
             //通过订单号获取优惠券信息
             $orderCouponData = OrderRepository::getCouponListByOrderId($orderNo);
+
             if ($orderCouponData) {
                 $coupon_id = array_column($orderCouponData, 'coupon_id');
                 $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
