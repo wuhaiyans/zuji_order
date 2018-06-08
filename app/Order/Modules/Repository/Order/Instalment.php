@@ -27,6 +27,7 @@ class Instalment {
 	 *          'order_no'          => 1,//订单编号
 	 *      ],
 	 *       'sku'=>[
+	 * 			'goods_no'			=> 1,//商品编号
 	 *          'zuqi'              => 1,//租期
 	 *          'zuqi_type'         => 1,//租期类型
 	 *          'all_amount'        => 1,//总金额
@@ -34,26 +35,41 @@ class Instalment {
 	 *          'yiwaixian'         => 1,//意外险
 	 *          'zujin'             => 1,//租金
 	 *          'pay_type'          => 1,//支付类型
-	 *          'pay_type'          => 1,//支付类型
 	 *      ],
-	 *      'coupon'=>[ 			  // 非必须
-	 *          'discount_amount'   => 1,//优惠金额
-	 *          'coupon_type'       => 1,//优惠券类型
-	 *      ],
+	 *      'coupon'=>[ 		// 非必须 二位数组
+	 * 			[
+	 *          	'discount_amount'   => 1,//优惠金额
+	 *          	'coupon_type'       => 1,//优惠券类型
+	 *      	]
+	 * 		],
 	 *      'user'=>[
 	 *          'user_id'           => 1,//用户ID
 	 *       ],
 	 *  ];
 	 * @return array 返回分期数据
 	 */
-	public function instalmentData( array $params ){
+	public static function instalmentData( array $params ){
 
+		$filter = self::filter_param($params);
+		if(!$filter){
+			return false;
+		}
 		// 单商品分期的相关数据
 		$sku = [
 			'zujin' 	=> $params['sku']['zujin'],
 			'zuqi' 		=> $params['sku']['zuqi'],
 			'insurance' => $params['sku']['yiwaixian'],
 		];
+
+		// 判断支付方式
+		$payment_type_id = $params['sku']['pay_type'];
+		$pay_type = [
+			\App\Order\Modules\Inc\PayInc::WithhodingPay,
+			\App\Order\Modules\Inc\PayInc::MiniAlipay,
+		];
+		if(!in_array($payment_type_id,$pay_type)){
+			return [];
+		}
 
 		// 租期类型 长租短租判断
 		$zuqi_type = $params['sku']['zuqi_type'];
@@ -78,7 +94,7 @@ class Instalment {
 			}
 		}
 		// 商品优惠金额 递减分期
-		$goods_discount_amount = $params['sku']['discount_amount'];
+		$goods_discount_amount = !empty($params['sku']['discount_amount']) ? $params['sku']['discount_amount'] : 0 ;
 		if($goods_discount_amount > 0){
 			// 递减分期
 			$model = '\App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter';
@@ -116,6 +132,7 @@ class Instalment {
 	 *          'order_no'          => 1,//订单编号
 	 *      ],
 	 *       'sku'=>[
+	 * 			'goods_no'			=> 1,//商品编号
 	 *          'zuqi'              => 1,//租期
 	 *          'zuqi_type'         => 1,//租期类型
 	 *          'all_amount'        => 1,//总金额
@@ -124,29 +141,100 @@ class Instalment {
 	 *          'zujin'             => 1,//租金
 	 *          'pay_type'          => 1,//支付类型
 	 *      ],
-	 *      'coupon'=>[ 			  // 非必须
-     *          'discount_amount'   => 1,//优惠金额
-     *          'coupon_type'       => 1,//优惠券类型
-     *      ],
+	 *      'coupon'=>[ 		// 非必须 二位数组
+	 * 			[
+     *          	'discount_amount'   => 1,//优惠金额
+     *          	'coupon_type'       => 1,//优惠券类型
+     *      	]
+	 * 		],
 	 *      'user'=>[
 	 *          'user_id'           => 1,//用户ID
 	 *       ],
 	 *  ];
 	 * @return bool true：成功；false：失败
 	 */
-	public static function create( array $param ):bool{
-		if(!is_array($param)){
+	public static function create( array $params ):bool{
+		$filter = self::filter_param($params);
+		if(!$filter){
+			return false;
+		}
+		// 调用分期数据
+		$_data = self::instalmentData($params);
+		if(!$_data){
+			\App\Lib\Common\LogApi::error('创建分期错误');
 			return false;
 		}
 
+		// 判断支付方式
+		$payment_type_id = $params['sku']['pay_type'];
+		$pay_type = [
+			\App\Order\Modules\Inc\PayInc::WithhodingPay,
+			\App\Order\Modules\Inc\PayInc::MiniAlipay,
+		];
+		if(!in_array($payment_type_id,$pay_type)){
+			return false;
+		}
+
+		$order_no 	= $params['order']['order_no'];
+		$goods_no 	= $params['sku']['goods_no'];
+		$user_id 	= $params['user']['user_id'];
+
+
 		// 循环插入
-		foreach($param as $item){
+		foreach($_data as &$item){
+			$item['order_no'] 			= $order_no;
+			$item['goods_no'] 			= $goods_no;
+			$item['user_id'] 			= $user_id;
+			$item['status']				= \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID;
+			$item['unfreeze_status']	= 2;
 			OrderGoodsInstalment::create($item);
 		}
 		return true;
-
 	}
-	
+
+	// 参数验证
+	public function filter_param(array $params):bool{
+		if(!is_array($params)){
+			return false;
+		}
+
+		$order      = $params['order'];
+		$sku        = $params['sku'];
+		$user       = $params['user'];
+
+		//获取goods_no
+		$order = filter_array($order, [
+			'order_no'=>'required',
+		]);
+		if(count($order) < 1){
+			return false;
+		}
+
+		//获取sku
+		$sku = filter_array($sku, [
+			'zuqi'          => 'required',
+			'zuqi_type'     => 'required',
+			'all_amount'    => 'required',
+			'amount'        => 'required',
+			'yiwaixian'     => 'required',
+			'zujin'         => 'required',
+			'pay_type'      => 'required',
+		]);
+		if(count($sku) < 7){
+			return false;
+		}
+
+		$user = filter_array($user, [
+			'user_id' 			=> 'required',
+		]);
+		if(empty($user)){
+			return false;
+		}
+
+		return true;
+	}
+
+
 	/**
 	 * 根据用户id和订单号、商品编号，关闭用户的分期
 	 * @param data  array

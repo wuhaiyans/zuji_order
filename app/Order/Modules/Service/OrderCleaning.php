@@ -68,6 +68,7 @@ class OrderCleaning
             foreach($orderCleanList['data'] as $keys=>$values){
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
+                $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
             }
 
 

@@ -112,7 +112,8 @@ class Goods {
      * @return bool
      */
     public function returnFinish( ):bool{
-        return true;
+        $this->model->goods_status=OrderGoodStatus::REFUNDED;
+        $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------
@@ -224,59 +225,6 @@ class Goods {
         $this->model->goods_status = OrderGoodStatus::RENEWAL_OF_RENT;
         $this->model->update_time = time();
         return $this->model->save();
-    }
-
-    /**
-     * 续租开始
-     *
-     * @param array
-     * [
-     *      'zuqi'          =>  '', // 【必选】int 租期
-     *      'relet_amount'  =>  '', // 【必选】int 续租费(元)
-     *      'user_id'       =>  '', // 【必选】int 用户ID
-     *      'order_no'      =>  '', // 【必选】string 订单编号
-     *      'pay_type'      =>  '', // 【必选】int 支付方式
-     *      'user_name'     =>  '', // 【必选】string 用户名
-     *      'goods_id'      =>  '', // 【必选】int 商品ID
-     * ]
-     * @return bool | array
-     */
-    public function reletOpen($params) {
-
-        // 更新goods状态
-
-        // 订单续租
-        $order = Order::getByNo($goodsData['order_no']);
-        return $order->reletOpen();
-    }
-
-    /**
-     * 续租关闭
-     */
-    public function reletClose():bool {
-
-    }
-
-	/**
-     * 续租完成
-     *      支付完成或创建分期成功执行
-     *
-     * 步骤:
-     *  1.修改商品状态
-     *  2.添加新周期
-     *  3.修改订单状态
-     *  4.解锁订单
-     *
-     * @author jinlin wang
-     * @param array
-     * @return boolean
-     */
-	public function reletFinish():bool {
-	    //修改商品状态
-        //添加新周期
-        //修改订单状态
-        //解锁订单
-        return true;
     }
 	
 	//-+------------------------------------------------------------------------
