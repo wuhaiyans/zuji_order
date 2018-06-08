@@ -211,7 +211,6 @@ class MiniOrderController extends Controller
             'district_id'=>$addressId['country_id'],
             'address'=>$address,
         ];
-        print_r($data);
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30005,get_msg());

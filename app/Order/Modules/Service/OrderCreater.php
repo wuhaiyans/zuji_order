@@ -163,7 +163,6 @@ class OrderCreater
      */
     public function miniCreate($data){
         try{
-            print_r($data);
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
@@ -199,7 +198,6 @@ class OrderCreater
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
             $b = $orderCreater->filter();
             if(!$b){
-                print_r($orderCreater->getOrderCreater()->getError());die;
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
                 User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
@@ -209,7 +207,7 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            //var_dump($schemaData);
+            print_r($schemaData);die;
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();

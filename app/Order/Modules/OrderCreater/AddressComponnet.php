@@ -74,7 +74,6 @@ class AddressComponnet implements OrderCreater
             return false;
         }
         $data =$this->getDataSchema();
-        print_r($data);die;
         $addressData = [
             'order_no'=>$data['order']['order_no'],
             'consignee_mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
