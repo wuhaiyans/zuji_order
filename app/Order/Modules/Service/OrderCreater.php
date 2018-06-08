@@ -196,7 +196,15 @@ class OrderCreater
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
-
+            $b = $orderCreater->filter();
+            if(!$b){
+                print_r($orderCreater->getOrderCreater()->getError());die;
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
@@ -233,6 +241,7 @@ class OrderCreater
 
         } catch (\Exception $exc) {
             DB::rollBack();
+            print_r($exc);
             echo $exc->getMessage();
             die;
         }

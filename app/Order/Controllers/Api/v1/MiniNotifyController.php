@@ -139,7 +139,12 @@ class MiniNotifyController extends Controller
      */
     public function rentTransition(){
         $data = $this->data;
-        $b = OrderRepository::orderPayStatus($data['out_order_no'], \App\Order\Modules\Inc\OrderStatus::OrderPayed);
+        $params = [
+            'business_type'=>1,
+            'business_no'=>$data['out_order_no'],
+            'status'=>'success',
+        ];
+        $b = \App\Order\Modules\Service\OrderPayNotify::callback($params);
         if (!$b) {
             echo "小程序订单支付失败";return;
         }
