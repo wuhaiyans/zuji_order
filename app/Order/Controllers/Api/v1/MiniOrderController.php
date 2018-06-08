@@ -139,7 +139,7 @@ class MiniOrderController extends Controller
         $miniData['user_id'] = $_user['user_id'];
         //风控系统处理
         $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
-        if($b === false){
+        if($b != true){
             \App\Lib\Common\LogApi::notify('风控系统接口请求错误',$miniData);
             return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
         }
