@@ -224,6 +224,7 @@ class Instalment {
 		if (!is_array($data) || $data == [] ) {
 			return false;
 		}
+
 		$where = [];
 		if(isset($data['id'])){
 			$where[] = ['id', '=', $data['id']];
@@ -237,7 +238,10 @@ class Instalment {
 		}
 
 		$status = ['status'=>OrderInstalmentStatus::CANCEL];
+
+
 		$result =  OrderGoodsInstalment::where($where)->update($status);
+
 		if (!$result) return false;
 
 		return true;
