@@ -306,9 +306,9 @@ class Order {
 	 * @return bool
 	 */
 	public function refundFinish( ):bool{
-		$this->model->order_status = OrderStatus::OrderClosedRefunded; 
-		return $this->model->save();
-		return true;
+		$this->model->order_status = OrderStatus::OrderClosedRefunded;
+        $this->model->freeze_type = OrderFreezeStatus::Non;
+        return $this->model->save();
 	}
 	
 	

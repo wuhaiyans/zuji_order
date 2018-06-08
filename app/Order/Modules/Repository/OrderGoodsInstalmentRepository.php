@@ -265,7 +265,6 @@ class OrderGoodsInstalmentRepository
         if(isset($data['user_id'])){
             $where[] = ['user_id', '=', $data['user_id']];
         }
-
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
         $result =  OrderGoodsInstalment::where($where)->update($status);
         if (!$result) return false;

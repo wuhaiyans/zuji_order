@@ -29,20 +29,6 @@ class OrderGoodsInstalmentRecordRepository
 
     public static function create($data){
 
-        $data =filter_array($data,[
-            'instalment_id'             => 'required',
-            'type'                      => 'required',
-            'payment_amount'            => 'required',
-            'payment_discount_amount'   => 'required',
-            'discount_type'             => 'required',
-            'discount_value'            => 'required',
-            'discount_name'             => 'required',
-            'status'                    => 'required',
-        ]);
-        if(count($data) != 8){
-            return false;
-        }
-
         $info = OrderGoodsInstalmentRecord::create($data);
         return $info->getQueueableId();
     }

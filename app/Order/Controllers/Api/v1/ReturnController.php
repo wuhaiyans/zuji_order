@@ -66,13 +66,12 @@ class ReturnController extends Controller
     }
     /*
      *
-     *
+     *申请退款
      * 用户支付中，已支付使用
      * order_no订单编号  必选
      * user_id用户id      必选
      *
      */
-    //申请退款
     public function returnMoney(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
@@ -83,7 +82,7 @@ class ReturnController extends Controller
         if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $return = $this->OrderReturnCreater->CreateRefund($params);//修改信息
+        $return = $this->OrderReturnCreater->createRefund($params);//修改信息
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34007,"创建失败");
         }
@@ -129,7 +128,7 @@ class ReturnController extends Controller
 
     }
     /**
-     * 订单退款审核
+     * 退款---审核
      * @param Request $request
      *
      */
@@ -231,7 +230,7 @@ class ReturnController extends Controller
      * 取消退货申请
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|string
-     * 'refund_no'=>['111','222'] 退货单id
+     * 'refund_no'=>['111','222'] 退货单编号
      * user_id
      */
     public function cancelApply(Request $request)
@@ -246,7 +245,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelApply($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+            return apiResponse([],ApiStatus::CODE_33004);//取消失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }
@@ -266,7 +265,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelRefund($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+            return apiResponse([],ApiStatus::CODE_33002);//取消退款失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }
@@ -332,16 +331,20 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'business_type'           =>'required',
+            'business_type'   =>'required',
             'business_no'     =>'required',
-            'status'     =>'required',
-            'order_no'     =>'required',
+            'status'           =>'required',
+            'order_no'        =>'required',
         ]);
         if(count($param)<4){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->refundUpdate($params);
-        return apiResponse([],$res);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_33008);//退款完成修改失败
+
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
 
     /**
