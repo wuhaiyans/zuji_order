@@ -307,11 +307,10 @@ class WithholdController extends Controller
             $IncomeData = [
                 'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
                 'order_no'      => $orderInfo['order_no'],
-                'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+                'business_type' => OrderStatus::BUSINESS_FENQI,
+                'business_no'   => $instalmentInfo['id'],
                 'appid'         => $appid,
                 'channel'       => $channel,
-                'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
-                'account'       => $agreementNo,
                 'amount'        => $amount,
                 'create_time'   => time(),
             ];
@@ -511,11 +510,10 @@ class WithholdController extends Controller
                 $IncomeData = [
                     'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
                     'order_no'      => $orderInfo['order_no'],
-                    'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+                    'business_type' => OrderStatus::BUSINESS_FENQI,
+                    'business_no'   => $instalmentInfo['id'],
                     'appid'         => $appid,
                     'channel'       => $channel,
-                    'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
-                    'account'       => $agreementNo,
                     'amount'        => $amount,
                     'create_time'   => time(),
                 ];
@@ -682,11 +680,10 @@ class WithholdController extends Controller
                 $IncomeData = [
                     'name'          => "商品-" . $item['goods_no'] . "分期" . $item['term'] . "代扣",
                     'order_no'      => $orderInfo['order_no'],
-                    'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $item['id'],
+                    'business_type' => OrderStatus::BUSINESS_FENQI,
+                    'business_no'   => $item['id'],
                     'appid'         => 1,
                     'channel'       => $channel,
-                    'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
-                    'account'       => $agreementNo,
                     'amount'        => $amount,
                     'create_time'   => time(),
                 ];
