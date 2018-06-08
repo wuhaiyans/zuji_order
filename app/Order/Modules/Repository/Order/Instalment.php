@@ -277,11 +277,11 @@ class Instalment {
 	 * @param data  array
 	 * [
 	 *      'reason'       			=> '', //原因
-	 *      'status' 				=> '', //状态
+	 *      'status' 				=> '', 【必须】//状态
 	 *      'agreement_no' 			=> '', //支付平台签约协议号
 	 *      'out_agreement_no'      => '', //业务系统签约协议号
 	 *      'trade_no' 				=> '', //支付平台交易码
-	 *      'out_trade_no' 			=> '', //业务平台交易码
+	 *      'out_trade_no' 			=> '', 【必须】//业务平台交易码
 	 * ]
 	 * @return String	SUCCESS成功、FAIL失败
 	 */
