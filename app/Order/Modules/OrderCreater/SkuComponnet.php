@@ -54,7 +54,7 @@ class SkuComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
-		
+//        var_dump($goodsArr);die;
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
@@ -208,6 +208,7 @@ class SkuComponnet implements OrderCreater
                     'sku_num' => intval($skuInfo['sku_num']),
                     'brand_id' => intval($spuInfo['brand_id']),
                     'category_id' => intval($spuInfo['catid']),
+                    'machine_id' => intval($spuInfo['machine_id']),
                     'specs' => $spuInfo['specs'],
                     'thumb' => $spuInfo['thumb'],
                     'insurance' =>$spuInfo['yiwaixian'],
@@ -220,7 +221,6 @@ class SkuComponnet implements OrderCreater
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
                     'chengse' => intval($skuInfo['chengse']),
-                    'contract_id' => $spuInfo['contract_id'],
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
@@ -328,6 +328,7 @@ class SkuComponnet implements OrderCreater
                     'prod_no'=>$v['spu_no'],
                     'brand_id'=>$v['brand_id'],
                     'category_id'=>$v['category_id'],
+                    'machine_id'=>$v['machine_id'],
                     'user_id'=>$userId,
                     'quantity'=>1,
                     'goods_yajin'=>$v['yajin'],
