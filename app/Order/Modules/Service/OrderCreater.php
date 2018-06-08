@@ -178,7 +178,7 @@ class OrderCreater
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
-            echo 11;die;
+
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
@@ -193,7 +193,7 @@ class OrderCreater
 
 //            //优惠券
 //            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
+            echo 11;die;
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
