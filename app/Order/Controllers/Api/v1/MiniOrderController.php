@@ -274,17 +274,17 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($params['order_no']);
+        $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($params['order_no']);
         if( empty($result) ){
             \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$params['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
         }
         //发送取消请求
         $data = [
-            'out_order_no'=>$result['out_order_no'],//商户端订单号
+            'out_order_no'=>$result['order_no'],//商户端订单号
             'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
             'remark'=>$params['remark'],//订单操作说明
-            'app_id'=>$result['notify_app_id'],//小程序appid
+            'app_id'=>$result['app_id'],//小程序appid
         ];
         $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
         if($b === false){
