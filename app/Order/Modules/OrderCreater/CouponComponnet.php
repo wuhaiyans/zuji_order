@@ -37,7 +37,7 @@ class CouponComponnet implements OrderCreater
                     'coupon_no'=>$v,
                 ];
             }
-            //var_dump($couponData);die;
+           // var_dump($couponData);die;
             $coupon = Coupon::getCoupon($couponData);
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");

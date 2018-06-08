@@ -37,7 +37,7 @@ class InstalmentController extends Controller
             'zuqi_type'     => 'required',
             'all_amount'    => 'required',
             'amount'        => 'required',
-            'yiwaixian'     => 'required',
+            'insurance'     => 'required',
             'zujin'         => 'required',
             'pay_type'      => 'required',
         ]);

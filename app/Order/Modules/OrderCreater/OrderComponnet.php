@@ -250,8 +250,8 @@ class OrderComponnet implements OrderCreater
                 $order_amount += $v['amount_after_discount'];
                 $goods_yajin += $v['yajin'];
                 $order_yajin += $v['deposit_yajin'];
-                $order_insurance += $v['yiwaixian'];
-                $coupon_amount += $v['coupon_amount'];
+                $order_insurance += $v['insurance'];
+                $coupon_amount += ($v['first_coupon_amount']+$v['order_coupon_amount']);
                 $discount_amount += $v['discount_amount'];
             }
         }
