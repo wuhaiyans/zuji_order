@@ -180,7 +180,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -191,8 +191,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -343,7 +343,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -354,8 +354,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);

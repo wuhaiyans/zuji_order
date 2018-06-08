@@ -136,6 +136,13 @@ class MiniOrderController extends Controller
         //用户处理
         $_user = \App\Lib\User\User::getUserId($miniData);
         $data['user_id'] = $_user['user_id'];
+        $miniData['user_id'] = $_user['user_id'];
+        //风控系统处理
+        $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
+        if($b === false){
+            \App\Lib\Common\LogApi::notify('风控系统接口请求错误',$miniData);
+            return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
+        }
         //处理用户收货地址
         $addressId = \App\Lib\User\User::getAddressId($miniData);
         $data['address_info'] = [
@@ -145,6 +152,7 @@ class MiniOrderController extends Controller
             'mobile'=>$miniData['mobile'],
             'name'=>$miniData['name'],
             'address'=>$miniData['house'],
+            'credit_amount'=>$miniData['credit_amount'],
         ];
         //小程序订单确认
         $res = $this->OrderCreate->miniConfirmation($data);
