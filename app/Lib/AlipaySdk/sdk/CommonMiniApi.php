@@ -122,7 +122,7 @@ class CommonMiniApi extends BaseApi {
 			'name'=>'张三',
 			'cert_no'=>'110101200010012568',
 			'mobile'=>'18820881688',
-			'house'=>'西湖区文三路168号',
+			'house'=>'北京 北京 顺义 西湖区文三路168号',
 			'zm_grade'=>'Z3',
 			'credit_amount'=>'1500',
 			'user_id'=>'2018032002411058',
