@@ -12,7 +12,7 @@ class Refund
 {
 
     /**
-     * 'id'      =>''//退换货id
+     * 'order_no'      =>''//订单编号
      *'business_type' => '',	// 业务类型
      *
      * 'business_no'	=> '',	// 业务编码
@@ -21,16 +21,23 @@ class Refund
 
      */
     public function refundUpdate($params){
-        $base_api = config('tripartitle.API_INNER_URL');
-
-        $response = Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
-            'method'=> 'api.Return.refundUpdate',//模拟
-            'data' => json_encode(['params'=>$params])
-        ]);
-
-        return $response;
+        try{
+            $base_api = config('tripartitle.API_INNER_URL');
+            $response = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'api.Return.refundUpdate',//模拟
+                'data' => json_encode(['params'=>$params])
+            ]);
+            $res = json_decode($response);
+            if ($res->code != 0) {
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+        return true;
     }
 
 }

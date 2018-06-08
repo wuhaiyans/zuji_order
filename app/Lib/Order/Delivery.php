@@ -27,18 +27,26 @@ class Delivery
 
     public static function receive($orderNo,$role)
     {
-        $base_api = config('tripartite.API_INNER_URL');
-        $params['order_no'] =$orderNo;
-        $params['role'] =$role;
+        try{
+            $base_api = config('tripartite.API_INNER_URL');
+            $params['order_no'] =$orderNo;
+            $params['role'] =$role;
 
-        $response = Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
-            'method'=> 'api.order.deliveryReceive',//模拟
-            'params' => $params
-        ]);
-        return $response;
-
+            $response = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'api.order.deliveryReceive',//模拟
+                'params' => $params
+            ]);
+            $res = json_decode($response);
+            if ($res->code != 0) {
+                return false;
+            }
+        }catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+        return true;
     }
      //申请退货审核通过-》客户发货后，会通知此方法
 
