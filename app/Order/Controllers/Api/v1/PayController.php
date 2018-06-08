@@ -671,7 +671,7 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function createpayNotify(Request $request){
+	public function withholdCreatePayNotify(Request $request){
 		$params     = $request->all();
 
 		$rules = [
@@ -691,40 +691,9 @@ class PayController extends Controller
 
 		// 扣款成功 修改分期状态
 		$params = $params['params'];
+		\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
-		if($params['status'] == "success"){
-
-			// 查询分期信息
-			$instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$params['out_trade_no']]);
-			if( !is_array($instalmentInfo)){
-				// 提交事务
-				echo "FAIL";exit;
-			}
-
-			$data = [
-				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::PAYING,
-				'update_time'   => time(),
-			];
-
-			$b = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_trade_no']], $data);
-			if(!$b){
-				echo "FAIL";exit;
-			}
-
-			// 修改扣款记录数据
-			$recordData = [
-				'status'        => $this->status[$params['status']],
-				'update_time'   => time(),
-			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$params['out_no']],$recordData);
-			if(!$record){
-				echo "FAIL";exit;
-			}
-
-		}
-		echo "SUCCESS";
 	}
-
 
 
 

@@ -60,7 +60,7 @@ class ReturnController extends Controller
 
         $return = $this->OrderReturnCreater->add($params);
         if(!$return){
-            return apiResponse([],ApiStatus::CODE_34007,"创建失败");
+            return apiResponse([],ApiStatus::CODE_34006,"创建退换货单失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
@@ -84,7 +84,7 @@ class ReturnController extends Controller
         }
         $return = $this->OrderReturnCreater->createRefund($params);//修改信息
         if(!$return){
-            return apiResponse([],ApiStatus::CODE_34007,"创建失败");
+            return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
 
@@ -122,7 +122,7 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->returnOfGoods($params);//审核同意
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_34007,"审核失败");
+            return apiResponse([],ApiStatus::CODE_33001,"退换货审核失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
 
@@ -145,7 +145,7 @@ class ReturnController extends Controller
         }
         $res= $this->OrderReturnCreater->refundApply($param);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_34007,"审核失败");
+            return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
@@ -199,7 +199,7 @@ class ReturnController extends Controller
         }
         $res= $this->OrderReturnCreater->uploadWuliu($params);
         if(!$res){
-            return apiResponse([], ApiStatus::CODE_34002,'上传物流失败');
+            return apiResponse([], ApiStatus::CODE_33003,'上传物流失败');
         }
         return apiResponse([], ApiStatus::CODE_0);
 
@@ -219,7 +219,7 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $ret = $this->OrderReturnCreater->returnResult($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_34002);//未找到退货单信息
+            return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
         }
         return apiResponse([$ret],ApiStatus::CODE_0);
 
@@ -245,7 +245,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelApply($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_33004);//取消失败
+            return apiResponse([],ApiStatus::CODE_33004);//取消退换货失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }
@@ -265,7 +265,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelRefund($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_33002);//取消退款失败
+            return apiResponse([],ApiStatus::CODE_33007);//取消退款失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }
@@ -290,7 +290,7 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->isQualified($param['business_key'],$params['data']);
         if(!$res){
-            return  apiResponse([],ApiStatus::CODE_33008);//修改失败
+            return  apiResponse([],ApiStatus::CODE_33008);//修改检测结果失败
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
@@ -319,7 +319,7 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->updateorder($params);
         if(!$res){
-            return  apiResponse([],ApiStatus::CODE_33008);//更新失败
+            return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }
         return  apiResponse([],ApiStatus::CODE_0);
     }
@@ -344,7 +344,7 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->refundUpdate($params);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_33008);//退款完成修改失败
+            return apiResponse([],ApiStatus::CODE_34002);//退款完成修改失败
 
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -407,7 +407,7 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $res = $this->OrderReturnCreater->refuseRefund($params);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_33008);//拒绝退款失败
+            return apiResponse([],ApiStatus::CODE_34004);//拒绝退款失败
         }
          return apiResponse( [], ApiStatus::CODE_0);
     }
