@@ -401,6 +401,7 @@ class OrderReturnCreater
                 if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
                     $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                     $create_data['order_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
+                    $create_data['auth_unfreeze_amount']=0;//订单实际支付押金
                     if($create_data['order_amount']>0){
                         $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                     }
@@ -422,16 +423,20 @@ class OrderReturnCreater
                 if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
                     $create_data['out_auth_no']=$pay_result['payment_no'];
                     $create_data['order_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
+                    $create_data['auth_unfreeze_amount']=0;//订单实际支付押金
                     if($create_data['order_amount']>0){
                         $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                     }
                 }
-                $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
-                if(!$create_clear){
-                    //事务回滚
-                    DB::rollBack();
-                    return false;//创建退款清单失败
+                if( $create_data['order_amount']>0 || $create_data['auth_unfreeze_amount']>0){
+                    $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
+                    if(!$create_clear){
+                        //事务回滚
+                        DB::rollBack();
+                        return false;//创建退款清单失败
+                    }
                 }
+
             }else{
                 //更新退款单状态为审核拒绝
                 $returnApply=$return->refundAccept($param['remark']);
@@ -915,6 +920,7 @@ class OrderReturnCreater
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
                             $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                             $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
+                            $create_data['auth_unfreeze_amount']=0;//商品实际支付押金
                             if($goods_info['order_amount']>0){
                                 $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                             }
@@ -938,16 +944,20 @@ class OrderReturnCreater
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
                             $create_data['out_auth_no']=$pay_result['payment_no'];
                             $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
+                            $create_data['auth_unfreeze_amount']=0;//商品实际支付押金
                             if($create_data['order_amount']>0){
                                 $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
                             }
                         }
-                        $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
-                        if(!$create_clear){
-                            //事务回滚
-                            DB::rollBack();
-                            return false;//创建退款清单失败
+                        if($create_data['order_amount']>0 ||  $create_data['auth_unfreeze_amount']>0){
+                            $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
+                            if(!$create_clear){
+                                //事务回滚
+                                DB::rollBack();
+                                return false;//创建退款清单失败
+                            }
                         }
+
                     }
                     $delivery_data['goods'][$k]['goods_no']=$return_info['goods_no'];
 
