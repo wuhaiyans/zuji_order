@@ -124,11 +124,13 @@ class MiniNotifyController extends Controller
         // 扣款成功 修改分期状态
         if($data['pay_status'] == "PAY_SUCCESS"){
             $trade_no = $data['out_trans_no'];
+            $params = [
+                'status'=>'success',
+                'out_trade_no'=>$trade_no,
+            ];
             //修改分期状态
-            $b = OrderInstalment::save(['trade_no'=>$trade_no],['status'=>OrderInstalmentStatus::SUCCESS]);
-            if(!$b){
-                echo "修改分期状态.FAIL";return;
-            }
+            $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
+            $Instalment->paySuccess($params);
         }
         echo 'success';return;
     }
