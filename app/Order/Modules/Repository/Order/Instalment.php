@@ -32,7 +32,7 @@ class Instalment {
 	 *          'zuqi_type'         => 1,//租期类型
 	 *          'all_amount'        => 1,//总金额
 	 *          'amount'            => 1,//实际支付金额
-	 *          'yiwaixian'         => 1,//意外险
+	 *          'insurance'         => 1,//意外险
 	 *          'zujin'             => 1,//租金
 	 *          'pay_type'          => 1,//支付类型
 	 *      ],
@@ -58,7 +58,7 @@ class Instalment {
 		$sku = [
 			'zujin' 	=> $params['sku']['zujin'],
 			'zuqi' 		=> $params['sku']['zuqi'],
-			'insurance' => $params['sku']['yiwaixian'],
+			'insurance' => $params['sku']['insurance'],
 		];
 
 		// 判断支付方式
@@ -137,7 +137,7 @@ class Instalment {
 	 *          'zuqi_type'         => 1,//租期类型
 	 *          'all_amount'        => 1,//总金额
 	 *          'amount'            => 1,//实际支付金额
-	 *          'yiwaixian'         => 1,//意外险
+	 *          'insurance'         => 1,//意外险
 	 *          'zujin'             => 1,//租金
 	 *          'pay_type'          => 1,//支付类型
 	 *      ],
@@ -216,7 +216,7 @@ class Instalment {
 			'zuqi_type'     => 'required',
 			'all_amount'    => 'required',
 			'amount'        => 'required',
-			'yiwaixian'     => 'required',
+			'insurance'     => 'required',
 			'zujin'         => 'required',
 			'pay_type'      => 'required',
 		]);
