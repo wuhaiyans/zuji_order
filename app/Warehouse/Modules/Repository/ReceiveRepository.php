@@ -136,6 +136,7 @@ class ReceiveRepository
 
             foreach ($details as $detail) {//存receiveGoods
                 $detail['receive_no'] = $receiveNo;
+                $detail['refund_no'] = isset($detail['refund_no']) ? $detail['refund_no'] : '';
                 $detail['imei'] = isset($detail['imei']) ? $detail['imei'] : '';
                 $detail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
                 $detail['create_time'] = $time;

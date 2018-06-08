@@ -101,7 +101,6 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -129,6 +128,7 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
+            var_dump($schemaData);
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();

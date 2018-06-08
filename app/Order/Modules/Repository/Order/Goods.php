@@ -113,7 +113,7 @@ class Goods {
      */
     public function returnFinish( ):bool{
         $this->model->goods_status=OrderGoodStatus::REFUNDED;
-        $this->model->save();
+        return $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------
@@ -140,10 +140,10 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
-        if($this->model->goods_status==OrderGoodStatus::EXCHANGE_OF_GOODS){
+        if($this->model->goods_status==OrderGoodStatus::RENTING_MACHINE){
             return false;
         }
-        $this->model->goods_status=OrderGoodStatus::EXCHANGE_OF_GOODS;
+        $this->model->goods_status=OrderGoodStatus::RENTING_MACHINE;
         return $this->model->save();
     }
 	

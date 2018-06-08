@@ -174,6 +174,7 @@ class GoodsReturn {
      * @return bool
      */
     public function returnFinish(array $data ):bool{
+        $status='';
         if($data['status']=="processing"){//退款处理中
             $status=ReturnStatus::ReturnTui;//退货/退款单状态
         }
@@ -181,7 +182,7 @@ class GoodsReturn {
             $status=ReturnStatus::ReturnTuiHuo;//退货/退款单状态
         }
         $this->model->status=$status;
-        $this->model->save();
+        return $this->model->save();
     }
     /**
      * 退款完成

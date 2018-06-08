@@ -193,7 +193,8 @@ class SkuComponnet implements OrderCreater
         foreach ($this->goodsArr as $k=>$v) {
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
-            $coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['coupon_amount'])?$this->sku[$skuInfo['sku_id']]['coupon_amount']:0.00;
+            $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['first_coupon_amount']:0.00;
+            $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['order_coupon_amount']:0.00;
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
@@ -209,8 +210,8 @@ class SkuComponnet implements OrderCreater
                     'category_id' => intval($spuInfo['catid']),
                     'specs' => $spuInfo['specs'],
                     'thumb' => $spuInfo['thumb'],
-                    'yiwaixian' =>$spuInfo['yiwaixian'],
-                    'yiwaixian_cost' => $spuInfo['yiwaixian_cost'],
+                    'insurance' =>$spuInfo['yiwaixian'],
+                    'insurance_cost' => $spuInfo['yiwaixian_cost'],
                     'zujin' => $skuInfo['shop_price'],
                     'yajin' => $skuInfo['yajin'],
                     'zuqi' => intval($skuInfo['zuqi']),
@@ -226,11 +227,12 @@ class SkuComponnet implements OrderCreater
                     'discount_amount' => $skuInfo['buyout_price'],
                     'amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
                     'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
-                    'coupon_amount' => $coupon_amount,
+                    'first_coupon_amount' => $first_coupon_amount,
+                    'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?$this->deposit[$skuInfo['sku_id']]['mianyajin']:0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
                     'deposit_yajin' => !empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:0.00,
-                    'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$coupon_amount,
+                    'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
             ];
@@ -265,7 +267,7 @@ class SkuComponnet implements OrderCreater
         //计算总租金
         $totalAmount =0;
         foreach ($sku as $k=>$v){
-            $totalAmount +=($v['zuqi']*$v['zujin']-$v['discount_amount'])*$v['sku_num'];
+            $totalAmount +=($v['zuqi']*$v['zujin'])*$v['sku_num'];
         }
         $zongyouhui=0;
         foreach ($sku as $k => $v) {
@@ -274,23 +276,21 @@ class SkuComponnet implements OrderCreater
                 foreach ($coupon as $key=>$val) {
                     //首月0租金
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == 2) {
-                        $zongzujin = ($v['zuqi'] - 1) * $v['zujin'];
-                        $youhui+= $v['zujin'];
-                        $skuyouhui[$v['sku_id']]['coupon_amount'] =$youhui;
+                        $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
                     }
                     //现金券
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
-                        $zongzujin = $v['zuqi'] * $v['zujin'] - $v['discount_amount'];
-                        $skuyouhui[$v['sku_id']]['coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
 
                         if ($v['zuqi_type'] == 2) {
-                            $skuyouhui[$v['sku_id']]['coupon_amount'] = $skuyouhui[$v['sku_id']]['coupon_amount']+$youhui;
+                            $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'];
                         } else {
+                            $zongzujin = $v['zuqi'] * $v['zujin'];
+                            $skuyouhui[$v['sku_id']]['order_coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
                             if ($k == count($sku) - 1 && $i ==$v['sku_num']-1) {
-                                $skuyouhui[$v['sku_id']]['coupon_amount'] = $val['discount_amount'] - $zongyouhui;
+                                $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'] - $zongyouhui;
                             }else{
-                                $zongyouhui += $skuyouhui[$v['sku_id']]['coupon_amount'];
+                                $zongyouhui += $skuyouhui[$v['sku_id']]['order_coupon_amount'];
                             }
                         }
                         $coupon[$key]['is_use'] = 1;
@@ -298,7 +298,6 @@ class SkuComponnet implements OrderCreater
                 }
             }
         }
-
         $this->sku =$skuyouhui;
         return $coupon;
     }
@@ -339,13 +338,13 @@ class SkuComponnet implements OrderCreater
                     'order_no'=>$orderNo,
                     'chengse'=>$v['chengse'],
                     'discount_amount'=>$v['discount_amount'],
-                    'coupon_amount'=>$v['coupon_amount'],
+                    'coupon_amount'=>$v['first_coupon_amount']+$v['order_coupon_amount'],
                     'amount_after_discount'=>$v['amount_after_discount'],
                     'edition'=>$v['edition'],
                     'market_price'=>$v['market_price'],
-                    'price'=>$v['amount_after_discount'] + $v['yiwaixian'],
+                    'price'=>$v['amount_after_discount'] + $v['insurance'],
                     'specs'=>$v['specs'],
-                    'insurance'=>$v['yiwaixian'],
+                    'insurance'=>$v['insurance'],
                     'buyout_price'=>$v['buyout_price'],
                     'weight'=>$v['weight'],
                     'create_time'=>time(),
