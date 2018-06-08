@@ -46,8 +46,12 @@ class Instalment {
 	 *  ];
 	 * @return array 返回分期数据
 	 */
-	public static function instalmentData( array $params ){
+	public function instalmentData( array $params ){
 
+		$filter = self::filter_param($params);
+		if(!$filter){
+			return false;
+		}
 		// 单商品分期的相关数据
 		$sku = [
 			'zujin' 	=> $params['sku']['zujin'],
@@ -134,20 +138,78 @@ class Instalment {
 	 *  ];
 	 * @return bool true：成功；false：失败
 	 */
-	public static function create( array $param ):bool{
-		
-		if(!is_array($param)){
+	public function create( array $params ):bool{
+		$filter = self::filter_param($params);
+		if(!$filter){
+			return false;
+		}
+		// 调用分期数据
+		$_data = self::instalmentData($params);
+
+		if(!$_data){
+			\App\Lib\Common\LogApi::error('创建分期错误');
 			return false;
 		}
 
+		$order_no 	= $params['order']['order_no'];
+		$goods_no 	= $params['sku']['goods_no'];
+		$user_id 	= $params['user']['user_id'];
+
+
 		// 循环插入
-		foreach($param as $item){
+		foreach($_data as &$item){
+			$item['order_no'] 	= $order_no;
+			$item['goods_no'] 	= $goods_no;
+			$item['user_id'] 	= $user_id;
+			$item['status']		= \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID;
 			OrderGoodsInstalment::create($item);
 		}
 		return true;
-
 	}
-	
+
+	// 参数验证
+	public function filter_param(array $params):bool{
+		if(!is_array($params)){
+			return false;
+		}
+
+		$order      = $params['order'];
+		$sku        = $params['sku'];
+		$user       = $params['user'];
+
+		//获取goods_no
+		$order = filter_array($order, [
+			'order_no'=>'required',
+		]);
+		if(count($order) < 1){
+			return false;
+		}
+
+		//获取sku
+		$sku = filter_array($sku, [
+			'zuqi'          => 'required',
+			'zuqi_type'     => 'required',
+			'all_amount'    => 'required',
+			'amount'        => 'required',
+			'yiwaixian'     => 'required',
+			'zujin'         => 'required',
+			'pay_type'      => 'required',
+		]);
+		if(count($sku) < 7){
+			return false;
+		}
+
+		$user = filter_array($user, [
+			'user_id' 			=> 'required',
+		]);
+		if(empty($user)){
+			return false;
+		}
+
+		return true;
+	}
+
+
 	/**
 	 * 根据用户id和订单号、商品编号，关闭用户的分期
 	 * @param data  array

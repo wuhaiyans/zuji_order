@@ -23,12 +23,14 @@ class Receive
      * type 类型:退 换 还 ...
      *
      * order_no
-     * data=[
+     * [
      *      [
      *          serial_no 【可选】
      *          goods_no 【必须】 //商品编号
      *          quantity 【可选】 //商品数量
-     *          imei  【可以没有】
+     *          imei1  【可以没有】
+     *          imei2  【可以没有】
+     *          imei3  【可以没有】
      *      ]
      *  ]
      */
@@ -84,13 +86,13 @@ class Receive
             'logistics_no' => 123,
             'goods_info' => [
                 [
-                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                'goods_no' => 123
                 ],
                 [
-                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                'goods_no' => 123
                 ],
                 [
-                'goods_no' => 123, 'imei1'=>1234, 'imei2'=>4567
+                'goods_no' => 123
                 ],
             ]
         ];

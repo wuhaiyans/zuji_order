@@ -109,7 +109,8 @@ class OrderReturnRepository
         return $return_result;
     }
     public static function getGoodsInfo($order_no){
-        $getGoods=OrderGoods::where(['order_no','=',$order_no])->get()->toArray();
+        $where[]=['order_no','=',$order_no];
+        $getGoods=OrderGoods::where($where)->get();
         if(!$getGoods){
             return false;
         }

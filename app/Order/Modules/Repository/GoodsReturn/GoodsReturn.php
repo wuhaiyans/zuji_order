@@ -187,7 +187,7 @@ class GoodsReturn {
             $status=ReturnStatus::ReturnTuiKuan;//退货/退款单状态
         }
         $this->model->status=$status;
-        $this->model->save();
+       return $this->model->save();
     }
     /**
      * 拒绝退款

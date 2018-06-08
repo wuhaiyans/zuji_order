@@ -66,13 +66,12 @@ class ReturnController extends Controller
     }
     /*
      *
-     *
+     *申请退款
      * 用户支付中，已支付使用
      * order_no订单编号  必选
      * user_id用户id      必选
      *
      */
-    //申请退款
     public function returnMoney(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
@@ -129,7 +128,7 @@ class ReturnController extends Controller
 
     }
     /**
-     * 订单退款审核
+     * 退款---审核
      * @param Request $request
      *
      */
@@ -341,7 +340,11 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->refundUpdate($params);
-        return apiResponse([],$res);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_33008);//退款完成修改失败
+
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
 
     /**
