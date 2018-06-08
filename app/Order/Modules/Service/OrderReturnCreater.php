@@ -269,6 +269,7 @@ class OrderReturnCreater
                     }
                     $order=$returnInfo[$k]['order_no'];
                     $data[$k]['goods_no']=$returnInfo[$k]['goods_no'];
+                    $refund[$k]['refund_no']=$params['detail'][$k]['refund_no'];
                     //获取商品扩展信息
                     $goodsDelivery[$k]=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
                     if(!$goodsDelivery){
@@ -313,6 +314,16 @@ class OrderReturnCreater
                 if(!$create_receive){
                     return false;//创建待收货单失败
                 }
+                //更新退换货单的收货编号
+                 foreach($refund as $k=>$v){
+                    $getReturn=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
+                    $updateReceive=$getReturn->updateReceive($create_receive);
+                    if(!$updateReceive){
+                       return false;
+                    }
+                 }
+
+
             }
             //审核发送短信
           /*  if($params['business_key']==OrderStatus::BUSINESS_RETURN){
@@ -1106,14 +1117,14 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
-                $data['order_no']=$return_info['order_no'];
-                $data['logistics_id']=$params['logistics_id'];
-                $data['logistics_no']=$params['logistics_no'];
-                $data['goods_info'][$k]['goods_no']=$return_info['goods_no'];
+                $data[$k]['receive_no']=$return_info['receive_no'];
                 //提交事务
                 DB::commit();
                 return ApiStatus::CODE_0;
             }
+            $data['logistics_id']=$params['logistics_id'];
+            $data['logistics_no']=$params['logistics_no'];
+            $data['receive_no']= $data[0]['receive_no'];
             //上传物流单号到收货系统
             $create_receive= Receive::updateLogistics($data);
             if(!$create_receive){

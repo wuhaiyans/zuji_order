@@ -53,6 +53,14 @@ class GoodsReturn {
         return $this->model->save();
     }
     /**
+     *创建收货单后，更新退货单编号
+     * @return bool
+     */
+    public function updateReceive($receive_no){
+        $this->model->receive_no = $receive_no;
+        return $this->model->save();
+    }
+    /**
      * 退换货审核拒绝
      * @return bool
      */
