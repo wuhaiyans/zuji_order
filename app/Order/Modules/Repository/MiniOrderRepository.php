@@ -21,6 +21,7 @@ class MiniOrderRepository
     public static function add($data){
         $arr = [
             'order_no'=>$data['out_order_no'],
+            'name'=>$data['name'],
             'zm_order_no'=>$data['order_no'],
             'transaction_id'=>$data['transaction_id'],
             'cert_no'=>$data['cert_no'],

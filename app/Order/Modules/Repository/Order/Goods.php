@@ -124,10 +124,6 @@ class Goods {
      * @return bool
      */
     public function barterOpen( ):bool{
-        //商品必须为租用中
-        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
-            return false;
-        }
         // 状态改为换货中
         $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
         return $this->model->save();
