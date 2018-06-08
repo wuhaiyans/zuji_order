@@ -193,10 +193,10 @@ class OrderCreater
 
 //            //优惠券
 //            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-            echo 11;die;
+            echo '456';
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
-
+            echo 11;die;
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
