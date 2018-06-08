@@ -74,8 +74,8 @@ class AddressComponnet implements OrderCreater
             return false;
         }
         $data =$this->getDataSchema();
-        if(empty($data['address']['address'])){
-            $address_info = $data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name'];
+        if(isset($data['address']['province_name']) && isset($data['address']['city_name']) && isset($data['address']['country_name']) ){
+            $address_info = $data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name'].' '.$address_info =  $data['address']['address'];
         }else{
             $address_info =  $data['address']['address'];
         }
