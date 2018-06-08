@@ -163,6 +163,7 @@ class OrderCreater
      */
     public function miniCreate($data){
         try{
+            print_r($data);
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器

@@ -197,13 +197,7 @@ class MiniOrderController extends Controller
         $addressId = \App\Lib\User\User::getAddressId([
             'house'=>$address,
         ]);
-        $data['address_info'] = [
-            'province_id'=>$addressId['provin_id'],
-            'city_id'=>$addressId['city_id'],
-            'district_id'=>$addressId['country_id'],
-            'address'=>$address,
-        ];
-        $data =[
+        $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
             'order_no'=>$orderNo,
@@ -211,6 +205,13 @@ class MiniOrderController extends Controller
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID
         ];
+        $data['address_info'] = [
+            'province_id'=>$addressId['provin_id'],
+            'city_id'=>$addressId['city_id'],
+            'district_id'=>$addressId['country_id'],
+            'address'=>$address,
+        ];
+        print_r($data);
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
