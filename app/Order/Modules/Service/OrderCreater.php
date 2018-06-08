@@ -241,7 +241,6 @@ class OrderCreater
 
         } catch (\Exception $exc) {
             DB::rollBack();
-            print_r($exc);
             echo $exc->getMessage();
             die;
         }

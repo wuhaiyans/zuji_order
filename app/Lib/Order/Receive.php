@@ -22,14 +22,14 @@ class Receive
      * 收货系统 检测结果反馈
      *  $data = [
     [
-    'goods_no' => '123',
+    'refund_no' => '123',
     'check_result' => 'success',//是否合格 fasle/success
     'check_description' => '原因',
     'evaluation_time' => '123123123',//检测时间
     'price' => '342'
     ],
     [
-    'goods_no' => '123',
+    'refund_no' => '123',
     'check_result' => 'success',//是否合格 fasle/success
     'check_description' => '原因',
     'evaluation_time' => '123123123',//检测时间
@@ -40,16 +40,25 @@ class Receive
 
     public static function checkResult($order_no, $business_key,$data)
     {
-        $base_api = config('tripartitle.API_INNER_URL');
+        try{
+            $base_api = config('tripartitle.API_INNER_URL');
 
-        $response = Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
-            'method'=> 'api.Return.isQualified',//模拟
-            'data' => json_encode(['order'=>$order_no,'business_key'=>$business_key,'data'=>$data])
-        ]);
+            $response = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'api.Return.isQualified',//模拟
+                'data' => json_encode(['order'=>$order_no,'business_key'=>$business_key,'data'=>$data])
+            ]);
+            $res = json_decode($response);
+            if ($res->code != 0) {
+                return false;
+            }
 
-        return $response;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+        return true;
     }
 
 

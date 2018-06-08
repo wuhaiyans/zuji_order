@@ -72,42 +72,35 @@ class Receive
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
-		return $res;
+
+
+
+        $obj = json_decode($res, true);
+
+
+        if ($obj['code'] != 0 || !isset($obj['data']['receive_no'])) {
+            return false;
+        }
+
+		return $obj['data']['receive_no'];
 
     }
 
     /**
      * 更新物流信息
      *
-     * @param $params string 订单信息 【必须】
-        $params = [
-            'order_no' => '123444',
-            'logistics_id' => 1,
-            'logistics_no' => 123,
-            'goods_info' => [
-                [
-                'goods_no' => 123
-                ],
-                [
-                'goods_no' => 123
-                ],
-                [
-                'goods_no' => 123
-                ],
-            ]
-        ];
      *
      * @return bool
      *
+     * $params = $receive_no,$logistics_id,$logistics_no
      */
     public static function updateLogistics($params){
 
         try {
             $result = [
-                'order_no' => $params['order_no'],
+                'receive_no' => $params['receive_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
-                'goods_no' => $params['goods_info'][0]['goods_no']
             ];
 
             $base_api = config('tripartite.warehouse_api_uri');
@@ -115,14 +108,18 @@ class Receive
             $res = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
-                'method'=> 'warehouse.receive.create',//模拟
+                'method'=> 'warehouse.receive.logistics',//模拟
                 'params' => json_encode($result)
             ]);
-            return $res;
 
+            $res = json_decode($res);
+            if ($res->code != 0) {
+                return false;
+            }
 
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+            return false;
         }
 
         return true;
