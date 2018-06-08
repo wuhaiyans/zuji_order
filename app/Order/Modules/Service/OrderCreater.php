@@ -196,11 +196,18 @@ class OrderCreater
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
-
+            $b = $orderCreater->filter();
+            if(!$b){
+                print_r($orderCreater->getOrderCreater()->getError());die;
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
             $schemaData = $orderCreater->getDataSchema();
-            echo 11;
+
             $b = $orderCreater->create();
-            echo '456';die;
             //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
