@@ -68,9 +68,12 @@ class InstalmentController extends Controller
             'user'      => $user,
         ];
 
-        $res = OrderGoodsInstalment::create($params);
+        $res        = new \App\Order\Modules\Repository\Order\Instalment();
+        $data       = $res->create($params);
 
-        if(!$res){
+        p($data);
+
+        if(!$data){
             return apiResponse([],ApiStatus::CODE_20001, "创建分期失败");
         }
 

@@ -52,7 +52,7 @@ class PayController extends Controller
 	
 	// 测试 代扣解约
 	public function testWithholdUnsign(){
-		
+
 		$user_id = '';
 		
 		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
@@ -254,32 +254,46 @@ class PayController extends Controller
 	 * 代扣解约 异步通知
 	 * @param array $_POST
 	 * [
-	 *		'agreement_no'		=> '',	//【必选】string 支付系统编号
-	 *		'out_agreement_no'	=> '',	//【必选】string 业务系统编号
-	 *		'user_id'			=> '',	//【必选】string 业务系统用户ID
-	 *		'status'			=> '',	//【必选】string 状态； init：初始化； processing：处理中；unsigned：解约成功；failed：支付失败
+	 *      'reason'            => '', 【必须】 String 错误原因
+	 *      'status'            => '', 【必须】 int：success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+	 *      'agreement_no'      => '', 【必须】 String 支付平台签约协议号
+	 *      'out_agreement_no'  => '', 【必须】 String 业务系统签约协议号
+	 *      'user_id'           => '', 【必须】 int 用户ID
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function withholdUnsignNotify()
+	public function withholdUnsignNotify(Request $request)
 	{
-		
-		$input = file_get_contents("php://input");
-		LogApi::info('代扣解约异步通知', $input);
-		
-		$params = json_decode($input,true);
-		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+		$params     = $request->all();
+
+		$rules = [
+			'reason'            => 'required',
+			'status'            => 'required',
+			'agreement_no'      => 'required',
+			'out_agreement_no'  => 'required',
+			'user_id'           => 'required',
+		];
+		// 参数过滤
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
 		}
-		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+
+		// 解约成功 修改协议表
+		$params = $params['params'];
+
+		if($params['status'] == "success"){
+			try{
+				// 查询用户协议
+				$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByWithholdNo( $params['out_agreement_no'] );
+				$withhold->unsignSuccess();
+			} catch(\Exception $exc){
+
+				echo "FAIL";exit;
+			}
 		}
-		
-		
-		
-		echo '{"status":"ok"}';exit;
-		
-		
+
+		echo "SUCCESS";
 	}
 	
 	
@@ -642,5 +656,79 @@ class PayController extends Controller
 
     }
 
-	
+
+
+	/**
+	 * 分期扣款异步回调处理
+	 * @requwet Array
+	 * [
+	 *      'reason'            => '', 【必须】 String 错误原因
+	 *      'status'            => '', 【必须】 int：success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+	 *      'agreement_no'      => '', 【必须】 String 支付平台签约协议号
+	 *      'out_agreement_no'  => '', 【必须】 String 业务系统签约协议号
+	 *      'trade_no'          => '', 【必须】 String 支付平台交易码
+	 *      'out_trade_no'      => '', 【必须】 String 业务平台交易码
+	 * ]
+	 * @return String FAIL：失败  SUCCESS：成功
+	 */
+	public function createpayNotify(Request $request){
+		$params     = $request->all();
+
+		$rules = [
+			'reason'            => 'required',
+			'status'            => 'required|int',
+			'agreement_no'      => 'required',
+			'out_agreement_no'  => 'required',
+			'trade_no'          => 'required',
+			'out_trade_no'      => 'required',
+		];
+
+		// 参数过滤
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+
+		// 扣款成功 修改分期状态
+		$params = $params['params'];
+
+		if($params['status'] == "success"){
+
+			// 查询分期信息
+			$instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$params['out_trade_no']]);
+			if( !is_array($instalmentInfo)){
+				// 提交事务
+				echo "FAIL";exit;
+			}
+
+			$data = [
+				'status'        => \App\Order\Modules\Inc\OrderInstalmentStatus::PAYING,
+				'update_time'   => time(),
+			];
+
+			$b = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_trade_no']], $data);
+			if(!$b){
+				echo "FAIL";exit;
+			}
+
+			// 修改扣款记录数据
+			$recordData = [
+				'status'        => $this->status[$params['status']],
+				'update_time'   => time(),
+			];
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$params['out_no']],$recordData);
+			if(!$record){
+				echo "FAIL";exit;
+			}
+
+		}
+		echo "SUCCESS";
+	}
+
+
+
+
+
+
+
 }
