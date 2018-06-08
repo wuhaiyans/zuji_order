@@ -67,7 +67,7 @@ class UserComponnet implements OrderCreater
         }else{
             $this->address = $addressInfo;
             $this->address['mobile'] = $userInfo['mobile'];
-            $this->address['name'] = $userInfo['name'];
+            $this->address['name'] = $userInfo['realname'];
         }
         $this->mobile = $userInfo['username'];
         $this->withholdingNo = $userInfo['withholding_no'];
