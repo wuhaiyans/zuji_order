@@ -292,7 +292,7 @@ class WithholdController extends Controller
             $instalmentRecord = [
                 'instalment_id'             => $instalmentId,   // 分期ID
                 'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                'payment_amount'            => $amount,         // 实际支付金额
+                'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额
                 'status'                    => OrderInstalmentStatus::PAYING, // 状态：
                 'create_time'               => time(),          // 创建时间
             ];
@@ -311,7 +311,7 @@ class WithholdController extends Controller
                 'business_no'   => $instalmentInfo['id'],
                 'appid'         => $appid,
                 'channel'       => $channel,
-                'amount'        => $amount,
+                'amount'        => $instalmentInfo['amount'],
                 'create_time'   => time(),
             ];
             $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
@@ -496,7 +496,7 @@ class WithholdController extends Controller
                 $instalmentRecord = [
                     'instalment_id'             => $instalmentId,   // 分期ID
                     'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                    'payment_amount'            => $amount,         // 实际支付金额
+                    'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额
                     'status'                    => OrderInstalmentStatus::PAYING, // 状态：
                     'create_time'               => time(),          // 创建时间
                 ];
@@ -514,7 +514,7 @@ class WithholdController extends Controller
                     'business_no'   => $instalmentInfo['id'],
                     'appid'         => $appid,
                     'channel'       => $channel,
-                    'amount'        => $amount,
+                    'amount'        => $instalmentInfo['amount'],
                     'create_time'   => time(),
                 ];
                 $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
@@ -663,11 +663,11 @@ class WithholdController extends Controller
 
                 // 创建扣款记录
                 $instalmentRecord = [
-                    'instalment_id' => $item['id'],   // 分期ID
-                    'type' => 1,               // 类型 1：代扣；2：主动还款
-                    'payment_amount' => $amount,         // 实际支付金额
-                    'status' => OrderInstalmentStatus::PAYING, // 状态：
-                    'create_time' => time(),          // 创建时间
+                    'instalment_id' => $item['id'],             // 分期ID
+                    'type' => 1,                                // 类型 1：代扣；2：主动还款
+                    'payment_amount' => $item['amount'],        // 实际支付金额
+                    'status' => OrderInstalmentStatus::PAYING,  // 状态：
+                    'create_time' => time(),                    // 创建时间
                 ];
                 $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
                 if (!$record) {
@@ -684,7 +684,7 @@ class WithholdController extends Controller
                     'business_no'   => $item['id'],
                     'appid'         => 1,
                     'channel'       => $channel,
-                    'amount'        => $amount,
+                    'amount'        => $item['amount'],
                     'create_time'   => time(),
                 ];
                 $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
