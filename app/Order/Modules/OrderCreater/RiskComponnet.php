@@ -85,7 +85,6 @@ class RiskComponnet implements OrderCreater
             $this->getOrderCreater()->setError('信用认证过期');
             $this->flag = false;
         }
-        print_r($userInfo);
         if( $userInfo['certified'] == 0 ){
             $this->getOrderCreater()->setError('账户尚未信用认证');
             $this->flag = false;

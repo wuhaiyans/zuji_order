@@ -20,19 +20,8 @@ class Receive
 {
     /**
      * 创建待收货
-     * type 类型:退 换 还 ...
+     * type 类型: 1：还，2：退，3：换
      *
-     * order_no
-     * [
-     *      [
-     *          serial_no 【可选】
-     *          goods_no 【必须】 //商品编号
-     *          quantity 【可选】 //商品数量
-     *          imei1  【可以没有】
-     *          imei2  【可以没有】
-     *          imei3  【可以没有】
-     *      ]
-     *  ]
      */
     public static function create($order_no, $type, $goods_info)
     {

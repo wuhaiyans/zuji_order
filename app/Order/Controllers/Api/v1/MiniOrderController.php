@@ -135,6 +135,7 @@ class MiniOrderController extends Controller
         $miniData = $miniApi->getResult();
         //用户处理
         $_user = \App\Lib\User\User::getUserId($miniData);
+        var_dump($_user);die;
         $data['user_id'] = $_user['user_id'];
         //处理用户收货地址
         $addressId = \App\Lib\User\User::getAddressId($miniData);
@@ -193,12 +194,20 @@ class MiniOrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-
+        //处理用户收货地址
+        $addressId = \App\Lib\User\User::getAddressId([
+            'house'=>$address,
+        ]);
+        $data['address_info'] = [
+            'province_id'=>$addressId['provin_id'],
+            'city_id'=>$addressId['city_id'],
+            'district_id'=>$addressId['country_id'],
+            'address'=>$address,
+        ];
         $data =[
             'appid'=>$appid,
             'pay_type'=>$payType,
             'order_no'=>$orderNo,
-            'address_info'=>$address,
             'sku'=>$sku,
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID
