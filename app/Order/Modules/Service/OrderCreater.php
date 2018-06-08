@@ -101,7 +101,6 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -129,6 +128,7 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
+            var_dump($schemaData);
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
@@ -198,7 +198,6 @@ class OrderCreater
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
             $b = $orderCreater->filter();
             if(!$b){
-                print_r($orderCreater->getOrderCreater()->getError());die;
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
                 User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
@@ -206,9 +205,7 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
-
             $b = $orderCreater->create();
-            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -227,8 +224,8 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
             // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
             //发送取消订单队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',

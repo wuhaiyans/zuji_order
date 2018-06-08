@@ -230,7 +230,7 @@ class ReturnController extends Controller
      * 取消退货申请
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|string
-     * 'refund_no'=>['111','222'] 退货单id
+     * 'refund_no'=>['111','222'] 退货单编号
      * user_id
      */
     public function cancelApply(Request $request)
@@ -245,7 +245,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelApply($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+            return apiResponse([],ApiStatus::CODE_33004);//取消失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }
@@ -265,7 +265,7 @@ class ReturnController extends Controller
         }
         $ret = $this->OrderReturnCreater->cancelRefund($params);
         if(!$ret){
-            return apiResponse([],ApiStatus::CODE_34002);//取消失败
+            return apiResponse([],ApiStatus::CODE_33002);//取消退款失败
         }
         return apiResponse( [], ApiStatus::CODE_0);
     }

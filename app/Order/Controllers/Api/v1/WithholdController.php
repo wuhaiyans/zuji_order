@@ -155,6 +155,7 @@ class WithholdController extends Controller
      */
     public function createpay(Request $request){
         $params     = $request->all();
+        $appid = $params['appid'];
         $rules = [
             'instalment_id'     => 'required|int',
             'remark'            => 'required',
@@ -260,7 +261,7 @@ class WithholdController extends Controller
             // 代扣接口
             $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
-            $backUrl = config('app.url') . "/order/pay/createpayNotify";
+            $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
             $withholding_data = [
                 'out_trade_no'  => $instalmentInfo['id'], //业务系统业务吗
@@ -302,6 +303,25 @@ class WithholdController extends Controller
                 return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
             }
 
+            // 创建收支明细表
+            $IncomeData = [
+                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+                'order_no'      => $orderInfo['order_no'],
+                'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+                'appid'         => $appid,
+                'channel'       => $channel,
+                'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
+                'account'       => $agreementNo,
+                'amount'        => $amount,
+                'create_time'   => time(),
+            ];
+            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+            if( !$IncomeId ){
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error('创建收支明细失败');
+                return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
+            }
+
             //发送短信通知 支付宝内部通知
             $notice = new \App\Order\Modules\Service\OrderNotice(
                 OrderStatus::BUSINESS_FENQI,
@@ -310,7 +330,7 @@ class WithholdController extends Controller
             $notice->notify();
 
             // 发送支付宝消息通知
-            $notice->alipay_notify();
+//            $notice->alipay_notify();
 
         }
         // 提交事务
@@ -331,7 +351,7 @@ class WithholdController extends Controller
         ini_set('max_execution_time', '0');
 
         $params     = $request->all();
-
+        $appid = $params['appid'];
         $rules = [
             'ids'            => 'required',
         ];
@@ -396,7 +416,7 @@ class WithholdController extends Controller
                 continue;
             }
             // 商品
-            $subject = '订单-' . $instalmentInfo['order_no'] . '-' . $instalmentInfo['goods_no'] . '-第' . $instalmentInfo['times'] . '期扣款';
+            $subject = '商品-' . $instalmentInfo['goods_no'] . '-第' . $instalmentInfo['times'] . '期扣款';
 
             // 价格
             $amount = $instalmentInfo['amount'] * 100;
@@ -446,7 +466,7 @@ class WithholdController extends Controller
                 }
                 // 代扣接口
                 $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                $backUrl = config('app.url') . "/order/pay/createpayNotify";
+                $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
                 $withholding_data = [
                     'out_trade_no'  => $instalmentInfo['id'],   //业务系统业务吗
@@ -485,9 +505,26 @@ class WithholdController extends Controller
                 if(!$record){
                     DB::rollBack();
                     \App\Lib\Common\LogApi::error('创建扣款记录失败');
-                    return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
+                    continue;
                 }
-
+                // 创建收支明细表
+                $IncomeData = [
+                    'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+                    'order_no'      => $orderInfo['order_no'],
+                    'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+                    'appid'         => $appid,
+                    'channel'       => $channel,
+                    'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
+                    'account'       => $agreementNo,
+                    'amount'        => $amount,
+                    'create_time'   => time(),
+                ];
+                $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+                if( !$IncomeId ){
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error('创建收支明细失败');
+                    continue;
+                }
                 //发送短信通知 支付宝内部通知
                 $notice = new \App\Order\Modules\Service\OrderNotice(
                     OrderStatus::BUSINESS_FENQI,
@@ -530,6 +567,9 @@ class WithholdController extends Controller
         }
 
         foreach($result as $item) {
+            //开启事务
+            DB::beginTransaction();
+
             // 订单
             $orderInfo = OrderRepository::getInfoById($item['order_no']);
             if (!$orderInfo) {
@@ -602,7 +642,7 @@ class WithholdController extends Controller
                 $withholding_data = [
                     'out_trade_no' => $item['id'], //业务系统业务吗
                     'amount' => $amount,              //交易金额；单位：分
-                    'back_url' => config('app.url') . "/order/pay/createpayNotify",  //后台通知地址
+                    'back_url' => config('app.url') . "/order/pay/withholdCreatePayNotify",  //后台通知地址
                     'name' => $subject,             //交易备注
                     'agreement_no' => $agreementNo,         //支付平台代扣协议号
                     'user_id' => $orderInfo['user_id'],//业务平台用户id
@@ -638,6 +678,25 @@ class WithholdController extends Controller
                     continue;
                 }
 
+                // 创建收支明细表
+                $IncomeData = [
+                    'name'          => "商品-" . $item['goods_no'] . "分期" . $item['term'] . "代扣",
+                    'order_no'      => $orderInfo['order_no'],
+                    'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $item['id'],
+                    'appid'         => 1,
+                    'channel'       => $channel,
+                    'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
+                    'account'       => $agreementNo,
+                    'amount'        => $amount,
+                    'create_time'   => time(),
+                ];
+                $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+                if( !$IncomeId ){
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error('创建收支明细失败');
+                    return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
+                }
+
                 //发送短信通知 支付宝内部通知
                 $notice = new \App\Order\Modules\Service\OrderNotice(
                     OrderStatus::BUSINESS_FENQI,
@@ -648,6 +707,9 @@ class WithholdController extends Controller
                 // 发送支付宝消息通知
                 $notice->alipay_notify();
             }
+
+            // 提交事务
+            DB::commit();
         }
         return true;
     }
@@ -681,16 +743,19 @@ class WithholdController extends Controller
         $channelId      = $params['channel'];
 
 
+        //开启事务
+        DB::beginTransaction();
 
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
-            // 提交事务
+            DB::rollBack();
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
         //分期状态
         if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
         }
 
@@ -703,6 +768,7 @@ class WithholdController extends Controller
 
         // 订单状态
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
         }
 
@@ -772,6 +838,9 @@ class WithholdController extends Controller
             'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
             'front_url' => $params['return_url'], //回调URL
         ]);
+
+        // 提交事务
+        DB::commit();
 
         return apiResponse($url,ApiStatus::CODE_0);
 

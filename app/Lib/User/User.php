@@ -72,10 +72,16 @@ class User{
         }else{
             $zm_face = 0;
         }
+        if($params['zm_risk'] == 'Y'){
+            $zm_risk = 1;
+        }else{
+            $zm_risk = 0;
+        }
         $data['params'] = [
             'mobile'=>$params['mobile'],
             'realname'=>$params['name'],
             'zm_face'=>$zm_face,
+            'zm_risk'=>$zm_risk,
             'cert_no'=>$params['cert_no'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));

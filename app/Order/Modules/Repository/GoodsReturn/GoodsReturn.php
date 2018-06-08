@@ -56,7 +56,7 @@ class GoodsReturn {
      *创建收货单后，更新退货单编号
      * @return bool
      */
-    public function updateReceive($receive_no){
+    public function updateReceive(string $receive_no){
         $this->model->receive_no = $receive_no;
         return $this->model->save();
     }
@@ -227,9 +227,6 @@ class GoodsReturn {
      * @return bool
      */
     public function uploadLogistics(array $data){
-        if($this->model->logistics_no!=''){
-            return false;
-        }
         $this->model->logistics_id=$data['logistics_id'];
         $this->model->logistics_name=$data['logistics_name'];
         $this->model->logistics_no=$data['logistics_no'];

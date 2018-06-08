@@ -906,4 +906,37 @@ class Pay extends \App\Lib\Configurable
 		}
 		LogApi::error('[支付阶段]业务未设置回调通知');
 	}
+
+	/**
+	 * 代扣回调
+	 * @param data  array
+	 * [
+	 *      'reason'       			=> '', //原因
+	 *      'status' 				=> '', 【必须】//状态
+	 *      'agreement_no' 			=> '', //支付平台签约协议号
+	 *      'out_agreement_no'      => '', //业务系统签约协议号
+	 *      'trade_no' 				=> '', //支付平台交易码
+	 *      'out_trade_no' 			=> '', 【必须】//业务平台交易码
+	 * ]
+	 * @return String	SUCCESS成功、FAIL失败
+	 */
+	public function withholdCreatePayNotify( array $param ){
+		$param = filter_array($param, [
+			'reason'=>'required',
+			'status'=>'required',
+			'agreement_no'=>'required',
+			'out_agreement_no'=>'required',
+			'trade_no'=>'required',
+			'out_trade_no'=>'required',
+		]);
+		if(count($param) < 6){
+			return false;
+		}
+
+		// 调用公共代扣回调方法
+		\App\Order\Modules\Repository\Order\Instalment::paySuccess($param);
+
+	}
+
+
 }
