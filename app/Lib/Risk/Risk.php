@@ -18,6 +18,7 @@ class Risk{
 
 
     public static function getRisk($arr){
+        print_r($arr);die;
         $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='yidun.get.user.yiduninfo';
         $data['params'] = [

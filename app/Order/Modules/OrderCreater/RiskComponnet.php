@@ -45,7 +45,6 @@ class RiskComponnet implements OrderCreater
             'mobile'=>$schema['user']['user_mobile'],
             'channel_appid'=>$appId,
         ]);
-        print_r($risk);
         if(!is_array($risk)){
             throw new Exception("获取风控信息失败");
         }
