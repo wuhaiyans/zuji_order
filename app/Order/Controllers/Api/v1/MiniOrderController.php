@@ -135,6 +135,7 @@ class MiniOrderController extends Controller
         $miniData = $miniApi->getResult();
         //用户处理
         $_user = \App\Lib\User\User::getUserId($miniData);
+        var_dump($_user);die;
         $data['user_id'] = $_user['user_id'];
         //处理用户收货地址
         $addressId = \App\Lib\User\User::getAddressId($miniData);
