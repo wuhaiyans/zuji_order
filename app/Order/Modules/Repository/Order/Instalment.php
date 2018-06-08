@@ -285,19 +285,13 @@ class Instalment {
 	 * ]
 	 * @return String	SUCCESS成功、FAIL失败
 	 */
-	public function paySuccess( array $param){
+	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
 
-			// 查询分期信息
-			$instalmentInfo = OrderGoodsInstalment::queryInfo(['id'=>$param['out_trade_no']]);
+			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['id'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				// 提交事务
-				echo "FAIL";exit;
-			}
-
-			// 分期数据
-			if(!isset($this->status[$param['status']])){
 				echo "FAIL";exit;
 			}
 
@@ -306,7 +300,7 @@ class Instalment {
 				'update_time'   => time(),
 			];
 
-			$b = OrderGoodsInstalment::save(['id'=>$param['out_trade_no']], $data);
+			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['id'=>$param['out_trade_no']], $data);
 			if(!$b){
 				echo "FAIL";exit;
 			}

@@ -261,7 +261,7 @@ class WithholdController extends Controller
             // 代扣接口
             $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
-            $backUrl = config('app.url') . "/order/pay/createpayNotify";
+            $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
             $withholding_data = [
                 'out_trade_no'  => $instalmentInfo['id'], //业务系统业务吗
@@ -466,7 +466,7 @@ class WithholdController extends Controller
                 }
                 // 代扣接口
                 $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                $backUrl = config('app.url') . "/order/pay/createpayNotify";
+                $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
                 $withholding_data = [
                     'out_trade_no'  => $instalmentInfo['id'],   //业务系统业务吗
@@ -642,7 +642,7 @@ class WithholdController extends Controller
                 $withholding_data = [
                     'out_trade_no' => $item['id'], //业务系统业务吗
                     'amount' => $amount,              //交易金额；单位：分
-                    'back_url' => config('app.url') . "/order/pay/createpayNotify",  //后台通知地址
+                    'back_url' => config('app.url') . "/order/pay/withholdCreatePayNotify",  //后台通知地址
                     'name' => $subject,             //交易备注
                     'agreement_no' => $agreementNo,         //支付平台代扣协议号
                     'user_id' => $orderInfo['user_id'],//业务平台用户id
