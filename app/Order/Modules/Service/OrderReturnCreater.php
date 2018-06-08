@@ -277,6 +277,7 @@ class OrderReturnCreater
                     }
                     $goodsDeliveryInfo[$k]=$goodsDelivery[$k]->getData();
                     $goodsDeliveryInfo[$k]['quantity']=$goods_info['quantity'];
+                    $goodsDeliveryInfo[$k]['refund_no']=$params['detail'][$k]['refund_no'];
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                 } else {
                     //更新审核状态为拒绝
@@ -301,6 +302,7 @@ class OrderReturnCreater
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no' => $goodsDeliveryInfo[$k]['goods_no'],
+                        'refund_no'=>$goodsDeliveryInfo[$k]['refund_no'],
                         'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
                         'imei1'     =>$goodsDeliveryInfo[$k]['imei1'],
@@ -879,7 +881,7 @@ class OrderReturnCreater
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
                         //退款：直接支付
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
-                            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                            $create_data['out_payment_no']=$pay_result['withhold_no'];//支付编号
                             $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
                             $create_data['auth_unfreeze_amount']=0;//商品实际支付押金
                             if($goods_info['order_amount']>0){
@@ -889,7 +891,7 @@ class OrderReturnCreater
                         }
                         //退款：代扣+预授权
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerDepositPay){
-                            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                            $create_data['out_payment_no']=$pay_result['withhold_no'];//支付编号
                             $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                             // $create_data['deposit_deduction_status']=OrderCleaningStatus::depositDeductionStatusNoPay;//代扣押金状态
                             $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
@@ -903,7 +905,7 @@ class OrderReturnCreater
                         }
                         //退款：代扣
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
-                            $create_data['out_auth_no']=$pay_result['payment_no'];
+                            $create_data['out_auth_no']=$pay_result['withhold_no'];
                             $create_data['order_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
                             $create_data['auth_unfreeze_amount']=0;//商品实际支付押金
                             if($create_data['order_amount']>0){
