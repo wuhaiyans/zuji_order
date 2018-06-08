@@ -21,6 +21,7 @@ use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
 use App\Order\Modules\Inc\ReletStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -232,7 +233,7 @@ class OrderRelet
                                     'user_id'=>$params['user_id'],//用户代扣协议号
                                 ],
                             ];
-                            if( OrderInstalment::create($fenqiData) ){
+                            if( Instalment::create($fenqiData) ){
                                 //续租完成
                                 // 修改设备表状态续租完成,新建设备周期数据,解锁订单
                                 $reletObj = Relet::getByReletNo($data['relet_no']);
