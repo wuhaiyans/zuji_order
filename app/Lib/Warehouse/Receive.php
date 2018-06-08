@@ -22,6 +22,11 @@ class Receive
      * 创建待收货
      * type 类型: 1：还，2：退，3：换
      *
+     * $goods_info[
+     *      refund_no
+     * ]
+     *
+     *
      */
     public static function create($order_no, $type, $goods_info)
     {

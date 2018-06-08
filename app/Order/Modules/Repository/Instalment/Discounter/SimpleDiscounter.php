@@ -21,7 +21,7 @@ class SimpleDiscounter implements Discounter {
 	 */
 	public function __construct( $discount_amount ){
 		$this->discount_amount = $discount_amount;
-		return $this;
+
 	}
 	
 	/**

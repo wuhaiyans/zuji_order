@@ -338,7 +338,7 @@ class OrderReturnCreater
                         //短信
                         $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_AGREE);
                         $b=$orderNoticeObj->notify();
-                        Log::debug($b?"Order :".$params['order_no']." IS OK":"IS error");
+                        Log::debug($b?"Order :".$order." IS OK":"IS error");
                     }
                 }
                 if($no_list){
@@ -346,7 +346,7 @@ class OrderReturnCreater
                             //短信
                             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_DISAGREE);
                             $b=$orderNoticeObj->notify();
-                            Log::debug($b?"Order :".$params['order_no']." IS OK":"IS error");
+                            Log::debug($b?"Order :".$order." IS OK":"IS error");
                     }
                 }
             }*/
