@@ -75,7 +75,7 @@ class User{
         $data['params'] = [
             'mobile'=>$params['mobile'],
             'realname'=>$params['name'],
-            'zm_face '=>$zm_face,
+            'zm_face'=>$zm_face,
             'cert_no'=>$params['cert_no'],
         ];
         print_r($data);
