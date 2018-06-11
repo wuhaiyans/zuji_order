@@ -671,32 +671,85 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function withholdCreatePayNotify(Request $request){
-		$params     = $request->all();
+	public function withholdCreatePayNotify(){
 
+//		$params     = $request->all();
+
+//		$rules = [
+//			'reason'            => 'required',
+//			'status'            => 'required',
+//			'agreement_no'      => 'required',
+//			'out_agreement_no'  => 'required',
+//			'trade_no'          => 'required',
+//			'out_trade_no'      => 'required',
+//		];
+
+		$params = [
+			'reason'            => 'required',
+			'status'            => 'success',
+			'agreement_no'      => '1234567890',
+			'out_agreement_no'  => '0987654321',
+			'trade_no'          => '000000000',
+			'out_trade_no'      => '889',
+		];
 		$rules = [
 			'reason'            => 'required',
-			'status'            => 'required|int',
+			'status'            => 'required',
 			'agreement_no'      => 'required',
 			'out_agreement_no'  => 'required',
 			'trade_no'          => 'required',
 			'out_trade_no'      => 'required',
 		];
-
 		// 参数过滤
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
-		}
+//		$validateParams = $this->validateParams($rules,$params);
+//		if ($validateParams['code'] != 0) {
+//			return apiResponse([],$validateParams['code']);
+//		}
 
 		// 扣款成功 修改分期状态
-		$params = $params['params'];
+//		$params = $params['params'];
 		\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 	}
 
 
 
+	/**
+	 * 收支明细表
+	 * @requwet Array
+	 * [
+	 * 		'appid'				=> '', // 入账渠道：1生活号'
+	 * 		'business_type'		=> '', // 订单号
+	 *		'channel'			=> '', // 入账方式
+	 * 		'amount'			=> '', // 金额
+	 * 		'create_time'		=> '', // 创建时间
+	 * ]
+	 * @return array
+	 *
+	 */
+	public function payIncomeQuery(Request $request){
+		$request               = $request->all()['params'];
+		$additional['page']    = isset($request['page']) ? $request['page'] : 1;
+		$additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+
+		$params         = filter_array($request, [
+			'appid'            	=> 'required',
+			'business_type'     => 'required',
+			'channel'      		=> 'required',
+			'amount'  			=> 'required',
+			'begin_time'       	=> 'required',
+			'end_time'       	=> 'required',
+		]);
+
+		$list = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
+		
+		if(!is_array($list)){
+			return apiResponse([], ApiStatus::CODE_50000, "程序异常");
+		}
+		return apiResponse($list,ApiStatus::CODE_0,"success");
+
+
+	}
 
 
 

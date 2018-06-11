@@ -29,8 +29,12 @@ class OrderGoodsInstalmentRecordRepository
 
     public static function create($data){
 
-        $info = OrderGoodsInstalmentRecord::create($data);
-        return $info->getQueueableId();
+        $ret = OrderGoodsInstalmentRecord::create($data);
+        if(!$ret){
+            return false;
+        }
+
+
     }
 
 
@@ -42,8 +46,16 @@ class OrderGoodsInstalmentRecordRepository
      */
 
     public static function save($params, $data){
+        if ( empty($params )) {
+            return false;
+        }
+        if ( empty($data )) {
+            return false;
+        }
 
-        return OrderGoodsInstalmentRecord::save($params, $data);
+        $result =  OrderGoodsInstalmentRecord::where($params)->update($data);
+        if (!$result) return false;
+        return true;
     }
 
 
