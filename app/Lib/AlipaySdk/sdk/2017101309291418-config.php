@@ -20,7 +20,7 @@ return array(
     //签名方式
     'sign_type' => "RSA2",
     //异步通知地址
-    'notify_url' => LOCALHOST_URL.'/alipay/Payment/payNotify',
+    'notify_url' => Config::get('constants.LOCALHOST_URL').'alipay/Payment/payNotify',
     
     // 允许的支付方式：(balance：余额；moneyFund：余额宝；pcredit：花呗；pcreditpayInstallment：花呗分期；creditCard：信用卡；debitCardExpress：借记卡快捷)
     'enable_pay_channels' => 'balance,moneyFund,pcredit,pcreditpayInstallment,creditCard,debitCardExpress',

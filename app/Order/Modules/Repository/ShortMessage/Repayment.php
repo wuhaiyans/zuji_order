@@ -5,11 +5,11 @@ namespace App\Order\Modules\Repository\ShortMessage;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * InstalmentWithhold
+ * Repayment
  *
  * @author maxiaoyu
  */
-class InstalmentWithhold implements ShortMessage {
+class Repayment implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -36,22 +36,9 @@ class InstalmentWithhold implements ShortMessage {
             return false;
         }
 
-        // 查询订单
-        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
-        if( !$orderInfo ){
-            return false;
-        }
-
         // 用户信息
         $userInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
         if( !is_array($userInfo )){
-            return false;
-        }
-
-        // 查询商品
-        $orderGoods = New \App\Order\Modules\Service\OrderGoods();
-        $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
-        if(!$goodsInfo){
             return false;
         }
 
@@ -63,14 +50,10 @@ class InstalmentWithhold implements ShortMessage {
 
         // 短信参数
         $dataSms =[
-            'mobile'        => $userInfo['mobile'],
-            'orderNo'       => $orderInfo['order_no'],
             'realName'      => $userInfo['realname'],
-            'goodsName'     => $goodsInfo['goods_name'],
-            'zuJin'         => $instalmentInfo['amount'],
         ];
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($dataSms['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
     }
 

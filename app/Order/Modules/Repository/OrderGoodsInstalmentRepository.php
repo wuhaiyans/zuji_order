@@ -55,7 +55,7 @@ class OrderGoodsInstalmentRepository
 
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zujin            = $this->componnet['sku']['zujin'];
-        $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
+        $this->yiwaixian        = $this->componnet['sku']['insurance'];
         $this->payment_type_id  = $this->componnet['sku']['pay_type'];
         $this->goods_discount_price     = !empty($this->componnet['sku']['discount_amount']) ? $this->componnet['sku']['discount_amount'] : 0;
 
@@ -180,6 +180,11 @@ class OrderGoodsInstalmentRepository
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+        }
+
+        // 根据还款类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_goods_instalment.pay_type', '=', $param['pay_type']];
         }
 
         //根据分期日期

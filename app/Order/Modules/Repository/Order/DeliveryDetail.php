@@ -10,6 +10,7 @@ namespace App\Order\Modules\Repository\Order;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Repository\OrderRepository;
 
 /**
  * 发货明细
@@ -71,9 +72,62 @@ class DeliveryDetail {
 	        return false;
         }
         $this->model->status=1;
-	    $this->model->save();
+	    return $this->model->save();
 
     }
+
+    /**
+     * 增加发货时 生成合同
+     * @param $orderNo 订单编号
+     * @param $goodsInfo 发货时商品信息
+     * @return bool
+     */
+
+    public static function addDeliveryContract(string $orderNo,array $goodsInfo):bool{
+        $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
+        $data =[
+            'order_no'=>$orderNo,
+            'user_id'=>$orderInfo['user_id'],
+            'email'=>'',
+            'name'=>$orderInfo['realname'],
+            'id_cards'=>$orderInfo['cret_no'],
+            'mobile'=>$orderInfo['mobile'],
+            'address'=>$orderInfo['address_info'],
+            'delivery_time'=>time(),
+        ];
+
+        $goods = OrderRepository::getGoodsListByOrderId($orderNo);
+        foreach ($goods as $k=>$v){
+            $specs =json_decode($v['specs'],true);
+
+            foreach ($goodsInfo as $key=>$value){
+                $imei ="";
+                if(in_array($v['goods_no'],$value)){
+                    $imei = $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
+                }
+            }
+            $goodsData=[
+                'spu_id'=>$v['prod_id'],
+                'goods_no'=>$v['goods_no'],
+                'chengse'=>$specs[1]['value'],
+                'machine_no'=>$v['machine_value'],
+                'imei'=>$imei,
+                'zuqi'=>$v['zuqi'],
+                'zujin'=>$v['amount_after_discount']+$v['yajin'],
+                'mianyajin'=>$v['goods_yajin']-$v['yajin'],
+                'yiwaixian'=>$v['insurance'],
+                'market_price'=>$v['market_price'],
+            ];
+            $contractData =array_merge($data,$goodsData);
+            $b =Contract::createContract($contractData);
+            if(!$b){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     /**
      * 生成订单发货单
      * @param array $deliveryData

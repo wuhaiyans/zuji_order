@@ -8,7 +8,6 @@ require_once __DIR__ . '/aop/request/AlipayOpenPublicMessageSingleSendRequest.ph
 
 class MessageSingleSend extends BaseApi {
 
-    private $error = '';
 
     public function __construct($appid) {
         parent::__construct($appid);

@@ -9,7 +9,7 @@ namespace App\Lib\Order;
 use App\Lib\Curl;
 use App\Lib\ApiStatus;
 
-    class OrderInfo {
+class OrderInfo {
 
         /**
          * 获取订单详情
@@ -30,7 +30,6 @@ use App\Lib\ApiStatus;
                 ];
                 $baseUrl = config("tripartite.API_INNER_URL");
                 $info = Curl::post($baseUrl, $data);
-                var_dump($info);
                 return $info;
 //                return apiResponse($info,ApiStatus::CODE_0);
 
@@ -38,25 +37,35 @@ use App\Lib\ApiStatus;
             return false;
 
 //            return apiResponse([],ApiStatus::CODE_10104);
-
      }
-        /**
-         * @param array 数组    array('order_no'=>'12312313','goods_no'=>"23123123")
-         * 整单退款时 array('order_no'=>'12312313','goods_no'=>"")
-         * 单个商品退款时array('order_no'=>'12312313','goods_no'=>"23123123")
-         * 退款成功更新状态
-         */
-        public function updateStatus($params){
-            $base_api = config('tripartitle.API_INNER_URL');
+    /**
+     * 退款成功回调通知
+     * 'order_no'      =>''//订单编号
+     *'business_type' => '',	// 业务类型
+     *
+     * 'business_no'	=> '',	// 业务编码
+     *
+     * 'status'		=> '',	// 支付状态  processing：处理中；success：支付完成
 
+     */
+     public function updateStatus($params){
+         try{
+            $base_api = config('tripartitle.API_INNER_URL');
             $response = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
-                'method'=> 'api.Return.updateStatus',//模拟
+                'method'=> 'api.Return.refundUpdate',//模拟
                 'data' => json_encode(['params'=>$params])
             ]);
-
-            return $response;
+            $res = json_decode($response);
+            if ($res->code != 0) {
+                return false;
+            }
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                return false;
+            }
+            return true;
         }
 
 

@@ -54,7 +54,7 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
-        $coupon		= $params['params']['coupon'];
+        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
         $userId		= $params['params']['user_id'];
 
         //判断参数是否设置
@@ -102,7 +102,9 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
-        $coupon		= $params['params']['coupon'];
+
+        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
+
         $userId		= $params['params']['user_id'];
         $addressId		= $params['params']['address_id'];
 
@@ -261,7 +263,7 @@ class OrderController extends Controller
 //            return apiResponse($orderData['data'],ApiStatus::CODE_0);
         } else {
 
-            return apiResponse([],ApiStatus::CODE_33001);
+            return apiResponse([],ApiStatus::CODE_34007);
         }
 
     }

@@ -49,6 +49,7 @@ class Config {
 				SceneConfig::WITHHOLD_FAIL 			=> 'hsb_sms_99a6f', //扣款失败
 				SceneConfig::WITHHOLD_WARMED	 	=> 'hsb_sms_16f75', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		=> 'hsb_sms_7326b', //扣款失败生成逾期
+				SceneConfig::REPAYMENT 				=> 'SMS_113461067', //提前还款短信
 
 
 			],

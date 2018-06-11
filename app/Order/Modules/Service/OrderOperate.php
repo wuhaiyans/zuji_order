@@ -6,6 +6,7 @@
  */
 namespace App\Order\Modules\Service;
 use App\Lib\Common\LogApi;
+use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
@@ -81,6 +82,12 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                //增加发货时生成合同
+                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+                if(!$b) {
                     DB::rollBack();
                     return false;
                 }
@@ -358,6 +365,16 @@ class OrderOperate
 
                 //分期关闭
                 //查询分期
+                //分期关闭
+                //查询分期
+                $isInstalment   =   OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderNo]);
+                if ($isInstalment) {
+                    $success =  Instalment::close(['order_no'=>$orderNo]);
+                    if (!$success) {
+                        DB::rollBack();
+                        return ApiStatus::CODE_31004;
+                    }
+                }
                 $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
                 if (!$success) {
                     DB::rollBack();

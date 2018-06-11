@@ -22,7 +22,7 @@ class Contract{
         if(!$orderNo){
             return false;
         }
-        $info = Curl::post(config('Contract_Order_NO_Url'), json_encode(['order_no'=>$orderNo]));
+        $info = Curl::post(config('tripartite.Contract_Order_NO_Url'), json_encode(['order_no'=>$orderNo]));
         if(!$info){
             return false;
         }
@@ -45,7 +45,7 @@ class Contract{
         if(!$orderNo || !$goodsNo){
             return false;
         }
-        $info = Curl::post(config('Contract_Goods_NO_Url'), json_encode(['order_no'=>$orderNo,'goods_no'=>$goodsNo]));
+        $info = Curl::post(config('tripartite.Contract_Goods_NO_Url'), json_encode(['order_no'=>$orderNo,'goods_no'=>$goodsNo]));
         if(!$info){
             return false;
         }
@@ -70,6 +70,7 @@ class Contract{
      * imei' =>''  //【必须】IMEI号
      * zuqi' =>''  //【必须】租期
      * 'zujin' =>''  //【必须】租金
+     * 'market_price'=>''//【必须】市场价
      * 'mianyajin' =>''  //【必须】免押金
      * 'yiwaixian' =>''  //【必须】意外险
      * 'user_id' =>''  //【必须】会员id
@@ -105,7 +106,7 @@ class Contract{
         if ($validator->fails()) {
             return false;
         }
-        $info = Curl::post(config('Contract_Create_Url'), json_encode($params));
+        $info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
         if(!$info){
             return false;
         }

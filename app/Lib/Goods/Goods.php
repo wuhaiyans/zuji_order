@@ -27,7 +27,18 @@ class Goods  extends \App\Lib\BaseApi{
 		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
 
 	}
-	
+
+    /**
+     * 获取商品信息
+     * @param int $spuId
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+    public static function getSpuInfo( int $spuId ){
+        return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spu.get', '1.0', ['id'=>$spuId]);
+
+    }
+
     /**
      * 获取商品信息
      * @param $data 配置参数

@@ -60,7 +60,24 @@ class Risk{
     }
 
 
-
+    /**
+     * 将小程序风控数据传入风控系统
+     * @return int
+     */
+    public static function setMiniRisk($arr){
+        $data=config('tripartite.Interior_Fengkong_Request_data');
+        $data['method'] ='zhima.mini.zhima';
+        $data['params'] = $arr;
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
+        $info =json_decode($info,true);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return false;
+        }
+        return true;
+    }
 
 }
 

@@ -22,6 +22,8 @@ class DepositComponnet implements OrderCreater
 
     private $schema;
 
+    private $miniCreditAmount;
+
     //是否满足押金减免条件
     private $deposit = true;
 
@@ -29,11 +31,12 @@ class DepositComponnet implements OrderCreater
 
     private $flag = true;
 
-    public function __construct(OrderCreater $componnet,int $payType,$certifiedFlag=true)
+    public function __construct(OrderCreater $componnet,int $payType,$certifiedFlag=true,$miniCreditAmount = 0)
     {
         $this->componnet = $componnet;
         $this->payType =$payType;
         $this->certifiedFlag =$certifiedFlag;
+        $this->miniCreditAmount =$miniCreditAmount;
 
     }
     /**
@@ -71,31 +74,37 @@ class DepositComponnet implements OrderCreater
         if($this->schema['user']['risk']==0){
             $this->deposit = false;
         }
-        //未通过信用分
-        if($this->schema['user']['score'] <config("tripartite.Fengkong_Score")){
-            $this->deposit = false;
+        if( $this->payType != \App\Order\Modules\Inc\PayInc::MiniAlipay){
+            //未通过信用分
+            if($this->schema['user']['score'] <config("tripartite.Fengkong_Score")){
+                $this->deposit = false;
+            }
         }
+
         
         if($this->deposit && $this->payType >0){
             //支付押金规则
             foreach ($this->schema['sku'] as $k=>$v)
             {
-                $deposit =Goods\Deposit::getDeposit([
-                    'spu_id'=>$v['spu_id'],
-                    'pay_type'=>$this->payType,
-                    'credit'=>$this->schema['user']['credit']?$this->schema['user']['credit']:0,
-                    'age'=>$this->schema['user']['age']?$this->schema['user']['age']:0,
-                    'yajin'=>$v['yajin']*100,
+                if( $this->payType == \App\Order\Modules\Inc\PayInc::MiniAlipay) {//小程序入口
+                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
+                }else{//其他入口
+                    $deposit = Goods\Deposit::getDeposit([
+                        'spu_id' => $v['spu_id'],
+                        'pay_type' => $this->payType,
+                        'credit' => $this->schema['user']['credit'] ? $this->schema['user']['credit'] : 0,
+                        'age' => $this->schema['user']['age'] ? $this->schema['user']['age'] : 0,
+                        'yajin' => $v['yajin'] * 100,
 
-                ]);
-                if(!is_array($deposit)){
-                    $this->getOrderCreater()->setError('商品押金接口错误');
-                    $this->flag = false;
+                    ]);
+                    if (!is_array($deposit)) {
+                        $this->getOrderCreater()->setError('商品押金接口错误');
+                        $this->flag = false;
+                    }
+                    $jianmian = priceFormat($deposit['jianmian'] / 100);
+                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
-                $jianmian = priceFormat($deposit['jianmian']/100);
-                $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian,$v['yajin'],$v['mianyajin'],$v['sku_id']);
             }
-
         }
         return $this->flag && $filter;
     }

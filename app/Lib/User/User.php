@@ -72,10 +72,16 @@ class User{
         }else{
             $zm_face = 0;
         }
+        if($params['zm_risk'] == 'Y'){
+            $zm_risk = 1;
+        }else{
+            $zm_risk = 0;
+        }
         $data['params'] = [
             'mobile'=>$params['mobile'],
             'realname'=>$params['name'],
             'zm_face'=>$zm_face,
+            'zm_risk'=>$zm_risk,
             'cert_no'=>$params['cert_no'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
@@ -107,6 +113,28 @@ class User{
         }
         if($info['code']!=0){
             return $info['code'];
+        }
+        return $info['data'];
+    }
+
+
+
+    /**
+     * 检验获取用户token信息
+     * Author: heaven
+     * @param $token
+     * @return bool|mixed
+     */
+    public static function checkToken($token){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.login.user.info.get';
+        $data['params'] = [
+            'token'=>$token,
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        if(!is_array($info)  || $info['code']!=0){
+            return false;
         }
         return $info['data'];
     }
