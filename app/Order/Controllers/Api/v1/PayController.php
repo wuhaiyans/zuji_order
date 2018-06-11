@@ -18,81 +18,81 @@ class PayController extends Controller
     {
     }
 	
-	// 测试 代扣签约
-	public function testWithholdSign(){
-		
-		$business_type = 1; 
-		$business_no = 'FA52123851726694';
-		try {
-			// 查询
-			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
-			
-			$step = $pay->getCurrentStep();
-			// echo '当前阶段：'.$step."\n";
-			
-			$_params = [
-				'name'			=> '测试-'.$step,					//【必选】string 交易名称
-				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSignFront',	//【必选】string 前端回跳地址
-			];
-			$url_info = $pay->getCurrentUrl( $_params );
-//			var_dump( $_params, $url_info );exit;
-			header( 'Location: '.$url_info['url'] );
-
-		} catch (\App\Lib\NotFoundException $exc) {
-			echo $exc->getMessage();
-		} catch (\Exception $exc) {
-			echo $exc->getTraceAsString();
-		}
-	}
-		// 测试 前端回跳
-	public function testWithholdSignFront(){
-		LogApi::info('代扣签约同步通知', $_GET);
-		var_dump( $_GET );exit;
-	}
-	
-	// 测试 代扣解约
-	public function testWithholdUnsign(){
-
-		$user_id = '';
-		
-		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
-    		'user_id'		=> '5', //租机平台用户ID
-    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
-    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
-    		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
-		]);
-		
-		var_dump( $info );exit;
-	}
-		
-	/**
-	 * 
-	 * @param array $_POST
-	 * [
-	 *		'refund_no'		=> '',	//【必选】string 支付系统退款编号
-	 *		'out_refund_no'	=> '',	//【必选】string 业务系统退款编号
-	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：退款成功；failed：退款失败
-	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
-	 *		'reason'		=> '',	//【必选】stirng 失败原因
-	 * ]
-	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
-	 */
-	public function refundNotify()
-	{
-		$input = file_get_contents("php://input");
-		LogApi::info('退款异步通知', $input);
-		
-		$params = json_decode($input,true);
-		if( is_null($params) ){
-			echo 'notice data is null ';exit;
-		}
-		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
-		}
-		
-		
-	}
-	
+//	// 测试 代扣签约
+//	public function testWithholdSign(){
+//		
+//		$business_type = 1; 
+//		$business_no = 'FA52123851726694';
+//		try {
+//			// 查询
+//			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
+//			
+//			$step = $pay->getCurrentStep();
+//			// echo '当前阶段：'.$step."\n";
+//			
+//			$_params = [
+//				'name'			=> '测试-'.$step,					//【必选】string 交易名称
+//				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSignFront',	//【必选】string 前端回跳地址
+//			];
+//			$url_info = $pay->getCurrentUrl( $_params );
+////			var_dump( $_params, $url_info );exit;
+//			header( 'Location: '.$url_info['url'] );
+//
+//		} catch (\App\Lib\NotFoundException $exc) {
+//			echo $exc->getMessage();
+//		} catch (\Exception $exc) {
+//			echo $exc->getTraceAsString();
+//		}
+//	}
+//		// 测试 前端回跳
+//	public function testWithholdSignFront(){
+//		LogApi::info('代扣签约同步通知', $_GET);
+//		var_dump( $_GET );exit;
+//	}
+//	
+//	// 测试 代扣解约
+//	public function testWithholdUnsign(){
+//
+//		$user_id = '';
+//		
+//		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
+//    		'user_id'		=> '5', //租机平台用户ID
+//    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
+//    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
+//    		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
+//		]);
+//		
+//		var_dump( $info );exit;
+//	}
+//		
+//	/**
+//	 * 
+//	 * @param array $_POST
+//	 * [
+//	 *		'refund_no'		=> '',	//【必选】string 支付系统退款编号
+//	 *		'out_refund_no'	=> '',	//【必选】string 业务系统退款编号
+//	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：退款成功；failed：退款失败
+//	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
+//	 *		'reason'		=> '',	//【必选】stirng 失败原因
+//	 * ]
+//	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
+//	 */
+//	public function refundNotify()
+//	{
+//		$input = file_get_contents("php://input");
+//		LogApi::info('退款异步通知', $input);
+//		
+//		$params = json_decode($input,true);
+//		if( is_null($params) ){
+//			echo 'notice data is null ';exit;
+//		}
+//		if( !is_array($params) ){
+//			echo 'notice data not array ';exit;
+//		}
+//		
+//		
+//	}
+//	
 	
 	/**
 	 * 支付异步通知处理
