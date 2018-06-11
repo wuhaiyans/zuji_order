@@ -57,43 +57,43 @@ class OrderOperateInc
             'adminActBtn'=>array(
                 //待支付
                 Inc\OrderStatus::OrderWaitPaying => [
-                    'return_visit_btn'   => '回访',
+                   '回访',
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
-                    'return_visit_btn'   => '回访',
+                    '回访',
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
-                    'return_visit_btn'   => '回访',
-                    'cancel_btn'   => '取消订单',
-                    'confirm_btn'   => '确认订单',
-                    'modify_address_btn' => '修改收货信息',
+                     '回访',
+                    '取消订单',
+                     '确认订单',
+                   '修改收货信息',
 
                 ],
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
-                    'return_visit_btn'   => '回访',
+                   '回访',
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
-                    'return_visit_btn'   => '回访',
+                    '回访',
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
-                    'return_visit_btn'   => '回访',
+                   '回访',
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
-                    'return_visit_btn'   => '回访',
+                   '回访',
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
-                    'return_visit_btn'   => '回访',
+                    '回访',
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
-                    'return_visit_btn'   => '回访',
+                    '回访',
                 ],
             )
 
