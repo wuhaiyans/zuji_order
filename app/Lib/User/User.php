@@ -116,6 +116,28 @@ class User{
         }
         return $info['data'];
     }
+
+
+
+    /**
+     * 检验获取用户token信息
+     * Author: heaven
+     * @param $token
+     * @return bool|mixed
+     */
+    public static function checkToken($token){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.login.user.info.get';
+        $data['params'] = [
+            'token'=>$token,
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        if(!is_array($info)  || $info['code']!=0){
+            return false;
+        }
+        return $info['data'];
+    }
 }
 
 

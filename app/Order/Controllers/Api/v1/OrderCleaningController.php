@@ -273,15 +273,8 @@ class OrderCleaningController extends Controller
      */
     public function orderCleanOperate(Request $request)
     {
-
         try {
-
-
-//            $this->testPay();
-//            exit;
-
             $params = $request->all();
-
             $rules = [
                 'clean_no'=> 'required'
             ];
