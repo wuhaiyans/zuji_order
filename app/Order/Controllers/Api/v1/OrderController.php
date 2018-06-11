@@ -579,7 +579,6 @@ class OrderController extends Controller
 
         $params = $request->all();
         $rule = [
-            'order_address_id' => 'required',
             'order_no'=> 'required',
             'mobile'  => 'required',
             'name'=> 'required',

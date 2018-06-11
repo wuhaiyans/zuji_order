@@ -36,7 +36,7 @@ class OrderUserAddressRepository
      */
     public static function modifyAddress($params){
         if (isset($params['mobile'])) {
-            $data['mobile']    =   $params['mobile'];
+            $data['consignee_mobile']    =   $params['mobile'];
         }
 
         if (isset($params['name'])) {

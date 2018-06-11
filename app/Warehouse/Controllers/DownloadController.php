@@ -8,8 +8,10 @@
 namespace App\Warehouse\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Repository\ImeiRepository;
+use App\Warehouse\Modules\Service\DeliveryService;
 use App\Warehouse\Modules\Service\ImeiService;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +53,42 @@ class DownloadController extends Controller
         }
 
         return \App\Lib\Excel::write($data, $headers,'imei数据导出');
+    }
+
+
+    /**
+     * 待发货导出
+     */
+    public function deliverys()
+    {
+        $delivery = new DeliveryService();
+        $params = request()->input();
+        $items = $delivery->export($params);
+
+        if (!$items) {
+            return false;
+        }
+
+        $headers = ['订单号','客户名','手机号', '地址','物流单号','商品名','价格','状态'];
+
+        $data = [];
+        foreach ($items as $l) {
+            if (!isset($l['goods']) || !$l['goods']) continue;
+            foreach ($l['goods'] as $g) {
+                $data[] = [
+                    $l['order_no'],
+                    $l['customer'],
+                    $l['customer_mobile'],
+                    $l['customer_address'],
+                    $l['logistics_no'],
+                    $g['goods_name'],
+                    isset($g['price']) ? $g['price'] : 0.00,
+                    Delivery::sta($l['status']),
+                ];
+            }
+        }
+
+        return \App\Lib\Excel::write($data, $headers,'待发货商品导出');
     }
 
 

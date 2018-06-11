@@ -35,6 +35,9 @@ return [
     'warehouse.delivery.list' => 'DeliveryController@list', //列表
     'warehouse.delivery.refuse' => 'DeliveryController@refuse', //拒签   待完成
     'warehouse.delivery.publics' => 'DeliveryController@publics', //发货公用参数
+    'warehouse.delivery.export' => 'DeliveryController@export', //导出excel
+
+
 
 
 

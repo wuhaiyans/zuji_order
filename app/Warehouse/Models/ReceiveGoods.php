@@ -21,7 +21,7 @@ class ReceiveGoods extends Warehouse
     const STATUS_PART_RECEIVE = 2;//部分收货完成
     const STATUS_ALL_RECEIVE = 3;//全部收货完成
     const STATUS_PART_CHECK = 4;//部分检测完成
-    const STATUS_ALL_CHECK = 4;//全部检测完成
+    const STATUS_ALL_CHECK = 5;//全部检测完成
 
 
     /**
