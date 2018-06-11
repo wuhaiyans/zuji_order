@@ -200,8 +200,9 @@ class WithholdController extends Controller
 
         // 保存 备注，更新状态
         $data = [
-            'remark' => $remark,
-            'status' => OrderInstalmentStatus::PAYING,// 扣款中
+            'remark'        => $remark,
+            'payment_time'  => time(),
+            'status'        => OrderInstalmentStatus::PAYING,// 扣款中
         ];
         $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
         if(!$result){
@@ -329,7 +330,7 @@ class WithholdController extends Controller
             $notice->notify();
 
             // 发送支付宝消息通知
-//            $notice->alipay_notify();
+            $notice->alipay_notify();
 
         }
         // 提交事务
