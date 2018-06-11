@@ -72,7 +72,6 @@ class Contract{
      * 'zujin' =>''  //【必须】租金
      * 'mianyajin' =>''  //【必须】免押金
      * 'yiwaixian' =>''  //【必须】意外险
-     * 'email' =>''  //【可选】邮箱地址
      * 'user_id' =>''  //【必须】会员id
      * 'name' =>''  //【必须】姓名
      * 'id_cards'=>'' //【必须】身份证号
