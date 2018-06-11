@@ -211,32 +211,6 @@ class OrderRepository
         return $orderGoodsDeliveryData->toArray();
     }
     /**
-     *
-     * 查询订单是否可以支付
-     *return boolean
-     */
-    public static function isPay($orderNo,$userId)
-    {
-        if (empty($orderNo)) return false;
-        $orderData = Order::query()->where([
-            ['user_id', '=', $userId],
-            ['order_no', '=', $orderNo],
-        ])->first()->toArray();
-        if(empty($orderData)){
-            return false;
-        }
-        if($orderData['order_status']!= OrderStatus::OrderWaitPaying || $orderData['pay_time'] >0){
-            return false;
-        }
-        if(($orderData['order_amount']+$orderData['order_yajin'])<=0){
-            return false;
-        }
-        return true;
-
-    }
-
-
-    /**
      * 查询未完成的订单
      * heaven
      * @param $userId 用户id
