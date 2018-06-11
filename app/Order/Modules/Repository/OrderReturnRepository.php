@@ -79,7 +79,24 @@ class OrderReturnRepository
         }
         return [];
     }
-
+    /**
+     * 导出 查询退货、退款列表
+     * @param $where
+     * @param $additional
+     * @return array
+     *
+     */
+    public static function getReturnList($where){
+        $parcels = DB::table('order_return')
+            ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
+            ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
+            ->where($where)
+            ->select('order_return.create_time as c_time','order_return.*','order_info.*','order_goods.goods_name','order_goods.zuqi')->get();
+        if($parcels){
+            return $parcels->toArray();
+        }
+        return [];
+    }
     /**
      * 获取订单支付编号信息
      * @param $business_type
