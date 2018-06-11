@@ -263,6 +263,27 @@ class MiniOrderController extends Controller
      * ]
      */
     public function miniOrderCancel(Request $request){
+        //测试消息通知接口 请求
+//        $alipayUserId = $userInfo['alipay_user_id'];
+        //通过用户id查询支付宝用户id
+        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord('2088122107771765');
+//        //查询账单
+//        $year = substr($instalmentInfo['term'], 0, 4);
+//        $month = substr($instalmentInfo['term'], -2);
+//        $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
+//        $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
+//        $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
+        $messageArr = [
+            'amount' => '0.00',
+            'bill_type' => '租金',
+            'bill_time' => '今日',
+            'pay_time' => date('Y-m-d H:i:s'),
+        ];
+        $b = $MessageSingleSendWord->PaySuccess($messageArr);
+        if ($b === false) {
+            \App\Lib\Common\LogApi::error("发送消息通知错误-" . $MessageSingleSendWord->getError());
+        }
+        die;
         $params = $request->all();
         $rules = [
             'order_no'  => 'required',
