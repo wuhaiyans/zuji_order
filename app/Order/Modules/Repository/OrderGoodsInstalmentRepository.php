@@ -182,6 +182,11 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
+        // 根据还款类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_goods_instalment.pay_type', '=', $param['pay_type']];
+        }
+
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];

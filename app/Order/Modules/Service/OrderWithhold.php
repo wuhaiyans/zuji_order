@@ -240,7 +240,7 @@ class OrderWithhold
         ];
 
         // 修改分期状态
-        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_trade_no']],$data);
+        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_no']],$data);
         if(!$result){
             DB::rollBack();
             echo "FAIL";exit;
@@ -267,11 +267,11 @@ class OrderWithhold
         $IncomeData = [
             'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
             'order_no'      => $instalmentInfo['order_no'],
-            'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+            'business_type' => OrderStatus::BUSINESS_FENQI,
+            'business_no'   => $instalmentInfo['id'],
             'appid'         => 1,
             'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-            'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
-            'account'       => "",
+            'out_trade_no'  => $params["payment_no"],
             'amount'        => $instalmentInfo['payment_amount'],
             'create_time'   => time(),
         ];
