@@ -37,35 +37,12 @@ class TestCreate extends Command
      */
     public function handle()
     {
-        try {
-            $limit = 10;
-            $page = 111;
-            do {
-                DB::beginTransaction();
+        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
+        var_dump($datas01);
 
-                $list = self::list($limit, $page);
-                $items = $list->items();
-                $totalpage = $list->lastPage();
-
-                foreach ($items as $item) {
-                    if (!$item->cert_no || !$item->realname) continue;
-
-                    $params = [
-                        'certNo' => $item->cert_no,
-                        'name' => $item->realname,
-                        'mobile' => $item->mobile
-                    ];
-
-                    $result = Kn::kinfo($params);
-                    $item->intro = json_encode($result);
-                    $item->update();
-                }
-                $page++;
-                Log::info($page);
-                DB::commit();
-            } while ($page <= $totalpage);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-        }
+    }
+    public static function list($limit, $page=1)
+    {
+        return KnightInfo::paginate($limit, ['*'], 'page', $page);
     }
 }

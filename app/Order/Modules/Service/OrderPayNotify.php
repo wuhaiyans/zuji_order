@@ -9,6 +9,7 @@
 namespace App\Order\Modules\Service;
 
 
+use App\Common\JobQueueApi;
 use App\Http\Requests\Request;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
@@ -51,6 +52,8 @@ class OrderPayNotify
             LogApi::notify("订单支付失败", $orderNo);
             return false;
         }
+
+        $b =\App\Lib\Common\JobQueueApi::cancel(config('app.env')."OrderCancel_".$orderNo);
         if($status =="success"){
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
