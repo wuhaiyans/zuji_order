@@ -358,6 +358,16 @@ class OrderOperate
 
                 //分期关闭
                 //查询分期
+                //分期关闭
+                //查询分期
+                $isInstalment   =   OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderNo]);
+                if ($isInstalment) {
+                    $success =  Instalment::close(['order_no'=>$orderNo]);
+                    if (!$success) {
+                        DB::rollBack();
+                        return ApiStatus::CODE_31004;
+                    }
+                }
                 $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
                 if (!$success) {
                     DB::rollBack();

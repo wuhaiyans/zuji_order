@@ -15,6 +15,7 @@ use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\MiniOrderRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
@@ -140,6 +141,7 @@ class OrderCleaning
 
 
     }
+
 
 
 
@@ -303,6 +305,8 @@ class OrderCleaning
                 'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
             ];
 
+            //查询分期有没有代扣并且扣款成功的记录
+            OrderGoodsInstalmentRepository::queryCount();
            $succss =  miniApi::OrderClose($params);
            LogApi::info('支付小程序解冻押金', [$succss,  $params]);
 
@@ -310,6 +314,14 @@ class OrderCleaning
 
 
         return true;
+
+    }
+
+
+    public static function miniNotify($param)
+    {
+        //验证小程序数据接口
+
 
     }
 
