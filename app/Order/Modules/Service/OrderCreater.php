@@ -226,7 +226,7 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
-            //发送取消订单队列
+            //发送取消订单队列（小程序取消订单队列）
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
                 'order_no'=>$data['order_no'],
