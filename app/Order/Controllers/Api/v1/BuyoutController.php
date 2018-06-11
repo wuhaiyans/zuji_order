@@ -114,48 +114,7 @@ class BuyoutController extends Controller
 
         return apiResponse($orderList,ApiStatus::CODE_0);
     }
-    /*
-     * 订单买断列表
-     * @param array $params 【必选】
-     * [
-     *      "id"=>"",买断单id
-     * ]
-     * @return json
-     */
-    /*public function getBuyoutList(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $where = [];
-        if(isset($params['keywords'])){
-            if($params['kw_type'] == 1){
-                $where['order_no'] = $params['keywords'];
-            }
-            elseif($params['kw_type'] == 2){
-                $where['goods_name'] = $params['keywords'];
-            }
-            elseif($params['kw_type'] == 3){
-                $where['user_mobile'] = $params['keywords'];
-            }
-            else{
-                $where['order_no'] = $params['keywords'];
-            }
-        }
-        if(isset($params['begin_time'])||isset($params['end_time'])){
-            $where['begin_time'] = $params['begin_time'];
-            $where['end_time'] = $params['end_time'];
-        }
-        if(isset($params['status'])){
-            $where['status'] = $params['status'];
-        }
-        if(isset($params['appid'])){
-            $where['appid'] = $params['appid'];
-        }
-        $sumCount = OrderBuyout::getCount($where);
-        $where['page'] = $params['page']>0?$params['page']-1:0;
-        $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
-        $orderList = OrderBuyout::getList($where);
-        return apiResponse($orderList,ApiStatus::CODE_0);
-    }*/
+
     /*
      * 用户买断
      * @param array $params 【必选】

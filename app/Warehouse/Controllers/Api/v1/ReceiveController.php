@@ -73,12 +73,12 @@ class ReceiveController extends Controller
         }
 
         try {
-            $this->receive->create($params);
+            $receiveNo = $this->receive->create($params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
-        return apiResponse([]);
+        return apiResponse(['receive_no'=>$receiveNo]);
     }
 
     /**
@@ -141,10 +141,9 @@ class ReceiveController extends Controller
          * logistics_no 物流编号
          */
         $rules = [
-            'order_no'  => 'required',
+            'receive_no'  => 'required',
             'logistics_id' => 'required',//物流渠道
             'logistics_no' => 'required',
-            'goods_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -315,14 +314,22 @@ class ReceiveController extends Controller
 
         try {
             $receive = $this->receive->finishCheck($params['receive_no']);
-            $imeis = $receive->imeis;
 
+            $goods = $receive->goods;
+            $goods_info = [];
 
-            foreach ($imeis as $imei) {
-                Imei::in($imei->imei);
+            foreach ($goods as $g) {
+                $goods_info[] = [
+                    'goods_no' => $g->goods_no,
+                    'refund_no' => $g->refund_no,
+                    'check_result' => $g->check_result == 1 ? 'success' : 'false',
+                    'check_description' => $g->check_description,
+                    'evaluation_time' => $g->check_time,
+                    'price' => $g->check_price
+                ];
             }
 
-//            \App\Lib\Order\Receive::checkResult($receive->order_no, $imeis->toArray());
+            \App\Lib\Order\Receive::checkResult($receive->order_no, $receive->type,$goods_info);
 
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());

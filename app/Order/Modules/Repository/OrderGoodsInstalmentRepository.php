@@ -55,7 +55,7 @@ class OrderGoodsInstalmentRepository
 
         $this->zuqi             = $this->componnet['sku']['zuqi'];
         $this->zujin            = $this->componnet['sku']['zujin'];
-        $this->yiwaixian        = $this->componnet['sku']['yiwaixian'];
+        $this->yiwaixian        = $this->componnet['sku']['insurance'];
         $this->payment_type_id  = $this->componnet['sku']['pay_type'];
         $this->goods_discount_price     = !empty($this->componnet['sku']['discount_amount']) ? $this->componnet['sku']['discount_amount'] : 0;
 
@@ -182,6 +182,11 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
         }
 
+        // 根据还款类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_goods_instalment.pay_type', '=', $param['pay_type']];
+        }
+
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
@@ -265,7 +270,6 @@ class OrderGoodsInstalmentRepository
         if(isset($data['user_id'])){
             $where[] = ['user_id', '=', $data['user_id']];
         }
-
         $status = ['status'=>OrderInstalmentStatus::CANCEL];
         $result =  OrderGoodsInstalment::where($where)->update($status);
         if (!$result) return false;

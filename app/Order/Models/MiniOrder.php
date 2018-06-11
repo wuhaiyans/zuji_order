@@ -31,6 +31,7 @@ class MiniOrder extends Model
     protected $fillable = [
         'order_no',
         'zm_order_no',
+        'name',
         'transaction_id',
         'cert_no',
         'mobile',

@@ -101,7 +101,6 @@ class OrderCreater
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
-            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -129,6 +128,7 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
+            var_dump($schemaData);
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
@@ -180,7 +180,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -191,17 +191,21 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
-
+            $b = $orderCreater->filter();
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
             $schemaData = $orderCreater->getDataSchema();
-            echo 11;
             $b = $orderCreater->create();
-            echo '456';die;
-            //var_dump($schemaData);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
@@ -220,8 +224,8 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
             // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
             //发送取消订单队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
@@ -339,7 +343,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -350,8 +354,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);

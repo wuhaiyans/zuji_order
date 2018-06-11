@@ -112,10 +112,14 @@ class JobQueueApi {
 		}
 		return false;
 	}
-	
-	public static function disable( string $key):bool{
+	/**
+	 * 取消任务
+	 * @param string $key
+	 * @return bool
+	 */
+	public static function cancel( string $key):bool{
 		$_config = [
-			'interface' => 'jobDisable',
+			'interface' => 'jobDelAsync',
 			'auth' => env('JOB_AUTH'),
 			'name' => $key,
 		];
@@ -133,4 +137,30 @@ class JobQueueApi {
 		}
 		return true;
 	}
+	
+	/**
+	 * （使用cancel）
+	 * @param string $key
+	 * @return bool
+	 */
+//	public static function disable( string $key):bool{
+//		$_config = [
+//			'interface' => 'jobDisable',
+//			'auth' => env('JOB_AUTH'),
+//			'name' => $key,
+//		];
+//		// 请求
+//		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
+//		if( !$res ){
+//			return false;
+//		}
+//		$res = json_decode($res,true);
+//		if( !$res ){
+//			return false;
+//		}
+//		if( $res['status']=='ok'){
+//			return true;
+//		}
+//		return true;
+//	}
 }

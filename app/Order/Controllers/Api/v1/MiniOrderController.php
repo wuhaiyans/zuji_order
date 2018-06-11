@@ -134,7 +134,15 @@ class MiniOrderController extends Controller
         }
         $miniData = $miniApi->getResult();
         //用户处理
-        $data['user_id'] = \App\Lib\User\User::getUserId($miniData);
+        $_user = \App\Lib\User\User::getUserId($miniData);
+        $data['user_id'] = $_user['user_id'];
+        $miniData['user_id'] = $_user['user_id'];
+        //风控系统处理
+        $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
+        if($b != true){
+            \App\Lib\Common\LogApi::notify('风控系统接口请求错误',$miniData);
+            return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
+        }
         //处理用户收货地址
         $addressId = \App\Lib\User\User::getAddressId($miniData);
         $data['address_info'] = [
@@ -144,6 +152,7 @@ class MiniOrderController extends Controller
             'mobile'=>$miniData['mobile'],
             'name'=>$miniData['name'],
             'address'=>$miniData['house'],
+            'credit_amount'=>$miniData['credit_amount'],
         ];
         //小程序订单确认
         $res = $this->OrderCreate->miniConfirmation($data);
@@ -172,7 +181,7 @@ class MiniOrderController extends Controller
         $orderNo	= $params['params']['order_no'];//支付方式ID
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
-        $coupon		= $params['params']['coupon'];
+        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
         $userId		= $params['params']['user_id'];
         $address		= $params['params']['address'];
 
@@ -192,15 +201,23 @@ class MiniOrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-
-        $data =[
+        //处理用户收货地址
+        $addressId = \App\Lib\User\User::getAddressId([
+            'house'=>$address,
+        ]);
+        $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
             'order_no'=>$orderNo,
-            'address_info'=>$address,
             'sku'=>$sku,
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID
+        ];
+        $data['address_info'] = [
+            'province_id'=>$addressId['provin_id'],
+            'city_id'=>$addressId['city_id'],
+            'district_id'=>$addressId['country_id'],
+            'address'=>$address,
         ];
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
@@ -257,17 +274,17 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($params['order_no']);
+        $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($params['order_no']);
         if( empty($result) ){
             \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$params['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
         }
         //发送取消请求
         $data = [
-            'out_order_no'=>$result['out_order_no'],//商户端订单号
+            'out_order_no'=>$result['order_no'],//商户端订单号
             'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
             'remark'=>$params['remark'],//订单操作说明
-            'app_id'=>$result['notify_app_id'],//小程序appid
+            'app_id'=>$result['app_id'],//小程序appid
         ];
         $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
         if($b === false){

@@ -10,9 +10,13 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Order\Controllers\Api\v1\InstalmentController;
+use App\Order\Models\OrderGoodsInstalment;
+use App\Order\Modules\Inc\CouponStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Service\OrderInstalment;
+use Mockery\Exception;
 
 class InstalmentComponnet implements OrderCreater
 {
@@ -57,33 +61,69 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
-//        $instalment = new Instalment();
-//        $instalmentData = $instalment->instalmentData($schema);
-//        var_dump($instalmentData);die;
-//        $instalmentData=[
-//            'order'=>[
-//                'order_no'=>'',
-//            ],
-//            'sku'=>[
-//	           'zuqi'              => 1,//租期
-//	           'zuqi_type'         => 1,//租期类型
-//	           'all_amount'        => 1,//总金额
-//	           'amount'            => 1,//实际支付金额
-//	           'yiwaixian'         => 1,//意外险
-//	           'zujin'             => 1,//租金
-//	           'pay_type'          => 1,//支付类型
-//	       ],
-//            'coupon'=>[ 			  // 非必须
-//	           'discount_amount'   => 1,//优惠金额
-//	           'coupon_type'       => 1,//优惠券类型
-//	       ],
-//	      'user'=>[
-//	           'user_id'           => 1,//用户ID
-//	        ],
-//        ];
-//
+        foreach ($schema['sku'] as $k=>$sku){
+            $skuInfo['zuqi_type'] = $sku['zuqi_type'];
+            $skuInfo['discount_info'] = [
+                [
+                    'discount_amount' =>$sku['first_coupon_amount'],
+                    'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize:商品券
+                ],
+                [
+                    'discount_amount' =>$sku['order_coupon_amount'],
+                    'zuqi_policy' =>CouponStatus::CouponTypeAvg,
+                ],
+                [
+                    'discount_amount' =>$sku['discount_amount'],
+                    'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
+                ]
+            ];
 
-        return array_merge($schema,['instalment'=>""]);
+            $_data = [
+         		'zujin'		    => $sku['zujin'],	    //【必选】price 每期租金
+         		'zuqi'		    => $sku['zuqi'],	    //【必选】int 租期（必选保证大于0）
+         		'insurance'    => $sku['insurance'],	//【必选】price 保险金额
+            ];
+            $instalment =$this->discountInstalment($_data,$skuInfo);
+            $schema['sku'][$k]['instalment'] = $instalment;
+        }
+        return $schema;
+    }
+
+    public function discountInstalment($_data,$sku){
+        try{
+            // 月租，分期计算器
+            if($sku['zuqi_type'] == 2){
+                $computer = new \App\Order\Modules\Repository\Instalment\MonthComputer( $_data );
+            }
+            // 日租，分期计算器
+            elseif($sku['zuqi_type'] == 1){
+                $computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $_data );
+            }
+            // 优惠策略
+            foreach( $sku['discount_info'] as $dis_info ){
+                // 分期策略：平均优惠
+                if( $dis_info['zuqi_policy'] == 'avg' ){
+                    $discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( $dis_info['discount_amount'] );
+                    $computer->addDiscounter( $discounter_simple );
+                }
+
+                // 分期策略：首月优惠（优惠金额为每期租金时，就是 首月0租金）
+                elseif( $dis_info['zuqi_policy'] == 'first' ){
+                    $discounter_first = new \App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter( $dis_info['discount_amount'] );
+                    $computer->addDiscounter( $discounter_first );
+                }
+                // 分期策略：分期顺序优惠
+                elseif( $dis_info['zuqi_policy'] == 'serialize' ){
+                    $discounter_serialize = new \App\Order\Modules\Repository\Instalment\Discounter\SerializeDiscounter( $dis_info['discount_amount'] );
+                    $computer->addDiscounter( $discounter_serialize );
+
+                }
+            }
+            return $computer->compute();
+
+        }catch( \Exception $exc ){
+            throw new Exception("获取分期信息错误");
+        }
     }
 
     /**
@@ -92,16 +132,44 @@ class InstalmentComponnet implements OrderCreater
      */
     public function create(): bool
     {
-
-        $schema =$this->componnet->getDataSchema();
+        $schema =$this->getDataSchema();
         $b = $this->componnet->create();
         if( !$b ){
             return false;
         }
-//        $instalment = OrderInstalment::create($schema);
-//        if (!$instalment) {
-//            return false;
-//        }
+        //支持分期支付方式
+        $payType = [
+            PayInc::WithhodingPay,
+            PayInc::MiniAlipay,
+        ];
+        if(!in_array($this->payType,$payType)){
+            return true;
+        }
+        foreach ($schema['sku'] as $key=>$sku){
+            //循环插入到分期表
+            for($i=0;$i<$sku['sku_num'];$i++) {
+                foreach ($sku['instalment'] as $k => $v) {
+                    $instalmentData = [
+                        'order_no' => $schema['order']['order_no'],
+                        'goods_no' => $sku['goods_no'],
+                        'user_id' => $schema['user']['user_id'],
+                        'term' => $v['term'],
+                        'day' => $v['day'],
+                        'times' => $v['times'],
+                        'original_amount' => $v['original_amount'],
+                        'discount_amount' => $v['discount_amount'],
+                        'amount' => $v['amount'],
+                        'status' => 1,
+                    ];
+                    $res = OrderGoodsInstalment::create($instalmentData);
+                    $id = $res->getQueueableId();
+                    if (!$id) {
+                        $this->getOrderCreater()->setError('保存分期数据失败');
+                        return false;
+                    }
+                }
+            }
+        }
         return true;
     }
 }

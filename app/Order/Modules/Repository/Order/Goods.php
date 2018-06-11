@@ -35,7 +35,7 @@ class Goods {
 
     /**
      * 构造函数
-     * @param array $data 订单原始数据
+     * @param array $data 商品原始数据
      */
     public function __construct( OrderGoods $model ) {
         $this->model = $model;
@@ -85,11 +85,11 @@ class Goods {
      * 申请退货
      * @return bool
      */
-    public function returnOpen( ):bool{
+    public function returnOpen( ){
         //商品必须为租用中
-        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
-            return false;
-        }
+       // if( $this->model->goods_status!=OrderGoodStatus::RENTING_MACHINE ){
+        //    return false;
+       // }
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
@@ -113,7 +113,7 @@ class Goods {
      */
     public function returnFinish( ):bool{
         $this->model->goods_status=OrderGoodStatus::REFUNDED;
-        $this->model->save();
+        return $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------
@@ -124,10 +124,6 @@ class Goods {
      * @return bool
      */
     public function barterOpen( ):bool{
-        //商品必须为租用中
-        if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
-            return false;
-        }
         // 状态改为换货中
         $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
         return $this->model->save();
@@ -144,10 +140,10 @@ class Goods {
      * @return bool
      */
     public function barterFinish( ):bool{
-        if($this->model->goods_status==OrderGoodStatus::EXCHANGE_OF_GOODS){
+        if($this->model->goods_status==OrderGoodStatus::RENTING_MACHINE){
             return false;
         }
-        $this->model->goods_status=OrderGoodStatus::EXCHANGE_OF_GOODS;
+        $this->model->goods_status=OrderGoodStatus::RENTING_MACHINE;
         return $this->model->save();
     }
 	

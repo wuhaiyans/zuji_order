@@ -215,14 +215,19 @@ class OrderWithhold
             'closed'        => \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL,
             'processing'    => \App\Order\Modules\Inc\OrderInstalmentStatus::PAYING,
         ];
+
+        //开启事务
+        DB::beginTransaction();
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$params['out_no']]);
         if( !is_array($instalmentInfo)){
             // 提交事务
+            DB::rollBack();
             echo "FAIL";exit;
         }
 
         if(!isset($status[$params['status']])){
+            DB::rollBack();
             echo "FAIL";exit;
         }
 
@@ -235,8 +240,9 @@ class OrderWithhold
         ];
 
         // 修改分期状态
-        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_trade_no']],$data);
+        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_no']],$data);
         if(!$result){
+            DB::rollBack();
             echo "FAIL";exit;
         }
 
@@ -251,9 +257,29 @@ class OrderWithhold
                 // 修改优惠券状态
                 $couponStatus = \App\Lib\Coupon\Coupon::setCoupon(['user_id'=>$instalmentInfo['user_id'],'coupon_id'=>$counponInfo['coupon_id']]);
                 if($couponStatus != ApiStatus::CODE_0){
+                    DB::rollBack();
                     echo "FAIL";exit;
                 }
             }
+        }
+
+        // 创建收支明细表
+        $IncomeData = [
+            'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+            'order_no'      => $instalmentInfo['order_no'],
+            'business_type' => OrderStatus::BUSINESS_FENQI,
+            'business_no'   => $instalmentInfo['id'],
+            'appid'         => 1,
+            'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+            'out_trade_no'  => $params["payment_no"],
+            'amount'        => $instalmentInfo['payment_amount'],
+            'create_time'   => time(),
+        ];
+        $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+        if( !$IncomeId ){
+            DB::rollBack();
+            \App\Lib\Common\LogApi::error('创建收支明细失败');
+            return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
         }
 
         // 修改扣款记录数据
@@ -263,8 +289,11 @@ class OrderWithhold
         ];
         $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$params['out_no']],$recordData);
         if(!$record){
+            DB::rollBack();
             echo "FAIL";exit;
         }
+        // 提交事务
+        DB::commit();
 
         echo "SUCCESS";
     }
