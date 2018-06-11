@@ -263,27 +263,6 @@ class MiniOrderController extends Controller
      * ]
      */
     public function miniOrderCancel(Request $request){
-        //测试消息通知接口 请求
-//        $alipayUserId = $userInfo['alipay_user_id'];
-        //通过用户id查询支付宝用户id
-        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord('2088122107771765');
-//        //查询账单
-//        $year = substr($instalmentInfo['term'], 0, 4);
-//        $month = substr($instalmentInfo['term'], -2);
-//        $y = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), 0, 4);
-//        $m = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -5, -3);
-//        $d = substr(date('Y-m-d', strtotime($year . '-' . $month . '-01 +1 month -1 day')), -2);
-        $messageArr = [
-            'amount' => '0.00',
-            'bill_type' => '租金',
-            'bill_time' => '今日',
-            'pay_time' => date('Y-m-d H:i:s'),
-        ];
-        $b = $MessageSingleSendWord->PaySuccess($messageArr);
-        if ($b === false) {
-            \App\Lib\Common\LogApi::error("发送消息通知错误-" . $MessageSingleSendWord->getError());
-        }
-        die;
         $params = $request->all();
         $rules = [
             'order_no'  => 'required',
@@ -314,4 +293,36 @@ class MiniOrderController extends Controller
         return apiResponse([],ApiStatus::CODE_0);
     }
 
+    /**
+     * 小程序系统任务取消订单接口（30分钟自动执行）
+     */
+    public function miniOrderCancelTimedTask(){
+        //查询商户订单
+        $order_info = \App\Order\Models\Order::where(['order_status'=>OrderStatus::OrderWaitPaying,'pay_type'=>\App\Order\Modules\Inc\PayInc::MiniAlipay ,'create_time'=>['LT',time()-1800]])->select();
+        if( empty($order_info) ){
+            \App\Lib\Common\LogApi::debug('小程序定时取消商户订单数据查询错误',$order_info);
+            return apiResponse([],ApiStatus::CODE_35003,'小程序定时取消商户订单数据查询错误');
+        }
+        //循环取消操作
+        foreach($order_info as $key=>$val){
+            //查询芝麻订单
+            $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($val['order_no']);
+            if( empty($result) ){
+                \App\Lib\Common\LogApi::debug('小程序定时取消芝麻订单查询失败',$val['order_no']);
+                continue;
+            }
+            //发送取消请求
+            $data = [
+                'out_order_no'=>$val['order_no'],//商户端订单号
+                'zm_order_no'=>$val['zm_order_no'],//芝麻订单号
+                'remark'=>'小程序系统取消订单操作',//订单操作说明
+                'app_id'=>$val['app_id'],//小程序appid
+            ];
+            $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+            if($b === false){
+                \App\Lib\Common\LogApi::debug('小程序定时取消芝麻订单查询失败',$val['order_no']);
+                continue;
+            }
+        }
+    }
 }
