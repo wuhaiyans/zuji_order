@@ -6,6 +6,14 @@ use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
 
+
+/**
+ * Class ReceiveController
+ * @package App\Warehouse\Controllers\Api\v1
+ *
+ *
+ *
+ */
 class ReceiveController extends Controller
 {
     const SESSION_ERR_KEY = 'delivery.error';

@@ -6,11 +6,7 @@
  */
 namespace App\Order\Controllers\Api\v1;
 
-use App\Lib\ApiStatus;
-use App\Order\Modules\Service\OrderInstalment;
-use App\Order\Modules\Inc\OrderInstalmentStatus;
 use Illuminate\Support\Facades\Redis;
-use App\Order\Modules\Repository\OrderRepository;
 
 class MiniNotifyController extends Controller
 {
@@ -45,7 +41,7 @@ class MiniNotifyController extends Controller
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$result);
             }
-            $this->OrderCancelNotify();
+            $this->orderCloseCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
             //入库 完成 或 扣款 回调信息
             $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
@@ -56,7 +52,7 @@ class MiniNotifyController extends Controller
             if( $redis_order == 'MiniWithhold' ){
                 $this->withholdingNotify();
             }else if( $redis_order == 'MiniOrderClose' ){
-                $this->orderCloseNotify();
+                $this->orderCloseCancelNotify();
             }
         }else if($this->data['notify_type'] == $this->CREATE){
             $this->rentTransition();
@@ -64,49 +60,12 @@ class MiniNotifyController extends Controller
     }
 
     /*
-     * 芝麻支付宝小程序 订单取消接口异步回调
-     */
-    private function OrderCancelNotify(){
-        $data = $this->data;
-        //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
-        if( $orderInfo == false ){
-            echo '订单不存在';return;
-        }
-        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder( $data['order_no'],$orderInfo['user_id'] );
-        if( $code == ApiStatus::CODE_0 ){
-            echo 'success';return;
-        }
-        echo $code.'取消订单错误';return;
-    }
-
-    /*
      * 芝麻支付宝小程序 订单关闭接口异步回调
      */
-    private function orderCloseNotify(){
-
-        $data = $this->data;
-        //查询订单信息（获取用户id）
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
-        if( $orderInfo == false ){
-            echo '订单不存在';return;
-        }
-        //修改订单状态
-        $b = \App\Order\Modules\Repository\OrderRepository::orderClose($data['out_order_no']);
+    private function orderCloseCancelNotify(){
+        $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($this->data);
         if(!$b){
-            echo "修改订单状态FAIL";return;
-        }
-        //修改商品表状态 （还机完成）
-        $where = [
-            'order_no'=>$data['out_order_no']
-        ];
-        $data = [
-            'goods_status'=>\App\Order\Modules\Inc\OrderGoodStatus::COMPLETE_THE_MACHINE,
-        ];
-        $OrderGoodsRepository = new \App\Order\Modules\Repository\OrderGoodsRepository();
-        $b = $OrderGoodsRepository->update( $where, $data );
-        if(!$b){
-            echo "修改商品表状态FAIL";return;
+            echo "fail";return;
         }
         echo 'success';return;
     }
