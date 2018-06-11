@@ -234,6 +234,13 @@ return [
     //买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
 
+
+    //-+------------------------------------------------------------------------
+    // | 收支明细
+    //-+------------------------------------------------------------------------
+    // 收支明细列表
+    'api.pay.payIncomeQuery'       => 'PayController@payIncomeQuery',
+
     // test
     'api.Test.test'       => 'TestController@test',
     'api.test.send.sms'       => 'TestController@sendSms',
