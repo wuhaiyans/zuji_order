@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderReturnCreater;
 use App\Order\Modules\Service\OrderCreater;
 use App\Order\Modules\Repository\ThirdInterface;
+use App\Lib\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class ReturnController extends Controller
 {
     protected $OrderCreate;
@@ -164,6 +167,41 @@ class ReturnController extends Controller
 
     }
 
+    /**
+     * 退款列表导出
+     * @param Request $request
+     *
+     */
+    public function refundListExport(Request $request) {
+        $params = $request->input('params');
+        $refundData =$this->OrderReturnCreater->getReturnList($params);
+        $returnListArray = objectToArray($refundData);
+        $data=[];
+        if ($returnListArray['original']['code']===ApiStatus::CODE_0) {
+            $headers = ['订单编号', '用户名', '申请退款时间', '下单时间', '完成交易时间', '实付金额', '应退金额', '退款状态', '物流信息', '订单状态'];
+            if($returnListArray['original']['data']){
+                foreach ($returnListArray['original']['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        $item['mobile'],
+                        date('Y-m-d H:i:s', $item['c_time']),
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        date('Y-m-d H:i:s', $item['complete_time']),
+                        $item['pay_amount'],
+                        $item['refund_amount'],
+                        $item['logistics_name'],
+                        $item['order_status_name'],
+                    ];
+                }
+            }else{
+                $data[] = [];
+            }
+
+            return Excel::write($data, $headers, '后台退款列表数据导出');
+        }else {
+            return apiResponse([], ApiStatus::CODE_34007);
+        }
+    }
     /**
      * 物流单号上传
      * @param Request $request

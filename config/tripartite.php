@@ -39,9 +39,9 @@ return [
 
     /*********电子合同接口***********/
     //电子合同创建
-    'Contract_Create_Url' => env('CONTRACT_CREATE_URL', 'http://zuji.huishoubao.com/index.php?m=contract&c=api&a=create'),
+    'Contract_Create_Url' => env('CONTRACT_CREATE_URL', 'http://dev-admin-zuji.huishoubao.com/index.php?m=contract&c=api&a=create'),
     //根据订单号获取电子合同
-    'Contract_Order_NO_Url' => env('CONTRACT_ORDER_NO_URL', 'http://zuji.huishoubao.com/index.php?m=contract&c=api&a=orderNoContract'),
+    'Contract_Order_NO_Url' => env('CONTRACT_ORDER_NO_URL', 'http://dev-admin-zuji.huishoubao.com/index.php?m=contract&c=api&a=orderNoContract'),
     //根据商品编号获取电子合同
-    'Contract_Goods_NO_Url' => env('CONTRACT_GOODS_NO_URL', 'http://zuji.huishoubao.com/index.php?m=contract&c=api&a=goodsNoContract'),
+    'Contract_Goods_NO_Url' => env('CONTRACT_GOODS_NO_URL', 'http://dev-admin-zuji.huishoubao.com/index.php?m=contract&c=api&a=goodsNoContract'),
 ];

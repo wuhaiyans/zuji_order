@@ -31,6 +31,10 @@ class SceneConfig {
      * 场景:<b>【扣款失败生成逾期】</b>
      */
     const WITHHOLD_OVERDUE = 'WithholdOverdue';
+    /**
+     * 场景：<b>【提前还款】</b>
+     */
+    const REPAYMENT = 'Repayment';
 
 	/**
      * 场景：<b>【申请退货】</b>
@@ -56,4 +60,5 @@ class SceneConfig {
      * 场景：<b>【收到客户退货手机】</b>
      */
     const RETURN_DELIVERY = 'ReturnDelivery';
+
 }

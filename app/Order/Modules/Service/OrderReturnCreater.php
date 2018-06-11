@@ -743,6 +743,108 @@ class OrderReturnCreater
         }
         return $where1;
     }
+
+    /**
+     * 导出，获取退换货订单列表方法
+     * @param $params
+     * @return array
+     *
+     */
+    public function getReturnList($params)
+    {
+        $where = [];
+        if (isset($params['begin_time'])!= '') {
+            $where['begin_time'] = strtotime($params['begin_time']);
+        }
+        if (isset($params['end_time'] )!= '') {
+            $where['end_time'] = strtotime($params['end_time']);
+        }
+        if(isset($params['business_key'])>0) {
+            $where['business_key'] = intval($params['business_key']);
+        }
+        if (isset($params['keywords'])!= '') {
+            if (isset($params['kw_type'])&&$params['kw_type']=='goods_name') {
+                $where['goods_name'] = $params['keywords'];
+            }elseif(isset($params['kw_type'])&&$params['kw_type']=='order_no') {
+                $where['order_no'] = $params['keywords'];
+            }elseif(isset($params['kw_type'])&&$params['kw_type']=='mobile'){
+                $where['mobile'] = $params['keywords'];
+            }
+        }
+        if (isset($params['return_status']) && $params['return_status'] > 0) {
+            $where['status'] = intval($params['return_status']);
+        }
+        if (isset($params['user_id'])) {
+            $where['user_id'] = $params['user_id'];
+        }
+        if (isset($params['reason_key'])) {
+            $where['reason_key'] = $params['reason_key'];
+        }
+        if (isset($params['order_status'])) {
+            $where['order_status'] = $params['order_status'];
+        }
+        if (isset($params['appid'])) {
+            $where['appid'] = $params['appid'];
+        }
+        $where= $this->_parse_order_where($where);
+        $data = $this->orderReturnRepository->getReturnList($where);
+        foreach($data as $k=>$v){
+            if($data[$k]->status!=ReturnStatus::ReturnCreated){
+                $data[$k]->operate_status=false;
+            }else{
+                $data[$k]->operate_status=true;
+            }
+            //业务类型
+            if($data[$k]->business_key==OrderStatus::BUSINESS_REFUND){
+                $data[$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_REFUND);//退款业务
+            }elseif($data[$k]->business_key==OrderStatus::BUSINESS_RETURN){
+                $data[$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
+            }elseif($data[$k]->business_key==OrderStatus::BUSINESS_BARTER){
+                $data[$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_BARTER);//换货业务
+            }
+            //订单状态
+            if($data[$k]->order_status==OrderStatus::OrderWaitPaying){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderWaitPaying);//待支付
+            }elseif($data[$k]->order_status==OrderStatus::OrderPaying){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPaying);//支付中
+            }elseif($data[$k]->order_status==OrderStatus::OrderPayed){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderPayed);//已支付
+            }elseif($data[$k]->order_status==OrderStatus::OrderInStock){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInStock);//备货中
+            }elseif($data[$k]->order_status==OrderStatus::OrderDeliveryed){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderDeliveryed);//已发货
+            }elseif($data[$k]->order_status==OrderStatus::OrderInService){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderInService);//租用中
+            }elseif($data[$k]->order_status==OrderStatus::OrderCancel){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderCancel);//已取消完成(未支付)
+            }elseif($data[$k]->order_status==OrderStatus::OrderClosedRefunded){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosedRefunded);//关闭（支付完成后退款）
+            }elseif($data[$k]->order_status==OrderStatus::OrderCompleted){
+                $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderCompleted);//已完成
+            }
+            //（退款、退机、换机）状态
+            if($data[$k]->status==ReturnStatus::ReturnCreated){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnCreated);//提交申请
+            }elseif($data[$k]->status==ReturnStatus::ReturnAgreed){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnAgreed);//同意
+            }elseif($data[$k]->status==ReturnStatus::ReturnDenied){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnDenied);//拒绝
+            }elseif($data[$k]->status==ReturnStatus::ReturnCanceled){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
+            }elseif($data[$k]->status==ReturnStatus::ReturnReceive){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnReceive);//已收货
+            }elseif($data[$k]->status==ReturnStatus::ReturnTuiHuo){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiHuo);//已退货
+            }elseif($data[$k]->status==ReturnStatus::ReturnHuanHuo){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnHuanHuo);//已换货
+            }elseif($data[$k]->status==ReturnStatus::ReturnTuiKuan){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiKuan);//已退款
+            }elseif($data[$k]->status==ReturnStatus::ReturnTui){
+                $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
+            }
+        }
+        return apiResponse($data,ApiStatus::CODE_0);
+    }
     //获取商品信息
     /*public function get_goods_info($params){
         if(empty($params['goods_no'])){
