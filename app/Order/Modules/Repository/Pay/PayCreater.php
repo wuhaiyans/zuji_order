@@ -291,6 +291,32 @@ class PayCreater {
 		LogApi::debug('[支付阶段]PWF创建成功',$data);
 		return new Pay( $data );
 	}
+
+
+	/**
+	 * 查询支付单
+	 * @param	array	$params		参数
+	 * [
+	 *		'businessType'		=> '',	// 业务类型
+	 *		'businessNo'		=> '',	// 业务编号
+	 * ]
+	 * @return array 支付单数据
+	 */
+	public static function getPayData( array $params )
+	{
+		if(!$params){
+			return [];
+		}
+		$payModel = new OrderPayModel();
+
+		$info = $payModel::query()
+			->where($params)
+			->get();
+		if(!$info){
+			return [];
+		}
+		return $info->toArray();
+	}
 	
 	
 }

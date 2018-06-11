@@ -10,11 +10,13 @@ use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
 use App\Lib\Payment\mini\MiniApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\MiniOrderRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
@@ -144,6 +146,7 @@ class OrderCleaning
 
 
 
+
     /**
      * 订单清算操作
      * Author: heaven
@@ -245,11 +248,7 @@ class OrderCleaning
 
                 ];
                 $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
-
-
-
                 LogApi::info('预授权转支付接口返回', [$succss,$freezePayParams]);
-
             }
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
@@ -287,24 +286,48 @@ class OrderCleaning
 
         } else {
 
-            $miniOrderData = MiniOrderRepository::getMiniOrderInfo($orderCleanData['order_no']);
-            if (empty($miniOrderData))
-            {
-                LogApi::info('没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
-                return false;
+            //小程序待退还押金大于0，并且处于待退押金状态
+            if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+
+                $miniOrderData = MiniOrderRepository::getMiniOrderInfo($orderCleanData['order_no']);
+                if (empty($miniOrderData))
+                {
+                    LogApi::info('没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
+                    return false;
+                }
+
+                //查询分期有没有代扣并且扣款成功的记录
+                $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>OrderInstalmentStatus::SUCCESS, 'pay_type'=>0]);
+                if ($instaleCount>0) {
+                    $params = [
+                        'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
+                        'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
+                        'out_trans_no'=>$orderCleanData['clean_no'],//资金交易号
+                        'pay_amount'=>$orderCleanData['auth_deduction_amount'],//支付金额
+                        'remark'=>'小程序退押金',//订单操作说明
+                        'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
+                    ];
+                    $succss =  miniApi::OrderClose($params);
+                    LogApi::info('支付小程序解冻押金', [$succss,  $params]);
+                } else {
+                    /*
+                      * 订单取消
+                      * params [
+                      *      'out_order_no'=>'',//商户端订单号
+                      *      'zm_order_no'=>'',//芝麻订单号
+                      *      'app_id'=>'',//芝麻小程序APPID
+                      * ]
+                      */
+                    $orderParams = [
+                        'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
+                        'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
+                        'app_id'=>config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
+                    ];
+                    $success =  miniApi::OrderCancel($orderParams);
+                    LogApi::info('支付小程序解冻押金', [$success,  $orderParams]);
+                }
+
             }
-
-            $params = [
-                'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
-                'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
-                'out_trans_no'=>$orderCleanData['clean_no'],//资金交易号
-                'pay_amount'=>$orderCleanData['auth_deduction_amount'],//支付金额
-                'remark'=>'小程序退押金',//订单操作说明
-                'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
-            ];
-
-           $succss =  miniApi::OrderClose($params);
-           LogApi::info('支付小程序解冻押金', [$succss,  $params]);
 
         }
 
@@ -312,6 +335,7 @@ class OrderCleaning
         return true;
 
     }
+
 
 
 

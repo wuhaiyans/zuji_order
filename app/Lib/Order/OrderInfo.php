@@ -30,7 +30,6 @@ class OrderInfo {
                 ];
                 $baseUrl = config("tripartite.API_INNER_URL");
                 $info = Curl::post($baseUrl, $data);
-                var_dump($info);
                 return $info;
 //                return apiResponse($info,ApiStatus::CODE_0);
 

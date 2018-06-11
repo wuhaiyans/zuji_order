@@ -57,15 +57,17 @@ class ReturnApply implements ShortMessage {
 		$goodsInfo=$goods->getData();
         //获取用户认证信息
         $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
+        if(!$userInfo){
+            return false;
+        }
         // 发送短息
-       $res=\App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
+        $res=\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName' => $userInfo['realname'],
             'orderNo' => $goodsInfo['order_no'],
             'goodsName' => $goodsInfo['goods_name'],
             'serviceTel'=>config('tripartite.Customer_Service_Phone'),
         ],$goodsInfo['order_no']);
         return $res;
-
 	}
 
 	// 支付宝 短信通知

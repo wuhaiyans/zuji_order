@@ -12,7 +12,6 @@ use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
 use App\Order\Modules\OrderCreater\CouponComponnet;
-use App\Order\Modules\OrderCreater\CreditComponnet;
 use App\Order\Modules\OrderCreater\DepositComponnet;
 use App\Order\Modules\OrderCreater\InstalmentComponnet;
 use App\Order\Modules\OrderCreater\OrderComponnet;
@@ -20,11 +19,9 @@ use App\Order\Modules\OrderCreater\RiskComponnet;
 use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
-use App\Order\Modules\OrderCreater\YidunComponnet;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Repository\ShortMessage\OrderCreate;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
@@ -180,7 +177,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -191,8 +188,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
@@ -226,7 +223,7 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
-            //发送取消订单队列
+            //发送取消订单队列（小程序取消订单队列）
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
                 'order_no'=>$data['order_no'],
@@ -343,7 +340,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
@@ -354,8 +351,8 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);

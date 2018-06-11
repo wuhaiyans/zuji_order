@@ -54,7 +54,6 @@ class SkuComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
-		
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
@@ -195,6 +194,7 @@ class SkuComponnet implements OrderCreater
             $spuInfo = $v['spu_info'];
             $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['first_coupon_amount']:0.00;
             $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['order_coupon_amount']:0.00;
+            $specs =json_decode($spuInfo['specs'],true);
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
@@ -208,6 +208,7 @@ class SkuComponnet implements OrderCreater
                     'sku_num' => intval($skuInfo['sku_num']),
                     'brand_id' => intval($spuInfo['brand_id']),
                     'category_id' => intval($spuInfo['catid']),
+                    'machine_id' => intval($spuInfo['machine_id']),
                     'specs' => $spuInfo['specs'],
                     'thumb' => $spuInfo['thumb'],
                     'insurance' =>$spuInfo['yiwaixian'],
@@ -219,8 +220,7 @@ class SkuComponnet implements OrderCreater
                     'zuqi_type_name' => $this->zuqiTypeName,
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
-                    'chengse' => intval($skuInfo['chengse']),
-                    'contract_id' => $spuInfo['contract_id'],
+                    'machine_value' => intval($skuInfo['machine_value']),
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
@@ -328,6 +328,7 @@ class SkuComponnet implements OrderCreater
                     'prod_no'=>$v['spu_no'],
                     'brand_id'=>$v['brand_id'],
                     'category_id'=>$v['category_id'],
+                    'machine_id'=>$v['machine_id'],
                     'user_id'=>$userId,
                     'quantity'=>1,
                     'goods_yajin'=>$v['yajin'],
@@ -336,7 +337,7 @@ class SkuComponnet implements OrderCreater
                     'zuqi_type'=>$v['zuqi_type'],
                     'zujin'=>$v['zujin'],
                     'order_no'=>$orderNo,
-                    'chengse'=>$v['chengse'],
+                    'machine_value'=>$v['machine_value'],
                     'discount_amount'=>$v['discount_amount'],
                     'coupon_amount'=>$v['first_coupon_amount']+$v['order_coupon_amount'],
                     'amount_after_discount'=>$v['amount_after_discount'],

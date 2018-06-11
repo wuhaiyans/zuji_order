@@ -225,22 +225,48 @@ class OrderWithhold
             DB::rollBack();
             echo "FAIL";exit;
         }
+        $instalmentId = $instalmentInfo['id'];
 
         if(!isset($status[$params['status']])){
             DB::rollBack();
             echo "FAIL";exit;
         }
 
-        $data = [
-            'status'        => $status[$params['status']],
-            'trade_no'      => $params['out_no'],
-            'out_trade_no'  => $params['payment_no'],
-            'update_time'   => time(),
-            'remark'        => '提前还款',
+
+        $_data = [
+            'status'            => $status[$params['status']],
+            'update_time'       => time(),
+            'pay_type'          => 1,       //还款类型：0 代扣   1 主动还款
+            'remark'            => '提前还款',
+            'payment_amount'    => $instalmentInfo['amount'], //实际支付金额
         ];
 
+
+        // 查询支付单
+        $payWhere = [
+            'businessType'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+            'businessNo'    => $params['out_no'],
+        ];
+        $PayData = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
+        if(empty($PayData)){
+            DB::rollBack();
+            echo "FAIL";exit;
+        }
+
+
+        // 优惠券信息
+        $counponWhere = [
+            'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+            'business_no'   => $params['out_no'],
+        ];
+        $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
+        if(!empty($counponInfo)){
+            $_data['payment_amount']    = $PayData['payment_amount']; // 实际支付金额 元
+            $_data['discount_amount']   = $instalmentInfo['amount'] - $PayData['payment_amount'];
+        }
+
         // 修改分期状态
-        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_trade_no']],$data);
+        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_no']],$_data);
         if(!$result){
             DB::rollBack();
             echo "FAIL";exit;
@@ -248,11 +274,7 @@ class OrderWithhold
 
         // 还原租金优惠券
         if($params['status'] == "failed"){
-            $counponWhere = [
-                'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $params['out_no'],
-            ];
-            $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
+
             if(!empty($counponInfo)){
                 // 修改优惠券状态
                 $couponStatus = \App\Lib\Coupon\Coupon::setCoupon(['user_id'=>$instalmentInfo['user_id'],'coupon_id'=>$counponInfo['coupon_id']]);
@@ -267,12 +289,12 @@ class OrderWithhold
         $IncomeData = [
             'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
             'order_no'      => $instalmentInfo['order_no'],
-            'business_no'   => OrderStatus::BUSINESS_FENQI . "-" . $instalmentInfo['id'],
+            'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+            'business_no'   => $instalmentId,
             'appid'         => 1,
             'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-            'type'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
-            'account'       => "",
-            'amount'        => $instalmentInfo['payment_amount'],
+            'out_trade_no'  => $params["payment_no"],
+            'amount'        => $PayData['payment_amount'],
             'create_time'   => time(),
         ];
         $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
@@ -294,6 +316,22 @@ class OrderWithhold
         }
         // 提交事务
         DB::commit();
+
+        // 发送短信
+
+        //发送短信通知 支付宝内部通知
+        $notice = new \App\Order\Modules\Service\OrderNotice(
+            OrderStatus::BUSINESS_FENQI,
+            $instalmentId,
+            "Repayment");
+        $notice->notify();
+
+        // 发送支付宝消息通知
+        $notice->alipay_notify();
+
+
+        // 提交蚁盾用户还款数据
+
 
         echo "SUCCESS";
     }

@@ -25,5 +25,5 @@ class OrderPayIncome extends Model
 
 
     // 可以被批量赋值的属性。
-    protected $fillable = ['name','order_no','business_no','appid','channel','type','account','amount','create_time'];
+    protected $fillable = ['name','order_no','business_type','business_no','appid','channel','trade_no','out_trade_no','amount','create_time'];
 }

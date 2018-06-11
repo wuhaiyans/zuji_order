@@ -110,7 +110,7 @@ return [
     'api.Withhold.unsign'               => 'WithholdController@unsign',
     // 代扣解约接口回调接口
     'api.Withhold.unsign_notify'        => 'WithholdController@unsign_notify',
-    // 代扣扣款接口
+    // 提前还款
     'api.Withhold.repayment'            => 'WithholdController@repayment',
     // 代扣扣款接口
     'api.Withhold.createpay'            => 'WithholdController@createpay',
@@ -175,6 +175,9 @@ return [
     'api.Return.refuseRefund'       =>'ReturnController@refuseRefund',
     //退款--取消退款
     'api.Return.cancelRefund'       =>'ReturnController@cancelRefund',
+    //退款列表导出
+    'api.Return.refundListExport'       =>'ReturnController@refundListExport',
+
 
 
 
@@ -247,7 +250,7 @@ return [
     //小程序订单同步接口
     'mini.order.fronttransition' => 'MiniOrderController@frontTransition',
     //取消订单接口
-    'mini.order.miniordercancel' => 'MiniOrderController@miniOrderCancel',
+    'mini.order.ordercancel' => 'MiniOrderController@miniOrderCancel',
 //    //小程序订单完成接口
 //    'mini.order.close' => 'MiniOrderController@cancelOrder',
 
