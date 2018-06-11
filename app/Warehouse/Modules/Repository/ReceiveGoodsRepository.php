@@ -42,6 +42,12 @@ class ReceiveGoodsRepository
             $query->where('name', 'like', '%'.$params['name'].'%');
         }
 
+        if (isset($params['status'])) {
+            $query->where('status', $params['status']);
+        } else {
+            $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
+        }
+
         return $query->with(['receive'])->paginate($limit,
             [
                 '*'

@@ -48,7 +48,11 @@ class ReceiveGoodsController extends Controller
     public function publics()
     {
         $data = [
-            'kw_types'    => ReceiveGoodsService::searchKws()
+            'kw_types'    => ReceiveGoodsService::searchKws(),
+            'status'      => [
+                ReceiveGoods::STATUS_ALL_RECEIVE => '待检测',
+                ReceiveGoods::STATUS_ALL_CHECK => '检测完成'
+            ]
         ];
 
         return apiResponse($data);
