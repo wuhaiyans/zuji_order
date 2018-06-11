@@ -54,8 +54,7 @@ class MessageSingleSend extends BaseApi {
         $result = $this->execute($request);
         $result = json_encode($result);
         $result = json_decode( $result ,true );
-
-        if( $result['alipay_open_public_message_single_send_response']['code'] == 10000 ){
+        if( $result['code'] == 10000 ){
             return true;
         }
         $this->error = $result;
