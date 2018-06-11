@@ -273,6 +273,7 @@ class DeliveryService
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
+
         if (!$items) {
             return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'current_page'=>0];
         }
@@ -298,7 +299,11 @@ class DeliveryService
                 if (!is_array($imei_list)) continue;
                 foreach ($imei_list as $im) {
                     if ($im['goods_no'] == $g['goods_no']) {
-                        $g['imeis'][] = $im['imei'];
+
+                        $g['imei'] = $im['imei'];
+                        $g['price'] = $im['price'];
+
+//                        $g['imeis'][] = $im['imei'];
                     }
                 }
             }unset($g);
@@ -324,6 +329,101 @@ class DeliveryService
             'status_list' => $status_list,
             'kw_types' => self::searchKws()
         ];
+
+    }
+
+
+    /**
+     * @param $params
+     * @return array
+     * @throws \Exception
+     *
+     * 数据导出 与列表类似
+     */
+    public function export($params)
+    {
+        $limit = 200;
+        if (isset($params['size']) && $params['size']) {
+            $limit = $params['size'];
+        }
+        $whereParams = [];
+
+        $logic_params = [];
+        //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
+        if (isset($params['status']) && $params['status']) {
+            $whereParams['status'] = $params['status'];
+        } else {
+            array_push($logic_params, ['status', '>', Delivery::STATUS_NONE]);
+        }
+
+        $search = $this->paramsSearch($params);
+        if ($search) {
+            $whereParams = array_merge($whereParams, $search);
+        }
+
+        $page = isset($params['page']) ? $params['page'] : 1;
+
+        $time_type   = isset($params['time_type']) ? $params['time_type'] : 'none';
+
+
+        if ($time_type != 'none') {
+            if (!isset($params['begin_time']) || !$params['begin_time']) {
+                throw new \Exception('请填写开始时间');
+            }
+
+            if (!isset($params['end_time']) || !$params['end_time']) {
+                throw new \Exception('请填写结束时间');
+            }
+
+            switch ($time_type) {
+                case self::TIME_TYPE_CREATE:
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
+                    break;
+
+                case self::TIME_TYPE_DELIVERY:
+                default:
+                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['delivery_time', '>=', strtotime($params['begin_time'])]);
+            }
+        }
+
+        $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
+        $items = $collect->items();
+
+        if (!$items) {
+            return false;
+        }
+
+
+        $result = [];
+        foreach ($items as $item) {
+            $it = $item->toArray();
+            $it['logistics_name'] = WarehouseHelper::getLogisticsName($it['logistics_id']);;
+            $it['status_mark'] = $item->getStatus();
+            $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
+            $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
+
+            $goods_list = $item->goods->toArray();
+            $imei_list  = $item->imeis->toArray();
+
+
+            if (is_array($goods_list) && is_array($imei_list)) {
+                foreach ($goods_list as &$g) {
+                    foreach ($imei_list as $im) {
+                        if ($im['goods_no'] == $g['goods_no']) {
+                            $g['imei'] = $im['imei'];
+                            $g['price'] = $im['price'];
+                        }
+                    }
+                }unset($g);
+
+            }
+            $it['goods'] = $goods_list;
+            array_push($result, $it);
+        }
+
+        return $result;
 
     }
 
