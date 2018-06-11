@@ -72,7 +72,23 @@ $api->version('v1', [
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
         $api->any('orderListExport', 'OrderController@orderListExport');
+        //退款列表导出
+        $api->any('refundListExport', 'ReturnController@refundListExport');
+        //退换货列表导出
+        $api->any('ReturnListExport', 'ReturnController@returnListExport');
+        //换货列表导出
+        $api->any('barterListExport', 'ReturnController@barterListExport');
 
 
 });
+$api->version('v1', [
+    'namespace' => 'App\ClientApi\Controllers',
+    'limit' => config('api.rate_limits.access.limit'),
+    'expires' => config('api.rate_limits.access.expires'),
+    'middleware' => 'api'
+], function($api){
+    $api->any('header', 'AuthRefferController@header');
+});
+
+
    

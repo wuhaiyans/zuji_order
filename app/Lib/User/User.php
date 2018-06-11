@@ -126,6 +126,7 @@ class User{
      * @return bool|mixed
      */
     public static function checkToken($token){
+        p($token);
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.login.user.info.get';
         $data['params'] = [

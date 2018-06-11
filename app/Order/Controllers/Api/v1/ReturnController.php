@@ -172,7 +172,7 @@ class ReturnController extends Controller
      * @param Request $request
      *
      */
-    public function refundListExport(Request $request) {
+    public function refundListExport(Request $request){
         $params = $request->input('params');
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
@@ -198,6 +198,82 @@ class ReturnController extends Controller
             }
 
             return Excel::write($data, $headers, '后台退款列表数据导出');
+        }else {
+            return apiResponse([], ApiStatus::CODE_34007);
+        }
+    }
+    /**
+     * 退换货列表导出
+     * @param Request $request
+     *
+     */
+    public function returnListExport(Request $request){
+        $params = $request->input('params');
+        $refundData =$this->OrderReturnCreater->getReturnList($params);
+        $returnListArray = objectToArray($refundData);
+        $data=[];
+        if ($returnListArray['original']['code']===ApiStatus::CODE_0) {
+            $headers = ['订单编号', '用户名', '下单时间', '申请退款时间', '订单金额', '设备名称', '租期', '退换货状态', '订单状态', '类型'];
+            if($returnListArray['original']['data']){
+                foreach ($returnListArray['original']['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        $item['mobile'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        date('Y-m-d H:i:s', $item['c_time']),
+                        $item['order_amount'],
+                        $item['goods_name'],
+                        $item['zuqi'],
+                        $item['status_name'],
+                        $item['order_status_name'],
+                        $item['business_name']
+
+                    ];
+                }
+            }else{
+                $data[] = [];
+            }
+
+            return Excel::write($data, $headers, '后台退换货列表数据导出');
+        }else {
+            return apiResponse([], ApiStatus::CODE_34007);
+        }
+    }
+    /**
+     * 换货列表导出
+     * @param Request $request
+     *
+     */
+    public function barterListExport(Request $request){
+        $params = $request->input('params');
+        $refundData =$this->OrderReturnCreater->getReturnList($params);
+        $returnListArray = objectToArray($refundData);
+        $data=[];
+        if ($returnListArray['original']['code']===ApiStatus::CODE_0) {
+            $headers = ['订单编号', '用户名', '申请换货时间', '下单时间', '完成交易时间', '实付金额', '应付金额', '订单金额', '设备名称', '租期','换货状态',  '订单状态'];
+            if($returnListArray['original']['data']){
+                foreach ($returnListArray['original']['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        $item['mobile'],
+                        date('Y-m-d H:i:s', $item['c_time']),
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        date('Y-m-d H:i:s', $item['complete_time']),
+                        $item['pay_amount'],
+                        $item['refund_amount'],
+                        $item['order_amount'],
+                        $item['goods_name'],
+                        $item['zuqi'],
+                        $item['status_name'],
+                        $item['order_status_name'],
+
+                    ];
+                }
+            }else{
+                $data[] = [];
+            }
+
+            return Excel::write($data, $headers, '后台换货列表数据导出');
         }else {
             return apiResponse([], ApiStatus::CODE_34007);
         }

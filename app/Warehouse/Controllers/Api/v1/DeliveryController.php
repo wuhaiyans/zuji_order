@@ -428,6 +428,38 @@ class DeliveryController extends Controller
 
 
     /**
+     * 导出excel
+     */
+    public function export()
+    {
+        $params = $this->_dealParams([]);
+
+        $params['detail'] = true;
+
+        $list = $this->delivery->list($params);
+
+        $data = [];
+        foreach ($list['data'] as $l) {
+            if (!$l['goods']) continue;
+            foreach ($l['goods'] as $g) {
+                $data[] = [
+                    'order_no' => $l['order_no'],
+                    'customer' => $l['customer'],
+                    'customer_mobile' => $l['customer_mobile'],
+                    'customer_address' => $l['customer_address'],
+
+                    'logistics_no' => $l['logistics_no'],
+                    'status' => Delivery::sta($l['status']),
+                    'goods_name' => $g['goods_name'],
+                    'price' => isset($g['price']) ? $g['price'] : 0.00
+                ];
+            }
+        }
+        dd($data);
+    }
+
+
+    /**
      * @param null $logisticsId
      * @return array|string
      *
