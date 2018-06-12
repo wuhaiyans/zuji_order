@@ -201,7 +201,7 @@ class TestCreate extends Command
                 break;
             //租用中
             case 4:
-                $array = ['order_status'=>6,'freeze_type'=>10,'goods_status'=>0,'complete_time'=>0];
+                $array = ['order_status'=>6,'freeze_type'=>0,'goods_status'=>10,'complete_time'=>0];
                 break;
             //已支付
             case 7:
@@ -209,11 +209,11 @@ class TestCreate extends Command
                 break;
             //退款中
             case 9:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //已退款
             case 10:
-                $array = [ 'order_status'=>8,'freeze_type'=>21,'goods_status'=>0,'complete_time'=>$update_time];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
                 break;
             //已发货
             case 11:
@@ -221,43 +221,43 @@ class TestCreate extends Command
                 break;
             //用户拒签
             case 12:
-                $array = [ 'order_status'=>5,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>5,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货审核中
             case 13:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货中
             case 14:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //平台已收货
             case 15:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测合格
             case 16:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测不合格
             case 17:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //换货中
             case 18:
-                $array = [ 'order_status'=>6,'freeze_type'=>30,'goods_status'=>4,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
                 break;
             //回寄中
             case 19:
-                $array = [ 'order_status'=>6,'freeze_type'=>30,'goods_status'=>4,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
                 break;
             //买断中
             case 20:
-                $array = [ 'order_status'=>6,'freeze_type'=>50,'goods_status'=>3,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>3,'goods_status'=>50,'complete_time'=>0];
                 break;
             //已买断
             case 21:
-                $array = [ 'order_status'=>9,'freeze_type'=>51,'goods_status'=>0,'complete_time'=>$order_info['update_time']];
+                $array = [ 'order_status'=>9,'freeze_type'=>0,'goods_status'=>51,'complete_time'=>$order_info['update_time']];
                 break;
             //资金已授权
             case 22:
@@ -265,7 +265,7 @@ class TestCreate extends Command
                 break;
             //资金已解冻
             case 23:
-                $array = [ 'order_status'=>8,'freeze_type'=>21,'goods_status'=>0,'complete_time'=>$update_time];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
                 break;
             //用户归还
             case 25:
