@@ -2,14 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Channel\Channel;
-use App\Lib\Goods\Goods;
-use App\Order\Models\Order;
-use App\Order\Models\OrderGoods;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use \App\Order\Modules\Repository\OrderUserAddressRepository;
-use \App\Order\Modules\Repository\OrderUserCertifiedRepository;
 
 class TestCreate extends Command
 {
@@ -360,5 +353,8 @@ class TestCreate extends Command
                 $ret = DB::table("order_info_extend")->insert(['order_no'=>$data['order_no'],'field_name'=>"visit","field_value"=>1]);
             }
         }
+        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
+        echo 2344;exit;
+
     }
 }
