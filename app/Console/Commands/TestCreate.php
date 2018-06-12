@@ -122,8 +122,27 @@ class TestCreate extends Command
                     DB::rollBack();
                     echo "商品接口获取失败:".$v['order_no'];die;
                 }
+
                 //自动生成goods_no
                 $goodsNo =createNo(6);
+
+                //订单服务周期
+                $service =\DB::connection('mysql_01')->table("zuji_order2_service")->where(['order_no'=>$v['order_no']])->get()->first();
+                if($service){
+                    $serviceData = [
+                        'order_no'=>$service['order_no'],
+                        'goods_no'=>$goodsNo,
+                        'user_id'=>$service['user_id'],
+                        'unit'=>$v['zuqi_type'],
+                        'unit_value'=>$v['zuqi'],
+                        'begin_time'=>$service['begin_time'],
+                        'end_time'=>$service['end_time'],
+                    ];
+                    $ret = DB::table("order_goods_unit")->insert($serviceData);
+                    if(!$ret){
+
+                    }
+                }
 
                 $goodsData =[
                     'order_no'=>$v['order_no'],
@@ -182,10 +201,6 @@ class TestCreate extends Command
 
     }
 
-    public static function list($limit, $page=1)
-    {
-        return KnightInfo::paginate($limit, ['*'], 'page', $page);
-    }
     //订单状态转换
     public function getStatus($status,$order_info){
         $array = [];
@@ -331,8 +346,19 @@ class TestCreate extends Command
         }
         return false;
     }
-    //订单服务周期数据导入
-    public function service($orderNO,$goodsNo){
-        
+    //订单回访数据导入
+    public function visit($order){
+        if($order['remark_id']>0){
+            $data = [
+                'order_no' => $order['order_no'],
+                'visit_id' => $order['order_no'],
+                'visit_text' => $order['order_no'],
+                'create_time' => $order['create_time'],
+            ];
+            $ret = DB::table("order_info_visit")->insert($data);
+            if($ret){
+                $ret = DB::table("order_info_extend")->insert(['order_no'=>$data['order_no'],'field_name'=>"visit","field_value"=>1]);
+            }
+        }
     }
 }
