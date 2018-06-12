@@ -223,24 +223,17 @@ class OrderClearingRepository
         $whereArray[] = ['order_type', '=', OrderStatus::orderMiniService];
         $orderData =  OrderClearing::where($whereArray)->first();
         if (!$orderData) return false;
-        //更新退款押金状态
-        if (isset($param['auth_unfreeze_status']) && !empty($param['auth_unfreeze_status']) && in_array($param['auth_unfreeze_status'],array_keys(OrderCleaningStatus::getDepositUnfreezeStatusList()))) {
-
+        if ($orderData->auth_unfreeze_status    ==  OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
             $orderData->auth_unfreeze_status  = OrderCleaningStatus::depositUnfreezeStatusPayd;
-            if ($param['auth_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd) {
-                $orderData->auth_unfreeze_time  = time();
-            }
-
-            if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusPayd) {
-
-                $orderData->auth_deduction_status = $param['auth_deduction_status'];
+            $orderData->auth_unfreeze_time  = time();
+            //判断预授权转支付是否为待支付状态，如果是，变更为已支付
+            if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusUnpayed) {
+                $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
                 $orderData->auth_deduction_time = time();
                 $orderData->out_unfreeze_pay_trade_no = $param['out_unfreeze_pay_trade_no'];
             }
 
         }
-
-
         $orderData->status  = OrderCleaningStatus::orderCleaningComplete;
         $orderData->update_time = time();
         $success =$orderData->save();
