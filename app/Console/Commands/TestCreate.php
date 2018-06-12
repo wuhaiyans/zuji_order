@@ -324,4 +324,8 @@ class TestCreate extends Command
         }
         return false;
     }
+    //订单服务周期数据导入
+    public function service($orderNO,$goodsNo){
+        
+    }
 }
