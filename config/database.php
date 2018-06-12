@@ -42,11 +42,11 @@ return [
         'mysql' => [
             'driver' => 'mysql',
 			'read' => [
-				'host' => '127.0.0.1',
+				'host' => '119.29.141.207',
 				'port' => env('DB_PORT_READ', '3306'),
 				'database' => env('DB_DATABASE_READ', 'zuji_order'),
-				'username' => env('DB_USERNAME_READ', 'root'),
-				'password' => env('DB_PASSWORD_READ', 'root'),
+				'username' => env('DB_USERNAME_READ', 'hjx'),
+				'password' => env('DB_PASSWORD_READ', '123456'),
 				'unix_socket' => env('DB_SOCKET_READ', ''),
 				'charset' => 'utf8mb4',
 				'collation' => 'utf8mb4_unicode_ci',
