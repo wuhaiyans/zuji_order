@@ -273,11 +273,6 @@ class DeliveryService
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
-
-
-
-
-
         if (!$items) {
             return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'current_page'=>0];
         }
@@ -295,8 +290,6 @@ class DeliveryService
             $it['status_mark'] = $item->getStatus();
             $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
             $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
-
-
 
             if ($show_detail) {
                 $goods_list = $item->goods->toArray();
@@ -317,15 +310,11 @@ class DeliveryService
                 $it['goods'] = $goods_list;
             }
 
-
-
             $it['buttons']['confirm_receive'] = $item->status == Delivery::STATUS_SEND ? true : false;//确认收货
             $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
             $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
             $it['buttons']['cancel_delivery'] = $item->status == Delivery::STATUS_SEND ? true : false;//取消发货
-
-
-
+            $it['buttons']['already_match'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false;//已配货
 
             array_push($result, $it);
         }
