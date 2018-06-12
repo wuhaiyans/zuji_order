@@ -230,7 +230,7 @@ class SkuComponnet implements OrderCreater
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
                     'machine_value' => $spuInfo['machine_name'],
-                    'chengse' => $skuInfo['chengse_name'],
+                    'chengse' => $skuInfo['chengse'],
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
