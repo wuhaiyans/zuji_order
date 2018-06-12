@@ -82,7 +82,7 @@ class JobQueueApi {
 	 */
 	private static function push( string $key, string $url, array $data, string $callback='', string $type='realTime', string $start='',string $cron='' ):bool{
 		if( $callback == '' ){
-			$callback = config('jobsystem.CALLBACK');
+			$callback = config('jobsystem.JOB_CALLBACK');
 		}
 		$_config = [
 			'interface' => 'jobAddAsync',
