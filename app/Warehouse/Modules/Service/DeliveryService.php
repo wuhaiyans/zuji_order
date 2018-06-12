@@ -460,4 +460,15 @@ class DeliveryService
         return DeliveryRepository::getOrderNoByDeliveryNo($delivery_no);
     }
 
+
+    /**
+     * 各种状态的数量统计
+     *
+     * 默认取待发货的
+     */
+    public static function statistics($status = Delivery::STATUS_WAIT_SEND)
+    {
+        return Delivery::where(['status'=>$status])->count();
+    }
+
 }

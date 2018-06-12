@@ -7,6 +7,8 @@ use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
+use App\Warehouse\Modules\Service\ReceiveGoodsService;
+use App\Warehouse\Modules\Service\ReceiveService;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
@@ -505,6 +507,17 @@ class DeliveryController extends Controller
     }
 
 
+
+    public function statistics()
+    {
+        return [
+            'delivery' => DeliveryService::statistics(),
+            'receive'   => ReceiveService::statistics(),
+            'check'     => ReceiveGoodsService::statistics()
+        ];
+    }
+
+
     protected function _info($delivery_no)
     {
         $model = Delivery::where(['delivery_no'=>$delivery_no])->first();
@@ -536,6 +549,10 @@ class DeliveryController extends Controller
 
         return ['order_no'=>$model->order_no, 'goods_info'=>$result];
     }
+
+
+
+
 
 }
 

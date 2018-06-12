@@ -127,4 +127,16 @@ class ReceiveGoodsService
 
         return [$params['kw_type'] => $params['keywords']];
     }
+
+
+
+    /**
+     * 各种状态的数量统计
+     *
+     * 默认取待检测的
+     */
+    public static function statistics($status = ReceiveGoods::STATUS_ALL_RECEIVE)
+    {
+        return ReceiveGoods::where(['status'=>$status])->count();
+    }
 }

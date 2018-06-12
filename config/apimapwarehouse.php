@@ -37,8 +37,7 @@ return [
     'warehouse.delivery.publics' => 'DeliveryController@publics', //发货公用参数
     'warehouse.delivery.export' => 'DeliveryController@export', //导出excel
 
-
-
+    'warehouse.delivery.statistics' => 'DeliveryController@statistics', //最终数量统计
 
 
     //收货 待完成
