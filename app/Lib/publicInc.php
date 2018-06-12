@@ -30,6 +30,7 @@ class PublicInc
             self::Type_Store => '门店',
         ];
     }
+    
     /**
      *  获取角色名称
      * @param int $status
