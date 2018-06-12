@@ -5,6 +5,7 @@
  *    date : 2018-05-04
  */
 namespace App\Order\Modules\Service;
+use App\Lib\Certification;
 use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
@@ -589,6 +590,8 @@ class OrderOperate
         //授权总金额
         $orderData['zujin_amount']  =   $orderData['order_yajin'];
 
+        $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
+        //
 
         $order['order_info'] = $orderData;
 
@@ -713,6 +716,7 @@ class OrderOperate
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+               $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
                } else {

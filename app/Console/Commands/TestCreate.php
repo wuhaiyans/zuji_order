@@ -38,7 +38,7 @@ class TestCreate extends Command
     public function handle()
     {
         $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
-        var_dump($datas01);
+        echo 2344;exit;
 
     }
     public static function list($limit, $page=1)
