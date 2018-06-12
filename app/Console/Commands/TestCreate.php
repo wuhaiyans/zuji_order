@@ -38,7 +38,8 @@ class TestCreate extends Command
     public function handle()
     {
         $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
-        var_dump($datas01);
+        $a=objectToArray($datas01);
+        var_dump($a);
 
     }
     public static function list($limit, $page=1)

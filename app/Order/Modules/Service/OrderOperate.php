@@ -127,29 +127,29 @@ class OrderOperate
     public static function getOrderStatus($orderNo){
         $order = Order::getByNo($orderNo);
         $orderInfo = $order->getData();
-        $res[] =[$orderInfo['create_time'] =>"已下单"];
+        $res[] =['time' =>$orderInfo['create_time'],'status' =>"已下单"];
         if($orderInfo['pay_time']){
-           $res[] =[$orderInfo['create_time'] =>"已支付"];
+           $res[] =['time' =>$orderInfo['pay_time'],'status'=>"已支付"];
         }
         if($orderInfo['confirm_time']){
-            $res[] =[$orderInfo['create_time'] =>"已确认"];
+            $res[] =['time' =>$orderInfo['confirm_time'],'status'=>"已确认"];
         }
         if($orderInfo['delivery_time']){
-            $res[] =[$orderInfo['create_time'] =>"已发货"];
+            $res[] =['time' =>$orderInfo['delivery_time'],'status'=>"已发货"];
         }
         if($orderInfo['receive_time']){
-            $res[] =[$orderInfo['create_time'] =>"租用中"];
+            $res[] =['time' =>$orderInfo['receive_time'],'status'=>"租用中"];
         }
         if($orderInfo['order_status'] == Inc\OrderStatus::OrderCancel){
-            $res[] =[$orderInfo['complete_time'] =>"已取消（未支付）"];
+            $res[] =['time' =>$orderInfo['complete_time'],'status'=>"已取消（未支付）"];
             return $res;
         }
         if($orderInfo['order_status'] == Inc\OrderStatus::OrderClosedRefunded){
-            $res[] =[$orderInfo['complete_time'] =>"已关闭（已退款）"];
+            $res[] =['time' =>$orderInfo['complete_time'],'status'=>"已关闭（已退款）"];
             return $res;
         }
         if($orderInfo['order_status'] == Inc\OrderStatus::OrderCompleted){
-            $res[] =[$orderInfo['complete_time'] =>"已完成"];
+            $res[] =['time' =>$orderInfo['complete_time'],'status'=>"已完成"];
             return $res;
         }
 
@@ -218,6 +218,10 @@ class OrderOperate
         $logData = OrderLogRepository::getOrderLog($orderNo);
         if(!$logData){
             return false;
+        }
+        foreach ($logData as $k=>$v){
+
+            $k['operator_type_name'] = \App\Lib\PublicInc::getRoleName($k['operator_type']);
         }
         return $logData;
     }
