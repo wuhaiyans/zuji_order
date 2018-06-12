@@ -98,8 +98,6 @@ class DeliveryDetail {
 
         $goods = OrderRepository::getGoodsListByOrderId($orderNo);
         foreach ($goods as $k=>$v){
-            $specs =json_decode($v['specs'],true);
-
             foreach ($goodsInfo as $key=>$value){
                 $imei ="";
                 if(in_array($v['goods_no'],$value)){
@@ -109,7 +107,7 @@ class DeliveryDetail {
             $goodsData=[
                 'spu_id'=>$v['prod_id'],
                 'goods_no'=>$v['goods_no'],
-                'chengse'=>$specs[1]['value'],
+                'chengse'=>$v['chengse'],
                 'machine_no'=>$v['machine_value'],
                 'imei'=>$imei,
                 'zuqi'=>$v['zuqi'],

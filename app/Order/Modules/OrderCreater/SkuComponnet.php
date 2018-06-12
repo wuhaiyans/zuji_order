@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Inc\Specifications;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -38,6 +39,9 @@ class SkuComponnet implements OrderCreater
     private $couponInfo=[];
     private $sku=[];
 
+    //规格
+    private $specs;
+
 
 	/**
 	 * 
@@ -60,6 +64,7 @@ class SkuComponnet implements OrderCreater
 
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
+
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])?$sku[$i]['begin_time']:"";
@@ -72,6 +77,18 @@ class SkuComponnet implements OrderCreater
             } elseif ($this->zuqiType == 2) {
                 $this->zuqiTypeName = "month";
             }
+            $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
+            // 格式化 规格
+            $_specs = [];
+            foreach($spec as $it){
+                $_specs[] = filter_array($it, [
+                    'id' => 'required',
+                    'name' => 'required',
+                    'value' => 'required',
+                ]);
+            }
+            $this->specs = $_specs;
+
         }
         $this->goodsArr =$goodsArr;
         $this->payType=$payType;
@@ -156,16 +173,8 @@ class SkuComponnet implements OrderCreater
                 $this->flag = false;
             }
             // 格式化 规格
-            $specs = [];
-            foreach(json_decode($skuInfo['spec'],true) as $it){
-                $specs[] = filter_array($it, [
-                    'id' => 'required',
-                    'name' => 'required',
-                    'value' => 'required',
-                ]);
-            }
             $mustSpec = [1,4];
-            $specId = array_column($specs, 'id');
+            $specId = array_column($this->specs, 'id');
             $specDiff = array_diff($mustSpec, $specId);
             if( count($specDiff)>0 ){
                 $this->getOrderCreater()->setError('商品规格错误');
@@ -209,7 +218,7 @@ class SkuComponnet implements OrderCreater
                     'brand_id' => intval($spuInfo['brand_id']),
                     'category_id' => intval($spuInfo['catid']),
                     'machine_id' => intval($spuInfo['machine_id']),
-                    'specs' => $spuInfo['specs'],
+                    'specs' => $this->specs,
                     'thumb' => $spuInfo['thumb'],
                     'insurance' =>$spuInfo['yiwaixian'],
                     'insurance_cost' => $spuInfo['yiwaixian_cost'],
@@ -220,7 +229,8 @@ class SkuComponnet implements OrderCreater
                     'zuqi_type_name' => $this->zuqiTypeName,
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
-                    'machine_value' => intval($skuInfo['machine_value']),
+                    'machine_value' => $spuInfo['machine_name'],
+                    'chengse' => $skuInfo['chengse_name'],
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
@@ -338,13 +348,14 @@ class SkuComponnet implements OrderCreater
                     'zujin'=>$v['zujin'],
                     'order_no'=>$orderNo,
                     'machine_value'=>$v['machine_value'],
+                    'chengse'=>$v['chengse'],
                     'discount_amount'=>$v['discount_amount'],
                     'coupon_amount'=>$v['first_coupon_amount']+$v['order_coupon_amount'],
                     'amount_after_discount'=>$v['amount_after_discount'],
                     'edition'=>$v['edition'],
                     'market_price'=>$v['market_price'],
                     'price'=>$v['amount_after_discount'] + $v['insurance'],
-                    'specs'=>$v['specs'],
+                    'specs'=>Specifications::input_format($v['specs']),
                     'insurance'=>$v['insurance'],
                     'buyout_price'=>$v['buyout_price'],
                     'weight'=>$v['weight'],
