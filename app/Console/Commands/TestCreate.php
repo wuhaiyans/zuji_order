@@ -2,7 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Channel\Channel;
+use App\Lib\Goods\Goods;
+use App\Lib\Order\OrderInfo;
+use App\Order\Models\Order;
+use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderGoodsUnit;
+use App\Order\Models\OrderUserAddress;
+use App\Order\Models\OrderUserCertified;
+use App\Order\Models\OrderVisit;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class TestCreate extends Command
 {
@@ -103,11 +114,11 @@ class TestCreate extends Command
                     'receive_time'=>$receive_time,//
                     'complete_time'=>$status['complete_time'],//
                 ];
-//                $res =Order::create($orderData);
-//                if(!$res->getQueueableId()){
-//                    DB::rollBack();
-//                    echo "订单导入失败:".$v['order_no'];die;
-//                }
+                $res =Order::updateOrCreate($orderData);
+                if(!$res->getQueueableId()){
+                    DB::rollBack();
+                    echo "订单导入失败:".$v['order_no'];die;
+                }
 
                 //通过接口获取商品信息--- 获取线上的
                 $goodsArr = Goods::getSkuList([$goods_info['sku_id']]);
@@ -131,9 +142,10 @@ class TestCreate extends Command
                         'begin_time'=>$service['begin_time'],
                         'end_time'=>$service['end_time'],
                     ];
-                    $ret = DB::table("order_goods_unit")->insert($serviceData);
-                    if(!$ret){
-
+                    $ret = OrderGoodsUnit::updateOrCreate($serviceData);
+                    if(!$ret->getQueueableId()){
+                        DB::rollBack();
+                        echo "插入服务周期失败:".$v['order_no'];die;
                     }
                 }
 
@@ -176,7 +188,7 @@ class TestCreate extends Command
                     'create_time'=>$goods_info['create_time'],
                     'update_time'=>$goods_info['update_time'],
                 ];
-                $res =OrderGoods::create($goodsData);
+                $res =OrderGoods::updateOrCreate($goodsData);
                 if(!$res->getQueueableId()){
                     DB::rollBack();
                     echo "商品导入失败:".$v['order_no'];die;
@@ -309,8 +321,8 @@ class TestCreate extends Command
             'address_info'=>$userAddress['address'],
             'create_time'=>$order['create_time'],
         ];
-        $ret = OrderUserAddressRepository::add($data);
-        if($ret){
+        $ret = OrderUserAddress::updateOrCreate($data);
+        if($ret->getQueueableId()){
             return true;
         }
         return false;
@@ -333,8 +345,8 @@ class TestCreate extends Command
             'cret_no'=>$order['cert_no'],
             'create_time'=>$order['create_time'],
         ];
-        $ret = OrderUserCertifiedRepository::add($data);
-        if($ret){
+        $ret = OrderUserCertified::updateOrCreate($data);
+        if($ret->getQueueableId()){
             return true;
         }
         return false;
@@ -344,17 +356,26 @@ class TestCreate extends Command
         if($order['remark_id']>0){
             $data = [
                 'order_no' => $order['order_no'],
-                'visit_id' => $order['order_no'],
-                'visit_text' => $order['order_no'],
+                'visit_id' => $order['remark_id'],
+                'visit_text' => $order['remark'],
                 'create_time' => $order['create_time'],
             ];
-            $ret = DB::table("order_info_visit")->insert($data);
-            if($ret){
-                $ret = DB::table("order_info_extend")->insert(['order_no'=>$data['order_no'],'field_name'=>"visit","field_value"=>1]);
+            $ret =OrderVisit::updateOrCreate($data);
+            if(!$ret->getQueueableId()){
+                return false;
+            }else{
+                $res = OrderExtend::updateOrCreate(['order_no'=>$data['order_no'],'field_name'=>"visit","field_value"=>1]);
+                if(!$res->getQueueableId()){
+                    return false;
+                }
             }
         }
-        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
-        echo 2344;exit;
+        return true;
 
     }
+
+
+
+
+
 }
