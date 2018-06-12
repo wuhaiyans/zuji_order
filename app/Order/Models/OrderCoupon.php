@@ -28,7 +28,7 @@ class OrderCoupon extends Model
      *
      * @var array
      */
-    protected $fillable = ['coupon_no','coupon_id','discount_amount','coupon_type','coupon_name','business_type','business_no'];
+    protected $fillable = ['coupon_no','coupon_id','discount_amount','coupon_type','coupon_name','order_no'];
 
 
 }
