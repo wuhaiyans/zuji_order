@@ -362,5 +362,71 @@ class OrderCleaning
         Log::error('[清算阶段]业务未设置回调通知');
     }
 
+    /**
+     * 订单清算小程序回调接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public static function miniUnfreezeAndPayClean($param)
+    {
+        try{
+            LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:', $param);
+            /**
+            支付宝小程序解压预授权成功后返回的值
+            pay_amount（单位元）
+            out_order_no商户订单号
+            zm_order_no芝麻订单号
+            notify_type 订单完结类型，目前包括取消(ZM_RENT_ORDER_CANCEL)、完结(ZM_RENT_ORDER_FINISH)
+            ZM_RENT_ORDER_CANCEL 一般不会有out_trans_no和alipay_fund_no，为ZM_RENT_ORDER_FINISH时才有out_trans_no和alipay_fund_no
+            out_trans_no 资商户资金交易号，最长32位，数字和字母组合，同一笔交易金额以最后一次的交易金额为准（请求时传入才会返回，扣款预授权支付金额为0.00则不需要传）
+            alipay_fund_no支付成功时支付宝生成的资金流水号，用于商户与支付宝进行对账（请求时传入out_trans_no才会返回）
+             * */
+            if (!isset($param['out_order_no'])) return false;
+            //更新查看清算表的状态
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
+            if ($orderCleanInfo['code']) {
+                LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                return false;
+            }
+            $orderCleanInfo = $orderCleanInfo['data'];
+            //查看清算状态是否已支付
+            if ($orderCleanInfo['auth_unfreeze_status']==OrderCleaningStatus::depositDeductionStatusUnpayed){
+
+                //更新订单清算押金转支付状态
+                $orderParam = [
+                    'order_no' => $param['out_order_no'],
+                    'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
+                ];
+                $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
+                if (!$success) {
+                    //更新业务系统的状态
+                    $businessParam = [
+                        'business_type' => $orderCleanInfo['business_type'],	// 业务类型
+                        'business_no'	=> $orderCleanInfo['business_no'],	// 业务编码
+                        'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
+                    ];
+                    $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
+                    LogApi::info(__METHOD__.'() '.microtime(true).'小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
+                    return $success ?? false;
+                } else {
+
+                        LogApi::info(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
+                        return false;
+                     }
+            } else {
+
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+            }
+            return true;
+
+        } catch (\Exception $e) {
+            LogApi::info(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
+            return false;
+
+        }
+
+    }
+
 
 }

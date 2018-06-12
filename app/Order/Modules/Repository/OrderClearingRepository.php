@@ -10,6 +10,7 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Models\OrderClearing;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderRepository;
 
 class OrderClearingRepository
@@ -98,22 +99,27 @@ class OrderClearingRepository
      */
     public static function getOrderCleanInfo($param)
     {
-
         if (empty($param)) {
             return false;
         }
         $whereArray = array();
-        if (isset($param['clean_no'])){
+        if (isset($param['clean_no'])) {
             $whereArray[] = ['clean_no', '=', $param['clean_no']];
-            $orderData =  OrderClearing::where($whereArray)->first();
-            if ($orderData) {
-              return  $orderData->toArray();
-            }
+        }
+        if (isset($param['order_no'])) {
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+        if (isset($param['order_type'])) {
+            $whereArray[] = ['order_type', '=', $param['order_type']];
+        }
+        $orderData =  OrderClearing::where($whereArray)->first();
+        if ($orderData) {
+            return  $orderData->toArray();
+        }
             return false;
         }
-        return false;
 
-    }
+
 
 
 
@@ -202,6 +208,41 @@ class OrderClearingRepository
     }
 
 
+
+    /**
+     * 更新小程序结算退款单数据
+     * Author: heaven
+     * @param $param
+     * @return bool
+     */
+    public static function upMiniOrderCleanStatus($param){
+        if (empty($param)) {
+            return false;
+        }
+        $whereArray[] = ['order_no', '=', $param['order_no']];
+        $whereArray[] = ['order_type', '=', OrderStatus::orderMiniService];
+        $orderData =  OrderClearing::where($whereArray)->first();
+        if (!$orderData) return false;
+        if ($orderData->auth_unfreeze_status    ==  OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+            $orderData->auth_unfreeze_status  = OrderCleaningStatus::depositUnfreezeStatusPayd;
+            $orderData->auth_unfreeze_time  = time();
+            //判断预授权转支付是否为待支付状态，如果是，变更为已支付
+            if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusUnpayed) {
+                $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
+                $orderData->auth_deduction_time = time();
+                $orderData->out_unfreeze_pay_trade_no = $param['out_unfreeze_pay_trade_no'];
+            }
+
+        }
+        $orderData->status  = OrderCleaningStatus::orderCleaningComplete;
+        $orderData->update_time = time();
+        $success =$orderData->save();
+        if(!$success){
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 更新结算退款单数据
      * Author: heaven
@@ -252,7 +293,7 @@ class OrderClearingRepository
         if (isset($param['auth_deduction_status']) && !empty($param['auth_deduction_status']) && in_array($param['auth_deduction_status'],array_keys(OrderCleaningStatus::getDepositDeductionStatusList()))) {
 
             $orderData->auth_deduction_status  = $param['auth_deduction_status'];
-            if ($param['auth_deduction_time']==OrderCleaningStatus::depositDeductionStatusPayd) {
+            if ($param['auth_deduction_status']==OrderCleaningStatus::depositDeductionStatusPayd) {
 
                 $orderData->auth_deduction_time  = time();
                 $orderData->out_unfreeze_pay_trade_no   = $param['out_unfreeze_pay_trade_no'];

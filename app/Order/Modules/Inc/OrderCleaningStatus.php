@@ -9,11 +9,11 @@ namespace App\Order\Modules\Inc;
 
 class OrderCleaningStatus{
 
-    /******************* start  businessType 业务类型  2，退货 3 退款，4，还机 ，5，买断 ****************************************************/
+    /******************* start  businessType 业务类型  2，退货 8 退款，4，还机 ，5，买断 ****************************************************/
 
     const businessTypeReturn = 2;
 
-    const businessTypeRefund = 3;
+    const businessTypeRefund = 8;
 
     const businessTypeReturnGoods = 4;
 
