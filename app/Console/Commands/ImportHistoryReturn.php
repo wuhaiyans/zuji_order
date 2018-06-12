@@ -9,6 +9,7 @@
 
 namespace App\Console\Commands;
 
+use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
 
@@ -19,7 +20,7 @@ class ImportHistoryReturn extends Command
      *
      * @var string
      */
-    protected $signature = 'command:ImportHistoryReturn {param1?} {--param2=}';
+    protected $signature = 'command:ImportHistoryReturn {param1?} {--param2=} {param3?} {--param4=}';
 
     /**
      * The console command description.
@@ -49,19 +50,68 @@ class ImportHistoryReturn extends Command
      */
     public function handle()
     {
-        // 入口方法
-        // 不指定参数名的情况下用argument
-        $param1 = $this->argument('param1');
-        // 用--开头指定参数名
-        $param2 = $this->option('param2');
-        //有参数
-        if(!empty($param2) && in_array($param2, $this->getTableField()) && !empty($param1)) {
-            $sql = "select * from zuji_order2_return where {$param2} = {$param1} order by return_id asc";
-        } else {
-            $sql = "select * from zuji_order2_return order by return_id asc";
+        /**
+         * 入口方法
+         * 支持传多个参数查询
+         * e.g: php artisan command:ImportHistoryReturn 1 --param2=return_id 1 --param4=business_key
+         */
+        //
+
+        try {
+
+            // 不指定参数名的情况下用argument
+            $param1 = $this->argument('param1');
+            // 用--开头指定参数名
+            $param2 = $this->option('param2');
+
+            // 不指定参数名的情况下用argument
+            $param3 = $this->argument('param3');
+            // 用--开头指定参数名
+            $param4 = $this->option('param4');
+
+            //有参数
+            $sql = '';
+            if(!empty($param2) && in_array($param2, $this->getTableField()) && !empty($param1)) {
+                $sql = "SELECT * FROM zuji_order2_return WHERE {$param2} = {$param1}";
+            }
+
+            if(!empty($param4) && in_array($param4, $this->getTableField()) && !empty($param3)) {
+                $sql .= " AND {$param4} = {$param3}";
+            }
+
+            if (empty($param1)) {
+
+                $sql = "SELECT * FROM zuji_order2_return";
+            }
+
+            $sql.= " ORDER BY return_id ASC";
+
+            $datas   =  $this->conn->select($sql);
+            $newData = objectToArray($datas);
+            if (!empty($newData)) {
+                LogApi::info(__METHOD__.'() '.microtime(true).'历史退货退款导入接口开始:'.$param1);
+                p($newData);
+                foreach($newData as $keys=>$values) {
+
+
+
+                }
+                $this->insertSelectReturn();
+
+            }
+
+
+        }   catch (\Exception $exception) {
+
+
+                 echo $exception->getMessage();
+
+
+
         }
-        $datas   =  $this->conn->select($sql);
-        $newData = objectToArray($datas);
+
+
+
     }
 
 
@@ -76,44 +126,91 @@ class ImportHistoryReturn extends Command
         return array_column(objectToArray($fields),"Field");
     }
 
-    private function insertSelectReturn($param)
+    /**
+     * 插入历史数据到新退货表
+     * Author: heaven
+     * @param $data 历史数据结果集
+     * @return bool|\Illuminate\Database\Eloquent\Model
+     */
+    private function insertSelectReturn($data)
     {
 
 
-        0 => array:16 [
-            "return_id" => 1
-            "business_key" => 1
-            "order_id" => 20
-            "order_no" => "2017121800068"
-            "user_id" => 12
-            "goods_id" => 20
-            "loss_type" => 1
-            "address_id" => 1
-            "reason_id" => 3
-            "reason_text" => ""
-            "return_status" => 3
-            "admin_id" => "1"
-            "return_check_remark" => "23322342"
-            "return_check_time" => 1513595312
-            "create_time" => 1513595257
-            "update_time" => 1513595312
-  ]
+//        0 => array:16 [
+//            "return_id" => 1
+//            "business_key" => 1
+//            "order_id" => 20
+//            "order_no" => "2017121800068"
+//            "user_id" => 12
+//            "goods_id" => 20
+//            "loss_type" => 1
+//            "address_id" => 1
+//            "reason_id" => 3
+//            "reason_text" => ""
+//            "return_status" => 3
+//            "admin_id" => "1"
+//            "return_check_remark" => "23322342"
+//            "return_check_time" => 1513595312
+//            "create_time" => 1513595257
+//            "update_time" => 1513595312
+//  ]
 
 
         $data = [
             'goods_no'      => $goods_info['goods_no'],
-            'order_no'      => $goods_info['order_no'],
+            'order_no'      => $data['order_no'],
             'business_key' => $params['business_key'],
-            'loss_type'     => $params['loss_type'],
-            'reason_id'     => $params['reason_id'],
-            'reason_text'   => $params['reason_text'],
-            'user_id'       => $params['user_id'],
+            'loss_type'     => $data['loss_type'],
+            'reason_id'     => $data['reason_id'],
+            'reason_text'   => $data['reason_text'],
+            'user_id'       => $data['user_id'],
             'status'        => ReturnStatus::ReturnCreated,
             'refund_no'     => create_return_no(),
-            'create_time'  => time(),
+            'create_time'  => $data['create_time'],
+            'check_time'  => $data['return_check_time'],
+            'update_time'  => $data['update_time'],
+
         ];
-        $create = OrderReturnRepository::createReturn($data);
+        $succsss = OrderReturn::updateOrCreate($data);
+         return $succsss ?? false;
 
 
     }
+
+
+    /**
+     * 退货原因映射
+     * Author: heaven
+     */
+    private function reasonIdMap()
+    {
+
+
+
+    }
+
+
+    /**
+     * 退货状态映射
+     * Author: heaven
+     */
+    private function returnStatusMap()
+    {
+
+
+
+    }
+
+
+    /**
+     * 业务类型映射
+     * Author: heaven
+     */
+    private function businessKeyMap()
+    {
+
+
+
+    }
+
 }
