@@ -22,5 +22,8 @@ class VerifyCsrfToken extends Middleware
 		
 		//
 		'/order/notice/notify',	// 订单通知
+		
+		//
+		'/commom/job/testJobCustomer',	// 任务消费者测试
     ];
 }
