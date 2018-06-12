@@ -221,7 +221,7 @@ class OrderOperate
         }
         foreach ($logData as $k=>$v){
 
-            $k['operator_type_name'] = \App\Lib\PublicInc::getRoleName($k['operator_type']);
+            $logData[$k]['operator_type_name'] = \App\Lib\PublicInc::getRoleName($v['operator_type']);
         }
         return $logData;
     }
