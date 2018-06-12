@@ -8,6 +8,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\ReceiveRepository;
 
@@ -279,5 +280,15 @@ class ReceiveService
         if (!ReceiveRepository::checkItems($params)) {
             throw new \Exception($params['receive_no'] . '设备:'.$params['goods_no'].'添加检测项失败');
         }
+    }
+
+    /**
+     * 各种状态的数量统计
+     *
+     * 默认取待收货的
+     */
+    public static function statistics($status = Receive::STATUS_INIT)
+    {
+        return Receive::where(['status'=>$status])->count();
     }
 }

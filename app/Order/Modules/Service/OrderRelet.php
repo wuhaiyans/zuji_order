@@ -8,14 +8,7 @@
 
 namespace App\Order\Modules\Service;
 
-
-
 use App\Lib\Common\LogApi;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderGoodsUnit;
-use App\Order\Models\OrderRelet;
-use App\Order\Modules\Inc\OrderFreezeStatus;
-use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\publicInc;
@@ -25,7 +18,6 @@ use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
-use App\Order\Modules\Repository\OrderPayWithholdRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\PayCreater;
 use App\Order\Modules\Repository\Relet\Relet;
@@ -36,9 +28,9 @@ class OrderRelet
 {
     protected $reletRepository;
 
-    public function __construct(ReletRepository $reletRepository)
+    public function __construct()
     {
-        $this->reletRepository = $reletRepository;
+        $this->reletRepository = new ReletRepository();
     }
 
     /**

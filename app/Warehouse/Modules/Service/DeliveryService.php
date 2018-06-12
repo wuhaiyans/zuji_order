@@ -273,16 +273,15 @@ class DeliveryService
         $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
-
         if (!$items) {
             return ['data'=>[], 'per_page'=>$limit, 'total'=>0, 'current_page'=>0];
         }
 
         $show_detail = isset($params['detail']) ? $params['detail'] : false;
 
-        if (!$show_detail) {
-            return ['data'=>$items, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
-        }
+//        if (!$show_detail) {
+//            return ['data'=>$items, 'per_page'=>$limit, 'total'=>$collect->total(), 'current_page'=>$collect->currentPage()];
+//        }
 
         $result = [];
         foreach ($items as $item) {
@@ -292,29 +291,31 @@ class DeliveryService
             $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
             $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
 
-            $goods_list = $item->goods->toArray();
-            $imei_list  = $item->imeis->toArray();
+            if ($show_detail) {
+                $goods_list = $item->goods->toArray();
+                $imei_list  = $item->imeis->toArray();
 
-            foreach ($goods_list as &$g) {
-                if (!is_array($imei_list)) continue;
-                foreach ($imei_list as $im) {
-                    if ($im['goods_no'] == $g['goods_no']) {
+                foreach ($goods_list as &$g) {
+                    if (!is_array($imei_list)) continue;
+                    foreach ($imei_list as $im) {
+                        if ($im['goods_no'] == $g['goods_no']) {
 
-                        $g['imei'] = $im['imei'];
-                        $g['price'] = $im['price'];
-
-//                        $g['imeis'][] = $im['imei'];
+                            $g['imei'] = $im['imei'];
+                            $g['price'] = $im['price'];
+                        }
                     }
-                }
-            }unset($g);
+                }unset($g);
 
-            $it['imeis'] = $item->imeis->toArray();
-            $it['goods'] = $goods_list;
+                $it['imeis'] = $item->imeis->toArray();
+                $it['goods'] = $goods_list;
+            }
 
+            $it['buttons']['confirm_receive'] = $item->status == Delivery::STATUS_SEND ? true : false;//确认收货
+            $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
+            $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
+            $it['buttons']['cancel_delivery'] = $item->status == Delivery::STATUS_SEND ? true : false;//取消发货
+            $it['buttons']['already_match'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false;//已配货
 
-
-//            $it['imeis'] = $item->imeis->toArray();
-//            $it['goods'] = $item->goods->toArray();
             array_push($result, $it);
         }
 
@@ -457,6 +458,17 @@ class DeliveryService
     public function getOrderNoByDeliveryNo($delivery_no)
     {
         return DeliveryRepository::getOrderNoByDeliveryNo($delivery_no);
+    }
+
+
+    /**
+     * 各种状态的数量统计
+     *
+     * 默认取待发货的
+     */
+    public static function statistics($status = Delivery::STATUS_WAIT_SEND)
+    {
+        return Delivery::where(['status'=>$status])->count();
     }
 
 }
