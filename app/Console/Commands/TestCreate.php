@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Order\Models\Order;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use \App\Order\Modules\Repository\OrderUserAddressRepository;
+use \App\Order\Modules\Repository\OrderUserCertifiedRepository;
 
 class TestCreate extends Command
 {
@@ -194,5 +196,51 @@ class TestCreate extends Command
                 break;
         }
         return $array;
+    }
+    //用户地址导入
+    public function userAddressInsert($order){
+        $userAddress = \DB::connection('mysql_01')->table('zuji_order2_address')->select('*')->first();
+        if(!$userAddress){
+            return false;
+        }
+        $data = [
+            'order_no'=>$order['order_no'],
+            'consignee_mobile'=>$userAddress['mobile'],
+            'name'=>$userAddress['name'],
+            'province_id'=>$userAddress['province_id'],
+            'city_id'=>$userAddress['city_id'],
+            'area_id'=>$userAddress['country_id'],
+            'address_info'=>$userAddress['address'],
+            'create_time'=>$order['create_time'],
+        ];
+        $ret = OrderUserAddressRepository::add($data);
+        if($ret){
+            return true;
+        }
+        return false;
+    }
+    //用户信用认证导入
+    public function userCertifiedInsert($order){
+        $userCertified = \DB::connection('mysql_01')->table('zuji_order2_address')->select('*')->first();
+        if(!$userCertified){
+            return false;
+        }
+        $data = [
+            'order_no'=>$order['order_no'],
+            'certified'=>$order['order_no'],
+            'certified_platform'=>$order['certified_platform'],
+            'credit'=>$order['credit'],
+            'score'=>0,
+            'risk'=>0,
+            'face'=>0,
+            'realname'=>$order['realname'],
+            'cret_no'=>$order['cert_no'],
+            'create_time'=>$order['create_time'],
+        ];
+        $ret = OrderUserCertifiedRepository::add($data);
+        if($ret){
+            return true;
+        }
+        return false;
     }
 }
