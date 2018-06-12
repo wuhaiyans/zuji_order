@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Lib\Channel\Channel;
+use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use Illuminate\Console\Command;
@@ -65,7 +66,7 @@ class TestCreate extends Command
                 $goods_info=objectToArray($goods);
 
                 //获取状态
-                $status =$this->getStatus($v['status']);
+                $status =$this->getStatus($v['status'],$v);
                 //完成时间
                 $complete_time =0;
 
@@ -82,10 +83,7 @@ class TestCreate extends Command
                     $confirm_time =$delivery_info['create_time'];
                     $receive_time =$delivery_info['confirm_time'];
                 }
-                echo 1;die;
 
-
-                var_dump($delivery_info);die;
                 $orderData =[
                     'order_no'=>$v['order_no'], //订单编号
                     'mobile'=>$v['mobile'],   //用户手机号
@@ -110,52 +108,61 @@ class TestCreate extends Command
                     'appid'=>$v['appid'],//
                     'channel_id'=>$channel_id,//
                     'receive_time'=>$receive_time,//
-                    'complete_time'=>$complete_time,//
+                    'complete_time'=>$status['complete_time'],//
                 ];
-                $res =Order::create($orderData);
-                if(!$res->getQueueableId()){
+//                $res =Order::create($orderData);
+//                if(!$res->getQueueableId()){
+//                    DB::rollBack();
+//                    echo "订单导入失败:".$v['order_no'];die;
+//                }
+
+                //通过接口获取商品信息--- 获取线上的
+                $goodsArr = Goods::getSkuList([$goods_info['sku_id']]);
+                if (!is_array($goodsArr)) {
                     DB::rollBack();
-                    echo "订单导入失败:".$v['order_no'];die;
+                    echo "商品接口获取失败:".$v['order_no'];die;
                 }
+                //自动生成goods_no
+                $goodsNo =createNo(6);
 
                 $goodsData =[
                     'order_no'=>$v['order_no'],
                     'goods_name'=>$v['goods_name'],
-                    'zuji_goods_id'=>$v['goods_id'],
-                    'zuji_goods_sn'=>$v['order_no'],
-                    'goods_no'=>createNo(6),
-                    'goods_thumb'=>$v['order_no'],
-                    'prod_id'=>$v['order_no'],
-                    'prod_no'=>$v['order_no'],
-                    'brand_id'=>$v['order_no'],
-                    'category_id'=>$v['order_no'],
-                    'machine_id'=>$v['order_no'],
-                    'user_id'=>$v['order_no'],
-                    'quantity'=>$v['order_no'],
-                    'goods_yajin'=>$v['order_no'],
-                    'yajin'=>$v['order_no'],
-                    'zuqi'=>$v['order_no'],
-                    'zuqi_type'=>$v['order_no'],
-                    'zujin'=>$v['order_no'],
-                    'machine_value'=>$v['order_no'],
-                    'chengse'=>$v['order_no'],
-                    'discount_amount'=>$v['order_no'],
-                    'coupon_amount'=>$v['order_no'],
-                    'amount_after_discount'=>$v['order_no'],
-                    'edition'=>$v['order_no'],
-                    'business_key'=>$v['order_no'],
-                    'business_no'=>$v['order_no'],
-                    'market_price'=>$v['order_no'],
-                    'price'=>$v['order_no'],
-                    'specs'=>$v['order_no'],
-                    'insurance'=>$v['order_no'],
-                    'buyout_price'=>$v['order_no'],
-                    'begin_time'=>$v['order_no'],
-                    'end_time'=>$v['order_no'],
-                    'weight'=>$v['order_no'],
+                    'zuji_goods_id'=>$goods_info['sku_id'],
+                    'zuji_goods_sn'=>$goodsArr[$goods_info['sku_id']]['sku_info']['sn'],
+                    'goods_no'=>$goodsNo,
+                    'goods_thumb'=>$goods_info['thumb'],
+                    'prod_id'=>$goods_info['spu_id'],
+                    'prod_no'=>$goodsArr[$goods_info['sku_id']]['spu_info']['sn'],
+                    'brand_id'=>$goods_info['brand_id'],
+                    'category_id'=>$goods_info['category_id'],
+                    'machine_id'=>$goodsArr[$goods_info['sku_id']]['sku_info']['machine_id'],
+                    'user_id'=>$v['user_id'],
+                    'quantity'=>1,
+                    'goods_yajin'=>($goods_info['yajin']+$goods_info['mianyajin'])/100,
+                    'yajin'=>$goods_info['yajin']/100,
+                    'zuqi'=>$goods_info['zuqi'],
+                    'zuqi_type'=>$goods_info['zuqi_type'],
+                    'zujin'=>$goods_info['zujin']/100,
+                    'machine_value'=>empty($goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'])?"":$goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'],
+                    'chengse'=>$goods_info['chengse'],
+                    'discount_amount'=>0,
+                    'coupon_amount'=>$v['discount_amount']/100,
+                    'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
+                    'edition'=>$goodsArr[$goods_info['sku_id']]['sku_info']['edition'],
+                    'business_key'=>0,
+                    'business_no'=>'',
+                    'market_price'=>$goodsArr[$goods_info['sku_id']]['sku_info']['market_price'],
+                    'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100,
+                    'specs'=>$goods_info['specs'],
+                    'insurance'=>$goods_info['yiwaixian']/100,
+                    'buyout_price'=>($goodsArr[$goods_info['sku_id']]['sku_info']['market_price']*120 -($goods_info['zuqi']*$goods_info['zujin']/100)),
+                    'begin_time'=>0,
+                    'end_time'=>0,
+                    'weight'=>$goodsArr[$goods_info['sku_id']]['sku_info']['weight'],
                     'goods_status'=>$status['goods_status'],
-                    'create_time'=>$v['order_no'],
-                    'update_time'=>$v['order_no'],
+                    'create_time'=>$goods_info['create_time'],
+                    'update_time'=>$goods_info['update_time'],
                 ];
                 $res =OrderGoods::create($goodsData);
                 if(!$res->getQueueableId()){
