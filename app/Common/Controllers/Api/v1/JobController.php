@@ -23,16 +23,28 @@ class JobController extends Controller
 	 */
 	public function testJobProducer(){
 		LogApi::debug('testJobProducer');
-//		\App\Lib\Common\JobQueueApi::addRealTime('test', $url, $data)
-		var_dump(123);exit;
+		$url = 'http://dev-order-zuji.huishoubao.com/common/job/testJobCustomer';
+		$b = \App\Lib\Common\JobQueueApi::addRealTime('test', $url, ['test'=>'TEST']);
+		echo 'Job creation is '. ( $b ? 'ok': 'error');
+		exit;
 	}
 		
 	/**
 	 * 任务消费者
 	 */
 	public function testJobCustomer(){
-		LogApi::debug('test');
-		var_dump(123);exit;
+		$input = file_get_contents("php://input");
+		LogApi::debug('testJobCustomer', $input);
+		
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo 'job\'s data is null ';exit;
+		}
+		if( !is_array($params) ){
+			echo 'job\'s data not array ';exit;
+		}
+		
+		echo '{"status":"ok"}';
 	}
 		
 	
