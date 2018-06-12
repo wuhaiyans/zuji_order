@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Order\Models\Order;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class TestCreate extends Command
 {
@@ -37,11 +39,62 @@ class TestCreate extends Command
      */
     public function handle()
     {
-        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->first();
-        $a=objectToArray($datas01);
-        var_dump($a);
+        try{
+            DB::beginTransaction();
+            $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->where(['business_key'=>1])->limit(5)->get();
+            $orders=objectToArray($datas01);
+
+            foreach ($orders as $k=>$v){
+                $order_type =1;
+                if($v['appid'] == 36 || $v['appid'] == 90 || $v['appid'] == 91 || $v['appid'] == 92){
+                    $order_type =3;
+                }
+                $res =$this->getStatus($v['status']);
+                var_dump($res);die;
+                $newData =[
+                    'order_no'=>$v['order_no'], //订单编号
+                    'mobile'=>$v['mobile'],   //用户手机号
+                    'user_id'=>$v['user_id'],  //订单类型
+                    'order_type'=>$order_type, //订单类型 1线上订单2门店订单 3小程序订单
+                    'order_status'=>$res['order_status'],//
+                    'freeze_type'=>$res['freeze_type'],//
+                    'pay_type'=>$v['payment_type_id'],//
+                    'zuqi_type'=>$v['order_no'],//
+                    'remark'=>$v['order_no'],//
+                    'order_amount'=>$v['order_no'],//订单实际总租金
+                    'goods_yajin'=>$v['order_no'],//商品总押金金额
+                    'discount_amount'=>$v['order_no'],//商品优惠总金额
+                    'order_yajin'=>$v['order_no'],//实付商品总押金金额
+                    'order_insurance'=>$v['order_no'],//意外险总金额
+                    'coupon_amount'=>$v['order_no'],//优惠总金额
+                    'create_time'=>$v['order_no'],//
+                    'update_time'=>$v['order_no'],//
+                    'pay_time'=>$v['order_no'],//
+                    'confirm_time'=>$v['order_no'],//
+                    'delivery_time'=>$v['order_no'],//
+                    'appid'=>$v['order_no'],//
+                    'channel_id'=>$v['order_no'],//
+                    'receive_time'=>$v['order_no'],//
+                    'complete_time'=>$v['order_no'],//
+
+                ];
+                $res =Order::create($newData);
+                if(!$res->getQueueableId()){
+                    DB::rollBack();
+                    echo "导入失败1";die;
+                }
+
+            }
+            DB::commit();
+            echo "导入成功";die;
+        }catch (\Exception $e){
+            DB::rollBack();
+            echo $e->getMessage();
+            die;
+        }
 
     }
+
     public static function list($limit, $page=1)
     {
         return KnightInfo::paginate($limit, ['*'], 'page', $page);
