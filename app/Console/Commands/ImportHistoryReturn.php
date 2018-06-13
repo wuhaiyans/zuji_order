@@ -85,7 +85,6 @@ class ImportHistoryReturn extends Command
 
                 $sql = "SELECT * FROM zuji_order2_return";
             }
-
             $sql.= " ORDER BY return_id ASC";
 
             $returnCount   =  $this->conn->select($sql)->count();
@@ -94,7 +93,6 @@ class ImportHistoryReturn extends Command
             $page = ceil($returnCount/$size);
 
             while (true) {
-
                 $sql.= " LIMIT({$offset}, {$size})";
                 $datas   =  $this->conn->select($sql);
                 $newData = objectToArray($datas);
@@ -111,6 +109,9 @@ class ImportHistoryReturn extends Command
                 if ($offset>$returnCount) {
                     echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
+                if ($returnCount%$size==0) {
+                    sleep(3000);
+                }
 
             }
 
@@ -124,7 +125,6 @@ class ImportHistoryReturn extends Command
         }
 
     }
-
 
     /**
      * 获取表的字段名
@@ -148,57 +148,50 @@ class ImportHistoryReturn extends Command
 
 
 //        0 => array:16 [
-//            "return_id" => 1
-//            "business_key" => 1
-//            "order_id" => 20
-//            "order_no" => "2017121800068"
-//            "user_id" => 12
-//            "goods_id" => 20
-//            "loss_type" => 1
+//            "return_id" => 1 已对应
+//            "business_key" => 1 已对应
+//            "order_id" => 20 已对应
+//            "order_no" => "2017121800068" 已对应
+//            "user_id" => 12 已对应
+//            "goods_id" => 20 已对应
+//            "loss_type" => 1 已对应
 //            "address_id" => 1
-//            "reason_id" => 3
-//            "reason_text" => ""
-//            "return_status" => 3
+//            "reason_id" => 3 已对应
+//            "reason_text" => "" 已对应
+//            "return_status" => 3 已对应
 //            "admin_id" => "1"
-//            "return_check_remark" => "23322342"
-//            "return_check_time" => 1513595312
-//            "create_time" => 1513595257
-//            "update_time" => 1513595312
+//            "return_check_remark" => "23322342" 已对应
+//            "return_check_time" => 1513595312 已对应
+//            "create_time" => 1513595257 已对应
+//            "update_time" => 1513595312   已对应
 //  ]
 
-
+        if ($data['return_status']==6) {
+            $bussness_key = 3;
+        } else {
+            $bussness_key = $this->businessKeyMap()[$data['business_key']];
+        }
         $data = [
-            'goods_no'      => $goods_info['goods_no'],
+            'goods_no'      => $data['goods_id'],
             'order_no'      => $data['order_no'],
-            'business_key' => $params['business_key'],
+            'business_key' => $bussness_key,
             'loss_type'     => $data['loss_type'],
             'reason_id'     => $data['reason_id'],
             'reason_text'   => $data['reason_text'],
             'user_id'       => $data['user_id'],
-            'status'        => ReturnStatus::ReturnCreated,
-            'refund_no'     => create_return_no(),
+            'status'        => $this->returnStatusMap()[$data['return_status']],
+            'refund_no'     => $data['return_id'],
+            'remark'        => $data['return_check_remark'],
             'create_time'  => $data['create_time'],
             'check_time'  => $data['return_check_time'],
             'update_time'  => $data['update_time'],
-
         ];
         $succsss = OrderReturn::updateOrCreate($data);
          return $succsss ?? false;
 
-
     }
 
 
-    /**
-     * 退货原因映射
-     * Author: heaven
-     */
-    private function reasonIdMap()
-    {
-
-
-
-    }
 
 
     /**
@@ -208,10 +201,15 @@ class ImportHistoryReturn extends Command
     private function returnStatusMap()
     {
 
-
-
+             return [
+                 1=>1,
+                 2=>1,
+                 3=>2,
+                 4=>3,
+                 5=>4,
+                 6=>2,
+             ];
     }
-
 
     /**
      * 业务类型映射
@@ -219,9 +217,9 @@ class ImportHistoryReturn extends Command
      */
     private function businessKeyMap()
     {
-
-
-
+            return [
+                1=>2,
+            ];
     }
 
 }
