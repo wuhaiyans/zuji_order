@@ -39,7 +39,7 @@ class ImportUserCertified extends Command
      */
     public function handle()
     {
-        $total = DB::table("zuji_order2")->count();
+        $total = DB::connection('mysql_01')->ttable("zuji_order2")->count();
         try{
             $limit = 10;
             $page =1;

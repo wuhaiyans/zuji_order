@@ -41,7 +41,7 @@ class ImportUserAddress extends Command
      */
     public function handle()
     {
-        $total = DB::table("zuji_order2")->count();
+        $total = DB::connection('mysql_01')->ttable("zuji_order2")->count();
         try{
             $limit = 10;
             $page =1;
@@ -74,7 +74,7 @@ class ImportUserAddress extends Command
                         }
                     }
                     else{
-                        $arr[$v['order_no']];
+                        $arr[$v['order_no']] = $data;
                     }
                 }
                 $page++;
