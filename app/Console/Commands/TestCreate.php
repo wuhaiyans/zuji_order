@@ -70,7 +70,7 @@ class TestCreate extends Command
                 $goods_info=objectToArray($goods);
 
                 //获取状态
-                $status =$this->getStatus($v['status'],$v);
+                $status =self::getStatus($v['status'],$v);
                 //完成时间
                 $complete_time =0;
 
@@ -207,7 +207,7 @@ class TestCreate extends Command
     }
 
     //订单状态转换
-    public function getStatus($status,$order_info){
+    public static function getStatus($status,$order_info){
         $array = [];
         $update_time =$order_info['update_time'];
         if($order_info['refund_time']!=0){

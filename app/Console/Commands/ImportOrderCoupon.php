@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderCoupon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -39,31 +40,38 @@ class ImportOrderCoupon extends Command
      */
     public function handle()
     {
+        $total = \DB::connection('mysql_01')->table('zuji_order2_yidun')->count();
         try{
-            DB::beginTransaction();
-            $datas01 = \DB::connection('mysql_01')->table('zuji_order2_coupon')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_coupon.order_id')->limit(1)->get();
-            $coupons=objectToArray($datas01);
-            foreach ($coupons as $k=>$v) {
-                $couponData = [
-                    'coupon_no' => $v['coupon_no'],
-                    'coupon_id' => $v['coupon_id'],
-                    'discount_amount' => $v['discount_amount'],
-                    'coupon_type' => $v['coupon_type'],
-                    'coupon_name' => $v['coupon_name'],
-                    'order_no' => $v['order_no'],
-                ];
-                $res = OrderCoupon::updateOrCreate($couponData);
-                if (!$res->getQueueableId()) {
-                    DB::rollBack();
-                    echo "订单优惠券导入失败:" . $v['order_no'];
-                    die;
-                }
+            $limit = 100;
+            $page =1;
+            $totalpage = ceil($total/$limit);
+            $arr =[];
+            do {
+                    $datas01 = \DB::connection('mysql_01')->table('zuji_order2_coupon')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_coupon.order_id')->forPage($page,$limit)->get();
+                    $coupons=objectToArray($datas01);
+                    foreach ($coupons as $k=>$v) {
+                        $couponData = [
+                            'coupon_no' => $v['coupon_no'],
+                            'coupon_id' => $v['coupon_id'],
+                            'discount_amount' => $v['discount_amount'],
+                            'coupon_type' => $v['coupon_type'],
+                            'coupon_name' => $v['coupon_name'],
+                            'order_no' => $v['order_no'],
+                        ];
+                        $res = OrderCoupon::updateOrCreate($couponData);
+                        if (!$res->getQueueableId()) {
+                            echo "订单优惠券导入失败:" . $v['order_no'];
+                            die;
+                        }
+                    }
+                $page++;
+                sleep(1000);
+            } while ($page <= $totalpage);
+            if(count($arr)>0){
+                LogApi::notify("订单优惠券信息导入失败",$arr);
             }
-
-            DB::commit();
             echo "导入成功";die;
         }catch (\Exception $e){
-            DB::rollBack();
             echo $e->getMessage();
             die;
         }
