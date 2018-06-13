@@ -1,7 +1,7 @@
 <?php
 /**
  *
- *  历史退货导入接口
+ *  历史退款导入接口
  *  author: heaven
  *  date  : 2018-06-13
  *
@@ -101,8 +101,8 @@ class ImportHistoryRefund extends Command
                 $newData = objectToArray($datas);
                 p($newData);
                 if (empty($newData)) {
-                    LogApi::info("导入退货no data");
-                    echo '导入退货no data';
+                    LogApi::info("导入退款no data");
+                    echo 'no data';
                     echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
 
@@ -110,16 +110,16 @@ class ImportHistoryRefund extends Command
 
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
-                        echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
+                        echo '导入退款error ' . date("Y-m-d H:i:s", time()) . "\n";
                         $errorReturnArr = $values[$values['return_id']];
                     }
                 }
 //                echo 2344;exit;
                 $offset += $size;
-                LogApi::info("导入退货offset".$offset);
+                LogApi::info("导入退款offset".$offset);
                 echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
-                    LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
+                    LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()));
                     echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
@@ -127,15 +127,15 @@ class ImportHistoryRefund extends Command
                 }
 
             }
-            LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()) );
-            LogApi::info('导入退货错误的记录列表：'.json_encode($errorReturnArr));
-            echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";
-            echo '导入退货错误的记录列表：'.json_encode($errorReturnArr);
+            LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()) );
+            LogApi::info('导入退款错误的记录列表：'.json_encode($errorReturnArr));
+            echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退款错误的记录列表：'.json_encode($errorReturnArr);
 
         }   catch (\Exception $e) {
 
-            LogApi::info('导入退货异常：'.$e->getMessage());
-            echo '导入退货异常：'.$e->getMessage() . "\n";
+            LogApi::info('导入退款异常：'.$e->getMessage());
+            echo '导入退款异常：'.$e->getMessage() . "\n";
 
         }
 
@@ -192,20 +192,20 @@ class ImportHistoryRefund extends Command
 
 
     /**
-     * 导入退货状态映射
+     * 导入退款状态映射
      * Author: heaven
      */
     private function returnStatusMap()
     {
 
-        return [
-            1=>1,
-            2=>1,
-            3=>2,
-            4=>3,
-            5=>4,
-            6=>2,
-        ];
+             return [
+                 1=>1,
+                 2=>1,
+                 3=>2,
+                 4=>3,
+                 5=>4,
+                 6=>2,
+             ];
     }
 
     /**
@@ -214,9 +214,9 @@ class ImportHistoryRefund extends Command
      */
     private function businessKeyMap()
     {
-        return [
-            1=>2,
-        ];
+            return [
+                1=>2,
+            ];
     }
 
 }
