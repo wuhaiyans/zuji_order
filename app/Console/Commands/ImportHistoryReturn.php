@@ -14,14 +14,14 @@ use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
 
-class ImportHistoryRefund extends Command
+class ImportHistoryReturn extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportHistoryRefund {param1?} {--param2=} {param3?} {--param4=}';
+    protected $signature = 'command:ImportHistoryReturn {param1?} {--param2=} {param3?} {--param4=}';
 
     /**
      * The console command description.
@@ -59,7 +59,7 @@ class ImportHistoryRefund extends Command
         //
         try {
 
-            echo 'start ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退货start ' . date("Y-m-d H:i:s", time()) . "\n";
             //每次处理数据的条数
             $size = 200;
             // 不指定参数名的情况下用argument
@@ -75,7 +75,7 @@ class ImportHistoryRefund extends Command
             //有参数
             $sql = '';
             if(!empty($param2) && in_array($param2, $this->getTableField()) && !empty($param1)) {
-                $sql = "SELECT * FROM zuji_order2_refund WHERE {$param2} = {$param1}";
+                $sql = "SELECT * FROM zuji_order2_return WHERE {$param2} = {$param1}";
             }
 
             if(!empty($param4) && in_array($param4, $this->getTableField()) && !empty($param3)) {
@@ -84,10 +84,10 @@ class ImportHistoryRefund extends Command
 
             if (empty($param1)) {
 
-                $sql = "SELECT * FROM zuji_order2_refund";
+                $sql = "SELECT * FROM zuji_order2_return";
             }
-            $sql.= " ORDER BY refund_id ASC";
-            $returnSql = "SELECT count(*) as num FROM zuji_order2_refund";
+            $sql.= " ORDER BY return_id ASC";
+            $returnSql = "SELECT count(*) as num FROM zuji_order2_return";
             $returnCount   =  $this->conn->select($returnSql);
             $returnCount = objectToArray($returnCount);
             $returnCount    = $returnCount[0]['num'];
