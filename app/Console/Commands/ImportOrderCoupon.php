@@ -40,7 +40,7 @@ class ImportOrderCoupon extends Command
      */
     public function handle()
     {
-        $total = \DB::connection('mysql_01')->table('zuji_order2_yidun')->count();
+        $total = \DB::connection('mysql_01')->table('zuji_order2_coupon')->count();
         try{
             $limit = 100;
             $page =1;
@@ -48,20 +48,21 @@ class ImportOrderCoupon extends Command
             $arr =[];
             do {
                     $datas01 = \DB::connection('mysql_01')->table('zuji_order2_coupon')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_coupon.order_id')->forPage($page,$limit)->get();
+
                     $coupons=objectToArray($datas01);
+
                     foreach ($coupons as $k=>$v) {
                         $couponData = [
                             'coupon_no' => $v['coupon_no'],
                             'coupon_id' => $v['coupon_id'],
-                            'discount_amount' => $v['discount_amount'],
+                            'discount_amount' => $v['discount_amount']/100,
                             'coupon_type' => $v['coupon_type'],
                             'coupon_name' => $v['coupon_name'],
                             'order_no' => $v['order_no'],
                         ];
                         $res = OrderCoupon::updateOrCreate($couponData);
                         if (!$res->getQueueableId()) {
-                            echo "订单优惠券导入失败:" . $v['order_no'];
-                            die;
+                            $arr[$v['order_no']] =$couponData;
                         }
                     }
                 $page++;
@@ -69,6 +70,7 @@ class ImportOrderCoupon extends Command
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("订单优惠券信息导入失败",$arr);
+                echo "部分导入成功";die;
             }
             echo "导入成功";die;
         }catch (\Exception $e){
