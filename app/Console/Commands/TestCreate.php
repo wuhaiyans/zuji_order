@@ -54,17 +54,6 @@ class TestCreate extends Command
             $orders=objectToArray($datas01);
 
             foreach ($orders as $k=>$v){
-                $order_type =1; //订单类型
-                if($v['appid'] == 36 || $v['appid'] == 90 || $v['appid'] == 91 || $v['appid'] == 92){
-                    $order_type =3;
-                }
-
-                $ChannelInfo = Channel::getChannel($v['appid']);
-                if (!is_array($ChannelInfo)) {
-                     DB::rollBack();
-                     echo "获取渠道失败：".$v['order_no'];die;
-                }
-                $channel_id =intval($ChannelInfo['_channel']['id']);
                 //获取商品
                 $goods = \DB::connection('mysql_01')->table('zuji_order2_goods')->select('*')->where(['order_id'=>$v['order_id']])->first();
                 $goods_info=objectToArray($goods);
