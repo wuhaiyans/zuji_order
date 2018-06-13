@@ -56,9 +56,11 @@ class ImportHistoryReturn extends Command
          * e.g: php artisan command:ImportHistoryReturn 1 --param2=return_id 1 --param4=business_key
          */
         //
-
         try {
 
+            echo 'start ' . date("Y-m-d H:i:s", time()) . "\n";
+            //每次处理数据的条数
+            $size = 200;
             // 不指定参数名的情况下用argument
             $param1 = $this->argument('param1');
             // 用--开头指定参数名
@@ -86,31 +88,40 @@ class ImportHistoryReturn extends Command
 
             $sql.= " ORDER BY return_id ASC";
 
-            $datas   =  $this->conn->select($sql);
-            $newData = objectToArray($datas);
-            if (!empty($newData)) {
-                LogApi::info(__METHOD__.'() '.microtime(true).'历史退货退款导入接口开始:'.$param1);
-                p($newData);
-                foreach($newData as $keys=>$values) {
+            $returnCount   =  $this->conn->select($sql)->count();
+            $offset = 0;
+            //页数
+            $page = ceil($returnCount/$size);
 
+            while (true) {
 
-
+                $sql.= " LIMIT({$offset}, {$size})";
+                $datas   =  $this->conn->select($sql);
+                $newData = objectToArray($datas);
+                if (empty($newData)) {
+                    echo 'no data';
+                    echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
-                $this->insertSelectReturn();
+
+                foreach($newData as $keys=>$values) {
+                    $this->insertSelectReturn($values);
+                }
+                $offset += $size;
+                echo "offset".$offset."\n";
+                if ($offset>$returnCount) {
+                    echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
+                }
 
             }
+
+            echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";
 
 
         }   catch (\Exception $exception) {
 
-
-                 echo $exception->getMessage();
-
-
+            echo $exception->getMessage() . "\n";
 
         }
-
-
 
     }
 
