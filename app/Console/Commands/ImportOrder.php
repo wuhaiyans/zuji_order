@@ -146,7 +146,7 @@ class ImportOrder extends Command
                     }
                 }
                 $page++;
-                sleep(1000);
+                sleep(2);
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("订单风控信息导入失败",$arr);
@@ -165,8 +165,7 @@ class ImportOrder extends Command
      */
     public function getSpuInfo($spu_id){
 
-
-
+        
         return [];
     }
     /**

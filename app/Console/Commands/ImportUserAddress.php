@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use App\Lib\Order\OrderInfo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -47,11 +48,13 @@ class ImportUserAddress extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::table('order_info')->forPage($page,$limit)->get()->toArray();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->forPage($page,$limit)->get();
+                $orderList =objectToArray($orderList);
                 $orderList = array_keys_arrange($orderList,"order_no");
-                $orderIds = array_column("order_id",$orderList);
+                $orderIds = array_column($orderList,"order_id");
 
                 $addressList = DB::connection('mysql_01')->table("zuji_order2_address")->wherein("order_id",$orderIds)->get();
+                $addressList =objectToArray($addressList);
                 $addressList = array_keys_arrange($addressList,"order_id");
                 foreach ($orderList as $k=>$v) {
                     if($addressList[$v['order_id']]){
