@@ -9,6 +9,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
@@ -56,7 +57,7 @@ class ImportHistoryReturn extends Command
          * e.g: php artisan command:ImportHistoryReturn 1 --param2=return_id 1 --param4=business_key
          */
         //
-//        try {
+        try {
 
             echo 'start ' . date("Y-m-d H:i:s", time()) . "\n";
             //每次处理数据的条数
@@ -99,6 +100,7 @@ class ImportHistoryReturn extends Command
                 $datas   =  $this->conn->select($sql);
                 $newData = objectToArray($datas);
                 if (empty($newData)) {
+                    LogApi::info("导入退货no data");
                     echo 'no data';
                     echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
@@ -107,30 +109,34 @@ class ImportHistoryReturn extends Command
 
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
-                        echo 'error ' . date("Y-m-d H:i:s", time()) . "\n";
+                        echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
                         $errorReturnArr = $values[$values['return_id']];
                     }
                 }
 //                echo 2344;exit;
                 $offset += $size;
-                echo "offset".$offset."\n";
+                LogApi::info("导入退货offset".$offset);
+                echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
-                    echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
+                    LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
+                    echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
                     sleep(3000);
                 }
 
             }
+            LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()) );
+            LogApi::info('导入退货错误的记录列表：'.json_encode($errorReturnArr));
+            echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退货错误的记录列表：'.json_encode($errorReturnArr);
 
-            echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";
-            echo '错误的记录列表：'.json_encode($errorReturnArr);
+        }   catch (\Exception $e) {
 
-//        }   catch (\Exception $e) {
-//
-//            echo $e->getMessage() . "\n";
-//
-//        }
+            LogApi::info('导入退货异常：'.$e->getMessage());
+            echo '导入退货异常：'.$e->getMessage() . "\n";
+
+        }
 
     }
 
@@ -161,7 +167,6 @@ class ImportHistoryReturn extends Command
         }
 
         $orderReturnData = new OrderReturn();
-
 //        $whereArray[] = ['refund_no', '=', $data['return_id']];
 //        sql_profiler();
 //        $orderReturnData =  OrderReturn::where($whereArray)->first();
