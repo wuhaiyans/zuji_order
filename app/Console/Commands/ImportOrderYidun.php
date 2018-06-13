@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderRisk;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -39,30 +40,37 @@ class ImportOrderYidun extends Command
      */
     public function handle()
     {
+        $total = \DB::connection('mysql_01')->table('zuji_order2_yidun')->count();
         try{
-            DB::beginTransaction();
-            $datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_yidun.order_id')->limit(1)->get();
-            $yiduns=objectToArray($datas01);
-            foreach ($yiduns as $k=>$v) {
-                $riskData = [
-                    'order_no' => $v['order_no'],
-                    'decision' => $v['decision'],
-                    'score' => $v['score'],
-                    'strategies' => $v['strategies'],
-                    'type' => 'yidun',
-                ];
-                $res = OrderRisk::updateOrCreate($riskData);
-                if (!$res->getQueueableId()) {
-                    DB::rollBack();
-                    echo "订单风控信息导入失败:" . $v['order_no'];
-                    die;
-                }
-            }
-
-            DB::commit();
+            $limit = 1;
+            $page =1;
+            $totalpage = ceil($total/$limit);
+            $arr =[];
+            do {
+                    $datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_yidun.order_id')->forPage($page,$limit)->get();
+                    $yiduns=objectToArray($datas01);
+                    foreach ($yiduns as $k=>$v) {
+                        $riskData = [
+                            'order_no' => $v['order_no'],
+                            'decision' => $v['decision'],
+                            'score' => $v['score'],
+                            'strategies' => $v['strategies'],
+                            'type' => 'yidun',
+                        ];
+                        $res = OrderRisk::updateOrCreate($riskData);
+                        if (!$res->getQueueableId()) {
+                            $arr[$v['order_no']] =$riskData;
+                        }
+                    }
+                    $page++;
+                    sleep(1);
+            } while ($page <= $totalpage);
+              if(count($arr)>0){
+                  LogApi::notify("订单风控信息导入失败",$arr);
+                  echo "部分导入成功";die;
+              }
             echo "导入成功";die;
         }catch (\Exception $e){
-            DB::rollBack();
             echo $e->getMessage();
             die;
         }
