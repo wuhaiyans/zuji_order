@@ -58,66 +58,13 @@ class TestCreate extends Command
                 $goods = \DB::connection('mysql_01')->table('zuji_order2_goods')->select('*')->where(['order_id'=>$v['order_id']])->first();
                 $goods_info=objectToArray($goods);
 
-                //获取状态
-                $status =self::getStatus($v['status'],$v);
-                //完成时间
-                $complete_time =0;
-
-                //获取发货信息
-                $delivery = \DB::connection('mysql_01')->table('zuji_order2_delivery')->select('*')->where(['order_no'=>$v['order_no'],'business_key'=>1])->first();
-                $delivery_info =objectToArray($delivery);
-                $delivery_remark ="";
-                $delivery_time =0;
-                $confirm_time =0;
-                $receive_time =0;
-                if($delivery_info){
-                    $delivery_remark =$delivery_info['delivery_remark'];
-                    $delivery_time =$delivery_info['delivery_time'];
-                    $confirm_time =$delivery_info['create_time'];
-                    $receive_time =$delivery_info['confirm_time'];
-                }
-
-                $orderData =[
-                    'order_no'=>$v['order_no'], //订单编号
-                    'mobile'=>$v['mobile'],   //用户手机号
-                    'user_id'=>$v['user_id'],  //订单类型
-                    'order_type'=>$order_type, //订单类型 1线上订单2门店订单 3小程序订单
-                    'order_status'=>$status['order_status'],//
-                    'freeze_type'=>$status['freeze_type'],//
-                    'pay_type'=>$v['payment_type_id'],//
-                    'zuqi_type'=>$v['zuqi_type'],//
-                    'remark'=>$delivery_remark,//
-                    'order_amount'=>($v['amount']-$goods_info['yajin']-$v['yiwaixian'])/100,//订单实际总租金
-                    'goods_yajin'=>($goods_info['yajin']+$goods_info['mianyajin'])/100,//商品总押金金额
-                    'discount_amount'=>0,//商品优惠总金额
-                    'order_yajin'=>$goods_info['yajin']/100,//实付商品总押金金额
-                    'order_insurance'=>$v['yiwaixian']/100,//意外险总金额
-                    'coupon_amount'=>$v['discount_amount'],//优惠总金额
-                    'create_time'=>$v['create_time'],//
-                    'update_time'=>$v['update_time'],//
-                    'pay_time'=>$v['payment_time'],//
-                    'confirm_time'=>$confirm_time,//
-                    'delivery_time'=>$delivery_time,//
-                    'appid'=>$v['appid'],//
-                    'channel_id'=>$channel_id,//
-                    'receive_time'=>$receive_time,//
-                    'complete_time'=>$status['complete_time'],//
-                ];
-                $res =Order::updateOrCreate($orderData);
-                if(!$res->getQueueableId()){
-                    DB::rollBack();
-                    echo "订单导入失败:".$v['order_no'];die;
-                }
-
-                //通过接口获取商品信息--- 获取线上的
                 $goodsArr = Goods::getSkuList([$goods_info['sku_id']]);
                 if (!is_array($goodsArr)) {
                     DB::rollBack();
                     echo "商品接口获取失败:".$v['order_no'];die;
                 }
 
-                //自动生成goods_no
-                $goodsNo =createNo(6);
+
 
                 //订单服务周期
                 $service =\DB::connection('mysql_01')->table("zuji_order2_service")->where(['order_no'=>$v['order_no']])->get()->first();
