@@ -41,7 +41,7 @@ class ImportUserAddress extends Command
      */
     public function handle()
     {
-        $total = DB::table("order_info")->count();
+        $total = DB::table("zuji_order2")->count();
         try{
             $limit = 10;
             $page =1;
