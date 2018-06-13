@@ -22,10 +22,30 @@ class JobController extends Controller
 	 * 创建扣款定时任务
 	 */
 	public function createJobForWithholdCreatePay(){
+		
+		$params = [
+			'sign' => '',
+			'sign_type' => 'MD5',
+			'params' => [
+				'id' => '13206',
+			],
+		];
+		// 排序
+		ksort( $params['params'] );
+
+		$str = http_build_query( $params['params'] );
+
+		$key = '1234567890';
+
+		// 签名
+		$params['sign'] = md5($str.$key);
+		
+		$name = 'test-withhold-create-pay';
 		LogApi::debug('createJobForWithholdCreatePay');
 		$url = 'http://dev-api-zuji.huishoubao.com/api.php?m=crontab&c=instalment&a=instalment_list';
-		// 10秒钟一次
-		$b = \App\Lib\Common\JobQueueApi::addScheduleCron('test-withhold-create-pay', $url, ['test'=>'TEST'],'*/10 * * * * ?');
+		$b = \App\Lib\Common\JobQueueApi::addRealTime($name, $url, $params);
+//		// 10秒钟一次
+//		$b = \App\Lib\Common\JobQueueApi::addScheduleCron($name, $url, ['test'=>'TEST'],'*/10 * * * * ?');
 		echo 'Job creation is '. ( $b ? 'ok': 'error');
 		exit;
 	}
