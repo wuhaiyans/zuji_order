@@ -65,7 +65,7 @@ class ImportOrderCoupon extends Command
                         }
                     }
                 $page++;
-                sleep(1000);
+                sleep(1);
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("订单优惠券信息导入失败",$arr);

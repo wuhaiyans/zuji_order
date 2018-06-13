@@ -63,7 +63,7 @@ class ImportOrderYidun extends Command
                         }
                     }
                     $page++;
-                    sleep(1000);
+                    sleep(1);
             } while ($page <= $totalpage);
               if(count($arr)>0){
                   LogApi::notify("订单风控信息导入失败",$arr);
