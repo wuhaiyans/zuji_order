@@ -59,7 +59,7 @@ class ImportHistoryRefund extends Command
         //
         try {
 
-            echo 'start ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退款start ' . date("Y-m-d H:i:s", time()) . "\n";
             //每次处理数据的条数
             $size = 200;
             // 不指定参数名的情况下用argument
@@ -99,7 +99,7 @@ class ImportHistoryRefund extends Command
                 $sql.= " LIMIT {$offset}, {$size}";
                 $datas   =  $this->conn->select($sql);
                 $newData = objectToArray($datas);
-                p($newData);
+
                 if (empty($newData)) {
                     LogApi::info("导入退款no data");
                     echo 'no data';
@@ -117,10 +117,10 @@ class ImportHistoryRefund extends Command
 //                echo 2344;exit;
                 $offset += $size;
                 LogApi::info("导入退款offset".$offset);
-                echo "导入退货offset".$offset."\n";
+                echo "导入退款offset".$offset."\n";
                 if ($offset>$returnCount) {
                     LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()));
-                    echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
+                    echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
                     sleep(3000);
@@ -153,13 +153,111 @@ class ImportHistoryRefund extends Command
     }
 
     /**
-     * 插入历史数据到新退货表
+     * 插入历史数据到新退款表
      * Author: heaven
      * @param $data 历史数据结果集
      * @return bool|\Illuminate\Database\Eloquent\Model
      */
     private function insertSelectReturn($data)
     {
+
+
+//        [172] => Array
+//    (
+//            [refund_id] => 226
+//            [order_id] => 1888
+//            [refund_no] => Dev2018050400041
+//            [out_refund_no] => 201805040006
+//            [refund_amount] => 60100
+//            [user_id] => 124
+//            [mobile] => 18210481360
+//            [payment_amount] => 60100
+//            [should_amount] => 60100
+//            [should_remark] => 测试测试
+//            [should_admin_id] => 0
+//            [goods_id] => 1859
+//            [payment_id] => 727
+//            [payment_channel_id] => 4
+//            [refund_status] => 4
+//            [business_key] => 1
+//            [reason_id] => 0
+//            [refund_type] => 0
+//            [account_name] =>
+//            [account_no] =>
+//            [really_name] =>
+//            [create_time] => 1525404264
+//            [update_time] => 1525404299
+//            [refund_time] => 1525404299
+//            [refund_remark] => 测试测试
+//            [admin_id] => 0
+//            [out_refund_remark] =>
+//            [order_no] => Dev2018050400037
+//        )
+
+
+            $datas['refund_id'];
+            $datas['order_id'];
+            $datas['refund_no'];
+            $datas['out_refund_no'];
+            $datas['refund_amount'];
+            $datas['user_id'];
+            $datas['mobile'];
+            $datas['payment_amount'];
+            $datas['should_amount'];
+            $datas['should_remark'];
+            $datas['should_admin_id'];
+            $datas['goods_id'];
+            $datas['payment_id'];
+            $datas['payment_channel_id'];
+            $datas['refund_status'];
+            $datas['business_key'];
+            $datas['reason_id'];
+            $datas['refund_type'];
+            $datas['account_name'];
+            $datas['really_name'];
+            $datas['create_time'];
+            $datas['update_time'];
+            $datas['refund_time'];
+            $datas['refund_remark'];
+            $datas['admin_id'];
+            $datas['out_refund_remark'];
+            $datas['order_no'];
+
+        $data = [
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+            'order_no'=> $data['refund_id'],
+
+
+        ];
+        $ret = OrderReturn::updateOrCreate($data);
+
+
 
         if ($data['return_status']==6) {
             $bussness_key = 3;
