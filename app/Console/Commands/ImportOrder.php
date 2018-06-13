@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
+use App\Order\Models\OrderGoods;
 use Illuminate\Console\Command;
 
 class ImportOrder extends Command
@@ -64,6 +65,7 @@ class ImportOrder extends Command
                     $delivery =$this->getOrderDelivery($v['order_no']);
                     //获取商品信息
                     $goods_info =$this->getOrderGoods($v['order_no']);
+
                     $orderData =[
                         'order_no'=>$v['order_no'], //订单编号
                         'mobile'=>$v['mobile'],   //用户手机号
@@ -92,7 +94,55 @@ class ImportOrder extends Command
                     ];
                     $res =Order::updateOrCreate($orderData);
                     if(!$res->getQueueableId()){
-                        $arr[$v['order_no']] =$orderData;
+                        $arr['order'][$v['order_no']] =$orderData;
+                    }
+                    //自动生成goods_no
+                    $goodsNo =createNo(6);
+                    //获取服务周期
+                    $service = $this->getOrderServiceTime($v['order_no']);
+
+                    $goodsData =[
+                        'order_no'=>$v['order_no'],
+                        'goods_name'=>$v['goods_name'],
+                        'zuji_goods_id'=>$goods_info['sku_id'],
+                        'zuji_goods_sn'=>$goodsArr[$goods_info['sku_id']]['sku_info']['sn'],
+                        'goods_no'=>$goodsNo,
+                        'goods_thumb'=>$goods_info['thumb'],
+                        'prod_id'=>$goods_info['spu_id'],
+                        'prod_no'=>$goodsArr[$goods_info['sku_id']]['spu_info']['sn'],
+                        'brand_id'=>$goods_info['brand_id'],
+                        'category_id'=>$goods_info['category_id'],
+                        'machine_id'=>$goodsArr[$goods_info['sku_id']]['sku_info']['machine_id'],
+                        'user_id'=>$v['user_id'],
+                        'quantity'=>1,
+                        'goods_yajin'=>($goods_info['yajin']+$goods_info['mianyajin'])/100,
+                        'yajin'=>$goods_info['yajin']/100,
+                        'zuqi'=>$goods_info['zuqi'],
+                        'zuqi_type'=>$goods_info['zuqi_type'],
+                        'zujin'=>$goods_info['zujin']/100,
+                        'machine_value'=>empty($goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'])?"":$goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'],
+                        'chengse'=>$goods_info['chengse'],
+                        'discount_amount'=>0,
+                        'coupon_amount'=>$v['discount_amount']/100,
+                        'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
+                        'edition'=>$goodsArr[$goods_info['sku_id']]['sku_info']['edition'],
+                        'business_key'=>0,
+                        'business_no'=>'',
+                        'market_price'=>$goodsArr[$goods_info['sku_id']]['sku_info']['market_price'],
+                        'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100,
+                        'specs'=>$goods_info['specs'],
+                        'insurance'=>$goods_info['yiwaixian']/100,
+                        'buyout_price'=>($goodsArr[$goods_info['sku_id']]['sku_info']['market_price']*120 -($goods_info['zuqi']*$goods_info['zujin']/100)),
+                        'begin_time'=>$service['begin_time'],
+                        'end_time'=>$service['end_time'],
+                        'weight'=>$goodsArr[$goods_info['sku_id']]['sku_info']['weight'],
+                        'goods_status'=>$status['goods_status'],
+                        'create_time'=>$goods_info['create_time'],
+                        'update_time'=>$goods_info['update_time'],
+                    ];
+                    $res =OrderGoods::updateOrCreate($goodsData);
+                    if(!$res->getQueueableId()){
+                        $arr['goods'][$v['order_no']] =$orderData;
                     }
                 }
                 $page++;
@@ -107,6 +157,63 @@ class ImportOrder extends Command
             die;
         }
     }
+
+    /**
+     * 获取SPU
+     * @param $spu_id
+     * @return array
+     */
+    public function getSpuInfo($spu_id){
+
+
+
+        return [];
+    }
+    /**
+     * 获取SKU
+     * @param $spu_id
+     * @return array
+     */
+    public function getSkuInfo($sku_id){
+
+
+
+        return [];
+    }
+    /**
+     * 获取机型信息
+     * @param $spu_id
+     * @return array
+     */
+    public function getSpuMachineInfo($spu_id){
+
+
+
+        return [];
+    }
+
+
+
+
+    /**
+     * 获取订单服务周期
+     * @param $order_no
+     * @return mixed
+     */
+    public function getOrderServiceTime($order_no){
+        $arr['begin_time'] =0;
+        $arr['end_time'] =0;
+        //订单服务周期
+        $service =\DB::connection('mysql_01')->table("zuji_order2_service")->where(['order_no'=>$order_no])->get()->first();
+        if($service){
+            $serviceData=objectToArray($service);
+            $arr['begin_time'] =$serviceData['begin_time'];
+            $arr['end_time'] =$serviceData['end_time'];
+        }
+        return $arr;
+
+    }
+
     public function getOrderGoods($order_no){
         //获取商品
         $goods = $this->conn->table('zuji_order2_goods')->select('*')->where(['order_id'=>$order_no])->first();
