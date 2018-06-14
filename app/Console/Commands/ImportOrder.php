@@ -47,12 +47,12 @@ class ImportOrder extends Command
     {
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->count();
         try{
-            $limit = 1;
+            $limit = 10;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $datas01 = $this->conn->table('zuji_order2')->select('*')->where(['business_key'=>1])->forPage($page,$limit)->get();
+                $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1])->forPage($page,$limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -92,14 +92,13 @@ class ImportOrder extends Command
                         'receive_time'=>$delivery['receive_time'],//
                         'complete_time'=>$status['complete_time'],//
                     ];
-//                    $res =Order::updateOrCreate($orderData);
-//                    if(!$res->getQueueableId()){
-//                        $arr['order'][$v['order_no']] =$orderData;
-//                    }
-                    //自动生成goods_no
-                    $goodsNo =createNo(6);
+                    $res =Order::updateOrCreate($orderData);
+                    if(!$res->getQueueableId()){
+                        $arr['order'][$k] =$orderData;
+                    }
                     //获取服务周期
-                    $service = $this->getOrderServiceTime($v['order_no']);
+                    //$service = $this->getOrderServiceTime($v['order_no']);
+                    var_dump($v['order_no']);die;
                     //获取sku信息
                     $sku_info =$this->getSkuInfo($goods_info['sku_id']);
                     //获取spu信息
@@ -147,7 +146,7 @@ class ImportOrder extends Command
                     ];
                     $res =OrderGoods::updateOrCreate($goodsData);
                     if(!$res->getQueueableId()){
-                        $arr['goods'][$v['order_no']] =$orderData;
+                        $arr['goods'][$k] =$orderData;
                     }
                 }
                 $page++;
@@ -155,10 +154,11 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("订单风控信息导入失败",$arr);
+                echo "部分导入成功";die;
             }
             echo "导入成功";die;
         }catch (\Exception $e){
-            echo $e->getMessage();
+            echo $e->getLine();
             die;
         }
     }
@@ -232,8 +232,9 @@ class ImportOrder extends Command
      */
 
     public function getOrderDelivery($order_no){
-        $delivery = $this->conn->table('zuji_order2_delivery')->select('*')->where(['order_no'=>$order_no,'business_key'=>1])->first();
+        $delivery = $this->conn->table('zuji_order2_delivery')->where(['order_no'=>$order_no])->first();
         $delivery_info =objectToArray($delivery);
+        var_dump($delivery_info);die;
         $arr['delivery_remark'] ="";
         $arr['delivery_time'] =0;
         $arr['confirm_time'] =0;

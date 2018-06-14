@@ -42,7 +42,7 @@ class ImportOrderCoupon extends Command
     {
         $total = \DB::connection('mysql_01')->table('zuji_order2_coupon')->count();
         try{
-            $limit = 100;
+            $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];

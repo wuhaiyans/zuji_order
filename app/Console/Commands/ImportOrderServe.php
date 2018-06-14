@@ -2,11 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderGoodsUnit;
 
-class ImportOrderServer extends Command
+class ImportOrderServe extends Command
 {
     /**
      * The name and signature of the console command.
@@ -45,7 +46,7 @@ class ImportOrderServer extends Command
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->count();
         try{
-            $limit = 10;
+            $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
@@ -62,13 +63,13 @@ class ImportOrderServer extends Command
                 foreach ($orderList as $k=>$v) {
                     if($serviceList[$v['service_id']]){
                         $data = [
-                            'order_no'=>$orderList['order_no'],
+                            'order_no'=>$v['order_no'],
                             'goods_no'=>"",
-                            'user_id'=>$serviceList[$v['order_no']]['user_id'],
+                            'user_id'=>$serviceList[$v['service_id']]['user_id'],
                             'unit'=>$v['zuqi_type'],
                             'unit_value'=>$v['zuqi'],
-                            'begin_time'=>$serviceList[$v['order_no']]['begin_time'],
-                            'end_time'=>$serviceList[$v['order_no']]['end_time'],
+                            'begin_time'=>$serviceList[$v['service_id']]['begin_time'],
+                            'end_time'=>$serviceList[$v['service_id']]['end_time'],
                         ];
                         $ret = OrderGoodsUnit::updateOrCreate($data);
                         if(!$ret->getQueueableId()){
@@ -76,7 +77,7 @@ class ImportOrderServer extends Command
                         }
                     }
                     else{
-                        $arr[$v['order_no']] = $data;
+                        $arr[$v['order_no']] = $v['order_no'];
                     }
                 }
                 $page++;
@@ -84,6 +85,7 @@ class ImportOrderServer extends Command
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("订单服务周期导入失败",$arr);
+                echo "部分导入成功";die;
             }
             echo "导入成功";die;
         }catch (\Exception $e){
