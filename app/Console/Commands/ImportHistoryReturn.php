@@ -1,14 +1,15 @@
 <?php
 /**
  *
- *  历史退货退款导入接口
+ *  历史退货导入接口
  *  author: heaven
- *  date  : 2018-06-12
+ *  date  : 2018-06-13
  *
  */
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
@@ -53,12 +54,12 @@ class ImportHistoryReturn extends Command
         /**
          * 入口方法
          * 支持传多个参数查询
-         * e.g: php artisan command:ImportHistoryReturn 1 --param2=return_id 1 --param4=business_key
+         * e.g: php artisan command:ImportHistoryRefund 1 --param2=return_id 1 --param4=business_key
          */
         //
         try {
 
-            echo 'start ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退货start ' . date("Y-m-d H:i:s", time()) . "\n";
             //每次处理数据的条数
             $size = 200;
             // 不指定参数名的情况下用argument
@@ -86,41 +87,55 @@ class ImportHistoryReturn extends Command
                 $sql = "SELECT * FROM zuji_order2_return";
             }
             $sql.= " ORDER BY return_id ASC";
-
-            $returnCount   =  $this->conn->select($sql)->count();
+            $returnSql = "SELECT count(*) as num FROM zuji_order2_return";
+            $returnCount   =  $this->conn->select($returnSql);
+            $returnCount = objectToArray($returnCount);
+            $returnCount    = $returnCount[0]['num'];
             $offset = 0;
             //页数
             $page = ceil($returnCount/$size);
 
             while (true) {
-                $sql.= " LIMIT({$offset}, {$size})";
+                $sql.= " LIMIT {$offset}, {$size}";
                 $datas   =  $this->conn->select($sql);
                 $newData = objectToArray($datas);
+                p($newData);
                 if (empty($newData)) {
-                    echo 'no data';
+                    LogApi::info("导入退货no data");
+                    echo '导入退货no data';
                     echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
 
                 foreach($newData as $keys=>$values) {
-                    $this->insertSelectReturn($values);
+
+                    $success = $this->insertSelectReturn($values);
+                    if (!$success) {
+                        echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
+                        $errorReturnArr = $values[$values['return_id']];
+                    }
                 }
+//                echo 2344;exit;
                 $offset += $size;
-                echo "offset".$offset."\n";
+                LogApi::info("导入退货offset".$offset);
+                echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
-                    echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
+                    LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
+                    echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
                     sleep(3000);
                 }
 
             }
+            LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()) );
+            LogApi::info('导入退货错误的记录列表：'.json_encode($errorReturnArr));
+            echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";
+            echo '导入退货错误的记录列表：'.json_encode($errorReturnArr);
 
-            echo 'end ' . date("Y-m-d H:i:s", time()) . "\n";
+        }   catch (\Exception $e) {
 
-
-        }   catch (\Exception $exception) {
-
-            echo $exception->getMessage() . "\n";
+            LogApi::info('导入退货异常：'.$e->getMessage());
+            echo '导入退货异常：'.$e->getMessage() . "\n";
 
         }
 
@@ -133,7 +148,7 @@ class ImportHistoryReturn extends Command
      */
     private function getTableField()
     {
-        $fields = $this->conn->select('show columns from  zuji_order2_return');
+        $fields = $this->conn->select('show columns from  zuji_order2_refund');
         return array_column(objectToArray($fields),"Field");
     }
 
@@ -146,69 +161,51 @@ class ImportHistoryReturn extends Command
     private function insertSelectReturn($data)
     {
 
-
-//        0 => array:16 [
-//            "return_id" => 1 已对应
-//            "business_key" => 1 已对应
-//            "order_id" => 20 已对应
-//            "order_no" => "2017121800068" 已对应
-//            "user_id" => 12 已对应
-//            "goods_id" => 20 已对应
-//            "loss_type" => 1 已对应
-//            "address_id" => 1
-//            "reason_id" => 3 已对应
-//            "reason_text" => "" 已对应
-//            "return_status" => 3 已对应
-//            "admin_id" => "1"
-//            "return_check_remark" => "23322342" 已对应
-//            "return_check_time" => 1513595312 已对应
-//            "create_time" => 1513595257 已对应
-//            "update_time" => 1513595312   已对应
-//  ]
-
         if ($data['return_status']==6) {
             $bussness_key = 3;
         } else {
             $bussness_key = $this->businessKeyMap()[$data['business_key']];
         }
-        $data = [
-            'goods_no'      => $data['goods_id'],
-            'order_no'      => $data['order_no'],
-            'business_key' => $bussness_key,
-            'loss_type'     => $data['loss_type'],
-            'reason_id'     => $data['reason_id'],
-            'reason_text'   => $data['reason_text'],
-            'user_id'       => $data['user_id'],
-            'status'        => $this->returnStatusMap()[$data['return_status']],
-            'refund_no'     => $data['return_id'],
-            'remark'        => $data['return_check_remark'],
-            'create_time'  => $data['create_time'],
-            'check_time'  => $data['return_check_time'],
-            'update_time'  => $data['update_time'],
-        ];
-        $succsss = OrderReturn::updateOrCreate($data);
-         return $succsss ?? false;
+
+        $orderReturnData = new OrderReturn();
+//        $whereArray[] = ['refund_no', '=', $data['return_id']];
+//        sql_profiler();
+//        $orderReturnData =  OrderReturn::where($whereArray)->first();
+        $orderReturnData->goods_no = $data['goods_id'];
+        $orderReturnData->order_no = $data['order_no'];
+        $orderReturnData->business_key = $bussness_key;
+        $orderReturnData->loss_type = $data['loss_type'];
+        $orderReturnData->reason_id = $data['reason_id'];
+        $orderReturnData->reason_text = $data['reason_text'];
+        $orderReturnData->user_id = $data['user_id'];
+        $orderReturnData->status = $this->returnStatusMap()[$data['return_status']];
+        $orderReturnData->refund_no = $data['return_id'];
+        $orderReturnData->remark = $data['return_check_remark'];
+        $orderReturnData->create_time = $data['create_time'];
+        $orderReturnData->check_time = $data['return_check_time'];
+        $orderReturnData->update_time = $data['update_time'];
+        $succsss = $orderReturnData->save();
+
+        return $succsss;
 
     }
 
 
-
-
     /**
-     * 退货状态映射
+     * 导入退货状态映射
      * Author: heaven
      */
     private function returnStatusMap()
     {
 
-             return [
-                 1=>1,
-                 2=>1,
-                 3=>2,
-                 4=>3,
-                 5=>4,
-                 6=>2,
-             ];
+        return [
+            1=>1,
+            2=>1,
+            3=>2,
+            4=>3,
+            5=>4,
+            6=>2,
+        ];
     }
 
     /**
@@ -217,9 +214,9 @@ class ImportHistoryReturn extends Command
      */
     private function businessKeyMap()
     {
-            return [
-                1=>2,
-            ];
+        return [
+            1=>2,
+        ];
     }
 
 }
