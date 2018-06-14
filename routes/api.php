@@ -74,7 +74,7 @@ $api->version('v1', [
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
         //退换货列表导出
-        $api->any('ReturnListExport', 'ReturnController@returnListExport');
+        $api->any('returnListExport', 'ReturnController@returnListExport');
         //换货列表导出
         $api->any('barterListExport', 'ReturnController@barterListExport');
 
