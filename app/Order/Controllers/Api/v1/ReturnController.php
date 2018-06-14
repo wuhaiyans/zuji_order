@@ -176,7 +176,6 @@ class ReturnController extends Controller
         $params = $request->input('params');
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
-        print_R($returnListArray);
         $data=[];
         if ($returnListArray['original']['code']===ApiStatus::CODE_0) {
             $headers = ['订单编号', '用户名', '申请退款时间', '下单时间', '完成交易时间', '实付金额', '应退金额', '退款状态', '物流信息', '订单状态'];
