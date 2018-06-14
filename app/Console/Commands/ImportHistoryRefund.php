@@ -94,6 +94,9 @@ class ImportHistoryRefund extends Command
             $offset = 0;
             //页数
             $page = ceil($returnCount/$size);
+            $bar = $this->output->createProgressBar($returnCount); //开始
+
+
 
             while (true) {
                 $sql.= " LIMIT {$offset}, {$size}";
@@ -109,10 +112,14 @@ class ImportHistoryRefund extends Command
                 foreach($newData as $keys=>$values) {
 
                     $success = $this->insertSelectReturn($values);
-                    if (!$success->getQueueableId()) {
+                    if (!$success) {
                         echo '导入退款error ' . date("Y-m-d H:i:s", time()) . "\n";
                         $errorReturnArr = $values[$values['return_id']];
+                    } else {
+
+                        $bar->advance(); //中间
                     }
+
                 }
 //                echo 2344;exit;
                 $offset += $size;
@@ -127,6 +134,9 @@ class ImportHistoryRefund extends Command
                 }
 
             }
+
+
+            $bar->finish(); //结束
             LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()) );
             LogApi::info('导入退款错误的记录列表：'.json_encode($errorReturnArr));
             echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";
@@ -162,8 +172,9 @@ class ImportHistoryRefund extends Command
     {
         //根据订单号查询新表是否有退货的数据，如果存在，是退货业务，并且更新新表的数据，不存在，退款业务，并且创建退款业务
         $whereArray[] = ['order_no', '=', $datas['order_no']];
-        $orderReturnData =  OrderReturn::where($whereArray)->first();
-        if (!$orderReturnData)
+        $orderRefundData =  OrderReturn::where($whereArray)->first();
+//        p($orderRefundData);
+        if (!$orderRefundData)
         {
             //不存在退货记录说明是退款，插入
             $bussness_key = 8;
@@ -187,9 +198,17 @@ class ImportHistoryRefund extends Command
             'order_no'  =>  $datas['order_no'],
         ];
 
-         if ($orderReturnData) unset($refundData['refund_no']);
+         if ($orderRefundData){
+
+             unset($refundData['refund_no']);
+            return  $orderRefundData->update($refundData);
+         }
+
         $ret = OrderReturn::updateOrCreate($refundData);
-        return $ret;
+        if (!$ret->getQueueableId()) {
+                return false;
+        }
+        return true;
 
     }
 
