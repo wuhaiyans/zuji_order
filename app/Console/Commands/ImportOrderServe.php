@@ -14,7 +14,7 @@ class ImportOrderServe extends Command
      *
      * @var string
      */
-    protected $signature = 'command:ImportOrderServer';
+    protected $signature = 'command:ImportOrderServe';
 
     /**
      * The console command description.
@@ -45,6 +45,7 @@ class ImportOrderServe extends Command
             ['service_id','>',0]
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->count();
+        $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
             $page =1;
@@ -79,10 +80,12 @@ class ImportOrderServe extends Command
                     else{
                         $arr[$v['order_no']] = $v['order_no'];
                     }
+                    $bar->advance();
                 }
                 $page++;
                 sleep(1);
             } while ($page <= $totalpage);
+            $bar->finish();
             if(count($arr)>0){
                 LogApi::notify("订单服务周期导入失败",$arr);
                 echo "部分导入成功";die;

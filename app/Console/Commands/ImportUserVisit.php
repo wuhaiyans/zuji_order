@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderVisit;
@@ -43,7 +44,8 @@ class ImportUserVisit extends Command
             ['business_key','=',1,],
             ['remark_id','>',0]
         ];
-        $total = DB::connection('mysql_01')->ttable("zuji_order2")->where($where)->count();
+        $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->count();
+        $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
             $page =1;
@@ -64,10 +66,12 @@ class ImportUserVisit extends Command
                     if(!$ret->getQueueableId()){
                         $arr[$v['order_no']] = $data;
                     }
+                    $bar->advance();
                 }
                 $page++;
                 sleep(1);
             } while ($page <= $totalpage);
+            $bar->finish();
             if(count($arr)>0){
                 LogApi::notify("订单用户回访数据导入失败",$arr);
             }

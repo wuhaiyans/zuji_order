@@ -175,9 +175,6 @@ return [
     'api.Return.refuseRefund'       =>'ReturnController@refuseRefund',
     //退款--取消退款
     'api.Return.cancelRefund'       =>'ReturnController@cancelRefund',
-    //退款列表导出
-    'api.Return.refundListExport'       =>'ReturnController@refundListExport',
-
 
 
 
