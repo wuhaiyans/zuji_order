@@ -14,7 +14,7 @@ class ImportOrderServe extends Command
      *
      * @var string
      */
-    protected $signature = 'command:ImportOrderServer';
+    protected $signature = 'command:ImportOrderServe';
 
     /**
      * The console command description.

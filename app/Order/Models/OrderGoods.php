@@ -24,7 +24,14 @@ class OrderGoods extends Model
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = false;
+
+    /**
+     * 可以被批量赋值的属性.
+     *
+     * @var array
+     */
+    protected $fillable = ['order_no','goods_name','zuji_goods_id','zuji_goods_sn','goods_no','goods_thumb','prod_id','prod_no','brand_id','category_id','machine_id','user_id','quantity','goods_yajin','yajin','zuqi','zuqi_type','zujin','machine_value','chengse','discount_amount','coupon_amount','amount_after_discount','edition','business_key','business_no','market_price','price','specs','insurance','buyout_price','begin_time','end_time','weight','goods_status','create_time','update_time'];
 
     /**
      * 获取当前时间
