@@ -64,7 +64,7 @@ class ImportOrderServe extends Command
                     if($serviceList[$v['service_id']]){
                         $data = [
                             'order_no'=>$v['order_no'],
-                            'goods_no'=>"",
+                            'goods_no'=>$v['goods_id'],
                             'user_id'=>$serviceList[$v['service_id']]['user_id'],
                             'unit'=>$v['zuqi_type'],
                             'unit_value'=>$v['zuqi'],
