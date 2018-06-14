@@ -32,7 +32,7 @@ return [
         'sign_type'=>'MD5',
         'sign'=>'',
         'timestamp'=>date("Y-m-d H:i:s"),
-        'version'=>'v1',
+        'version'=>'1.0',
     ],
     //收发货
     'warehouse_api_uri' => env('WAREHOUSE_API_URI', 'http://dev-order-zuji.huishoubao.com/api'),
