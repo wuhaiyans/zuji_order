@@ -35,27 +35,51 @@ class ImportHistoryInstalment extends Command
    *
    * @return mixed
    */
-  public function handle()
-  {
+  public function handle(){
 
-      $result = \DB::connection('mysql_01')->table('zuji_order2_instalment')->select('*')->orderBy('id', 'DESC')->offset(0)->limit(2)->get()->toArray();
-      $result = objectToArray($result);
+    $total = \DB::connection('mysql_01')->table('zuji_order2_instalment')->count();
 
-      foreach($result as &$item){
-        // 查询订单信息
-        $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no','user_id','zujin')->where(['order_id'=>$item['order_id']])->first();
-        $orderInfo = objectToArray($orderInfo);
+    try{
+      $limit  = 300;
+      $page   = 1;
+      $totalpage = ceil($total/$limit);
+      do {
+          $result = \DB::connection('mysql_01')->table('zuji_order2_instalment')
+              ->forPage($page,$limit)
+              ->orderBy('id', 'DESC')
+              ->get()->toArray();
+          $result = objectToArray($result);
+
+          foreach($result as &$item) {
+            // 查询订单信息
+            $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'user_id', 'zujin')->where(['order_id' => $item['order_id']])->first();
+            $orderInfo = objectToArray($orderInfo);
 
 
-        $item['order_no']          = $orderInfo['order_no'];
-        $item['goods_no']          = createNo();
-        $item['user_id']           = $orderInfo['user_id'];
-        $item['day']               = 15;
-        $item['original_amount']   = $orderInfo['zujin']/100;
-        $item['amount']            = $item['amount']/100;
-      // 插入数据
-      \App\Order\Models\OrderGoodsInstalment::create($item);
+            $item['order_no'] = $orderInfo['order_no'];
+            $item['goods_no'] = createNo();
+            $item['user_id'] = $orderInfo['user_id'];
+            $item['day'] = 15;
+            $item['original_amount'] = $orderInfo['zujin'] / 100;
+            $item['amount'] = $item['amount'] / 100;
+            // 插入数据
+            \App\Order\Models\OrderGoodsInstalment::create($item);
 
-    }
+          }
+          $page++;
+          sleep(2);
+        } while ($page <= $totalpage);
+
+        echo "导入成功";die;
+      }catch (\Exception $e){
+        echo $e->getMessage();
+        die;
+      }
+
   }
+
+
+
+
+
 }
