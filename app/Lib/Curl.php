@@ -35,6 +35,12 @@ class Curl {
 	 */
 	public static $timeout = 10;
 	
+	/**
+	 *
+	 * @var type 
+	 */
+	public static $curl_info = null;
+	
 	
 	/**
 	 * 判断执行是否
@@ -174,10 +180,7 @@ class Curl {
 		// curl_setopt($ch, CURLOPT_HEADER, true);
 		// 发送请求
         $output = self::_curl_exec($ch);
-//		$curl_info = curl_getinfo($ch);
-//		if( 1 ){
-//			var_dump($curl_info);
-//		}
+		self::$curl_info = curl_getinfo($ch);
         curl_close($ch);
         return $output;
     }

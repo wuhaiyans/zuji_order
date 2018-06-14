@@ -35,6 +35,10 @@ Route::any('common/job/{action}', function(App\Common\Controllers\Api\v1\JobCont
     return $index->$action();
 });
 
+Route::any('common/test/{action}', function(App\Common\Controllers\Api\v1\TestController $index, $action){
+    return $index->$action();
+});
+
 Route::get('users/{action}', function(App\Order\Controllers\Api\v1\UsersController $index, $action){
     return $index->$action();
 });
