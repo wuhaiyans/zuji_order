@@ -2,19 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Order\Models\OrderUserCertified;
+use App\Order\Models\OrderVisit;
 
-class ImportUserCertified extends Command
+class ImportUserVisit extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportUserCertified';
+    protected $signature = 'command:ImportUserVisit';
 
     /**
      * The console command description.
@@ -40,30 +39,28 @@ class ImportUserCertified extends Command
      */
     public function handle()
     {
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
+        $where = [
+            ['business_key','=',1,],
+            ['remark_id','>',0]
+        ];
+        $total = DB::connection('mysql_01')->ttable("zuji_order2")->where($where)->count();
         try{
             $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->forPage($page,$limit)->get();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where($where)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
                     $data = [
-                        'order_no'=>$v['order_no'],
-                        'certified'=>$v['credit']>0?1:0,
-                        'certified_platform'=>$v['certified_platform'],
-                        'credit'=>$v['credit'],
-                        'score'=>0,
-                        'risk'=>0,
-                        'face'=>0,
-                        'realname'=>$v['realname'],
-                        'cret_no'=>$v['cert_no'],
-                        'create_time'=>$v['create_time'],
+                        'order_no' => $v['order_no'],
+                        'visit_id' => $v['remark_id'],
+                        'visit_text' => $v['remark'],
+                        'create_time' => $v['create_time'],
                     ];
-                    $ret = OrderUserCertified::updateOrCreate($data);
+                    $ret = OrderVisit::updateOrCreate($data);
                     if(!$ret->getQueueableId()){
                         $arr[$v['order_no']] = $data;
                     }
@@ -72,8 +69,7 @@ class ImportUserCertified extends Command
                 sleep(1);
             } while ($page <= $totalpage);
             if(count($arr)>0){
-                LogApi::notify("订单用户信用信息导入失败",$arr);
-                echo "部分导入成功";die;
+                LogApi::notify("订单用户回访数据导入失败",$arr);
             }
             echo "导入成功";die;
         }catch (\Exception $e){

@@ -126,11 +126,10 @@ class User{
      * @return bool|mixed
      */
     public static function checkToken($token){
-        p($token);
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.login.user.info.get';
+        $data['auth_token'] =$token;
         $data['params'] = [
-            'token'=>$token,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);

@@ -41,14 +41,14 @@ class ImportUserAddress extends Command
      */
     public function handle()
     {
-        $total = DB::connection('mysql_01')->ttable("zuji_order2")->count();
+        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
         try{
-            $limit = 10;
+            $limit = 1000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->forPage($page,$limit)->get();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
                 $orderList = array_keys_arrange($orderList,"order_no");
                 $orderIds = array_column($orderList,"order_id");

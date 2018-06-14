@@ -194,7 +194,6 @@ function is_assoc_arr( $arr ){
     }
     return false;
 }
-
 /**
  * @param int $price    价格，单位：分
  * @return string   格式化价格，单位：元

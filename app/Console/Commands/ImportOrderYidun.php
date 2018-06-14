@@ -42,26 +42,32 @@ class ImportOrderYidun extends Command
     {
         $total = \DB::connection('mysql_01')->table('zuji_order2_yidun')->count();
         try{
-            $limit = 1;
+            $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                    $datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_yidun.order_id')->forPage($page,$limit)->get();
+                    $datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2','zuji_order2.order_id','=','zuji_order2_yidun.order_id')->where('zuji_order2.business_key','=','1')->forPage($page,$limit)->get();
                     $yiduns=objectToArray($datas01);
+
                     foreach ($yiduns as $k=>$v) {
-                        $riskData = [
-                            'order_no' => $v['order_no'],
-                            'decision' => $v['decision'],
-                            'score' => $v['score'],
-                            'strategies' => $v['strategies'],
-                            'type' => 'yidun',
-                        ];
-                        $res = OrderRisk::updateOrCreate($riskData);
-                        if (!$res->getQueueableId()) {
-                            $arr[$v['order_no']] =$riskData;
+                            if(empty($v['order_no'])){
+                                LogApi::notify("订单不存在riskid:".$v['id'],[]);
+                                continue;
+                            }
+                            $riskData = [
+                                'order_no' => empty($v['order_no']) ? "" : $v['order_no'],
+                                'decision' => $v['decision'],
+                                'score' => $v['score'],
+                                'strategies' => $v['strategies'],
+                                'type' => 'yidun',
+                            ];
+                            $res = OrderRisk::updateOrCreate($riskData);
+                            if (!$res->getQueueableId()) {
+                                $arr[$v['order_no']] = $riskData;
+                            }
                         }
-                    }
+
                     $page++;
                     sleep(1);
             } while ($page <= $totalpage);
