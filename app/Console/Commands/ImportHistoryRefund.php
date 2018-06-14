@@ -109,7 +109,7 @@ class ImportHistoryRefund extends Command
                 foreach($newData as $keys=>$values) {
 
                     $success = $this->insertSelectReturn($values);
-                    if (!$success) {
+                    if (!$success->getQueueableId()) {
                         echo '导入退款error ' . date("Y-m-d H:i:s", time()) . "\n";
                         $errorReturnArr = $values[$values['return_id']];
                     }
@@ -158,133 +158,38 @@ class ImportHistoryRefund extends Command
      * @param $data 历史数据结果集
      * @return bool|\Illuminate\Database\Eloquent\Model
      */
-    private function insertSelectReturn($data)
+    private function insertSelectReturn($datas)
     {
-
-
-//        [172] => Array
-//    (
-//            [refund_id] => 226
-//            [order_id] => 1888
-//            [refund_no] => Dev2018050400041
-//            [out_refund_no] => 201805040006
-//            [refund_amount] => 60100
-//            [user_id] => 124
-//            [mobile] => 18210481360
-//            [payment_amount] => 60100
-//            [should_amount] => 60100
-//            [should_remark] => 测试测试
-//            [should_admin_id] => 0
-//            [goods_id] => 1859
-//            [payment_id] => 727
-//            [payment_channel_id] => 4
-//            [refund_status] => 4
-//            [business_key] => 1
-//            [reason_id] => 0
-//            [refund_type] => 0
-//            [account_name] =>
-//            [account_no] =>
-//            [really_name] =>
-//            [create_time] => 1525404264
-//            [update_time] => 1525404299
-//            [refund_time] => 1525404299
-//            [refund_remark] => 测试测试
-//            [admin_id] => 0
-//            [out_refund_remark] =>
-//            [order_no] => Dev2018050400037
-//        )
-
-
-            $datas['refund_id'];
-            $datas['order_id'];
-            $datas['refund_no'];
-            $datas['out_refund_no'];
-            $datas['refund_amount'];
-            $datas['user_id'];
-            $datas['mobile'];
-            $datas['payment_amount'];
-            $datas['should_amount'];
-            $datas['should_remark'];
-            $datas['should_admin_id'];
-            $datas['goods_id'];
-            $datas['payment_id'];
-            $datas['payment_channel_id'];
-            $datas['refund_status'];
-            $datas['business_key'];
-            $datas['reason_id'];
-            $datas['refund_type'];
-            $datas['account_name'];
-            $datas['really_name'];
-            $datas['create_time'];
-            $datas['update_time'];
-            $datas['refund_time'];
-            $datas['refund_remark'];
-            $datas['admin_id'];
-            $datas['out_refund_remark'];
-            $datas['order_no'];
-
-        $data = [
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-            'order_no'=> $data['refund_id'],
-
-
-        ];
-        $ret = OrderReturn::updateOrCreate($data);
-
-
-
-        if ($data['return_status']==6) {
-            $bussness_key = 3;
+        //根据订单号查询新表是否有退货的数据，如果存在，是退货业务，并且更新新表的数据，不存在，退款业务，并且创建退款业务
+        $whereArray[] = ['order_no', '=', $datas['order_no']];
+        $orderReturnData =  OrderReturn::where($whereArray)->first();
+        if (!$orderReturnData)
+        {
+            //不存在退货记录说明是退款，插入
+            $bussness_key = 8;
         } else {
-            $bussness_key = $this->businessKeyMap()[$data['business_key']];
+            //存在是退货，更新记录
+            $bussness_key = 2;
         }
 
-        $orderReturnData = new OrderReturn();
-//        $whereArray[] = ['refund_no', '=', $data['return_id']];
-//        sql_profiler();
-//        $orderReturnData =  OrderReturn::where($whereArray)->first();
-        $orderReturnData->goods_no = $data['goods_id'];
-        $orderReturnData->order_no = $data['order_no'];
-        $orderReturnData->business_key = $bussness_key;
-        $orderReturnData->loss_type = $data['loss_type'];
-        $orderReturnData->reason_id = $data['reason_id'];
-        $orderReturnData->reason_text = $data['reason_text'];
-        $orderReturnData->user_id = $data['user_id'];
-        $orderReturnData->status = $this->returnStatusMap()[$data['return_status']];
-        $orderReturnData->refund_no = $data['return_id'];
-        $orderReturnData->remark = $data['return_check_remark'];
-        $orderReturnData->create_time = $data['create_time'];
-        $orderReturnData->check_time = $data['return_check_time'];
-        $orderReturnData->update_time = $data['update_time'];
-        $succsss = $orderReturnData->save();
+        $refundData = [
+            'refund_no'  =>  createNo(2),
+            'old_refund_id' => $datas['refund_id'],
+            'out_refund_no'  =>  $datas['out_refund_no'],
+            'user_id'  =>  $datas['user_id'],
+            'business_key' =>   $bussness_key,
+            'pay_amount'  =>  $datas['payment_amount'],
+            'refund_amount'  =>  $datas['should_amount'],
+            'goods_no'  =>  $datas['goods_id'],
+            'status'    =>  $this->refundStatusMap()[$datas['refund_status']],
+            'create_time'  =>  $datas['create_time'],
+            'update_time'  =>  $datas['refund_time'],
+            'order_no'  =>  $datas['order_no'],
+        ];
 
-        return $succsss;
+         if ($orderReturnData) unset($refundData['refund_no']);
+        $ret = OrderReturn::updateOrCreate($refundData);
+        return $ret;
 
     }
 
@@ -293,28 +198,16 @@ class ImportHistoryRefund extends Command
      * 导入退款状态映射
      * Author: heaven
      */
-    private function returnStatusMap()
+    private function refundStatusMap()
     {
-
              return [
                  1=>1,
                  2=>1,
-                 3=>2,
-                 4=>3,
-                 5=>4,
-                 6=>2,
+                 3=>10,
+                 4=>9,
+                 5=>10,
              ];
     }
 
-    /**
-     * 业务类型映射
-     * Author: heaven
-     */
-    private function businessKeyMap()
-    {
-            return [
-                1=>2,
-            ];
-    }
 
 }
