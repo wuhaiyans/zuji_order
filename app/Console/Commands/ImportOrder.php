@@ -46,6 +46,7 @@ class ImportOrder extends Command
     public function handle()
     {
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->count();
+        $bar = $this->output->createProgressBar($total);
         try{
 
             $limit = 5000;
@@ -148,10 +149,12 @@ class ImportOrder extends Command
                     if(!$res->getQueueableId()){
                         $arr['goods'][$k] =$orderData;
                     }
+                    $bar->advance();
                 }
                 $page++;
                 sleep(2);
             } while ($page <= $totalpage);
+            $bar->finish();
             if(count($arr)>0){
                 LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;

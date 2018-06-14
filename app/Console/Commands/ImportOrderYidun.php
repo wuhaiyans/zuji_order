@@ -41,6 +41,7 @@ class ImportOrderYidun extends Command
     public function handle()
     {
         $total = \DB::connection('mysql_01')->table('zuji_order2_yidun')->count();
+        $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
             $page =1;
@@ -66,11 +67,13 @@ class ImportOrderYidun extends Command
                             if (!$res->getQueueableId()) {
                                 $arr[$v['order_no']] = $riskData;
                             }
+                        $bar->advance();
                         }
 
                     $page++;
                     sleep(1);
             } while ($page <= $totalpage);
+            $bar->finish();
               if(count($arr)>0){
                   LogApi::notify("订单风控信息导入失败",$arr);
                   echo "部分导入成功";die;
