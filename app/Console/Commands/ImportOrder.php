@@ -47,7 +47,8 @@ class ImportOrder extends Command
     {
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->count();
         try{
-            $limit = 10;
+
+            $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
@@ -76,29 +77,28 @@ class ImportOrder extends Command
                         'pay_type'=>$v['payment_type_id'],//
                         'zuqi_type'=>$v['zuqi_type'],//
                         'remark'=>$delivery['delivery_remark'],//
-                        'order_amount'=>($v['amount']-$goods_info['yajin']-$v['yiwaixian'])/100,//订单实际总租金
-                        'goods_yajin'=>($goods_info['yajin']+$goods_info['mianyajin'])/100,//商品总押金金额
+                        'order_amount'=>($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 <1?1:($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 ,//订单实际总租金
+                        'goods_yajin'=>($v['yajin']+$v['mianyajin'])/100,//商品总押金金额
                         'discount_amount'=>0,//商品优惠总金额
-                        'order_yajin'=>$goods_info['yajin']/100,//实付商品总押金金额
+                        'order_yajin'=>$v['yajin']/100,//实付商品总押金金额
                         'order_insurance'=>$v['yiwaixian']/100,//意外险总金额
                         'coupon_amount'=>$v['discount_amount'],//优惠总金额
-                        'create_time'=>$v['create_time'],//
-                        'update_time'=>$v['update_time'],//
-                        'pay_time'=>$v['payment_time'],//
-                        'confirm_time'=>$delivery['confirm_time'],//
-                        'delivery_time'=>$delivery['delivery_time'],//
+                        'create_time'=>intval($v['create_time']),//
+                        'update_time'=>intval($v['update_time']),//
+                        'pay_time'=>intval($v['payment_time']),//
+                        'confirm_time'=>intval($delivery['confirm_time']),//
+                        'delivery_time'=>intval($delivery['delivery_time']),//
                         'appid'=>$v['appid'],//
                         'channel_id'=>$channel_id,//
-                        'receive_time'=>$delivery['receive_time'],//
-                        'complete_time'=>$status['complete_time'],//
+                        'receive_time'=>intval($delivery['receive_time']),//
+                        'complete_time'=>intval($status['complete_time']),//
                     ];
                     $res =Order::updateOrCreate($orderData);
                     if(!$res->getQueueableId()){
-                        $arr['order'][$k] =$orderData;
+                        $arr['order'][$k] =$v['order_no'];
                     }
                     //获取服务周期
-                    //$service = $this->getOrderServiceTime($v['order_no']);
-                    var_dump($v['order_no']);die;
+                    $service = $this->getOrderServiceTime($v['order_no']);
                     //获取sku信息
                     $sku_info =$this->getSkuInfo($goods_info['sku_id']);
                     //获取spu信息
@@ -128,7 +128,7 @@ class ImportOrder extends Command
                         'chengse'=>$goods_info['chengse'],
                         'discount_amount'=>0,
                         'coupon_amount'=>$v['discount_amount']/100,
-                        'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
+                        'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100 ?1:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
                         'edition'=>$sku_info['edition'],
                         'business_key'=>0,
                         'business_no'=>'',
@@ -141,8 +141,8 @@ class ImportOrder extends Command
                         'end_time'=>$service['end_time'],
                         'weight'=>$sku_info['weight'],
                         'goods_status'=>$status['goods_status'],
-                        'create_time'=>$goods_info['create_time'],
-                        'update_time'=>$goods_info['update_time'],
+                        'create_time'=>intval($goods_info['create_time']),
+                        'update_time'=>intval($goods_info['update_time']),
                     ];
                     $res =OrderGoods::updateOrCreate($goodsData);
                     if(!$res->getQueueableId()){
@@ -158,7 +158,7 @@ class ImportOrder extends Command
             }
             echo "导入成功";die;
         }catch (\Exception $e){
-            echo $e->getLine();
+            echo $e->getMessage();
             die;
         }
     }
@@ -233,13 +233,13 @@ class ImportOrder extends Command
 
     public function getOrderDelivery($order_no){
         $delivery = $this->conn->table('zuji_order2_delivery')->where(['order_no'=>$order_no])->first();
-        $delivery_info =objectToArray($delivery);
-        var_dump($delivery_info);die;
         $arr['delivery_remark'] ="";
         $arr['delivery_time'] =0;
         $arr['confirm_time'] =0;
         $arr['receive_time'] =0;
-        if($delivery_info){
+
+        if($delivery){
+            $delivery_info =objectToArray($delivery);
             $arr['delivery_remark'] =$delivery_info['delivery_remark'];
             $arr['delivery_time'] =$delivery_info['delivery_time'];
             $arr['confirm_time'] =$delivery_info['create_time'];
@@ -297,6 +297,10 @@ class ImportOrder extends Command
             //已支付
             case 7:
                 $array = [ 'order_status'=>3,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
+                break;
+            //确认订单
+            case 8:
+                $array = [ 'order_status'=>4,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //退款中
             case 9:
