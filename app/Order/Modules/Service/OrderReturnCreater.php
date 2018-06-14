@@ -801,6 +801,8 @@ class OrderReturnCreater
                 $data[$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
             }elseif($data[$k]->business_key==OrderStatus::BUSINESS_BARTER){
                 $data[$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_BARTER);//换货业务
+            }else{
+                $data[$k]->business_name="";
             }
             //订单状态
             if($data[$k]->order_status==OrderStatus::OrderWaitPaying){
@@ -821,6 +823,8 @@ class OrderReturnCreater
                 $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderClosedRefunded);//关闭（支付完成后退款）
             }elseif($data[$k]->order_status==OrderStatus::OrderCompleted){
                 $data[$k]->order_status_name=OrderStatus::getStatusName(OrderStatus::OrderCompleted);//已完成
+            }else{
+                $data[$k]->order_status_name="";
             }
             //（退款、退机、换机）状态
             if($data[$k]->status==ReturnStatus::ReturnCreated){
@@ -841,6 +845,8 @@ class OrderReturnCreater
                 $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiKuan);//已退款
             }elseif($data[$k]->status==ReturnStatus::ReturnTui){
                 $data[$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
+            }else{
+                $data[$k]->status_name="";
             }
         }
         return apiResponse($data,ApiStatus::CODE_0);

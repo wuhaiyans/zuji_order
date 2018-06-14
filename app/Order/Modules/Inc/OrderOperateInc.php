@@ -57,43 +57,89 @@ class OrderOperateInc
             'adminActBtn'=>array(
                 //待支付
                 Inc\OrderStatus::OrderWaitPaying => [
-                   '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
-                    '回访',
+                    'return_visit_btn'   => '回访',
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
-                     '回访',
-                    '取消订单',
-                     '确认订单',
-                   '修改收货信息',
+                    //回访
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => true,
+                    //确认订单
+                    'confirm_btn'   => true,
+                    //修改收货信息
+                    'modify_address_btn' => true,
 
                 ],
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
-                   '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
-                    '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
-                   '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
-                   '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
-                    '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
-                    '回访',
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'cancel_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
                 ],
             )
 
