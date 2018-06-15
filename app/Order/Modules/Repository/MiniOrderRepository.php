@@ -4,7 +4,7 @@ use App\Order\Models\Order;
 use App\Order\Models\MiniOrder;
 
 /**
- * 小程序临时订单表
+ * 小程序订单表
  * Class MiniOrderRepository
  * Author zhangjinhui
  * @package App\Order\Modules\Repository

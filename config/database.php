@@ -44,7 +44,7 @@ return [
 			'read' => [
 				'host' => '119.29.141.207',
 				'port' => env('DB_PORT_READ', '3306'),
-				'database' => env('DB_DATABASE_READ', 'zuji_order'),
+				'database' => env('DB_DATABASE_READ', 'zuji'),
 				'username' => env('DB_USERNAME_READ', 'hjx'),
 				'password' => env('DB_PASSWORD_READ', '123456'),
 				'unix_socket' => env('DB_SOCKET_READ', ''),

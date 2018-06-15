@@ -55,6 +55,10 @@ class MiniNotifyController extends Controller
                 $this->orderCloseCancelNotify();
             }
         }else if($this->data['notify_type'] == $this->CREATE){
+            $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::add($_POST);
+            if( !$result ){
+                \App\Lib\Common\LogApi::debug('小程序订单确认支付回调记录失败',$result);
+            }
             $this->rentTransition();
         }
     }
