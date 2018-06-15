@@ -130,7 +130,7 @@ class ImportHistoryRefund extends Command
                     echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
-                    sleep(3000);
+                    sleep(3);
                 }
 
             }

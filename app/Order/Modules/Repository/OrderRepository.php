@@ -410,7 +410,7 @@ class OrderRepository
         page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
-    public static function getOrderList($param = array(), $pagesize=2)
+    public static function getOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
         //根据用户id
@@ -458,13 +458,19 @@ class OrderRepository
         if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
-        
+
+
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+//        //dd($whereArray);
         $orderList = DB::table('order_info')
             ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
             ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
             ->where($whereArray)
             ->select('order_info.*','order_user_address.*','order_info_visit.visit_id')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
+        //dd(objectToArray($orderList));
         return $orderList;
 
     }
