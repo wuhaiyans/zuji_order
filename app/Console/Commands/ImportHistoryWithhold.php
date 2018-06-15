@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -39,9 +40,14 @@ class ImportHistoryWithhold extends Command
     public function handle()
     {
 
-        $total = \DB::connection('mysql_01')->table('zuji_withholding_alipay')->count();
+        $total = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
+            ->where([
+                ['zuji_withholding_alipay.status', '=', 1],
+            ])->count();
+
+        $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 10;
+            $limit  = 300;
             $page   = 1;
             $totalpage = ceil($total/$limit);
             do {
@@ -50,43 +56,29 @@ class ImportHistoryWithhold extends Command
                 $result = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
                     ->select('zuji_withholding_alipay.*','zuji_withholding_notify_alipay.scene')
                     // 查询 已签约的数据
-                    ->where(['zuji_withholding_alipay.status'=>1,'zuji_withholding_notify_alipay.status'=>'NORMAL'])
+                    ->where([
+                        ['zuji_withholding_alipay.status', '=', 1],
+                        ['zuji_withholding_notify_alipay.status', '=', 'NORMAL']
+                    ])
                     ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
                     ->groupBy('zuji_withholding_alipay.agreement_no')
                     ->orderBy('zuji_withholding_alipay.id', 'DESC')
                     ->forPage($page,$limit)
                     ->get()->toArray();
                 $result = objectToArray($result);
-//                p($result);
-
 
 
                 foreach($result as &$item){
 
-                    // 开启事务
-                    DB::beginTransaction();
-
                     // 代扣协议号
-                    $agreement_no        = createNo(10);
+                    $agreement_no           = createNo(10);
 
                     // 支付宝授权编号
-                    $alipay_agreement_no = $item['agreement_no'];
+                    $alipay_agreement_no    = $item['agreement_no'];
 
-                    $user_id = $item['user_id'];
-                    /*
-                       [id] => 426
-                       [user_id] => 3                           // 租机用户ID
-                       [partner_id] => 4294967295               // 合作者身份 ID ；商户签约的支付宝账号对应的支付宝唯一用户号
-                       [alipay_user_id] => 2088922681574031     // 支付宝用号：用户签约的支付宝账号对应的支付宝唯一用户号
-                       [agreement_no] => 20185413440169491003   // 支付宝代扣协议号
-                       [status] => 2                            // 协议状态：0：无效记录；1：已签约：2：已解约
-                       [sign_time] => 2018-06-13 19:31:49       // 签约时间；支付宝代扣协议的实际签约时间，格式为
-                       [valid_time] => 2018-06-13 19:31:49      // 协议生效时间
-                       [invalid_time] => 2115-02-01 00:00:00    // 协议失效时间
-                       [unsign_time] => 2018-06-13 19:34:11     // 解约时间；如果协议未修改过，本参数值等于签约时间
-                       [scene] => DEFAULT|DEFAULT
-                   */
-//                    p($item);
+                    // 用户ID
+                    $user_id                = $item['user_id'];
+
 
             // 创建（支付）系统 代扣 表 zuji_pay_alipay_withhold
                     $zuji_pay_alipay_data = [
@@ -94,24 +86,27 @@ class ImportHistoryWithhold extends Command
                         'alipay_agreement_no'   => $alipay_agreement_no,        // '支付宝代扣协议号',
                         'partner_id'            => $item['partner_id'],         // '合作商ID',
                         'status'                => 'NORMAL',                    // '状态：TEMP：初始；NORMAL：已签约；UNSIGN：已解约',
-                        'alipay_user_id'        => $item['alipay_user_id'],      // '支付宝唯一用户号，以 2088开头的 16位纯数字',
+                        'alipay_user_id'        => $item['alipay_user_id'],     // '支付宝唯一用户号，以 2088开头的 16位纯数字',
                         'sign_time'             => $item['sign_time'],          // '签约时间',
                         'valid_time'            => $item['valid_time'],         // '签约生效时间',
                         'invalid_time'          => $item['invalid_time'],       // '签约失效时间',
-
                         'scene'                 => $item['scene'],              // '签约场景',
                         'external_user_id'      => $agreement_no,               // '商户用户标识（业务平台ID-业务平台用户ID-支付系统协议号）',
-
                         'sign_modify_time'      => $item['sign_time'],          // '最近一次协议修改时间，如果协议未修改过，本参数值等于签约时间',
                     ];
-//                    p($zuji_pay_alipay_data);
-//                    sql_profiler();
-                    $zuji_pay_alipay_id = \DB::connection('pay')->table('zuji_pay_alipay_withhold')->insert($zuji_pay_alipay_data);
-                    if(!$zuji_pay_alipay_id){
-                        DB::rollBack();
-                    }
-//                    die;
 
+                    //没有记录则添加
+                    $zuji_pay_alipay_info = \DB::connection('pay')->table('zuji_pay_alipay_withhold')
+                        ->where([
+                            ['alipay_agreement_no', '=', $alipay_agreement_no],
+                            ['status', '=', "NORMAL"]
+                        ])->first();
+                    if(!$zuji_pay_alipay_info){
+                        $zuji_pay_alipay_id = \DB::connection('pay')->table('zuji_pay_alipay_withhold')->insert($zuji_pay_alipay_data);
+                        if(!$zuji_pay_alipay_id){
+                            $arr[$item['withhold_id'].'zuji_pay_alipay_withhold'] = $zuji_pay_alipay_data;
+                        }
+                    }
 
             // 创建（支付）系统 代扣 表 zuji_pay_withhold
                     $zuji_pay_withhold_data = [
@@ -124,9 +119,17 @@ class ImportHistoryWithhold extends Command
                         'sign_time'         => strtotime($item['sign_time']),   // '签约时间戳',
                     ];
 
-                    $zuji_pay_withhold_id = \DB::connection('pay')->table('zuji_pay_withhold')->insert($zuji_pay_withhold_data);
-                    if(!$zuji_pay_withhold_id){
-                        DB::rollBack();
+                    //没有记录则添加
+                    $zuji_pay_withhold_info = \DB::connection('pay')->table('zuji_pay_withhold')
+                        ->where([
+                            ['out_agreement_no', '=', $alipay_agreement_no],
+                            ['status', '=', 1]
+                        ])->first();
+                    if(!$zuji_pay_withhold_info) {
+                        $zuji_pay_withhold_id = \DB::connection('pay')->table('zuji_pay_withhold')->insert($zuji_pay_withhold_data);
+                        if (!$zuji_pay_withhold_id) {
+                            $arr[$item['withhold_id'] . 'zuji_pay_withhold'] = $zuji_pay_withhold_data;
+                        }
                     }
 
                     //--------------------------------------------------------------------------------------------------
@@ -144,13 +147,24 @@ class ImportHistoryWithhold extends Command
                         'withhold_channel'  => 2,                           // '代扣协议-渠道',
                         'withhold_no'       => $alipay_agreement_no,        // '代扣协议-编号',
                     ];
-                    $order_pay_id = \App\Order\Models\OrderPayModel::create($order_pay_data);
-                    if(!$order_pay_id){
-                        DB::rollBack();
+
+                    //没有记录则添加
+                    $order_pay_info = \App\Order\Models\OrderPayModel::query()
+                        ->where([
+                            ['withhold_no', '=', $alipay_agreement_no],
+                            ['withhold_status', '=', 2],
+                            ['withhold_channel', '=', 2],
+                            ['user_id', '=', $user_id]
+                        ])->first();
+                    if(!$order_pay_info){
+                        $order_pay_id = \App\Order\Models\OrderPayModel::updateOrCreate($order_pay_data);
+                        if(!$order_pay_id->getQueueableId()){
+                            $arr[$item['withhold_id'].'order_pay'] = $order_pay_data;
+                        }
                     }
 
 
-            // 创建（订单）系统 预授权环节明细表 order_pay_withhold
+                    // 创建（订单）系统 预授权环节明细表 order_pay_withhold
                     $order_pay_withhold_data = [
                         'withhold_no'       => $alipay_agreement_no,        // '代扣协议码',
                         'out_withhold_no'   => $agreement_no,               // '支付系统代扣协议码',
@@ -159,14 +173,64 @@ class ImportHistoryWithhold extends Command
                         'user_id'           => $user_id,                    // '用户ID',
                         'counter'           => 1,                           // '代扣协议使用计数；为0时才允许解除代扣；创建时默认为1',
                     ];
-
-                    $order_pay_withhold_id = \App\Order\Models\OrderPayWithholdModel::create($order_pay_withhold_data);
-                    if(!$order_pay_withhold_id){
-                        DB::rollBack();
+                    //没有记录则添加
+                    $order_pay_withhold_info = \App\Order\Models\OrderPayWithholdModel::query()
+                        ->where([
+                            ['withhold_no', '=', $alipay_agreement_no],
+                            ['out_withhold_no', '=', 2],
+                            ['withhold_channel', '=', 2],
+                            ['withhold_status', '=', 2],
+                            ['user_id', '=', $user_id]
+                        ])->first();
+                    if(!$order_pay_withhold_info) {
+                        $order_pay_withhold_id = \App\Order\Models\OrderPayWithholdModel::updateOrCreate($order_pay_withhold_data);
+                        if (!$order_pay_withhold_id->getQueueableId()) {
+                            $arr[$item['withhold_id'] . 'order_pay_withhold'] = $order_pay_withhold_data;
+                        }
                     }
-                    DB::commit();
+            // 代扣 与 业务 关系表 order_pay_withhold_business
+                    $order_pay_withhold_business_data = [
+                        'withhold_no'       => $agreement_no,               // '业务系统代扣编码',
+                        'business_type'     => 1,                           // '业务类型',
+                        'business_no'       => $user_id,                    // '业务编号',
+                        'bind_time'         => strtotime($item['sign_time']),// '绑定时间',
+                    ];
+
+                    // 没有记录则添加
+                    $order_pay_withhold_business_where = [
+                        ['withhold_no', '=', $alipay_agreement_no],
+                        ['business_type', '=', 1],
+                        ['business_no', '=', $user_id]
+                    ];
+                    $order_pay_withhold_business_info = \App\Order\Models\OrderPayWithholdBusinessModel::query()
+                        ->where($order_pay_withhold_business_where)->first();
+
+                    // 有记录则修改绑定时间
+                    if(!$order_pay_withhold_business_info){
+                        $order_pay_withhold_business_id = \App\Order\Models\OrderPayWithholdBusinessModel::updateOrCreate($order_pay_withhold_business_data);
+                        if(!$order_pay_withhold_business_id->getQueueableId()){
+                            $arr[$item['withhold_id'].'order_pay_withhold_business'] = $order_pay_withhold_business_data;
+                        }
+                    }else{
+                        //修改签代扣次数 + 1
+                        \App\Order\Models\OrderPayWithholdModel::where($order_pay_withhold_business_where)->increment('counter');
+
+                        \App\Order\Models\OrderPayWithholdBusinessModel::where($order_pay_withhold_business_where)->update(
+                            ['bind_time'=>strtotime($item['sign_time'])]
+                        );
+                    }
                 }
+
+                $bar->advance();
+                $page++;
+                sleep(2);
+
+
             } while ($page <= $totalpage);
+            if(count($arr)>0){
+                LogApi::notify("资金预授权导表错误",$arr);
+            }
+            $bar->finish();
             echo "导入成功";die;
 
         }catch (\Exception $e){
