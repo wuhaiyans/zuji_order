@@ -57,9 +57,10 @@ class ImportUserAddress extends Command
                 $addressList = DB::connection('mysql_01')->table("zuji_order2_address")->wherein("order_id",$orderIds)->get();
                 $addressList =objectToArray($addressList);
                 $addressList = array_keys_arrange($addressList,"order_id");
+
                 foreach ($orderList as $k=>$v) {
                     $bar->advance();
-                    if($addressList[$v['order_id']]){
+                    if(!empty($addressList[$v['order_id']])){
                         $data = [
                             'order_no'=>$v['order_no'],
                             'consignee_mobile'=>$addressList[$v['order_id']]['mobile'],
@@ -76,7 +77,7 @@ class ImportUserAddress extends Command
                         }
                     }
                     else{
-                        $arr[$v['order_no']] = $data;
+                        $arr[$v['order_no']] = $v;
                     }
                 }
                 $page++;
