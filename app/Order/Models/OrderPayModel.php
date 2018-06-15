@@ -71,7 +71,7 @@ class OrderPayModel extends Model
 	 * ]
 	 * @return	bool				true：创建成功；false：创建失败
 	 */
-	public function create( array $data ){
+	public static function create( array $data ){
 		return parent::insert( $data );
 	}
 	

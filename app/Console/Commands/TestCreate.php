@@ -2,7 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Lib\Channel\Channel;
+use App\Lib\Goods\Goods;
+use App\Lib\Order\OrderInfo;
 use App\Order\Models\Order;
+use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderGoodsUnit;
+use App\Order\Models\OrderUserAddress;
+use App\Order\Models\OrderUserCertified;
+use App\Order\Models\OrderVisit;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +22,7 @@ class TestCreate extends Command
      *
      * @var string
      */
-    protected $signature = 'command:daoru';
+    protected $signature = 'command:daoru {user=jack} {--queue=}';
 
     /**
      * The console command description.
@@ -39,160 +48,194 @@ class TestCreate extends Command
      */
     public function handle()
     {
-        try{
-            DB::beginTransaction();
-            $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->where(['business_key'=>1])->limit(5)->get();
-            $orders=objectToArray($datas01);
-
-            foreach ($orders as $k=>$v){
-                $order_type =1;
-                if($v['appid'] == 36 || $v['appid'] == 90 || $v['appid'] == 91 || $v['appid'] == 92){
-                    $order_type =3;
-                }
-                $res =$this->getStatus($v['status']);
-                var_dump($res);die;
-                $newData =[
-                    'order_no'=>$v['order_no'], //订单编号
-                    'mobile'=>$v['mobile'],   //用户手机号
-                    'user_id'=>$v['user_id'],  //订单类型
-                    'order_type'=>$order_type, //订单类型 1线上订单2门店订单 3小程序订单
-                    'order_status'=>$res['order_status'],//
-                    'freeze_type'=>$res['freeze_type'],//
-                    'pay_type'=>$v['payment_type_id'],//
-                    'zuqi_type'=>$v['order_no'],//
-                    'remark'=>$v['order_no'],//
-                    'order_amount'=>$v['order_no'],//订单实际总租金
-                    'goods_yajin'=>$v['order_no'],//商品总押金金额
-                    'discount_amount'=>$v['order_no'],//商品优惠总金额
-                    'order_yajin'=>$v['order_no'],//实付商品总押金金额
-                    'order_insurance'=>$v['order_no'],//意外险总金额
-                    'coupon_amount'=>$v['order_no'],//优惠总金额
-                    'create_time'=>$v['order_no'],//
-                    'update_time'=>$v['order_no'],//
-                    'pay_time'=>$v['order_no'],//
-                    'confirm_time'=>$v['order_no'],//
-                    'delivery_time'=>$v['order_no'],//
-                    'appid'=>$v['order_no'],//
-                    'channel_id'=>$v['order_no'],//
-                    'receive_time'=>$v['order_no'],//
-                    'complete_time'=>$v['order_no'],//
-
-                ];
-                $res =Order::create($newData);
-                if(!$res->getQueueableId()){
-                    DB::rollBack();
-                    echo "导入失败1";die;
-                }
-
-            }
-            DB::commit();
-            echo "导入成功";die;
-        }catch (\Exception $e){
-            DB::rollBack();
-            echo $e->getMessage();
-            die;
-        }
+//        if ($this->confirm('Do you wish to continue? [y|N]')) {
+//            echo $this->argument('user');
+//        }
+//        $name = $this->anticipate('What is your name?', ['A', 'B']);
+//        if($name =="A" || $name =="B"){
+//            echo "A or B";die;
+//        }
+//        echo "error";die;
+//        $name = $this->choice('What is your name?', ['A', 'B'], false);
+//        echo "YES";die;
+        //line,info, comment, question 和 error
+ //       $this->line('Display this on the screen');
+        $headers = ['Name', 'Email'];
+        $users = ['tom','12@12'];
+        $this->table($headers, $users);
 
     }
 
-    public static function list($limit, $page=1)
-    {
-        return KnightInfo::paginate($limit, ['*'], 'page', $page);
-    }
     //订单状态转换
-    public function getStatus($status){
+    public static function getStatus($status,$order_info){
         $array = [];
+        $update_time =$order_info['update_time'];
+        if($order_info['refund_time']!=0){
+            $update_time =$order_info['refund_time'];
+        }
         switch($status){
             //已下单
             case 1:
-                $array = ['order_status'=>1, 'freeze_type'=>0,'goods_status'=>0
-                ];
+                $array = ['order_status'=>1, 'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //已取消
             case 2:
-                $array = ['order_status'=>7,'freeze_type'=>0,'goods_status'=>0];
+                $array = ['order_status'=>7,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>$order_info['update_time']];
                 break;
             //订单关闭
             case 3:
-                $array = ['order_status'=>8,'freeze_type'=>0,'goods_status'=>0];
+                $array = ['order_status'=>8,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>$order_info['update_time']];
                 break;
             //租用中
             case 4:
-                $array = ['order_status'=>6,'freeze_type'=>10,'goods_status'=>0];
+                $array = ['order_status'=>6,'freeze_type'=>0,'goods_status'=>10,'complete_time'=>0];
                 break;
             //已支付
             case 7:
-                $array = [ 'order_status'=>3,'freeze_type'=>0,'goods_status'=>0];
+                $array = [ 'order_status'=>3,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //退款中
             case 9:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //已退款
             case 10:
-                $array = [ 'order_status'=>8,'freeze_type'=>21,'goods_status'=>0];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
                 break;
             //已发货
             case 11:
-                $array = [ 'order_status'=>5,'freeze_type'=>0,'goods_status'=>0];
+                $array = [ 'order_status'=>5,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //用户拒签
             case 12:
-                $array = [ 'order_status'=>5,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>5,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货审核中
             case 13:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货中
             case 14:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //平台已收货
             case 15:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测合格
             case 16:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测不合格
             case 17:
-                $array = [ 'order_status'=>6,'freeze_type'=>20,'goods_status'=>1];
+                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
                 break;
             //换货中
             case 18:
-                $array = [ 'order_status'=>6,'freeze_type'=>30,'goods_status'=>4];
+                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
                 break;
             //回寄中
             case 19:
-                $array = [ 'order_status'=>6,'freeze_type'=>30,'goods_status'=>4];
+                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
                 break;
             //买断中
             case 20:
-                $array = [ 'order_status'=>6,'freeze_type'=>50,'goods_status'=>3];
+                $array = [ 'order_status'=>6,'freeze_type'=>3,'goods_status'=>50,'complete_time'=>0];
                 break;
             //已买断
             case 21:
-                $array = [ 'order_status'=>9,'freeze_type'=>51,'goods_status'=>0];
+                $array = [ 'order_status'=>9,'freeze_type'=>0,'goods_status'=>51,'complete_time'=>$order_info['update_time']];
                 break;
             //资金已授权
             case 22:
-                $array = [ 'order_status'=>3,'freeze_type'=>0,'goods_status'=>0];
+                $array = [ 'order_status'=>3,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //资金已解冻
             case 23:
-                $array = [ 'order_status'=>8,'freeze_type'=>21,'goods_status'=>0];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
                 break;
             //用户归还
             case 25:
-                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>0];
                 break;
             //已完成
             case 26:
-                $array = [ 'order_status'=>9,'freeze_type'=>0,'goods_status'=>0];
+                $array = [ 'order_status'=>9,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>$order_info['update_time']];
                 break;
         }
         return $array;
     }
+    //用户地址导入
+    public function userAddressInsert($order){
+        $userAddress = \DB::connection('mysql_01')->table('zuji_order2_address')->select('*')->first();
+        if(!$userAddress){
+            return false;
+        }
+        $data = [
+            'order_no'=>$order['order_no'],
+            'consignee_mobile'=>$userAddress['mobile'],
+            'name'=>$userAddress['name'],
+            'province_id'=>$userAddress['province_id'],
+            'city_id'=>$userAddress['city_id'],
+            'area_id'=>$userAddress['country_id'],
+            'address_info'=>$userAddress['address'],
+            'create_time'=>$order['create_time'],
+        ];
+        $ret = OrderUserAddress::updateOrCreate($data);
+        if($ret->getQueueableId()){
+            return true;
+        }
+        return false;
+    }
+    //用户信用认证导入
+    public function userCertifiedInsert($order){
+        $userCertified = \DB::connection('mysql_01')->table('zuji_order2_address')->select('*')->first();
+        if(!$userCertified){
+            return false;
+        }
+        $data = [
+            'order_no'=>$order['order_no'],
+            'certified'=>$order['order_no'],
+            'certified_platform'=>$order['certified_platform'],
+            'credit'=>$order['credit'],
+            'score'=>0,
+            'risk'=>0,
+            'face'=>0,
+            'realname'=>$order['realname'],
+            'cret_no'=>$order['cert_no'],
+            'create_time'=>$order['create_time'],
+        ];
+        $ret = OrderUserCertified::updateOrCreate($data);
+        if($ret->getQueueableId()){
+            return true;
+        }
+        return false;
+    }
+    //订单回访数据导入
+    public function visit($order){
+        if($order['remark_id']>0){
+            $data = [
+                'order_no' => $order['order_no'],
+                'visit_id' => $order['remark_id'],
+                'visit_text' => $order['remark'],
+                'create_time' => $order['create_time'],
+            ];
+            $ret =OrderVisit::updateOrCreate($data);
+            if(!$ret->getQueueableId()){
+                return false;
+            }else{
+                $res = OrderExtend::updateOrCreate(['order_no'=>$data['order_no'],'field_name'=>"visit","field_value"=>1]);
+                if(!$res->getQueueableId()){
+                    return false;
+                }
+            }
+        }
+        return true;
+
+    }
+
+
+
+
+
 }

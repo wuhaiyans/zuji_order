@@ -510,11 +510,11 @@ class DeliveryController extends Controller
 
     public function statistics()
     {
-        return [
+        return apiResponse([
             'delivery' => DeliveryService::statistics(),
             'receive'   => ReceiveService::statistics(),
             'check'     => ReceiveGoodsService::statistics()
-        ];
+        ]);
     }
 
 

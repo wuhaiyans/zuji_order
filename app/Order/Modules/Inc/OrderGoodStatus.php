@@ -109,6 +109,16 @@ class OrderGoodStatus{
         return '';
     }
 
+    /**
+     * 获取成色值
+     * @param $key
+     * @return mixed
+     */
+    public static function spec_chengse_value($key){
+        $chengse = array('100'=>'全新','99'=>'99成新','95'=>'95成新','90'=>'9成新','80'=>'8成新','70'=>'7成新',);
+        return $chengse[$key];
+    }
+
 
 
 }

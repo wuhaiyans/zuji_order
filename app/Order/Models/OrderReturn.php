@@ -23,4 +23,14 @@ class OrderReturn extends Model
      */
     public $timestamps = false;
 
+
+
+    /**
+     * 可以被批量赋值的属性.
+     *
+     * @var array
+     */
+
+    protected $fillable = ['receive_no','logistics_id','logistics_no','evaluation_status','evaluation_remark','evaluation_time','refund_no','loss_type','reason_id','reason_text','old_refund_id','out_refund_no','user_id','business_key','pay_amount','refund_amount','remark','goods_no','status','create_time','check_time','update_time','order_no'];
+
 }

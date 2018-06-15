@@ -194,7 +194,6 @@ function is_assoc_arr( $arr ){
     }
     return false;
 }
-
 /**
  * @param int $price    价格，单位：分
  * @return string   格式化价格，单位：元
@@ -232,7 +231,7 @@ function v($data, $exit = '')
 /**
  * 规则：前缀（1位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+微秒（5位）+随机数（1位）
  * Author: heaven
- * @param int $noType   1分期交易号, 2退货编号, 3支付交易, 4预授权 5,业务平台退款码6.goods_no生成方式,7.还机单编号 8.买断编号,9续租
+ * @param int $noType 1.分期交易号, 2.退货编号, 3.支付交易, 4.预授权, 5.业务平台退款码 6.goods_no生成方式, 7.还机单编号 8.买断编号,9.续租, 10.代扣协议号
  * @return bool|string
 
  */
@@ -248,6 +247,7 @@ function createNo($noType=1){
         7 => 'H',
         8 => 'B',
         9 => 'X',
+        10 => 'W',
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
