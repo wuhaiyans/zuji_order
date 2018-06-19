@@ -128,7 +128,8 @@ class ReturnStatus {
                 self::ReturnAgreed => '审核通过',
                 self::ReturnDenied => '审核拒绝',
                 self::ReturnHuanHuo => '已换货',
-            ]//换货
+            ],//换货
+
         ];
 
     }
