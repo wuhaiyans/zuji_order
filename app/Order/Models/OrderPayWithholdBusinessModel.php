@@ -21,4 +21,6 @@ class OrderPayWithholdBusinessModel extends Model
      */
     public $timestamps = false;
 
+    protected $fillable = ['withhold_no','business_type','business_no','bind_time','unbind_time'];
+
 }

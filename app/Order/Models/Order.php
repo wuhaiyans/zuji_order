@@ -26,7 +26,7 @@ class Order extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','mobile','user_id','order_type','order_status','freeze_type','pay_type','zuqi_type','remark','order_amount','goods_yajin','discount_amount','order_yajin','order_insurance','coupon_amount','create_time','update_time','pay_time','confirm_time','delivery_time','appid_id','channel_id','receive_time','complete_time'];
+    protected $fillable = ['order_no','mobile','user_id','order_type','order_status','freeze_type','pay_type','zuqi_type','remark','order_amount','goods_yajin','discount_amount','order_yajin','order_insurance','coupon_amount','create_time','update_time','pay_time','confirm_time','delivery_time','appid','channel_id','receive_time','complete_time'];
 
     /**
      * 获取当前时间
