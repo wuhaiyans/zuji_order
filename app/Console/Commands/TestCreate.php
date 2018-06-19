@@ -22,7 +22,7 @@ class TestCreate extends Command
      *
      * @var string
      */
-    protected $signature = 'command:daoru {user=jack} {--queue=}';
+    protected $signature = 'command:daoru';
 
     /**
      * The console command description.
@@ -60,9 +60,9 @@ class TestCreate extends Command
 //        echo "YES";die;
         //line,info, comment, question 和 error
  //       $this->line('Display this on the screen');
-        $headers = ['Name', 'Email'];
-        $users = ['tom','12@12'];
-        $this->table($headers, $users);
+//        $headers = ['Name', 'Email'];
+//        $users = [['tom','12@12']];
+//        $this->table($headers, $users);
 
     }
 
