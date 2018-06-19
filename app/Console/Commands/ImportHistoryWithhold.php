@@ -39,11 +39,13 @@ class ImportHistoryWithhold extends Command
      */
     public function handle()
     {
-
         $total = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
             ->where([
                 ['zuji_withholding_alipay.status', '=', 1],
-            ])->count();
+                ['zuji_withholding_notify_alipay.status', '=', 'NORMAL']
+            ])
+            ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
+            ->count();
 
         $bar = $this->output->createProgressBar($total);
         try{
@@ -164,7 +166,7 @@ class ImportHistoryWithhold extends Command
                     }
 
 
-                    // 创建（订单）系统 预授权环节明细表 order_pay_withhold
+            // 创建（订单）系统 预授权环节明细表 order_pay_withhold
                     $order_pay_withhold_data = [
                         'withhold_no'       => $alipay_agreement_no,        // '代扣协议码',
                         'out_withhold_no'   => $agreement_no,               // '支付系统代扣协议码',
@@ -177,17 +179,21 @@ class ImportHistoryWithhold extends Command
                     $order_pay_withhold_info = \App\Order\Models\OrderPayWithholdModel::query()
                         ->where([
                             ['withhold_no', '=', $alipay_agreement_no],
-                            ['out_withhold_no', '=', 2],
                             ['withhold_channel', '=', 2],
                             ['withhold_status', '=', 2],
                             ['user_id', '=', $user_id]
                         ])->first();
+
                     if(!$order_pay_withhold_info) {
                         $order_pay_withhold_id = \App\Order\Models\OrderPayWithholdModel::updateOrCreate($order_pay_withhold_data);
+
                         if (!$order_pay_withhold_id->getQueueableId()) {
                             $arr[$item['withhold_id'] . 'order_pay_withhold'] = $order_pay_withhold_data;
                         }
                     }
+
+
+
             // 代扣 与 业务 关系表 order_pay_withhold_business
                     $order_pay_withhold_business_data = [
                         'withhold_no'       => $agreement_no,               // '业务系统代扣编码',
