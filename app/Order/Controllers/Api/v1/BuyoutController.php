@@ -50,6 +50,7 @@ class BuyoutController extends Controller
         }
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
+        $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
@@ -268,7 +269,8 @@ class BuyoutController extends Controller
             'goods_no'=>$goodsInfo['goods_no'],
             'user_id'=>$goodsInfo['user_id'],
             'plat_id'=>$params['user_id'],
-            'buyout_price'=>$params['buyout_price']?$params['buyout_price']+$fenqiAmount:$goodsInfo['buyout_price']+$fenqiAmount,
+            'buyout_price'=>$params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'],
+            'zujin_price'=>$fenqiAmount,
             'create_time'=>time()
         ];
         $ret = OrderBuyout::create($data);
@@ -390,7 +392,7 @@ class BuyoutController extends Controller
             'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
             'userId' => $buyout['user_id'],
             'businessNo' => $buyout['buyout_no'],
-            'paymentAmount' => $buyout['buyout_price'],
+            'paymentAmount' => $buyout['buyout_price']+$buyout['zujin_price'],
             'paymentFenqi' => 0,
         ];
         \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);

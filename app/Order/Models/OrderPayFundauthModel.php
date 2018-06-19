@@ -15,5 +15,16 @@ class OrderPayFundauthModel extends Model
 
     protected $primaryKey='fundauth_no';
 
+    /**
+     * 默认使用时间戳戳功能
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    protected $fillable = ['fundauth_no','out_fundauth_no','fundauth_status','user_id','freeze_time','unfreeze_time','total_amount','unfreeze_amount','pay_amount'];
+
+
+
 
 }

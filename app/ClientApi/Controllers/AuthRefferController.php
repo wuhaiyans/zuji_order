@@ -15,6 +15,13 @@ class AuthRefferController extends Controller{
      * 校验token信息
      * Author: heaven
      * @param Request $request
+     *[
+     * "appid"    => "1"
+     * "version"  => "v1"
+     * "auth_token" => ""
+     * "method"  =>""
+     * "params"=>[]
+     * ]
      * @return bool
      */
     public function header(Request $request)
@@ -27,15 +34,11 @@ class AuthRefferController extends Controller{
             $checkInfo = User::checkToken($token);
             //验证通过
             if ($checkInfo){
-                $data = config('tripartite.Interior_Order_Request_data');
-                $data['method'] =$params['method'];
-                $data['params'] = [
-                      'user_id'=> $checkInfo[0]['id'],
-                      'mobile'=> $checkInfo[0]['mobile'],
-                      'username'=>$checkInfo[0]['username'],
-                ];
+                $params['params']['user_id']=$checkInfo[0]['id'];
+                $params['params']['mobile']=$checkInfo[0]['mobile'];
+                $params['params']['username']=$checkInfo[0]['username'];
                 $header = ['Content-Type: application/json'];
-                $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($data),$header);
+                $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
                     return response()->json([
@@ -58,6 +61,7 @@ class AuthRefferController extends Controller{
             }
         }
     }
+
 
 
 
