@@ -47,7 +47,7 @@ class OrderUserAddress extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','mobile','name','province_id','city_id','area_id','address_info','create_time','update_time'];
+    protected $fillable = ['order_no','consignee_mobile','name','province_id','city_id','area_id','address_info','create_time','update_time'];
 
 
 }

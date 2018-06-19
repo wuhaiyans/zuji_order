@@ -257,6 +257,8 @@ return [
     'mini.order.ordercancel' => 'MiniOrderController@miniOrderCancel',
 //    //小程序订单完成接口
 //    'mini.order.close' => 'MiniOrderController@cancelOrder',
+    //小程序数据同步接口
+    'mini.order.dataOperate' => 'MiniOrderController@dataOperate',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************

@@ -42,6 +42,7 @@ class ImportUserAddress extends Command
     public function handle()
     {
         $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
+        $bar = $this->output->createProgressBar($total);
         try{
             $limit = 1000;
             $page =1;
@@ -56,8 +57,10 @@ class ImportUserAddress extends Command
                 $addressList = DB::connection('mysql_01')->table("zuji_order2_address")->wherein("order_id",$orderIds)->get();
                 $addressList =objectToArray($addressList);
                 $addressList = array_keys_arrange($addressList,"order_id");
+
                 foreach ($orderList as $k=>$v) {
-                    if($addressList[$v['order_id']]){
+                    $bar->advance();
+                    if(!empty($addressList[$v['order_id']])){
                         $data = [
                             'order_no'=>$v['order_no'],
                             'consignee_mobile'=>$addressList[$v['order_id']]['mobile'],
@@ -74,12 +77,13 @@ class ImportUserAddress extends Command
                         }
                     }
                     else{
-                        $arr[$v['order_no']] = $data;
+                        $arr[$v['order_no']] = $v;
                     }
                 }
                 $page++;
                 sleep(2);
             } while ($page <= $totalpage);
+            $bar->finish();
             if(count($arr)>0){
                 LogApi::notify("订单用户地址信息导入失败",$arr);
             }

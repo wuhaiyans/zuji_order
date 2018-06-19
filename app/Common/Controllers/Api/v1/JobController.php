@@ -23,31 +23,46 @@ class JobController extends Controller
 	 */
 	public function createJobForWithholdCreatePay(){
 		
-		$params = [
-			'sign' => '',
-			'sign_type' => 'MD5',
-			'params' => [
-				'id' => '13206',
-			],
+		$ids = [
+			'13209',
+			'13210',
+			'13211',
+			'13212',
+			'13213',
+			'13214',
+			'13215',
+			'13216',
+			'13217',
 		];
-		// 排序
-		ksort( $params['params'] );
-
-		$str = http_build_query( $params['params'] );
-
-		$key = '1234567890';
-
-		// 签名
-		$params['sign'] = md5($str.$key);
 		
-		$name = 'test-withhold-create-pay';
-		LogApi::debug('createJobForWithholdCreatePay');
-		$url = 'http://dev-api-zuji.huishoubao.com/api.php?m=crontab&c=instalment&a=instalment_list';
-		$b = \App\Lib\Common\JobQueueApi::addRealTime($name, $url, $params);
-//		// 10秒钟一次
-//		$b = \App\Lib\Common\JobQueueApi::addScheduleCron($name, $url, ['test'=>'TEST'],'*/10 * * * * ?');
-		echo 'Job creation is '. ( $b ? 'ok': 'error');
-		exit;
+		foreach( $ids as $id ){
+		
+			$params = [
+				'sign' => '',
+				'sign_type' => 'MD5',
+				'params' => [
+					'id' => $id,
+				],
+			];
+			// 排序
+			ksort( $params['params'] );
+
+			$str = http_build_query( $params['params'] );
+
+			$key = '1234567890';
+
+			// 签名
+			$params['sign'] = md5($str.$key);
+
+			$name = 'test-withhold-create-pay-'.$id;
+			LogApi::debug('createJobForWithholdCreatePay');
+			$url = 'http://dev-api-zuji.huishoubao.com/api.php?m=crontab&c=instalment&a=instalment_withhold';
+			$b = \App\Lib\Common\JobQueueApi::addRealTime($name, $url, $params);
+	//		// 10秒钟一次
+	//		$b = \App\Lib\Common\JobQueueApi::addScheduleCron($name, $url, ['test'=>'TEST'],'*/10 * * * * ?');
+			echo '#'.$id.' Job creation is '. ( $b ? 'ok': 'error')."\n";
+
+		}
 	}
 	
 	

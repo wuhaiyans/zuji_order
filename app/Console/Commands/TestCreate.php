@@ -22,7 +22,7 @@ class TestCreate extends Command
      *
      * @var string
      */
-    protected $signature = 'command:daoru';
+    protected $signature = 'command:daoru {user=jack} {--queue=}';
 
     /**
      * The console command description.
@@ -48,97 +48,21 @@ class TestCreate extends Command
      */
     public function handle()
     {
-        try{
-            DB::beginTransaction();
-            $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->where(['business_key'=>1])->limit(5)->get();
-            $orders=objectToArray($datas01);
-
-            foreach ($orders as $k=>$v){
-                //获取商品
-                $goods = \DB::connection('mysql_01')->table('zuji_order2_goods')->select('*')->where(['order_id'=>$v['order_id']])->first();
-                $goods_info=objectToArray($goods);
-
-                $goodsArr = Goods::getSkuList([$goods_info['sku_id']]);
-                if (!is_array($goodsArr)) {
-                    DB::rollBack();
-                    echo "商品接口获取失败:".$v['order_no'];die;
-                }
-
-
-
-                //订单服务周期
-                $service =\DB::connection('mysql_01')->table("zuji_order2_service")->where(['order_no'=>$v['order_no']])->get()->first();
-                if($service){
-                    $serviceData = [
-                        'order_no'=>$service['order_no'],
-                        'goods_no'=>$goodsNo,
-                        'user_id'=>$service['user_id'],
-                        'unit'=>$v['zuqi_type'],
-                        'unit_value'=>$v['zuqi'],
-                        'begin_time'=>$service['begin_time'],
-                        'end_time'=>$service['end_time'],
-                    ];
-                    $ret = OrderGoodsUnit::updateOrCreate($serviceData);
-                    if(!$ret->getQueueableId()){
-                        DB::rollBack();
-                        echo "插入服务周期失败:".$v['order_no'];die;
-                    }
-                }
-
-                $goodsData =[
-                    'order_no'=>$v['order_no'],
-                    'goods_name'=>$v['goods_name'],
-                    'zuji_goods_id'=>$goods_info['sku_id'],
-                    'zuji_goods_sn'=>$goodsArr[$goods_info['sku_id']]['sku_info']['sn'],
-                    'goods_no'=>$goodsNo,
-                    'goods_thumb'=>$goods_info['thumb'],
-                    'prod_id'=>$goods_info['spu_id'],
-                    'prod_no'=>$goodsArr[$goods_info['sku_id']]['spu_info']['sn'],
-                    'brand_id'=>$goods_info['brand_id'],
-                    'category_id'=>$goods_info['category_id'],
-                    'machine_id'=>$goodsArr[$goods_info['sku_id']]['sku_info']['machine_id'],
-                    'user_id'=>$v['user_id'],
-                    'quantity'=>1,
-                    'goods_yajin'=>($goods_info['yajin']+$goods_info['mianyajin'])/100,
-                    'yajin'=>$goods_info['yajin']/100,
-                    'zuqi'=>$goods_info['zuqi'],
-                    'zuqi_type'=>$goods_info['zuqi_type'],
-                    'zujin'=>$goods_info['zujin']/100,
-                    'machine_value'=>empty($goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'])?"":$goodsArr[$goods_info['sku_id']]['sku_info']['machine_name'],
-                    'chengse'=>$goods_info['chengse'],
-                    'discount_amount'=>0,
-                    'coupon_amount'=>$v['discount_amount']/100,
-                    'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
-                    'edition'=>$goodsArr[$goods_info['sku_id']]['sku_info']['edition'],
-                    'business_key'=>0,
-                    'business_no'=>'',
-                    'market_price'=>$goodsArr[$goods_info['sku_id']]['sku_info']['market_price'],
-                    'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100,
-                    'specs'=>$goods_info['specs'],
-                    'insurance'=>$goods_info['yiwaixian']/100,
-                    'buyout_price'=>($goodsArr[$goods_info['sku_id']]['sku_info']['market_price']*120 -($goods_info['zuqi']*$goods_info['zujin']/100)),
-                    'begin_time'=>0,
-                    'end_time'=>0,
-                    'weight'=>$goodsArr[$goods_info['sku_id']]['sku_info']['weight'],
-                    'goods_status'=>$status['goods_status'],
-                    'create_time'=>$goods_info['create_time'],
-                    'update_time'=>$goods_info['update_time'],
-                ];
-                $res =OrderGoods::updateOrCreate($goodsData);
-                if(!$res->getQueueableId()){
-                    DB::rollBack();
-                    echo "商品导入失败:".$v['order_no'];die;
-                }
-
-
-            }
-            DB::commit();
-            echo "导入成功";die;
-        }catch (\Exception $e){
-            DB::rollBack();
-            echo $e->getMessage();
-            die;
-        }
+//        if ($this->confirm('Do you wish to continue? [y|N]')) {
+//            echo $this->argument('user');
+//        }
+//        $name = $this->anticipate('What is your name?', ['A', 'B']);
+//        if($name =="A" || $name =="B"){
+//            echo "A or B";die;
+//        }
+//        echo "error";die;
+//        $name = $this->choice('What is your name?', ['A', 'B'], false);
+//        echo "YES";die;
+        //line,info, comment, question 和 error
+ //       $this->line('Display this on the screen');
+        $headers = ['Name', 'Email'];
+        $users = ['tom','12@12'];
+        $this->table($headers, $users);
 
     }
 

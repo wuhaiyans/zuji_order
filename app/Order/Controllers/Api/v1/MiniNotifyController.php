@@ -39,22 +39,29 @@ class MiniNotifyController extends Controller
             //入库取消订单回调信息
             $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
             if( !$result ){
-                \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$result);
+                \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
             }
             $this->orderCloseCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
             //入库 完成 或 扣款 回调信息
             $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
             if( !$result ){
-                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$result);
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
             }
             $redis_order = Redis::get('dev:zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
             if( $redis_order == 'MiniWithhold' ){
                 $this->withholdingNotify();
+                return;
             }else if( $redis_order == 'MiniOrderClose' ){
                 $this->orderCloseCancelNotify();
+                return;
             }
+            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
         }else if($this->data['notify_type'] == $this->CREATE){
+            $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::add($_POST);
+            if( !$result ){
+                \App\Lib\Common\LogApi::debug('小程序订单确认支付回调记录失败',$_POST);
+            }
             $this->rentTransition();
         }
     }
