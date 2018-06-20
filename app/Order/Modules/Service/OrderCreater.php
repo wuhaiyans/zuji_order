@@ -101,8 +101,6 @@ class OrderCreater
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
-                //把无法下单的原因放入到用户表中
-                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
@@ -118,7 +116,7 @@ class OrderCreater
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+                'credit_status'		=> $b && $need_to_sign_withholding=='N',
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
                 '_order_info' => $schemaData,
@@ -269,7 +267,6 @@ class OrderCreater
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
-
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
@@ -293,13 +290,12 @@ class OrderCreater
                     $need_to_sign_withholding = 'Y';
                 }
             }
-
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b &&$need_to_sign_withholding=='N',
+                'credit_status'		=> $b && $need_to_sign_withholding=='N',
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
                 '_order_info' => $schemaData,

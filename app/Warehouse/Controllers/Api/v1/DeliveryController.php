@@ -167,7 +167,9 @@ class DeliveryController extends Controller
     {
         $rules = [
             'delivery_no' => 'required',
-            'receive_type'=> 'required'
+            'receive_type'=> 'required',
+            'user_id'=> 'required',
+            'user_name'=> 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -180,7 +182,7 @@ class DeliveryController extends Controller
         try {
             $deliveryInfo = $this->delivery->receive($params['delivery_no'], $receive_type);
 
-            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], $params['receive_type']);
+            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], ['receive_type'=>$params['receive_type'],'user_id'=>$params['user_id'],'user_name'=>$params['user_name']]);
 
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
@@ -247,7 +249,11 @@ class DeliveryController extends Controller
         $rules = [//delivery_no 发货单号
             'delivery_no' => 'required',
             'logistics_id' => 'required',//物流渠道
-            'logistics_no' => 'required'
+            'logistics_no' => 'required',
+            'logistics_note' => 'required',
+            'user_id' => 'required',
+            'user_name' => 'required',
+            'type'=> 'required',
         ];
         $params = $this->_dealParams($rules);
 
@@ -264,9 +270,13 @@ class DeliveryController extends Controller
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
             ];
+            //操作员信息,用户或管理员操作有
+            $user_info['user_id'] = $params['user_id'];
+            $user_info['user_name'] = $params['user_name'];
+            $user_info['type'] = $params['type'];
 
             //通知订单接口
-            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info']);
+            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());

@@ -298,6 +298,36 @@ class OrderController extends Controller
     }
 
     /**
+     *  增加订单出险/取消 记录
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function addOrderInsurance(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'=>'required',
+            'type'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderInsurance($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
      *  增加联系备注
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -366,6 +396,12 @@ class OrderController extends Controller
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     * @param $operator_info array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -379,9 +415,10 @@ class OrderController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
+
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
@@ -402,7 +439,7 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
+        $res = OrderOperate::deliveryReceive($params['order_no'],$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }

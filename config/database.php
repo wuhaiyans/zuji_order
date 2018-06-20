@@ -23,6 +23,8 @@ return [
     | Here are each of the database connections setup for your application.
     | Of course, examples of configuring each database platform that is
     | supported by Laravel is shown below to make development simple.
+
+
     |
     |
     | All database work in Laravel is done through the PHP PDO facilities
@@ -42,7 +44,7 @@ return [
         'mysql' => [
             'driver' => 'mysql',
 			'read' => [
-				'host' => env('DB_HOST','119.29.141.207'),
+				'host' => env('DB_HOST','zz'),
 				'port' => env('DB_PORT', '3306'),
 				'database' => env('DB_DATABASE', 'zuji_order'),
 				'username' => env('DB_USERNAME', 'hjx'),
