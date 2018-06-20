@@ -221,6 +221,46 @@ class OrderController extends Controller
     }
 
 
+
+    /**
+     * 客户端订单列表接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getClientOrderList(Request $request){
+        try{
+
+            $params = $request->all();
+
+            $rules = [
+                'user_id'  => 'required',
+            ];
+            $validateParams = $this->validateParams($rules,$params);
+
+
+            if (empty($validateParams) || $validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $orderData = Service\OrderOperate::getClientOrderList($validateParams['data']);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_33001);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+    }
+
+
     /**
      * 订单列表导出接口
      * Author: heaven

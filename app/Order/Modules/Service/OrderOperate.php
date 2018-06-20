@@ -680,7 +680,55 @@ class OrderOperate
     }
 
 
+    /**
+     * 获取客户端订单列表
+     * Author: heaven
+     * @param array $param
+     * @return array
+     */
+    public static function getClientOrderList($param = array())
+    {
+        //根据用户id查找订单列表
 
+        $orderList = OrderRepository::getClientOrderList($param);
+
+        $orderListArray = objectToArray($orderList);
+
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+
+                //设备名称
+
+                //订单商品列表相关的数据
+                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
+
+
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                //回访标识
+//                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+
+                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+
+
+    }
 
     /**
      * 获取订单列表

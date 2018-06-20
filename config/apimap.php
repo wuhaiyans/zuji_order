@@ -56,6 +56,9 @@ return [
 
     //订单列表接口
     'api.order.orderlist'=>'OrderController@orderList',
+
+    //客户端订单列表接口
+    'api.order.orderClientlist'=>'OrderController@getClientOrderList',
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
 
