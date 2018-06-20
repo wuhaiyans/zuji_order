@@ -403,7 +403,7 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
+        $res = OrderOperate::deliveryReceive($params['order_no'],$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
