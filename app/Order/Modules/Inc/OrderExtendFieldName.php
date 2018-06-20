@@ -19,5 +19,9 @@ class OrderExtendFieldName {
      * @var int 回访标识
      */
     const FieldVisit = "visit";
+    /**
+     * @var int 出险标识
+     */
+    const FieldInsurance = "insurance";
 
 }

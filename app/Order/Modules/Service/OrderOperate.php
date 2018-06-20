@@ -165,6 +165,53 @@ class OrderOperate
     }
 
     /**
+     *  增加订单出险/取消出险记录
+     * @param $params
+     * [
+     *  'order_no'  => '',//订单编号
+     *  'remark'=>'',//备注
+     *  'type'=>'',// 类型 1出险 2取消出险
+     * ]
+     * @return array|bool
+     */
+
+    public static function orderInsurance($params)
+    {
+        DB::beginTransaction();
+        try{
+            $res=OrderRepository::getOrderExtends($params['order_no'],Inc\OrderExtendFieldName::FieldVisit);
+            if(empty($res)){
+                $extendData= [
+                    'order_no'=>$params['order_no'],
+                    'field_name'=>Inc\OrderExtendFieldName::FieldVisit,
+                    'field_value'=>1,
+                ];
+                $res =OrderExtend::create($extendData);
+                $id = $res->getQueueableId();
+                if(!$id){
+                    DB::rollBack();
+                    return false;
+                }
+            }
+            $params['create_time'] =time();
+            $order = OrderVisit::updateOrCreate($params);
+            $id =$order->getQueueableId();
+            if(!$id){
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
+    }
+
+    /**
      * 保存回访标识
      * @param $params
      * [
@@ -209,9 +256,6 @@ class OrderOperate
             die;
 
         }
-
-        $order =OrderExtend::updateOrCreate($params);
-        return $order->getQueueableId();
     }
 
     /**

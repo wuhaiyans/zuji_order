@@ -298,6 +298,36 @@ class OrderController extends Controller
     }
 
     /**
+     *  增加订单出险/取消 记录
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function addOrderInsurance(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'=>'required',
+            'type'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderInsurance($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
      *  增加联系备注
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
