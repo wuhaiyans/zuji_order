@@ -1316,7 +1316,7 @@ class OrderReturnCreater
      *
      * 备注：不要加事务 外面调用 已经嵌套事务
      */
-    public function createchange($order_no,$goods_info){
+    public static function createchange($order_no,$goods_info){
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
