@@ -194,16 +194,22 @@ class Delivery
      * 接收反馈
      *
      * @param string $order_no
-     * @param int $role  在 App\Lib\publicInc 中;
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
      *  const Type_Store =4;//线下门店
      * @return
      */
-    public static function receive($orderNo, $role)
+    public static function receive($orderNo, $row)
     {
-        $response = \App\Lib\Order\Delivery::receive($orderNo, $role);
+        $response = \App\Lib\Order\Delivery::receive($orderNo, $row);
         $response =json_decode($response,true);
         if($response['code']!=ApiStatus::CODE_0){
             throw new \Exception(ApiStatus::$errCodes[$response['code']]);

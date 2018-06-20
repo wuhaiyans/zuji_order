@@ -167,7 +167,9 @@ class DeliveryController extends Controller
     {
         $rules = [
             'delivery_no' => 'required',
-            'receive_type'=> 'required'
+            'receive_type'=> 'required',
+            'user_id'=> 'required',
+            'user_name'=> 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -180,7 +182,7 @@ class DeliveryController extends Controller
         try {
             $deliveryInfo = $this->delivery->receive($params['delivery_no'], $receive_type);
 
-            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], $params['receive_type']);
+            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], ['receive_type'=>$params['receive_type'],'user_id'=>$params['user_id'],'user_name'=>$params['user_name']]);
 
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
