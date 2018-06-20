@@ -379,6 +379,7 @@ class OrderController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
+
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);

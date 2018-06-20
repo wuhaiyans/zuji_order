@@ -61,7 +61,6 @@ class SkuComponnet implements OrderCreater
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
-
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
 
@@ -199,6 +198,7 @@ class SkuComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         foreach ($this->goodsArr as $k=>$v) {
+
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
             $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['first_coupon_amount']:0.00;
@@ -229,7 +229,7 @@ class SkuComponnet implements OrderCreater
                     'zuqi_type_name' => $this->zuqiTypeName,
                     'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
                     'market_price' => $skuInfo['market_price'],
-                    'machine_value' => $spuInfo['machine_name'],
+                    'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",
                     'chengse' => $skuInfo['chengse'],
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,

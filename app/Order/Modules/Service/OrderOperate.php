@@ -99,7 +99,7 @@ class OrderOperate
                 //判断订单冻结类型 冻结就走换货发货
                 foreach ($goodsInfo as $k=>$v){
                     $v['order_no']=$orderDetail['order_no'];
-                    $b = OrderReturnRepository::createchange($v);
+                    $b = OrderReturnCreater::createchange($v);
                     if(!$b){
                         DB::rollBack();
                         return false;
@@ -328,6 +328,10 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            //通过session 获取用户信息 插入操作日志
+            $userInfo =session('user_info');
+
+            OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
             return true;
