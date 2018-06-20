@@ -64,6 +64,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
@@ -79,6 +85,12 @@ class OrderOperateInc
                     'confirm_btn'   => true,
                     //修改收货信息
                     'modify_address_btn' => true,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
 
                 ],
                 //备货中
@@ -90,6 +102,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -100,6 +118,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => true,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
@@ -110,6 +134,10 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //买断
+                    'buy_off'       => true,
+                    //保险操作
+                    'Insurance'     => true
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -120,6 +148,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
@@ -130,6 +164,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
@@ -140,6 +180,12 @@ class OrderOperateInc
                     'confirm_btn'   => false,
                     //修改收货信息
                     'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false
                 ],
             )
 

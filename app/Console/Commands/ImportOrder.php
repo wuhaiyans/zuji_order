@@ -48,7 +48,6 @@ class ImportOrder extends Command
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->count();
         $bar = $this->output->createProgressBar($total);
         try{
-
             $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
