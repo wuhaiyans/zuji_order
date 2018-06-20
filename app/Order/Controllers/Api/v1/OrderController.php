@@ -366,6 +366,12 @@ class OrderController extends Controller
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     * @param $operator_info array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -379,9 +385,10 @@ class OrderController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
+
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
@@ -402,7 +409,7 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
+        $res = OrderOperate::deliveryReceive($params['order_no'],$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }

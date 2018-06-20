@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Lib\Common\LogApi;
+use App\Order\Models\OrderExtend;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderVisit;
@@ -63,6 +64,7 @@ class ImportUserVisit extends Command
                         'create_time' => $v['create_time'],
                     ];
                     $ret = OrderVisit::updateOrCreate($data);
+                    OrderExtend::updateOrCreate(['order_no'=>$v['order_no'],'field_name'=>'visit','field_value'=>1]);
                     if(!$ret->getQueueableId()){
                         $arr[$v['order_no']] = $data;
                     }

@@ -66,6 +66,17 @@ class ImportOrder extends Command
                     $delivery =$this->getOrderDelivery($v['order_no']);
                     //获取商品信息
                     $goods_info =$this->getOrderGoods($v['order_id']);
+                    //获取支付时间
+                    $payment_time = intval($v['payment_time']);
+                    $follow_info =$this->getOrderFollow($v['order_id'],7);
+                    if(!empty($follow_info)){
+                        $payment_time =$follow_info['create_time'];
+                    }
+                    $follow_info =$this->getOrderFollow($v['order_id'],22);
+                    if(!empty($follow_info)){
+                        $payment_time =$follow_info['create_time'];
+                    }
+
 
                     $orderData =[
                         'order_no'=>$v['order_no'], //订单编号
@@ -164,7 +175,21 @@ class ImportOrder extends Command
             die;
         }
     }
+    /**
+     * 获取follow
+     * @param $order_id
+     * @param $new_status
+     * @return array
+     */
+    public function getOrderFollow($order_id,$new_status){
 
+        $datas01 = $this->conn->table('zuji_order2_follow')->select('*')->where(['order_id'=>$order_id,'new_status'=>$new_status])->first();
+        $arr=[];
+        if($datas01){
+            $arr =objectToArray($datas01);
+        }
+        return $arr;
+    }
     /**
      * 获取SPU
      * @param $spu_id

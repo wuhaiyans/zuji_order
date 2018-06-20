@@ -51,10 +51,16 @@ class OrderOperate
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     *@param $operatorInfo array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @return boolean
      */
 
-    public static function delivery($orderDetail,$goodsInfo){
+    public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -92,28 +98,29 @@ class OrderOperate
                     DB::rollBack();
                     return false;
                 }
+                //增加操作日志
+                if(!empty($operatorInfo)){
+
+                    OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
+                }
+
                 DB::commit();
                 return true;
 
-            }else{
+            }else {
                 //判断订单冻结类型 冻结就走换货发货
-                foreach ($goodsInfo as $k=>$v){
-                    $v['order_no']=$orderDetail['order_no'];
-                    $b = OrderReturnRepository::createchange($v);
-                    if(!$b){
-                        DB::rollBack();
-                        return false;
-                    }
+                $b = OrderReturnCreater::createchange($orderDetail['order_no'], $goodsInfo);
+                if (!$b) {
+                    DB::rollBack();
+                    return false;
                 }
                 DB::commit();
                 return true;
             }
-
         }catch (\Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
             die;
-
         }
 
     }
@@ -229,7 +236,13 @@ class OrderOperate
     /**
      * 确认收货接口
      * @param int $orderNo 订单编号
-     * @param int $role  在 App\Lib\publicInc 中;
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
@@ -238,8 +251,8 @@ class OrderOperate
      * @return boolean
      */
 
-    public static function deliveryReceive($orderNo,$role){
-        if(empty($orderNo) || empty($role)){return false;}
+    public static function deliveryReceive($orderNo,$row=[]){
+        if(empty($orderNo) || empty($row)){return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -281,6 +294,11 @@ class OrderOperate
                     return false;
                 }
             }
+            if(!empty($row)){
+                //增加收货日志
+                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货","");
+            }
+
             DB::commit();
             return true;
         }catch (\Exception $exc){
@@ -328,6 +346,10 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            //通过session 获取用户信息 插入操作日志
+            $userInfo =session('user_info');
+
+            OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
             return true;

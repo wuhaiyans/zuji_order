@@ -14,6 +14,7 @@ use App\Http\Requests\Request;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Order;
+use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Contracts\Logging\Log;
@@ -53,6 +54,8 @@ class OrderPayNotify
             return false;
         }
 
+        $orderInfo =$order->getData();
+
         $b =\App\Lib\Common\JobQueueApi::cancel(config('app.env')."OrderCancel_".$orderNo);
         if($status =="success"){
             //发送支付成功短信
@@ -60,6 +63,9 @@ class OrderPayNotify
             $orderNoticeObj->notify();
             //发送支付宝推送消息
             $orderNoticeObj->alipay_notify();
+            //增加操作日志
+            OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderInfo['order_no'],"支付","支付成功");
+
             //发送邮件 -----begin
             //        $data =[
             //            'subject'=>'用户已付款',
