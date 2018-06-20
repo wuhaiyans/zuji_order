@@ -90,13 +90,20 @@ class Delivery
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     *@param $operatorInfo array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * 需要写成curl形式 供发货系统使用
      */
-    public static function delivery($orderDetail,$goodsInfo)
+    public static function delivery($orderDetail,$goodsInfo,$operatorInfo)
     {
         $base_api = config('tripartite.API_INNER_URL');
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
+        $params['operator_info'] =$operatorInfo;
 
 
         $response = Curl::post($base_api, [

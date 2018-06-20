@@ -51,10 +51,16 @@ class OrderOperate
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     *@param $operatorInfo array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @return boolean
      */
 
-    public static function delivery($orderDetail,$goodsInfo){
+    public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -92,6 +98,12 @@ class OrderOperate
                     DB::rollBack();
                     return false;
                 }
+                //增加操作日志
+                if(!empty($operatorInfo)){
+
+                    OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
+                }
+
                 DB::commit();
                 return true;
 
@@ -239,7 +251,7 @@ class OrderOperate
      * @return boolean
      */
 
-    public static function deliveryReceive($orderNo,$row){
+    public static function deliveryReceive($orderNo,$row=[]){
         if(empty($orderNo) || empty($row)){return false;}
         DB::beginTransaction();
         try{
@@ -282,9 +294,10 @@ class OrderOperate
                     return false;
                 }
             }
-
-            //增加收货日志
-            OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货","");
+            if(!empty($row)){
+                //增加收货日志
+                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货","");
+            }
 
             DB::commit();
             return true;

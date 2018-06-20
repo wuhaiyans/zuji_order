@@ -236,7 +236,7 @@ class Delivery
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
-     * @param $user_info array 操作人员信息
+     * @param $operatorInfo array 操作人员信息
      * [
      *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
      *      'user_id'=>1,//用户ID
@@ -246,9 +246,9 @@ class Delivery
      *
      *
      */
-    public static function delivery($orderDetail, $goods_info, $user_info)
+    public static function delivery($orderDetail, $goods_info, $operatorInfo)
     {
-      $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info);
+      $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           throw new \Exception(ApiStatus::$errCodes[$response['code']]);
