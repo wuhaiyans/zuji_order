@@ -13,6 +13,7 @@ use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
@@ -179,22 +180,18 @@ class OrderOperate
     {
         DB::beginTransaction();
         try{
-            $res=OrderRepository::getOrderExtends($params['order_no'],Inc\OrderExtendFieldName::FieldVisit);
-            if(empty($res)){
-                $extendData= [
-                    'order_no'=>$params['order_no'],
-                    'field_name'=>Inc\OrderExtendFieldName::FieldVisit,
-                    'field_value'=>1,
-                ];
-                $res =OrderExtend::create($extendData);
-                $id = $res->getQueueableId();
-                if(!$id){
-                    DB::rollBack();
-                    return false;
-                }
+            $extendData= [
+                'order_no'=>$params['order_no'],
+                'field_name'=>Inc\OrderExtendFieldName::FieldInsurance,
+                'field_value'=>1,
+            ];
+            $res =OrderExtend::updateOrCreate($extendData);
+            if(!$res->getQueueableId()){
+                DB::rollBack();
+                return false;
             }
             $params['create_time'] =time();
-            $order = OrderVisit::updateOrCreate($params);
+            $order = OrderInsurance::updateOrCreate($params);
             $id =$order->getQueueableId();
             if(!$id){
                 DB::rollBack();
