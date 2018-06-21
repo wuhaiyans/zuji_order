@@ -34,7 +34,7 @@ class AuthRefferController extends Controller{
             $checkInfo = User::checkToken($token);
             //验证通过
             if ($checkInfo){
-                $params['params']['userinfo']=[
+                $params['userinfo']=[
                     'uid'=>$checkInfo[0]['id'],
                     'mobile'=>$checkInfo[0]['mobile'],
                     'type'=>1,
