@@ -379,6 +379,26 @@ class OrderOperate
     }
 
     /**
+     * 订单统计查询
+     * @return array
+     */
+
+    public static function counted(){
+        $arr =[];
+        //退货待审核数量
+        $arr['return_checking'] = OrderReturnRepository::returnCheckingCount();
+        //待退款数量
+
+
+        //待确认订单数量
+        $arr['waiting_confirm'] = OrderRepository::getWaitingConfirmCount();
+
+
+
+        return $arr;
+    }
+
+    /**
      * 后台确认订单操作
      * $data =[
      *   'order_no'  => '',//订单编号
