@@ -1585,4 +1585,14 @@ class OrderReturnCreater
         }
 
     }
+
+    /**
+     * 待审核的退货的设置数量
+     */
+    public function returnCount(){
+        $where[]=["status","=",ReturnStatus::ReturnCreated];
+        $where[]=["business_key","=",OrderStatus::BUSINESS_RETURN];
+       return $this->orderReturnRepository->returnCount($where);//待审核的退换货数量
+
+    }
 }

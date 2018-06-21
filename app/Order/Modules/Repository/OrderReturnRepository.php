@@ -134,6 +134,14 @@ class OrderReturnRepository
         return $getGoods;
     }
 
+    /**
+     * 获取退货待审核的数量
+     * @param $where
+     */
+    public static function returnCount($where){
+        $getReturn=orderReturn::where($where)->count();
+        return $getReturn;
+    }
 
 
 
