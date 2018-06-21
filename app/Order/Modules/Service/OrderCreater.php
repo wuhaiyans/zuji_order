@@ -129,7 +129,7 @@ class OrderCreater
 //            $orderNoticeObj->notify();
             //发送取消订单队列
         $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
-            'method' => 'api.inner.cancelOrder',
+            'method' => 'api.inner.miniCancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => time(),
@@ -327,7 +327,6 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
-            var_dump($schemaData['sku']);die;
             return $result;
         } catch (\Exception $exc) {
             echo $exc->getMessage();

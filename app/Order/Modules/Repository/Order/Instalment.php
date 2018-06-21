@@ -308,31 +308,55 @@ class Instalment {
 				echo "FAIL";exit;
 			}
 
-			// 修改扣款记录数据
+
+
+			// 创建扣款记录数据
 			$recordData = [
-				'status'        => OrderInstalmentStatus::SUCCESS,
-				'update_time'   => time(),
+				'instalment_id'             => $instalmentInfo['id'],   	// 分期ID
+				'type'                      => 1,               			// 类型 1：代扣；2：主动还款
+				'payment_amount'            => $instalmentInfo['amount'],   // 实际支付金额：元
+				'status'        			=> OrderInstalmentStatus::SUCCESS,
+				'create_time'               => time(),          			// 创建时间
+				'update_time'   			=> time(),
 			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$instalmentInfo['id']],$recordData);
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
 			if(!$record){
 				DB::rollBack();
+				\App\Lib\Common\LogApi::error('创建扣款记录失败');
 				echo "FAIL";exit;
 			}
 
-			// 修改收支明细 交易吗
+			// 创建收支明细
 			$incomeData = [
+				'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+				'order_no'      => $instalmentInfo['order_no'],
+				'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+				'business_no'   => $param['out_trade_no'],
+				'appid'         => 1,
+				'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'amount'        => $instalmentInfo['amount'],
+				'create_time'   => time(),
 				'trade_no'       => $param['out_trade_no'],
 				'out_trade_no'   => $param['trade_no'],
 			];
-			$incomeWhere =    [
-				'business_type'	=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-				'business_no'	=> $param['out_trade_no'],
-			];
-			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::save($incomeWhere,$incomeData);
+			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
 			if(!$incomeB){
 				DB::rollBack();
+				\App\Lib\Common\LogApi::error('创建收支明细失败');
 				echo "FAIL";exit;
 			}
+
+
+			//发送短信通知 支付宝内部通知
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+				$instalmentInfo['id'],
+				"InstalmentWithhold");
+			$notice->notify();
+
+			// 发送支付宝消息通知
+			$notice->alipay_notify();
+
 
 			// 提交事务
 			DB::commit();

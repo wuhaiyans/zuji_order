@@ -34,9 +34,12 @@ class AuthRefferController extends Controller{
             $checkInfo = User::checkToken($token);
             //验证通过
             if ($checkInfo){
-                $params['params']['user_id']=$checkInfo[0]['id'];
-                $params['params']['mobile']=$checkInfo[0]['mobile'];
-                $params['params']['username']=$checkInfo[0]['username'];
+                $params['userinfo']=[
+                    'uid'=>$checkInfo[0]['id'],
+                    'mobile'=>$checkInfo[0]['mobile'],
+                    'type'=>1,
+                    'username'=>$checkInfo[0]['mobile']
+                ];
                 $header = ['Content-Type: application/json'];
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
                 $info =json_decode($info,true);

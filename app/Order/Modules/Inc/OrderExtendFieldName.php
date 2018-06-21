@@ -23,10 +23,5 @@ class OrderExtendFieldName {
      * @var string 出险标识
      */
     const FieldInsurance = "insurance";
-    /**
-     * @var string 确认收货备注
-     */
-    const DeliveryReceive ='deliveryReceive';
-
 
 }
