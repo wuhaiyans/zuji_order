@@ -199,7 +199,7 @@ class Delivery
             'order_no'  => $orderNo,
         ];
         $res= Curl::post($base_api, array_merge(self::getParams(), [
-            'method'=> 'warehouse.receive.receivedOrder',//模拟
+            'method'=> 'warehouse.delivery.receive',//模拟
             'params' => json_encode($result)
         ]));
 
@@ -215,7 +215,7 @@ class Delivery
 
     /**
      * ok
-     * 确认收货接口
+     * 确认收货接口  --------废弃
      * 接收反馈
      *
      * @param string $order_no

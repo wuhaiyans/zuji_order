@@ -471,20 +471,7 @@ class OrderController extends Controller
      * [
      *  'order_no' =>'',//订单编号
      *  'remark'=>'',//备注
-     *  'row'=>'',内部接口传递
      * ]
-     * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,5收发货系统
-     *      'user_id'=>用户ID（管理员或用户必须）,
-     *      'user_name'=>用户名（管理员或用户必须）,
-     * ]
-     *
-     * int receive_type  在 App\Lib\publicInc 中;
-     *  const Type_Admin = 1; //管理员
-     *  const Type_User = 2;    //用户
-     *  const Type_System = 3; // 系统自动化任务
-     *  const Type_Store =4;//线下门店
-     *  const Type_Warehouse =5;//收发货系统
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -497,9 +484,7 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $params['row'] = isset($params['row'])?$params['row']:[];
-
-        $res = OrderOperate::deliveryReceive($params,$params['row']);
+        $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
@@ -527,6 +512,14 @@ class OrderController extends Controller
      * $params[
      *   'order_no'  => '',//订单编号
      *   'remark'=>'',//操作备注
+     *  'userinfo'  //转发过来的信息
+     * ]
+     * $userinfo [
+     *  'uid'=>'',
+     *  'mobile'=>'',
+     *  'type'=>'',
+     *  'username'=>'',
+     *
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

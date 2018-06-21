@@ -35,6 +35,8 @@ return [
     'api.order.delivery'=>'OrderController@delivery',
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
+    //自动执行任务  订单确认收货接口
+    'api.order.systemDeliveryReceive'=>'OrderController@systemDeliveryReceive',
 
 
     //支付宝初始化接口

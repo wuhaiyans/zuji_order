@@ -73,6 +73,7 @@ class SkuComponnet implements OrderCreater
             $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
             if ($this->zuqiType == 1) {
                 $this->zuqiTypeName = "day";
+                $goodsArr[$skuId]['sku_info']['zuqi'] = (strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400;
             } elseif ($this->zuqiType == 2) {
                 $this->zuqiTypeName = "month";
             }

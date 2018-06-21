@@ -276,27 +276,26 @@ class OrderOperate
     }
     /**
      * 确认收货接口
+     * @param  $system //0 前后端操作,1 自动执行任务
      * @param $params
      * [
      *      'order_no'=>''//订单编号
      *      'remark'=>''//备注
+     *      'userinfo'
      * ]
-     * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下 5,收发货系统,
-     *      'user_id'=>用户ID（管理员或用户必须）,
-     *      'user_name'=>用户名（管理员或用户必须）,
-     * ]
-     *
-     * int receive_type  在 App\Lib\publicInc 中;
-     *  const Type_Admin = 1; //管理员
-     *  const Type_User = 2;    //用户
-     *  const Type_System = 3; // 系统自动化任务
-     *  const Type_Store =4;//线下门店
+     * $userinfo [
+     *  'uid'=>'',
+     *  'mobile'=>'',
+     *  'type'=>'',
+     *  'username'=>'',
      * ]
      * @return boolean
      */
 
-    public static function deliveryReceive($params,$row=[]){
+    public static function deliveryReceive($params,$system=0){
+        $orderNo =$params['order_no'];
+        $remark = isset($params['remark'])?$params['remark']:'';
+
         if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
@@ -339,28 +338,21 @@ class OrderOperate
                     return false;
                 }
             }
-            if(empty($row)){
-                //通过session 获取用户信息 插入操作日志
-                $userInfo =session('user_info')?session('user_info'):[];
-                if(!empty($userInfo)){
-                    OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$orderNo,"确认收货"," ");
-                }else{
-                    OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"确认收货"," ");
-                }
 
-                //通知给收发货系统
-                $b =Delivery::orderReceive($orderNo);
-                if(!$b){
-                    DB::rollBack();
-                    return false;
-                }
-
-            }else{
-                //收发货系统传递过来
-                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货"," ");
+            //通知给收发货系统
+            $b =Delivery::orderReceive($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
             }
-
-
+            if($system==0){
+                //插入操作日志
+                $userInfo =$params['userinfo'];
+                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
+                OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userType,$orderNo,"确认收货",$remark);
+            }else{
+                OrderLogRepository::add(0,'',\App\Lib\PublicInc::Type_System,$orderNo,"确认收货","系统自动执行任务");
+            }
 
             DB::commit();
             return true;
@@ -403,6 +395,14 @@ class OrderOperate
      * $data =[
      *   'order_no'  => '',//订单编号
      *   'remark'=>'',//操作备注
+     *    'userinfo'
+     * ]
+     *  $userinfo [
+     *  'uid'=>'',
+     *  'mobile'=>'',
+     *  'type'=>'',
+     *  'username'=>'',
+     *
      * ]
      * @return boolean
      */
@@ -430,10 +430,8 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            //通过session 获取用户信息 插入操作日志
-            $userInfo =session('user_info');
-
-            OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
+            $userInfo =$data['userinfo'];
+            OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
             return true;
