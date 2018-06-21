@@ -60,7 +60,7 @@ class WithholdController extends Controller
         try{
             // 查询用户协议
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
-            $payWithhold = $withhold->get_data();
+            $payWithhold = $withhold->getData();
 
             $data = [
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
