@@ -286,12 +286,12 @@ class Instalment {
 	 * @return String	SUCCESS成功、FAIL失败
 	 */
 	public static function paySuccess( array $param){
-
+		
 		if($param['status'] == "success"){
 			//开启事务
 			DB::beginTransaction();
 
-			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['id'=>$param['out_trade_no']]);
+			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				// 提交事务
 				echo "FAIL";exit;
@@ -302,7 +302,7 @@ class Instalment {
 				'update_time'   => time(),
 			];
 			// 修改分期状态
-			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['id'=>$param['out_trade_no']], $data);
+			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
 			if(!$b){
 				DB::rollBack();
 				echo "FAIL";exit;
@@ -313,7 +313,7 @@ class Instalment {
 				'status'        => OrderInstalmentStatus::SUCCESS,
 				'update_time'   => time(),
 			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['out_trade_no']],$recordData);
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['id']],$recordData);
 			if(!$record){
 				DB::rollBack();
 				echo "FAIL";exit;

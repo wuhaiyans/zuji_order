@@ -677,13 +677,23 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function withholdCreatePayNotify(Request $request){
+	public function withholdCreatePayNotify(){
+//
+//		$params     = $request->all();
+//		\App\Lib\Common\LogApi::error('代扣回调调试', $params);
 
-		$params     = $request->all();
-		\App\Lib\Common\LogApi::error('代扣回调调试', $params);
+		$params = [
+			'params' => [
+				'reason'            => '',
+				'status'            => 'success',
+				'agreement_no'      => 'agreement_no',
+				'out_agreement_no'  => 'out_agreement_no',
+				'trade_no'          => 'trade_no',
+				'out_trade_no'      => 'FA62165027705682',
+			]
+		];
 
 		$rules = [
-			'reason'            => 'required',
 			'status'            => 'required',
 			'agreement_no'      => 'required',
 			'out_agreement_no'  => 'required',
