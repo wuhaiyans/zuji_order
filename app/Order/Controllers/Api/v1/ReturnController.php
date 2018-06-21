@@ -61,7 +61,7 @@ class ReturnController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
         }
 
-        $return = $this->OrderReturnCreater->add($params);
+        $return = $this->OrderReturnCreater->add($params,$orders['userinfo']);
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34006,"创建退换货单失败");
         }
@@ -85,7 +85,7 @@ class ReturnController extends Controller
         if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $return = $this->OrderReturnCreater->createRefund($params);//修改信息
+        $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);//修改信息
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
         }
@@ -123,7 +123,7 @@ class ReturnController extends Controller
         if(empty($params['business_key'])){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
         }
-        $res=$this->OrderReturnCreater->returnOfGoods($params);//审核同意
+        $res=$this->OrderReturnCreater->returnOfGoods($params,$orders['userinfo']);//审核同意
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33001,"退换货审核失败");
         }
@@ -146,7 +146,7 @@ class ReturnController extends Controller
         if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res= $this->OrderReturnCreater->refundApply($param);
+        $res= $this->OrderReturnCreater->refundApply($param,$orders['userinfo']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
@@ -525,11 +525,5 @@ class ReturnController extends Controller
         }
          return apiResponse( [], ApiStatus::CODE_0);
     }
-
-
-    public function test(){
-
-    }
-
 
 }
