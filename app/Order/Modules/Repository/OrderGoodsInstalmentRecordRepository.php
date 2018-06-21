@@ -33,7 +33,7 @@ class OrderGoodsInstalmentRecordRepository
         if(!$ret){
             return false;
         }
-
+        return $ret->getQueueableId();
 
     }
 

@@ -186,7 +186,32 @@ class Delivery
 
         return true;
     }
+    /**
+     * 订单请求 确认收货
+     *
+     * @param string $order_no 订单号, 根据订单号获取商品数据
+     * @return boolean
+     */
+    public static function orderReceive($orderNo)
+    {
+        $base_api = config('tripartite.warehouse_api_uri');
+        $result = [
+            'order_no'  => $orderNo,
+        ];
+        $res= Curl::post($base_api, array_merge(self::getParams(), [
+            'method'=> 'warehouse.delivery.deliveryCreate',//模拟
+            'params' => json_encode($result)
+        ]));
 
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * ok
@@ -194,16 +219,23 @@ class Delivery
      * 接收反馈
      *
      * @param string $order_no
-     * @param int $role  在 App\Lib\publicInc 中;
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
      *  const Type_Store =4;//线下门店
      * @return
      */
-    public static function receive($orderNo, $role)
+    public static function receive($orderNo, $row)
     {
-        $response = \App\Lib\Order\Delivery::receive($orderNo, $role);
+        $row['receive_type'] =5;
+        $response = \App\Lib\Order\Delivery::receive($orderNo, $row);
         $response =json_decode($response,true);
         if($response['code']!=ApiStatus::CODE_0){
             throw new \Exception(ApiStatus::$errCodes[$response['code']]);
@@ -230,13 +262,19 @@ class Delivery
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     * @param $operatorInfo array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @return string
      *
      *
      */
-    public static function delivery($orderDetail, $goods_info)
+    public static function delivery($orderDetail, $goods_info, $operatorInfo)
     {
-      $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info);
+      $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           throw new \Exception(ApiStatus::$errCodes[$response['code']]);

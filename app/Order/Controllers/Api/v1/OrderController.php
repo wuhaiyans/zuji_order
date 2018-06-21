@@ -49,7 +49,7 @@ class OrderController extends Controller
     public function confirmation(Request $request){
 		
         $params = $request->all();
-		
+
         //获取appid
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
@@ -221,6 +221,46 @@ class OrderController extends Controller
     }
 
 
+
+    /**
+     * 客户端订单列表接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getClientOrderList(Request $request){
+        try{
+
+            $params = $request->all();
+
+            $rules = [
+                'user_id'  => 'required',
+            ];
+            $validateParams = $this->validateParams($rules,$params);
+
+
+            if (empty($validateParams) || $validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $orderData = Service\OrderOperate::getClientOrderList($validateParams['data']);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_33001);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+    }
+
+
     /**
      * 订单列表导出接口
      * Author: heaven
@@ -298,6 +338,36 @@ class OrderController extends Controller
     }
 
     /**
+     *  增加订单出险/取消 记录
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function addOrderInsurance(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'=>'required',
+            'type'=>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+
+        $res = OrderOperate::orderInsurance($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+    }
+
+    /**
      *  增加联系备注
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -366,6 +436,12 @@ class OrderController extends Controller
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     * @param $operator_info array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -379,17 +455,36 @@ class OrderController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         if(count($params['goods_info']) <1){
+
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res = OrderOperate::delivery($params['order_info'],$params['goods_info']);
+        $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
     /**
-     *  确认收货接口
+     * 确认收货接口
      * @param Request $request
+     * $params
+     * [
+     *  'order_no' =>'',//订单编号
+     *  'remark'=>'',//备注
+     *  'row'=>'',内部接口传递
+     * ]
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,5收发货系统
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
+     *  const Type_Admin = 1; //管理员
+     *  const Type_User = 2;    //用户
+     *  const Type_System = 3; // 系统自动化任务
+     *  const Type_Store =4;//线下门店
+     *  const Type_Warehouse =5;//收发货系统
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -402,12 +497,13 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['role']);
+        $res = OrderOperate::deliveryReceive($params,$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
+
 
     /**
      * 确认订单接口
@@ -439,9 +535,6 @@ class OrderController extends Controller
         }
         return apiResponse($res,ApiStatus::CODE_0);
         die;
-
-
-
 
     }
     /**

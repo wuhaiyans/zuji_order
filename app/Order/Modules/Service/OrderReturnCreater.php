@@ -1314,10 +1314,10 @@ class OrderReturnCreater
      * @param $params
      * @return \Illuminate\Http\JsonResponse|string
      *
+     * 备注：不要加事务 外面调用 已经嵌套事务
      */
-    public function createchange($order_no,$goods_info){
+    public static function createchange($order_no,$goods_info){
         //开启事物
-        DB::beginTransaction();
         try{
             foreach ($goods_info as $k=>$v) {
                 //获取设备信息
@@ -1325,7 +1325,6 @@ class OrderReturnCreater
                 //更新原设备为无效
                 $updateDelivery=$delivery->barterDelivery();
                 if(!$updateDelivery){
-                    DB::rollBack();
                     return false;
                 }
             }
@@ -1333,12 +1332,10 @@ class OrderReturnCreater
             if(!$goods_result){
                 return false;//创建换货记录失败
             }
-            DB::commit();
             return true;
         }catch (\Exception $exc) {
-            DB::rollBack();
             echo $exc->getMessage();
-            die;
+            return false;
         }
 
 

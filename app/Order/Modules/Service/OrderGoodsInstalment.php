@@ -290,6 +290,8 @@ class OrderGoodsInstalment
      * @return mixed  false：更新失败；int：受影响记录数
      */
     public static function instalment_failed($fail_num,$instalment_id,$term){
+        //修改扣款失败
+        OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['status'=>OrderInstalmentStatus::FAIL]);
 
         //发送通知
         if ($fail_num == 0) {

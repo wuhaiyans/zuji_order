@@ -50,6 +50,7 @@ class BuyoutController extends Controller
         }
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
+        $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
@@ -187,6 +188,7 @@ class BuyoutController extends Controller
             'user_id'=>$goodsInfo['user_id'],
             'goods_name'=>$goodsInfo['goods_name'],
             'buyout_price'=>$goodsInfo['buyout_price'],
+            'amount'=>$goodsInfo['buyout_price'],
             'create_time'=>time(),
         ];
         $ret = OrderBuyout::create($data);
@@ -258,7 +260,8 @@ class BuyoutController extends Controller
         $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
         $where[] = ['goods_no','=',$goodsInfo['goods_no']];
         $instaulment = OrderInstalmentRepository::getSumAmount($where);
-        $fenqiAmount = $instaulment?$instaulment:0;
+        $fenqiPrice = $instaulment?$instaulment:0;
+        $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
 
         DB::beginTransaction();
         //创建买断单
@@ -268,7 +271,9 @@ class BuyoutController extends Controller
             'goods_no'=>$goodsInfo['goods_no'],
             'user_id'=>$goodsInfo['user_id'],
             'plat_id'=>$params['user_id'],
-            'buyout_price'=>$params['buyout_price']?$params['buyout_price']+$fenqiAmount:$goodsInfo['buyout_price']+$fenqiAmount,
+            'buyout_price'=>$buyoutPrice,
+            'zujin_price'=>$fenqiPrice,
+            'amount'=>$buyoutPrice+$fenqiPrice,
             'create_time'=>time()
         ];
         $ret = OrderBuyout::create($data);
@@ -390,7 +395,7 @@ class BuyoutController extends Controller
             'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
             'userId' => $buyout['user_id'],
             'businessNo' => $buyout['buyout_no'],
-            'paymentAmount' => $buyout['buyout_price'],
+            'paymentAmount' => $buyout['amount'],
             'paymentFenqi' => 0,
         ];
         \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);

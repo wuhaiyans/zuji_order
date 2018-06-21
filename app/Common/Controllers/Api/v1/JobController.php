@@ -24,15 +24,6 @@ class JobController extends Controller
 	public function createJobForWithholdCreatePay(){
 		
 		$ids = [
-			'13209',
-			'13210',
-			'13211',
-			'13212',
-			'13213',
-			'13214',
-			'13215',
-			'13216',
-			'13217',
 		];
 		
 		foreach( $ids as $id ){
@@ -54,15 +45,16 @@ class JobController extends Controller
 			// 签名
 			$params['sign'] = md5($str.$key);
 
-			$name = 'test-withhold-create-pay-'.$id;
+			$name = 'withhold-create-pay-'.$id;
 			LogApi::debug('createJobForWithholdCreatePay');
-			$url = 'http://dev-api-zuji.huishoubao.com/api.php?m=crontab&c=instalment&a=instalment_withhold';
+			$url = 'https://test2-api-zuji.huishoubao.com/api.php?m=crontab&c=instalment&a=instalment_withhold';
 			$b = \App\Lib\Common\JobQueueApi::addRealTime($name, $url, $params);
 	//		// 10秒钟一次
 	//		$b = \App\Lib\Common\JobQueueApi::addScheduleCron($name, $url, ['test'=>'TEST'],'*/10 * * * * ?');
 			echo '#'.$id.' Job creation is '. ( $b ? 'ok': 'error')."\n";
 
 		}
+		echo "----------\n";
 	}
 	
 	

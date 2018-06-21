@@ -18,9 +18,12 @@ return [
     'api.order.orderLog'=>'OrderController@orderLog',
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+    //保存订单出险信息
+    'api.order.outInsurance'=>'OrderController@addOrderInsurance',
     //获取订单状态流信息
     'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
+    
     //订单确认修改收货地址信息
     'api.order.modifyAddress'=>'OrderController@modifyAddress',
 
@@ -53,6 +56,9 @@ return [
 
     //订单列表接口
     'api.order.orderlist'=>'OrderController@orderList',
+
+    //客户端订单列表接口
+    'api.order.orderClientlist'=>'OrderController@getClientOrderList',
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
 

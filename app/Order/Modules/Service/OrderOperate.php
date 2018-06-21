@@ -13,6 +13,7 @@ use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
 use App\Order\Modules\PublicInc;
@@ -51,10 +52,16 @@ class OrderOperate
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
+     *@param $operatorInfo array 操作人员信息
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
      * @return boolean
      */
 
-    public static function delivery($orderDetail,$goodsInfo){
+    public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -92,28 +99,29 @@ class OrderOperate
                     DB::rollBack();
                     return false;
                 }
+                //增加操作日志
+                if(!empty($operatorInfo)){
+
+                    OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
+                }
+
                 DB::commit();
                 return true;
 
-            }else{
+            }else {
                 //判断订单冻结类型 冻结就走换货发货
-                foreach ($goodsInfo as $k=>$v){
-                    $v['order_no']=$orderDetail['order_no'];
-                    $b = OrderReturnRepository::createchange($v);
-                    if(!$b){
-                        DB::rollBack();
-                        return false;
-                    }
+                $b = OrderReturnCreater::createchange($orderDetail['order_no'], $goodsInfo);
+                if (!$b) {
+                    DB::rollBack();
+                    return false;
                 }
                 DB::commit();
                 return true;
             }
-
         }catch (\Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
             die;
-
         }
 
     }
@@ -155,6 +163,49 @@ class OrderOperate
         }
 
         return $res;
+    }
+
+    /**
+     *  增加订单出险/取消出险记录
+     * @param $params
+     * [
+     *  'order_no'  => '',//订单编号
+     *  'remark'=>'',//备注
+     *  'type'=>'',// 类型 1出险 2取消出险
+     * ]
+     * @return array|bool
+     */
+
+    public static function orderInsurance($params)
+    {
+        DB::beginTransaction();
+        try{
+            $extendData= [
+                'order_no'=>$params['order_no'],
+                'field_name'=>Inc\OrderExtendFieldName::FieldInsurance,
+                'field_value'=>1,
+            ];
+            $res =OrderExtend::updateOrCreate($extendData);
+            if(!$res->getQueueableId()){
+                DB::rollBack();
+                return false;
+            }
+            $params['create_time'] =time();
+            $order = OrderInsurance::updateOrCreate($params);
+            $id =$order->getQueueableId();
+            if(!$id){
+                DB::rollBack();
+                return false;
+            }
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+
     }
 
     /**
@@ -202,9 +253,6 @@ class OrderOperate
             die;
 
         }
-
-        $order =OrderExtend::updateOrCreate($params);
-        return $order->getQueueableId();
     }
 
     /**
@@ -228,8 +276,18 @@ class OrderOperate
     }
     /**
      * 确认收货接口
-     * @param int $orderNo 订单编号
-     * @param int $role  在 App\Lib\publicInc 中;
+     * @param $params
+     * [
+     *      'order_no'=>''//订单编号
+     *      'remark'=>''//备注
+     * ]
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下 5,收发货系统,
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
      *  const Type_Admin = 1; //管理员
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
@@ -238,8 +296,8 @@ class OrderOperate
      * @return boolean
      */
 
-    public static function deliveryReceive($orderNo,$role){
-        if(empty($orderNo) || empty($role)){return false;}
+    public static function deliveryReceive($params,$row=[]){
+        if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -281,6 +339,19 @@ class OrderOperate
                     return false;
                 }
             }
+            if(empty($row)){
+                //通过session 获取用户信息 插入操作日志
+                if(isset(session('user_info'))){
+
+                }
+
+            }else{
+                //收发货系统传递过来
+                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货"," ");
+            }
+
+
+
             DB::commit();
             return true;
         }catch (\Exception $exc){
@@ -296,6 +367,7 @@ class OrderOperate
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
+
     /**
      * 后台确认订单操作
      * $data =[
@@ -328,6 +400,10 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            //通过session 获取用户信息 插入操作日志
+            $userInfo =session('user_info');
+
+            OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
             return true;
@@ -617,7 +693,55 @@ class OrderOperate
     }
 
 
+    /**
+     * 获取客户端订单列表
+     * Author: heaven
+     * @param array $param
+     * @return array
+     */
+    public static function getClientOrderList($param = array())
+    {
+        //根据用户id查找订单列表
 
+        $orderList = OrderRepository::getClientOrderList($param);
+
+        $orderListArray = objectToArray($orderList);
+
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+
+                //设备名称
+
+                //订单商品列表相关的数据
+                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
+
+
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                //回访标识
+//                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+
+                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+
+
+    }
 
     /**
      * 获取订单列表
