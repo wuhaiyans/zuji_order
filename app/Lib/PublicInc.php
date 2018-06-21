@@ -18,6 +18,7 @@ class PublicInc
     const Type_Admin = 1; //管理员
     const Type_System = 3; // 系统自动化任务
     const Type_Store =4;//线下门店
+    const Type_Warehouse =5;//收发货系统
     /**
      * 角色列表
      * @return array
@@ -28,6 +29,7 @@ class PublicInc
             self::Type_Admin => '卖家',
             self::Type_System => '系统',
             self::Type_Store => '门店',
+            self::Type_Warehouse => '收发货系统',
         ];
     }
     /**
