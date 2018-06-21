@@ -101,6 +101,16 @@ class OrderRepository
             ->select('order_info.*','order_userinfo.*');
     }
 
+    /**
+     * 待确认订单的数量
+     * @return int
+     */
+
+    public static function getWaitingConfirmCount(){
+        $whereArray[] = ['order_status', '=', OrderStatus::OrderPayed];
+        return Order::where($whereArray)->count();
+    }
+
 
     /**
      *

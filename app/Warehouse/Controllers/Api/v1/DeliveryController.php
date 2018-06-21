@@ -166,7 +166,7 @@ class DeliveryController extends Controller
     public function receive()
     {
         $rules = [
-            'delivery_no' => 'required',
+            'order_no' => 'required',
             'receive_type'=> 'required',
             'user_id'=> 'required',
             'user_name'=> 'required'
@@ -180,9 +180,9 @@ class DeliveryController extends Controller
         $receive_type = isset($params['receive_type']) ? $params['receive_type'] : false;
 
         try {
-            $deliveryInfo = $this->delivery->receive($params['delivery_no'], $receive_type);
+            $deliveryInfo = $this->delivery->receive($params['order_no'], $receive_type);
 
-            \App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], ['receive_type'=>$params['receive_type'],'user_id'=>$params['user_id'],'user_name'=>$params['user_name']]);
+            //\App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], ['receive_type'=>$params['receive_type'],'user_id'=>$params['user_id'],'user_name'=>$params['user_name']]);
 
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());

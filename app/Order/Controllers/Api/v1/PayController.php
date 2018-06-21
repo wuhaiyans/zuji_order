@@ -683,22 +683,12 @@ class PayController extends Controller
 		\App\Lib\Common\LogApi::error('代扣回调调试', $params);
 
 		$rules = [
-			'reason'            => 'required',
 			'status'            => 'required',
 			'agreement_no'      => 'required',
 			'out_agreement_no'  => 'required',
 			'trade_no'          => 'required',
 			'out_trade_no'      => 'required',
 		];
-
-//		$params = [
-//			'reason'            => 'required',
-//			'status'            => 'success',
-//			'agreement_no'      => '1234567890',
-//			'out_agreement_no'  => '0987654321',
-//			'trade_no'          => '000000000',
-//			'out_trade_no'      => '889',
-//		];
 
 		// 参数过滤
 		$validateParams = $this->validateParams($rules,$params);

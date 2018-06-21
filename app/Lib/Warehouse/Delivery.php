@@ -199,7 +199,7 @@ class Delivery
             'order_no'  => $orderNo,
         ];
         $res= Curl::post($base_api, array_merge(self::getParams(), [
-            'method'=> 'warehouse.delivery.deliveryCreate',//模拟
+            'method'=> 'warehouse.receive.receivedOrder',//模拟
             'params' => json_encode($result)
         ]));
 
