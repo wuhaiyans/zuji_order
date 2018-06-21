@@ -307,7 +307,7 @@ class WithholdController extends Controller
             $instalmentRecord = [
                 'instalment_id'             => $instalmentId,   // 分期ID
                 'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额
+                'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额：元
                 'status'                    => OrderInstalmentStatus::PAYING, // 状态：
                 'create_time'               => time(),          // 创建时间
             ];
@@ -323,7 +323,7 @@ class WithholdController extends Controller
                 'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
                 'order_no'      => $orderInfo['order_no'],
                 'business_type' => OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $instalmentInfo['id'],
+                'business_no'   => $trade_no,
                 'appid'         => $appid,
                 'channel'       => $channel,
                 'amount'        => $instalmentInfo['amount'],
@@ -527,7 +527,7 @@ class WithholdController extends Controller
                 $instalmentRecord = [
                     'instalment_id'             => $instalmentId,   // 分期ID
                     'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                    'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额
+                    'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额：元
                     'status'                    => OrderInstalmentStatus::PAYING, // 状态：
                     'create_time'               => time(),          // 创建时间
                 ];
@@ -542,7 +542,7 @@ class WithholdController extends Controller
                     'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
                     'order_no'      => $orderInfo['order_no'],
                     'business_type' => OrderStatus::BUSINESS_FENQI,
-                    'business_no'   => $instalmentInfo['id'],
+                    'business_no'   => $trade_no,
                     'appid'         => $appid,
                     'channel'       => $channel,
                     'amount'        => $instalmentInfo['amount'],
