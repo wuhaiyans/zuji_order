@@ -6,6 +6,7 @@
  */
 namespace App\Order\Modules\Service;
 use App\Lib\Certification;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
@@ -106,6 +107,17 @@ class OrderOperate
                 }
 
                 DB::commit();
+
+                //增加确认收货队列
+                $day =$orderInfo['zuqi_type'] ==1?3:7;
+
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
+                    'method' => 'api.inner.deliveryReceive',
+                    'order_no'=>$orderDetail['order_no'],
+                ],time()+86400,"");
+
+
+
                 return true;
 
             }else {

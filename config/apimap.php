@@ -35,8 +35,6 @@ return [
     'api.order.delivery'=>'OrderController@delivery',
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
-    //自动执行任务  订单确认收货接口
-    'api.order.systemDeliveryReceive'=>'OrderController@systemDeliveryReceive',
 
 
     //支付宝初始化接口
@@ -276,6 +274,7 @@ return [
 
     'api.inner.cancelOrder'=>'InnerServiceController@cancelOrder',//订单取消处理接口
     'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
+    'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
