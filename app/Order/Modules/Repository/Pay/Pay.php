@@ -250,7 +250,6 @@ class Pay extends \App\Lib\Configurable
 		if( $this->isSuccess() ){
 			throw new \Exception('支付单已完成');
 		}
-		print_r($this->needFundauth());die;
 		if( $this->needPayment() ){
 			return $this->getPaymentUrl($channel,$params);
 		}elseif( $this->needWithhold() ){
