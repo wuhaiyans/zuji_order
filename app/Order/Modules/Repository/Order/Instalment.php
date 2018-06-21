@@ -288,13 +288,16 @@ class Instalment {
 	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
-			//开启事务
-			DB::beginTransaction();
 
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
-				// 提交事务
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
+				return false;
+			}
+
+			// 已经处理过的请求 直接返回 true
+			if($instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS){
+				return true;
 			}
 
 			$data = [
@@ -304,11 +307,9 @@ class Instalment {
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
 			if(!$b){
-				DB::rollBack();
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('修改分期状态失败');
+				return false;
 			}
-
-
 
 			// 创建扣款记录数据
 			$recordData = [
@@ -321,9 +322,8 @@ class Instalment {
 			];
 			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
 			if(!$record){
-				DB::rollBack();
 				\App\Lib\Common\LogApi::error('创建扣款记录失败');
-				echo "FAIL";exit;
+				return false;
 			}
 
 			// 创建收支明细
@@ -341,9 +341,8 @@ class Instalment {
 			];
 			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
 			if(!$incomeB){
-				DB::rollBack();
 				\App\Lib\Common\LogApi::error('创建收支明细失败');
-				echo "FAIL";exit;
+				return false;
 			}
 
 
@@ -357,14 +356,10 @@ class Instalment {
 			// 发送支付宝消息通知
 			$notice->alipay_notify();
 
-
-			// 提交事务
-			DB::commit();
-
-			echo "SUCCESS";exit;
+			return true;
 		}
 
-		echo "FAIL";exit;
+		return false;
 
 	}
 

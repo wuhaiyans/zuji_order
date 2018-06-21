@@ -704,13 +704,22 @@ class PayController extends Controller
 			// 开启事务
 			DB::beginTransaction();
 
-			\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo '{"status":"ok"}';exit;
 
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
 
-			// 提交事务
-			DB::commit();
-			echo '{"status":"ok"}';exit;
 
 		} catch (\App\Lib\NotFoundException $exc) {
 			LogApi::error('代扣扣款异步处理失败', $exc );
