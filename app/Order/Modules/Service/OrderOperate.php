@@ -114,9 +114,7 @@ class OrderOperate
                 $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
-                ],time()+86400,"");
-
-
+                ],time()+86400*$day,"");
 
                 return true;
 
