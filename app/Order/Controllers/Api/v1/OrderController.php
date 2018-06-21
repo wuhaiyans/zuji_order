@@ -49,7 +49,7 @@ class OrderController extends Controller
     public function confirmation(Request $request){
 		
         $params = $request->all();
-		
+
         //获取appid
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
