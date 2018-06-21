@@ -276,9 +276,13 @@ class OrderOperate
     }
     /**
      * 确认收货接口
-     * @param int $orderNo 订单编号
+     * @param $params
+     * [
+     *      'order_no'=>''//订单编号
+     *      'remark'=>''//备注
+     * ]
      * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下 5,收发货系统,
      *      'user_id'=>用户ID（管理员或用户必须）,
      *      'user_name'=>用户名（管理员或用户必须）,
      * ]
@@ -292,8 +296,8 @@ class OrderOperate
      * @return boolean
      */
 
-    public static function deliveryReceive($orderNo,$row=[]){
-        if(empty($orderNo) || empty($row)){return false;}
+    public static function deliveryReceive($params,$row=[]){
+        if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -335,10 +339,18 @@ class OrderOperate
                     return false;
                 }
             }
-            if(!empty($row)){
-                //增加收货日志
-                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货","");
+            if(empty($row)){
+                //通过session 获取用户信息 插入操作日志
+                if(isset(session('user_info'))){
+
+                }
+
+            }else{
+                //收发货系统传递过来
+                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货"," ");
             }
+
+
 
             DB::commit();
             return true;
@@ -355,6 +367,7 @@ class OrderOperate
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
+
     /**
      * 后台确认订单操作
      * $data =[

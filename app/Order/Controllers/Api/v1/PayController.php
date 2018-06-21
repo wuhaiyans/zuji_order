@@ -677,27 +677,11 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function withholdCreatePayNotify(){
+	public function withholdCreatePayNotify(Request $request){
 
-//		$params     = $request->all();
+		$params     = $request->all();
+		\App\Lib\Common\LogApi::error('代扣回调调试', $params);
 
-//		$rules = [
-//			'reason'            => 'required',
-//			'status'            => 'required',
-//			'agreement_no'      => 'required',
-//			'out_agreement_no'  => 'required',
-//			'trade_no'          => 'required',
-//			'out_trade_no'      => 'required',
-//		];
-
-		$params = [
-			'reason'            => 'required',
-			'status'            => 'success',
-			'agreement_no'      => '1234567890',
-			'out_agreement_no'  => '0987654321',
-			'trade_no'          => '000000000',
-			'out_trade_no'      => '889',
-		];
 		$rules = [
 			'reason'            => 'required',
 			'status'            => 'required',
@@ -706,14 +690,24 @@ class PayController extends Controller
 			'trade_no'          => 'required',
 			'out_trade_no'      => 'required',
 		];
+
+//		$params = [
+//			'reason'            => 'required',
+//			'status'            => 'success',
+//			'agreement_no'      => '1234567890',
+//			'out_agreement_no'  => '0987654321',
+//			'trade_no'          => '000000000',
+//			'out_trade_no'      => '889',
+//		];
+
 		// 参数过滤
-//		$validateParams = $this->validateParams($rules,$params);
-//		if ($validateParams['code'] != 0) {
-//			return apiResponse([],$validateParams['code']);
-//		}
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
 
 		// 扣款成功 修改分期状态
-//		$params = $params['params'];
+		$params = $params['params'];
 		\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 	}
