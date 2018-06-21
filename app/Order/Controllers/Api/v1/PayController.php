@@ -672,7 +672,6 @@ class PayController extends Controller
 	 */
 	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::debug('代扣回调调试',$input);
 		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
@@ -687,10 +686,10 @@ class PayController extends Controller
 
 		try {
 
-			// 校验支付状态
-			$status_info = \App\Lib\Payment\CommonPaymentApi::query($params);
-			if( $status_info['status'] != 'success' ){// 支付成功
-				echo 'payment status not success';exit;
+			// 校验扣款交易状态
+			$status_info = \App\Lib\Payment\CommonWithholdingApi::deductQuery($params);
+			if( $status_info['status'] != 'success' ){//
+				echo 'status not success';exit;
 			}
 
 			// 开启事务
