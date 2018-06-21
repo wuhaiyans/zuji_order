@@ -691,15 +691,6 @@ class PayController extends Controller
 			'out_trade_no'      => 'required',
 		];
 
-//		$params = [
-//			'reason'            => 'required',
-//			'status'            => 'success',
-//			'agreement_no'      => '1234567890',
-//			'out_agreement_no'  => '0987654321',
-//			'trade_no'          => '000000000',
-//			'out_trade_no'      => '889',
-//		];
-
 		// 参数过滤
 		$validateParams = $this->validateParams($rules,$params);
 		if ($validateParams['code'] != 0) {
