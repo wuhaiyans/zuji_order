@@ -224,9 +224,9 @@ class OrderCreater
             //发送取消订单队列（小程序取消订单队列）
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
                 'method' => 'api.inner.cancelOrder',
-                'order_no'=>$data['order_no'],
-                'user_id'=>$data['user_id'],
-                'time' => time(),
+//                'order_no'=>$data['order_no'],
+//                'user_id'=>$data['user_id'],
+//                'time' => time(),
             ],time()+1800,"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
             return $result;
