@@ -327,7 +327,6 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
-            var_dump($schemaData['sku']);die;
             return $result;
         } catch (\Exception $exc) {
             echo $exc->getMessage();
