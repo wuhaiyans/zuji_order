@@ -497,13 +497,30 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
+        $params['row'] = isset($params['row'])?$params['row']:[];
+
         $res = OrderOperate::deliveryReceive($params,$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
+    /**
+     * 所有有关订单统计查询
 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function counted(Request $request){
+
+        $params =$request->all();
+
+        $res =Service\OrderOperate::counted();
+        return apiResponse($res,ApiStatus::CODE_0);
+        die;
+
+    }
 
     /**
      * 确认订单接口

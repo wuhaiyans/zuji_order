@@ -341,8 +341,18 @@ class OrderOperate
             }
             if(empty($row)){
                 //通过session 获取用户信息 插入操作日志
-                if(isset(session('user_info'))){
+                $userInfo =session('user_info')?session('user_info'):[];
+                if(!empty($userInfo)){
+                    OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$orderNo,"确认收货"," ");
+                }else{
+                    OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"确认收货"," ");
+                }
 
+                //通知给收发货系统
+                $b =Delivery::orderReceive($orderNo);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
                 }
 
             }else{
@@ -366,6 +376,26 @@ class OrderOperate
         $day = Inc\publicInc::calculateDay($zuqi);
         $endTime = $beginTime + $day*86400;
         return $endTime;
+    }
+
+    /**
+     * 订单统计查询
+     * @return array
+     */
+
+    public static function counted(){
+        $arr =[];
+        //退货待审核数量
+        $arr['return_checking'] = OrderReturnRepository::returnCheckingCount();
+        //待退款数量
+
+
+        //待确认订单数量
+        $arr['waiting_confirm'] = OrderRepository::getWaitingConfirmCount();
+
+
+
+        return $arr;
     }
 
     /**
