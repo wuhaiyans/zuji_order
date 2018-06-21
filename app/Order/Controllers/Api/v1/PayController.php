@@ -657,13 +657,6 @@ class PayController extends Controller
 
     }
 
-
-
-
-
-
-
-
 	/**
 	 * 分期扣款异步回调处理
 	 * @requwet Array
@@ -677,8 +670,9 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function withholdCreatePayNotify(Request $request){
+	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
+		LogApi::debug('代扣回调调试',$input);
 		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
@@ -689,7 +683,7 @@ class PayController extends Controller
 			echo 'notice data not array ';exit;
 		}
 
-		LogApi::debug('代扣回调调试',$params);
+
 
 		try {
 
