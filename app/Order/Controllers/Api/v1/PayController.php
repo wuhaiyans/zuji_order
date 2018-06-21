@@ -678,28 +678,44 @@ class PayController extends Controller
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
 	public function withholdCreatePayNotify(Request $request){
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣异步通知', $input);
 
-		$params     = $request->all();
-		\App\Lib\Common\LogApi::error('代扣回调调试', $params);
-
-		$rules = [
-			'reason'            => 'required',
-			'status'            => 'required',
-			'agreement_no'      => 'required',
-			'out_agreement_no'  => 'required',
-			'trade_no'          => 'required',
-			'out_trade_no'      => 'required',
-		];
-
-		// 参数过滤
-		$validateParams = $this->validateParams($rules,$params);
-		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo 'notice data is null ';exit;
+		}
+		if( !is_array($params) ){
+			echo 'notice data not array ';exit;
 		}
 
-		// 扣款成功 修改分期状态
-		$params = $params['params'];
-		\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+		LogApi::debug('代扣回调调试',$params);
+
+		try {
+
+			// 校验支付状态
+			$status_info = \App\Lib\Payment\CommonPaymentApi::query($params);
+			if( $status_info['status'] != 'success' ){// 支付成功
+				echo 'payment status not success';exit;
+			}
+
+			// 开启事务
+			DB::beginTransaction();
+
+			\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+
+
+
+			// 提交事务
+			DB::commit();
+			echo '{"status":"ok"}';exit;
+
+		} catch (\App\Lib\NotFoundException $exc) {
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			echo $exc->getMessage();
+		}
+
 
 	}
 

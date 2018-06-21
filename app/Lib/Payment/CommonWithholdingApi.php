@@ -75,7 +75,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function deduct( array $params ){
-		\App\Lib\Common\LogApi::error('代扣调试', $params);
 		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.withhold.deduct.applay', '1.0', $params);
     }
 
