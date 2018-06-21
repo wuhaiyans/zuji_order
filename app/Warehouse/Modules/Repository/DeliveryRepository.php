@@ -282,7 +282,7 @@ class DeliveryRepository
      */
     public static function receive($order_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
-//        $model = Delivery::find($order_no);
+        //$model = Delivery::find($order_no);
         $model = Delivery::where([
             ['order_no','=',$order_no],
             ['status','=',Delivery::STATUS_SEND]
