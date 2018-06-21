@@ -64,6 +64,7 @@ class WithholdingComponnet implements OrderCreater
                 $this->flag = false;
             }
             if(empty($this->withholdingInfo['withhold_status']) ||$this->withholdingInfo['withhold_status']==2){
+                $this->withholdingInfo['withhold_no']="";
                 $this->getOrderCreater()->setError('用户已经解约代扣协议');
                 $this->flag = false;
             }

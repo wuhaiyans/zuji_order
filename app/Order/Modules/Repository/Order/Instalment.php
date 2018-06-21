@@ -291,7 +291,7 @@ class Instalment {
 			//开启事务
 			DB::beginTransaction();
 
-			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['id'=>$param['out_trade_no']]);
+			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				// 提交事务
 				echo "FAIL";exit;
@@ -302,7 +302,7 @@ class Instalment {
 				'update_time'   => time(),
 			];
 			// 修改分期状态
-			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['id'=>$param['out_trade_no']], $data);
+			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
 			if(!$b){
 				DB::rollBack();
 				echo "FAIL";exit;
@@ -313,7 +313,7 @@ class Instalment {
 				'status'        => OrderInstalmentStatus::SUCCESS,
 				'update_time'   => time(),
 			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$param['out_trade_no']],$recordData);
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$instalmentInfo['id']],$recordData);
 			if(!$record){
 				DB::rollBack();
 				echo "FAIL";exit;
@@ -321,14 +321,14 @@ class Instalment {
 
 			// 修改收支明细 交易吗
 			$incomeData = [
-				'trade_no'       => $param['trade_no'],
-				'out_trade_no'   => $param['out_trade_no'],
+				'trade_no'       => $param['out_trade_no'],
+				'out_trade_no'   => $param['trade_no'],
 			];
 			$incomeWhere =    [
 				'business_type'	=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
 				'business_no'	=> $param['out_trade_no'],
 			];
-			$incomeB = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save($incomeWhere,$incomeData);
+			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::save($incomeWhere,$incomeData);
 			if(!$incomeB){
 				DB::rollBack();
 				echo "FAIL";exit;
@@ -337,7 +337,7 @@ class Instalment {
 			// 提交事务
 			DB::commit();
 
-			echo "SUCCESS";
+			echo "SUCCESS";exit;
 		}
 
 		echo "FAIL";exit;

@@ -465,8 +465,26 @@ class OrderController extends Controller
         return apiResponse([],ApiStatus::CODE_0);
     }
     /**
-     *  确认收货接口
+     * 确认收货接口
      * @param Request $request
+     * $params
+     * [
+     *  'order_no' =>'',//订单编号
+     *  'remark'=>'',//备注
+     *  'row'=>'',内部接口传递
+     * ]
+     * @param array $row[
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,5收发货系统
+     *      'user_id'=>用户ID（管理员或用户必须）,
+     *      'user_name'=>用户名（管理员或用户必须）,
+     * ]
+     *
+     * int receive_type  在 App\Lib\publicInc 中;
+     *  const Type_Admin = 1; //管理员
+     *  const Type_User = 2;    //用户
+     *  const Type_System = 3; // 系统自动化任务
+     *  const Type_Store =4;//线下门店
+     *  const Type_Warehouse =5;//收发货系统
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -479,11 +497,29 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001);
         }
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['row']);
+        $params['row'] = isset($params['row'])?$params['row']:[];
+
+        $res = OrderOperate::deliveryReceive($params,$params['row']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
         return apiResponse([],ApiStatus::CODE_0);
+    }
+    /**
+     * 所有有关订单统计查询
+
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function counted(Request $request){
+
+        $params =$request->all();
+
+        $res =Service\OrderOperate::counted();
+        return apiResponse($res,ApiStatus::CODE_0);
+        die;
+
     }
 
     /**
@@ -516,9 +552,6 @@ class OrderController extends Controller
         }
         return apiResponse($res,ApiStatus::CODE_0);
         die;
-
-
-
 
     }
     /**
