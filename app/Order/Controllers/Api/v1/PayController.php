@@ -676,10 +676,16 @@ class PayController extends Controller
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
 		}
 		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
 		}
 
 
@@ -689,7 +695,10 @@ class PayController extends Controller
 			// 校验扣款交易状态
 			$status_info = \App\Lib\Payment\CommonWithholdingApi::deductQuery($params);
 			if( $status_info['status'] != 'success' ){//
-				echo 'status not success';exit;
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'status not success',
+				]);exit;
 			}
 
 			// 开启事务
@@ -704,9 +713,18 @@ class PayController extends Controller
 			echo '{"status":"ok"}';exit;
 
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 			echo $exc->getMessage();
 		} catch (\Exception $exc) {
-			echo $exc->getMessage();
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		}
 
 
