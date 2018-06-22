@@ -85,7 +85,7 @@ class ReletRepository
             ->get();
 
 //        dd(DB::getQueryLog());
-        dd($result->toArray());
+        dd($result);
         die;
         if (!$result) return false;
 
