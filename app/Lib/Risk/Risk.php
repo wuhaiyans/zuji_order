@@ -50,7 +50,6 @@ class Risk{
         ];
         $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
-        var_dump($info);die;
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
