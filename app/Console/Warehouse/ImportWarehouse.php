@@ -7,14 +7,17 @@
  * Date: 2018/6/11
  * Time: 下午5:05
  */
+//$stime=microtime(true);
+$num = 0;//统计插入条数
+$sel = 0;//统计查询条数
 
 //增量索引值
 $t = time();//初始化时间 或 增量时间
 $_t = 0;//上次执行时间
 $order_ID_S = 0;//订单增量开始ID 初始化为0
-$order_ID_N = 10000;//订单增量结束ID 必填
+$order_ID_N = 100;//订单增量结束ID 必填
 // ...
-
+echo '开始时间:'.date('Y-m-d H:i:s',$t).';<br>';
 //数据库配置
 $user = 'root';
 $password = '123456';
@@ -65,12 +68,13 @@ $db3->autocommit(false);
 
 //DB1 数据查询
 // 查询订单
-$result_order2_all1=$db1->query("SELECT order_id,order_no FROM zuji_order2 WHERE order_id>".$order_ID_S." AND order_id<".$order_ID_N);
+$result_order2_all1=$db1->query("SELECT order_id,business_key,order_no,appid FROM zuji_order2 WHERE order_id>".$order_ID_S." AND order_id<".$order_ID_N);
 //$result_order2_all1=$db1->query("SELECT order_id,order_no FROM zuji_order2 WHERE order_no='20180227000712'");
 while($arr = $result_order2_all1->fetch_assoc()){
     //订单二维数组 order_id,order_no
     $order2_all1[]=$arr;
 }
+$sel++;
 
 //省,市,区县
 $result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
@@ -78,6 +82,7 @@ while($arr = $result_zuji_district_all1->fetch_assoc()){
     //二维数组 id,name
     $district_all1[$arr['id']]=$arr;
 }
+$sel++;
 
 //------------------导入发货------------------
 if( !orderDelivery($order2_all1,$district_all1,$db1,$db3) ){
@@ -90,7 +95,7 @@ if( !orderDelivery($order2_all1,$district_all1,$db1,$db3) ){
 }
 
 //------------------导入收货、检测------------------
-if( !orderReceive($order2_all1,$district_all1,$db1,$db2,$t) ){
+if( !orderReceive($order2_all1,$district_all1,$db1,$db3) ){
     $db3->rollback();//回滚
     //关闭链接
     $db1->close();
@@ -106,6 +111,14 @@ $db3->commit();
 $db3->autocommit(TRUE);
 $db1->close();
 $db3->close();
+
+$tn = time();
+echo '结束时间:'.date('Y-m-d H:i:s',$tn).';<br>';
+//$etime=microtime(true);
+echo '用时:'.($tn-$t).'(秒);<br>';
+echo '查询总条数:'.$sel.';<br>';
+echo '插入总条数:'.$num.';<br>';
+
 die;
 
 
@@ -120,6 +133,7 @@ die;
  * $db3         链接3(新)
  */
 function orderDelivery($order2_all1,$district_all1,$db1,$db3){
+    global $num,$sel;
     //拼接发货单sql
     $delivery_insert_sql = "INSERT INTO zuji_delivery (delivery_no,app_id,order_no,logistics_id,logistics_no,customer,customer_mobile,customer_address,status,create_time,delivery_time,status_time,status_remark,receive_type,business_key) VALUES ";
     //拼接发货商品清单sql
@@ -127,18 +141,22 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
     //拼接设备IMEI号表sql
     $delivery_goods_imei_insert_sql = "INSERT INTO zuji_delivery_goods_imei (delivery_no,goods_no,serial_no,imei,apple_serial,status,price,create_time,status_time) VALUES ";
     foreach ($order2_all1 as $key=>$item){
-
+        $delivery_all1 = [];
         $delivery_result=$db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=".$item['order_id']." ORDER BY delivery_id DESC");
         while($arr = $delivery_result->fetch_assoc()){
             //订单二维数组 order_id,order_no
             $delivery_all1[]=$arr;
         }
+        $sel++;
         if( !$delivery_all1 ){
             continue;
         }
         $address_row=$db1->query("SELECT * FROM zuji_order2_address WHERE order_id=".$item['order_id']." ORDER BY address_id DESC LIMIT 1")->fetch_assoc();
+        $sel++;
         $goods_row=$db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=".$item['order_id']." ORDER BY goods_id DESC LIMIT 1")->fetch_assoc();
-        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id']." ORDER BY goods_id DESC LIMIT 1")->fetch_assoc();
+        $sel++;
+        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
+        $sel++;
 
         foreach ($delivery_all1 as $k=>$delivery_row){
             $delivery_no = $delivery_row['delivery_id'];
@@ -154,7 +172,7 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
 
             $delivereyGoods = getDeliveryGoodsStatus($delivery_row['delivery_status']);
 
-            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3'),";
+            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
             $delivery_goods_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
 
             //imei
@@ -172,8 +190,6 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
                 }
             }
         }
-
-
     }
     $delivery_insert_sql = substr($delivery_insert_sql,0,-1);
     $delivery_goods_insert_sql = substr($delivery_goods_insert_sql,0,-1);
@@ -205,29 +221,34 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
  * 导入收货表,检测信息
  */
 function orderReceive($order2_all1,$district_all1,$db1,$db3){
+    global $num,$sel;
     //导入收货单sql
     $receive_insert_sql = "INSERT INTO zuji_receive (receive_no,app_id,order_no,logistics_id,logistics_no,customer,customer_mobile,customer_address,status,type,status_time,create_time,receive_time,check_time,check_result,check_description,business_key) VALUES ";
     $receive_goods_insert_sql = "INSERT INTO zuji_receive_goods (receive_no,refund_no,serial_no,goods_no,goods_name,quantity,quantity_received,status,status_time,check_time,check_result,check_description,check_price) VALUES ";
-    $receive_goods_imei_insert_sql = "INSERT INTO zuji_receive_goods (receive_no,serial_no,goods_no,imei,status,create_time,cancel_time,cancel_remark,type,serial_number) VALUES ";
+    $receive_goods_imei_insert_sql = "INSERT INTO zuji_receive_goods_imei (receive_no,serial_no,goods_no,imei,status,create_time,cancel_time,cancel_remark,type,serial_number) VALUES ";
     //查询db1订单商品表
     foreach ($order2_all1 as $key=>$item) {
-
-        $receive_result=$db1->query("SELECT * FROM zuji_order2_receive WHERE order_id=".$item['order_id']." ORDER BY delivery_id DESC");
+        $receive_all1=[];
+        $receive_result=$db1->query("SELECT * FROM zuji_order2_receive WHERE order_id=".$item['order_id']." ORDER BY receive_id DESC");
         while($arr = $receive_result->fetch_assoc()){
             //订单二维数组 order_id,order_no
             $receive_all1[]=$arr;
         }
+        $sel++;
         if( !$receive_all1 ){
             continue;
         }
         $address_row=$db1->query("SELECT * FROM zuji_order2_address WHERE order_id=".$item['order_id']." ORDER BY address_id DESC LIMIT 1")->fetch_assoc();
+        $sel++;
         $goods_row=$db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=".$item['order_id']." ORDER BY goods_id DESC LIMIT 1")->fetch_assoc();
+        $sel++;
         $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
+        $sel++;
         foreach ($receive_all1 as $k=>$receive_row){
             $receive_no = $receive_row['receive_id'];
             $address_info = '';//地址详情
-            $evaluation_row=$db1->query("SELECT * FROM zuji_order2_evaluation WHERE order_id=".$item['order_id']." AND business_key='".$item['business_key']."' ORDER BY address_id DESC LIMIT 1")->fetch_assoc();
-
+            $evaluation_row=$db1->query("SELECT * FROM zuji_order2_evaluation WHERE order_id=".$item['order_id']." AND business_key='".$item['business_key']."' ORDER BY evaluation_id DESC LIMIT 1")->fetch_assoc();
+            $sel++;
             //省
             $address_info .= $district_all1[$address_row['province_id']]['name'].' ';
             //市
@@ -242,19 +263,25 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $goodsStatus = getGoodsReceiveStatusE($evaluation_row['evaluation_status']);
                 $checkResult = getCheckResult($evaluation_row['evaluation_status']);
                 $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".$receive_row['business_key']."'),";
+                $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
+                $num++;
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
                     $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $num++;
                 }else{
                     //安卓
                     $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $num++;
                     if($goods_row['imei2']){
                         $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".$goods_row['imei2']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $num++;
                     }
                     if($goods_row['imei3']){
                         $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".$goods_row['imei3']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $num++;
                     }
                 }
             }else{
@@ -262,19 +289,25 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $status = getReceiveStatus($receive_row['receive_status']);
                 $goodsStatus = getGoodsReceiveStatus($receive_row['receive_status']);
                 $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".$receive_row['business_key']."'),";
+                $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
+                $num++;
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
                     $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $num++;
                 }else{
                     //安卓
                     $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $num++;
                     if($goods_row['imei2']){
                         $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".$goods_row['imei2']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $num++;
                     }
                     if($goods_row['imei3']){
                         $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".$goods_row['imei3']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $num++;
                     }
                 }
 
@@ -285,7 +318,6 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
     $receive_insert_sql = substr($receive_insert_sql,0,-1);
     $receive_goods_insert_sql = substr($receive_goods_insert_sql,0,-1);
     $receive_goods_imei_insert_sql = substr($receive_goods_imei_insert_sql,0,-1);
-
 
     if ($receive_insert_sql) {
         if( !$db3->query($receive_insert_sql) ){
