@@ -230,10 +230,13 @@ class OrderOperate
         $whereArray[] = ['order_no', '=', $params['order_no']];
         $whereArray[] = ['goods_no', '=', $params['goods_no']];
         $insuranceData =  OrderInsurance::where($whereArray)->first();
+        $data = array();
         if ($insuranceData) {
-            return  $insuranceData->toArray();
-        }
+            $data = $insuranceData->toArray();
+            $data['typeName'] =  getInsuranceTypeName($data['type']);
 
+        }
+        return $data;
 
     }
 
