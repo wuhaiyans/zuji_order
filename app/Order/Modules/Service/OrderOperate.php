@@ -109,12 +109,12 @@ class OrderOperate
                 DB::commit();
 
                 //增加确认收货队列
-                $day =$orderInfo['zuqi_type'] ==1?3:7;
+                $confirmTime =$orderInfo['zuqi_type'] ==1?config('web.short_confirm_days'):config('web.long_confirm_days');
 
                 $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
-                ],time()+86400*$day,"");
+                ],time()+$confirmTime,"");
 
                 return true;
 
