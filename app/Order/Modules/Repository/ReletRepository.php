@@ -75,9 +75,10 @@ class ReletRepository
         }
 
         //查询
-        $orderList = DB::table('order_relet')
-            ->where($whereArray)
-            ->paginate($pagesize);
+        $orderList = OrderRelet::where($whereArray)->paginate($pagesize);
+//        $orderList = DB::table('order_relet')
+//            ->where($whereArray)
+//            ->paginate($pagesize);
         var_dump($orderList);die;
 
         //返回
