@@ -348,6 +348,7 @@ class OrderController extends Controller
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
+            'goods_no' =>'required',
             'remark'=>'required',
             'type'=>'required',
         ];
@@ -478,11 +479,13 @@ class OrderController extends Controller
     public function deliveryReceive(Request $request)
     {
         $params =$request->all();
+        $userInfo =isset($params['userinfo'])?$params['userinfo']:[];
         $params =$params['params'];
 
         if(empty($params['order_no'])){
             return apiResponse([],ApiStatus::CODE_20001);
         }
+        $params['userinfo'] =$userInfo;
 
         $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
@@ -532,6 +535,7 @@ class OrderController extends Controller
             'order_no'  => 'required',
             'remark'=>'required',
         ];
+        $userInfo =$params['userinfo'];
         $validateParams = $this->validateParams($rules,$params);
 
         if (empty($validateParams) || $validateParams['code']!=0) {
@@ -539,6 +543,7 @@ class OrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $params =$params['params'];
+        $params['userinfo'] =$userInfo;
         $res =Service\OrderOperate::confirmOrder($params);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30011);
@@ -546,15 +551,6 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
         die;
 
-    }
-    /**
-     * 定时任务取消订单
-     * @return bool
-     */
-    public function cronCancelOrder(){
-
-      OrderOperate::cronCancelOrder();
-      echo "complete";die;
     }
 
     /**
