@@ -233,16 +233,6 @@ class OrderController extends Controller
 
             $params = $request->all();
 
-//            $rules = [
-//                'userinfo'  => 'required',
-//            ];
-//            $validateParams = $this->validateParams($rules,$params);
-
-
-//            if (empty($validateParams) || $validateParams['code']!=0) {
-//
-//                return apiResponse([],$validateParams['code']);
-//            }
             if (!isset($params['userinfo']) || empty($params['userinfo'])) {
 
                 return apiResponse([], ApiStatus::CODE_10102,[],'用户id为空');

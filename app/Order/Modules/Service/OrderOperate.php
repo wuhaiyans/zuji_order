@@ -716,7 +716,7 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+//                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
                 //回访标识
 //                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
@@ -843,13 +843,21 @@ class OrderOperate
                    if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
                        || $expire_process
                    ) {
-                       unset($goodsList[$keys]['act_goods_state']['expiry_process']);
+                       $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                    }
                    //无分期或者分期已全部还完不出现提前还款按钮
 
                    $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                    if (empty($orderInstalmentData)){
-                       unset($goodsList[$keys]['act_goods_state']['prePay_btn']);
+                       $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
+                   }
+
+                   //查询是否有提前还款操作
+                   $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
+                   if ($aheadInfo) {
+
+                       $goodsList[$keys]['act_goods_state']['ahead_buyout'] = true;
+
                    }
 
                }
