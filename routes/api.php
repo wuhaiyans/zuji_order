@@ -23,12 +23,8 @@ $api->version('v1', [
 
     $api->post('trade/notify', 'TradeController@notify'); //支付回调接口
 
-    // 定时任务 订单取消接口 不加token
-    $api->get('cronCancelOrder', 'OrderController@cronCancelOrder');
-    // 定时任务 订单自动确认收货接口 不加token
-    $api->get('cronDeliveryReceive', 'OrderController@cronDeliveryReceive');
 
-   // $api->group(['middleware' => ['auth:api']], function($api) {
+
 
         $apiMap = config('apimap');
 
@@ -79,6 +75,8 @@ $api->version('v1', [
         $api->any('returnListExport', 'ReturnController@returnListExport');
         //换货列表导出
         $api->any('barterListExport', 'ReturnController@barterListExport');
+
+
 
 
 });
