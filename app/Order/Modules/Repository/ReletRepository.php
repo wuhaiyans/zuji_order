@@ -78,7 +78,7 @@ class ReletRepository
         //查询
         $result =  OrderRelet::query()
             ->where($whereArray)
-            ->select('order_info.user_id','order_goods_instalment.*','order_info.mobile')
+            ->select('order_relet.*')
             ->offset($offset)
             ->limit($pagesize)
             ->get();
