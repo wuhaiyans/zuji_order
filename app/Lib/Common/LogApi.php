@@ -52,7 +52,10 @@ class LogApi {
 	 */
 	public static function debug( string $msg, $data=[] )
 	{
-		return self::log('Debug', $msg, $data);
+		if(config('logsystem.LOG_REPORT') == 'debug' ){
+			return self::log('Debug', $msg, $data);
+		}
+		return self::getInstace();
 	}
 	
 	/**

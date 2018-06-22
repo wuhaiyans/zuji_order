@@ -357,7 +357,7 @@ class ReturnController extends Controller
         if(empty($params['user_id'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
-        $ret = $this->OrderReturnCreater->cancelApply($params);
+        $ret = $this->OrderReturnCreater->cancelApply($params,$orders['userinfo']);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33004);//取消退换货失败
         }
@@ -377,7 +377,7 @@ class ReturnController extends Controller
         if(empty($params['user_id'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
-        $ret = $this->OrderReturnCreater->cancelRefund($params);
+        $ret = $this->OrderReturnCreater->cancelRefund($params,$orders['userinfo']);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33007);//取消退款失败
         }

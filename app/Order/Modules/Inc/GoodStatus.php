@@ -18,7 +18,7 @@ class GoodStatus {
      * @var int 审核通过
      */
     const GoodInvalid = 2;
-    
+
     /**
      * @var int 审核拒绝
      */

@@ -189,18 +189,22 @@ class Delivery
     /**
      * 订单请求 确认收货
      *
-     * @param string $order_no 订单号, 根据订单号获取商品数据
+     * @param $params
+     * [
+     *      'order_no'=>'',
+     *      'receive_type'=>''//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+     *      'user_id'=>'',
+     *      'user_name'=>''
+     * ]
      * @return boolean
      */
-    public static function orderReceive($orderNo)
+    public static function orderReceive($params)
     {
         $base_api = config('tripartite.warehouse_api_uri');
-        $result = [
-            'order_no'  => $orderNo,
-        ];
+
         $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.receive',//模拟
-            'params' => json_encode($result)
+            'params' => json_encode($params)
         ]));
 
         $res = json_decode($res, true);
