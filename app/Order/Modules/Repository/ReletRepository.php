@@ -90,7 +90,7 @@ class ReletRepository
             ->where($whereArray)
             ->count();
         $data = [
-            'pages'=>$page,
+            'page'=>$page,
             'pagesize'=>$pagesize,
             'count'=>$count,
             'data'=>$result->toArray()
