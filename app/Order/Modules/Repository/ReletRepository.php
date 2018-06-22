@@ -86,8 +86,17 @@ class ReletRepository
 
         //dd(DB::getQueryLog());
         if (!$result) return false;
+        $count = OrderRelet::query()
+            ->where($whereArray)
+            ->count();
+        $data = [
+            'pages'=>$page,
+            'pagesize'=>$pagesize,
+            'count'=>$count,
+            'data'=>$result->toArray()
+        ];
 
-        return $result->toArray();
+        return $data;
 
 
     }
