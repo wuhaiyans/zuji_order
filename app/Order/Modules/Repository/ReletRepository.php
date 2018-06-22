@@ -8,16 +8,9 @@
 
 namespace App\Order\Modules\Repository;
 
-use App\Lib\Common\LogApi;
 use App\Order\Models\OrderRelet;
-use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReletStatus;
-use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Modules\Repository\Order\Order;
 use Illuminate\Support\Facades\DB;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderGoodsUnit;
 
 class ReletRepository
 {
