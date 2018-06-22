@@ -83,7 +83,7 @@ class ReletRepository
             ->limit($pagesize)
             ->get();
         if (!$result) return false;
-        var_dump($result->toArray());die;
+//        dd($result->toArray());
         return $result->toArray();
 
 
