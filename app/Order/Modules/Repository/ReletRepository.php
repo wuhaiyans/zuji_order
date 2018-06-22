@@ -92,7 +92,7 @@ class ReletRepository
         $data = [
             'page'=>$page,
             'pagesize'=>$pagesize,
-            'count'=>$count,
+            'total'=>$count,
             'data'=>$result->toArray()
         ];
 

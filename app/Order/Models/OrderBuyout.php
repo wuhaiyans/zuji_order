@@ -24,6 +24,7 @@ class OrderBuyout extends Model
     // create()时可以被赋值的属性。
     public $fillable = [
 		'id', //主键id
+		'type',//类型 0:用户买断;1:客服买断
 		'buyout_no',//买断单编号
 		'order_no', //订单编号
 		'goods_no', //商品编号
