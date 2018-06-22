@@ -22,6 +22,12 @@ class InstalmentController extends Controller
         $coupon     = !empty($request['params']['coupon']) ? $request['params']['coupon'] : "";
         $user       = $request['params']['user'];
 
+
+
+
+
+
+
         //获取goods_no
         $order = filter_array($order, [
             'order_no'=>'required',
@@ -70,8 +76,6 @@ class InstalmentController extends Controller
 
         $res        = new \App\Order\Modules\Repository\Order\Instalment();
         $data       = $res->create($params);
-
-        p($data);
 
         if(!$data){
             return apiResponse([],ApiStatus::CODE_20001, "创建分期失败");

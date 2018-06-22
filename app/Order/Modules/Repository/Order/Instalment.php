@@ -48,9 +48,9 @@ class Instalment {
 	 *  ];
 	 * @return array 返回分期数据
 	 */
-	public static function instalmentData( array $params ){
+	public function instalmentData( array $params ){
 
-		$filter = self::filter_param($params);
+		$filter = $this->filter_param($params);
 		if(!$filter){
 			return false;
 		}
@@ -153,13 +153,13 @@ class Instalment {
 	 *  ];
 	 * @return bool true：成功；false：失败
 	 */
-	public static function create( array $params ):bool{
-		$filter = self::filter_param($params);
+	public function create( array $params ):bool{
+		$filter = $this->filter_param($params);
 		if(!$filter){
 			return false;
 		}
 		// 调用分期数据
-		$_data = self::instalmentData($params);
+		$_data = $this->instalmentData($params);
 		if(!$_data){
 			\App\Lib\Common\LogApi::error('创建分期错误');
 			return false;
@@ -193,7 +193,7 @@ class Instalment {
 	}
 
 	// 参数验证
-	public function filter_param(array $params):bool{
+	public function filter_param(array $params){
 		if(!is_array($params)){
 			return false;
 		}
