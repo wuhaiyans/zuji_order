@@ -337,6 +337,8 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    //更新订单状态
+
                     // 退货
                     if($params['business_key'] == OrderStatus::BUSINESS_RETURN ){
                         //插入操作日志
@@ -350,7 +352,7 @@ class OrderReturnCreater
                 }
             }
             //存在审核同意商品
-            if($goodsDeliveryInfo){
+            if(isset($goodsDeliveryInfo)){
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no' => $goodsDeliveryInfo[$k]['goods_no'],
