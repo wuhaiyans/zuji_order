@@ -777,7 +777,7 @@ class OrderController extends Controller
                 return apiResponse($goodsData,ApiStatus::CODE_0);
             } else {
 
-                return apiResponse([],ApiStatus::CODE_34007);
+                return apiResponse([],ApiStatus::CODE_50003);
             }
 
         }catch (\Exception $e) {
