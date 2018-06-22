@@ -119,6 +119,18 @@ class OrderGoodStatus{
         return $chengse[$key];
     }
 
+    /**
+     * 获取出险类型状态
+     * Author: heaven
+     * @param $key
+     * @return mixed
+     */
+    public static function getInsuranceTypeName($key){
+        $info = array('1'=>'出险','2'=>'取消出险');
+        return $info[$key];
+
+    }
+
 
 
 }
