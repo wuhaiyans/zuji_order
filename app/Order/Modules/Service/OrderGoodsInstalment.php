@@ -13,144 +13,6 @@ class OrderGoodsInstalment
 {
 
     /**
-     * 创建订单分期
-     * @return array
-     *  $array = [
-     *       'order'=>[
-     *          'order_no'          => 1,//订单编号
-     *      ],
-     *       'sku'=>[
-     *          'zuqi'              => 1,//租期
-     *          'zuqi_type'         => 1,//租期类型
-     *          'all_amount'        => 1,//总金额
-     *          'amount'            => 1,//实际支付金额
-     *          'insurance'         => 1,//意外险
-     *          'zujin'             => 1,//租金
-     *          'pay_type'          => 1,//支付类型
-     *      ],
-     *      'coupon'=>[非必须
-     *          'discount_amount'   => 1,//优惠金额
-     *          'coupon_type'       => 1,//优惠券类型
-     *      ],
-     *      'user'=>[
-     *          'user_id'           => 1,//用户ID
-     *       ],
-     *  ];
-     */
-    public static function create($params){
-        $order    = $params['order'];
-        $params['sku']      = $params['sku'][0];
-        $sku      = $params['sku'];
-        $coupon   = isset($params['coupon']) ? $params['coupon'] : "";
-        $user     = $params['user'];
-
-        $order = filter_array($order, [
-            'order_no' => 'required',
-        ]);
-        if(!$order['order_no']){
-            return false;
-        }
-
-        //获取sku
-        $sku = filter_array($sku, [
-            'goods_no'      => 'required',
-            'zuqi'          => 'required',
-            'zuqi_type'     => 'required',
-            'all_amount'    => 'required',
-            'amount'        => 'required',
-            'insurance'     => 'required',
-            'zujin'         => 'required',
-            'pay_type'      => 'required',
-            'buyout_price'  => 'required',
-        ]);
-
-        if(count($sku) < 8){
-            return false;
-        }
-
-        filter_array($coupon, [
-            'discount_amount'   => 'required',
-            'coupon_type'       => 'required',
-        ]);
-
-
-        $user = filter_array($user, [
-            'user_id'        => 'required',
-        ]);
-        if(count($user) < 1){
-            return false;
-        }
-
-        $res = new OrderGoodsInstalmentRepository($params);
-        return $res->create();
-
-    }
-
-
-    /**
-     * 创建订单分期
-     * @return array
-     *  $array = [
-     *       'order'=>[
-     *           'order_no'         => 1,//订单编号
-     *       ],
-     *       'sku'=>[
-     *          'zuqi'              => 1,//租期
-     *          'zuqi_type'         => 1,//租期类型
-     *          'all_amount'        => 1,//总金额
-     *          'amount'            => 1,//实际支付金额
-     *          'insurance'         => 1,//意外险
-     *          'zujin'             => 1,//租金
-     *          'payment_type_id'   => 1,//支付类型
-     *      ],
-     *      'coupon'=>[非必须
-     *          'discount_amount'   => 1,//优惠金额
-     *          'coupon_type'       => 1,//优惠券类型
-     *      ],
-     *      'user'=>[
-     *          'user_id'           =>1,
-     *       ],
-     *  ];
-     */
-    public static function get_data_schema($params){
-        $params['sku']=$params['sku'][0];
-        $sku      = $params['sku'];
-        $coupon   = !empty($params['coupon']) ? $params['coupon'] : "";
-        $user     = $params['user'];
-
-        $sku = filter_array($sku, [
-            'zuqi'=>'required',
-            'zuqi_type'=>'required',
-            'all_amount'=>'required',
-            'amount'=>'required',
-            'insurance'=>'required',
-            'zujin'=>'required',
-            'pay_type'=>'required',
-        ]);
-
-        if(count($sku) < 7){
-            return false;
-        }
-
-        filter_array($coupon, [
-            'discount_amount'=>'required',
-            'coupon_type'=>'required',
-        ]);
-
-        $user = filter_array($user, [
-            'withholding_no' => 'required',
-        ]);
-        if(count($user) < 1){
-            return false;
-        }
-
-        $res = new OrderGoodsInstalmentRepository($params);
-        return $res->get_data_schema();
-
-
-    }
-
-    /**
      * 查询分期数据
      * @params array 查询条件
      * @return array
@@ -218,25 +80,6 @@ class OrderGoodsInstalment
         return $result;
     }
 
-
-    /**
-     * 根据用户id和订单号、商品编号，关闭用户的分期
-     * @param data  array
-     * [
-     *      'id'       => '', 主键ID
-     *      'order_no' => '', 订单编号
-     *      'goods_no' => '', 商品编号
-     *      'user_id'  => ''  用户id
-     * ]
-     */
-    public static function close($data){
-        if (!is_array($data) || $data == [] ) {
-            return false;
-        }
-        $result =  OrderGoodsInstalmentRepository::closeInstalment($data);
-        return $result;
-    }
-
     /**
      * 是否允许扣款
      * @param  int  $instalment_id 订单分期付款id
@@ -290,6 +133,8 @@ class OrderGoodsInstalment
      * @return mixed  false：更新失败；int：受影响记录数
      */
     public static function instalment_failed($fail_num,$instalment_id,$term){
+        //修改扣款失败
+        OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['status'=>OrderInstalmentStatus::FAIL]);
 
         //发送通知
         if ($fail_num == 0) {

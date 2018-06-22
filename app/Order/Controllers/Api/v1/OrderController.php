@@ -49,7 +49,7 @@ class OrderController extends Controller
     public function confirmation(Request $request){
 		
         $params = $request->all();
-		
+
         //获取appid
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
@@ -221,6 +221,51 @@ class OrderController extends Controller
     }
 
 
+
+    /**
+     * 客户端订单列表接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getClientOrderList(Request $request){
+        try{
+
+            $params = $request->all();
+
+//            $rules = [
+//                'userinfo'  => 'required',
+//            ];
+//            $validateParams = $this->validateParams($rules,$params);
+
+
+//            if (empty($validateParams) || $validateParams['code']!=0) {
+//
+//                return apiResponse([],$validateParams['code']);
+//            }
+            if (!isset($params['userinfo']) || empty($params['userinfo'])) {
+
+                return apiResponse([], ApiStatus::CODE_10102,[],'用户id为空');
+
+            }
+
+            $orderData = Service\OrderOperate::getClientOrderList($params);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_33001);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+    }
+
+
     /**
      * 订单列表导出接口
      * Author: heaven
@@ -308,6 +353,7 @@ class OrderController extends Controller
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
+            'goods_no' =>'required',
             'remark'=>'required',
             'type'=>'required',
         ];
@@ -328,6 +374,39 @@ class OrderController extends Controller
     }
 
     /**
+     * 获取出险详情接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function outInsuranceDetail(Request $request)
+    {
+
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'goods_no' =>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$validateParams['data'];
+
+        $res = OrderOperate::getInsuranceInfo($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30036);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+
+    }
+
+
+
+    /**
      *  增加联系备注
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -335,6 +414,7 @@ class OrderController extends Controller
 
     public function saveOrderVisit(Request $request)
     {
+        return apiResponse(['a'=>'A'],ApiStatus::CODE_0);
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
@@ -425,25 +505,48 @@ class OrderController extends Controller
         return apiResponse([],ApiStatus::CODE_0);
     }
     /**
-     *  确认收货接口
+     * 确认收货接口
      * @param Request $request
+     * $params
+     * [
+     *  'order_no' =>'',//订单编号
+     *  'remark'=>'',//备注
+     * ]
      * @return \Illuminate\Http\JsonResponse
      */
 
     public function deliveryReceive(Request $request)
     {
         $params =$request->all();
+        $userInfo =isset($params['userinfo'])?$params['userinfo']:[];
         $params =$params['params'];
 
         if(empty($params['order_no'])){
             return apiResponse([],ApiStatus::CODE_20001);
         }
+        $params['userinfo'] =$userInfo;
 
-        $res = OrderOperate::deliveryReceive($params['order_no'],$params['row']);
+        $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
         }
         return apiResponse([],ApiStatus::CODE_0);
+    }
+    /**
+     * 所有有关订单统计查询
+
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function counted(Request $request){
+
+        $params =$request->all();
+
+        $res =Service\OrderOperate::counted();
+        return apiResponse($res,ApiStatus::CODE_0);
+        die;
+
     }
 
     /**
@@ -451,6 +554,14 @@ class OrderController extends Controller
      * $params[
      *   'order_no'  => '',//订单编号
      *   'remark'=>'',//操作备注
+     *  'userinfo'  //转发过来的信息
+     * ]
+     * $userinfo [
+     *  'uid'=>'',
+     *  'mobile'=>'',
+     *  'type'=>'',
+     *  'username'=>'',
+     *
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -463,6 +574,7 @@ class OrderController extends Controller
             'order_no'  => 'required',
             'remark'=>'required',
         ];
+        $userInfo =$params['userinfo'];
         $validateParams = $this->validateParams($rules,$params);
 
         if (empty($validateParams) || $validateParams['code']!=0) {
@@ -470,6 +582,7 @@ class OrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $params =$params['params'];
+        $params['userinfo'] =$userInfo;
         $res =Service\OrderOperate::confirmOrder($params);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30011);
@@ -477,18 +590,6 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
         die;
 
-
-
-
-    }
-    /**
-     * 定时任务取消订单
-     * @return bool
-     */
-    public function cronCancelOrder(){
-
-      OrderOperate::cronCancelOrder();
-      echo "complete";die;
     }
 
     /**
@@ -670,6 +771,46 @@ class OrderController extends Controller
             } else {
 
                 return apiResponse([],ApiStatus::CODE_30034);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+
+    }
+
+
+    /**
+     * 根据订单获取商品列表
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGoodsListByOrderNo(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $rule = [
+                'order_no'=> 'required'
+            ];
+
+            $validateParams = $this->validateParams($rule,  $params);
+
+
+            if ($validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $goodsData = OrderOperate::getGoodsListByOrderNo($validateParams['data']['order_no']);
+
+            if ($goodsData) {
+
+                return apiResponse($goodsData,ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_50003);
             }
 
         }catch (\Exception $e) {

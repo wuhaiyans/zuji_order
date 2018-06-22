@@ -248,6 +248,4 @@ return [
 
 
     'warehouse_api_uri' => env('WAREHOUSE_API_URI', 'http://laravel.order/api'),
-    'order_api_uri' => env('ORDER_API_URI', 'http://laravel.order/api')
-
 ];

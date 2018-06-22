@@ -657,13 +657,6 @@ class PayController extends Controller
 
     }
 
-
-
-
-
-
-
-
 	/**
 	 * 分期扣款异步回调处理
 	 * @requwet Array
@@ -678,43 +671,71 @@ class PayController extends Controller
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
 	public function withholdCreatePayNotify(){
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣异步通知', $input);
 
-//		$params     = $request->all();
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
+		}
+		if( !is_array($params) ){
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
+		}
 
-//		$rules = [
-//			'reason'            => 'required',
-//			'status'            => 'required',
-//			'agreement_no'      => 'required',
-//			'out_agreement_no'  => 'required',
-//			'trade_no'          => 'required',
-//			'out_trade_no'      => 'required',
-//		];
 
-		$params = [
-			'reason'            => 'required',
-			'status'            => 'success',
-			'agreement_no'      => '1234567890',
-			'out_agreement_no'  => '0987654321',
-			'trade_no'          => '000000000',
-			'out_trade_no'      => '889',
-		];
-		$rules = [
-			'reason'            => 'required',
-			'status'            => 'required',
-			'agreement_no'      => 'required',
-			'out_agreement_no'  => 'required',
-			'trade_no'          => 'required',
-			'out_trade_no'      => 'required',
-		];
-		// 参数过滤
-//		$validateParams = $this->validateParams($rules,$params);
-//		if ($validateParams['code'] != 0) {
-//			return apiResponse([],$validateParams['code']);
-//		}
 
-		// 扣款成功 修改分期状态
-//		$params = $params['params'];
-		\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+		try {
+
+			// 校验扣款交易状态
+			$status_info = \App\Lib\Payment\CommonWithholdingApi::deductQuery($params);
+			if( $status_info['status'] != 'success' ){//
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'status not success',
+				]);exit;
+			}
+
+			// 开启事务
+			DB::beginTransaction();
+
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo '{"status":"ok"}';exit;
+
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
+
+
+		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
+			echo $exc->getMessage();
+		} catch (\Exception $exc) {
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
+		}
+
 
 	}
 

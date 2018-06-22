@@ -101,6 +101,16 @@ class OrderRepository
             ->select('order_info.*','order_userinfo.*');
     }
 
+    /**
+     * 待确认订单的数量
+     * @return int
+     */
+
+    public static function getWaitingConfirmCount(){
+        $whereArray[] = ['order_status', '=', OrderStatus::OrderPayed];
+        return Order::where($whereArray)->count();
+    }
+
 
     /**
      *
@@ -141,6 +151,7 @@ class OrderRepository
 
 
     /**
+     *
      * 根据订单id查询设备列表
      * heaven
      * @param $orderNo 订单编号
@@ -398,6 +409,47 @@ class OrderRepository
 
     }
 
+
+
+    /**
+     *  获取客户端订单列表
+     *  heaven
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+    columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+    pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+    page:表示查询第几页及查询页码
+     * @param array $param  获取订单列表参数
+     */
+    public static function getClientOrderList($param = array(), $pagesize=5)
+    {
+        $whereArray = array();
+        //根据用户id
+        $whereArray[] = ['order_info.user_id', '=', $param['userinfo']['uid']];
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+        }
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        $page = 1;
+        if (isset($param['page'])){
+            $page = intval($param['page']);
+        }
+        $orderList = DB::table('order_info')
+            ->select('order_info.*','order_user_address.*')
+            ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+            ->where($whereArray)
+            ->orderBy('order_info.create_time', 'DESC')
+            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+        //dd(objectToArray($orderList));
+        return $orderList;
+
+    }
 
 
     /**

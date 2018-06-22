@@ -64,8 +64,15 @@ class GoodsReturn {
      * 退换货审核拒绝
      * @return bool
      */
-    public function refuse( ):bool{
-        return true;
+    public function refuse( array $data):bool{
+        //退换货单必须是待审核
+        if( $this->model->status !=ReturnStatus::ReturnCreated ){
+            return false;
+        }
+        $this->model->status = ReturnStatus::ReturnDenied;
+        $this->model->remark=$data['remark'];
+        $this->model->reason_key=$data['reason_key'];
+        return $this->model->save();
     }
     /**
      *  取消发货

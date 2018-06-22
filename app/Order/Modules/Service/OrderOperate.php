@@ -6,6 +6,7 @@
  */
 namespace App\Order\Modules\Service;
 use App\Lib\Certification;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
@@ -106,6 +107,15 @@ class OrderOperate
                 }
 
                 DB::commit();
+
+                //增加确认收货队列
+                $confirmTime =$orderInfo['zuqi_type'] ==1?config('web.short_confirm_days'):config('web.long_confirm_days');
+
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
+                    'method' => 'api.inner.deliveryReceive',
+                    'order_no'=>$orderDetail['order_no'],
+                ],time()+$confirmTime,"");
+
                 return true;
 
             }else {
@@ -208,6 +218,31 @@ class OrderOperate
 
     }
 
+
+    /**
+     * 获取保险操作信息
+     * Author: heaven
+     * @param $params
+     * @return mixed
+     */
+    public static function getInsuranceInfo($params){
+
+        $whereArray[] = ['order_no', '=', $params['order_no']];
+        $whereArray[] = ['goods_no', '=', $params['goods_no']];
+        $insuranceData =  OrderInsurance::where($whereArray)->first();
+        $data = array();
+        if ($insuranceData) {
+            $data = $insuranceData->toArray();
+            $data['typeName'] =  getInsuranceTypeName($data['type']);
+
+        }
+        return $data;
+
+    }
+
+
+
+
     /**
      * 保存回访标识
      * @param $params
@@ -276,24 +311,20 @@ class OrderOperate
     }
     /**
      * 确认收货接口
-     * @param int $orderNo 订单编号
-     * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>用户ID（管理员或用户必须）,
-     *      'user_name'=>用户名（管理员或用户必须）,
-     * ]
-     *
-     * int receive_type  在 App\Lib\publicInc 中;
-     *  const Type_Admin = 1; //管理员
-     *  const Type_User = 2;    //用户
-     *  const Type_System = 3; // 系统自动化任务
-     *  const Type_Store =4;//线下门店
+     * @param  $system //0 前后端操作,1 自动执行任务
+     * @param $params
+     * [
+     *      'order_no'=>''//订单编号
+     *      'remark'=>''//备注
      * ]
      * @return boolean
      */
 
-    public static function deliveryReceive($orderNo,$row=[]){
-        if(empty($orderNo) || empty($row)){return false;}
+    public static function deliveryReceive($params,$system=0){
+        $orderNo =$params['order_no'];
+        $remark = isset($params['remark'])?$params['remark']:'';
+
+        if(empty($orderNo)){return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -303,6 +334,10 @@ class OrderOperate
                 return false;
             }
             $b =$order->sign();
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
 
             $orderInfo = $order->getData();
 
@@ -335,10 +370,37 @@ class OrderOperate
                     return false;
                 }
             }
-            if(!empty($row)){
-                //增加收货日志
-                OrderLogRepository::add($row['user_id'],$row['user_name'],$row['receive_type'],$orderNo,"确认收货","");
+
+            if($system==1){
+                $remark="系统自动执行任务";
+                $userId =1;
+                $userName ="系统";
+                $userType =\App\Lib\PublicInc::Type_System;
+            }else{
+                $userInfo =$params['userinfo'];
+                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
+                $userId =$userInfo['uid'];
+                $userName =$userInfo['username'];
             }
+
+
+            $params=[
+                    'order_no'=>$orderNo,//
+                    'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+                    'user_id'=>$userId,//
+                    'user_name'=>$userName,//
+            ];
+
+            //通知给收发货系统
+            $b =Delivery::orderReceive($params);
+            if(!$b){
+                LogApi::info("收发货系统确认收货失败");
+                DB::rollBack();
+                return false;
+            }
+            //插入操作日志
+            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
+
 
             DB::commit();
             return true;
@@ -355,11 +417,40 @@ class OrderOperate
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
+
+    /**
+     * 订单统计查询
+     * @return array
+     */
+
+    public static function counted(){
+        $arr =[];
+        //退货待审核数量
+        $arr['return_checking'] = OrderReturnRepository::returnCheckingCount();
+        //待退款数量
+
+
+        //待确认订单数量
+        $arr['waiting_confirm'] = OrderRepository::getWaitingConfirmCount();
+
+
+
+        return $arr;
+    }
+
     /**
      * 后台确认订单操作
      * $data =[
      *   'order_no'  => '',//订单编号
      *   'remark'=>'',//操作备注
+     *    'userinfo'
+     * ]
+     *  $userinfo [
+     *  'uid'=>'',
+     *  'mobile'=>'',
+     *  'type'=>'',
+     *  'username'=>'',
+     *
      * ]
      * @return boolean
      */
@@ -387,10 +478,8 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            //通过session 获取用户信息 插入操作日志
-            $userInfo =session('user_info');
-
-            OrderLogRepository::add($userInfo['id'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
+            $userInfo =$data['userinfo'];
+            OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
             return true;
@@ -399,94 +488,6 @@ class OrderOperate
             echo $exc->getMessage();
             die;
 
-        }
-
-    }
-
-    /**
-     *  定时任务取消订单
-     * Author: heaven
-     * @param $orderNo 订单编号
-     * @param string $userId 用户id
-     * @return bool|string
-     */
-    public static function cronCancelOrder()
-    {
-        try {
-            $param = [
-                'order_status' => Inc\OrderStatus::OrderWaitPaying,
-                'now_time'=> time() - 7200,
-            ];
-            $orderData = OrderRepository::getOrderAll($param);
-            if (!$orderData) {
-                return false;
-            }
-            //var_dump($orderData);die;
-            foreach ($orderData as $k => $v) {
-                //开启事物
-                DB::beginTransaction();
-                $b = OrderRepository::closeOrder($v['order_no']);
-                if(!$b){
-                    DB::rollBack();
-                    LogApi::debug("更改订单状态失败:" . $v['order_no']);
-                }
-
-                //分期关闭
-                //查询分期
-                //分期关闭
-                //查询分期
-                $isInstalment   =   OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderNo]);
-                if ($isInstalment) {
-                    $success =  Instalment::close(['order_no'=>$orderNo]);
-                    if (!$success) {
-                        DB::rollBack();
-                        return ApiStatus::CODE_31004;
-                    }
-                }
-                $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
-                if (!$success) {
-                    DB::rollBack();
-                    LogApi::debug("订单关闭分期失败:" . $v['order_no']);
-                }
-                DB::commit();
-                //释放库存
-                //查询商品的信息
-                $orderGoods = OrderRepository::getGoodsListByOrderId($v['order_no']);
-                if ($orderGoods) {
-                    foreach ($orderGoods as $orderGoodsValues) {
-                        //暂时一对一
-                        $goods_arr[] = [
-                            'sku_id' => $orderGoodsValues['zuji_goods_id'],
-                            'spu_id' => $orderGoodsValues['prod_id'],
-                            'num' => $orderGoodsValues['quantity']
-                        ];
-                    }
-                    $success = Goods::addStock($goods_arr);
-                    if (!$success)
-                        //DB::rollBack();
-                        LogApi::debug("订单恢复库存失败:" . $v['order_no']);
-                }
-
-            //优惠券归还
-            //通过订单号获取优惠券信息
-            $orderCouponData = OrderRepository::getCouponListByOrderId($v['order_no']);
-            if ($orderCouponData) {
-                $coupon_id = array_column($orderCouponData, 'coupon_id');
-                $success = Coupon::setCoupon(['user_id' => $v['user_id'], 'coupon_id' => $coupon_id]);
-
-                if ($success) {
-                    DB::rollBack();
-                    LogApi::debug("订单优惠券恢复失败:" . $v['order_no']);
-                }
-
-            }
-
-        }
-        return true;
-
-        } catch (\Exception $exc) {
-            DB::rollBack();
-            return  ApiStatus::CODE_31006;
         }
 
     }
@@ -680,19 +681,17 @@ class OrderOperate
     }
 
 
-
-
     /**
-     * 获取订单列表
+     * 获取客户端订单列表
      * Author: heaven
      * @param array $param
      * @return array
      */
-    public static function getOrderList($param = array())
+    public static function getClientOrderList($param = array())
     {
         //根据用户id查找订单列表
 
-        $orderList = OrderRepository::getOrderList($param);
+        $orderList = OrderRepository::getClientOrderList($param);
 
         $orderListArray = objectToArray($orderList);
 
@@ -719,9 +718,59 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
                 //回访标识
-                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+//                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
                 $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+
+
+    }
+
+    /**
+     * 获取后台订单列表
+     * Author: heaven
+     * @param array $param
+     * @return array
+     */
+    public static function getOrderList($param = array())
+    {
+        //根据用户id查找订单列表
+
+        $orderList = OrderRepository::getOrderList($param);
+
+        $orderListArray = objectToArray($orderList);
+
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+
+                //设备名称
+
+                //订单商品列表相关的数据
+                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+
+
+                $goodsData =  self::getManageGoodsActAdminState($values['order_no'], $actArray);
+
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                //回访标识
+                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+
+                //$orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
             }
 
@@ -768,7 +817,7 @@ class OrderOperate
 
 
     /**
-     * 获取设置的操作列表
+     * 获取客户端设置的操作列表
      * Author: heaven
      * @param $orderNo
      * @param $actArray
@@ -811,6 +860,69 @@ class OrderOperate
 
 
    }
+
+
+
+
+
+    /**
+     * 获取后台设置的操作列表
+     * Author: heaven
+     * @param $orderNo
+     * @param $actArray
+     * @return array|bool
+     */
+    public static function getManageGoodsActAdminState($orderNo, $actArray)
+    {
+
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+        if (empty($goodsList)) return [];
+
+        //到期时间多于1个月不出现到期处理
+        foreach($goodsList as $keys=>$values) {
+            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
+            if (empty($actArray)){
+                $goodsList[$keys]['act_goods_state']= [];
+            } else {
+
+                $goodsList[$keys]['act_goods_state']= $actArray;
+                //是否处于售后之中
+                $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
+                if ($expire_process) {
+                    $goodsList[$keys]['act_goods_state']['buy_off'] = false;
+                }
+                //是否已经操作过保险
+
+                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
+//                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                if ($insuranceData){
+                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+                    $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+                    $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
+                }
+
+            }
+
+        }
+
+        return $goodsList;
+
+
+    }
+
+    /**
+     *
+     * 根据订单号获取商品列表信息
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
+        public static function getGoodsListByOrderNo($orderNo)
+        {
+            return  OrderRepository::getGoodsListByOrderId($orderNo);
+
+        }
 
 
 

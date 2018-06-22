@@ -129,7 +129,7 @@ class OrderCreater
 //            $orderNoticeObj->notify();
             //发送取消订单队列
         $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
-            'method' => 'api.inner.cancelOrder',
+            'method' => 'api.inner.miniCancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
             'time' => time(),
@@ -238,6 +238,31 @@ class OrderCreater
         }
     }
 
+    public static function dataSchemaFormate($schemaData){
+
+        $first_amount =0;
+        if($schemaData['order']['zuqi_type'] ==1){
+            //短租
+            foreach ($schemaData['sku'] as $key=>$value){
+                foreach ($value['instalment'] as $k=>$v){
+                    $first_amount+=$v['amount'];
+                }
+                $schemaData['sku'][$key]['first_amount'] =$first_amount;
+            }
+        }else{
+            //长租
+            foreach ($schemaData['sku'] as $key=>$value){
+
+                $schemaData['sku'][$key]['first_amount'] =$value['instalment'][0]['amount'];
+            }
+
+        }
+
+        return $schemaData;
+
+
+    }
+
     /**
      * 订单确认查询
      * 结构 同create()方法 少个地址组件
@@ -282,7 +307,7 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
 
             }
-            $schemaData = $orderCreater->getDataSchema();
+            $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
             // 是否需要签署代扣协议
             $need_to_sign_withholding = 'N';
             if( $data['pay_type']== PayInc::WithhodingPay){
@@ -301,7 +326,6 @@ class OrderCreater
                 '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
-                'pay_type'=>$data['pay_type'],
             ];
             return $result;
         } catch (\Exception $exc) {

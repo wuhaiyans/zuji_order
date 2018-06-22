@@ -274,18 +274,22 @@ class DeliveryRepository
 
 
     /**
-     * @param $delivery_no
+     * @param $order_no
      * @param bool $auto
      * @return bool
      *
      * 收货操作
      */
-    public static function receive($delivery_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
+    public static function receive($order_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
-        $model = Delivery::find($delivery_no);
+        //$model = Delivery::find($order_no);
+        $model = Delivery::where([
+            ['order_no','=',$order_no],
+            ['status','=',Delivery::STATUS_SEND]
+        ])->first();
 
         if (!$model) {
-            throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
+            throw new NotFoundResourceException('发货单订单编号:' . $order_no . ',status:'.Delivery::STATUS_SEND.' 未找到');
         }
         $model->status = Delivery::STATUS_RECEIVED;
         $model->status_time = time();

@@ -200,8 +200,8 @@ class PayController extends Controller
 		
 		$info = \App\Lib\Payment\CommonRefundApi::apply([
     		'name'			=> '测试退款',			//交易名称
-    		'out_refund_no' => 'FA53160228302177',		//业务系统退款码
-    		'payment_no'	=> '10A53149660195069', //支付系统支付码
+    		'out_refund_no' => 'FA53115196191961',		//业务系统退款码
+    		'payment_no'	=> '10A62174181767923', //支付系统支付码
     		'amount'		=> 1, //支付金额；单位：分
 			'refund_back_url'		=> env('APP_URL').'/order/pay/refundNotify',	//【必选】string //退款回调URL
 		]);
@@ -215,37 +215,29 @@ class PayController extends Controller
 		
 		
 		$business_type = 1; 
-		$business_no = 'A602128482172832';
+		$business_no = 'A602128482165165';
 		$pay = null;
 		try {
 			// 查询
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
-			// 取消
-			$pay->cancel();
-			// 恢复
-			$pay->resume();
 
 		} catch (\App\Lib\NotFoundException $exc) {
 			// 创建支付
-			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPaymentWithholdFundauth([
-				'user_id'		=> '5',
+			$pay = \App\Order\Modules\Repository\Pay\PayCreater::createPayment([
+				'userId'		=> '5',
 				'businessType'	=> $business_type,
 				'businessNo'	=> $business_no,
 				
 				'paymentAmount' => '0.01',
-				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'paymentChannel'=> \App\Order\Modules\Repository\Pay\Channel::Jdpay,
 				'paymentFenqi'	=> 0,
-				
-				'withholdChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
-				
-				'fundauthAmount' => '1.00',
-				'fundauthChannel'=> \App\Order\Modules\Repository\Pay\Channel::Alipay,
 			]);
 		} catch (\Exception $exc) {
 			echo $exc->getMessage();exit;
 		}
 		
 		try {
+			//
 			$step = $pay->getCurrentStep();
 			// echo '当前阶段：'.$step."\n";
 			
@@ -256,7 +248,7 @@ class PayController extends Controller
 			
 			$pay->setPaymentAmount(0.01);
 			
-			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
+			$url_info = $pay->getCurrentUrl( \App\Order\Modules\Repository\Pay\Channel::Jdpay, $_params );
 			header( 'Location: '.$url_info['url'] ); 
 //			var_dump( $url_info );
 			

@@ -186,11 +186,40 @@ class Delivery
 
         return true;
     }
+    /**
+     * 订单请求 确认收货
+     *
+     * @param $params
+     * [
+     *      'order_no'=>'',
+     *      'receive_type'=>''//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+     *      'user_id'=>'',
+     *      'user_name'=>''
+     * ]
+     * @return boolean
+     */
+    public static function orderReceive($params)
+    {
+        $base_api = config('tripartite.warehouse_api_uri');
 
+        $res= Curl::post($base_api, array_merge(self::getParams(), [
+            'method'=> 'warehouse.delivery.receive',//模拟
+            'params' => json_encode($params)
+        ]));
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * ok
-     * 确认收货接口
+     * 确认收货接口  --------废弃
      * 接收反馈
      *
      * @param string $order_no
@@ -209,6 +238,7 @@ class Delivery
      */
     public static function receive($orderNo, $row)
     {
+        $row['receive_type'] =5;
         $response = \App\Lib\Order\Delivery::receive($orderNo, $row);
         $response =json_decode($response,true);
         if($response['code']!=ApiStatus::CODE_0){

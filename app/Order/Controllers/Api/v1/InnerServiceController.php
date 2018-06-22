@@ -9,6 +9,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
 class InnerServiceController extends Controller
 {
@@ -48,9 +49,76 @@ class InnerServiceController extends Controller
 
     }
 
+    /**
+     * 确认收货接口
+     * @param Request $request
+     * $params
+     * [
+     *  'order_no' =>'',//订单编号
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function deliveryReceive(Request $request)
+    {
+        $input = file_get_contents("php://input");
+
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单确认收货费处理参数:'.$input);
+        $params = json_decode($input,true);
+        $rules = [
+            'order_no'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+
+        $res = OrderOperate::deliveryReceive($validateParams['data'],1);
+        if(!$res){
+            return $this->innerErrMsg(ApiStatus::$errCodes[ApiStatus::CODE_30012]);
+        }
+        return $this->innerOkMsg();
+    }
 
 
 
+    /**
+     * 小程序订单取消处理接口
+     * heaven
+     * @param order_no 订单编号
+     *
+     */
+    public function miniCancelOrder(Request $request)
+    {
+
+        $input = file_get_contents("php://input");
+
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        $params = json_decode($input,true);
+        $rules = [
+            'order_no'  => 'required',
+            'user_id'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $validateParams['data']['user_id']);
+        if ($success) {
+
+            return $this->innerErrMsg(ApiStatus::$errCodes[$success]);
+        }
+        return $this->innerOkMsg();
+
+    }
 
 
 

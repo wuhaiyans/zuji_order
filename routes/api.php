@@ -23,10 +23,8 @@ $api->version('v1', [
 
     $api->post('trade/notify', 'TradeController@notify'); //支付回调接口
 
-    // 订单取消接口
-    $api->get('cronCancelOrder', 'OrderController@cronCancelOrder');
 
-   // $api->group(['middleware' => ['auth:api']], function($api) {
+
 
         $apiMap = config('apimap');
 
@@ -78,6 +76,22 @@ $api->version('v1', [
         //换货列表导出
         $api->any('barterListExport', 'ReturnController@barterListExport');
 
+    /***********************************************************************************************
+     * ******************************cron 脚本处理start    heaven********************************
+     ***********************************************************************************************/
+
+    // 定时任务 订单取消接口 不加token
+        $api->get('cronCancelOrder', 'CronController@cronCancelOrder');
+    // 定时任务 订单自动确认收货接口 不加token
+        $api->get('cronDeliveryReceive', 'CronController@cronDeliveryReceive');
+
+
+    /*************************************************************************************************
+     * ******************************cron 脚本处理end   heaven*************************************
+     ************************************************************************************************/
+
+
+
 
 });
 $api->version('v1', [
@@ -88,6 +102,3 @@ $api->version('v1', [
 ], function($api){
     $api->any('header', 'AuthRefferController@header');
 });
-
-
-   

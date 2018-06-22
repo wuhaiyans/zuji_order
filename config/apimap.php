@@ -18,9 +18,15 @@ return [
     'api.order.orderLog'=>'OrderController@orderLog',
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+    //保存订单出险信息
+    'api.order.outInsurance'=>'OrderController@addOrderInsurance',
+    //设备出险详情
+    'api.order.outInsuranceDetail'=>'OrderController@outInsuranceDetail',
+
     //获取订单状态流信息
     'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
+    
     //订单确认修改收货地址信息
     'api.order.modifyAddress'=>'OrderController@modifyAddress',
 
@@ -30,6 +36,8 @@ return [
     'api.order.deliveryReceive'=>'OrderController@deliveryReceive',
     //订单发货接口
     'api.order.delivery'=>'OrderController@delivery',
+    //订单数量统计
+    'api.order.counted'=>'OrderController@counted',
 
 
     //支付宝初始化接口
@@ -53,8 +61,14 @@ return [
 
     //订单列表接口
     'api.order.orderlist'=>'OrderController@orderList',
+
+    //客户端订单列表接口
+    'api.order.orderClientlist'=>'OrderController@getClientOrderList',
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
+
+    //根据订单编号查询设备列表接口
+    'api.order.goodslist'=>'OrderController@getGoodsListByOrderNo',
 
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
@@ -100,6 +114,7 @@ return [
 
 
     // 代扣相关
+
     // 代扣协议查询
     'api.Withhold.query'                => 'WithholdController@query',
     // 代扣签约接口
@@ -265,10 +280,10 @@ return [
      ***********************************************************************************************/
 
     'api.inner.cancelOrder'=>'InnerServiceController@cancelOrder',//订单取消处理接口
-
+    'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
+    'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
      ************************************************************************************************/
-
 ];
