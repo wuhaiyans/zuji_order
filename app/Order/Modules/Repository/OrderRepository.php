@@ -151,6 +151,7 @@ class OrderRepository
 
 
     /**
+     *
      * 根据订单id查询设备列表
      * heaven
      * @param $orderNo 订单编号
@@ -424,7 +425,7 @@ class OrderRepository
     {
         $whereArray = array();
         //根据用户id
-        $whereArray[] = ['order_info.user_id', '=', $param['user_id']];
+        $whereArray[] = ['order_info.user_id', '=', $param['userinfo']['uid']];
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
             $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
@@ -433,6 +434,10 @@ class OrderRepository
             $pagesize = $param['size'];
         }
 
+        $page = 1;
+        if (isset($param['page'])){
+            $page = intval($param['page']);
+        }
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*')
             ->join('order_user_address',function($join){
@@ -440,7 +445,7 @@ class OrderRepository
             }, null,null,'inner')
             ->where($whereArray)
             ->orderBy('order_info.create_time', 'DESC')
-            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
+            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
         //dd(objectToArray($orderList));
         return $orderList;
 

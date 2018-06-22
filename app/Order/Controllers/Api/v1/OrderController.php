@@ -233,18 +233,23 @@ class OrderController extends Controller
 
             $params = $request->all();
 
-            $rules = [
-                'user_id'  => 'required',
-            ];
-            $validateParams = $this->validateParams($rules,$params);
+//            $rules = [
+//                'userinfo'  => 'required',
+//            ];
+//            $validateParams = $this->validateParams($rules,$params);
 
 
-            if (empty($validateParams) || $validateParams['code']!=0) {
+//            if (empty($validateParams) || $validateParams['code']!=0) {
+//
+//                return apiResponse([],$validateParams['code']);
+//            }
+            if (!isset($params['userinfo']) || empty($params['userinfo'])) {
 
-                return apiResponse([],$validateParams['code']);
+                return apiResponse([], ApiStatus::CODE_10102,[],'用户id为空');
+
             }
 
-            $orderData = Service\OrderOperate::getClientOrderList($validateParams['data']);
+            $orderData = Service\OrderOperate::getClientOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 
@@ -736,6 +741,46 @@ class OrderController extends Controller
             } else {
 
                 return apiResponse([],ApiStatus::CODE_30034);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+
+    }
+
+
+    /**
+     * 根据订单获取商品列表
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGoodsListByOrderNo(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $rule = [
+                'order_no'=> 'required'
+            ];
+
+            $validateParams = $this->validateParams($rule,  $params);
+
+
+            if ($validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+            $goodsData = OrderOperate::getGoodsListByOrderNo($validateParams['data']['order_no']);
+
+            if ($goodsData) {
+
+                return apiResponse($goodsData,ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_34007);
             }
 
         }catch (\Exception $e) {

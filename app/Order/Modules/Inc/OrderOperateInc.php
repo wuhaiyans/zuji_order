@@ -69,7 +69,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
@@ -90,7 +94,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                     //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
 
                 ],
                 //备货中
@@ -107,7 +115,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -123,7 +135,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
@@ -137,7 +153,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => true,
                     //保险操作
-                    'Insurance'     => true
+                    'Insurance'     => true,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -153,7 +173,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
@@ -169,7 +193,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
@@ -185,7 +213,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
             )
 
