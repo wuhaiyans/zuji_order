@@ -218,6 +218,28 @@ class OrderOperate
 
     }
 
+
+    /**
+     * 获取保险操作信息
+     * Author: heaven
+     * @param $params
+     * @return mixed
+     */
+    public static function getInsuranceInfo($params){
+
+        $whereArray[] = ['order_no', '=', $params['order_no']];
+        $whereArray[] = ['goods_no', '=', $params['goods_no']];
+        $insuranceData =  OrderInsurance::where($whereArray)->first();
+        if ($insuranceData) {
+            return  $insuranceData->toArray();
+        }
+
+
+    }
+
+
+
+
     /**
      * 保存回访标识
      * @param $params
@@ -707,7 +729,7 @@ class OrderOperate
     }
 
     /**
-     * 获取订单列表
+     * 获取后台订单列表
      * Author: heaven
      * @param array $param
      * @return array
@@ -734,10 +756,10 @@ class OrderOperate
                 //设备名称
 
                 //订单商品列表相关的数据
-                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
+                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
 
 
-                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+                $goodsData =  self::getManageGoodsActAdminState($values['order_no'], $actArray);
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
@@ -745,7 +767,7 @@ class OrderOperate
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
-                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+                //$orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
 
             }
 
@@ -792,7 +814,7 @@ class OrderOperate
 
 
     /**
-     * 获取设置的操作列表
+     * 获取客户端设置的操作列表
      * Author: heaven
      * @param $orderNo
      * @param $actArray
@@ -835,6 +857,69 @@ class OrderOperate
 
 
    }
+
+
+
+
+
+    /**
+     * 获取后台设置的操作列表
+     * Author: heaven
+     * @param $orderNo
+     * @param $actArray
+     * @return array|bool
+     */
+    public static function getManageGoodsActAdminState($orderNo, $actArray)
+    {
+
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+        if (empty($goodsList)) return [];
+
+        //到期时间多于1个月不出现到期处理
+        foreach($goodsList as $keys=>$values) {
+            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
+            if (empty($actArray)){
+                $goodsList[$keys]['act_goods_state']= [];
+            } else {
+
+                $goodsList[$keys]['act_goods_state']= $actArray;
+                //是否处于售后之中
+                $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
+                if ($expire_process) {
+                    $goodsList[$keys]['act_goods_state']['buy_off'] = false;
+                }
+                //是否已经操作过保险
+
+                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
+//                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                if ($insuranceData){
+                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+                    $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+                    $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
+                }
+
+            }
+
+        }
+
+        return $goodsList;
+
+
+    }
+
+    /**
+     *
+     * 根据订单号获取商品列表信息
+     * Author: heaven
+     * @param $orderNo
+     * @return array|bool
+     */
+        public static function getGoodsListByOrderNo($orderNo)
+        {
+            return  OrderRepository::getGoodsListByOrderId($orderNo);
+
+        }
 
 
 
