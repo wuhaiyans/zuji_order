@@ -32,7 +32,6 @@ class RiskComponnet implements OrderCreater
         $this->userInfo =$schema['user'];
         //获取信用分
         $score = Risk::getCredit(['user_id'=>$schema['user']['user_id']]);
-        var_dump($score);die;
         $this->score =0;
         if(is_array($score)){
             $this->score =$score['score'];
