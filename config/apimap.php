@@ -20,6 +20,9 @@ return [
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
     //保存订单出险信息
     'api.order.outInsurance'=>'OrderController@addOrderInsurance',
+    //设备出险详情
+    'api.order.outInsuranceDetail'=>'OrderController@outInsuranceDetail',
+
     //获取订单状态流信息
     'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
@@ -63,6 +66,9 @@ return [
     'api.order.orderClientlist'=>'OrderController@getClientOrderList',
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
+
+    //根据订单编号查询设备列表接口
+    'api.order.goodslist'=>'OrderController@getGoodsListByOrderNo',
 
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
@@ -108,6 +114,7 @@ return [
 
 
     // 代扣相关
+
     // 代扣协议查询
     'api.Withhold.query'                => 'WithholdController@query',
     // 代扣签约接口

@@ -73,16 +73,31 @@ class ReletRepository
         } else {
             $pagesize = 20;
         }
+        $offset     = ($page - 1) * $pagesize;
 
+        //DB::connection()->enableQueryLog();
         //查询
-        $orderList = OrderRelet::where($whereArray)->paginate($pagesize)->items();
-//        $orderList = DB::table('order_relet')
-//            ->where($whereArray)
-//            ->paginate($pagesize);
-        var_dump($orderList);die;
+        $result =  OrderRelet::query()
+            ->where($whereArray)
+            ->select('order_relet.*')
+            ->offset($offset)
+            ->limit($pagesize)
+            ->get();
 
-        //返回
-        return $orderList;
+        //dd(DB::getQueryLog());
+        if (!$result) return false;
+        $count = OrderRelet::query()
+            ->where($whereArray)
+            ->count();
+        $data = [
+            'page'=>$page,
+            'pagesize'=>$pagesize,
+            'total'=>$count,
+            'data'=>$result->toArray()
+        ];
+
+        return $data;
+
 
     }
 
