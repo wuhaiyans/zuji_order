@@ -16,15 +16,6 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 class WithholdController extends Controller
 {
 
-    // 异步回调 状态
-    protected $NotifyStatus = [
-        'init'          => OrderInstalmentStatus::UNPAID,
-        'success'       => OrderInstalmentStatus::SUCCESS,
-        'failed'        => OrderInstalmentStatus::FAIL,
-        'finished'      => OrderInstalmentStatus::CANCEL,
-        'closed'        => OrderInstalmentStatus::CANCEL,
-        'processing'    => OrderInstalmentStatus::PAYING,
-    ];
     /*
      * 代扣协议查询
      * @param array $request
@@ -303,49 +294,6 @@ class WithholdController extends Controller
                 }
             }
 
-            // 创建扣款记录
-            $instalmentRecord = [
-                'instalment_id'             => $instalmentId,   // 分期ID
-                'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额：元
-                'status'                    => OrderInstalmentStatus::PAYING, // 状态：
-                'create_time'               => time(),          // 创建时间
-            ];
-            $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
-            if(!$record){
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error('创建扣款记录失败');
-                return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
-            }
-
-            // 创建收支明细表
-            $IncomeData = [
-                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
-                'order_no'      => $orderInfo['order_no'],
-                'business_type' => OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $trade_no,
-                'appid'         => $appid,
-                'channel'       => $channel,
-                'amount'        => $instalmentInfo['amount'],
-                'create_time'   => time(),
-            ];
-            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
-            if( !$IncomeId ){
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error('创建收支明细失败');
-                return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
-            }
-
-            //发送短信通知 支付宝内部通知
-            $notice = new \App\Order\Modules\Service\OrderNotice(
-                OrderStatus::BUSINESS_FENQI,
-                $instalmentId,
-                "InstalmentWithhold");
-            $notice->notify();
-
-            // 发送支付宝消息通知
-            $notice->alipay_notify();
-
         }
         // 提交事务
         DB::commit();
@@ -523,46 +471,6 @@ class WithholdController extends Controller
                         continue;
                     }
                 }
-                // 创建扣款记录
-                $instalmentRecord = [
-                    'instalment_id'             => $instalmentId,   // 分期ID
-                    'type'                      => 1,               // 类型 1：代扣；2：主动还款
-                    'payment_amount'            => $instalmentInfo['amount'],         // 实际支付金额：元
-                    'status'                    => OrderInstalmentStatus::PAYING, // 状态：
-                    'create_time'               => time(),          // 创建时间
-                ];
-                $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
-                if(!$record){
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error('创建扣款记录失败');
-                    continue;
-                }
-                // 创建收支明细表
-                $IncomeData = [
-                    'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
-                    'order_no'      => $orderInfo['order_no'],
-                    'business_type' => OrderStatus::BUSINESS_FENQI,
-                    'business_no'   => $trade_no,
-                    'appid'         => $appid,
-                    'channel'       => $channel,
-                    'amount'        => $instalmentInfo['amount'],
-                    'create_time'   => time(),
-                ];
-                $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
-                if( !$IncomeId ){
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error('创建收支明细失败');
-                    continue;
-                }
-                //发送短信通知 支付宝内部通知
-                $notice = new \App\Order\Modules\Service\OrderNotice(
-                    OrderStatus::BUSINESS_FENQI,
-                    $instalmentId,
-                    "InstalmentWithhold");
-                $notice->notify();
-
-                // 发送支付宝消息通知
-                $notice->alipay_notify();
 
             }
             // 提交事务
@@ -720,48 +628,6 @@ class WithholdController extends Controller
                     }
                 }
 
-                // 创建扣款记录
-                $instalmentRecord = [
-                    'instalment_id' => $item['id'],             // 分期ID
-                    'type' => 1,                                // 类型 1：代扣；2：主动还款
-                    'payment_amount' => $item['amount'],        // 实际支付金额
-                    'status' => OrderInstalmentStatus::PAYING,  // 状态：
-                    'create_time' => time(),                    // 创建时间
-                ];
-                $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
-                if (!$record) {
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error("创建扣款记录失败");
-                    continue;
-                }
-
-                // 创建收支明细表
-                $IncomeData = [
-                    'name'          => "商品-" . $item['goods_no'] . "分期" . $item['term'] . "代扣",
-                    'order_no'      => $orderInfo['order_no'],
-                    'business_type' => OrderStatus::BUSINESS_FENQI,
-                    'business_no'   => $item['id'],
-                    'appid'         => 1,
-                    'channel'       => $channel,
-                    'amount'        => $item['amount'],
-                    'create_time'   => time(),
-                ];
-                $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
-                if( !$IncomeId ){
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error('创建收支明细失败');
-                    return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
-                }
-
-                //发送短信通知 支付宝内部通知
-                $notice = new \App\Order\Modules\Service\OrderNotice(
-                    OrderStatus::BUSINESS_FENQI,
-                    $item['id'],
-                    "InstalmentWithhold");
-                $notice->notify();
-
-                // 发送支付宝消息通知
-                $notice->alipay_notify();
             }
 
             // 提交事务

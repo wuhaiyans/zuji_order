@@ -21,6 +21,6 @@ class OrderInsurance extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','remark','type','create_time'];
+    protected $fillable = ['order_no','goods_no','remark','type','create_time'];
 
 }

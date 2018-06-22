@@ -109,12 +109,12 @@ class OrderOperate
                 DB::commit();
 
                 //增加确认收货队列
-                $day =$orderInfo['zuqi_type'] ==1?3:7;
+                $confirmTime =$orderInfo['zuqi_type'] ==1?config('web.short_confirm_days'):config('web.long_confirm_days');
 
                 $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
-                ],time()+86400*$day,"");
+                ],time()+$confirmTime,"");
 
                 return true;
 
@@ -291,13 +291,6 @@ class OrderOperate
      * [
      *      'order_no'=>''//订单编号
      *      'remark'=>''//备注
-     *      'userinfo'
-     * ]
-     * $userinfo [
-     *  'uid'=>'',
-     *  'mobile'=>'',
-     *  'type'=>'',
-     *  'username'=>'',
      * ]
      * @return boolean
      */
@@ -316,6 +309,10 @@ class OrderOperate
                 return false;
             }
             $b =$order->sign();
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
 
             $orderInfo = $order->getData();
 
@@ -349,20 +346,36 @@ class OrderOperate
                 }
             }
 
+            if($system==1){
+                $remark="系统自动执行任务";
+                $userId =1;
+                $userName ="系统";
+                $userType =\App\Lib\PublicInc::Type_System;
+            }else{
+                $userInfo =$params['userinfo'];
+                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
+                $userId =$userInfo['uid'];
+                $userName =$userInfo['username'];
+            }
+
+
+            $params=[
+                    'order_no'=>$orderNo,//
+                    'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+                    'user_id'=>$userId,//
+                    'user_name'=>$userName,//
+            ];
+
             //通知给收发货系统
-            $b =Delivery::orderReceive($orderNo);
+            $b =Delivery::orderReceive($params);
             if(!$b){
+                LogApi::info("收发货系统确认收货失败");
                 DB::rollBack();
                 return false;
             }
-            if($system==0){
-                //插入操作日志
-                $userInfo =$params['userinfo'];
-                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
-                OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userType,$orderNo,"确认收货",$remark);
-            }else{
-                OrderLogRepository::add(0,'',\App\Lib\PublicInc::Type_System,$orderNo,"确认收货","系统自动执行任务");
-            }
+            //插入操作日志
+            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
+
 
             DB::commit();
             return true;
@@ -450,94 +463,6 @@ class OrderOperate
             echo $exc->getMessage();
             die;
 
-        }
-
-    }
-
-    /**
-     *  定时任务取消订单
-     * Author: heaven
-     * @param $orderNo 订单编号
-     * @param string $userId 用户id
-     * @return bool|string
-     */
-    public static function cronCancelOrder()
-    {
-        try {
-            $param = [
-                'order_status' => Inc\OrderStatus::OrderWaitPaying,
-                'now_time'=> time() - 7200,
-            ];
-            $orderData = OrderRepository::getOrderAll($param);
-            if (!$orderData) {
-                return false;
-            }
-            //var_dump($orderData);die;
-            foreach ($orderData as $k => $v) {
-                //开启事物
-                DB::beginTransaction();
-                $b = OrderRepository::closeOrder($v['order_no']);
-                if(!$b){
-                    DB::rollBack();
-                    LogApi::debug("更改订单状态失败:" . $v['order_no']);
-                }
-
-                //分期关闭
-                //查询分期
-                //分期关闭
-                //查询分期
-                $isInstalment   =   OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderNo]);
-                if ($isInstalment) {
-                    $success =  Instalment::close(['order_no'=>$orderNo]);
-                    if (!$success) {
-                        DB::rollBack();
-                        return ApiStatus::CODE_31004;
-                    }
-                }
-                $success = OrderGoodsInstalment::close(['order_no' => $v['order_no']]);
-                if (!$success) {
-                    DB::rollBack();
-                    LogApi::debug("订单关闭分期失败:" . $v['order_no']);
-                }
-                DB::commit();
-                //释放库存
-                //查询商品的信息
-                $orderGoods = OrderRepository::getGoodsListByOrderId($v['order_no']);
-                if ($orderGoods) {
-                    foreach ($orderGoods as $orderGoodsValues) {
-                        //暂时一对一
-                        $goods_arr[] = [
-                            'sku_id' => $orderGoodsValues['zuji_goods_id'],
-                            'spu_id' => $orderGoodsValues['prod_id'],
-                            'num' => $orderGoodsValues['quantity']
-                        ];
-                    }
-                    $success = Goods::addStock($goods_arr);
-                    if (!$success)
-                        //DB::rollBack();
-                        LogApi::debug("订单恢复库存失败:" . $v['order_no']);
-                }
-
-            //优惠券归还
-            //通过订单号获取优惠券信息
-            $orderCouponData = OrderRepository::getCouponListByOrderId($v['order_no']);
-            if ($orderCouponData) {
-                $coupon_id = array_column($orderCouponData, 'coupon_id');
-                $success = Coupon::setCoupon(['user_id' => $v['user_id'], 'coupon_id' => $coupon_id]);
-
-                if ($success) {
-                    DB::rollBack();
-                    LogApi::debug("订单优惠券恢复失败:" . $v['order_no']);
-                }
-
-            }
-
-        }
-        return true;
-
-        } catch (\Exception $exc) {
-            DB::rollBack();
-            return  ApiStatus::CODE_31006;
         }
 
     }

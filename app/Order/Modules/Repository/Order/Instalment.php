@@ -48,9 +48,9 @@ class Instalment {
 	 *  ];
 	 * @return array 返回分期数据
 	 */
-	public static function instalmentData( array $params ){
+	public function instalmentData( array $params ){
 
-		$filter = self::filter_param($params);
+		$filter = $this->filter_param($params);
 		if(!$filter){
 			return false;
 		}
@@ -153,13 +153,13 @@ class Instalment {
 	 *  ];
 	 * @return bool true：成功；false：失败
 	 */
-	public static function create( array $params ):bool{
-		$filter = self::filter_param($params);
+	public function create( array $params ):bool{
+		$filter = $this->filter_param($params);
 		if(!$filter){
 			return false;
 		}
 		// 调用分期数据
-		$_data = self::instalmentData($params);
+		$_data = $this->instalmentData($params);
 		if(!$_data){
 			\App\Lib\Common\LogApi::error('创建分期错误');
 			return false;
@@ -193,7 +193,7 @@ class Instalment {
 	}
 
 	// 参数验证
-	public function filter_param(array $params):bool{
+	public function filter_param(array $params){
 		if(!is_array($params)){
 			return false;
 		}
@@ -288,13 +288,16 @@ class Instalment {
 	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
-			//开启事务
-			DB::beginTransaction();
 
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
-				// 提交事务
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
+				return false;
+			}
+
+			// 已经处理过的请求 直接返回 true
+			if($instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS){
+				return true;
 			}
 
 			$data = [
@@ -304,43 +307,59 @@ class Instalment {
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
 			if(!$b){
-				DB::rollBack();
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('修改分期状态失败');
+				return false;
 			}
 
-			// 修改扣款记录数据
+			// 创建扣款记录数据
 			$recordData = [
-				'status'        => OrderInstalmentStatus::SUCCESS,
-				'update_time'   => time(),
+				'instalment_id'             => $instalmentInfo['id'],   	// 分期ID
+				'type'                      => 1,               			// 类型 1：代扣；2：主动还款
+				'payment_amount'            => $instalmentInfo['amount'],   // 实际支付金额：元
+				'status'        			=> OrderInstalmentStatus::SUCCESS,
+				'create_time'               => time(),          			// 创建时间
+				'update_time'   			=> time(),
 			];
-			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$instalmentInfo['id']],$recordData);
+			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
 			if(!$record){
-				DB::rollBack();
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('创建扣款记录失败');
+				return false;
 			}
 
-			// 修改收支明细 交易吗
+			// 创建收支明细
 			$incomeData = [
+				'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+				'order_no'      => $instalmentInfo['order_no'],
+				'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+				'business_no'   => $param['out_trade_no'],
+				'appid'         => 1,
+				'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'amount'        => $instalmentInfo['amount'],
+				'create_time'   => time(),
 				'trade_no'       => $param['out_trade_no'],
 				'out_trade_no'   => $param['trade_no'],
 			];
-			$incomeWhere =    [
-				'business_type'	=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-				'business_no'	=> $param['out_trade_no'],
-			];
-			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::save($incomeWhere,$incomeData);
+			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
 			if(!$incomeB){
-				DB::rollBack();
-				echo "FAIL";exit;
+				\App\Lib\Common\LogApi::error('创建收支明细失败');
+				return false;
 			}
 
-			// 提交事务
-			DB::commit();
 
-			echo "SUCCESS";exit;
+			//发送短信通知 支付宝内部通知
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+				$instalmentInfo['id'],
+				"InstalmentWithhold");
+			$notice->notify();
+
+			// 发送支付宝消息通知
+			$notice->alipay_notify();
+
+			return true;
 		}
 
-		echo "FAIL";exit;
+		return false;
 
 	}
 
