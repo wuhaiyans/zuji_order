@@ -79,7 +79,8 @@ class ReletRepository
 //        $orderList = DB::table('order_relet')
 //            ->where($whereArray)
 //            ->paginate($pagesize);
-        var_dump($orderList);die;
+        $sql = OrderRelet::toSql();
+        var_dump($sql);die;
 
         //返回
         return $orderList;
