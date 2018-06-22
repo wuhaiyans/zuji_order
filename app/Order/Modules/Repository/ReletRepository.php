@@ -8,16 +8,9 @@
 
 namespace App\Order\Modules\Repository;
 
-use App\Lib\Common\LogApi;
 use App\Order\Models\OrderRelet;
-use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReletStatus;
-use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Modules\Repository\Order\Order;
 use Illuminate\Support\Facades\DB;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderGoodsUnit;
 
 class ReletRepository
 {
@@ -58,7 +51,7 @@ class ReletRepository
      */
     public function getList($params){
         //拼接 页数 搜索参数 每页显示数
-        $whereArray = [];
+        $whereArray[] = ['1','=','1'];
 
         //根据用户id
         if (isset($params['user_id']) && !empty($params['user_id'])) {
@@ -88,6 +81,7 @@ class ReletRepository
             ->offset($pagesize)
             ->limit($page)
             ->get();
+        var_dump($orderList);die;
 
         //返回
         return $orderList;

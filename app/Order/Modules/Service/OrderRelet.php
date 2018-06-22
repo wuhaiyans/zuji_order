@@ -28,9 +28,9 @@ class OrderRelet
 {
     protected $reletRepository;
 
-    public function __construct()
+    public function __construct(ReletRepository $reletRepository)
     {
-        $this->reletRepository = new ReletRepository();
+        $this->reletRepository = $reletRepository;
     }
 
     /**

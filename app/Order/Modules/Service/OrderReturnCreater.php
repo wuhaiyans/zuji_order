@@ -1475,7 +1475,7 @@ class OrderReturnCreater
             if($return_info['goods_no']){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        $success =\App\Order\Modules\Service\OrderGoodsInstalment::close($params);
+                        $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                         if (!$success) {
                             DB::rollBack();
                             return false;
@@ -1488,7 +1488,7 @@ class OrderReturnCreater
                 //查询订单的状态
                 $orderInfoData =  OrderRepository::getInfoById($params['order_no'],$return_info['user_id']);
                 if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                    $success = \App\Order\Modules\Service\OrderGoodsInstalment::close($params);
+                    $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                     if (!$success) {
                         DB::rollBack();
                         return false;
