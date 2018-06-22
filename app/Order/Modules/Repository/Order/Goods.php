@@ -243,7 +243,7 @@ class Goods {
         $orderGoodData = $builder->get();
 		$list = [];
 		foreach( $orderGoodData as $it ) {
-			$list[] = new Goods( $it );
+			$list[] = new self( $it );
 		}
 		return $list;
 	}

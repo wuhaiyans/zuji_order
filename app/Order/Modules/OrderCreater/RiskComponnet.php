@@ -38,25 +38,35 @@ class RiskComponnet implements OrderCreater
         }
 
         //获取蚁盾信息
-        $risk =Risk::getRisk([
-            'user_id'=>$schema['user']['user_id'],
-            'user_name'=>$schema['user']['realname'],
-            'cert_no'=>$schema['user']['cert_no'],
-            'mobile'=>$schema['user']['user_mobile'],
-            'channel_appid'=>$appId,
-        ]);
-        if(!is_array($risk)){
-            throw new Exception("获取风控信息失败");
-        }
-        $riskData =[
+//        $risk =Risk::getRisk([
+//            'user_id'=>$schema['user']['user_id'],
+//            'user_name'=>$schema['user']['realname'],
+//            'cert_no'=>$schema['user']['cert_no'],
+//            'mobile'=>$schema['user']['user_mobile'],
+//            'channel_appid'=>$appId,
+//        ]);
+//        if(!is_array($risk)){
+//            throw new Exception($risk);
+//        }
+//        $riskData =[
+//            'risk'=>[
+//                'decision' => $risk['decision'],
+//                'score' => $risk['score'],
+//                'strategies' =>$risk['strategies'],
+//                'type'=>Risk::RiskYidun,
+//            ],
+//            'score'=>$this->score,
+//        ];
+          $riskData =[
             'risk'=>[
-                'decision' => $risk['decision'],
-                'score' => $risk['score'],
-                'strategies' =>$risk['strategies'],
+                'decision' => "假数据",
+                'score' => 0,
+                'strategies' =>'',
                 'type'=>Risk::RiskYidun,
             ],
             'score'=>$this->score,
         ];
+
         $this->risk =$riskData;
     }
     /**

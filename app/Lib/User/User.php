@@ -136,7 +136,7 @@ class User{
         if(!is_array($info)  || $info['code']!=0){
             return false;
         }
-        return $info['data'];
+        return $info["data"];
     }
 }
 

@@ -16,5 +16,7 @@ return [
     //短期多长时间出现到期处理
     'day_expiry_process_days' => 0,
     //短期发货后多长时间变成确认收货
-    'day_confirm_days' => 3*24*3600,
+    'short_confirm_days' => 3*24*3600,
+    //长租发货后多长时间变成确认收货
+    'long_confirm_days' => 7*24*3600,
 ];
