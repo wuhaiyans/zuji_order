@@ -21,6 +21,7 @@ class AuthRefferController extends Controller{
      * "auth_token" => ""
      * "method"  =>""
      * "params"=>[]
+     * "type"   =>
      * ]
      * @return bool
      */
@@ -36,8 +37,7 @@ class AuthRefferController extends Controller{
             if ($checkInfo){
                 $params['userinfo']=[
                     'uid'=>$checkInfo[0]['id'],
-                    'mobile'=>$checkInfo[0]['mobile'],
-                    'type'=>1,
+                    'type'=>$params['type'],
                     'username'=>$checkInfo[0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
@@ -47,7 +47,7 @@ class AuthRefferController extends Controller{
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
                         'msg' => "访问接口错误",
-                        'data'    =>[]
+                        'data'    =>$info['data']
                     ]);
                 }
                 return response()->json([
