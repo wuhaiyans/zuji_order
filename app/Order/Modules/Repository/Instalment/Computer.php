@@ -56,7 +56,7 @@ abstract class Computer {
 	public function __construct( $params ) {
 		$this->params = $params;
 		$this->year = intval( date('Y') );
-		$this->month = intval( date('m') );
+		$this->month = intval( date('m',strtotime('+1 month')) );
 		$this->day = intval( date('d') );
 	}
 	

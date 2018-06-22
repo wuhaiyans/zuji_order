@@ -16,15 +16,6 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 class WithholdController extends Controller
 {
 
-    // 异步回调 状态
-    protected $NotifyStatus = [
-        'init'          => OrderInstalmentStatus::UNPAID,
-        'success'       => OrderInstalmentStatus::SUCCESS,
-        'failed'        => OrderInstalmentStatus::FAIL,
-        'finished'      => OrderInstalmentStatus::CANCEL,
-        'closed'        => OrderInstalmentStatus::CANCEL,
-        'processing'    => OrderInstalmentStatus::PAYING,
-    ];
     /*
      * 代扣协议查询
      * @param array $request
