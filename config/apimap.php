@@ -64,6 +64,9 @@ return [
     //订单列表筛选项接口
     'api.order.list.filter'=>'OrderController@orderListFilter',
 
+    //根据订单编号查询设备列表接口
+    'api.order.goodslist'=>'OrderController@getGoodsListByOrderNo',
+
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
     'api.order.getRiskInfo'=>'OrderController@getRiskInfo',
