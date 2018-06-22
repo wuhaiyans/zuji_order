@@ -29,12 +29,11 @@ class Risk{
         ];
         $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
-        var_dump($info);die;
         if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+            return "蚁盾接口请求失败";
         }
         if($info['code']!=0){
-            return $info['code'];
+            return $info['msg'];
         }
         return $info['data'];
     }
