@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Repository\GoodsReturn\GoodsReturn;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Common\Controllers\Api\v1\TestController;
 class OrderReturnCreater
 {
     protected $orderReturnRepository;
@@ -984,10 +985,14 @@ class OrderReturnCreater
      */
     public function returnResult($params){
         try{
+            $list=[];
+
+            $list['business_type']=$params['business_key'];
+            $list['business_name']=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);
+
             foreach($params as $k=>$v){
-               if(empty($v['refund_no'])){
-                   return false;
-               }
+
+              // p($list);
                //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
                 if(!$return){
@@ -1043,6 +1048,14 @@ class OrderReturnCreater
             echo $exc->getMessage();
             die;
         }
+    }
+
+    /**
+     * 换货结果查看
+     * @param $params
+     */
+    public function barterResult($params){
+
     }
     /**
      * 检测合格或不合格
