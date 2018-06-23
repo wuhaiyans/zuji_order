@@ -75,6 +75,28 @@ class OrderBuyout
 
 		return OrderBuyoutRepository::getInfo($where);
 	}
+
+
+    /**
+     * 查询客服操作提前买断的设备
+     * author: heaven
+     * @param $data
+     * @return id
+     */
+    public static function getAheadInfo($orderNo,$goodsNo, $status=0){
+        if(!$orderNo || !$goodsNo){
+            return false;
+        }
+        $where = [
+            ['order_no','=', $orderNo],
+            ['goods_no','=', $goodsNo],
+            ['status' ,'=', $status],
+            ['type' ,'=', 1],
+        ];
+//        OrderBuyout::query()->where($where)->first();
+        return OrderBuyoutRepository::getInfo($where);
+    }
+
 	/**
 	 * 查询统计数量
 	 * @param $data

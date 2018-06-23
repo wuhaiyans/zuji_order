@@ -20,6 +20,9 @@ return [
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
     //保存订单出险信息
     'api.order.outInsurance'=>'OrderController@addOrderInsurance',
+    //设备出险详情
+    'api.order.outInsuranceDetail'=>'OrderController@outInsuranceDetail',
+
     //获取订单状态流信息
     'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
@@ -111,6 +114,7 @@ return [
 
 
     // 代扣相关
+
     // 代扣协议查询
     'api.Withhold.query'                => 'WithholdController@query',
     // 代扣签约接口
