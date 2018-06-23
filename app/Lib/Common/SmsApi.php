@@ -31,10 +31,12 @@ class SmsApi {
 			'sign_type'		=> 'MD5',
 			'sign'			=> '',
 			'appid'			=> '1',
-			'method'		=> 'zuji.sms_code.send',
+			'method'		=> 'zuji.sms.send',
 			'timestamp' 	=> date("Y-m-d H:i:s"),
 			'params'		=> [
-				'mobile'	=> $mobile,
+				'type'			=> "SM_LOGIN",
+				'mobile'		=> $mobile,
+				'country_code'	=> "86",
 			],
 		];
 		$info = Curl::post($url, json_encode($data));
@@ -59,7 +61,7 @@ class SmsApi {
 			'sign_type'		=> 'MD5',
 			'sign'			=> '',
 			'appid'			=> '1',
-			'method'		=> 'zuji.sms_code.verification',
+			'method'		=> 'zuji.sms.verification',
 			'timestamp' 	=> date("Y-m-d H:i:s"),
 			'params'		=> [
 				'mobile'	=> $mobile,
@@ -89,7 +91,7 @@ class SmsApi {
 			'sign_type'		=> 'MD5',
 			'sign'			=> '',
 			'appid'			=> '1',
-			'method'		=> 'zuji.sms_code.send_data',
+			'method'		=> 'zuji.sms.send_data',
 			'timestamp' 	=> date("Y-m-d H:i:s"),
 			'params'		=> [
 				'mobile'	=> $mobile,
