@@ -279,7 +279,7 @@ class OrderReturnCreater
                     return  false;
                 }
                 //获取退换货单的信息
-                $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['detail'][$k]['refund_no']);
+                $return = GoodsReturn::getReturnByRefundNo($params['detail'][$k]['refund_no']);
                 if (!$return) {
                     return false;
                 }
@@ -289,7 +289,7 @@ class OrderReturnCreater
                 if(!$goods){
                     return false;
                 }
-               $goods_info= $goods->getData();
+               $goods_info[$k]= $goods->getData();
                 //审核同意
                 if ($params['detail'][$k]['audit_state'] == 'true'){
                     //更新审核状态为同意
@@ -308,7 +308,7 @@ class OrderReturnCreater
                         return false;
                     }
                     $goodsDeliveryInfo[$k]=$goodsDelivery[$k]->getData();
-                    $goodsDeliveryInfo[$k]['quantity']=$goods_info['quantity'];
+                    $goodsDeliveryInfo[$k]['quantity']=$goods_info[$k]['quantity'];
                     $goodsDeliveryInfo[$k]['refund_no']=$params['detail'][$k]['refund_no'];
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
@@ -337,7 +337,6 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
-                    //更新订单状态
 
                     // 退货
                     if($params['business_key'] == OrderStatus::BUSINESS_RETURN ){
@@ -349,6 +348,25 @@ class OrderReturnCreater
                         //插入操作日志
                         OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$returnInfo[$k]['order_no'],"换货","审核拒绝");
                     }
+                }
+            }
+            //获取此订单的商品是否还有处理中的设备，没有则解冻
+            $status=false;
+            foreach($goods_info as $k=>$v){
+                if($v['goods_status']==OrderGoodStatus::RENTING_MACHINE || $v['goods_status']==OrderGoodStatus::REFUNDED || $v['goods_status']==OrderGoodStatus::EXCHANGE_OF_GOODS){
+                    $status=true;
+                }else{
+                    $status=false;
+                    break;
+                }
+            }
+            if($status==true){
+                //解冻订单并关闭订单
+                $orderInfo=\App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no']);
+                $updateOrder=$orderInfo->returnClose();
+                if(!$updateOrder){
+                    DB::rollBack();
+                    return false;
                 }
             }
             //存在审核同意商品

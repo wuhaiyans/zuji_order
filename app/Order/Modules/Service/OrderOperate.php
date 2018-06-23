@@ -258,7 +258,6 @@ class OrderOperate
     {
         DB::beginTransaction();
         try{
-
             $res=OrderRepository::getOrderExtends($params['order_no'],Inc\OrderExtendFieldName::FieldVisit);
             if(empty($res)){
                 $extendData= [
