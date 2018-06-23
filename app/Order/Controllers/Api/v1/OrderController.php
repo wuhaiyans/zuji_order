@@ -233,16 +233,6 @@ class OrderController extends Controller
 
             $params = $request->all();
 
-//            $rules = [
-//                'userinfo'  => 'required',
-//            ];
-//            $validateParams = $this->validateParams($rules,$params);
-
-
-//            if (empty($validateParams) || $validateParams['code']!=0) {
-//
-//                return apiResponse([],$validateParams['code']);
-//            }
             if (!isset($params['userinfo']) || empty($params['userinfo'])) {
 
                 return apiResponse([], ApiStatus::CODE_10102,[],'用户id为空');
@@ -372,6 +362,39 @@ class OrderController extends Controller
         return apiResponse([],ApiStatus::CODE_0);
 
     }
+
+    /**
+     * 获取出险详情接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function outInsuranceDetail(Request $request)
+    {
+
+        $params =$request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'goods_no' =>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$validateParams['data'];
+
+        $res = OrderOperate::getInsuranceInfo($params);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_30036);
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+
+    }
+
+
 
     /**
      *  增加联系备注

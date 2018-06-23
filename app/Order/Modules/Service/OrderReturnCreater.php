@@ -75,7 +75,7 @@ class OrderReturnCreater
                 if( $order_info['user_id'] != $params['user_id'] ){
                     return false;
                 }
-                //用户必须在收货后天内才可以申请退换货
+                //用户必须在收货后7天内才可以申请退换货
                 $nowdata=time();
                 if($order_info['delivery_time']!=0){
                     $time=$nowdata-$order_info['delivery_time'];
@@ -289,7 +289,7 @@ class OrderReturnCreater
                 if(!$goods){
                     return false;
                 }
-               $goods_info[$k]= $goods->getData();
+               $goods_info= $goods->getData();
                 //审核同意
                 if ($params['detail'][$k]['audit_state'] == 'true'){
                     //更新审核状态为同意
@@ -308,7 +308,7 @@ class OrderReturnCreater
                         return false;
                     }
                     $goodsDeliveryInfo[$k]=$goodsDelivery[$k]->getData();
-                    $goodsDeliveryInfo[$k]['quantity']=$goods_info[$k]['quantity'];
+                    $goodsDeliveryInfo[$k]['quantity']=$goods_info['quantity'];
                     $goodsDeliveryInfo[$k]['refund_no']=$params['detail'][$k]['refund_no'];
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
@@ -349,11 +349,17 @@ class OrderReturnCreater
                         OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$returnInfo[$k]['order_no'],"换货","审核拒绝");
                     }
                 }
+                //获取商品信息
+                $goodsStatus=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo[$k]['goods_no']);
+                if(!$goodsStatus){
+                    return false;
+                }
+                $goodsInfo[$k]= $goodsStatus->getData();
             }
             //获取此订单的商品是否还有处理中的设备，没有则解冻
             $status=false;
-            foreach($goods_info as $k=>$v){
-                if($v['goods_status']==OrderGoodStatus::RENTING_MACHINE || $v['goods_status']==OrderGoodStatus::REFUNDED || $v['goods_status']==OrderGoodStatus::EXCHANGE_OF_GOODS){
+            foreach($goodsInfo as $k=>$v){
+                if($v['goods_status']==OrderGoodStatus::RENTING_MACHINE){
                     $status=true;
                 }else{
                     $status=false;
@@ -1176,23 +1182,33 @@ class OrderReturnCreater
 
 
                 }
+                //获取商品信息
+                $goodsInfo =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no'] );
+                if(!$goodsInfo){
+                    return false;
+                }
+                $goodsStatus[$k]=$goodsInfo->getData();
             }
-
             if($business_key==OrderStatus::BUSINESS_BARTER){
-                if($list){
-                    if(!in_array(ReturnStatus::ReturnCreated,$list) && !in_array(ReturnStatus::ReturnAgreed,$list)&& !in_array(ReturnStatus::ReturnReceive,$list) && !in_array(ReturnStatus::ReturnTui,$list)) {
-                        //修改订单为租用中
-                        $order_result = $order->returnClose();
-                        if (!$order_result) {
-                            //事务回滚
-                            DB::rollBack();
-                            return ApiStatus::CODE_33007;//更新订单冻结状态失败
-                        }
+                //获取此订单的商品是否还有处理中的设备，没有则解冻
+                $status=false;
+                foreach($goodsStatus as $k=>$v){
+                    if($v['goods_status']==OrderGoodStatus::RENTING_MACHINE){
+                        $status=true;
+                    }else{
+                        $status=false;
+                        break;
+                    }
+                }
+                if($status==true){
+                    //解冻订单并关闭订单
+                    $orderInfo=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
+                    $updateOrder=$orderInfo->returnClose();
+                    if(!$updateOrder){
+                        return false;
                     }
                 }
             }
-
-
             DB::commit();
             if($business_key ==OrderStatus::BUSINESS_BARTER){
                 if($order_no){

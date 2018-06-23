@@ -75,7 +75,7 @@ class ReletRepository
         }
         $offset     = ($page - 1) * $pagesize;
 
-//        DB::connection()->enableQueryLog();
+        //DB::connection()->enableQueryLog();
         //查询
         $result =  OrderRelet::query()
             ->where($whereArray)
@@ -84,12 +84,19 @@ class ReletRepository
             ->limit($pagesize)
             ->get();
 
-//        dd(DB::getQueryLog());
-        dd($result);
-        die;
+        //dd(DB::getQueryLog());
         if (!$result) return false;
+        $count = OrderRelet::query()
+            ->where($whereArray)
+            ->count();
+        $data = [
+            'page'=>$page,
+            'pagesize'=>$pagesize,
+            'total'=>$count,
+            'data'=>$result->toArray()
+        ];
 
-        return $result->toArray();
+        return $data;
 
 
     }

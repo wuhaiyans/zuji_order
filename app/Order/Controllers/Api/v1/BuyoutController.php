@@ -266,6 +266,7 @@ class BuyoutController extends Controller
         DB::beginTransaction();
         //创建买断单
         $data = [
+            'type'=>1,
             'buyout_no'=>createNo(8),
             'order_no'=>$goodsInfo['order_no'],
             'goods_no'=>$goodsInfo['goods_no'],
