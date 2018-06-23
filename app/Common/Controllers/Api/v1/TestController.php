@@ -19,6 +19,18 @@ class TestController extends Controller
 	
     public function test()
     {
+		
+		$info = [
+			'refund_no' => '',
+			'business_type' => '2',
+			'status' => '',
+			
+			'logistics_id' => '',
+			'logistics_name' => '',
+			'logistics_no' => '',
+		];
+		
+		
 		echo json_encode([
 			// 业务
 			'business_type' => '业务类型',
@@ -60,25 +72,6 @@ class TestController extends Controller
 				'zujin' => '499.00',
 			],
 			
-			// 换货表单
-			'exchange_form' => [
-				'reason_list' => [
-					[
-						'value' => '1',
-						'name' => '屏幕问题',
-					],
-					[
-						'value' => '2',
-						'name' => '电池问题',
-					],
-				]
-			],
-			// 换货信息
-			'exchange_info' => [
-				'reason_name' => '原因：屏幕问题',
-				'reason_text' => '说明“屏幕上有坏点',
-			],
-			
 			// 物流表单
 			'logistics_form' => [
 				'channel_list' => [
@@ -100,8 +93,73 @@ class TestController extends Controller
 				'channel_name' => '顺丰物流',
 			],
 			
+			
+			// 换货表单
+			'exchange_form' => [
+				'reason_list' => [
+					[
+						'value' => '1',
+						'name' => '屏幕问题',
+					],
+					[
+						'value' => '2',
+						'name' => '电池问题',
+					],
+				]
+			],
+			// 换货信息
+			'exchange_info' => [
+				'reason_name' => '原因：屏幕问题',
+				'reason_text' => '说明“屏幕上有坏点',
+			],
+			
 			// 换货结果
 			'exchange_result' => '已经调换并发货，注意签收',
+			
+			// 退货表单
+			'return_form' => [
+				'reason_list' => [
+					[
+						'value' => '1',
+						'name' => '屏幕问题',
+					],
+					[
+						'value' => '2',
+						'name' => '电池问题',
+					],
+				]
+			],
+			// 退款信息
+			'return_info' => [
+				'reason_name' => '原因：屏幕问题',
+				'reason_text' => '说明“屏幕上有坏点',
+			],
+			
+			// 退款结果
+			'return_result' => '退款完成',
+			
+			
+			// 检测结果
+			'jiance_status' => 'qualified',// qualified：合格；unqualified：不合格
+			'jiance_text' => 'Xxxxxxx',
+			
+			// 支付信息
+			'payment_info' => [
+				 'status' => 'paid',// paid:已支付；not-paid：未支付
+				 'total_amount' => '1000.00',// 总支付金额
+				 'discount_amount' => '300.00',// 优惠金额
+				 'amount' => '700.00',// 应付金额
+				 'amount_list' => [
+					 [
+						 'name' => '2期租金',
+						 'amount' => '700',
+					 ],
+					 [
+						 'name' => '赔偿金',
+						 'amount' => '300',
+					 ],
+				 ],
+			],
 			
 		]);
     }
