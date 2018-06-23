@@ -623,7 +623,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		else{
 			//解冻订单
-			if(!OrderGiveback::__unfreeze($orderGivevbackInfo['order_no'])){
+			if(!OrderGiveback::__unfreeze($paramsArr['order_no'])){
 				set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
 				return false;
 			}
@@ -850,7 +850,7 @@ class GivebackController extends Controller
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
 				'businessNo' => $paramsArr['giveback_no'],// 业务编号
-				'userId' => $params['user_id'],// 用户id
+				'userId' => $paramsArr['user_id'],// 用户id
 				'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
 				'paymentFenqi' => 0,//不分期
 			];
