@@ -47,6 +47,24 @@ class OrderGivebackRepository
 		return $this->order_giveback_model->insertGetId( $data );
 	}
     /**
+     * 根据条件获取一条还机单数据
+	 * @param where $where 查询条件
+	 * $where = [
+	 *		'order_no' => '',//订单编号
+	 *		'giveback_no' => '',//还机单编号
+	 *		'goods_no' => '',//设备编号
+	 * ]
+	 * @return array|false
+	 */
+	public function getNeedpayInfo( $where ) {
+		$result = $this->order_giveback_model->where($where)->select();
+		if( $result ) {
+			return $result->toArray();
+		}
+		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
+		return false;
+	}
+    /**
      * 根据商品编号获取一条还机单数据
 	 * @param string $goodsNo 商品编号
 	 * @return array 

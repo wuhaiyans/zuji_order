@@ -44,6 +44,29 @@ class OrderGiveback
 		return $result;
     }
     /**
+     * 获取当前条件下，是否有需要支付的还机单
+	 * @param where $where 查询条件
+	 * $where = [
+	 *		'order_no' => '',//订单编号
+	 *		'giveback_no' => '',//还机单编号
+	 *		'goods_no' => '',//设备编号
+	 * ]
+	 * @return array|false
+	 */
+	public function getNeedpayInfo( $where ) {
+		$where = filter_array($where, [
+			'order_no' => 'required',
+			'giveback_no' => 'required',
+			'goods_no' => 'required',
+		]);
+		if( empty($where) ) {
+			set_apistatus(\App\Lib\ApiStatus::CODE_92300,'获取单条还机单数据时，参数为空!');
+			return false;
+		}
+		$where['payment_status'] = [OrderGivebackStatus::PAYMENT_STATUS_IN_PAY, OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY];
+		return $this->order_giveback_repository->getNeedpayInfo($where);
+	}
+    /**
      * 根据商品编号获取一条还机单数据
 	 * @param string $goodsNo 商品编号
 	 * @return array|false
