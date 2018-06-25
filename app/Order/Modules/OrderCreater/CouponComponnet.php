@@ -31,9 +31,10 @@ class CouponComponnet implements OrderCreater
         $this->componnet = $componnet;
         if(!empty($coupon)){
             //获取优惠券类型接口
+            $couponData =[];
             for ($i=0;$i<count($coupon);$i++){
                 if($coupon[$i]!=""){
-                    $couponData[]=[
+                    $couponData[$i]=[
                         'user_id'=>$userId,
                         'coupon_no'=>$coupon[$i],
                     ];
