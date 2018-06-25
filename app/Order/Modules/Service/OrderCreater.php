@@ -123,7 +123,6 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
-            var_dump($schemaData);
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
