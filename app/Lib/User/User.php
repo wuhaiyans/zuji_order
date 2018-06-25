@@ -135,7 +135,6 @@ class User{
         $header = ['Content-Type: application/json'];
         $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
         Log::debug("checkToken获取用户信息",$list);
-        
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
         Log::debug("checkToken返回结果".$info);
         $info = str_replace("\r\n","",$info);
