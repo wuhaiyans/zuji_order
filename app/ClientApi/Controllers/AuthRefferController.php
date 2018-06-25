@@ -38,7 +38,7 @@ class AuthRefferController extends Controller{
         if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))&& !empty($params['type']) && $params['type']>0) {
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
-            Log::debug("验证token调用第三方User::checkToken返回的结果",$checkInfo);
+            Log::debug("验证token调用第三方User::checkToken返回的结果".$checkInfo);
             //验证通过
             if ($checkInfo){
                 $params['userinfo']=[
