@@ -11,7 +11,7 @@ namespace App\Lib\User;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Curl;
-
+use Illuminate\Support\Facades\Log;
 class User{
     /**
      * 获取用户信息
@@ -134,7 +134,7 @@ class User{
         ];
         $header = ['Content-Type: application/json'];
         $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
-        LogApi::debug("获取用户信息",$list);
+        Log::debug("获取用户信息",$list);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
         $info =json_decode($info,true);
         if(!is_array($info)  || $info['code']!=0){

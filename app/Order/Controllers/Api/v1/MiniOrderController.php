@@ -116,6 +116,7 @@ class MiniOrderController extends Controller
         $data['coupon'] = [
             $params['coupon_no']
         ];
+        print_r(config('miniappid.'.$data['appid']));
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
         //获取请求流水号
