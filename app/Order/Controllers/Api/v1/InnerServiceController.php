@@ -110,6 +110,24 @@ class InnerServiceController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        //调用小程序取消订单接口
+        //查询芝麻订单
+        $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($params['order_no']);
+        if( empty($result) ){
+            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$params['order_no']);
+            return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
+        }
+        //发送取消请求
+        $data = [
+            'out_order_no'=>$result['order_no'],//商户端订单号
+            'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
+            'app_id'=>$result['app_id'],//小程序appid
+        ];
+        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+        if($b === false){
+            \App\Lib\Common\LogApi::info('小程序订单取消失败（芝麻）',\App\Lib\Payment\mini\MiniApi::getError());
+            return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
+        }
 
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $validateParams['data']['user_id']);
         if ($success) {
