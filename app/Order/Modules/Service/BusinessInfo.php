@@ -7,53 +7,139 @@
  */
 
 namespace App\Order\Modules\Service;
-
-
 class BusinessInfo
 {
     private $data = [];
     public function __construct()
     {
     }
+    /**
+     * 业务类型
+     * @param string $type
+     */
 
-    public function setBusinessType( string $type )
+    public  function setBusinessType( string $type )
     {
-        return $this->data['business_type'] = $type;
-    }
-    public function setBusinessName( string $name )
-    {
-        return $this->data['business_name'] = $name;
-    }
-    public function setBusinessNo( string $no )
-    {
+          $this->data['business_type'] = $type;
     }
 
-    public function setOrderInfo( array $order_info )
+    /**
+     * 业务名称
+     * @param string $name
+     */
+    public  function setBusinessName( string $name )
+    {
+        $this->data['business_name'] = $name;
+    }
+    public  function setBusinessNo( string $no )
     {
     }
-    public function setGoodsInfo( array $goods_info )
+
+    /**
+     * 订单信息
+     * @param array $order_info
+     *
+     */
+    public  function setOrderInfo( array $order_info )
     {
+        $this->data['order_info']=$order_info;
     }
-    public function setStateFlow( array $state_flow )
+
+    /**
+     * 商品信息
+     * @param array $goods_info
+     *
+     */
+    public  function setGoodsInfo( array $goods_info )
     {
-        return $this->data['stateFlow'] = $state_flow;
+        $this->data['goods_info']=$goods_info;
     }
-    public function setStatus( string $status )
+
+    /**
+     * 状态流
+     * @param array $state_flow
+     *
+     */
+    public  function setStateFlow( array $state_flow )
     {
+        $this->data['stateFlow'] = $state_flow;
     }
-    public function setStatusText( string $status_text )
+
+    /**
+     * 业务状态
+     * @param string $status
+     */
+    public  function setStatus( string $status )
     {
+        $this->data['status'] = $status;
     }
-    public function setLogisticsForm( array $logistics_form )
+
+    /**
+     * 业务状态名称
+     * @param string $status_text
+     */
+    public  function setStatusText( string $status_text )
     {
+        $this->data['status_text'] = $status_text;
     }
-    public function setLogisticsInfo( array $logistics_info )
+
+    /**
+     * 收货物流信息
+     * @param array $logistics_form
+     */
+    public  function setLogisticsForm( array $logistics_form )
     {
+        $this->data['logistics_form']=$logistics_form;
     }
-    public function getStateFlow(){
+
+    /**
+     * 物流信息
+     * @param array $logistics_info
+     */
+    public  function setLogisticsInfo( array $logistics_info )
+    {
+        $this->data['logistics_info']=$logistics_info;
+    }
+
+    /**
+     * 退换货问题
+     * @param array $reason
+     */
+    public  function setReturnReason( array $reason )
+    {
+        $this->data['reason_list']=$reason;
+    }
+
+    /**
+     * 用户选择的退换货的原因信息
+     * @param array $reason
+     */
+    public  function setReturnReasonResult( array $reason )
+    {
+        $this->data['reason_info']=$reason;
+    }
+
+    /**检测结果
+     * @param string $checkInfo
+     */
+    public  function setCheckResult( array $checkInfo )
+    {
+        $this->data['check_info']=$checkInfo;
+    }
+
+    /**
+     * 换货物流信息及商品信息
+     * @param array $barterLogistics
+     */
+    public function setBarterLogistics(array $barterLogistics){
+        $this->data['barter_logistics']=$barterLogistics;
+    }
+    public  static function getStateFlow(){
         // 业务状态
         return [
-                'stateFlow'  =>  [
+                'stateFlow'  => [
+
+                 [
                         'status' => 'A',
                         'name' => '申请',
                     ],
@@ -68,24 +154,27 @@ class BusinessInfo
                     [
                         'status' => 'D',
                         'name' => '完成',
+                    ]
+                 ],
+                'cancelStateFlow'  => [
+                    [
+                        'status' => 'A',
+                        'name' => '申请',
                     ],
-                'cancelStateFlow'  =>  [
-                    'status' => 'A',
-                    'name' => '申请',
-                ],
-                [
-                    'status' => 'B',
-                    'name' => '审核',
-                ],
-                [
-                    'status' => 'C',
-                    'name' => '取消',
-                ],
+                    [
+                        'status' => 'B',
+                        'name' => '审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '取消',
+                    ],
+                ]
 
 
             ];
     }
-    public function toArray( )
+    public function toArray()
     {
         return $this->data;
     }

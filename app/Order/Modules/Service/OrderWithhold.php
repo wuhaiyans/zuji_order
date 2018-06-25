@@ -8,7 +8,6 @@ use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
-
 class OrderWithhold
 {
 
@@ -25,7 +24,6 @@ class OrderWithhold
         $remark         = "还机代扣剩余分期";
         //开启事务
         DB::beginTransaction();
-
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){

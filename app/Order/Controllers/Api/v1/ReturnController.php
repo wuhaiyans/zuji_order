@@ -322,8 +322,9 @@ class ReturnController extends Controller
     // 退货结果查看接口
     /*
      * [
-     *   ['refund_no'=>''] 必选
-     *   ['refund_no'=>''] 必选
+     *    "business_key"  =>"" 必选  业务类型
+     *   'refund_no'=>''可选
+     *   'order_no'=>''可选
      * ]
      *
      */
