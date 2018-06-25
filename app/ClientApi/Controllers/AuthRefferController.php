@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\ClientApi\Controllers;
 use App\Lib\Curl;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Log;
+
 class AuthRefferController extends Controller{
     /**
      * 校验token信息
