@@ -14,6 +14,7 @@ require_once __DIR__ . '/aop/request/ZhimaMerchantOrderCreditPayRequest.php';
 class CommonMiniApi extends BaseApi {
 
 	public function __construct($appid) {
+		echo $appid;
 		$this->appid = $appid;
 		parent::__construct($appid);
 	}
