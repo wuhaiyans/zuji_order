@@ -119,6 +119,8 @@ class OrderCreater
                 'credit_status'		=> $b && $need_to_sign_withholding=='N',
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                // 是否需要 信用认证
+                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 '_order_info' => $schemaData,
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
@@ -323,6 +325,8 @@ class OrderCreater
                 'credit_status'		=> $b && $need_to_sign_withholding=='N',
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                // 是否需要 信用认证
+                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
