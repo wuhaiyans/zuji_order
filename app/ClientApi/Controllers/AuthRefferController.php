@@ -30,15 +30,13 @@ class AuthRefferController extends Controller{
      */
     public function header(Request $request)
     {
-        Log::debug("验证token开始");
         //默认订单都需要验证，除了主动扣款
         $params = $request->all();
-        Log::debug("验证token接收的参数",$params);
         //是否需要验证
         if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))&& !empty($params['type']) && $params['type']>0) {
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
-            Log::debug("验证token调用第三方User::checkToken返回的结果".$checkInfo);
+            Log::debug("验证token调用第三方User::checkToken返回的结果".print_r($checkInfo,true));
             //验证通过
             if ($checkInfo){
                 $params['userinfo']=[
