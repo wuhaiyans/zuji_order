@@ -657,13 +657,6 @@ class PayController extends Controller
 
     }
 
-
-
-
-
-
-
-
 	/**
 	 * 分期扣款异步回调处理
 	 * @requwet Array
@@ -677,43 +670,70 @@ class PayController extends Controller
 	 * ]
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
-	public function withholdCreatePayNotify(Request $request){
+	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
 		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
 		}
 		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
 		}
 
-		LogApi::debug('代扣回调调试',$params);
+
 
 		try {
 
-			// 校验支付状态
-			$status_info = \App\Lib\Payment\CommonPaymentApi::query($params);
-			if( $status_info['status'] != 'success' ){// 支付成功
-				echo 'payment status not success';exit;
+			// 校验扣款交易状态
+			$status_info = \App\Lib\Payment\CommonWithholdingApi::deductQuery($params);
+			if( $status_info['status'] != 'success' ){//
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'status not success',
+				]);exit;
 			}
 
 			// 开启事务
 			DB::beginTransaction();
 
-			\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo '{"status":"ok"}';exit;
 
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
 
-			// 提交事务
-			DB::commit();
-			echo '{"status":"ok"}';exit;
 
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 			echo $exc->getMessage();
 		} catch (\Exception $exc) {
-			echo $exc->getMessage();
+			LogApi::error('代扣扣款异步处理失败', $exc );
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		}
 
 

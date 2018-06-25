@@ -131,12 +131,13 @@ class User{
         $data['auth_token'] =$token;
         $data['params'] = [
         ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $header = ['Content-Type: application/json'];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
         $info =json_decode($info,true);
         if(!is_array($info)  || $info['code']!=0){
             return false;
         }
-        return $info['data'];
+        return $info["data"];
     }
 }
 

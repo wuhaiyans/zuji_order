@@ -26,32 +26,183 @@ class OrderOperateInc
             'actState'=>array(
                 //待支付
                 Inc\OrderStatus::OrderWaitPaying => [
-                    'payment_btn'   => '付款',
-                    'cancel_btn'    => '取消'
+                    //付款
+                    'payment_btn'   => true,
+                    //取消
+                    'cancel_btn'    => true,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+
+
                 ],
                 //支付中
-                Inc\OrderStatus::OrderPaying => '',
+                Inc\OrderStatus::OrderPaying => [
+
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+                ],
                 //已支付
-                Inc\OrderStatus::OrderPayed => '',
+                Inc\OrderStatus::OrderPayed => [
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+                ],
                 //备货中
-                Inc\OrderStatus::OrderInStock => '',
+                Inc\OrderStatus::OrderInStock => [
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+                ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
-                    'confirm_btn'   => '确认收货',
-                    'logistics_btn' =>'查看物流',
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => true,
+                    //查看物流
+                    'logistics_btn' => true,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
-                    'service_btn'=>'申请售后',
-                    'prePay_btn'=>'提前还款',
-                    'expiry_process'   => '到期处理',
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> true,
+                    //提前还款
+                    'prePay_btn'=>  true,
+                    //到期处理
+                    'expiry_process'  =>  true,
+                    //提前买断
+                    'ahead_buyout' => false
                 ],
                 //已取消（未支付）
-                Inc\OrderStatus::OrderCancel => '',
+                Inc\OrderStatus::OrderCancel => [
+
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+
+                ],
                 //已关闭（已退款）
-                Inc\OrderStatus::OrderClosedRefunded => '',
+                Inc\OrderStatus::OrderClosedRefunded => [
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+
+                ],
                  //已完成
-                Inc\OrderStatus::OrderCompleted => '',
+                Inc\OrderStatus::OrderCompleted => [
+
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false
+                ],
             ),
             //后台用户出现的按钮
             'adminActBtn'=>array(
@@ -69,7 +220,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
@@ -90,7 +245,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                     //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
 
                 ],
                 //备货中
@@ -107,7 +266,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -123,7 +286,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
@@ -137,7 +304,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => true,
                     //保险操作
-                    'Insurance'     => true
+                    'Insurance'     => true,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -153,7 +324,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
@@ -169,7 +344,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
@@ -185,7 +364,11 @@ class OrderOperateInc
                     //买断
                     'buy_off'       => false,
                     //保险操作
-                    'Insurance'     => false
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
             )
 

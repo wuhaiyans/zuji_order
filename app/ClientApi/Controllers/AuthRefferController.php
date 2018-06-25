@@ -21,6 +21,7 @@ class AuthRefferController extends Controller{
      * "auth_token" => ""
      * "method"  =>""
      * "params"=>[]
+     * "type"   =>
      * ]
      * @return bool
      */
@@ -29,25 +30,25 @@ class AuthRefferController extends Controller{
         //默认订单都需要验证，除了主动扣款
         $params = $request->all();
         //是否需要验证
-        if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
+        if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))&& !empty($params['type']) && $params['type']>0) {
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
             //验证通过
             if ($checkInfo){
-                $params['params']['userinfo']=[
+                $params['userinfo']=[
                     'uid'=>$checkInfo[0]['id'],
-                    'mobile'=>$checkInfo[0]['mobile'],
-                    'type'=>1,
+                    'type'=>$params['type'],
                     'username'=>$checkInfo[0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
+
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
                         'msg' => "访问接口错误",
-                        'data'    =>[]
+                        'data'    =>$info['data']
                     ]);
                 }
                 return response()->json([

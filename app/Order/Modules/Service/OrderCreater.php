@@ -67,7 +67,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            //$orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
@@ -284,7 +284,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            //$orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);

@@ -17,6 +17,152 @@ class TestController extends Controller
     {
     }
 	
+    public function test()
+    {
+		
+		$info = [
+			'refund_no' => '',
+			'business_type' => '2',
+			'status' => '',
+			
+			'logistics_id' => '',
+			'logistics_name' => '',
+			'logistics_no' => '',
+		];
+		
+		
+		echo json_encode([
+			// 业务
+			'business_type' => '业务类型',
+			'business_name' => '换货',
+			
+			// 业务状态
+			'state_flow' => [
+				[
+					'status' => 'A',
+					'name' => '申请',
+				],
+				[
+					'status' => 'B',
+					'name' => '审核',
+				],
+				[
+					'status' => 'C',
+					'name' => '检测',
+				],
+				[
+					'status' => 'D',
+					'name' => '完成',
+				],
+			],
+			'status' => 'A',
+			'status_text' => '状态提示',
+			
+			// 订单信息
+			'order_info' => [
+				'order_no' => '1234567890',
+				'datetime' => '2017年03月14日 10:10',
+			],
+			// 商品信息
+			'goods_info' => [
+				'goods_name' => '商品名称',
+				'goods_img' => 'https://s1.huishoubao.com/zuji/images/content/152248181530767.png',
+				'goods_specs' => '64G|亮黑|全网通|12期',
+				'zuqi_type' => 'month',
+				'zujin' => '499.00',
+			],
+			
+			// 物流表单
+			'logistics_form' => [
+				'channel_list' => [
+					[
+						'value' => '1',
+						'name' => '顺丰物流',
+					],
+					[
+						'value' => '2',
+						'name' => '圆通物流',
+					],
+				],
+				'tips' => '提示：若填写错误，请及时联系客服进行修改',
+				'service_tel' => '4000809966',
+			],
+			// 物流信息
+			'logistics_info' => [
+				'no' => '1234567890',
+				'channel_name' => '顺丰物流',
+			],
+			
+			
+			// 换货表单
+			'exchange_form' => [
+				'reason_list' => [
+					[
+						'value' => '1',
+						'name' => '屏幕问题',
+					],
+					[
+						'value' => '2',
+						'name' => '电池问题',
+					],
+				]
+			],
+			// 换货信息
+			'exchange_info' => [
+				'reason_name' => '原因：屏幕问题',
+				'reason_text' => '说明“屏幕上有坏点',
+			],
+			
+			// 换货结果
+			'exchange_result' => '已经调换并发货，注意签收',
+			
+			// 退货表单
+			'return_form' => [
+				'reason_list' => [
+					[
+						'value' => '1',
+						'name' => '屏幕问题',
+					],
+					[
+						'value' => '2',
+						'name' => '电池问题',
+					],
+				]
+			],
+			// 退款信息
+			'return_info' => [
+				'reason_name' => '原因：屏幕问题',
+				'reason_text' => '说明“屏幕上有坏点',
+			],
+			
+			// 退款结果
+			'return_result' => '退款完成',
+			
+			
+			// 检测结果
+			'jiance_status' => 'qualified',// qualified：合格；unqualified：不合格
+			'jiance_text' => 'Xxxxxxx',
+			
+			// 支付信息
+			'payment_info' => [
+				 'status' => 'paid',// paid:已支付；not-paid：未支付
+				 'total_amount' => '1000.00',// 总支付金额
+				 'discount_amount' => '300.00',// 优惠金额
+				 'amount' => '700.00',// 应付金额
+				 'amount_list' => [
+					 [
+						 'name' => '2期租金',
+						 'amount' => '700',
+					 ],
+					 [
+						 'name' => '赔偿金',
+						 'amount' => '300',
+					 ],
+				 ],
+			],
+			
+		]);
+    }
 	/**
 	 * 
 	 */

@@ -8,16 +8,9 @@
 
 namespace App\Order\Modules\Repository;
 
-use App\Lib\Common\LogApi;
 use App\Order\Models\OrderRelet;
-use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReletStatus;
-use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Modules\Repository\Order\Order;
 use Illuminate\Support\Facades\DB;
-use App\Order\Models\OrderGoods;
-use App\Order\Models\OrderGoodsUnit;
 
 class ReletRepository
 {
@@ -80,17 +73,31 @@ class ReletRepository
         } else {
             $pagesize = 20;
         }
+        $offset     = ($page - 1) * $pagesize;
 
+        //DB::connection()->enableQueryLog();
         //查询
-        $orderList = DB::table('order_relet')
+        $result =  OrderRelet::query()
             ->where($whereArray)
             ->select('order_relet.*')
-            ->offset($pagesize)
-            ->limit($page)
+            ->offset($offset)
+            ->limit($pagesize)
             ->get();
 
-        //返回
-        return $orderList;
+        //dd(DB::getQueryLog());
+        if (!$result) return false;
+        $count = OrderRelet::query()
+            ->where($whereArray)
+            ->count();
+        $data = [
+            'page'=>$page,
+            'pagesize'=>$pagesize,
+            'total'=>$count,
+            'data'=>$result->toArray()
+        ];
+
+        return $data;
+
 
     }
 
