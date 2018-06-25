@@ -42,6 +42,9 @@ class CouponComponnet implements OrderCreater
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");
             }
+            if(empty($coupon)){
+                throw new Exception("该优惠券已使用");
+            }
             $couponInfo =[];
             foreach ($coupon as $key=>$value){
                 foreach ($value as $k=>$v){
