@@ -5,6 +5,7 @@
  *      date: 2018-06-08
  */
 namespace App\ClientApi\Controllers;
+use App\Lib\Common\LogApi;
 use App\Lib\User\User;
 use Illuminate\Http\Request;
 use App\ClientApi\Controllers;
@@ -41,6 +42,8 @@ class AuthRefferController extends Controller{
                     'username'=>$checkInfo[0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
+                $list=['url'=>config('tripartite.API_INNER_URL'),'data'=>$params];
+                LogApi::debug("验证token",$list);
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
