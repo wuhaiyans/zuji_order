@@ -25,13 +25,12 @@ class AuthRefferController extends Controller{
      * ]
      * @return bool
      */
-    public function header()
+    public function header(Request $request)
     {
-        echo sdasda;exit;
         //默认订单都需要验证，除了主动扣款
         $params = $request->all();
         //是否需要验证
-        if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
+        if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))&& !empty($params['type']) && $params['type']>0) {
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
             //验证通过
@@ -41,7 +40,6 @@ class AuthRefferController extends Controller{
                     'type'=>$params['type'],
                     'username'=>$checkInfo[0]['mobile']
                 ];
-                var_dump($params);die;
                 $header = ['Content-Type: application/json'];
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
 
