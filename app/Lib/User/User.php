@@ -127,7 +127,7 @@ class User{
      * @return bool|mixed
      */
     public static function checkToken($token){
-        Log::debug("调用checkToken接收的值",$token);
+        Log::debug("调用checkToken接收的值".$token);
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.login.user.info.get';
         $data['auth_token'] =$token;
@@ -137,7 +137,7 @@ class User{
         $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
         Log::debug("checkToken获取用户信息",$list);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
-        Log::debug("checkToken返回结果",$info);
+        Log::debug("checkToken返回结果".$info);
         $info =json_decode($info,true);
         if(!is_array($info)  || $info['code']!=0){
             return false;
