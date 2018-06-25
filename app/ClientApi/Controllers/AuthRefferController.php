@@ -40,8 +40,10 @@ class AuthRefferController extends Controller{
                     'type'=>$params['type'],
                     'username'=>$checkInfo[0]['mobile']
                 ];
+                var_dump($params);die;
                 $header = ['Content-Type: application/json'];
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
+
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
                     return response()->json([
