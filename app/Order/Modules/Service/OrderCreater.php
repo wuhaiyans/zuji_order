@@ -157,6 +157,7 @@ class OrderCreater
      *];
      */
     public function miniCreate($data){
+        print_r($data);die;
         try{
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
