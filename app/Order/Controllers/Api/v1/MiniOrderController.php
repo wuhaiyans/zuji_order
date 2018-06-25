@@ -116,7 +116,10 @@ class MiniOrderController extends Controller
         $data['coupon'] = [
             $params['coupon_no']
         ];
-        print_r(config('miniappid.'.$data['appid']));
+        //判断APPid是否有映射
+        if(empty(config('miniappid.'.$data['appid']))){
+            return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');
+        }
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
         //获取请求流水号

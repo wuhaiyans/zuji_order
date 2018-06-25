@@ -123,7 +123,6 @@ class OrderCreater
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
             ];
-            var_dump($schemaData);
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
@@ -157,6 +156,7 @@ class OrderCreater
      *];
      */
     public function miniCreate($data){
+        print_r($data);die;
         try{
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
@@ -340,6 +340,7 @@ class OrderCreater
      */
     public function miniConfirmation($data)
     {
+        print_r($data);die;
         try{
             $orderType =OrderStatus::orderMiniService;
             $data['user_id'] = intval($data['user_id']);
