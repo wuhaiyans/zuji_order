@@ -61,6 +61,7 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
+        print_r($schema);die;
         foreach ($schema['sku'] as $k=>$sku){
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
             $skuInfo['discount_info'] = [
