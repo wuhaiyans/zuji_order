@@ -42,7 +42,6 @@ class AuthRefferController extends Controller{
                 ];
                 $header = ['Content-Type: application/json'];
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
-
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
                     return response()->json([
@@ -60,7 +59,7 @@ class AuthRefferController extends Controller{
                 return response()->json([
                     'code'  =>ApiStatus::CODE_20003,
                     'msg' => "验证错误",
-                    'data'    =>[]
+                    'data'    =>$checkInfo
                 ]);
             }
         }
