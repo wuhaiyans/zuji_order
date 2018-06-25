@@ -340,7 +340,6 @@ class OrderCreater
      */
     public function miniConfirmation($data)
     {
-        print_r($data);die;
         try{
             $orderType =OrderStatus::orderMiniService;
             $data['user_id'] = intval($data['user_id']);
