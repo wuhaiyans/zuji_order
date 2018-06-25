@@ -140,7 +140,7 @@ class MiniOrderController extends Controller
         //用户处理
         $_user = \App\Lib\User\User::getUserId($miniData);
         $data['user_id'] = $_user['user_id'];
-        $miniData['user_id'] = $_user['user_id'];
+        $miniData['member_id'] = $_user['user_id'];
         //风控系统处理
         $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
         if($b != true){
