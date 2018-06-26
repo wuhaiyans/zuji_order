@@ -213,5 +213,8 @@ class DeliveryDetail {
         }
         return new self( $goods_delivery_info );
     }
+
+
+
 	
 }
