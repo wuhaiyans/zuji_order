@@ -452,7 +452,7 @@ class Pay extends \App\Lib\Configurable
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
 			'payment_channel' => $params['payment_channel'],
 			'payment_amount' => $params['payment_amount'],
-			'update_time'		=> $update_time,
+			'update_time'		=> time(),
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
@@ -464,13 +464,29 @@ class Pay extends \App\Lib\Configurable
 		$b = $paymentModel->insert([
 			'payment_no' => $this->paymentNo,
 			'out_payment_no' => $params['out_payment_no'],
-			'create_time' => time(),
+			'create_time' => $params['payment_time'],
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
 			throw new \Exception( '支付失败' );
 		}
-		
+
+		// 创建收支明细
+		$incomeData = [
+			'name'          => "业务类型" . $this->businessType . "-支付",
+			'business_type' => $this->businessType,
+			'business_no'   => $this->businessNo,
+			'channel'       => $params['payment_channel'],
+			'amount'        => $params['payment_amount'],
+			'create_time'   => $params['payment_time'],
+			'out_trade_no'  => $params['out_payment_no'],
+		];
+		$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
+		if(!$incomeB){
+			LogApi::error('[支付阶段]创建收支明细失败');
+			throw new \Exception( '支付失败' );
+		}
+
 		$this->status = $status;
 		$this->paymentStatus = PaymentStatus::PAYMENT_SUCCESS;
 		
@@ -600,7 +616,7 @@ class Pay extends \App\Lib\Configurable
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
 			'fundauth_channel' => $params['fundauth_channel'],
-			'update_time'		=> $update_time,
+			'update_time'		=> $params['payment_time'],
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );
