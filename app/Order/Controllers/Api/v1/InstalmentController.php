@@ -5,7 +5,8 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderGoodsInstalment;
-
+use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Service\OrderGoods;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,12 +22,6 @@ class InstalmentController extends Controller
         $sku        = $request['params']['sku'];
         $coupon     = !empty($request['params']['coupon']) ? $request['params']['coupon'] : "";
         $user       = $request['params']['user'];
-
-
-
-
-
-
 
         //获取goods_no
         $order = filter_array($order, [
@@ -109,4 +104,64 @@ class InstalmentController extends Controller
 
     }
 
+    /*
+     * 扣款明细接口
+     * @param array $request
+	 * [
+	 *		'goods_no'		=> '', //【必选】string 商品编号
+	 * ]
+	 * @return array instalmentList
+     */
+    public function info(Request $request){
+        $params    = $request->all();
+        // 参数过滤
+        $rules = [
+            'goods_no'         => 'required',  //商品编号
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $goodsNo         = $params['params']['goods_no'];
+
+        // 订单详情
+        $orderGoodsService = new OrderGoods();
+        $orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+
+        // 分期列表
+        $where = [
+            'goods_no' => $goodsNo,
+        ];
+        $instalmentList = \App\Order\Modules\Service\OrderGoodsInstalment::queryList($where);
+
+        $instalmentList = $instalmentList[$goodsNo];
+
+        foreach($instalmentList as &$item){
+
+            // 是否扣款
+            $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
+
+            // 是否允许扣款
+            $item['allow_pay']  = 0;
+            if($item['term'] <= date('Ym') && ($item['status']==OrderInstalmentStatus::UNPAID || $item['status']==OrderInstalmentStatus::FAIL)){
+                $item['allow_pay']  = 1;
+            }
+
+            // 扣款时间
+            $item['payment_time'] = date("Y-m-d H:i:s",$item['payment_time']);
+
+            // 是否有意外险 默认没有意外险 0
+            $item['yiwaixian']  = 0;
+
+            if($item['times'] == 1){
+                $item['yiwaixian']  = 1;
+                $item['yiwaixian_amount']   = $orderGoodsInfo['insurance'];
+                $item['fenqi_amount']       = $item['amount'] - $orderGoodsInfo['insurance'];
+            }
+        }
+
+        return apiResponse($instalmentList,ApiStatus::CODE_0,"success");
+
+    }
 }

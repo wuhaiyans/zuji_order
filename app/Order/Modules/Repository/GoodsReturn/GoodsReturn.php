@@ -236,7 +236,7 @@ class GoodsReturn {
      * @return bool
      */
     public function barterDelivery(array $data ){
-        $this->model->barter_logistics_name=$data['logistics_name'];
+        $this->model->barter_logistics_id=$data['logistics_id'];
         $this->model->barter_logistics_no=$data['logistics_no'];
         return $this->model->save();
     }
