@@ -751,8 +751,8 @@ class OrderOperate
 
                $orderOperateData  = self::getOrderOprate($values['order_no']);
                
-                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'];
-                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'];
+                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
+                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
 
             }
 
