@@ -55,6 +55,9 @@ class OrderOperate
      *   ]
      * ]
      *@param $operatorInfo array 操作人员信息
+     *
+     *
+     *
      * [
      *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
      *      'user_id'=>1,//用户ID
@@ -121,7 +124,7 @@ class OrderOperate
 
             }else {
                 //判断订单冻结类型 冻结就走换货发货
-                $b = OrderReturnCreater::createchange($orderDetail['order_no'], $goodsInfo);
+                $b = OrderReturnCreater::createchange($orderDetail, $goodsInfo);
                 if (!$b) {
                     DB::rollBack();
                     return false;

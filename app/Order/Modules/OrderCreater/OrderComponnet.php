@@ -210,15 +210,19 @@ class OrderComponnet implements OrderCreater
         $skuSchema =$this->skuComponnet->getDataSchema();
         $this->zuqiType =$this->skuComponnet->getZuqiType();
         $zuqiTypeName =$this->skuComponnet->getZuqiTypeName();
+        $orderYajin =$this->skuComponnet->getOrderYajin();
+
         return array_merge(['order'=>[
             'order_no'=>$this->orderNo,
             'zuqi_type'=>$this->zuqiType,
             'zuqi_type_name'=>$zuqiTypeName,
             'pay_type'=>$this->payType,
             'order_type'=>$this->orderType,
+            'order_yajin'=>$orderYajin,
         ]],$userSchema,$skuSchema);
 
     }
+
 
     /**
      * 创建数据
