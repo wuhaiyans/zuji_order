@@ -42,6 +42,9 @@ class SkuComponnet implements OrderCreater
     //规格
     private $specs;
 
+    //总押金
+    private $orderYajin=0;
+
 
 	/**
 	 * 
@@ -93,6 +96,10 @@ class SkuComponnet implements OrderCreater
         $this->goodsArr =$goodsArr;
         $this->payType=$payType;
 
+    }
+
+    public function getOrderYajin(){
+        return $this->orderYajin;
     }
     /**
      * 获取订单创建器
@@ -205,6 +212,8 @@ class SkuComponnet implements OrderCreater
             $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['first_coupon_amount']:0.00;
             $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['order_coupon_amount']:0.00;
             $specs =json_decode($spuInfo['specs'],true);
+            $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
+            $this->orderYajin =$deposit_yajin;
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
@@ -242,7 +251,7 @@ class SkuComponnet implements OrderCreater
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?$this->deposit[$skuInfo['sku_id']]['mianyajin']:0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
-                    'deposit_yajin' => !empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:0.00,
+                    'deposit_yajin' => $deposit_yajin,
                     'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],

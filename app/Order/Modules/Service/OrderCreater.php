@@ -46,6 +46,7 @@ class OrderCreater
      *'sku'=>[0=>['sku_id'=>1,'sku_num'=>2]], //商品数组
      *'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"], //优惠券组信息
      *'user_id'=>18,  //增加用户ID
+     * 'pay_channel_id'=>,//支付渠道
      *];
      */
 
@@ -73,7 +74,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -88,13 +89,13 @@ class OrderCreater
            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
            $b = $orderCreater->filter();
-//            if(!$b){
-//                DB::rollBack();
-//                //把无法下单的原因放入到用户表中
-//                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-//                set_msg($orderCreater->getOrderCreater()->getError());
-//                return false;
-//            }
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
             $schemaData = $orderCreater->getDataSchema();
 
             $b = $orderCreater->create();
@@ -105,25 +106,21 @@ class OrderCreater
                 return false;
             }
             DB::commit();
-            // 是否需要签署代扣协议
-            $need_to_sign_withholding = 'N';
-            if( $data['pay_type']== PayInc::WithhodingPay){
-                if( !$schemaData['withholding']['withholding_no'] ){
-                    $need_to_sign_withholding = 'Y';
-                }
-            }
+
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b && $need_to_sign_withholding=='N',
+                'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 '_order_info' => $schemaData,
                 'order_no'=>$orderNo,
                 'pay_type'=>$data['pay_type'],
+
             ];
            // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
@@ -291,7 +288,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
@@ -309,23 +306,25 @@ class OrderCreater
 
             }
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
-            // 是否需要签署代扣协议
-            $need_to_sign_withholding = 'N';
-            if( $data['pay_type']== PayInc::WithhodingPay){
-                if( !$schemaData['withholding']['withholding_no'] ){
-                    $need_to_sign_withholding = 'Y';
-                }
+
+            $need_to_fundauth ="N";
+            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
+                $need_to_fundauth ="Y";
             }
+
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b && $need_to_sign_withholding=='N',
+                'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $need_to_sign_withholding,
+                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                //是否需要预授权
+                'need_to_fundauth'	 => $need_to_fundauth,
                 '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
