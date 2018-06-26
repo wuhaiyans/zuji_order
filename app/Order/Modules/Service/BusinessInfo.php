@@ -134,6 +134,14 @@ class BusinessInfo
     public function setBarterLogistics(array $barterLogistics){
         $this->data['barter_logistics']=$barterLogistics;
     }
+
+    /**
+     * 备注信息及客服电话
+     * @param string $remark
+     */
+    public function setRemark(string $remark){
+        $this->data['remark']=$remark;
+    }
     public  static function getStateFlow(){
         // 业务状态
         return [

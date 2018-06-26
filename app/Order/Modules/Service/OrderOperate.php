@@ -13,6 +13,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
+use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderExtend;
 use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
@@ -54,6 +55,9 @@ class OrderOperate
      *   ]
      * ]
      *@param $operatorInfo array 操作人员信息
+     *
+     *
+     *
      * [
      *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
      *      'user_id'=>1,//用户ID
@@ -120,7 +124,7 @@ class OrderOperate
 
             }else {
                 //判断订单冻结类型 冻结就走换货发货
-                $b = OrderReturnCreater::createchange($orderDetail['order_no'], $goodsInfo);
+                $b = OrderReturnCreater::createchange($orderDetail, $goodsInfo);
                 if (!$b) {
                     DB::rollBack();
                     return false;
@@ -670,7 +674,8 @@ class OrderOperate
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
-        $goodsExtendData =  OrderRepository::getGoodsDeliverInfo($orderNo);
+
+        $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
 //        p($goodsExtendData);
         $order['goods_extend_info'] = $goodsExtendData;
 
@@ -679,6 +684,21 @@ class OrderOperate
 
     }
 
+
+    /**
+     * 获取物流信息
+     * @param string $order_no
+     * @param string $goods_no
+     * @return DeliveryDetail|bool
+     */
+    public static function getOrderDeliveryInfo(string $order_no){
+        $builder=OrderDelivery::where([['order_no','=',$order_no]])->limit(1);
+        $order_delivery_info = $builder->first();
+        if( !$order_delivery_info ){
+            return false;
+        }
+        return $order_delivery_info->toArray();
+    }
 
     /**
      * 获取客户端订单列表
@@ -796,21 +816,15 @@ class OrderOperate
         $orderData  =   $orderData['data'];
         if (empty($orderData['order_info'])) return [];
         $actArray   =   Inc\OrderOperateInc::orderInc($orderData['order_info']['order_status'], 'actState');
-        //长期租用中七天之内出现售后
-        if ($orderData['order_info']['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_MONTH &&
-            $orderData['order_info']['order_status'] == Inc\OrderStatus::OrderInService)
-        {
 
-            //收货后超过7天不出现售后按钮
-            if (time()-config('web.month_service_days')>$orderData['order_info']['receive_time'] && $orderData['order_info']['receive_time']>0) {
-                unset($actArray['service_btn']);
-                unset($actArray['expiry_process']);
-            }
+        //处于租用中订单上无操作按钮
+        if ($orderData['order_info']['order_status'] == Inc\OrderStatus::OrderInService) {
+            $actArray['service_btn'] = false;
+            $actArray['expiry_process'] = false;
+            $actArray['prePay_btn'] = false;
 
         }
-
-            return $actArray;
-
+        return $actArray;
 
     }
 
