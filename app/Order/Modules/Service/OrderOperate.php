@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\Pay\WithholdQuery;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
@@ -552,8 +553,29 @@ class OrderOperate
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
-            //优惠券归还
 
+            //支付方式为代扣 需要解除订单代扣
+            if($orderInfoData['pay_type'] == Inc\PayInc::WithhodingPay){
+                //查询是否签约代扣 如果签约 解除代扣
+                try{
+                    $withhold = WithholdQuery::getByBusinessNo(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo);
+                    $params =[
+                        'business_type' =>Inc\OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
+                        'business_no'	=>$orderNo,	// 【必须】string	业务编码
+                    ];
+                    $b =$withhold->unbind($params);
+                    if(!$b){
+                        DB::rollBack();
+                        return ApiStatus::CODE_31008;
+                    }
+
+                }catch (\Exception $e){
+                    //未签约 不解除
+                }
+
+            }
+
+            //优惠券归还
             //通过订单号获取优惠券信息
             $orderCouponData = OrderRepository::getCouponListByOrderId($orderNo);
 
