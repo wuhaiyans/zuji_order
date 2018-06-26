@@ -112,24 +112,29 @@ class OrderCreater
 			//-+----------------------------------------------------------------
 			// | 创建支付单
 			//-+----------------------------------------------------------------
-			$payResult = self::__createPay([
-				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
-				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
-				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
-				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-				'businessNo' => $order_no,//业务编号（订单编号）【必须】<br/>
-				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-				'paymentAmount' => 1,//Price 支付金额（总租金），单位：元【必须】<br/>
-				'paymentFenqi' => 6,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-			]);
-			//支付单创建错误，返回错误
-			if( !$payResult ){
-				return false;
-			}
-			//如果订单无需支付【不用创建支付单】则修改订单状态为无需支付
-			if( $payResult['isPay'] == false ){
-				//修改订单状态为无需支付
-			}
+//			$payResult = self::__createPay([
+//				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
+//				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
+//				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
+//				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+//				'businessNo' => $order_no,//业务编号（订单编号）【必须】<br/>
+//				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+//				'paymentAmount' => 1,//Price 支付金额（总租金），单位：元【必须】<br/>
+//				'paymentFenqi' => 6,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+//			]);
+//			//支付单创建错误，返回错误
+//			if( !$payResult ){
+//				return false;
+//			}
+//			//如果订单无需支付【不用创建支付单】则修改订单状态为无需支付
+//			if( $payResult['isPay'] == false ){
+//				//修改订单状态为无需支付
+//			}
+			$payResult = [
+				'withholdStatus' => false,
+				'paymentStatus' => false,
+				'fundauthStatus' => true,
+			];
 			
             DB::commit();
 
