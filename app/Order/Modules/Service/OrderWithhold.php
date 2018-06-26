@@ -184,146 +184,162 @@ class OrderWithhold
      * ]
      * @return String FAIL：失败  SUCCESS：成功
      */
-    public function repaymentNotify($params){
+    public function repaymentNotify(){
+
+        $input = file_get_contents("php://input");
+        LogApi::info('支付异步通知', $input);
+
+        $params = json_decode($input,true);
+        if( is_null($params) ){
+            echo 'notice data is null ';exit;
+        }
+        if( !is_array($params) ){
+            echo 'notice data not array ';exit;
+        }
+
         $params = filter_array($params, [
             'payment_no'    => 'required',
             'out_no'        => 'required',
             'status'        => 'required',
             'reason'        => 'required',
         ]);
-
         if(count($params) < 4){
             echo "FAIL";exit;
         }
 
+        // 支付成功
+        if($params['status'] == "success"){
 
-        $status = [
-            'init'          => \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID,
-            'success'       => \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS,
-            'failed'        => \App\Order\Modules\Inc\OrderInstalmentStatus::FAIL,
-            'finished'      => \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL,
-            'closed'        => \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL,
-            'processing'    => \App\Order\Modules\Inc\OrderInstalmentStatus::PAYING,
-        ];
-
-        //开启事务
-        DB::beginTransaction();
-        // 查询分期信息
-        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$params['out_no']]);
-        if( !is_array($instalmentInfo)){
-            // 提交事务
-            DB::rollBack();
-            echo "FAIL";exit;
-        }
-        $instalmentId = $instalmentInfo['id'];
-
-        if(!isset($status[$params['status']])){
-            DB::rollBack();
-            echo "FAIL";exit;
-        }
-
-
-        $_data = [
-            'status'            => $status[$params['status']],
-            'update_time'       => time(),
-            'pay_type'          => 1,       //还款类型：0 代扣   1 主动还款
-            'remark'            => '提前还款',
-            'payment_amount'    => $instalmentInfo['amount'], //实际支付金额
-        ];
-
-
-        // 查询支付单
-        $payWhere = [
-            'businessType'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-            'businessNo'    => $params['out_no'],
-        ];
-        $PayData = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
-        if(empty($PayData)){
-            DB::rollBack();
-            echo "FAIL";exit;
-        }
-
-
-        // 优惠券信息
-        $counponWhere = [
-            'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-            'business_no'   => $params['out_no'],
-        ];
-        $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
-        if(!empty($counponInfo)){
-            $_data['payment_amount']    = $PayData['payment_amount']; // 实际支付金额 元
-            $_data['discount_amount']   = $instalmentInfo['amount'] - $PayData['payment_amount'];
-        }
-
-        // 修改分期状态
-        $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['id'=>$params['out_no']],$_data);
-        if(!$result){
-            DB::rollBack();
-            echo "FAIL";exit;
-        }
-
-        // 还原租金优惠券
-        if($params['status'] == "failed"){
-
-            if(!empty($counponInfo)){
-                // 修改优惠券状态
-                $couponStatus = \App\Lib\Coupon\Coupon::setCoupon(['user_id'=>$instalmentInfo['user_id'],'coupon_id'=>$counponInfo['coupon_id']]);
-                if($couponStatus != ApiStatus::CODE_0){
-                    DB::rollBack();
-                    echo "FAIL";exit;
-                }
+            //开启事务
+            DB::beginTransaction();
+            // 查询分期信息
+            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$params['out_no']]);
+            if( !is_array($instalmentInfo)){
+                // 提交事务
+                DB::rollBack();
+                echo "FAIL";exit;
             }
+            $instalmentId = $instalmentInfo['id'];
+
+
+            // 查询支付单数据
+
+            $payWhere = [
+                'businessType'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'businessNo'    => $params['out_no'],
+            ];
+            $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
+            if(empty($PayData)){
+                DB::rollBack();
+                echo "FAIL";exit;
+            }
+
+            $_data = [
+                'status'            => OrderInstalmentStatus::SUCCESS,
+                'update_time'       => time(),
+                'pay_type'          => 1,       //还款类型：0 代扣   1 主动还款
+                'remark'            => '提前还款',
+                'payment_amount'    => $payInfo['payment_amount'], //实际支付金额
+            ];
+
+
+
+            // 优惠券信息
+            $discount_amount    = 0;
+            $discount_type      = "";
+            $discount_value     = "";
+            $discount_name      = "";
+            $counponWhere = [
+                'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'   => $params['out_no'],
+            ];
+            $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
+            if(!empty($counponInfo)){
+                // 修改优惠券使用状态
+                $couponStatus = \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
+                if($couponStatus != ApiStatus::CODE_0){
+                    return apiResponse([],ApiStatus::CODE_50010);
+                }
+
+                $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
+                $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
+
+                $discount_amount            = $_data['discount_amount'];
+                $discount_type              = $counponInfo['coupon_type'];
+                $discount_value             = $counponInfo['coupon_no'];
+                $discount_name              = "租金抵用券";
+
+            }
+
+
+            // 修改分期状态
+            $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['trade_no'=>$params['out_no']],$_data);
+            if(!$result){
+                DB::rollBack();
+                echo "FAIL";exit;
+            }
+
+
+            // 创建收支明细表
+            $IncomeData = [
+                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+                'order_no'      => $instalmentInfo['order_no'],
+                'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'   => $params['out_no'],
+                'appid'         => 1,
+                'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                'out_trade_no'  => $params["payment_no"],
+                'amount'        => $payInfo['payment_amount'],
+                'create_time'   => time(),
+            ];
+            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+            if( !$IncomeId ){
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error('创建收支明细失败');
+                return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
+            }
+
+
+            // 创建扣款记录数据
+            $recordData = [
+                'instalment_id'             => $instalmentId,
+                'type'                      => 2,  //类型；1：代扣；2：主动还款',
+                'payment_amount'            => $payInfo['payment_amount'],
+                'payment_discount_amount'   => $discount_amount,
+                'discount_type'             => $discount_type,
+                'discount_value'            => $discount_value,
+                'discount_name'             => $discount_name,
+                'status'                    => OrderInstalmentStatus::SUCCESS,
+                'create_time'               => time(),
+                'update_time'               => time(),
+            ];
+            $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
+            if(!$record){
+                DB::rollBack();
+                echo "FAIL";exit;
+            }
+            // 提交事务
+            DB::commit();
+
+            // 发送短信
+
+            //发送短信通知 支付宝内部通知
+            $notice = new \App\Order\Modules\Service\OrderNotice(
+                OrderStatus::BUSINESS_FENQI,
+                $instalmentId,
+                "Repayment");
+            $notice->notify();
+
+            // 发送支付宝消息通知
+            $notice->alipay_notify();
+
+
+            // 提交蚁盾用户还款数据
+
+
+            echo "SUCCESS";
+
         }
-
-        // 创建收支明细表
-        $IncomeData = [
-            'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
-            'order_no'      => $instalmentInfo['order_no'],
-            'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-            'business_no'   => $instalmentId,
-            'appid'         => 1,
-            'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-            'out_trade_no'  => $params["payment_no"],
-            'amount'        => $PayData['payment_amount'],
-            'create_time'   => time(),
-        ];
-        $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
-        if( !$IncomeId ){
-            DB::rollBack();
-            \App\Lib\Common\LogApi::error('创建收支明细失败');
-            return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
-        }
-
-        // 修改扣款记录数据
-        $recordData = [
-            'status'        => $status[$params['status']],
-            'update_time'   => time(),
-        ];
-        $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::save(['instalment_id'=>$params['out_no']],$recordData);
-        if(!$record){
-            DB::rollBack();
-            echo "FAIL";exit;
-        }
-        // 提交事务
-        DB::commit();
-
-        // 发送短信
-
-        //发送短信通知 支付宝内部通知
-        $notice = new \App\Order\Modules\Service\OrderNotice(
-            OrderStatus::BUSINESS_FENQI,
-            $instalmentId,
-            "Repayment");
-        $notice->notify();
-
-        // 发送支付宝消息通知
-        $notice->alipay_notify();
-
-
-        // 提交蚁盾用户还款数据
-
-
-        echo "SUCCESS";
     }
 
 }

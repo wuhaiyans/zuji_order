@@ -149,6 +149,11 @@ class InstalmentComponnet implements OrderCreater
             //循环插入到分期表
             for($i=0;$i<$sku['sku_num'];$i++) {
                 foreach ($sku['instalment'] as $k => $v) {
+                    $amount =$v['amount'];
+                    if($v['term'] ==1){
+                        $amount =$v['amount']+$sku['insurance'];
+                    }
+
                     $instalmentData = [
                         'order_no' => $schema['order']['order_no'],
                         'goods_no' => $sku['goods_no'],
@@ -158,7 +163,7 @@ class InstalmentComponnet implements OrderCreater
                         'times' => $v['times'],
                         'original_amount' => $v['original_amount'],
                         'discount_amount' => $v['discount_amount'],
-                        'amount' => $v['amount'],
+                        'amount' => $amount,
                         'status' => 1,
                     ];
                     $res = OrderGoodsInstalment::create($instalmentData);

@@ -615,8 +615,11 @@ class OrderController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
-
-        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $params['user_id']=18);
+        $uid='';
+        if(isset($params['userinfo'])){
+            $uid=$params['userinfo']['uid'];
+        }
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $uid);
 
         return apiResponse([],$code);
 
