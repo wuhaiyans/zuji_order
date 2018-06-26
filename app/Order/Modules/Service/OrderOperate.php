@@ -613,7 +613,7 @@ class OrderOperate
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
-        $goodsFirstAmount = 0.00;
+        $goodsFirstAmount = array();
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
