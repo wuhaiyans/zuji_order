@@ -107,6 +107,30 @@ class OrderCreater
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
+			
+			
+			//-+----------------------------------------------------------------
+			// | 创建支付单
+			//-+----------------------------------------------------------------
+			$payResult = self::__createPay([
+				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
+				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
+				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
+				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+				'businessNo' => $order_no,//业务编号（订单编号）【必须】<br/>
+				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+				'paymentAmount' => 1,//Price 支付金额（总租金），单位：元【必须】<br/>
+				'paymentFenqi' => 6,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+			]);
+			//支付单创建错误，返回错误
+			if( !$payResult ){
+				return false;
+			}
+			//如果订单无需支付【不用创建支付单】则修改订单状态为无需支付
+			if( $payResult['isPay'] == false ){
+				//修改订单状态为无需支付
+			}
+			
             DB::commit();
 
             $need_to_fundauth ="N";
@@ -147,7 +171,8 @@ class OrderCreater
             'time' => time(),
         ],time()+7200,"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-            return $result;
+			
+            return array_merge($result,['pay_info'=>$payResult]);
 
             } catch (\Exception $exc) {
                 DB::rollBack();
@@ -502,12 +527,12 @@ class OrderCreater
 	 *		'fundauthStatus' => '',是否需要预授权（true：需要预授权；false：无需预授权）//<br/>
 	 * ]
 	 */
-	private function __createPay( $param ) {
+	private static function __createPay( $param ) {
 		//-+--------------------------------------------------------------------
 		// | 校验参数
 		//-+--------------------------------------------------------------------
 		
-		if( !$this->__praseParam($param) ){
+		if( !self::__praseParam($param) ){
 			return false;
 		}
 		
@@ -517,14 +542,14 @@ class OrderCreater
 		//代扣方式支付租金
 		if( $param['payType'] == PayInc::WithhodingPay ){
 			//然后判断预授权然后创建相关支付单
-			$result = $this->__withholdFundAuth($param);
+			$result = self::__withholdFundAuth($param);
 			//分期支付的状态为false
 			$data['payment_status'] = false;
 		}
 		//分期方式支付租金
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
-			$result = $this->__paymentFundAuth($param);
+			$result = self::__paymentFundAuth($param);
 			//代扣支付的状态为false
 			$data['withhold_status'] = false;
 			//代扣支付的状态为false
@@ -545,12 +570,22 @@ class OrderCreater
 	 * 判断代扣->预授权
 	 * @param type $param
 	 */
-	private function __withholdFundAuth($param) {
+	private static function __withholdFundAuth($param) {
 		//记录最终结果
 		$result = [];
 		//判断是否已经签约了代扣 
 		try{
-			WithholdQuery::getByUserChannel($param['userId'],$param['payChannelId']);
+			$withhold = WithholdQuery::getByUserChannel($param['userId'],$param['payChannelId']);
+			//已经签约代扣的进行代扣和订单的绑定
+			$params =[
+                'business_type' =>$param['businessType'],  // 【必须】int    业务类型
+                'business_no'  =>$param['businessNo'],  // 【必须】string  业务编码
+            ];
+            $b =$withhold->bind($params);
+			//签约代扣和订单绑定失败
+            if(!$b){
+                return false;
+            }
 			$result['withholdStatus'] = false;
 		}catch(\Exception $e){
 			$result['withholdStatus'] = true;
@@ -592,7 +627,7 @@ class OrderCreater
 	 * 判断支付->预授权
 	 * @param type $param
 	 */
-	private function __paymentFundAuth($param) {
+	private static function __paymentFundAuth($param) {
 		//记录最终结果
 		$result = [];
 		//判断预授权
@@ -622,7 +657,7 @@ class OrderCreater
 	 * 校验订单创建过程中 支付单创建需要的参数
 	 * @param Array $param
 	 */
-	private function __praseParam( &$param ) {
+	private static function __praseParam( &$param ) {
 		$paramArr = filter_array($param, [
 	 		'payType' => '',//支付方式 【必须】<br/>
 	 		'payChannelId' => '',//支付渠道 【必须】<br/>
