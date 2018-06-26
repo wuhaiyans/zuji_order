@@ -824,6 +824,8 @@ class OrderOperate
         if (empty($orderNo)) return [];
         $actArray = [];
 
+        $list = array();
+
         $orderData   =  self::getOrderInfo($orderNo);
 
         $orderData  =   $orderData['data'];
