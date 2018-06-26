@@ -113,6 +113,8 @@ return [
     'api.Instalment.create'             => 'InstalmentController@create',
     // 扣款明细接口
     'api.Instalment.info'               => 'InstalmentController@info',
+    // 分期提前还款详情接口
+    'api.Instalment.queryInfo'          => 'InstalmentController@queryInfo',
 
     // 代扣相关
 
