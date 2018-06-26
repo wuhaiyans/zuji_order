@@ -659,8 +659,8 @@ class OrderCreater
 	 */
 	private static function __praseParam( &$param ) {
 		$paramArr = filter_array($param, [
-	 		'payType' => '',//支付方式 【必须】<br/>
-	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+	 		'payType' => 'required',//支付方式 【必须】<br/>
+	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
 			'businessType' => 'required',//业务类型<br/>
 			'businessNo' => 'required',//业务编号<br/>
