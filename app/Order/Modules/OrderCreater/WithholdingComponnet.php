@@ -9,6 +9,8 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Models\Order;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderPayWithholdRepository;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
@@ -28,7 +30,7 @@ class WithholdingComponnet implements OrderCreater
      */
     private $withholdingInfo =[];
     private $withhodldingNo="";
-    private $needWithholding ="N";
+    private $needWithholding ="";
 
     public function __construct(OrderCreater $componnet,int $payType,int $userId,int $payChannelId)
     {
@@ -99,11 +101,33 @@ class WithholdingComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+        $orderNo =$this->componnet->getOrderCreater()->getOrderNo();
 
         //判断如果是代扣预授权 并且已经签订代扣协议 把代扣协议绑定到订单中
+        if($this->payType == PayInc::WithhodingPay && $this->needWithholding=="N"){
+            $withhold=WithholdQuery::getByUserChannel($this->userId,$this->payChannelId);
+            $params =[
+                'business_type' =>OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
+                'business_no'	=>$orderNo,	// 【必须】string	业务编码
+            ];
+            $b =$withhold->bind($params);
+            if(!$b){
+                $this->getOrderCreater()->setError('代扣协议绑定订单失败');
+                return false;
+            }
+            //判断如果已经签约代扣 并且预授权金额为 0 订单状态改为已支付
+            $orderYajin =$this->componnet->getOrderCreater()->getSkuComponnet()->getOrderYajin();
+            if($orderYajin=="0" && $this->needWithholding=="N"){
 
+                $data['order_status']=OrderStatus::OrderPayed;
+                $b =Order::where('order_no', '=', $orderNo)->update($data);
+                if(!$b){
+                    $this->getOrderCreater()->setError('更新订单支付状态失败');
+                    return false;
+                }
+            }
+        }
 
-        //判断如果已经签约代扣 并且预授权金额为 0 订单状态改为已支付
 
 
         return true;

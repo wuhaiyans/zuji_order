@@ -107,19 +107,31 @@ class OrderCreater
             }
             DB::commit();
 
+            $need_to_fundauth ="N";
+            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
+                $need_to_fundauth ="Y";
+            }
+
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
                 'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
+                //支付方式
+                'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                //是否需要预授权
+                'need_to_fundauth'	 => $need_to_fundauth,
+
                 '_order_info' => $schemaData,
                 'order_no'=>$orderNo,
-                'pay_type'=>$data['pay_type'],
+
+
 
             ];
            // 创建订单后 发送支付短信。;
@@ -318,7 +330,10 @@ class OrderCreater
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
                 'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
+                //支付方式
+                'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
                 'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
