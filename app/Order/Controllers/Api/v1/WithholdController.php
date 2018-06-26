@@ -712,6 +712,7 @@ class WithholdController extends Controller
         $youhui = 0;
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
             $youhui = $couponInfo['youhui'];
         }
@@ -730,8 +731,6 @@ class WithholdController extends Controller
                 'business_no'       => $trade_no,
             ];
             \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-
-
         }
 
 

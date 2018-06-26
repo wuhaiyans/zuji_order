@@ -613,13 +613,20 @@ class OrderOperate
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
+        $goodsFirstAmount = 0.00;
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
+
             foreach ($goodsExtendData as $keys=> $goodsValues) {
                 if (is_array($goodsValues)) {
                     foreach($goodsValues as $values) {
 
+                        if ($values['times']==1)
+                        {
+
+                            $goodsFirstAmount[$values['goods_no']] =$values['amount'];
+                        }
 
                         if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
                         {
@@ -669,9 +676,10 @@ class OrderOperate
         //订单商品列表相关的数据
         $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
 
-        $goodsData =  self::getGoodsListActState($orderNo, $actArray);
+        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsFirstAmount);
 
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
 
@@ -718,6 +726,8 @@ class OrderOperate
 
             foreach ($orderListArray['data'] as $keys=>$values) {
 
+
+
                 //订单状态名称
                 $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
                 //支付方式名称
@@ -739,7 +749,10 @@ class OrderOperate
                 //回访标识
 //                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
-                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+               $orderOperateData  = self::getOrderOprate($values['order_no']);
+               
+                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
+                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
 
             }
 
@@ -811,6 +824,8 @@ class OrderOperate
         if (empty($orderNo)) return [];
         $actArray = [];
 
+        $list = array();
+
         $orderData   =  self::getOrderInfo($orderNo);
 
         $orderData  =   $orderData['data'];
@@ -824,7 +839,12 @@ class OrderOperate
             $actArray['prePay_btn'] = false;
 
         }
-        return $actArray;
+        if ($orderData['order_info']['freeze_type'] >0) {
+            $actArray['cancel_pay_btn'] = false;
+        }
+        $list['button_operate'] = $actArray;
+        $list['logistics_info'] = $orderData['goods_extend_info'];
+        return $list;
 
     }
 
@@ -836,7 +856,7 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-   public static function getGoodsListActState($orderNo, $actArray)
+   public static function getGoodsListActState($orderNo, $actArray, $goodsFirstAmount=array())
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -844,6 +864,11 @@ class OrderOperate
 
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
+               if ($goodsFirstAmount) {
+
+                   $goodsList[$keys]['firstAmount'] = $goodsFirstAmount[$values['goods_no']];
+
+               }
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
