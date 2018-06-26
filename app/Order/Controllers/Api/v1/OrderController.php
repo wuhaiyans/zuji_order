@@ -56,6 +56,7 @@ class OrderController extends Controller
         $sku		= $params['params']['sku_info'];
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
         $userId		= $params['params']['user_id'];
+        $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
         if(empty($appid)){
@@ -67,6 +68,9 @@ class OrderController extends Controller
         if(empty($userId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户标识]");
         }
+        if(empty($payChannelId)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
+        }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         }
@@ -77,6 +81,7 @@ class OrderController extends Controller
             'sku'		=> $sku,
             'coupon'	=> $coupon,
             'user_id'	=> $userId,  //增加用户ID
+            'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->confirmation( $data );
         if(!is_array($res)){
@@ -108,6 +113,8 @@ class OrderController extends Controller
         $userId		= $params['params']['user_id'];
         $addressId		= $params['params']['address_id'];
 
+        $payChannelId =$params['params']['pay_channel_id'];
+
         //判断参数是否设置
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
@@ -121,6 +128,9 @@ class OrderController extends Controller
         if(empty($addressId)){
             return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
         }
+        if(empty($payChannelId)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
+        }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
@@ -132,6 +142,7 @@ class OrderController extends Controller
             'sku'=>$sku,
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID
+            'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->create($data);
         if(!$res){

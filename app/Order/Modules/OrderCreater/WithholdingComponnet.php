@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderPayWithholdRepository;
+use App\Order\Modules\Repository\Pay\WithholdQuery;
 
 class WithholdingComponnet implements OrderCreater
 {
@@ -18,6 +19,8 @@ class WithholdingComponnet implements OrderCreater
     private $componnet;
     private $flag = true;
     private $payType;
+    private $userId;
+    private $payChannelId;
 
     /**
      * 代扣签约信息
@@ -25,16 +28,14 @@ class WithholdingComponnet implements OrderCreater
      */
     private $withholdingInfo =[];
     private $withhodldingNo="";
+    private $needWithholding ="N";
 
-    public function __construct(OrderCreater $componnet,int $payType,int $userId)
+    public function __construct(OrderCreater $componnet,int $payType,int $userId,int $payChannelId)
     {
         $this->componnet = $componnet;
         $this->payType=$payType;
-        if($payType == PayInc::WithhodingPay){
-            //查询该用户代扣数据
-            $withhodingInfo = OrderPayWithholdRepository::find($userId);
-            $this->withholdingInfo =$withhodingInfo;
-        }
+        $this->userId =$userId;
+        $this->payChannelId=$payChannelId;
     }
     /**
      * 获取订单创建器
@@ -58,17 +59,16 @@ class WithholdingComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         // 代扣支付方式时，进行判断
         if($this->payType == PayInc::WithhodingPay){
+
             //查询该用户代扣数据
-            if(empty($this->withholdingInfo['withhold_no']) ||$this->withholdingInfo['withhold_no']==""){
+            try{
+                $withhold=WithholdQuery::getByUserChannel($this->userId,$this->payChannelId);
+                $this->needWithholding ="N";
+            }catch(\Exception $e){
+                $this->needWithholding ="Y";
                 $this->getOrderCreater()->setError('未签约代扣协议');
                 $this->flag = false;
             }
-            if(empty($this->withholdingInfo['withhold_status']) ||$this->withholdingInfo['withhold_status']==2){
-                $this->withholdingInfo['withhold_no']="";
-                $this->getOrderCreater()->setError('用户已经解约代扣协议');
-                $this->flag = false;
-            }
-            $this->withhodldingNo =!empty($this->withholdingInfo['withhold_no'])?$this->withholdingInfo['withhold_no']:"";
 
         }
 
@@ -84,7 +84,7 @@ class WithholdingComponnet implements OrderCreater
         $schema = $this->componnet->getDataSchema();
         return array_merge($schema,[
             'withholding' => [
-                'withholding_no' => strlen($this->withhodldingNo)?$this->withhodldingNo:"",
+                'needWithholding'=>$this->needWithholding,
             ]
         ]);
     }
@@ -99,6 +99,13 @@ class WithholdingComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+
+        //判断如果是代扣预授权 并且已经签订代扣协议 把代扣协议绑定到订单中
+
+
+        //判断如果已经签约代扣 并且预授权金额为 0 订单状态改为已支付
+
+
         return true;
     }
 }
