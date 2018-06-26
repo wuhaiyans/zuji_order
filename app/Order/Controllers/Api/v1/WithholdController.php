@@ -664,16 +664,31 @@ class WithholdController extends Controller
         // 渠道
         $channelId      = $params['channel'];
 
+        // 查询分期信息
+        $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
+        if( !is_array($instalmentInfo)){
+            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
+        }
+
+        // 生成交易码
+        $trade_no = createNo();
+        // 扣款交易码
+        if( $instalmentInfo['trade_no'] == '' ){
+            // 1)记录租机交易码
+            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['trade_no'=>$trade_no]);
+            if( $b === false ){
+                Log::error("数据异常");
+                return apiResponse([], ApiStatus::CODE_71000, "更新交易码错误");
+            }
+            $instalmentInfo['trade_no'] = $trade_no;
+        }
+
+        $trade_no = $instalmentInfo['trade_no'];
+
 
         //开启事务
         DB::beginTransaction();
 
-        // 查询分期信息
-        $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
-        if( !is_array($instalmentInfo)){
-            DB::rollBack();
-            return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
-        }
 
         //分期状态
         if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
@@ -694,16 +709,10 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
         }
 
-        // 创建扣款记录
-        $instalmentRecord = [
-            'instalment_id'             => $instalmentId,   // 分期ID
-            'type'                      => 1,               // 类型 1：代扣；2：主动还款
-            'status'                    => OrderInstalmentStatus::PAYING, // 状态：
-            'create_time'               => time(),          // 创建时间
-        ];
         $youhui = 0;
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
             $youhui = $couponInfo['youhui'];
         }
@@ -711,45 +720,25 @@ class WithholdController extends Controller
         $amount = $instalmentInfo['amount'] - $youhui;
         $amount = $amount > 0 ? $amount : 0.01;
 
-        $instalmentRecord['payment_amount']             =   $amount;
-        $instalmentRecord['payment_discount_amount']    =   $youhui;
-
-
         //修改优惠券信息
         if($youhui > 0){
-            $instalmentRecord['discount_type']          =   1;
-            $instalmentRecord['discount_value']         =   $couponInfo['coupon_no'];
-            $instalmentRecord['discount_name']          =   "租金抵用券";
 
             // 创建优惠券使用记录
             $couponData = [
                 'coupon_id'         => $couponInfo['coupon_id'],
                 'discount_amount'   => $couponInfo['youhui'],
                 'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'       => $instalmentInfo['id'],
+                'business_no'       => $trade_no,
             ];
             \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-
-            // 修改优惠券状态
-            $couponStatus = \App\Lib\Coupon\Coupon::useCoupon([$couponInfo['coupon_id']]);
-            if($couponStatus != ApiStatus::CODE_0){
-                return apiResponse([],ApiStatus::CODE_50010);
-            }
         }
 
-        // 创建主动还款记录
-        $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($instalmentRecord);
-        if(!$record){
-            DB::rollBack();
-            \App\Lib\Common\LogApi::error('创建扣款记录失败');
-            return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
-        }
 
         // 创建支付单
         $payData = [
             'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $instalmentId,	// 业务编号
+            'businessNo'		=> $trade_no,	// 业务编号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
             'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
         ];

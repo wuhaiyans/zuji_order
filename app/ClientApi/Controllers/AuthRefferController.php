@@ -54,7 +54,7 @@ class AuthRefferController extends Controller{
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
                         'msg' => "访问接口错误",
-                        'data'    =>$info['data']
+                        'data'    =>$info
                     ]);
                 }
                 return response()->json([
