@@ -1032,6 +1032,10 @@ class OrderReturnCreater
                     $params=[
                         "method"=>"warehouse.delivery.logisticList"
                     ];
+                    //备注信息、客服电话
+                    $remark['remark']="若填写错误，请及时联系客服进行修改";
+                    $remark['mobile']=config('tripartite.Customer_Service_Phone');
+                    $buss->setRemark($remark);
                     //获取物流信息
                     $header = ['Content-Type: application/json'];
                     $info=curl::post(config('tripartite.warehouse_api_uri'), json_encode($params),$header);
@@ -1155,8 +1159,11 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            $list=[];
+            //检测不合格的状态
+           // $list=[];
+            //检测合格的退换货编号
             $yes_list=[];
+            //检测不合格的状态
             $no_list=[];
             foreach($data as $k=>$v){
                 if(empty($data[$k]['goods_no']) && empty($data[$k]['check_result']) && empty($data[$k]['check_description'])   && empty($data[$k]['price'])  && empty($data[$k]['evaluation_time']) && empty($data[$k]['refund_no'])){
@@ -1250,7 +1257,7 @@ class OrderReturnCreater
 
 
                 }else{
-                    $list[]=$return_info['status'];
+                    //$list[]=$return_info['status'];
                     $no_list[]=$return_info['status'];
                     if($business_key ==OrderStatus::BUSINESS_RETURN){
                         //更新退货单检测信息
