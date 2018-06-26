@@ -65,7 +65,7 @@ class ReturnController extends Controller
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34006,"创建退换货单失败");
         }
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse($return,ApiStatus::CODE_0);
     }
     /*
      *
@@ -89,7 +89,7 @@ class ReturnController extends Controller
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
         }
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse($return,ApiStatus::CODE_0);
 
     }
     /**
