@@ -113,7 +113,6 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        p($whereArray);
         LogApi::debug("查询分期条件",$whereArray);
 
         $result =  OrderGoodsInstalment::query()
