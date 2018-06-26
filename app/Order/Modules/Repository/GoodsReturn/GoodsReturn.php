@@ -229,6 +229,17 @@ class GoodsReturn {
         $this->model->status=ReturnStatus::ReturnHuanHuo;
         return $this->model->save();
     }
+
+    /**
+     * 换货发货更新物流细信息
+     * @param array $data
+     * @return bool
+     */
+    public function barterDelivery(array $data ){
+        $this->model->barter_logistics_id=$data['logistics_id'];
+        $this->model->barter_logistics_no=$data['logistics_no'];
+        return $this->model->save();
+    }
     /**
      *
      * 更新物流单号

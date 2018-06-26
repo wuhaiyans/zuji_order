@@ -133,6 +133,28 @@ class ReturnStatus {
         ];
 
     }
+    /***********退货/换货原因问题******************/
+
+    public static function getReturnQeustionList(){
+        return [
+            'return'=> [
+                '1'  => '价格不划算',
+                '2'  => '随便试试',
+                '3'  => '不想租了',
+                '4'  => '已经买了',
+            ],
+            'barter'=>[
+                '5'  => '寄错手机型号',
+                '6'  => '不想用了',
+                '7'  => '收到时已经拆封',
+                '8'  => '手机无法正常使用',
+            ]
+
+        ] ;
+
+
+
+    }
 
     public static function getStatusName($status){
         $list = self::getStatusList();
@@ -173,6 +195,16 @@ class ReturnStatus {
         $list = self::business_key();
         if( isset($list[$status]) ){
             return $list[$status];
+        }
+        return '';
+    }
+    public static function getName($status){
+        $list = self::getReturnQeustionList();
+        foreach($list as $v){
+            if( isset($v[$status]) ){
+                return $v[$status];
+            }
+
         }
         return '';
     }

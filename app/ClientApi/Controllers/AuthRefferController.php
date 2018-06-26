@@ -48,6 +48,7 @@ class AuthRefferController extends Controller{
                 $list=['url'=>config('tripartite.API_INNER_URL'),'data'=>$params];
                 Log::debug("验证token",$list);
                 $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
+                Log::debug("验证token".$info);
                 $info =json_decode($info,true);
                 if(!is_array($info)  || $info['code']!=0){
                     return response()->json([

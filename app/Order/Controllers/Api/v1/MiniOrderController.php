@@ -158,6 +158,10 @@ class MiniOrderController extends Controller
             'address'=>$miniData['house'],
             'credit_amount'=>$miniData['credit_amount'],
         ];
+        $data['mobile']=$miniData['mobile'];
+        $data['name']=$miniData['name'];
+        $data['address']=$miniData['house'];
+        $data['credit_amount']=$miniData['credit_amount'];
         //小程序订单确认
         $res = $this->OrderCreate->miniConfirmation($data);
         if(!$res){

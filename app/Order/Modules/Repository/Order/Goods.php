@@ -247,6 +247,29 @@ class Goods {
 		}
 		return $list;
 	}
+    //-+------------------------------------------------------------------------
+    // | 静态方法
+    //-+------------------------------------------------------------------------
+    /**
+     * 获取商品列表
+     * @param string	$order_no		订单编号
+     * @param int		$lock			锁
+     * @return array
+     */
+    public static function getOrderNo( string $order_no, int $lock=0 ) {
+
+        $builder = \App\Order\Models\OrderGoods::where([
+            ['order_no', '=', $order_no],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $orderGoodData = $builder->first();
+        if( !$orderGoodData ){
+            return false;
+        }
+        return new Goods($orderGoodData);
+    }
 	
 	/**
 	 * 获取商品
