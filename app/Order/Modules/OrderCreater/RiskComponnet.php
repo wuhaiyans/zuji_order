@@ -8,6 +8,7 @@
 
 namespace App\Order\Modules\OrderCreater;
 
+use App\Lib\ApiStatus;
 use App\Lib\Risk\Risk;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderYidunRepository;
@@ -24,6 +25,8 @@ class RiskComponnet implements OrderCreater
     private $risk;
     //信用分
     private $score;
+    //白骑士
+    private $knight;
 
     public function __construct(OrderCreater $componnet,int $appId)
     {
@@ -36,6 +39,13 @@ class RiskComponnet implements OrderCreater
         if(is_array($score)){
             $this->score =$score['score'];
         }
+
+        //获取白骑士信息
+        $knight =Risk::getKnight(['user_id'=>$schema['user']['user_id']]);
+        if(!is_array($knight)){
+            throw new \Exception("获取白骑士信息失败:".$knight);
+        }
+        $this->knight =$knight;
 
         //获取蚁盾信息
 //        $risk =Risk::getRisk([
@@ -125,19 +135,44 @@ class RiskComponnet implements OrderCreater
             return false;
         }
         $orderNo =$this->componnet->getOrderCreater()->getOrderNo();
-        $data =$this->risk;
-        $riskData =[
-            'decision' => $data['risk']['decision'],
-            'order_no'=>$orderNo,  // 编号
-            'score' => $data['risk']['score'],
-            'strategies' =>$data['risk']['strategies'],
-            'type'=>$data['risk']['type'],
-        ];
-        $Id =OrderRiskRepository::add($riskData);
-        if(!$Id){
-            $this->getOrderCreater()->setError('保存风控数据失败');
-            return false;
+        $data =$this->knight;
+        foreach ($this->knight as $k=>$v){
+            if($k=="zhima_score"){
+                continue;
+            }
+            if($v===false){
+                $v ="false";
+            }
+            if($v===true){
+                $v ="true";
+            }
+            $riskData =[
+                'decision' => $v,
+                'order_no'=>$orderNo,  // 编号
+                'score' => 0,
+                'strategies' =>"",
+                'type'=>$k,
+            ];
+             $id =OrderRiskRepository::add($riskData);
+            if(!$id){
+                $this->getOrderCreater()->setError('保存风控数据失败');
+                return false;
+            }
+
         }
         return true;
+//        $data =$this->risk;
+//        $riskData =[
+//            'decision' => $data['risk']['decision'],
+//            'order_no'=>$orderNo,  // 编号
+//            'score' => $data['risk']['score'],
+//            'strategies' =>$data['risk']['strategies'],
+//            'type'=>$data['risk']['type'],
+//        ];
+//        $Id =OrderRiskRepository::add($riskData);
+//        if(!$Id){
+//            $this->getOrderCreater()->setError('保存风控数据失败');
+//            return false;
+//        }
     }
 }
