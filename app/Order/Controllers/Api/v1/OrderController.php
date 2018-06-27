@@ -416,7 +416,6 @@ class OrderController extends Controller
 
     public function saveOrderVisit(Request $request)
     {
-        return apiResponse(['a'=>'A'],ApiStatus::CODE_0);
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
