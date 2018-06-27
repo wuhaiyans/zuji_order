@@ -253,8 +253,12 @@ return [
     //-+------------------------------------------------------------------------
     // | 收支明细
     //-+------------------------------------------------------------------------
-    // 收支明细列表
-    'api.pay.payIncomeQuery'       => 'PayController@payIncomeQuery',
+    // 入账明细列表
+    'api.pay.payIncomeQuery'       => 'PayincomeController@payIncomeQuery',
+    // 入账明细详情
+    'api.pay.payIncomeInfo'       => 'PayincomeController@payIncomeInfo',
+    // 入账明细筛选条件
+    'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
 
     // test
     'api.Test.test'       => 'TestController@test',

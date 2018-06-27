@@ -13,6 +13,35 @@ class PayincomeController extends Controller
 
 
     /**
+     * 入账明细筛选条件
+     * @return array
+     *
+     */
+    public function payIncomeWhere(){
+        $list = [
+            'create_time'       => "",  //日期范围
+            'business_type'     => [    //入账类型
+                1   => '下单支付',
+                2   => '分期代扣',
+                3   => '主动还款',
+            ],
+            'appid'             => [    //入账渠道
+                1   => '生活号',
+                2   => '分期代扣',
+                3   => '主动还款',
+            ],
+            'channel'           => [    //入账方式
+                1   => '银联',
+                2   => '支付宝',
+                3   => '京东支付',
+            ],
+            'amount'            => "",  //金额范围
+        ];
+
+        return apiResponse($list,ApiStatus::CODE_0,"success");
+    }
+
+    /**
      * 收支明细表
      * @requwet Array
      * [
@@ -75,13 +104,55 @@ class PayincomeController extends Controller
         }
 
         $income_id = $params['params']['income_id'];
-        $Info = \App\Order\Modules\Repository\OrderPayIncomeRepository::getInfoById($income_id);
+        $info = \App\Order\Modules\Repository\OrderPayIncomeRepository::getInfoById($income_id);
 
-        p($Info);
-        if(!is_array($list)){
+
+        if(!is_array($info)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
-        return apiResponse($list,ApiStatus::CODE_0,"success");
+
+        //获取订单信息
+        $OrderRepository= new \App\Order\Modules\Repository\OrderRepository();
+        $orderInfo = $OrderRepository->get_order_info(['order_no'=>$info['order_no']]);
+        $orderInfo = $orderInfo[0];
+
+        $memberInfo = \App\Lib\User\User::getUser($orderInfo['user_id']);
+
+        $info['realname']   =   $memberInfo['realname'];
+        $info['mobile']     =   $memberInfo['mobile'];
+
+        // 入账订单
+        if($info['business_type'] == 1){
+            $info['remark'] = isset($orderInfo['remark']) ? $orderInfo['remark'] : "";
+        }else{
+            // 查询分期
+            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$info['business_no']]);
+            $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
+        }
+
+        // 入账类型
+        $type = [
+            1 => "下单支付",
+            2 => "分期代扣",
+            3 => "主动还款",
+        ];
+
+        // 入账方式
+        $channel = [
+            1 => "银联",
+            2 => "支付宝",
+            3 => "京东支付",
+        ];
+
+        $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
+        // 入账类型
+        $info['business_type']  = $type[$info['business_type']];
+        // 入账方式
+        $info['channel']        = $channel[$info['channel']];
+
+        return apiResponse($info,ApiStatus::CODE_0,"success");
     }
+
+
 
 }
