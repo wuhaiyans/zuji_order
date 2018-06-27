@@ -311,7 +311,7 @@ class PayCreater {
 
 		$info = $payModel::query()
 			->where($params)
-			->get();
+			->first();
 		if(!$info){
 			return [];
 		}

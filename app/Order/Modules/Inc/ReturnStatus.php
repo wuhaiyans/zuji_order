@@ -120,6 +120,7 @@ class ReturnStatus {
                 self::ReturnDenied => '审核拒绝',
                 self::ReturnCanceled => '取消退货申请',
                 self::ReturnReceive =>'已收货',
+                self::ReturnTui =>'退款中',
                 self::ReturnTuiHuo => '已退货',
             ],//退货
             'barter'=>[
@@ -127,6 +128,7 @@ class ReturnStatus {
                 self::ReturnCreated => '提交申请',
                 self::ReturnAgreed => '审核通过',
                 self::ReturnDenied => '审核拒绝',
+                self::ReturnReceive =>'已收货',
                 self::ReturnHuanHuo => '已换货',
             ],//换货
 
@@ -138,16 +140,12 @@ class ReturnStatus {
     public static function getReturnQeustionList(){
         return [
             'return'=> [
-                '1'  => '价格不划算',
-                '2'  => '随便试试',
-                '3'  => '不想租了',
-                '4'  => '已经买了',
-            ],
-            'barter'=>[
-                '5'  => '寄错手机型号',
-                '6'  => '不想用了',
-                '7'  => '收到时已经拆封',
-                '8'  => '手机无法正常使用',
+                '1'  => '寄错手机型号',
+                '2'  => '不想用了',
+                '3'  => '收到时已经拆封',
+                '4'  => '手机无法正常使用',
+                '5'  => '未收到手机',
+                '6'  => '换货',
             ]
 
         ] ;

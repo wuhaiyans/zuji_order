@@ -139,14 +139,14 @@ class InstalmentController extends Controller
 
         foreach($instalmentList as &$item){
 
-            // 是否扣款
-            $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
-
             // 是否允许扣款
             $item['allow_pay']  = 0;
             if($item['term'] <= date('Ym') && ($item['status']==OrderInstalmentStatus::UNPAID || $item['status']==OrderInstalmentStatus::FAIL)){
                 $item['allow_pay']  = 1;
             }
+
+            // 是否扣款
+            $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
 
             // 扣款时间
             $item['payment_time'] = date("Y-m-d H:i:s",$item['payment_time']);
@@ -164,4 +164,66 @@ class InstalmentController extends Controller
         return apiResponse($instalmentList,ApiStatus::CODE_0,"success");
 
     }
+
+
+    /*
+    * 分期提前还款详情接口
+    * @param array $request
+    * [
+    *		'instalment_id'		=> '', //【必选】string 分期id
+    * ]
+    * @return array instalmentList
+    */
+    public function queryInfo(Request $request){
+        $params    = $request->all();
+
+        // 参数过滤
+        $rules = [
+            'instalment_id'         => 'required',  //商品编号
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $instalment_id      = $params['params']['instalment_id'];
+
+
+        $instalmentInfo     = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$instalment_id]);
+        if(!$instalmentInfo){
+            return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
+        }
+
+        // 租金抵用券
+        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+
+        if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
+            $discount_amount = $couponInfo['youhui'];
+
+            if($discount_amount >= $instalmentInfo['amount']){
+                $instalmentInfo['discount_amount']     = $instalmentInfo['amount'];
+                $instalmentInfo['amount']              = '0.00';
+            }else{
+                $amount = $instalmentInfo['amount'] - $couponInfo['youhui'];
+
+                $instalmentInfo['discount_amount']     = $discount_amount/100;
+                $instalmentInfo['amount']              = $amount;
+            }
+        }
+
+        $memberInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
+
+
+        $instalmentInfo['realname']         = "*" . mb_substr($memberInfo['realname'], 1, mb_strlen ( $memberInfo['realname'] )-1, 'utf-8');
+        $instalmentInfo['mobile']           = substr($memberInfo['mobile'], -4);
+
+        return apiResponse($instalmentInfo, ApiStatus::CODE_0);
+
+
+
+
+
+    }
+
+
+
 }

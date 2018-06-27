@@ -1400,6 +1400,7 @@ class OrderReturnCreater
             }
             $data['logistics_id']=$params['logistics_id'];
             $data['logistics_no']=$params['logistics_no'];
+            $data['logistics_name']=$params['logistics_name'];
             $data['receive_no']= $receive_no;
             //上传物流单号到收货系统
             $create_receive= Receive::updateLogistics($data);
