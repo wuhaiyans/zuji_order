@@ -42,11 +42,11 @@ class RiskComponnet implements OrderCreater
 
         //获取白骑士信息
         $knight =Risk::getKnight(['user_id'=>$schema['user']['user_id']]);
-        if(!is_array($knight)){
-            throw new \Exception("获取白骑士信息失败:".$knight);
+        $this->knight =[];
+        if(is_array($knight)){
+           // throw new \Exception("获取白骑士信息失败:".$knight);
+            $this->knight =$knight;
         }
-        $this->knight =$knight;
-
         //获取蚁盾信息
 //        $risk =Risk::getRisk([
 //            'user_id'=>$schema['user']['user_id'],
@@ -135,7 +135,9 @@ class RiskComponnet implements OrderCreater
             return false;
         }
         $orderNo =$this->componnet->getOrderCreater()->getOrderNo();
-        $data =$this->knight;
+        if(empty($this->knight)){
+            return true;
+        }
         foreach ($this->knight as $k=>$v){
             if($k=="zhima_score"){
                 continue;
