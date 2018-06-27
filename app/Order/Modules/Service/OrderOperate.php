@@ -239,7 +239,7 @@ class OrderOperate
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
-            $data['typeName'] =  getInsuranceTypeName($data['type']);
+            $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }
         return $data;
