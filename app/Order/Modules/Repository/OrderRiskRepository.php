@@ -1,8 +1,10 @@
 <?php
 namespace App\Order\Modules\Repository;
+use App\Lib\Certification;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderRisk;
+use App\Order\Models\OrderUserCertified;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
 
@@ -31,6 +33,15 @@ class OrderRiskRepository
         $whereArray[] = ['order_no', '=', $orderNo];
         $order =  OrderRisk::query()->where($whereArray)->first();
         if (!$order) return false;
-        return $order->toArray();
+        $orderRisk =$order->toArray();
+
+        $order = OrderUserCertified::query()->where($whereArray)->first();
+        if (!$order) return false;
+        $orderCertified =$order->toArray();
+
+        $orderCertified['certified_platform'] =Certification::getPlatformName($orderCertified['certified_platform']);
+
+
+        return array_merge($orderCertified,$orderRisk);
     }
 }
