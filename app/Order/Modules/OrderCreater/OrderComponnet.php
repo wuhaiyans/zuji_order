@@ -211,6 +211,8 @@ class OrderComponnet implements OrderCreater
         $this->zuqiType =$this->skuComponnet->getZuqiType();
         $zuqiTypeName =$this->skuComponnet->getZuqiTypeName();
         $orderYajin =$this->skuComponnet->getOrderYajin();
+        $orderZujin =$this->skuComponnet->getOrderZujin();
+        $orderFenqi =$this->skuComponnet->getOrderFenqi();
 
         return array_merge(['order'=>[
             'order_no'=>$this->orderNo,
@@ -219,6 +221,8 @@ class OrderComponnet implements OrderCreater
             'pay_type'=>$this->payType,
             'order_type'=>$this->orderType,
             'order_yajin'=>$orderYajin,
+            'order_zujin'=>$orderZujin,
+            'order_fenqi'=>$orderFenqi,
         ]],$userSchema,$skuSchema);
 
     }
