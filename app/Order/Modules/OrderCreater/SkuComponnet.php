@@ -44,6 +44,8 @@ class SkuComponnet implements OrderCreater
 
     //总押金
     private $orderYajin=0;
+    private $orderZujin=0;
+    private $orderFenqi=0;
 
 
 	/**
@@ -98,9 +100,7 @@ class SkuComponnet implements OrderCreater
 
     }
 
-    public function getOrderYajin(){
-        return $this->orderYajin;
-    }
+
     /**
      * 获取订单创建器
      * @return OrderCreater
@@ -134,7 +134,7 @@ class SkuComponnet implements OrderCreater
 
             //计算短租租期
             if($this->zuqiType ==1){
-                if(strtotime($skuInfo['begin_time'])-strtotime($skuInfo['begin_time'])<86400*2){
+                if(strtotime($skuInfo['end_time'])-strtotime($skuInfo['begin_time'])<86400*2){
                     $this->getOrderCreater()->setError('短租时间错误');
                     $this->flag = false;
                 }
@@ -198,6 +198,15 @@ class SkuComponnet implements OrderCreater
     public function getZuqiTypeName(){
         return $this->zuqiTypeName;
     }
+    public function getOrderYajin(){
+        return $this->orderYajin;
+    }
+    public function getOrderZujin(){
+        return $this->orderZujin;
+    }
+    public function getOrderFenqi(){
+        return $this->orderFenqi;
+    }
 
     /**
      * 获取数据结构
@@ -214,6 +223,9 @@ class SkuComponnet implements OrderCreater
             $specs =json_decode($spuInfo['specs'],true);
             $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
             $this->orderYajin =$deposit_yajin;
+            $amount_after_discount =$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount;
+            $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
+            $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
