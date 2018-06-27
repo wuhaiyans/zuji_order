@@ -336,7 +336,7 @@ class ReturnController extends Controller
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
         }
-        return apiResponse([$ret],ApiStatus::CODE_0);
+        return apiResponse($ret,ApiStatus::CODE_0);
 
 
     }
