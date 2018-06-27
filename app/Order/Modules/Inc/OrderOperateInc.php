@@ -30,6 +30,8 @@ class OrderOperateInc
                     'payment_btn'   => true,
                     //取消
                     'cancel_btn'    => true,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -52,6 +54,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -71,6 +75,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => true,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -90,6 +96,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => true,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -109,6 +117,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => true,
                     //查看物流
@@ -129,6 +139,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -149,6 +161,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -169,6 +183,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -190,6 +206,8 @@ class OrderOperateInc
                     'payment_btn'   => false,
                     //取消
                     'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流

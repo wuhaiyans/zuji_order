@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderGoodsInstalment;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
@@ -112,10 +113,13 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
+        LogApi::debug("查询分期条件",$whereArray);
+
         $result =  OrderGoodsInstalment::query()
-            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
+            ->leftJoin('order_info', 'order_goods_instalment.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
             ->select('order_info.user_id','order_goods_instalment.*','order_info.mobile')
+
             ->offset($offset)
             ->limit($pageSize)
             ->get();

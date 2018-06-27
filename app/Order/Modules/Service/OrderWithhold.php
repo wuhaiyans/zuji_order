@@ -184,18 +184,18 @@ class OrderWithhold
      * ]
      * @return String FAIL：失败  SUCCESS：成功
      */
-    public function repaymentNotify(){
-
-        $input = file_get_contents("php://input");
-        LogApi::info('支付异步通知', $input);
-
-        $params = json_decode($input,true);
-        if( is_null($params) ){
-            echo 'notice data is null ';exit;
-        }
-        if( !is_array($params) ){
-            echo 'notice data not array ';exit;
-        }
+    public static function repaymentNotify($params = []){
+//
+//        $input = file_get_contents("php://input");
+//        LogApi::info('支付异步通知', $input);
+//
+//        $params = json_decode($input,true);
+//        if( is_null($params) ){
+//            echo 'notice data is null ';exit;
+//        }
+//        if( !is_array($params) ){
+//            echo 'notice data not array ';exit;
+//        }
 
         $params = filter_array($params, [
             'payment_no'    => 'required',
@@ -217,7 +217,7 @@ class OrderWithhold
             if( !is_array($instalmentInfo)){
                 // 提交事务
                 DB::rollBack();
-                echo "FAIL";exit;
+                echo "FAIL_0";exit;
             }
             $instalmentId = $instalmentInfo['id'];
 
@@ -225,13 +225,15 @@ class OrderWithhold
             // 查询支付单数据
 
             $payWhere = [
-                'businessType'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'businessNo'    => $params['out_no'],
+                'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'    => $params['out_no'],
             ];
             $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
-            if(empty($PayData)){
+
+            if(empty($payInfo)){
+                v($payInfo);
                 DB::rollBack();
-                echo "FAIL";exit;
+                echo "FAIL_1";exit;
             }
 
             $_data = [
@@ -245,10 +247,7 @@ class OrderWithhold
 
 
             // 优惠券信息
-            $discount_amount    = 0;
-            $discount_type      = "";
-            $discount_value     = "";
-            $discount_name      = "";
+            $recordData         = [];
             $counponWhere = [
                 'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                 'business_no'   => $params['out_no'],
@@ -264,19 +263,17 @@ class OrderWithhold
                 $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
                 $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
 
-                $discount_amount            = $_data['discount_amount'];
-                $discount_type              = $counponInfo['coupon_type'];
-                $discount_value             = $counponInfo['coupon_no'];
-                $discount_name              = "租金抵用券";
-
+                $recordData['payment_discount_amount']      = $_data['discount_amount'];
+                $recordData['discount_type']                = $counponInfo['coupon_type'];
+                $recordData['discount_value']               = $counponInfo['coupon_no'];
+                $recordData['discount_name']                = "租金抵用券";
             }
-
 
             // 修改分期状态
             $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['trade_no'=>$params['out_no']],$_data);
             if(!$result){
                 DB::rollBack();
-                echo "FAIL";exit;
+                echo "FAIL_2";exit;
             }
 
 
@@ -301,22 +298,17 @@ class OrderWithhold
 
 
             // 创建扣款记录数据
-            $recordData = [
-                'instalment_id'             => $instalmentId,
-                'type'                      => 2,  //类型；1：代扣；2：主动还款',
-                'payment_amount'            => $payInfo['payment_amount'],
-                'payment_discount_amount'   => $discount_amount,
-                'discount_type'             => $discount_type,
-                'discount_value'            => $discount_value,
-                'discount_name'             => $discount_name,
-                'status'                    => OrderInstalmentStatus::SUCCESS,
-                'create_time'               => time(),
-                'update_time'               => time(),
-            ];
+            $recordData['instalment_id']        = $instalmentId;
+            $recordData['type']                 = 2;
+            $recordData['payment_amount']       = $payInfo['payment_amount'];
+            $recordData['status']               = OrderInstalmentStatus::SUCCESS;
+            $recordData['create_time']          = time();
+            $recordData['update_time']          = time();
+
             $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
             if(!$record){
                 DB::rollBack();
-                echo "FAIL";exit;
+                echo "FAIL_3";exit;
             }
             // 提交事务
             DB::commit();
@@ -325,7 +317,7 @@ class OrderWithhold
 
             //发送短信通知 支付宝内部通知
             $notice = new \App\Order\Modules\Service\OrderNotice(
-                OrderStatus::BUSINESS_FENQI,
+                \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                 $instalmentId,
                 "Repayment");
             $notice->notify();

@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\Pay\WithholdQuery;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
@@ -552,8 +553,29 @@ class OrderOperate
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
-            //优惠券归还
 
+            //支付方式为代扣 需要解除订单代扣
+            if($orderInfoData['pay_type'] == Inc\PayInc::WithhodingPay){
+                //查询是否签约代扣 如果签约 解除代扣
+                try{
+                    $withhold = WithholdQuery::getByBusinessNo(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo);
+                    $params =[
+                        'business_type' =>Inc\OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
+                        'business_no'	=>$orderNo,	// 【必须】string	业务编码
+                    ];
+                    $b =$withhold->unbind($params);
+                    if(!$b){
+                        DB::rollBack();
+                        return ApiStatus::CODE_31008;
+                    }
+
+                }catch (\Exception $e){
+                    //未签约 不解除
+                }
+
+            }
+
+            //优惠券归还
             //通过订单号获取优惠券信息
             $orderCouponData = OrderRepository::getCouponListByOrderId($orderNo);
 
@@ -613,13 +635,20 @@ class OrderOperate
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
+        $goodsFirstAmount = array();
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
+
             foreach ($goodsExtendData as $keys=> $goodsValues) {
                 if (is_array($goodsValues)) {
                     foreach($goodsValues as $values) {
 
+                        if ($values['times']==1)
+                        {
+
+                            $goodsFirstAmount[$values['goods_no']] =$values['amount'];
+                        }
 
                         if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
                         {
@@ -669,9 +698,10 @@ class OrderOperate
         //订单商品列表相关的数据
         $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
 
-        $goodsData =  self::getGoodsListActState($orderNo, $actArray);
+        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsFirstAmount);
 
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
 
@@ -718,6 +748,8 @@ class OrderOperate
 
             foreach ($orderListArray['data'] as $keys=>$values) {
 
+
+
                 //订单状态名称
                 $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
                 //支付方式名称
@@ -739,7 +771,10 @@ class OrderOperate
                 //回访标识
 //                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
-                $orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+               $orderOperateData  = self::getOrderOprate($values['order_no']);
+               
+                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
+                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
 
             }
 
@@ -811,6 +846,8 @@ class OrderOperate
         if (empty($orderNo)) return [];
         $actArray = [];
 
+        $list = array();
+
         $orderData   =  self::getOrderInfo($orderNo);
 
         $orderData  =   $orderData['data'];
@@ -824,7 +861,12 @@ class OrderOperate
             $actArray['prePay_btn'] = false;
 
         }
-        return $actArray;
+        if ($orderData['order_info']['freeze_type'] >0) {
+            $actArray['cancel_pay_btn'] = false;
+        }
+        $list['button_operate'] = $actArray;
+        $list['logistics_info'] = $orderData['goods_extend_info'];
+        return $list;
 
     }
 
@@ -836,7 +878,7 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-   public static function getGoodsListActState($orderNo, $actArray)
+   public static function getGoodsListActState($orderNo, $actArray, $goodsFirstAmount=array())
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -844,6 +886,11 @@ class OrderOperate
 
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
+               if ($goodsFirstAmount) {
+
+                   $goodsList[$keys]['firstAmount'] = $goodsFirstAmount[$values['goods_no']];
+
+               }
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
@@ -944,6 +991,122 @@ class OrderOperate
             return  OrderRepository::getGoodsListByOrderId($orderNo);
 
         }
+	/**
+	 * 获取订单支付单状态列表
+	 * @param array $param 创建支付单数组
+	 * $param = [<br/>
+	 		'payType' => '',//支付方式 【必须】<br/>
+	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+			'userId' => 'required',//业务用户ID<br/>
+			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
+	 * ]<br/>
+	 * @return mixed boolen：flase创建失败|array $result 结果数组
+	 * $result = [<br/>
+	 *		'withholdStatus' => '',是否需要签代扣（true：需要签约代扣；false：无需签约代扣）//<br/>
+	 *		'paymentStatus' => '',是否需要支付（true：需要支付；false:无需支付）//<br/>
+	 *		'fundauthStatus' => '',是否需要预授权（true：需要预授权；false：无需预授权）//<br/>
+	 * ]
+	 */
+	public static function getPayStatus( $param ) {
+		//-+--------------------------------------------------------------------
+		// | 校验参数
+		//-+--------------------------------------------------------------------
+		
+		if( !self::__praseParam($param) ){
+			return false;
+		}
+		
+		//-+--------------------------------------------------------------------
+		// | 判断租金支付方式（分期/代扣）
+		//-+--------------------------------------------------------------------
+		//代扣方式支付租金
+		if( $param['payType'] == PayInc::WithhodingPay ){
+			//然后判断预授权然后创建相关支付单
+			$result = self::__withholdFundAuth($param);
+			//分期支付的状态为false
+			$data['payment_status'] = false;
+		}
+		//分期方式支付租金
+		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
+			//然后判断预授权然后创建相关支付单
+			$result = self::__paymentFundAuth($param);
+			//代扣支付的状态为false
+			$data['withhold_status'] = false;
+			//代扣支付的状态为false
+			$data['payment_status'] = true;
+		}
+		//暂无其他支付
+		else{
+			return false;
+		}
+		//判断支付单创建结果
+		if( !$result ){
+			return false;
+		}
+		return array_merge($result, $data);
+	}
+	
+	/**
+	 * 判断代扣->预授权
+	 * @param type $param
+	 */
+	private static function __withholdFundAuth($param) {
+		//记录最终结果
+		$result = [];
+		//判断是否已经签约了代扣 
+		try{
+			$withhold = WithholdQuery::getByUserChannel($param['userId'],$param['payChannelId']);
+			$result['withholdStatus'] = false;
+		}catch(\Exception $e){
+			$result['withholdStatus'] = true;
+		}
+		//预授权金额为0
+		if( $param['fundauthAmount'] == 0 ){
+			$result['fundauthStatus'] = false;
+		}
+		//预授权金额不为0
+		else{
+			$result['fundauthStatus'] = true;
+		}
+		return $result;
+	}
+	/**
+	 * 判断支付->预授权
+	 * @param type $param
+	 */
+	private static function __paymentFundAuth($param) {
+		//记录最终结果
+		$result = [];
+		//判断预授权
+		//创建普通支付的支付单
+		if( $param['fundauthAmount'] == 0 ){
+			$result['fundauthStatus'] = false;
+		}
+		//创建支付+预授权的支付单
+		else{
+			$result['fundauthStatus'] = true;
+		}
+		return $result;
+	}
+
+
+	/**
+	 * 校验订单创建过程中 支付单创建需要的参数
+	 * @param Array $param
+	 */
+	private static function __praseParam( &$param ) {
+		$paramArr = filter_array($param, [
+	 		'payType' => '',//支付方式 【必须】<br/>
+	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+			'userId' => 'required',//业务用户ID<br/>
+			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
+		]);
+		if( count($paramArr) != 4 ){
+			return FALSE;
+		}
+		$param = $paramArr;
+		return true;
+	}
 
 
 

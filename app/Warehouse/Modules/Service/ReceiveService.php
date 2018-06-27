@@ -10,7 +10,9 @@ namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Func\WarehouseHelper;
+use App\Warehouse\Modules\Repository\DeliveryRepository;
 use App\Warehouse\Modules\Repository\ReceiveRepository;
+use PHPUnit\Framework\MockObject\Stub\Exception;
 
 class ReceiveService
 {
@@ -291,4 +293,37 @@ class ReceiveService
     {
         return Receive::where(['status'=>$status])->count();
     }
+
+    /**
+     * 确认同意换货
+     *      创建发货单
+     */
+    public function createDelivery($receive_no){
+        $model = Receive::find($receive_no);
+        $goods = $model->goods;
+        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
+            $delivery = new DeliveryRepository();
+            $data = [
+                'order_no'=>$model->order_no,
+                'app_id'=>$model->app_id,
+                'customer'=>$model->customer,
+                'customer_mobile'=>$model->customer_mobile,
+                'customer_address'=>$model->customer_address,
+            ];
+            foreach ($goods as $k=>$item){
+                $data['delivery_detail'][]=[
+                    'goods_name'=>$item->goods_name,
+                    'goods_no'=>$item->goods_no,
+                    'quantity'=>$item->quantity,
+                ];
+            }
+            //创建发货单
+            if (!$delivery->create($data)) {
+                throw new \Exception('创建发货单失败');
+            }
+        }else{
+            throw new \Exception('当前状态无法确认同意换货');
+        }
+    }
+
 }
