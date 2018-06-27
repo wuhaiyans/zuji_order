@@ -40,6 +40,7 @@ class OrderCleaning
 
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
 
+
        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
 
