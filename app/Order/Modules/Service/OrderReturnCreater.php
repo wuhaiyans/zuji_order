@@ -1004,12 +1004,7 @@ class OrderReturnCreater
                 $order_no=$params['order_no'];
                 //获取退换货原因
                 $reason=ReturnStatus::getReturnQeustionList();
-                if($params['business_key']==OrderStatus::BUSINESS_RETURN){
-                    $buss->setReturnReason($reason['return']);
-                }
-                if($params['business_key']==OrderStatus::BUSINESS_BARTER){
-                    $buss->setReturnReason($reason['barter']);
-                }
+                $buss->setReturnReason($reason['return']);
 
             }
             //注入状态流
@@ -1114,7 +1109,6 @@ class OrderReturnCreater
                 $quesion['reason_name']=ReturnStatus::getName($returnInfo['reason_id']);//退换货原因
                 $quesion['reason_text']=$returnInfo['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
-
 
             }
 
@@ -1406,6 +1400,7 @@ class OrderReturnCreater
             }
             $data['logistics_id']=$params['logistics_id'];
             $data['logistics_no']=$params['logistics_no'];
+            $data['logistics_name']=$params['logistics_name'];
             $data['receive_no']= $receive_no;
             //上传物流单号到收货系统
             $create_receive= Receive::updateLogistics($data);

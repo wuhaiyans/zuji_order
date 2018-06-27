@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
@@ -740,7 +741,12 @@ class OrderOperate
     {
         //根据用户id查找订单列表
 
-        $orderList = OrderRepository::getClientOrderList($param);
+        $newParam =  $param['params'];
+
+        $newParam['uid']=  $param['userinfo']['uid'];
+
+
+        $orderList = OrderRepository::getClientOrderList($newParam);
 
         $orderListArray = objectToArray($orderList);
 
@@ -775,6 +781,16 @@ class OrderOperate
                
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
+                if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
+                    $params = [
+                    'payType' => $values['pay_type'],//支付方式 【必须】<br/>
+                    'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
+                    'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
+                    'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
+	        ];
+
+                    $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
+                }
 
             }
 
