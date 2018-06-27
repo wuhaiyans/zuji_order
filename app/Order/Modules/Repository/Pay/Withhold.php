@@ -123,9 +123,9 @@ class Withhold extends \App\Lib\Configurable {
 		if( $n ){
 			++$this->counter;
 			return true;
-		};
+		}
 
-		Error::type('data-save')::setError('业务计数失败');
+		Error::setError('业务计数失败');
 		return false;
 	}
 	

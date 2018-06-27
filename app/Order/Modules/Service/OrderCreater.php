@@ -117,47 +117,55 @@ class OrderCreater
 				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
 				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
 				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-				'businessNo' => $order_no,//业务编号（订单编号）【必须】<br/>
+				'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
 				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-				'paymentAmount' => 1,//Price 支付金额（总租金），单位：元【必须】<br/>
-				'paymentFenqi' => 6,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+				'paymentAmount' => $schemaData['order']['order_zujin'],//Price 支付金额（总租金），单位：元【必须】<br/>
+				'paymentFenqi' => $schemaData['order']['order_fenqi'],//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
 			]);
 			//支付单创建错误，返回错误
 			if( !$payResult ){
+                DB::rollBack();
 				return false;
 			}
 			//如果订单无需支付【不用创建支付单】则修改订单状态为无需支付
-			if( $payResult['isPay'] == false ){
+			if(!$payResult['isPay']){
 				//修改订单状态为无需支付
+                    $data['order_status']=OrderStatus::OrderPayed;
+                    $b =Order::where('order_no', '=', $orderNo)->update($data);
+                    if(!$b){
+                        DB::rollBack();
+                        return false;
+                    }
 			}
+			$payResult = [
+				'withholdStatus' => $payResult['withholdStatus'],
+				'paymentStatus' => $payResult['payment_status'],
+				'fundauthStatus' => $payResult['fundauthStatus'],
+			];
 			
             DB::commit();
-
-            $need_to_fundauth ="N";
-            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
-                $need_to_fundauth ="Y";
-            }
-
+//            $need_to_fundauth ="N";
+//            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
+//                $need_to_fundauth ="Y";
+//            }
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                'credit_status'		=> $b,
                 //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 //支付方式
                 'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
+//                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                //是否需要预授权
-                'need_to_fundauth'	 => $need_to_fundauth,
+//                //是否需要预授权
+//                'need_to_fundauth'	 => $need_to_fundauth,
 
                 '_order_info' => $schemaData,
                 'order_no'=>$orderNo,
-
-
 
             ];
            // 创建订单后 发送支付短信。;
@@ -535,7 +543,8 @@ class OrderCreater
 		if( !self::__praseParam($param) ){
 			return false;
 		}
-		
+		//默认需要支付
+		$data['isPay'] =true;
 		//-+--------------------------------------------------------------------
 		// | 判断租金支付方式（分期/代扣）
 		//-+--------------------------------------------------------------------
@@ -563,7 +572,8 @@ class OrderCreater
 		if( !$result ){
 			return false;
 		}
-		return array_merge($result, $data);
+		//array_merge两个参数位置不可颠倒
+		return array_merge( $data,$result);
 	}
 	
 	/**
@@ -610,7 +620,8 @@ class OrderCreater
 		}
 		//不需要签约代扣+预授权金额为0 【不创建支付单】
 		elseif( !$result['withholdStatus'] && $param['fundauthAmount'] == 0 ){
-			$result['fundauthStatus'] = false;
+            $result['fundauthStatus'] = false;
+			$result['isPay'] = false;
 		}
 		//不需要签约代扣+预授权金额不为0 【创建预授权支付单】
 		else{
@@ -659,8 +670,8 @@ class OrderCreater
 	 */
 	private static function __praseParam( &$param ) {
 		$paramArr = filter_array($param, [
-	 		'payType' => '',//支付方式 【必须】<br/>
-	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+	 		'payType' => 'required',//支付方式 【必须】<br/>
+	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
 			'businessType' => 'required',//业务类型<br/>
 			'businessNo' => 'required',//业务编号<br/>

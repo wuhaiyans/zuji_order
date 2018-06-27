@@ -373,6 +373,30 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+    /**
+     * 确认同意换货
+     *      创建发货单
+     *
+     * 1.验证是否全部合格
+     * 2.创建发货单
+     */
+    public function createDelivery(){
+        $rules = [
+            'receive_no' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->receive->createDelivery($params['receive_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+        return \apiResponse([]);
+    }
+
 
     /**
      * 共用的状态等统一接口

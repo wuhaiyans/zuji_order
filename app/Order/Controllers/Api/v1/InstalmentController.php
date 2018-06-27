@@ -139,14 +139,14 @@ class InstalmentController extends Controller
 
         foreach($instalmentList as &$item){
 
-            // 是否扣款
-            $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
-
             // 是否允许扣款
             $item['allow_pay']  = 0;
             if($item['term'] <= date('Ym') && ($item['status']==OrderInstalmentStatus::UNPAID || $item['status']==OrderInstalmentStatus::FAIL)){
                 $item['allow_pay']  = 1;
             }
+
+            // 是否扣款
+            $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
 
             // 扣款时间
             $item['payment_time'] = date("Y-m-d H:i:s",$item['payment_time']);

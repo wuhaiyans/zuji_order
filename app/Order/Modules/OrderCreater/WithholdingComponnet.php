@@ -59,20 +59,20 @@ class WithholdingComponnet implements OrderCreater
     {
 
         $filter =  $this->componnet->filter();
-        // 代扣支付方式时，进行判断
-        if($this->payType == PayInc::WithhodingPay){
-
-            //查询该用户代扣数据
-            try{
-                $withhold=WithholdQuery::getByUserChannel($this->userId,$this->payChannelId);
-                $this->needWithholding ="N";
-            }catch(\Exception $e){
-                $this->needWithholding ="Y";
-                $this->getOrderCreater()->setError('未签约代扣协议');
-                $this->flag = false;
-            }
-
-        }
+//        // 代扣支付方式时，进行判断
+//        if($this->payType == PayInc::WithhodingPay){
+//
+//            //查询该用户代扣数据
+//            try{
+//                $withhold=WithholdQuery::getByUserChannel($this->userId,$this->payChannelId);
+//                $this->needWithholding ="N";
+//            }catch(\Exception $e){
+//                $this->needWithholding ="Y";
+//                $this->getOrderCreater()->setError('未签约代扣协议');
+//                $this->flag = false;
+//            }
+//
+//        }
 
         return $this->flag && $filter;
     }
@@ -83,12 +83,12 @@ class WithholdingComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        $schema = $this->componnet->getDataSchema();
-        return array_merge($schema,[
-            'withholding' => [
-                'needWithholding'=>$this->needWithholding,
-            ]
-        ]);
+        return $this->componnet->getDataSchema();
+//        return array_merge($schema,[
+//            'withholding' => [
+//                'needWithholding'=>$this->needWithholding,
+//            ]
+//        ]);
     }
 
     /**
@@ -101,32 +101,23 @@ class WithholdingComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        $orderNo =$this->componnet->getOrderCreater()->getOrderNo();
-
-        //判断如果是代扣预授权 并且已经签订代扣协议 把代扣协议绑定到订单中
-        if($this->payType == PayInc::WithhodingPay && $this->needWithholding=="N"){
-            $withhold=WithholdQuery::getByUserChannel($this->userId,$this->payChannelId);
-            $params =[
-                'business_type' =>OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
-                'business_no'	=>$orderNo,	// 【必须】string	业务编码
-            ];
-            $b =$withhold->bind($params);
-            if(!$b){
-                $this->getOrderCreater()->setError('代扣协议绑定订单失败');
-                return false;
-            }
-            //判断如果已经签约代扣 并且预授权金额为 0 订单状态改为已支付
-            $orderYajin =$this->componnet->getOrderCreater()->getSkuComponnet()->getOrderYajin();
-            if($orderYajin=="0" && $this->needWithholding=="N"){
-
-                $data['order_status']=OrderStatus::OrderPayed;
-                $b =Order::where('order_no', '=', $orderNo)->update($data);
-                if(!$b){
-                    $this->getOrderCreater()->setError('更新订单支付状态失败');
-                    return false;
-                }
-            }
-        }
+//        $orderNo =$this->componnet->getOrderCreater()->getOrderNo();
+//
+//        //判断如果是代扣预授权 并且已经签订代扣协议 把代扣协议绑定到订单中
+//        if($this->payType == PayInc::WithhodingPay && $this->needWithholding=="N"){
+//
+//            //判断如果已经签约代扣 并且预授权金额为 0 订单状态改为已支付
+//            $orderYajin =$this->componnet->getOrderCreater()->getSkuComponnet()->getOrderYajin();
+//            if($orderYajin=="0" && $this->needWithholding=="N"){
+//
+//                $data['order_status']=OrderStatus::OrderPayed;
+//                $b =Order::where('order_no', '=', $orderNo)->update($data);
+//                if(!$b){
+//                    $this->getOrderCreater()->setError('更新订单支付状态失败');
+//                    return false;
+//                }
+//            }
+//        }
 
 
 
