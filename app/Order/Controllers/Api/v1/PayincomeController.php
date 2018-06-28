@@ -118,8 +118,8 @@ class PayincomeController extends Controller
 
         $memberInfo = \App\Lib\User\User::getUser($orderInfo['user_id']);
 
-        $info['realname']   =   $memberInfo['realname'];
-        $info['mobile']     =   $memberInfo['mobile'];
+        $info['realname']   =   $memberInfo['realname'] ? $memberInfo['realname'] : "";
+        $info['mobile']     =   $memberInfo['mobile'] ? $memberInfo['mobile'] : "";
 
         // 入账订单
         if($info['business_type'] == 1){
