@@ -642,7 +642,13 @@ class OrderOperate
             }
         }
 
-        var_dump($riskArray);die;
+        if(empty($orderRisk)){
+            $arr['name'] = '风控数据';
+            $arr['value'] = '暂无';
+            $riskArray[]=$arr;
+        }
+
+        return $riskArray;
     }
 
 
