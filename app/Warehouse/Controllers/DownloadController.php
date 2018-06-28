@@ -120,15 +120,23 @@ class DownloadController extends Controller
 //        echo fread($file, $file_filesize);
 //        fclose($file);
 
-        $filename=$filePath; //文件名
+//        $filename=$filePath; //文件名
+//
+//        header( "Content-type:test/html;charset=utf-8");
+//        header( "Content-type:application/vnd.ms-excel");
+//        header( "Accept-Ranges:bytes ");
+//        header( "Accept-Length:" .filesize($filename));
+//        header( "Content-Disposition:  attachment;  filename=imei导入模板文件.xls");
+////        echo file_get_contents($filename);
+//        readfile($filename);
 
-        header( "Content-type:test/html;charset=utf-8");
-        header( "Content-type:application/vnd.ms-excel");
-        header( "Accept-Ranges:bytes ");
-        header( "Accept-Length:" .filesize($filename));
-        header( "Content-Disposition:  attachment;  filename=imei导入模板文件.xls");
-//        echo file_get_contents($filename);
-        readfile($filename);
+        $file=fopen($filePath,"r");
+        header("Content-Type: application/octet-stream");
+        header("Accept-Ranges: bytes");
+        header("Accept-Length: ".filesize($filePath));
+        header("Content-Disposition: attachment; filename=imei导入模板文件.xls");
+        echo fread($file,filesize($filePath));
+        fclose($file);
 
 
 
