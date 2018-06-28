@@ -105,7 +105,8 @@ class DownloadController extends Controller
         if (ob_get_length()){
             ob_end_clean();
         }
-        return response()->download($filePath, 'imei导入模板文件.xls');
+        return response()->download($filePath);
+//        return response()->download($filePath, 'imei导入模板文件.xls');
     }
 
 }
