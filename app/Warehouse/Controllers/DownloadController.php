@@ -111,14 +111,23 @@ class DownloadController extends Controller
 //        return response()->download($filePath, 'imei导入模板文件.xls', $headers);
 
 
-        $file_filesize = filesize($filePath);
-        $file = fopen($filePath, "r");
-        Header("Content-type: application/octet-stream");
-        Header("Accept-Ranges: bytes");
-        Header("Accept-Length: " . $file_filesize);
-        Header("Content-Disposition: attachment; filename=imei导入模板文件.xls");
-        echo fread($file, $file_filesize);
-        fclose($file);
+//        $file_filesize = filesize($filePath);
+//        $file = fopen($filePath, "r");
+//        Header("Content-type: application/octet-stream");
+//        Header("Accept-Ranges: bytes");
+//        Header("Accept-Length: " . $file_filesize);
+//        Header("Content-Disposition: attachment; filename=imei导入模板文件.xls");
+//        echo fread($file, $file_filesize);
+//        fclose($file);
+
+        $filename=$filePath; //文件名
+        Header( "Content-type:  application/octet-stream ");
+        Header( "Accept-Ranges:  bytes ");
+        Header( "Accept-Length: " .filesize($filename));
+        header( "Content-Disposition:  attachment;  filename=imei导入模板文件.xls");
+        echo file_get_contents($filename);
+        readfile($filename);
+
 
 
     }
