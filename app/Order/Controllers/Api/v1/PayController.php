@@ -411,7 +411,7 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
+            if ($validateParams['code']!=0) $this->innerErrMsg($validateParams['msg']);
             if ($param['status']!='success'){
                 LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
             }
@@ -419,6 +419,7 @@ class PayController extends Controller
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_refund_no']]);
             if ($orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                $this->innerErrMsg(__METHOD__."() ".microtime(true).' 订单清算记录不存在');
 
             }
             $orderCleanInfo = $orderCleanInfo['data'];
@@ -455,23 +456,27 @@ class PayController extends Controller
                         }  else {
 
                             LogApi::info('退款业务回调更新整体清算的状态失败', $orderParam);
+                            $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
                     $this->innerErrMsg();
-                    LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+                    LogApi::info(__METHOD__."() ".microtime(true)." 退款业务状态更新失败");
+                    $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务状态更新失败');
                 }
 
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['params']['out_refund_no']}订单清算退款状态无效");
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                $this->innerErrMsg(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
             }
             $this->innerOkMsg();
 
 
         } catch (\Exception $e)  {
-            $this->innerErrMsg();
+
             LogApi::info(__METHOD__ . "()订单清算退款回调地址异常 " .$e->getMessage(),  $param);
+            $this->innerErrMsg(__METHOD__ . "()订单清算退款回调地址异常 " .$e->getMessage());
 
         }
 
@@ -501,13 +506,14 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
+            if ($validateParams['code']!=0) $this->innerErrMsg($validateParams['msg']);
             //更新查看清算表的状态
 
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
-
+            dd($orderCleanInfo);
             if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                $this->innerErrMsg('订单清算记录不存在');
 
             }
             $orderCleanInfo = $orderCleanInfo['data'];
@@ -543,24 +549,27 @@ class PayController extends Controller
                         }  else {
 
                             LogApi::info('押金解押业务回调更新整体清算的状态失败', $orderParam);
+                            $this->innerErrMsg('押金解押业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
-                    $this->innerErrMsg();
-                    LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+                    LogApi::info(__METHOD__."() ".microtime(true)." 更新订单退押金状态失败");
+                    $this->innerErrMsg('更新订单退押金状态失败');
                 }
 
             } else {
 
                 LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param}订单清算退款状态无效");
+                $this->innerErrMsg('订单清算解押状态无效');
             }
             $this->innerOkMsg();
 
 
         } catch (\Exception $e) {
 
-            $this->innerErrMsg();
+
             LogApi::info(__METHOD__ . "()订单清算退押金回调接口异常 " .$e->getMessage(),$param);
+            $this->innerErrMsg(__METHOD__ . "()订单清算退押金回调接口异常 ");
 
         }
 
@@ -578,7 +587,6 @@ class PayController extends Controller
     {
 
         try{
-
             $input = file_get_contents("php://input");
             LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
@@ -590,7 +598,7 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) return apiResponse([],$validateParams['code'], $validateParams['msg']);
+            if ($validateParams['code']!=0) $this->innerErrMsg($validateParams['msg']);
             if ($param['status']!='success'){
                 LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
             }
@@ -598,6 +606,7 @@ class PayController extends Controller
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
             if ($orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                $this->innerErrMsg('订单清算记录不存在');
 
             }
             $orderCleanInfo = $orderCleanInfo['data'];
@@ -629,29 +638,28 @@ class PayController extends Controller
                                 'status'		=> $param['status'],	// 支付状态  processing：处理中；success：支付完成
                             ];
                             $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-
                             LogApi::info('押金转支付回调业务接口OrderCleaning::getBusinessCleanCallback', $businessParam);
                         }  else {
-
                             LogApi::info('押金转支付回调更新整体清算的状态失败', $orderParam);
+                            $this->innerErrMsg('押金转支付回调更新整体清算的状态失败');
                         }
                     }
                 } else {
-                    $this->innerErrMsg();
-                    LogApi::info(__METHOD__."() ".microtime(true)." 更新失败");
+                    LogApi::info(__METHOD__."() ".microtime(true)."押金转支付的状态更新失败");
+                    $this->innerErrMsg('押金转支付的状态更新失败');
                 }
 
             } else {
 
                 LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                $this->innerErrMsg('订单清算押金转支付状态无效');
             }
             $this->innerOkMsg();
 
 
         } catch (\Exception $e) {
-
-            $this->innerErrMsg();
             LogApi::info(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
+            $this->innerErrMsg(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage());
 
         }
 
