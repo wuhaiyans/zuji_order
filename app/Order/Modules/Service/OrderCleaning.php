@@ -40,6 +40,7 @@ class OrderCleaning
 
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
 
+
        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
 
@@ -91,7 +92,7 @@ class OrderCleaning
     public static function cancelOrderClean($param = array())
     {
         $success= OrderClearingRepository::cancelOrderClean($param);
-        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_CODE_31203;
+        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_31203;
 
     }
 

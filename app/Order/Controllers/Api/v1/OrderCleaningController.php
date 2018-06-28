@@ -125,7 +125,9 @@ class OrderCleaningController extends Controller
         }
 
         $res = OrderCleaning::cancelOrderClean($params['params']);
-        return apiResponse($res,ApiStatus::CODE_0,"success");
+
+
+        return apiResponse([],$res);
 
     }
 
