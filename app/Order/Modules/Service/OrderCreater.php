@@ -70,7 +70,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
@@ -217,13 +217,13 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
+            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -329,7 +329,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
@@ -553,16 +553,16 @@ class OrderCreater
 			//然后判断预授权然后创建相关支付单
 			$result = self::__withholdFundAuth($param);
 			//分期支付的状态为false
-			$data['payment_status'] = false;
+			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
 			//代扣支付的状态为false
-			$data['withhold_status'] = false;
+			$data['withholdStatus'] = false;
 			//代扣支付的状态为false
-			$data['payment_status'] = true;
+			$data['paymentStatus'] = true;
 		}
 		//暂无其他支付
 		else{

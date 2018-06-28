@@ -74,12 +74,6 @@ class DepositComponnet implements OrderCreater
         if($this->schema['user']['risk']==0){
             $this->deposit = false;
         }
-        if( $this->payType != \App\Order\Modules\Inc\PayInc::MiniAlipay){
-            //未通过信用分
-            if($this->schema['user']['score'] <config("tripartite.Fengkong_Score")){
-                $this->deposit = false;
-            }
-        }
 
         
         if($this->deposit && $this->payType >0){

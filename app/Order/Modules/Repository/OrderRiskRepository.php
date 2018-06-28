@@ -31,17 +31,9 @@ class OrderRiskRepository
         if (empty($orderNo)) return false;
         $whereArray = array();
         $whereArray[] = ['order_no', '=', $orderNo];
-        $order =  OrderRisk::query()->where($whereArray)->first();
+        $order =  OrderRisk::query()->where($whereArray)->get();
         if (!$order) return false;
-        $orderRisk =$order->toArray();
 
-        $order = OrderUserCertified::query()->where($whereArray)->first();
-        if (!$order) return false;
-        $orderCertified =$order->toArray();
-
-        $orderCertified['certified_platform'] =Certification::getPlatformName($orderCertified['certified_platform']);
-
-
-        return array_merge($orderCertified,$orderRisk);
+        return objectToArray($order);
     }
 }
