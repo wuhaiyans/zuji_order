@@ -139,7 +139,7 @@ class BusinessInfo
      * 备注信息及客服电话
      * @param string $remark
      */
-    public function setRemark(string $remark){
+    public function setRemark(array $remark){
         $this->data['remark']=$remark;
     }
     public  static function getStateFlow(){
