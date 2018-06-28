@@ -105,7 +105,10 @@ class DownloadController extends Controller
         if (ob_get_length()){
             ob_end_clean();
         }
-        return response()->download($filePath, 'imei导入模板文件.xls');
+        $headers = [
+            'Content-Type:application/vnd.ms-excel',
+        ];
+        return response()->download($filePath, 'imei导入模板文件.xls', $headers);
     }
 
 }
