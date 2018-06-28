@@ -87,13 +87,13 @@ class RiskComponnet implements OrderCreater
             $score =0;
             $strategies= '';
             if($k=="zhima_score"){
-                $v =$v['grade'];
                 $score =$v['score'];
+                $v =$v['grade'];
             }
             if($k=="yidun"){
-                $v =$v['decision'];
                 $score =$v['score'];
                 $strategies =$v['strategies'];
+                $v =$v['decision'];
             }
             if($v===false){
                 $v ="false";
@@ -114,8 +114,8 @@ class RiskComponnet implements OrderCreater
                 return false;
             }
 
+            
         }
-        die;
         return true;
 
     }

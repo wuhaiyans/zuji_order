@@ -29,7 +29,6 @@ class ReturnController extends Controller
      * [
      *      user_id用户id     必选
      *      business_key业务类型  必选
-     *      loss_type商品损耗    必选
      *      reason_id退货原因id   必选
      *      reason_text退货原因   可选
      *      'goods_no'=>[]商品编号 必选
@@ -42,9 +41,8 @@ class ReturnController extends Controller
         $data= filter_array($params,[
             'user_id'=>'required',
             'business_key'=>'required',
-            'loss_type'=>'required',
         ]);
-        if(count($data)<3){
+        if(count($data)<2){
             return ApiStatus::CODE_20001;
         }
         if(empty($params['goods_no'])){
@@ -57,9 +55,9 @@ class ReturnController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"退换货原因不能为空");
         }
         //验证是全新未拆封还是已拆封已使用
-        if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
-            return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
-        }
+       // if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
+         //   return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
+      //  }
 
         $return = $this->OrderReturnCreater->add($params,$orders['userinfo']);
         if(!$return){
