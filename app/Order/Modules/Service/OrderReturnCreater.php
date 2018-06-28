@@ -586,9 +586,9 @@ class OrderReturnCreater
                     return false;
                 }
                 //审核通过之后不能取消
-                if($return_info[$refund_no]['status']>1){
-                    return false;
-                }
+               // if($return_info[$refund_no]['status']>3){
+               //     return false;
+             //   }
                 //更新退换货状态为已取消
                 $cancelApply=$return->close();
                 if(!$cancelApply){
