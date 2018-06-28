@@ -68,14 +68,8 @@ class OrderGoodsInstalment
             'limit'  =>'required',
         ]);
 
-        $total = OrderGoodsInstalmentRepository::queryCount($params);
-        if($total == 0){
-            return [];
-        }
-
         $result =  OrderGoodsInstalmentRepository::queryList($params, $additional);
         $result = array_group_by($result,'goods_no');
-        $result['total'] = $total;
 
         return $result;
     }
