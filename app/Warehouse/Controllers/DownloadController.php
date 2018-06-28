@@ -105,10 +105,22 @@ class DownloadController extends Controller
         if (ob_get_length()){
             ob_end_clean();
         }
-        $headers = [
-            'Content-Type:application/x-xls',
-        ];
-        return response()->download($filePath, 'imei导入模板文件.xls', $headers);
+//        $headers = [
+//            'Content-Type:application/vnd.ms-excel',
+//        ];
+//        return response()->download($filePath, 'imei导入模板文件.xls', $headers);
+
+
+        $file_filesize = filesize($filePath);
+        $file = fopen($filePath, "r");
+        Header("Content-type: application/octet-stream");
+        Header("Accept-Ranges: bytes");
+        Header("Accept-Length: " . $file_filesize);
+        Header("Content-Disposition: attachment; filename=imei导入模板文件.xls");
+        echo fread($file, $file_filesize);
+        fclose($file);
+
+
     }
 
 }
