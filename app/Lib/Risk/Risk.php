@@ -20,6 +20,8 @@ class Risk{
     const RistKnightJd ='knight_jd';//京东
     const RistKnightTaobao ='knight_taobao';//淘宝
     const RistKnightMno='knight_mno';//白骑士运营商
+    const RistScore='risk_score';//风控系统分数
+    const RistZhimaScore='zhima_score';//芝麻分数
 
 
     //风控值描述
@@ -42,6 +44,8 @@ class Risk{
             self::RistKnightJd => '京东',
             self::RistKnightTaobao => '淘宝',
             self::RistKnightMno => '白骑士运营商',
+            self::RistScore => '风控系统分',
+            self::RistZhimaScore => '芝麻',
         ];
     }
     /**

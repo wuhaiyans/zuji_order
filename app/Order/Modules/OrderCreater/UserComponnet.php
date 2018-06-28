@@ -26,8 +26,6 @@ class UserComponnet implements OrderCreater
 
     //用户ID
     private $userId;
-    //风控系统分数
-    private $score=0;
     //手机号
     private $mobile;
     //代扣协议号
@@ -93,13 +91,6 @@ class UserComponnet implements OrderCreater
     public function getUserId(){
         return $this->userId;
     }
-    /**
-     * 设置风控系统分
-     *
-     */
-    public function setScore($score){
-        $this->score =$score;
-    }
 
     /**
      * 获取订单创建器
@@ -127,6 +118,16 @@ class UserComponnet implements OrderCreater
             $this->getOrderCreater()->setError('由于您的退款次数过多，账户暂时无法下单，请联系客服人员！');
             $this->flag = false;
         }
+        // 信用认证结果有效期
+        if(time()-$this->creditTime > 60*60 ){
+            $this->getOrderCreater()->setError('信用认证过期');
+            $this->flag = false;
+        }
+        if( $this->certified == 0 ){
+            $this->getOrderCreater()->setError('账户尚未信用认证');
+            $this->flag = false;
+        }
+
 
         return $this->flag;
     }
@@ -152,7 +153,6 @@ class UserComponnet implements OrderCreater
                 'face'=>$this->face,
                 'age'=>$this->age,
                 'risk'=>$this->risk,
-                'score'=>$this->score,
             ],
             'address'=>$this->address,
         ];
@@ -176,7 +176,6 @@ class UserComponnet implements OrderCreater
             'risk'=>$data['user']['risk'],
             'realname'=>$data['user']['realname'],
             'cret_no'=>$data['user']['cert_no'],
-            'score'=>$this->score,
             'create_time'=>time(),
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
