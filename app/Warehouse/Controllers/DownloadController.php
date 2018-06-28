@@ -131,6 +131,7 @@ class DownloadController extends Controller
 //        readfile($filename);
 
         $file=fopen($filePath,"r");
+        header("Content-type:test/html;charset=gb2312");
         header("Content-Type: application/octet-stream");
         header("Accept-Ranges: bytes");
         header("Accept-Length: ".filesize($filePath));
