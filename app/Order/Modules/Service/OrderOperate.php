@@ -1093,7 +1093,7 @@ class OrderOperate
 			$result = self::__withholdFundAuth($param);
             LogApi::debug('客户端getPayStatus代扣方式支付租金返回结果', $result);
 			//分期支付的状态为false
-			$data['payment_status'] = false;
+			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
@@ -1101,9 +1101,9 @@ class OrderOperate
 			$result = self::__paymentFundAuth($param);
             LogApi::debug('客户端getPayStatus分期方式支付租金返回结果', $result);
 			//代扣支付的状态为false
-			$data['withhold_status'] = false;
+			$data['withholdStatus'] = false;
 			//代扣支付的状态为false
-			$data['payment_status'] = true;
+			$data['paymentStatus'] = true;
 		}
 		//暂无其他支付
 		else{
