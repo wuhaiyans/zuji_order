@@ -121,9 +121,11 @@ class DownloadController extends Controller
 //        fclose($file);
 
         $filename=$filePath; //文件名
-        Header( "Content-type:  application/vnd.ms-excel");
-        Header( "Accept-Ranges:  bytes ");
-        Header( "Accept-Length: " .filesize($filename));
+
+        header( "Content-type:test/html;charset=utf-8");
+        header( "Content-type:application/vnd.ms-excel");
+        header( "Accept-Ranges:bytes ");
+        header( "Accept-Length:" .filesize($filename));
         header( "Content-Disposition:  attachment;  filename=imei导入模板文件.xls");
 //        echo file_get_contents($filename);
         readfile($filename);
