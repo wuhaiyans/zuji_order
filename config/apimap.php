@@ -26,6 +26,10 @@ return [
     //获取订单状态流信息
     'api.order.getOrderStatus'=>'OrderController@getOrderStatus',
 
+    //根据订单号获取支付信息
+    'api.order.getPayInfoByOrderNo'=>'OrderController@getPayInfoByOrderNo',
+
+
     
     //订单确认修改收货地址信息
     'api.order.modifyAddress'=>'OrderController@modifyAddress',
