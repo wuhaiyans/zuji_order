@@ -1362,9 +1362,9 @@ class OrderReturnCreater
         DB::beginTransaction();
         try{
             $data=[];
-            foreach($params['goods_info'] as $k=>$v){
+            foreach($params['goods_info'] as $k=>$refund_no){
                 //获取退款单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($refund_no);
                 if(!$return){
                     return false;
                 }
