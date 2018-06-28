@@ -241,6 +241,9 @@ class OrderController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function getClientOrderList(Request $request){
+		
+		\Illuminate\Support\Facades\Log::debug('--'.config('logsystem.LOG_API').' --'.config('logsystem.LOG_REPORT'));
+
         try{
 
 
