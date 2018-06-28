@@ -139,10 +139,7 @@ class User{
         Log::debug("checkToken返回结果".$info);
         $info = str_replace("\r\n","",$info);
         $info =json_decode($info,true);
-        if(!is_array($info)  || $info['code']!=0){
-            return false;
-        }
-        return $info["data"];
+        return $info;
     }
 }
 
