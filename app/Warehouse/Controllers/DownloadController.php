@@ -125,7 +125,7 @@ class DownloadController extends Controller
         Header( "Accept-Ranges:  bytes ");
         Header( "Accept-Length: " .filesize($filename));
         header( "Content-Disposition:  attachment;  filename=imei导入模板文件.xls");
-        echo file_get_contents($filename);
+//        echo file_get_contents($filename);
         readfile($filename);
 
 
