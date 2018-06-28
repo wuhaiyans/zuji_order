@@ -102,7 +102,9 @@ class DownloadController extends Controller
     public function imeitpl()
     {
         $filePath = storage_path('app/download/imei_data_tpl.xls');
-        ob_end_clean();
+        if (ob_get_length()){
+            ob_end_clean();
+        }
         return response()->download($filePath, 'imei导入模板文件.xls');
     }
 
