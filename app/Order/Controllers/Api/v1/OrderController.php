@@ -752,35 +752,19 @@ class OrderController extends Controller
      */
     public function getRiskInfo(Request $request)
     {
+        $params = $request->all();
+        $rule = [
+            'order_no'=> 'required'
+        ];
+        $validateParams = $this->validateParams($rule,  $params);
 
-        try{
-            $params = $request->all();
-            $rule = [
-                'order_no'=> 'required'
-            ];
+        if ($validateParams['code']!=0) {
 
-            $validateParams = $this->validateParams($rule,  $params);
-
-
-            if ($validateParams['code']!=0) {
-
-                return apiResponse([],$validateParams['code']);
-            }
-
-            $orderData = OrderRiskRepository::getRisknfoByOrderNo($validateParams['data']['order_no']);
-
-            if ($orderData) {
-
-                return apiResponse($orderData,ApiStatus::CODE_0);
-            } else {
-
-                return apiResponse([],ApiStatus::CODE_30034);
-            }
-
-        }catch (\Exception $e) {
-            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
-
+            return apiResponse([],$validateParams['code']);
         }
+        $orderData =OrderOperate::getOrderRisk($validateParams['data']['order_no']);
+
+        return apiResponse($orderData,ApiStatus::CODE_0);
 
     }
 

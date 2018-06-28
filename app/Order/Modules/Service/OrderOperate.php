@@ -11,6 +11,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
+use App\Lib\Risk\Risk;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderDelivery;
@@ -29,6 +30,8 @@ use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use Illuminate\Support\Facades\DB;
@@ -600,6 +603,52 @@ class OrderOperate
             return  ApiStatus::CODE_31006;
         }
 
+    }
+
+    /**
+     * 获取风控和认证信息
+     * @param $orderNo
+     * @return array
+     */
+    public static function getOrderRisk($orderNo){
+
+        //获取认证信息
+        $orderCertified = OrderUserCertifiedRepository::getUserCertifiedByOrder($orderNo);
+        $arr =[];
+        $riskArray =[];
+        if(!empty($orderCertified)){
+            $arr['name'] = '认证平台';
+            $arr['value'] = Certification::getPlatformName($orderCertified['certified_platform']);
+            $riskArray[]=$arr;
+            $arr['name'] = '信用分';
+            $arr['value'] = $orderCertified['credit'];
+            $riskArray[]=$arr;
+            $arr['name'] = '风控分';
+            $arr['value'] = $orderCertified['score'];
+            $riskArray[]=$arr;
+        }
+        //获取风控系统信息
+        $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo);
+        if($orderRisk){
+            foreach ($orderRisk as $k=>$v){
+                $arr['name'] = Risk::getRiskName($v['type']);
+                $arr['value'] = Risk::getDecisionName($v['decision']);
+                $riskArray[]=$arr;
+                if($v['type'] == Risk::RiskYidun){
+                    $arr['name'] = '蚁盾分数';
+                    $arr['value'] = $v['score'];
+                    $riskArray[]=$arr;
+                }
+            }
+        }
+
+        if(empty($orderRisk)){
+            $arr['name'] = '风控数据';
+            $arr['value'] = '暂无';
+            $riskArray[]=$arr;
+        }
+
+        return $riskArray;
     }
 
 
