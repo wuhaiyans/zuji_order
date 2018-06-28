@@ -112,16 +112,26 @@ class OrderCreater
 			//-+----------------------------------------------------------------
 			// | 创建支付单
 			//-+----------------------------------------------------------------
-			$payResult = self::__createPay([
-				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
-				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
-				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
-				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-				'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
-				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-				'paymentAmount' => $schemaData['order']['order_zujin'],//Price 支付金额（总租金），单位：元【必须】<br/>
-				'paymentFenqi' => $schemaData['order']['order_fenqi'],//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-			]);
+//			$payResult = self::__createPay([
+//				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
+//				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
+//				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
+//				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+//				'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
+//				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+//				'paymentAmount' => $schemaData['order']['order_zujin'],//Price 支付金额（总租金），单位：元【必须】<br/>
+//				'paymentFenqi' => $schemaData['order']['order_fenqi'],//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+//			]);
+            $payResult = self::__createPay([
+                'payType' => $data['pay_type'],//支付方式 【必须】<br/>
+                'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
+                'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
+                'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+                'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
+                'fundauthAmount' => 0.01,//Price 预授权金额（押金），单位：元【必须】<br/>
+                'paymentAmount' => 0.01,//Price 支付金额（总租金），单位：元【必须】<br/>
+                'paymentFenqi' => 0,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+            ]);
 			//支付单创建错误，返回错误
 			if( !$payResult ){
                 DB::rollBack();
