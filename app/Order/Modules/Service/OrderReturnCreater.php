@@ -586,9 +586,9 @@ class OrderReturnCreater
                     return false;
                 }
                 //审核通过之后不能取消
-                //if($return_info[$refund_no]['status']==ReturnStatus::ReturnAgreed){
-                 //   return false;
-               // }
+                if($return_info[$refund_no]['status']>1){
+                    return false;
+                }
                 //更新退换货状态为已取消
                 $cancelApply=$return->close();
                 if(!$cancelApply){
@@ -1096,6 +1096,12 @@ class OrderReturnCreater
                 $quesion['reason_name']=ReturnStatus::getName($returnInfo['reason_id']);//退换货原因
                 $quesion['reason_text']=$returnInfo['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
+                //设置是否显示取消退换货按钮
+                if($returnInfo['status']>3){
+                    $buss->setCancel("false");
+                }else{
+                    $buss->setCancel("true");
+                }
 
             }
 
