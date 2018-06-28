@@ -195,9 +195,8 @@ class InstalmentController extends Controller
 
 
         // 订单详情
-        $orderGoodsService = new OrderGoods();
-        $orderGoodsInfo = $orderGoodsService->getGoodsInfo($instalmentInfo['order_no']);
-        if(!$orderGoodsInfo){
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getOrderInfo(['order_no'=>$instalmentInfo['order_no']]);
+        if(!$orderInfo){
             return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
         }
 
@@ -213,12 +212,12 @@ class InstalmentController extends Controller
         }
 
         $instalmentInfo['allow_pay'] = 0;
-        if($orderGoodsInfo['status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
+        if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
             if($instalmentInfo['term'] <= date('Ym') && ($instalmentInfo['status'] == OrderInstalmentStatus::UNPAID || $instalmentInfo['status']==OrderInstalmentStatus::FAIL)){
                 $item['allow_pay']  = 1;
             }
         }
-        
+
         // 分期金额
         $instalmentInfo['fenqi_amount']     = $instalmentInfo['original_amount'];
 
