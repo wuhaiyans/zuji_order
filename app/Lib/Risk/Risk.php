@@ -24,12 +24,38 @@ class Risk{
 
     //风控值描述
 
-    const DecisionAccept = 'accept';
-    const DecisionReject = 'reject';
-    const DecisionValidate = 'validate';
+    const DecisionAccept = 'ACCEPT';
+    const DecisionReject = 'REJECT';
+    const DecisionValidate = 'VALIDATA';
 
     const DecisionTrue ='true';
     const DecisionFalse ='false';
+    /**
+     *  获取风控类型列表
+     * @return array
+     */
+    public static function getRiskList(){
+        return [
+            self::RiskYidun => '蚁盾',
+            self::RiskKnight => '白骑士',
+            self::RiskTongdun => '同盾',
+            self::RistKnightJd => '京东',
+            self::RistKnightTaobao => '淘宝',
+            self::RistKnightMno => '白骑士运营商',
+        ];
+    }
+    /**
+     *  根据风控类型转换 文字
+     * @param int $decision 描述
+     * @return string 描述值
+     */
+    public static function getRiskName($risk){
+        $list = self::getRiskList();
+        if( isset($list[$risk]) ){
+            return $list[$risk];
+        }
+        return '';
+    }
 
     /**
      *  获取风控值列表

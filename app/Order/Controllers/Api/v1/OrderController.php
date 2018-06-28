@@ -767,7 +767,8 @@ class OrderController extends Controller
                 return apiResponse([],$validateParams['code']);
             }
 
-            $orderData = OrderRiskRepository::getRisknfoByOrderNo($validateParams['data']['order_no']);
+            //$orderData = OrderRiskRepository::getRisknfoByOrderNo($validateParams['data']['order_no']);
+            $orderData =OrderOperate::getOrderRisk($validateParams['data']['order_no']);
 
             if ($orderData) {
 

@@ -3,6 +3,7 @@ namespace App\Order\Modules\Repository;
 
 
 
+use App\Lib\Certification;
 use App\Order\Models\OrderUserCertified;
 
 class OrderUserCertifiedRepository
@@ -27,5 +28,19 @@ class OrderUserCertifiedRepository
         if (!$result) return false;
         //指定order_no为数组下标
         return array_keys_arrange($result,"order_no");
+    }
+    /**
+     * 根据订单号获取认证信息
+     * @param $orderNo 订单编号
+     * @return array
+     */
+    public static function getUserCertifiedByOrder($orderNo){
+        if (empty($orderNo)) return false;
+        $whereArray = array();
+        $whereArray[] = ['order_no', '=', $orderNo];
+        $order = OrderUserCertified::query()->where($whereArray)->first();
+        if (!$order) return [];
+        $orderCertified =$order->toArray();
+        return $orderCertified;
     }
 }
