@@ -1003,7 +1003,7 @@ class OrderReturnCreater
                 $buss->setStatusText("申请");
                 $order_no=$params['order_no'];
                 //获取退换货原因
-                $reason=ReturnStatus::getReturnQeustionList();
+                $reason=ReturnStatus::getQuestionList();
                 $buss->setReturnReason($reason['return']);
 
             }

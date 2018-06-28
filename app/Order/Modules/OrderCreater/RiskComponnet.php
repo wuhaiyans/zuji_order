@@ -29,12 +29,11 @@ class RiskComponnet implements OrderCreater
         $this->componnet = $componnet;
         //获取白骑士信息
         $knight =Risk::getKnight(['user_id'=>$userId]);
-        $riskData['risk'] =[];
+        $this->knight =[];
         if(is_array($knight)){
-            $riskData['risk'] =$knight;
+            $this->knight =$knight;
         }
 
-        $this->knight =$riskData;
     }
     /**
      * 获取订单创建器
@@ -65,7 +64,8 @@ class RiskComponnet implements OrderCreater
     public function getDataSchema(): array
     {
        $schema = $this->componnet->getDataSchema();
-       return array_merge($schema,$this->knight);
+       $risk['risk'] =$this->knight;
+       return array_merge($schema,$risk);
     }
 
     /**
@@ -115,6 +115,7 @@ class RiskComponnet implements OrderCreater
             }
 
         }
+        die;
         return true;
 
     }
