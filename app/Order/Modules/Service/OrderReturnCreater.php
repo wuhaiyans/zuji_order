@@ -99,7 +99,6 @@ class OrderReturnCreater
                     'goods_no'      => $goods_info['goods_no'],
                     'order_no'      => $goods_info['order_no'],
                     'business_key'  => $params['business_key'],
-                    'loss_type'     => '',
                     'reason_id'     => $params['reason_id'],
                     'reason_text'   => $params['reason_text'],
                     'user_id'       => $params['user_id'],
