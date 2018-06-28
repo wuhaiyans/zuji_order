@@ -788,8 +788,9 @@ class OrderOperate
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
 	        ];
-
+                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
+                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
                 }
 
             }
@@ -1027,7 +1028,7 @@ class OrderOperate
 		//-+--------------------------------------------------------------------
 		// | 校验参数
 		//-+--------------------------------------------------------------------
-		
+        LogApi::debug('getPayStatus参数', $param);
 		if( !self::__praseParam($param) ){
 			return false;
 		}
@@ -1039,6 +1040,7 @@ class OrderOperate
 		if( $param['payType'] == PayInc::WithhodingPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__withholdFundAuth($param);
+            LogApi::debug('getPayStatus代扣方式支付租金返回结果', $result);
 			//分期支付的状态为false
 			$data['payment_status'] = false;
 		}
@@ -1046,6 +1048,7 @@ class OrderOperate
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
+            LogApi::debug('getPayStatus分期方式支付租金返回结果', $result);
 			//代扣支付的状态为false
 			$data['withhold_status'] = false;
 			//代扣支付的状态为false
@@ -1059,6 +1062,7 @@ class OrderOperate
 		if( !$result ){
 			return false;
 		}
+        LogApi::debug('getPayStatus ，$data返回结果', $data);
 		return array_merge($result, $data);
 	}
 	
