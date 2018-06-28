@@ -835,13 +835,15 @@ class OrderController extends Controller
                 if ($orderData) {
 
                     if ($orderData['order_status']==1) {
-                        $params = [
+                        $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
                             'userId' => $params['userinfo']['uid'],//业务用户ID<br/>
                             'fundauthAmount' => $orderData['order_yajin'],//Price 预授权金额，单位：元<br/>
                         ];
-                        $payInfo = OrderOperate::getPayStatus($params);
+                        $payInfo = OrderOperate::getPayStatus($orderParams);
+
+                       
                     }
 
 
