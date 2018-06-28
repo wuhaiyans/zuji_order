@@ -438,7 +438,7 @@ class OrderRepository
         if (isset($param['page'])){
             $page = intval($param['page']);
         }
-
+        sql_profiler();
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*')
             ->join('order_user_address',function($join){
@@ -447,6 +447,7 @@ class OrderRepository
             ->where($whereArray)
             ->orderBy('order_info.create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+
         //dd(objectToArray($orderList));
         return $orderList;
 
