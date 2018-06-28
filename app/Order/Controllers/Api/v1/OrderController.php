@@ -9,6 +9,7 @@ use App\Order\Models\OrderUserAddress;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Service;
 use Illuminate\Http\Request;
 use App\Order\Models\OrderGoodExtend;
@@ -807,6 +808,54 @@ class OrderController extends Controller
         }
 
     }
+
+    /**
+     *
+     *
+     */
+    public function getPayInfoByOrderNo(Request $request)
+    {
+
+        try{
+            $params = $request->all();
+            $rule = [
+                'order_no'=> 'required'
+            ];
+            $validateParams = $this->validateParams($rule,  $params);
+
+
+                if ($validateParams['code']!=0) {
+
+                    return apiResponse([],$validateParams['code']);
+                }
+
+                $orderData = OrderOperate::getOrderinfoByOrderNo($validateParams['data']['order_no']);
+                $payInfo = array();
+
+                if ($orderData) {
+
+                    if ($orderData['order_status']==1) {
+                        $params = [
+                            'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
+                            'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
+                            'userId' => $params['userinfo']['uid'],//业务用户ID<br/>
+                            'fundauthAmount' => $orderData['order_yajin'],//Price 预授权金额，单位：元<br/>
+                        ];
+                        $payInfo = self::getPayStatus($params);
+                    }
+
+
+                }
+                return apiResponse($payInfo,ApiStatus::CODE_0);
+
+            }catch (\Exception $e)
+            {
+                return apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            }
+
+    }
+
+
 
 
 

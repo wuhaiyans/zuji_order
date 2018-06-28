@@ -1180,6 +1180,15 @@ class OrderOperate
 	}
 
 
+	public static function getOrderinfoByOrderNo($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
+        return $orderInfo;
+
+    }
+
+
 
 
 }
