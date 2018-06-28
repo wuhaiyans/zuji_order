@@ -37,12 +37,18 @@ class AuthRefferController extends Controller{
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
             Log::debug("验证token调用第三方User::checkToken返回的结果".print_r($checkInfo,true));
-            //验证通过
-            if ($checkInfo){
+            //验证不通过
+            if (is_null($checkInfo)
+                || !is_array($checkInfo)
+                || !isset($checkInfo['code'])
+                || !isset($checkInfo['msg'])
+                || !isset($checkInfo['data']) ){
+                return response()->json($checkInfo);
+            }else{
                 $params['userinfo']=[
-                    'uid'      =>$checkInfo[0]['id'],
+                    'uid'      =>$checkInfo['data'][0]['id'],
                     'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
-                    'username' =>$checkInfo[0]['mobile']
+                    'username' =>$checkInfo['data'][0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
                 $list=['url'=>config('tripartite.API_INNER_URL'),'data'=>$params];
@@ -57,13 +63,12 @@ class AuthRefferController extends Controller{
                     || !isset($info['data']) ){
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
-                        'msg'   => "访问接口错误",
+                        'msg'   => "转发接口错误",
                         'data'  =>$info
                     ]);
                 }
                 return response()->json($info);
-            }else{
-                return response()->json($checkInfo);
+
             }
         }else{
             return response()->json([
