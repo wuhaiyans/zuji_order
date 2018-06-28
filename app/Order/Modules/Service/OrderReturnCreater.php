@@ -1098,9 +1098,9 @@ class OrderReturnCreater
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
                 if($returnInfo['status']>3){
-                    $buss->setCancel("false");
+                    $buss->setCancel(false);
                 }else{
-                    $buss->setCancel("true");
+                    $buss->setCancel(true);
                 }
 
             }
