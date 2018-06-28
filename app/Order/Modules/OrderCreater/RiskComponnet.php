@@ -83,12 +83,14 @@ class RiskComponnet implements OrderCreater
         if(empty($this->knight)){
             return true;
         }
+        var_dump($this->knight);
         foreach ($this->knight as $k=>$v){
             $score =0;
             $strategies= '';
             if($k=="zhima_score"){
-                $v =$v['grade'];
+                $value =$v['grade'];
                 $score =$v['score'];
+                $v =$value;
             }
             if($k=="yidun"){
                 $v =$v['decision'];
@@ -108,11 +110,12 @@ class RiskComponnet implements OrderCreater
                 'strategies' =>$strategies,
                 'type'=>$k,
             ];
-             $id =OrderRiskRepository::add($riskData);
-            if(!$id){
-                $this->getOrderCreater()->setError('保存风控数据失败');
-                return false;
-            }
+            var_dump($riskData);
+//             $id =OrderRiskRepository::add($riskData);
+//            if(!$id){
+//                $this->getOrderCreater()->setError('保存风控数据失败');
+//                return false;
+//            }
 
         }
         die;
