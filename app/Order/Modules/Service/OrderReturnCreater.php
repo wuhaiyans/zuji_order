@@ -60,6 +60,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
+
             $no_list = [];
             foreach( $params['goods_no'] as $k => $goods_no ){
                 // 查商品
@@ -1030,11 +1031,14 @@ class OrderReturnCreater
                     $remark['remark']="若填写错误，请及时联系客服进行修改";
                     $remark['mobile']=config('tripartite.Customer_Service_Phone');
                     $buss->setRemark($remark);
-                    //获取物流信息
-                    $header = ['Content-Type: application/json'];
-                    $info=curl::post(config('tripartite.warehouse_api_uri'), json_encode($params),$header);
-                    $logistics=json_decode($info,true);
-                    $buss->setLogisticsInfo($logistics['data']['list']);
+                    if(empty($returnInfo['logistics_no']) && empty($returnInfo['logistics_name'])) {
+                        //获取物流信息
+                        $header = ['Content-Type: application/json'];
+                        $info = curl::post(config('tripartite.warehouse_api_uri'), json_encode($params), $header);
+                        $logistics = json_decode($info, true);
+                        $buss->setLogisticsInfo($logistics['data']['list']);
+                    }
+
                 }elseif($returnInfo['status']==ReturnStatus::ReturnDenied){
                     $buss->setStatus("B");
                     $buss->setStatusText("审核拒绝");
