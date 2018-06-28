@@ -354,27 +354,27 @@ class OrderCreater
             }
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
 
-            $need_to_fundauth ="N";
-            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
-                $need_to_fundauth ="Y";
-            }
+//            $need_to_fundauth ="N";
+//            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
+//                $need_to_fundauth ="Y";
+//            }
 
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['score'],
-                'credit_status'		=> $b && $schemaData['withholding']['needWithholding']=='N',
+                'credit_status'		=> $b,
                 //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 //支付方式
                 'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
-                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
+              //  'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 //是否需要预授权
-                'need_to_fundauth'	 => $need_to_fundauth,
+            //    'need_to_fundauth'	 => $need_to_fundauth,
                 '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
@@ -553,16 +553,16 @@ class OrderCreater
 			//然后判断预授权然后创建相关支付单
 			$result = self::__withholdFundAuth($param);
 			//分期支付的状态为false
-			$data['payment_status'] = false;
+			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
 			//代扣支付的状态为false
-			$data['withhold_status'] = false;
+			$data['withholdStatus'] = false;
 			//代扣支付的状态为false
-			$data['payment_status'] = true;
+			$data['paymentStatus'] = true;
 		}
 		//暂无其他支付
 		else{

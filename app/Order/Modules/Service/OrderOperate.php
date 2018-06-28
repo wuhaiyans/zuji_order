@@ -11,6 +11,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
+use App\Lib\Risk\Risk;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderDelivery;
@@ -18,6 +19,7 @@ use App\Order\Models\OrderExtend;
 use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Instalment;
@@ -29,6 +31,8 @@ use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use Illuminate\Support\Facades\DB;
@@ -239,7 +243,7 @@ class OrderOperate
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
-            $data['typeName'] =  getInsuranceTypeName($data['type']);
+            $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }
         return $data;
@@ -602,6 +606,52 @@ class OrderOperate
 
     }
 
+    /**
+     * 获取风控和认证信息
+     * @param $orderNo
+     * @return array
+     */
+    public static function getOrderRisk($orderNo){
+
+        //获取认证信息
+        $orderCertified = OrderUserCertifiedRepository::getUserCertifiedByOrder($orderNo);
+        $arr =[];
+        $riskArray =[];
+        if(!empty($orderCertified)){
+            $arr['name'] = '认证平台';
+            $arr['value'] = Certification::getPlatformName($orderCertified['certified_platform']);
+            $riskArray[]=$arr;
+            $arr['name'] = '信用分';
+            $arr['value'] = $orderCertified['credit'];
+            $riskArray[]=$arr;
+            $arr['name'] = '风控分';
+            $arr['value'] = $orderCertified['score'];
+            $riskArray[]=$arr;
+        }
+        //获取风控系统信息
+        $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo);
+        if($orderRisk){
+            foreach ($orderRisk as $k=>$v){
+                $arr['name'] = Risk::getRiskName($v['type']);
+                $arr['value'] = Risk::getDecisionName($v['decision']);
+                $riskArray[]=$arr;
+                if($v['type'] == Risk::RiskYidun){
+                    $arr['name'] = '蚁盾分数';
+                    $arr['value'] = $v['score'];
+                    $riskArray[]=$arr;
+                }
+            }
+        }
+
+        if(empty($orderRisk)){
+            $arr['name'] = '风控数据';
+            $arr['value'] = '暂无';
+            $riskArray[]=$arr;
+        }
+
+        return $riskArray;
+    }
+
 
     /**
      * 生成订单号
@@ -788,8 +838,9 @@ class OrderOperate
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
 	        ];
-
+                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
+                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
                 }
 
             }
@@ -1027,7 +1078,7 @@ class OrderOperate
 		//-+--------------------------------------------------------------------
 		// | 校验参数
 		//-+--------------------------------------------------------------------
-		
+        LogApi::debug('客户端getPayStatus参数', $param);
 		if( !self::__praseParam($param) ){
 			return false;
 		}
@@ -1035,21 +1086,24 @@ class OrderOperate
 		//-+--------------------------------------------------------------------
 		// | 判断租金支付方式（分期/代扣）
 		//-+--------------------------------------------------------------------
+		$result = false;
 		//代扣方式支付租金
 		if( $param['payType'] == PayInc::WithhodingPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__withholdFundAuth($param);
+            LogApi::debug('客户端getPayStatus代扣方式支付租金返回结果', $result);
 			//分期支付的状态为false
-			$data['payment_status'] = false;
+			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
 		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
+            LogApi::debug('客户端getPayStatus分期方式支付租金返回结果', $result);
 			//代扣支付的状态为false
-			$data['withhold_status'] = false;
+			$data['withholdStatus'] = false;
 			//代扣支付的状态为false
-			$data['payment_status'] = true;
+			$data['paymentStatus'] = true;
 		}
 		//暂无其他支付
 		else{
@@ -1059,6 +1113,7 @@ class OrderOperate
 		if( !$result ){
 			return false;
 		}
+        LogApi::debug('客户端getPayStatus ，$data返回结果', $data);
 		return array_merge($result, $data);
 	}
 	
@@ -1112,8 +1167,8 @@ class OrderOperate
 	 */
 	private static function __praseParam( &$param ) {
 		$paramArr = filter_array($param, [
-	 		'payType' => '',//支付方式 【必须】<br/>
-	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+	 		'payType' => 'required',//支付方式 【必须】<br/>
+	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
 			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
 		]);
@@ -1123,6 +1178,15 @@ class OrderOperate
 		$param = $paramArr;
 		return true;
 	}
+
+
+	public static function getOrderinfoByOrderNo($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
+        return $orderInfo;
+
+    }
 
 
 

@@ -149,7 +149,7 @@ class InstalmentController extends Controller
             $item['status']     = $item['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
 
             // 扣款时间
-            $item['payment_time'] = date("Y-m-d H:i:s",$item['payment_time']);
+            $item['payment_time'] = !empty($item['payment_time']) ? date("Y-m-d H:i:s",$item['payment_time']) : "";
 
             // 是否有意外险 默认没有意外险 0
             $item['yiwaixian']  = 0;
