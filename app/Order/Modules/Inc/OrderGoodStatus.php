@@ -53,6 +53,11 @@ class OrderGoodStatus{
      */
     const COMPLETE_THE_MACHINE = 41;
     /**
+	 * 还机关闭
+     * @var int 7
+     */
+    const CLOSED_THE_MACHINE = 42;
+    /**
      * 买断中
      * @var int 3
      */
