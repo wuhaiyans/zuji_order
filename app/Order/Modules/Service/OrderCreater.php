@@ -137,10 +137,9 @@ class OrderCreater
                         return false;
                     }
 			}
-			var_dump($payResult);die;
 			$payResult = [
 				'withholdStatus' => $payResult['withholdStatus'],
-				'paymentStatus' => $payResult['payment_status'],
+				'paymentStatus' => $payResult['paymentStatus'],
 				'fundauthStatus' => $payResult['fundauthStatus'],
 			];
 			
