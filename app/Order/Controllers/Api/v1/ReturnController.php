@@ -42,7 +42,7 @@ class ReturnController extends Controller
             'user_id'=>'required',
             'business_key'=>'required',
         ]);
-        if(count($data)<3){
+        if(count($data)<2){
             return ApiStatus::CODE_20001;
         }
         if(empty($params['goods_no'])){

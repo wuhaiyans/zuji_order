@@ -93,10 +93,10 @@ class InstalmentController extends Controller
             'mobile'    => 'required',
             'term'      => 'required',
         ]);
-
-        $code = new OrderGoodsInstalment();
-        $list = $code->queryList($params,$additional);
-
+        $list = OrderGoodsInstalment::queryList($params,$additional);
+        foreach($list[0] as &$item){
+            $item['status']   = OrderInstalmentStatus::getStatusList($item['status']);
+        }
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }

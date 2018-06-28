@@ -69,15 +69,10 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
-        //根据用户mobile
-        if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
-        }
+
         $result = OrderGoodsInstalment::query()->where($whereArray)
-            ->leftJoin('order_info', 'order_goods_instalment.user_id', '=', 'order_info.user_id')
-            ->select('order_info.user_id','order_goods_instalment.*')
-            ->get();
-        return count($result);
+            ->count();
+        return $result;//count($result);
     }
     /**
      * 查询列表
@@ -108,18 +103,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
-        //根据用户mobile
-        if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
-        }
-
-        LogApi::debug("查询分期条件",$whereArray);
 
         $result =  OrderGoodsInstalment::query()
-            ->leftJoin('order_info', 'order_goods_instalment.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
-            ->select('order_info.user_id','order_goods_instalment.*','order_info.mobile')
-
             ->offset($offset)
             ->limit($pageSize)
             ->get();
