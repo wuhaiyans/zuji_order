@@ -19,6 +19,7 @@ use App\Order\Models\OrderExtend;
 use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Instalment;
@@ -1085,6 +1086,7 @@ class OrderOperate
 		//-+--------------------------------------------------------------------
 		// | 判断租金支付方式（分期/代扣）
 		//-+--------------------------------------------------------------------
+		$result = false;
 		//代扣方式支付租金
 		if( $param['payType'] == PayInc::WithhodingPay ){
 			//然后判断预授权然后创建相关支付单
