@@ -106,7 +106,7 @@ class Risk{
         $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
         if(!is_array($info)){
-            throw new \Exception("风控白骑士接口获取失败");
+            return ApiStatus::CODE_60000;
         }
         if($info['code']!=0){
             return $info['code'];
