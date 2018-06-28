@@ -621,29 +621,42 @@ class OrderOperate
             $arr['name'] = '认证平台';
             $arr['value'] = Certification::getPlatformName($orderCertified['certified_platform']);
             $riskArray[]=$arr;
-            $arr['name'] = '信用分';
+            $arr['name'] = '平台信用分';
             $arr['value'] = $orderCertified['credit'];
-            $riskArray[]=$arr;
-            $arr['name'] = '风控分';
-            $arr['value'] = $orderCertified['score'];
             $riskArray[]=$arr;
         }
         //获取风控系统信息
         $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo);
         if($orderRisk){
             foreach ($orderRisk as $k=>$v){
-                $arr['name'] = Risk::getRiskName($v['type']);
-                $arr['value'] = Risk::getDecisionName($v['decision']);
-                $riskArray[]=$arr;
                 if($v['type'] == Risk::RiskYidun){
                     $arr['name'] = '蚁盾分数';
                     $arr['value'] = $v['score'];
                     $riskArray[]=$arr;
                 }
+                if($v['type'] == Risk::RistZhimaScore){
+                    $arr['name'] = '芝麻分数';
+                    $arr['value'] = $v['score'];
+                    $riskArray[]=$arr;
+                    $arr['name'] = '芝麻等级';
+                    $arr['value'] = !empty(Risk::getDecisionName($v['decision']))?Risk::getDecisionName($v['decision']):$v['decision'];
+                    $riskArray[]=$arr;
+                    continue;
+                }
+                if($v['type'] == Risk::RistScore){
+                    $arr['name'] = '风控系统分';
+                    $arr['value'] = $v['score'];
+                    $riskArray[]=$arr;
+                    continue;
+                }
+                $arr['name'] = Risk::getRiskName($v['type']);
+                $arr['value'] = !empty(Risk::getDecisionName($v['decision']))?Risk::getDecisionName($v['decision']):$v['decision'];
+                $riskArray[]=$arr;
+
             }
         }
 
-        if(empty($orderRisk)){
+        if(!$orderRisk){
             $arr['name'] = '风控数据';
             $arr['value'] = '暂无';
             $riskArray[]=$arr;
