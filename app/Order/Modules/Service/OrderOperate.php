@@ -19,6 +19,7 @@ use App\Order\Models\OrderExtend;
 use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\PublicInc;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\Instalment;
@@ -1085,6 +1086,7 @@ class OrderOperate
 		//-+--------------------------------------------------------------------
 		// | 判断租金支付方式（分期/代扣）
 		//-+--------------------------------------------------------------------
+		$result = false;
 		//代扣方式支付租金
 		if( $param['payType'] == PayInc::WithhodingPay ){
 			//然后判断预授权然后创建相关支付单
@@ -1165,8 +1167,8 @@ class OrderOperate
 	 */
 	private static function __praseParam( &$param ) {
 		$paramArr = filter_array($param, [
-	 		'payType' => '',//支付方式 【必须】<br/>
-	 		'payChannelId' => '',//支付渠道 【必须】<br/>
+	 		'payType' => 'required',//支付方式 【必须】<br/>
+	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
 			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
 		]);
