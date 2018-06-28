@@ -841,7 +841,7 @@ class OrderController extends Controller
                             'userId' => $params['userinfo']['uid'],//业务用户ID<br/>
                             'fundauthAmount' => $orderData['order_yajin'],//Price 预授权金额，单位：元<br/>
                         ];
-                        $payInfo = self::getPayStatus($params);
+                        $payInfo = OrderOperate::getPayStatus($params);
                     }
 
 
