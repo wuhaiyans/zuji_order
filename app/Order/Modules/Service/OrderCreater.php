@@ -137,10 +137,9 @@ class OrderCreater
                         return false;
                     }
 			}
-			var_dump($payResult);die;
 			$payResult = [
 				'withholdStatus' => $payResult['withholdStatus'],
-				'paymentStatus' => $payResult['payment_status'],
+				'paymentStatus' => $payResult['paymentStatus'],
 				'fundauthStatus' => $payResult['fundauthStatus'],
 			];
 			
@@ -152,7 +151,7 @@ class OrderCreater
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['score'],
+                'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
                 //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
@@ -364,7 +363,7 @@ class OrderCreater
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['score'],
+                'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
                 //预授权金额
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
