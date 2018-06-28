@@ -142,7 +142,12 @@ class BusinessInfo
      * @param string $status
      */
     public function setCancel(string $status){
-        $this->data['cancel_button']=$status;
+        if($status=="1"){
+            $this->data['cancel_button']=false;
+        }else{
+            $this->data['cancel_button']=true;
+        }
+
     }
     /**
      * 备注信息及客服电话
