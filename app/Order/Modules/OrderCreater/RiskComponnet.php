@@ -108,13 +108,15 @@ class RiskComponnet implements OrderCreater
                 'strategies' =>$strategies,
                 'type'=>$k,
             ];
-             $id =OrderRiskRepository::add($riskData);
-            if(!$id){
-                $this->getOrderCreater()->setError('保存风控数据失败');
-                return false;
-            }
+            var_dump($riskData);
+//             $id =OrderRiskRepository::add($riskData);
+//            if(!$id){
+//                $this->getOrderCreater()->setError('保存风控数据失败');
+//                return false;
+//            }
 
         }
+        die;
         return true;
 
     }
