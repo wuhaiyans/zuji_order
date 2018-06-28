@@ -193,9 +193,37 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
         }
 
+
+        // 订单详情
+        $orderGoodsService = new OrderGoods();
+        $orderGoodsInfo = $orderGoodsService->getGoodsInfo($instalmentInfo['order_no']);
+        if(!$orderGoodsInfo){
+            return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
+        }
+
+        // 商品详情
+        $OrderGoods = new \App\Order\Modules\Service\OrderGoods();
+        $goodInfo = $OrderGoods->getGoodsInfo($instalmentInfo['goods_no']);
+
+
+        // 首期意外险
+        $instalmentInfo['yiwaixian_amount'] = 0;
+        if($instalmentInfo['times'] == 1){
+            $instalmentInfo['yiwaixian_amount'] = $goodInfo['insurance'];
+        }
+
+        $instalmentInfo['allow_pay'] = 0;
+        if($orderGoodsInfo['status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
+            if($instalmentInfo['term'] <= date('Ym') && ($instalmentInfo['status'] == OrderInstalmentStatus::UNPAID || $instalmentInfo['status']==OrderInstalmentStatus::FAIL)){
+                $item['allow_pay']  = 1;
+            }
+        }
+        
+        // 分期金额
+        $instalmentInfo['fenqi_amount']     = $instalmentInfo['original_amount'];
+
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
-
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
             $discount_amount = $couponInfo['youhui'];
 
@@ -210,8 +238,10 @@ class InstalmentController extends Controller
             }
         }
 
-        $memberInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
+        $instalmentInfo['status'] = $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
 
+        // 用户信息
+        $memberInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
 
         $instalmentInfo['realname']         = "*" . mb_substr($memberInfo['realname'], 1, mb_strlen ( $memberInfo['realname'] )-1, 'utf-8');
         $instalmentInfo['mobile']           = substr($memberInfo['mobile'], -4);

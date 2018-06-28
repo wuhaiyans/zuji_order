@@ -125,6 +125,7 @@ class PayincomeController extends Controller
         if($info['business_type'] == 1){
             $info['remark'] = isset($orderInfo['remark']) ? $orderInfo['remark'] : "";
         }else{
+
             // 查询分期
             $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$info['business_no']]);
             $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
