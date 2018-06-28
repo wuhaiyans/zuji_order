@@ -438,7 +438,6 @@ class OrderRepository
         if (isset($param['page'])){
             $page = intval($param['page']);
         }
-        sql_profiler();
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*')
             ->join('order_user_address',function($join){
