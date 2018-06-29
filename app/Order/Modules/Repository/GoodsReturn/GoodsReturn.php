@@ -187,6 +187,7 @@ class GoodsReturn {
         }
         if($data['status']=="success"){
             $status=ReturnStatus::ReturnTuiHuo;//退货/退款单状态
+            $this->model->complete_time=time();
         }
         $this->model->status=$status;
         return $this->model->save();
@@ -201,6 +202,7 @@ class GoodsReturn {
         }
         if($data['status']=="success"){
             $status=ReturnStatus::ReturnTuiKuan;//退货/退款单状态
+            $this->model->complete_time=time();
         }
         $this->model->status=$status;
        return $this->model->save();
@@ -227,6 +229,7 @@ class GoodsReturn {
             return false;
         }
         $this->model->status=ReturnStatus::ReturnHuanHuo;
+        $this->model->complete_time=time();
         return $this->model->save();
     }
 
