@@ -157,7 +157,7 @@ class LogApi {
 			'data' => [
 				'level' => $level,						// 级别
 				'session_id' => session()->getId(),		// 回话ID
-				'user_id' => session('user'),						// 用户ID
+				'user_id' => '',						// 用户ID
 				'serial_no' => self::_autoincrement(),	// 序号
 				'content' => $data,						// 内容
 			],
