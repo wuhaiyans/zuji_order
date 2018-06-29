@@ -184,7 +184,6 @@ class OrderWithhold
      * @return json
      */
     public static function repaymentNotify($params){
-        LogApi::info("提前还款回调", $params);
         //过滤参数
         $rule = [
             'business_type'     => 'required',//业务类型
@@ -195,10 +194,6 @@ class OrderWithhold
         if ($validator->fails()) {
             return false;
         }
-        if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
-            return false;
-        }
-
 
         // 支付成功
         if($params['status'] == "success"){
@@ -267,7 +262,6 @@ class OrderWithhold
                 'business_no'   => $params['business_no'],
                 'appid'         => 1,
                 'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                'out_trade_no'  => $params["payment_no"],
                 'amount'        => $payInfo['payment_amount'],
                 'create_time'   => time(),
             ];
