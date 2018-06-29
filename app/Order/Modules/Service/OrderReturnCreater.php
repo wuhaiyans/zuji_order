@@ -306,7 +306,7 @@ class OrderReturnCreater
                     $data[$k]['goods_no']    = $returnInfo[$k]['goods_no'];
                     $refund[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
                     //获取商品扩展信息
-                    $goodsDelivery[$k] = \App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
+                    $goodsDelivery[$k]=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
                     if( !$goodsDelivery ){
                         return false;
                     }
@@ -987,6 +987,7 @@ class OrderReturnCreater
      */
     public function returnResult($params){
         try{
+            $order_no=$params['order_no'];
             $buss=new \App\Order\Modules\Service\BusinessInfo();
             //业务类型
             $buss->setBusinessType($params['business_key']);
@@ -1007,7 +1008,6 @@ class OrderReturnCreater
                 $reason=ReturnStatus::getQuestionList();
                 $buss->setReturnReason($reason['return']);
             }
-
             //注入状态流
             $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
@@ -1036,10 +1036,23 @@ class OrderReturnCreater
                         //获取物流信息
                         $header = ['Content-Type: application/json'];
                         $info = curl::post(config('tripartite.warehouse_api_uri'), json_encode($params), $header);
-                        $logistics = json_decode($info, true);
-                        $buss->setLogisticsInfo($logistics['data']['list']);
-                    }
+                        $info = json_decode($info, true);
+                        if( is_null($info)
+                            || !is_array($info)
+                            || !isset($info['code'])
+                            || !isset($info['msg'])
+                            || !isset($info['data']) ){
+                           return false;
+                        }
+                        $i=0;
+                        foreach($info['data']['list'] as $k=>$id){
 
+                            $logistics[$i]['id']=$k;
+                            $logistics[$i]['name']=$id;
+                            $i=$i+1;
+                        }
+                        $buss->setLogisticsInfo($logistics);
+                    }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
                     $buss->setStatus("B");
                     $buss->setStatusText("审核拒绝");
@@ -1107,16 +1120,15 @@ class OrderReturnCreater
                 }
 
             }
-
             //查询订单信息
-            $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
+            $order=\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
             if(!$order){
                 return false;
             }
             $orderInfo=$order->getData();
             $buss->setOrderInfo($orderInfo);
             //获取商品信息
-            $goods=\App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no']);
+            $goods=\App\Order\Modules\Repository\Order\Goods::getOrderNo($order_no);
             $goodsInfo=$goods->getData();
             $buss->setGoodsInfo($goodsInfo);
             //获取换货信息
