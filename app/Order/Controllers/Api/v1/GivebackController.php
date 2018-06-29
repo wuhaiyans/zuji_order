@@ -72,7 +72,17 @@ class GivebackController extends Controller
 		$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
 		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 		$data['status_text'] = '还机申请中';//后台状态
-		$data['logistics_list'] = \App\Warehouse\Config::$logistics;//物流列表
+		
+		//物流信息
+		$logistics_list = [];
+		$logistics = \App\Warehouse\Config::$logistics;
+		foreach ($logistics as $id => $name) {
+			$logistics_list[] = [
+				'id' => $id,
+				'name' => $name,
+			];
+		}
+		$data['logistics_list'] = $logistics_list;//物流列表
 		return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
 
 //		//-+--------------------------------------------------------------------
@@ -571,7 +581,7 @@ class GivebackController extends Controller
 		$data['goods_info'] =$orderGoodsInfo;
 		$orderGivebackInfo['status_name'] = OrderGivebackStatus::getStatusName($orderGivebackInfo['status']);
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
-		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']);
+		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
 		$data['giveback_info'] =$orderGivebackInfo;
 		$data['payment_info'] =['url'=>$paymentUrl['url']];
 		$data['status'] = OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
@@ -596,7 +606,7 @@ class GivebackController extends Controller
 //			'payment_status' => $orderGivebackInfo['payment_status'],
 //			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
 //			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
-//			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
+//			'evaluation_status_name' => OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']),
 //			'payment_url' => $paymentUrl['url'],
 //		];
 
@@ -670,6 +680,84 @@ class GivebackController extends Controller
 		return apiResponse($orderGivebackList);
 
 	}
+	
+	/**
+	 * 获取还机信息
+	 * @param Request $request
+	 */
+	public function getInfo(Request $request) {
+		//-+--------------------------------------------------------------------
+		// | 获取参数并验证
+		//-+--------------------------------------------------------------------
+		$params = $request->input();
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+		if( empty($paramsArr['goods_no']) ) {
+			return apiResponse([],ApiStatus::CODE_91001);
+		}
+		$goodsNo = $paramsArr['goods_no'];//提取商品编号
+		//-+--------------------------------------------------------------------
+		// | 通过商品编号获取需要展示的数据
+		//-+--------------------------------------------------------------------
+
+		//初始化最终返回数据数组
+		$data = [];
+		$orderGoodsInfo = $this->__getOrderGoodsInfo($goodsNo);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		
+		//创建服务层对象
+		$orderGivebackService = new OrderGiveback();
+		//获取还机单基本信息
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		if( !$orderGivebackInfo ){
+			return apiResponse([], get_code(), get_msg());
+		}
+		$orderGivebackInfo['status_name'] = OrderGivebackStatus::getStatusName($orderGivebackInfo['status']);
+		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
+		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
+		$orderGivebackInfo['yajin_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['yajin_status']);
+		
+		
+		
+		//组合最终返回商品基础数据
+		$data['goods_info'] = $orderGoodsInfo;//商品信息
+		$data['giveback_info'] =$orderGivebackInfo;//还机单信息
+		//判断是否已经收货
+		$isDelivery = false;
+		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ){
+			$isDelivery = true;
+		}
+		//快递信息
+		$data['logistics_info'] =[
+			'logistics_name' => $orderGivebackInfo['logistics_name'],
+			'logistics_no' => $orderGivebackInfo['logistics_no'],
+			'is_delivery' => $isDelivery,//是否已收货
+		];
+		//检测结果
+		if( $orderGivebackInfo['evaluation_status'] != OrderGivebackStatus::EVALUATION_STATUS_INIT ){
+			$data['evaluation_info'] = [
+				'evaluation_status_name' => $orderGivebackInfo['evaluation_status_name'],
+			];
+		}
+		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED ){
+			$data['evaluation_info']['remark'] = $orderGivebackInfo['evaluation_remark'];//检测备注
+			$data['evaluation_info']['compensate_amount'] = $orderGivebackInfo['compensate_amount'];//赔偿金额
+		}
+		//退还押金
+		if( $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION ){
+			$data['yajin_info'] = [
+				'yajin_status_name' => $orderGivebackInfo['yajin_status_name'],
+			];
+		}
+		
+		$data['status'] = ''.OrderGivebackStatus::adminMapView($orderGivebackInfo['status']);//状态
+		
+		//物流信息
+		return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
+
+	}
+	
 
 	/**
 	 * 检测结果处理【检测合格-代扣成功(无剩余分期)】
