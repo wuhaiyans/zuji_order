@@ -54,7 +54,7 @@ class OrderGiveback
 	 * ]
 	 * @return array|false
 	 */
-	public function getNeedpayInfo( $where ) {
+	public static function getNeedpayInfo( $where ) {
 		$where = filter_array($where, [
 			'order_no' => 'required',
 			'giveback_no' => 'required',
@@ -65,7 +65,8 @@ class OrderGiveback
 			return false;
 		}
 		$where['payment_status'] = [OrderGivebackStatus::PAYMENT_STATUS_IN_PAY, OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY];
-		return $this->order_giveback_repository->getNeedpayInfo($where);
+		$order_giveback_repository = new OrderGivebackRepository();
+		return $order_giveback_repository->getNeedpayInfo($where);
 	}
     /**
      * 根据商品编号获取一条还机单数据

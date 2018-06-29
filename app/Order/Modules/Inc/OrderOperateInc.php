@@ -43,7 +43,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
 
 
                 ],
@@ -67,7 +71,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
@@ -88,7 +96,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
                 ],
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
@@ -109,7 +121,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -130,7 +146,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
 
                 ],
                 //租用中
@@ -152,7 +172,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  true,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -174,7 +198,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
 
                 ],
                 //已关闭（已退款）
@@ -196,7 +224,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
 
                 ],
                  //已完成
@@ -219,7 +251,11 @@ class OrderOperateInc
                     //到期处理
                     'expiry_process'  =>  false,
                     //提前买断
-                    'ahead_buyout' => false
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
                 ],
             ),
             //后台用户出现的按钮
