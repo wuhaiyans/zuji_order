@@ -104,7 +104,9 @@ class Delivery
      */
     public static function apply($orderInfo,$goodsInfo)
     {
-        $base_api = config('tripartite.warehouse_api_uri');
+		// liuhongxing 2018-06-29 修改
+        //$base_api = config('tripartite.warehouse_api_uri');
+		$base_api = env('WAREHOUSE_API');
         $result = [
             'order_no'  => $orderInfo['order_no'],
             'realname'  => $orderInfo['name'],
@@ -172,7 +174,9 @@ class Delivery
      */
     public static function cancel($order_no)
     {
-        $base_api = config('api.warehouse_api_uri');
+		// liuhongxing 2018-06-29 修改
+        //$base_api = config('api.warehouse_api_uri');
+		$base_api = env('WAREHOUSE_API');
 
         $res = Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.cancel',//模拟
@@ -202,7 +206,9 @@ class Delivery
      */
     public static function orderReceive($params)
     {
-        $base_api = config('tripartite.warehouse_api_uri');
+		// liuhongxing 2018-06-29 修改
+        //$base_api = config('tripartite.warehouse_api_uri');
+		$base_api = env('WAREHOUSE_API');
 
         $res= Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.receive',//模拟
@@ -218,36 +224,36 @@ class Delivery
 
         return true;
     }
-
-    /**
-     * ok
-     * 确认收货接口  --------废弃
-     * 接收反馈
-     *
-     * @param string $order_no
-     * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>用户ID（管理员或用户必须）,
-     *      'user_name'=>用户名（管理员或用户必须）,
-     * ]
-     *
-     * int receive_type  在 App\Lib\publicInc 中;
-     *  const Type_Admin = 1; //管理员
-     *  const Type_User = 2;    //用户
-     *  const Type_System = 3; // 系统自动化任务
-     *  const Type_Store =4;//线下门店
-     * @return
-     */
-    public static function receive($orderNo, $row)
-    {
-        $row['receive_type'] =5;
-        $response = \App\Lib\Order\Delivery::receive($orderNo, $row);
-        $response =json_decode($response,true);
-        if($response['code']!=ApiStatus::CODE_0){
-            throw new \Exception(ApiStatus::$errCodes[$response['code']]);
-        }
-        return $response;
-    }
+//
+//    /**
+//     * ok
+//     * 确认收货接口  --------废弃
+//     * 接收反馈
+//     *
+//     * @param string $order_no
+//     * @param array $row[
+//     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
+//     *      'user_id'=>用户ID（管理员或用户必须）,
+//     *      'user_name'=>用户名（管理员或用户必须）,
+//     * ]
+//     *
+//     * int receive_type  在 App\Lib\publicInc 中;
+//     *  const Type_Admin = 1; //管理员
+//     *  const Type_User = 2;    //用户
+//     *  const Type_System = 3; // 系统自动化任务
+//     *  const Type_Store =4;//线下门店
+//     * @return
+//     */
+//    public static function receive($orderNo, $row)
+//    {
+//        $row['receive_type'] =5;
+//        $response = \App\Lib\Order\Delivery::receive($orderNo, $row);
+//        $response =json_decode($response,true);
+//        if($response['code']!=ApiStatus::CODE_0){
+//            throw new \Exception(ApiStatus::$errCodes[$response['code']]);
+//        }
+//        return $response;
+//    }
 
 
 
