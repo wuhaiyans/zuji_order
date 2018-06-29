@@ -109,6 +109,8 @@ class Delivery
 		$base_api = env('WAREHOUSE_API');
         $result = [
             'order_no'  => $orderInfo['order_no'],
+            'business_key'=>$orderInfo['business_key'],
+            'business_no'=>$orderInfo['business_no'],
             'realname'  => $orderInfo['name'],
             'mobile'    => $orderInfo['consignee_mobile'],
             'address_info' => $orderInfo['address_info'],
