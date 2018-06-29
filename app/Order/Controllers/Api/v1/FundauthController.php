@@ -40,7 +40,7 @@ class FundauthController extends Controller
 
         $params['out_auth_no']  = createNo(4);         //订单系统授权码
         $params['channel_type'] = 2;                   //渠道 默认为2 支付宝
-        $params['back_url']     = env("API_INNER_URL") . "/fundauthNotify";//后台通知地址
+        $params['back_url']     = env("ORDER_API") . "/fundauthNotify";//后台通知地址
 
         $data = CommonFundAuthApi::fundauthUrl($params);
         $url = !empty($data['authorization_url']) ? $data['authorization_url'] : "";
@@ -119,7 +119,7 @@ class FundauthController extends Controller
         }
         $data['out_trade_no']   = $withholdInfo['out_trade_no'];
         $data['auth_no']        = $withholdInfo['auth_no'];
-        $data['back_url']       = env("API_INNER_URL") . "/fundauthUnfreezeNotify";//后台通知地址
+        $data['back_url']       = env("ORDER_API") . "/fundauthUnfreezeNotify";//后台通知地址
 
 
         $result = CommonFundAuthApi::unfreeze( $params );
@@ -164,7 +164,7 @@ class FundauthController extends Controller
      		'out_trade_no'  => $withholdInfo['withhold_no'],    //订单系统交易码
      		'auth_no'       => $withholdInfo['out_withhold_no'],//支付系统授权码
      		'amount'        => $params['amount'],               //解冻金额 单位：分
-     		'back_url'      => env("API_INNER_URL") . "/unfreezeAndPayNotify",//后台通知地址
+     		'back_url'      => env("ORDER_API") . "/unfreezeAndPayNotify",//后台通知地址
      		'user_id'       => $params['user_id'],              //用户id
         ];
 
