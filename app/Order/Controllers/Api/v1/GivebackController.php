@@ -710,9 +710,28 @@ class GivebackController extends Controller
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单基本信息
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
-			return apiResponse([], get_code(), get_msg());
+			//组合最终返回商品基础数据
+			$data['goods_info'] = $orderGoodsInfo;//商品信息
+			$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+			$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
+			$data['status_text'] = '还机申请中';//后台状态
+
+			//物流信息
+			$logistics_list = [];
+			$logistics = \App\Warehouse\Config::$logistics;
+			foreach ($logistics as $id => $name) {
+				$logistics_list[] = [
+					'id' => $id,
+					'name' => $name,
+				];
+			}
+			$data['logistics_list'] = $logistics_list;//物流列表
+			return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
 		}
+		
+		
 		$orderGivebackInfo['status_name'] = OrderGivebackStatus::getStatusName($orderGivebackInfo['status']);
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
 		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
