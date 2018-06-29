@@ -156,7 +156,7 @@ class LogApi {
 			'host' => request()->server('HTTP_HOST'),	// 	Host名称
 			'data' => [
 				'level' => $level,						// 级别
-				'session_id' => session_id(),			// 回话
+				'session_id' => session()->getId(),		// 回话ID
 				'user_id' => '',						// 用户ID
 				'serial_no' => self::_autoincrement(),	// 序号
 				'content' => $data,						// 内容

@@ -173,68 +173,51 @@ class OrderWithhold
     }
 
 
-
     /**
      * 提前还款异步回调接口
      * @requwet Array
      * [
-     *       "payment_no":"mock",            //类型：String  必有字段  备注：支付平台支付码
-     *       "out_no":"mock",                //类型：String  必有字段  备注：订单平台支付码
-     *       "status":"mock",                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
-     *       "reason":"mock"                 //类型：String  必有字段  备注：失败理由，成功无此字段
+     *      "business_type" =>"", 业务类型
+     *      "business_no"   =>"", 业务编号
+     * 		"status"        =>"", 支付状态
      * ]
-     * @return String FAIL：失败  SUCCESS：成功
+     * @return json
      */
-    public static function repaymentNotify(){
+    public static function repaymentNotify($params){
 
-        $input = file_get_contents("php://input");
-        LogApi::info('分期提前还款回调', $input);
+        //过滤参数
+        $rule = [
+            'business_type'     => 'required',//业务类型
+            'business_no'       => 'required',//业务编码
+            'status'            => 'required',//支付状态
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return false;
+        }
+        if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+            return false;
+        }
 
-        $params = json_decode($input,true);
-        if( is_null($params) ){
-            echo 'notice data is null ';exit;
-        }
-        if( !is_array($params) ){
-            echo 'notice data not array ';exit;
-        }
-
-//        $params = filter_array($params, [
-//            'payment_no'    => 'required',
-//            'out_no'        => 'required',
-//            'status'        => 'required',
-//            'reason'        => 'required',
-//        ]);
-        if(count($params) < 4){
-            echo "FAIL";exit;
-        }
 
         // 支付成功
         if($params['status'] == "success"){
 
-            //开启事务
-            DB::beginTransaction();
-            // 查询分期信息
-            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$params['out_no']]);
+            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$params['business_no']]);
             if( !is_array($instalmentInfo)){
-                // 提交事务
-                DB::rollBack();
-                echo "FAIL_0";exit;
+                return false;
             }
             $instalmentId = $instalmentInfo['id'];
 
 
             // 查询支付单数据
-
             $payWhere = [
                 'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'    => $params['out_no'],
+                'business_no'    => $params['business_no'],
             ];
             $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
-
             if(empty($payInfo)){
-                v($payInfo);
-                DB::rollBack();
-                echo "FAIL_1";exit;
+                return false;
             }
 
             $_data = [
@@ -251,7 +234,7 @@ class OrderWithhold
             $recordData         = [];
             $counponWhere = [
                 'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $params['out_no'],
+                'business_no'   => $params['business_no'],
             ];
             $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
             if(!empty($counponInfo)){
@@ -271,10 +254,9 @@ class OrderWithhold
             }
 
             // 修改分期状态
-            $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['trade_no'=>$params['out_no']],$_data);
+            $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['trade_no'=>$params['business_no']],$_data);
             if(!$result){
-                DB::rollBack();
-                echo "FAIL_2";exit;
+                return false;
             }
 
 
@@ -283,7 +265,7 @@ class OrderWithhold
                 'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
                 'order_no'      => $instalmentInfo['order_no'],
                 'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $params['out_no'],
+                'business_no'   => $params['business_no'],
                 'appid'         => 1,
                 'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
                 'out_trade_no'  => $params["payment_no"],
@@ -292,9 +274,8 @@ class OrderWithhold
             ];
             $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
             if( !$IncomeId ){
-                DB::rollBack();
                 \App\Lib\Common\LogApi::error('创建收支明细失败');
-                return apiResponse([], ApiStatus::CODE_50000, '创建扣款记录失败');
+                return false;
             }
 
 
@@ -308,12 +289,8 @@ class OrderWithhold
 
             $record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
             if(!$record){
-                DB::rollBack();
-                echo "FAIL_3";exit;
+               return false;
             }
-            // 提交事务
-            DB::commit();
-
             // 发送短信
 
             //发送短信通知 支付宝内部通知
@@ -329,8 +306,7 @@ class OrderWithhold
 
             // 提交蚁盾用户还款数据
 
-
-            echo "SUCCESS";
+            return true;
 
         }
     }
