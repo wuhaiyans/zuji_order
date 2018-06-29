@@ -843,7 +843,7 @@ class OrderReturnCreater
             $where1[] = ['order_goods.goods_name', 'like', '%'.$where['goods_name'].'%'];
         }
         if(isset($where['mobile'])){
-            $where1[] = ['order_info.mobile', '=', $where['mobile']];
+            $where1[] = ['order_info.mobile','like','%'.$where['mobile'].'%'];
         }
         if( isset($where['status']) ){
             $where1[] = ['order_return.status', '=', $where['status']];
