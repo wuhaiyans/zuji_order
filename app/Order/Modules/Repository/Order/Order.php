@@ -164,7 +164,7 @@ class Order {
 	public function setPayStatus( array $data ):bool{
 		// 必须为 等待支付 或 支付中
 		if( $this->model->order_status != OrderStatus::OrderPaying
-				|| $this->model->order_status != OrderStatus::OrderWaitPaying){
+				&& $this->model->order_status != OrderStatus::OrderWaitPaying){
 			\App\Lib\Common\LogApi::type('data-error')::error('订单支付状态禁止',$this->model->toArray());
 			return false;
 		}
