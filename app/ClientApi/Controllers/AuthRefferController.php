@@ -51,9 +51,9 @@ class AuthRefferController extends Controller{
                     'username' =>$checkInfo['data'][0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
-                $list=['url'=>config('tripartite.API_INNER_URL'),'data'=>$params];
+                $list=['url'=>config('tripartite.ORDER_API'),'data'=>$params];
                 Log::debug("验证token",$list);
-                $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
+                $info = Curl::post(config('tripartite.ORDER_API'), json_encode($params),$header);
                 Log::debug("验证token".$info);
                 $info =json_decode($info,true);
                 if( is_null($info)
