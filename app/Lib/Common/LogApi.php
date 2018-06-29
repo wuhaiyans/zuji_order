@@ -52,7 +52,7 @@ class LogApi {
 	 */
 	public static function debug( string $msg, $data=[] )
 	{
-		if(config('logsystem.LOG_REPORT') == 'debug' ){
+		if(config('logsystem.LOG_REPORT') == 'debug' || \Illuminate\Support\Facades\Redis::get('zuji.common.config.LOG_REPORT')=='debug' ){
 			return self::log('Debug', $msg, $data);
 		}
 		return self::getInstace();
