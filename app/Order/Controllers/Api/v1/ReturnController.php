@@ -534,6 +534,21 @@ class ReturnController extends Controller
      * ]
      */
     public function allowReturn(Request $request){
+        $orders = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'goods_no'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$orders);
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+        $return=$this->OrderReturnCreater->allowReturn($orders['params']);
+        if(!$return){
+            return apiResponse([],ApiStatus::CODE_0);//允许进入售后和退换货
+        }
+        return apiResponse([],ApiStatus::CODE_34008);//不允许进入退换货
 
     }
 
