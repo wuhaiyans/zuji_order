@@ -741,8 +741,8 @@ class WithholdController extends Controller
 
         // 提交事务
         DB::commit();
-        echo $payment_url['url'];exit;
 
+        return apiResponse($payment_url['url'],ApiStatus::CODE_0);
 
 
     }
