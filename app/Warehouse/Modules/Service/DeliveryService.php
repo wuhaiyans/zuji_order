@@ -204,6 +204,13 @@ class DeliveryService
     {
         if ($logisticsId === null) {
             return Config::$logistics;
+//            foreach (Config::$logistics as $k=>$item){
+//                $data[] = [
+//                    'status'=>$k,
+//                    'name'=>$item,
+//                ];
+//            }
+//            return $data;
         }
         return isset(Config::$logistics[$logisticsId]) ? Config::$logistics[$logisticsId] : '';
     }

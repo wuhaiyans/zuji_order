@@ -155,22 +155,30 @@ class Goods {
 	 * 还机开始
 	 * @return bool
 	 */
-    public function givebackOpen():bool {
-        return true;
+    public function givebackOpen( $givebackNo ):bool {
+        $this->model->goods_status = OrderGoodStatus::BACK_IN_THE_MACHINE;
+        $this->model->business_key = \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK;
+        $this->model->business_no = $givebackNo;
+        $this->model->update_time = time();
+        return $this->model->save();
     }
 	/**
 	 * 还机关闭
 	 * @return bool
 	 */
     public function givebackClose():bool {
-        return true;
+        $this->model->goods_status = OrderGoodStatus::CLOSED_THE_MACHINE;
+        $this->model->update_time = time();
+        return $this->model->save();
     }
 	/**
 	 * 还机完成
 	 * @return bool
 	 */
     public function givebackFinish():bool {
-        return true;
+        $this->model->goods_status = OrderGoodStatus::COMPLETE_THE_MACHINE;
+        $this->model->update_time = time();
+        return $this->model->save();
     }
 	
     //-+------------------------------------------------------------------------
@@ -180,7 +188,7 @@ class Goods {
 	 * 买断开始
 	 * @return bool
 	 */
-    public function buyoutOpen():bool {
+    public function buyoutOpen(  ):bool {
         return true;
     }
 	/**

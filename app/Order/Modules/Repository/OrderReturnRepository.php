@@ -144,6 +144,23 @@ class OrderReturnRepository
         return $getReturn;
     }
 
+    /**
+     * 获取已取消除外的退货单信息
+     * @param $order_no
+     * @param $gods_no
+     */
+    public static function returnList($order_no,$goods_no){
+        $where[]=['goods_no','=',$goods_no];
+        $where[]=['order_no','=',$order_no];
+        $where[]=['status','!=',ReturnStatus::ReturnCanceled];
+        $getReturn=orderReturn::where($where)->first();
+        if(!$getReturn){
+            return false;
+        }
+        return $getReturn->toArray($getReturn);
+
+    }
+
 
 
 }

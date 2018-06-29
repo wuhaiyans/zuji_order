@@ -320,9 +320,9 @@ class ReturnController extends Controller
     // 退货结果查看接口
     /*
      * [
-     *    "business_key"  =>"" 必选  业务类型
-     *   'refund_no'=>''可选
-     *   'order_no'=>''可选
+     *    "business_key"  =>'' 必选  业务类型
+     *   'goods_no'       =>''必选   商品编号
+     *   'order_no'       =>''必选   订单编号
      * ]
      *
      */
@@ -523,6 +523,18 @@ class ReturnController extends Controller
             return apiResponse([],ApiStatus::CODE_34004);//拒绝退款失败
         }
          return apiResponse( [], ApiStatus::CODE_0);
+    }
+
+    /**
+     * 是否允许进入退换货
+     * @param Request $request
+     * [
+     *   "order_no"  =>"", 【必选】订单编号
+     *    ""
+     * ]
+     */
+    public function allowReturn(Request $request){
+
     }
 
 }

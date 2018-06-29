@@ -136,10 +136,32 @@ class BusinessInfo
     }
 
     /**
+     * 退换货编号
+     * @param string $refund_no
+     */
+    public function setRefundNo(string $refund_no){
+        $this->data['refund_no']=$refund_no;
+    }
+
+    /**
+     * 是否显示取消按钮
+     * true   显示
+     * false  不显示
+     * @param string $status
+     */
+    public function setCancel(string $status){
+        if($status=="1"){
+            $this->data['cancel_button']=false;
+        }else{
+            $this->data['cancel_button']=true;
+        }
+
+    }
+    /**
      * 备注信息及客服电话
      * @param string $remark
      */
-    public function setRemark(string $remark){
+    public function setRemark(array $remark){
         $this->data['remark']=$remark;
     }
     public  static function getStateFlow(){

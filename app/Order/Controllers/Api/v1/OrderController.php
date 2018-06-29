@@ -241,6 +241,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function getClientOrderList(Request $request){
+		
         try{
 
 
@@ -251,11 +252,11 @@ class OrderController extends Controller
                 return apiResponse([], ApiStatus::CODE_10102,[],'用户id为空');
 
             }
-
+			\App\Lib\Common\LogApi::debug('客户端查询订单列表请求',$params);
             $orderData = Service\OrderOperate::getClientOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
-
+				\App\Lib\Common\LogApi::debug('客户端查询订单列表结果',$orderData['data']);
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 

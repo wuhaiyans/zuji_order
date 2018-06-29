@@ -60,6 +60,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
+
             $no_list = [];
             foreach( $params['goods_no'] as $k => $goods_no ){
                 // 查商品
@@ -305,7 +306,7 @@ class OrderReturnCreater
                     $data[$k]['goods_no']    = $returnInfo[$k]['goods_no'];
                     $refund[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
                     //获取商品扩展信息
-                    $goodsDelivery[$k] = \App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
+                    $goodsDelivery[$k]=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
                     if( !$goodsDelivery ){
                         return false;
                     }
@@ -585,9 +586,9 @@ class OrderReturnCreater
                     return false;
                 }
                 //审核通过之后不能取消
-                //if($return_info[$refund_no]['status']==ReturnStatus::ReturnAgreed){
-                 //   return false;
-               // }
+               // if($return_info[$refund_no]['status']>3){
+               //     return false;
+             //   }
                 //更新退换货状态为已取消
                 $cancelApply=$return->close();
                 if(!$cancelApply){
@@ -986,6 +987,7 @@ class OrderReturnCreater
      */
     public function returnResult($params){
         try{
+            $order_no=$params['order_no'];
             $buss=new \App\Order\Modules\Service\BusinessInfo();
             //业务类型
             $buss->setBusinessType($params['business_key']);
@@ -997,30 +999,30 @@ class OrderReturnCreater
             }
             //获取状态流
             $stateFlow=$buss->getStateFlow();
-            if($params['order_no']){
+            //根据order_no和goods_no获取退货单信息
+            $return=$this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
+            if(!$return){
                 $buss->setStatus("A");
                 $buss->setStatusText("申请");
-                $order_no=$params['order_no'];
                 //获取退换货原因
                 $reason=ReturnStatus::getQuestionList();
                 $buss->setReturnReason($reason['return']);
-
             }
             //注入状态流
             $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
-            if($params['refund_no']){
+            if(isset($return['refund_no'])){
                 //获取退换货单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['refund_no']);
-                if(!$return){
-                    return false;
-                }
-                $returnInfo=$return->getData();
-                $order_no=$returnInfo['order_no'];
-                if($returnInfo['status']==ReturnStatus::ReturnCreated){
+               // $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($return['refund_no']);
+              //  if(!$return){
+               //     return false;
+              //  }
+              //  $returnInfo=$return->getData();
+                $buss->setRefundNo($return['refund_no']);
+                if($return['status']==ReturnStatus::ReturnCreated){
                     $buss->setStatus("B");
                     $buss->setStatusText("待审核");
-                }elseif($returnInfo['status']==ReturnStatus::ReturnAgreed){
+                }elseif($return['status']==ReturnStatus::ReturnAgreed){
                     $buss->setStatus("B");
                     $buss->setStatusText("审核同意");
                     $params=[
@@ -1030,71 +1032,94 @@ class OrderReturnCreater
                     $remark['remark']="若填写错误，请及时联系客服进行修改";
                     $remark['mobile']=config('tripartite.Customer_Service_Phone');
                     $buss->setRemark($remark);
-                    //获取物流信息
-                    $header = ['Content-Type: application/json'];
-                    $info=curl::post(config('tripartite.warehouse_api_uri'), json_encode($params),$header);
-                    $logistics=json_decode($info,true);
-                    $buss->setLogisticsInfo($logistics['data']['list']);
-                }elseif($returnInfo['status']==ReturnStatus::ReturnDenied){
+                    if(empty($return['logistics_no']) && empty($return['logistics_name'])) {
+                        //获取物流信息
+                        $header = ['Content-Type: application/json'];
+                        $info = curl::post(config('tripartite.warehouse_api_uri'), json_encode($params), $header);
+                        $info = json_decode($info, true);
+                        if( is_null($info)
+                            || !is_array($info)
+                            || !isset($info['code'])
+                            || !isset($info['msg'])
+                            || !isset($info['data']) ){
+                           return false;
+                        }
+                        $i=0;
+                        foreach($info['data']['list'] as $k=>$id){
+
+                            $logistics[$i]['id']=$k;
+                            $logistics[$i]['name']=$id;
+                            $i=$i+1;
+                        }
+                        $buss->setLogisticsInfo($logistics);
+                    }
+                }elseif($return['status']==ReturnStatus::ReturnDenied){
                     $buss->setStatus("B");
                     $buss->setStatusText("审核拒绝");
-                }elseif($returnInfo['status']==ReturnStatus::ReturnCanceled && $returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测不合格");
                     $buss->setCheckResult("检测不合格");
-                }elseif($returnInfo['status']==ReturnStatus::ReturnCanceled){
+                }
+               /* elseif($returnInfo['status']==ReturnStatus::ReturnCanceled){
                     $buss->setStateFlow($stateFlow['cancelStateFlow']);
                     $buss->setStatus("C");
                     $buss->setStatusText("已取消");
-                }elseif($returnInfo['status']==ReturnStatus::ReturnReceive){
+                }*/
+                elseif($return['status']==ReturnStatus::ReturnReceive){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
-                    if($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluation){
+                    if($return['evaluation_status']==ReturnStatus::ReturnEvaluation){
                         $checkResult['check_result']="待检测";
 
-                    }elseif($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                    }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                         $checkResult['check_result']="检测不合格";
 
-                    }elseif($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
+                    }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
                         $checkResult['check_result']="检测合格";
 
                     }
-                    $checkResult['check_remark']=$returnInfo['evaluation_remark'];
+                    $checkResult['check_remark']=$return['evaluation_remark'];
                     $buss->setCheckResult( $checkResult);
-                }elseif($returnInfo['status']==ReturnStatus::ReturnTuiHuo || $returnInfo['status']==ReturnStatus::ReturnHuanHuo || $returnInfo['status']==ReturnStatus::ReturnTui){
+                }elseif($return['status']==ReturnStatus::ReturnTuiHuo || $return['status']==ReturnStatus::ReturnHuanHuo || $return['status']==ReturnStatus::ReturnTui){
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
-                    if($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluation){
+                    if($return['evaluation_status']==ReturnStatus::ReturnEvaluation){
                         $checkResult['check_result']="待检测";
 
-                    }elseif($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                    }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                         $checkResult['check_result']="检测不合格";
 
-                    }elseif($returnInfo['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
+                    }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
                         $checkResult['check_result']="检测合格";
 
                     }
-                    $checkResult['check_remark']=$returnInfo['evaluation_remark'];
+                    $checkResult['check_remark']=$return['evaluation_remark'];
                     if(isset($checkResult)){
                         $buss->setCheckResult( $checkResult);
                     }
 
-                }elseif($returnInfo['status']==ReturnStatus::ReturnTuiKuan){
+                }elseif($return['status']==ReturnStatus::ReturnTuiKuan){
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
                 }
-                if(!empty($returnInfo['logistics_no']) && !empty($returnInfo['logistics_name'])){
-                     $channel_list['logistics_no']=$returnInfo['logistics_no'];
-                     $channel_list['logistics_name']=$returnInfo['logistics_name'];
+                if(!empty($return['logistics_no']) && !empty($return['logistics_name'])){
+                     $channel_list['logistics_no']=$return['logistics_no'];
+                     $channel_list['logistics_name']=$return['logistics_name'];
                      $buss->setLogisticsForm($channel_list);
 
                 }
-                $quesion['reason_name']=ReturnStatus::getName($returnInfo['reason_id']);//退换货原因
-                $quesion['reason_text']=$returnInfo['reason_text'];//退换货原因
+                $quesion['reason_name']=ReturnStatus::getName($return['reason_id']);//退换货原因
+                $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
+                //设置是否显示取消退换货按钮
+                if($return['status']>3){
+                    $buss->setCancel("1");
+                }else{
+                    $buss->setCancel("0");
+                }
 
             }
-
             //查询订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
             if(!$order){
@@ -1104,13 +1129,13 @@ class OrderReturnCreater
             $buss->setOrderInfo($orderInfo);
             //获取商品信息
             $goods=\App\Order\Modules\Repository\Order\Goods::getOrderNo($order_no);
-            $goodsInfo=$goods->getData($goods);
+            $goodsInfo=$goods->getData();
             $buss->setGoodsInfo($goodsInfo);
             //获取换货信息
-            if(!empty($returnInfo['barter_logistics_no']) && !empty($returnInfo['barter_logistics_id'])){
-                $barter['barter_logistics_no']=$returnInfo['barter_logistics_no'];
-                $barter['barter_logistics_name']=\App\Lib\Warehouse\Logistics::info($returnInfo['barter_logistics_id']);
-                $barter['order_no']=$order_no;
+            if(!empty($return['barter_logistics_no']) && !empty($return['barter_logistics_id'])){
+                $barter['barter_logistics_no']=$return['barter_logistics_no'];
+                $barter['barter_logistics_name']=\App\Lib\Warehouse\Logistics::info($return['barter_logistics_id']);
+                $barter['order_no']=$params['order_no'];
                 $barter['old_goods_name']=$goodsInfo['goods_name'];
                 $barter['goods_name']=$goodsInfo['goods_name'];
                 $buss->setBarterLogistics($barter);
@@ -1352,9 +1377,9 @@ class OrderReturnCreater
         DB::beginTransaction();
         try{
             $data=[];
-            foreach($params['goods_info'] as $k=>$v){
+            foreach($params['goods_info'] as $k=>$refund_no){
                 //获取退款单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['refund_no']);
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($refund_no);
                 if(!$return){
                     return false;
                 }
