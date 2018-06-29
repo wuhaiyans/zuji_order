@@ -129,8 +129,8 @@ class OrderCreater
                 'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
                 'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
                 'fundauthAmount' => 0.01,//Price 预授权金额（押金），单位：元【必须】<br/>
-                'paymentAmount' => 0.01,//Price 支付金额（总租金），单位：元【必须】<br/>
-                'paymentFenqi' => 0,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                'paymentAmount' => 0.12,//Price 支付金额（总租金），单位：元【必须】<br/>
+                'paymentFenqi' => 12,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
             ]);
 			//支付单创建错误，返回错误
 			if( !$payResult ){
