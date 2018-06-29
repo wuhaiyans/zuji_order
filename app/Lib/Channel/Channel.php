@@ -88,7 +88,7 @@ class Channel{
         }
         foreach($info['data'] as $keys=>$values) {
 
-            $channerName[] = $values['name'];
+            $channerName[$values['id']] = $values['name'];
         }
         return $channerName;
 
