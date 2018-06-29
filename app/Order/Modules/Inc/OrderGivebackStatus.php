@@ -87,6 +87,68 @@ class OrderGivebackStatus{
         }
         return '';
     }
+	
+	
+	//-+------------------------------------------------------------------------
+	// | 前端还机单状态定义
+	//-+------------------------------------------------------------------------
+	/**
+	 * 前端申请还机
+	 */
+	const VIEW_STATUS_APPLYING = 1;
+	/**
+	 * 前端还机检测
+	 */
+	const VIEW_STATUS_CHECK = 2;
+	/**
+	 * 前端申请还机
+	 */
+	const VIEW_STATUS_RETURN_DEPOSTI= 3;
+	/**
+	 * 后台状态对应前端状态值
+	 * @param $status int 后台状态值
+	 * @return $status int 前端状态值
+	 */
+	public static function adminMapView( $status ) {
+		$map = [
+            self::STATUS_APPLYING => self::VIEW_STATUS_APPLYING,
+            self::STATUS_DEAL_WAIT_DELIVERY => self::VIEW_STATUS_APPLYING,
+            self::STATUS_DEAL_WAIT_CHECK => self::VIEW_STATUS_CHECK,
+            self::STATUS_DEAL_WAIT_PAY => self::VIEW_STATUS_CHECK,
+            self::STATUS_DEAL_IN_PAY => self::VIEW_STATUS_CHECK,
+            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => self::VIEW_STATUS_RETURN_DEPOSTI,
+            self::STATUS_AGED_FAIL => self::VIEW_STATUS_CHECK,
+            self::STATUS_DEAL_DONE => self::VIEW_STATUS_RETURN_DEPOSTI,
+		];
+		if( isset($map[$status]) ){
+			return $map[$status];
+		}
+		return fasle;
+	}
+    /**
+     * 订单还前端状态列表
+     * @return array
+     */
+    public static function getViewStatusList(){
+        return [
+			self::VIEW_STATUS_APPLYING => '申请还机',
+			self::VIEW_STATUS_CHECK => '还机检测',
+			self::VIEW_STATUS_RETURN_DEPOSTI => '退还押金',
+        ];
+    }
+
+    /**
+     * 订单还机前端状态值 转换成 状态名称
+     * @param int $status   订单还机状态值
+     * @return string 订单还机状态名称
+     */
+    public static function getViewStatusName($status){
+        $list = self::getViewStatusList();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
 
 
 	//-+------------------------------------------------------------------------
