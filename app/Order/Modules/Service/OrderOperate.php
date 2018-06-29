@@ -481,7 +481,8 @@ class OrderOperate
             }
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
-
+            $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
+            $orderInfo['business_no'] =$orderInfo['order_no'];
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
