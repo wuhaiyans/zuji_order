@@ -36,14 +36,16 @@ class OrderClearingRepository
         if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
         if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
 
-
+        //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
         if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && empty($param['refund_amount']))
         {
             $status    =   OrderCleaningStatus::orderCleaningComplete;
+            //预授权转支付不为空，为待押金转支付状态
         } else if (!empty($param['auth_deduction_amount'])){
 
             $status    =   OrderCleaningStatus::orderCleaningDeposit;
 
+            //预授权转支付不为空，为待押金转支付状态
         }   else if (empty($param['auth_deduction_amount']) && !empty($param['auth_unfreeze_amount'])){
 
             $status    =   OrderCleaningStatus::orderCleaningUnfreeze;

@@ -479,8 +479,18 @@ class OrderRepository
         }
 
         //根据手机号
+        if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
+        }
+        //根据订单号
+        if (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
+        }
+
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['mobile']];
+            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
         }
 
         //应用来源ID

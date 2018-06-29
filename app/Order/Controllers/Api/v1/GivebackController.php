@@ -20,28 +20,24 @@ class GivebackController extends Controller
 	 * @param Request $request
 	 * @return array $data
 	 */
-	public function givebackReturn( $params = [] ){
+	public static function givebackReturn( $params = [] ){
 		// 拼接返回参数
 		return array_merge([
 			"business_type" 	=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			"business_name"		=> "还机",
 			"state_flow"		=> [
 				[
-					"status"	=> "A",
-					"name"		=> "申请"
+					'status' => OrderGivebackStatus::VIEW_STATUS_APPLYING,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_APPLYING),
 				],
 				[
-					"status"	=> "B",
-					"name"		=> "审核"
+					'status' => OrderGivebackStatus::VIEW_STATUS_CHECK,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_CHECK),
 				],
 				[
-					"status"	=> "C",
-					"name"		=> "检测"
+					'status' => OrderGivebackStatus::VIEW_STATUS_RETURN_DEPOSTI,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_RETURN_DEPOSTI),
 				],
-				[
-					"status"	=> "D",
-					"name"		=> "完成"
-				]
 			],
 		],$params);
 
@@ -67,52 +63,72 @@ class GivebackController extends Controller
 
 		//初始化最终返回数据数组
 		$data = [];
+		$orderGoodsInfo = $this->__getOrderGoodsInfo($goodsNo);
+		if( !$orderGoodsInfo ) {
+			return apiResponse([], get_code(), get_msg());
+		}
+		//组合最终返回商品基础数据
+		$data['goods_info'] = $orderGoodsInfo;//商品信息
+		$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
+		$data['status_text'] = '还机申请中';//后台状态
+		$data['logistics_list'] = \App\Warehouse\Config::$logistics;//物流列表
+		return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
+
+//		//-+--------------------------------------------------------------------
+//		// | 此部分数据数据【已作废】
+//		//-+--------------------------------------------------------------------
+//		//默认不需要展示已支付和待支付租金价格字段
+//		$data['zujin_view_flag'] = 0;
+//		//判断商品租期类型【长租代扣支付需要获取分期】
+//		if( $orderGoodsInfo['zuqi_type'] == 1 ){
+//			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+//		}
+//		//获取当前商品是否存在分期列表
+//		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+//		if( empty($instalmentList[$goodsNo]) ){
+//			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+//		}
+//
+//		//长租代扣分期，展示已支付租金和待支付租金
+//		$data['zujin_view_flag'] = 1;
+//		$zujinAlreadyPay = $instalmentAmount = 0;
+//		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+//			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
+//				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+//			}
+//			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+//				$instalmentAmount += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+//			}
+//		}
+//		//组合最终返回价格基础数据
+//		$data['zujin_already_pay'] = $zujinAlreadyPay;
+//		$data['zujin_need_pay'] = $instalmentAmount;
+	}
+	
+	private function __getOrderGoodsInfo( $goodsNo ){
+		
 		//获取商品基础数据
 		//创建商品服务层对象
 		$orderGoodsService = new OrderGoods();
 		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
-			return apiResponse([], get_code(), get_msg());
+			return [];
 		}
-		//组合最终返回商品基础数据
-		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
-		$data['goods_name'] = $orderGoodsInfo['goods_name'];
-		$data['goods_thumb'] = $orderGoodsInfo['goods_thumb'];
-		$data['status'] = OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_APPLYING);
-		$data['zuqi'] = $orderGoodsInfo['zuqi'];
-		$data['zuqi_type'] = $orderGoodsInfo['zuqi_type'];
-		$data['zuqi_begin_date'] = $orderGoodsInfo['begin_time'];
-		$data['zuqi_end_date'] = $orderGoodsInfo['end_time'];
-		$data['order_no'] = $orderGoodsInfo['order_no'];
-
-		//默认不需要展示已支付和待支付租金价格字段
-		$data['zujin_view_flag'] = 0;
-		//判断商品租期类型【长租代扣支付需要获取分期】
-		if( $orderGoodsInfo['zuqi_type'] == 1 ){
-			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+		//商品信息解析
+		$specs = explode(';', $orderGoodsInfo['specs']);
+		$specsStrArr = [];
+		foreach ($specs as $key => $value) {
+			$value = explode(':', $value);
+			$specsStrArr[]= $value[1];
 		}
-		//获取当前商品是否存在分期列表
-		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
-		if( empty($instalmentList[$goodsNo]) ){
-			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
-		}
-
-		//长租代扣分期，展示已支付租金和待支付租金
-		$data['zujin_view_flag'] = 1;
-		$zujinAlreadyPay = $instalmentAmount = 0;
-		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
-				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
-			}
-			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-				$instalmentAmount += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
-			}
-		}
-		//组合最终返回价格基础数据
-		$data['zujin_already_pay'] = $zujinAlreadyPay;
-		$data['zujin_need_pay'] = $instalmentAmount;
-		return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+		$specsStr = $specsStrArr[3] . '|' . $specsStrArr[1] . '|' . $specsStrArr[4] . '|'  . $specsStrArr[2];
+		$orderGoodsInfo['goods_specs'] = $specsStr;//商品规格信息
+		$orderGoodsInfo['goods_img'] = $orderGoodsInfo['goods_thumb'];//商品缩略图
+		return $orderGoodsInfo;
 	}
+
+
 	/**
 	 * 生成还机单等相关操作
 	 * @param Request $request
@@ -199,9 +215,9 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 
-		$return  = $this->givebackReturn(['status'=>"A","status_text"=>"申请换机"]);
+//		$return  = $this->givebackReturn(['status'=>"A","status_text"=>"申请换机"]);
 
-		return apiResponse($return, ApiStatus::CODE_0, '数据获取成功');
+		return apiResponse([], ApiStatus::CODE_0, '数据获取成功');
 	}
 	/**
 	 * 还机确认收货
@@ -274,8 +290,8 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 
-		$return  = $this->givebackReturn(['status'=>"B","status_text"=>"还机确认收货"]);
-		return apiResponse($return, ApiStatus::CODE_0, '确认收货成功');
+//		$return  = $this->givebackReturn(['status'=>"B","status_text"=>"还机确认收货"]);
+		return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
 
 	}
 
@@ -506,8 +522,8 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 
-		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
-		return apiResponse($return, ApiStatus::CODE_0, '确认收货成功');
+//		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
+		return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
 	}
 
 	/**
@@ -530,16 +546,14 @@ class GivebackController extends Controller
 		if ($validator->fails()) {
 			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
 		}
-		//创建商品服务层对象
-		$orderGoodsService = new OrderGoods();
+		//创建服务层对象
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单基本信息
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($paramsArr['goods_no']);
 		if( !$orderGivebackInfo ){
 			return apiResponse([], get_code(), get_msg());
 		}
-		//获取商品信息
-		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivebackInfo['goods_no']);
+		$orderGoodsInfo = $this->__getOrderGoodsInfo($orderGivebackInfo['goods_no']);
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
@@ -554,31 +568,39 @@ class GivebackController extends Controller
 			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());
 		}
 		//拼接返回数据
-		$data = [
-			'order_no' => $orderGoodsInfo['order_no'],
-			'goods_no' => $orderGoodsInfo['goods_no'],
-			'goods_thumb' => $orderGoodsInfo['goods_thumb'],
-			'goods_name' => $orderGoodsInfo['goods_name'],
-			'chengse' => $orderGoodsInfo['chengse'],
-			'zuqi_type' => $orderGoodsInfo['zuqi_type'],
-			'zuqi' => $orderGoodsInfo['zuqi'],
-			'begin_time' => $orderGoodsInfo['begin_time'],
-			'end_time' => $orderGoodsInfo['end_time'],
-			'status' => $orderGivebackInfo['status'],
-			'status_name' => OrderGivebackStatus::getStatusName($orderGivebackInfo['status']),
-			'instalment_num' => $orderGivebackInfo['instalment_num'],
-			'instalment_amount' => $orderGivebackInfo['instalment_amount'],
-			'compensate_amount' => $orderGivebackInfo['compensate_amount'],
-			'payment_status' => $orderGivebackInfo['payment_status'],
-			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
-			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
-			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
-			'payment_url' => $paymentUrl['url'],
-		];
-
-
-		$return  = $this->givebackReturn(['status'=>"A","status_text"=>"获取支付信息","payment_info"=>$data]);
+		$data['goods_info'] =$orderGoodsInfo;
+		$orderGivebackInfo['status_name'] = OrderGivebackStatus::getStatusName($orderGivebackInfo['status']);
+		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
+		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']);
+		$data['giveback_info'] =$orderGivebackInfo;
+		$data['payment_info'] =['url'=>$paymentUrl['url']];
+		$data['status'] = OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
+		$data['status_text'] =OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
+		$return  = $this->givebackReturn($data);
 		return apiResponse($return, ApiStatus::CODE_0, '获取支付信息');
+//		$data = [
+//			'order_no' => $orderGoodsInfo['order_no'],
+//			'goods_no' => $orderGoodsInfo['goods_no'],
+//			'goods_thumb' => $orderGoodsInfo['goods_thumb'],
+//			'goods_name' => $orderGoodsInfo['goods_name'],
+//			'chengse' => $orderGoodsInfo['chengse'],
+//			'zuqi_type' => $orderGoodsInfo['zuqi_type'],
+//			'zuqi' => $orderGoodsInfo['zuqi'],
+//			'begin_time' => $orderGoodsInfo['begin_time'],
+//			'end_time' => $orderGoodsInfo['end_time'],
+//			'status' => $orderGivebackInfo['status'],
+//			'status_name' => OrderGivebackStatus::getStatusName($orderGivebackInfo['status']),
+//			'instalment_num' => $orderGivebackInfo['instalment_num'],
+//			'instalment_amount' => $orderGivebackInfo['instalment_amount'],
+//			'compensate_amount' => $orderGivebackInfo['compensate_amount'],
+//			'payment_status' => $orderGivebackInfo['payment_status'],
+//			'payment_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']),
+//			'evaluation_status' => $orderGivebackInfo['evaluation_status'],
+//			'evaluation_status_name' => OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['evaluation_status']),
+//			'payment_url' => $paymentUrl['url'],
+//		];
+
+
 	}
 
 	/**
