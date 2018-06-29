@@ -105,8 +105,7 @@ class WithholdController extends Controller
 
             // 判断用户代扣协议是否允许 解约
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
-            $payWithhold = $withhold->getData();
-            if($payWithhold['counter'] != 0){
+            if($withhold->getCounter() != 0){
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '不允许解约');
             }
