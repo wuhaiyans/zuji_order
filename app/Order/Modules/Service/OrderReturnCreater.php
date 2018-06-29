@@ -843,7 +843,7 @@ class OrderReturnCreater
             $where1[] = ['order_goods.goods_name', 'like', '%'.$where['goods_name'].'%'];
         }
         if(isset($where['mobile'])){
-            $where1[] = ['order_info.mobile', '=', $where['mobile']];
+            $where1[] = ['order_info.mobile','like','%'.$where['mobile'].'%'];
         }
         if( isset($where['status']) ){
             $where1[] = ['order_return.status', '=', $where['status']];
@@ -1802,11 +1802,15 @@ class OrderReturnCreater
      *    'goods_no'   =>  ''  必选  商品编号
      * ]
      */
-    public function allowReturn($params){
-        if(empty($params['goods_no']) || empty($params['goods_no'])){
+    public static function allowReturn($params){
+        if(empty($params['goods_no']) || empty($params['order_no'])){
            return false;
         }
-        return $this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
+        $return= orderReturnRepository::returnList($params['order_no'],$params['goods_no']);
+        if($return){
+            return false;
+        }
+        return true;
     }
 
 }
