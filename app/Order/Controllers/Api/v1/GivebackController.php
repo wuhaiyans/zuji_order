@@ -10,6 +10,8 @@ use App\Order\Modules\Service\OrderGoods;
 use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Models\OrderGoods;
 
 class GivebackController extends Controller
 {
@@ -156,17 +158,25 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([], get_code(), get_msg());
 				}
+//				//修改商品表业务类型、商品编号、还机状态
+//				$orderGoodsService = new OrderGoods();
+//				$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
+//					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+//					'business_no' => $giveback_no,
+//					'goods_status' => $status,
+//				]);
 				//修改商品表业务类型、商品编号、还机状态
-				$orderGoodsService = new OrderGoods();
-				$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], [
-					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-					'business_no' => $giveback_no,
-					'goods_status' => $status,
-				]);
+				$orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
+				if( !$orderGoods ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_92401);
+				}
+				$orderGoodsResult = $orderGoods->givebackOpen( $giveback_no );
 				if(!$orderGoodsResult){
 					//事务回滚
 					DB::rollBack();
-					return apiResponse([], get_code(), get_msg());
+					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
 				}
 				//推送到收发货系统
 				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, [['goods_no'=>$goodsNo]]);
@@ -469,12 +479,26 @@ class GivebackController extends Controller
 				return apiResponse([], get_code(), get_msg());
 			}
 			//更新商品表状态
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], ['goods_status'=>$status]);
-			if( !$orderGoodsResult ){
-				//事务回滚
-				DB::rollBack();
-				return apiResponse([], get_code(), get_msg());
+			if( $status == OrderGivebackStatus::STATUS_DEAL_DONE ){
+				$orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
+				if( !$orderGoods ){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([], ApiStatus::CODE_92401);
+				}
+				$orderGoodsResult = $orderGoods->givebackFinish();
+				if(!$orderGoodsResult){
+					//事务回滚
+					DB::rollBack();
+					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
+				}
 			}
+//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], ['goods_status'=>$status]);
+//			if( !$orderGoodsResult ){
+//				//事务回滚
+//				DB::rollBack();
+//				return apiResponse([], get_code(), get_msg());
+//			}
 		} catch (\Exception $ex) {
 			//回滚事务
 			DB::rollBack();

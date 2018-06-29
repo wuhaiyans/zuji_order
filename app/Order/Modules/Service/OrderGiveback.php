@@ -4,6 +4,8 @@ namespace App\Order\Modules\Service;
 use App\Order\Modules\Repository\OrderGivebackRepository;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use Illuminate\Support\Facades\DB;
+use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Models\OrderGoods;
 
 class OrderGiveback
 {
@@ -308,7 +310,14 @@ class OrderGiveback
 			if(!self::__unfreeze($params['business_no'])){
 				return false;
 			}
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
+//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
+			
+			//更新商品表状态
+			$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
+			if( !$orderGoods ){
+				return false;
+			}
+			$orderGoodsResult = $orderGoods->givebackFinish();
 			if( !$orderGoodsResult ){
 //				//事务回滚
 //				DB::rollBack();
@@ -418,11 +427,23 @@ class OrderGiveback
 				set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
 				return false;
 			}
-			//同步到商品状态
-			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
-			if( !$orderGoodsResult ){
-				return false;
+			
+			//更新商品表状态
+			if( $status == OrderGivebackStatus::STATUS_DEAL_DONE ){
+				$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
+				if( !$orderGoods ){
+					return false;
+				}
+				$orderGoodsResult = $orderGoods->givebackFinish();
+				if(!$orderGoodsResult){
+					return false;
+				}
 			}
+//			//同步到商品状态
+//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
+//			if( !$orderGoodsResult ){
+//				return false;
+//			}
 		} catch (\Exception $ex) {
 			return false;
 		}
