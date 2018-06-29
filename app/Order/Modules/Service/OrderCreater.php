@@ -610,7 +610,6 @@ class OrderCreater
 		}catch(\Exception $e){
 			$result['withholdStatus'] = true;
 		}
-        var_dump($result);die;
 		//需要签约代扣+预授权金额为0 【创建签约代扣的支付单】
 		if( $result['withholdStatus'] && $param['fundauthAmount'] == 0 ){
 			$result['fundauthStatus'] = false;
