@@ -50,6 +50,7 @@ class OrderController extends Controller
     public function confirmation(Request $request){
 		
         $params = $request->all();
+        var_dump($params);die;
 
         //获取appid
         $appid		= $params['appid'];

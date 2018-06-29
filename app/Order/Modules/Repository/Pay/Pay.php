@@ -888,7 +888,7 @@ class Pay extends \App\Lib\Configurable
 		{
 			$call = $this->_getBusinessCallback();
 			if( !is_callable( $call ) ){
-				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付阶段完成)');
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知不可调用',$call);
 				throw new \Exception( '支付回调设置不可调用-'.$call );
 			}
 			$b = $call( [
@@ -896,11 +896,11 @@ class Pay extends \App\Lib\Configurable
 				'business_no' => $this->businessNo,
 				'status' => 'success',
 			] );
-			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 			if( !$b ){
-				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付阶段完成)');
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知处理失败');
 				throw new \Exception('支付通知业务回调处理失败');
 			}
+			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 		}
 		// 支付阶段关闭时，回调业务通知
 		elseif( $this->status == PayStatus::CLOSED )
