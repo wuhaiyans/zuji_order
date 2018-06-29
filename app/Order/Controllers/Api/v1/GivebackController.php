@@ -149,7 +149,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$paramsArr = isset($params['params'])? $params['params'] :'';
+		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$rules = [
 			'goods_no'     => 'required',//商品编号
 			'order_no'     => 'required',//订单编号
