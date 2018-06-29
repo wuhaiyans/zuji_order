@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -184,25 +185,25 @@ class OrderWithhold
      * ]
      * @return String FAIL：失败  SUCCESS：成功
      */
-    public static function repaymentNotify($params = []){
-//
-//        $input = file_get_contents("php://input");
-//        LogApi::info('支付异步通知', $input);
-//
-//        $params = json_decode($input,true);
-//        if( is_null($params) ){
-//            echo 'notice data is null ';exit;
-//        }
-//        if( !is_array($params) ){
-//            echo 'notice data not array ';exit;
-//        }
+    public static function repaymentNotify(){
 
-        $params = filter_array($params, [
-            'payment_no'    => 'required',
-            'out_no'        => 'required',
-            'status'        => 'required',
-            'reason'        => 'required',
-        ]);
+        $input = file_get_contents("php://input");
+        LogApi::info('分期提前还款回调', $input);
+
+        $params = json_decode($input,true);
+        if( is_null($params) ){
+            echo 'notice data is null ';exit;
+        }
+        if( !is_array($params) ){
+            echo 'notice data not array ';exit;
+        }
+
+//        $params = filter_array($params, [
+//            'payment_no'    => 'required',
+//            'out_no'        => 'required',
+//            'status'        => 'required',
+//            'reason'        => 'required',
+//        ]);
         if(count($params) < 4){
             echo "FAIL";exit;
         }
