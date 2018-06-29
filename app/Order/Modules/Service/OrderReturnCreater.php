@@ -1773,4 +1773,20 @@ class OrderReturnCreater
 
     }
 
+    /**
+     * 是否允许退换货审核
+     * @param $params
+     * [
+     *    'order_no'   =>  ''  必选 订单编号
+     *    'goods_no'   =>  ''  必选  商品编号
+     * ]
+     */
+    public function allowReturn($params){
+        if(empty($params['goods_no']) || empty($params['goods_no'])){
+           return false;
+        }
+        return $this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
+
+    }
+
 }
