@@ -20,7 +20,7 @@ return [
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
     ],
-    'Interior_Fengkong_Url' =>env("API_FENGKONG_URL","https://dev-fk-zuji.huishoubao.com/api"),
+    'Interior_Fengkong_Url' =>env("FENGKONG_API","https://dev-fk-zuji.huishoubao.com/api"),
     'Interior_Fengkong_Request_data'=>[
         'appid'=>1,
         'version'=>'1.0',

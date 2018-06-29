@@ -55,8 +55,10 @@ class Delivery
     *
     */
     public  static function createDelivery($params){
-        $base_api = config('tripartite.warehouse_api_uri');
-
+		// liuhongxing 2018-06-29 修改
+        //$base_api = config('tripartite.warehouse_api_uri');
+		$base_api = env('WAREHOUSE_API');
+		
         $rules = [
             'order_no' => 'required',
             'goods' => 'required'

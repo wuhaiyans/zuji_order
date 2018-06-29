@@ -32,7 +32,7 @@ class OrderApi {
 		// | 创建请求
 		//-+--------------------------------------------------------------------
 		$request = new \App\Lib\ApiRequest();
-		$request->setUrl( env('API_URLS')['ORDER_SYSTEM'] );	// 接口地址
+		$request->setUrl( env('ORDER_API') );	// 接口地址
 		$request->setAppid( 1 );								// 系统Appid
 		$request->setMethod( $method );							// 接口名称
 		$request->setVersion( 1.0 );

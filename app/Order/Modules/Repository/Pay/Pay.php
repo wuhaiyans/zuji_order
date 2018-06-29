@@ -548,7 +548,7 @@ class Pay extends \App\Lib\Configurable
 			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
 			'sign_time'			=> $update_time,
 			'update_time'		=> $update_time,
-			'counter'			=> 1, // 计数
+			'counter'			=> 0, // 计数（在业务与代扣协议绑定时，开始计数）
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段][代扣签约]保存失败');
