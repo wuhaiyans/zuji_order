@@ -162,7 +162,7 @@ class Order {
 	 * ]
 	 * @return bool
 	 */
-	public function setPayStatus( string $data ):bool{
+	public function setPayStatus( array $data ):bool{
 		// 必须为 等待支付 或 支付中
 		if( $this->model->order_status != OrderStatus::OrderPaying
 				|| $this->model->order_status != OrderStatus::OrderWaitPaying){

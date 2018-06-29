@@ -24,8 +24,10 @@ class Channel{
         $data['params'] = [
             'appid'=>$appid,
         ];
+
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
+
         //var_dump($info);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
@@ -33,7 +35,7 @@ class Channel{
         if($info['code']!=0){
             return $info['code'];
         }
-        return $info['data'];
+        return $info['data']['appid'];
     }
 
 

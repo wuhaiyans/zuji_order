@@ -93,8 +93,8 @@ class InstalmentController extends Controller
             'mobile'    => 'required',
             'term'      => 'required',
         ]);
-        $list = OrderGoodsInstalment::queryList($params,$additional);
-        foreach($list[0] as &$item){
+        $list = \App\Order\Modules\Repository\OrderGoodsInstalment::queryList($params,$additional);
+        foreach($list as &$item){
             $item['status']   = OrderInstalmentStatus::getStatusList($item['status']);
         }
         if(!is_array($list)){
