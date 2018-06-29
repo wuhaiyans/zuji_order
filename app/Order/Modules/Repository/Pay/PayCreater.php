@@ -173,6 +173,7 @@ class PayCreater {
 			'fundauth_status'	=> $params['fundauthStatus'],
 			'fundauth_amount'	=> $params['fundauthAmount'],
 		];
+		var_dump($data);die;
 		//sql_profiler();
 		$b = $payModel->insert($data);
 		if( !$b )
