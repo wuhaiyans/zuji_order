@@ -290,6 +290,8 @@ class Withhold extends \App\Lib\Configurable {
 		return [
 			'withhold_no'		=> $this->withhold_no,
 			'out_withhold_no'	=> $this->out_withhold_no,
+			'withhold_status'	=> $this->withhold_status,
+			'counter'			=> $this->counter,
 		];
 	}
 	
