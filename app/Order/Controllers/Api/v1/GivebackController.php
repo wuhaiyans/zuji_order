@@ -85,6 +85,7 @@ class GivebackController extends Controller
 		$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
 		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 		$data['status_text'] = '还机申请中';//后台状态
+		$data['logistics_list'] = \App\Warehouse\Config::$logistics;//物流列表
 		return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
 
 //		//-+--------------------------------------------------------------------
