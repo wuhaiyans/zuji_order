@@ -439,31 +439,6 @@ class ReturnController extends Controller
 
 
     /**
-     * 退款成功更新退款状态
-     * @param Request $request
-     *
-     */
-    public function refundUpdate(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'business_type'   =>'required',
-            'business_no'     =>'required',
-            'status'           =>'required',
-            'order_no'        =>'required',
-        ]);
-        if(count($param)<4){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->refundUpdate($params);
-        if(!$res){
-            return apiResponse([],ApiStatus::CODE_34002);//退款完成修改失败
-
-        }
-        return apiResponse([],ApiStatus::CODE_0);
-    }
-
-    /**
      *params[
      * 'order_no'
      * 'business_key'
