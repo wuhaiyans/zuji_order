@@ -114,12 +114,19 @@ class Delivery
             'address_info' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
-        $res= Curl::post($base_api, array_merge(self::getParams(), [
+		$params = [
             'method'=> 'warehouse.delivery.deliveryCreate',//模拟
             'params' => json_encode($result)
-        ]));
-
+        ];
+        $res= Curl::post( $base_api, array_merge(self::getParams(), $params) );
+		
         $res = json_decode($res, true);
+		
+		\App\Lib\Common\LogApi::debug( '发货申请', [
+			'url' => $base_api,
+			'request' => $params,
+			'response' => $res,
+		] );
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);
