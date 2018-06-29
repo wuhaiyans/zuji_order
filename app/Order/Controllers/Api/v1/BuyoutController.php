@@ -7,6 +7,7 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Repository\Order\Goods;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
@@ -43,11 +44,11 @@ class BuyoutController extends Controller
         if(empty($buyoutInfo)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
         }
-        $this->OrderGoodsRepository = new OrderGoodsRepository;
-        $goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($buyoutInfo['goods_no']);
+        $goodsInfo = Goods::getByGoodsNo($buyoutInfo['goods_no']);
         if(empty($goodsInfo)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
         }
+        $goodsInfo = $goodsInfo->getData();
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
@@ -147,35 +148,32 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"user_id必须");
         }
         //获取订单商品信息
-        $this->OrderGoodsRepository = new OrderGoodsRepository;
-        $goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
-        if(empty($goodsInfo)){
+        $goodsObj = Goods::getByGoodsNo($params['goods_no']);
+        if(empty($goodsObj)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到该订单商品");
         }
+        $goodsInfo = $goodsObj->getData();
         //验证商品是否冻结
         if($goodsInfo['goods_status']==OrderGoodStatus::BUY_OFF){
             return apiResponse([],ApiStatus::CODE_20001,"该订单商品正买断进行中");
         }
         //获取订单信息
         $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->get_order_info(['order_no'=>$goodsInfo['order_no'],"user_id"=>$params['user_id']]);
+        $orderInfo = $this->OrderRepository->getInfoById($goodsInfo['order_no'],$params['user_id']);
         //验证商品是否冻结
         if($orderInfo['freeze_type']>0){
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
         }
 
-        //获取订单商品服务时间
-        $this->OrderGoodsUnitRepository = new OrderGoodsUnitRepository;
-        $goodsServe = $this->OrderGoodsUnitRepository->getGoodsUnitInfo($params['goods_no']);
         //按天处理
-        if($goodsServe['unit'] == 1){
+        if($goodsInfo['zuqi_type'] == 1){
             $triggerTime = config("web.day_expiry_process_days");
         }
         //按月处理
-        elseif($goodsServe['unit'] == 2){
+        elseif($goodsInfo['zuqi_type'] == 2){
             $triggerTime = config("web.month_expiry_process_days");
         }
-        $newTime = $goodsServe['end_time']-$triggerTime;
+        $newTime = $goodsInfo['end_time']-$triggerTime;
         if($newTime>time()){
             return apiResponse([],ApiStatus::CODE_20001,"该订单未到买断时间");
         }
@@ -196,11 +194,8 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"买断单创建失败");
         }
-        $goods = [
-            'goods_status' => OrderGoodStatus::BUY_OFF,
-            'business_no' => $data['buyout_no'],
-        ];
-        $ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+        //更新订单商品状态
+        $ret = $goodsObj->buyoutOpen(['business_no' => $data['buyout_no']]);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");

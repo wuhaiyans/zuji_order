@@ -238,6 +238,8 @@ return [
     'api.giveback.get.status.list'       => 'GivebackController@getStatusList',
 	//还机获取列表
     'api.giveback.get.list'       => 'GivebackController@getList',
+	//还机获取还机信息
+    'api.giveback.get.info'       => 'GivebackController@getInfo',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口
