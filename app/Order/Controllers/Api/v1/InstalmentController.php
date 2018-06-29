@@ -97,7 +97,7 @@ class InstalmentController extends Controller
         foreach($list as &$item){
             $item['status']         = OrderInstalmentStatus::getStatusList($item['status']);
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
-            $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";;
+            $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
         }
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");

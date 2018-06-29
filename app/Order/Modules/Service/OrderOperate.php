@@ -696,6 +696,11 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据
         $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
+        foreach($goodsExtendData as &$item){
+            $item['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusList($item['status']);
+            $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
+            $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";;
+        }
         $order['instalment_info'] = $goodsExtendData;
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
