@@ -158,11 +158,11 @@ class Order {
 	 * @params array	$data
 	 * [
 	 *		'status'	=> '',	//【必选】string 支付状态
-	 *		'pay_type'	=> '',	//【必选】int 支付方式 （status=success时必选）
 	 * ]
 	 * @return bool
 	 */
 	public function setPayStatus( array $data ):bool{
+		\App\Lib\Common\LogApi::debug('订单',$this->model->toArray());
 		// 必须为 等待支付 或 支付中
 		if( $this->model->order_status != OrderStatus::OrderPaying
 				|| $this->model->order_status != OrderStatus::OrderWaitPaying){
