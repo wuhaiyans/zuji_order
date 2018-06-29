@@ -1113,7 +1113,7 @@ class OrderReturnCreater
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
-                if($return['status']>3){
+                if($return['status']>1){
                     $buss->setCancel("1");
                 }else{
                     $buss->setCancel("0");
@@ -1786,7 +1786,6 @@ class OrderReturnCreater
            return false;
         }
         return $this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
-
     }
 
 }
