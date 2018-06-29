@@ -162,10 +162,10 @@ class Order {
 	 * @return bool
 	 */
 	public function setPayStatus( array $data ):bool{
-		\App\Lib\Common\LogApi::debug('订单',$this->model->toArray());
 		// 必须为 等待支付 或 支付中
 		if( $this->model->order_status != OrderStatus::OrderPaying
-				|| $this->model->order_status != OrderStatus::OrderWaitPaying){
+				&& $this->model->order_status != OrderStatus::OrderWaitPaying){
+			\App\Lib\Common\LogApi::type('data-error')::error('订单支付状态禁止',$this->model->toArray());
 			return false;
 		}
 		// 支付中
@@ -181,7 +181,9 @@ class Order {
 		}else{
 			return false;
 		}
-		return $this->model->save();
+		$res = $this->model->save();
+		\App\Lib\Common\LogApi::debug('订单支付状态更新结果', $res);
+		return $res;
 	}
 	
 	/**

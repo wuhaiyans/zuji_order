@@ -696,7 +696,7 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据
         $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
-        $order['instalment_info'] = $goodsExtendData;
+
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
         $goodsFirstAmount = array();
@@ -704,9 +704,13 @@ class OrderOperate
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
 
-            foreach ($goodsExtendData as $keys=> $goodsValues) {
+            foreach ($goodsExtendData as &$goodsValues) {
                 if (is_array($goodsValues)) {
-                    foreach($goodsValues as $values) {
+                    foreach($goodsValues as &$values) {
+
+                        $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
+                        $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
+                        $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
 
                         if ($values['times']==1)
                         {
@@ -724,6 +728,7 @@ class OrderOperate
                         }
                     }
 
+
                 }
             }
             //未支付总金额
@@ -731,7 +736,8 @@ class OrderOperate
             //已支付总金额
             $orderData['instalment_payed_amount'] = normalizeNum($instalmentPayedAmount);
         }
-
+        
+        $order['instalment_info'] = $goodsExtendData;
 
         //订单状态名称
         $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);

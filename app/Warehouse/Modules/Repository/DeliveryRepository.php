@@ -489,7 +489,7 @@ class DeliveryRepository
      */
     public static function list($params, $logic_params, $limit, $page=null)
     {
-        $query = Delivery::where($params);
+        $query = Delivery::where($params)->orderByDesc('delivery_no');
 
         if (is_array($logic_params) && count($logic_params)>0) {
             foreach ($logic_params as $logic) {

@@ -1113,7 +1113,7 @@ class OrderReturnCreater
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
-                if($return['status']>3){
+                if($return['status']>1){
                     $buss->setCancel("1");
                 }else{
                     $buss->setCancel("0");
@@ -1438,7 +1438,7 @@ class OrderReturnCreater
      */
     public function updateorder($params){
         //开启事物
-        DB::beginTransaction();
+       // DB::beginTransaction();
         try{
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
@@ -1454,7 +1454,7 @@ class OrderReturnCreater
                 //更新退货单状态为已换货
                 $updateBarter=$return->barterFinish();
                 if(!$updateBarter){
-                    DB::rollBack();
+                  //  DB::rollBack();
                     return false;
                 }
                 $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
@@ -1464,21 +1464,21 @@ class OrderReturnCreater
                 //更新商品状态为租用中
                 $updateGoods=$goods->barterFinish();
                 if(!$updateGoods){
-                    DB::rollBack();
+                   // DB::rollBack();
                     return false;
                 }
             }
             //订单解冻
             $updateOrder=$order->returnClose();
             if(!$updateOrder){
-                DB::rollBack();
+                //DB::rollBack();
                 return false;
             }
-            DB::commit();
+           // DB::commit();
             return true;
 
         }catch (\Exception $exc) {
-            DB::rollBack();
+          //  DB::rollBack();
             echo $exc->getMessage();
             die;
         }
@@ -1786,7 +1786,6 @@ class OrderReturnCreater
            return false;
         }
         return $this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
-
     }
 
 }

@@ -71,8 +71,8 @@ class SkuComponnet implements OrderCreater
 
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
-            $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])?$sku[$i]['begin_time']:"";
-            $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])?$sku[$i]['end_time']:"";
+            $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])&&$this->zuqiType == 1?$sku[$i]['begin_time']:"";
+            $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])&&$this->zuqiType == 1?$sku[$i]['end_time']:"";
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
             $goodsArr[$skuId]['sku_info']['goods_no'] = createNo(6);
             $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];

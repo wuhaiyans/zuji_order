@@ -105,8 +105,7 @@ class WithholdController extends Controller
 
             // 判断用户代扣协议是否允许 解约
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
-            $payWithhold = $withhold->getData();
-            if($payWithhold['counter'] != 0){
+            if($withhold->getCounter() != 0){
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '不允许解约');
             }
@@ -735,15 +734,15 @@ class WithholdController extends Controller
         $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
 
         //获取支付的url
-        $url = $payResult->getCurrentUrl($channelId, [
+        $payment_url = $payResult->getCurrentUrl($channelId, [
             'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
             'front_url' => $params['return_url'], //回调URL
         ]);
 
         // 提交事务
         DB::commit();
+        echo $payment_url['url'];exit;
 
-        return apiResponse($url,ApiStatus::CODE_0);
 
 
     }
