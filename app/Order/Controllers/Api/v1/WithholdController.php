@@ -103,29 +103,18 @@ class WithholdController extends Controller
             //开启事务
             DB::beginTransaction();
 
-            // 查看用户是否有未扣款的分期
-            /* 如果有未扣款的分期信息，则不允许解约 */
-            $n = \App\Order\Models\OrderGoodsInstalment::query()->where([
-                'user_id'=> $userId])
-                ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL]
-                )->get()->count();
-
-            if( $n > 0 ){
+            // 判断用户代扣协议是否允许 解约
+            $withhold = WithholdQuery::getByUserChannel($userId,$channel);
+            if($withhold->getCounter() != 0){
                 DB::rollBack();
-                Error::setError('[代扣解约]解约失败，有未完成分期');
-                return apiResponse( [], ApiStatus::CODE_71010, '解约失败，有未完成分期');
+                return apiResponse( [], ApiStatus::CODE_50000, '不允许解约');
             }
 
-            // 查询用户协议
-            $withhold = WithholdQuery::getByUserChannel($userId,$channel);
             $result   = $withhold->unsignApply();
             if(!$result){
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
             }
-
-            return apiResponse( [], ApiStatus::CODE_0);
-
             // 提交事务
             DB::commit();
             return apiResponse([],ApiStatus::CODE_0,"success");

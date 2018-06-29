@@ -5,6 +5,7 @@
  *    date : 2018-05-14
  */
 namespace App\Order\Modules\Service;
+use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
@@ -72,6 +73,10 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
+                //入账来源
+                $channelData = Channel::getChannel($values['app_id']);
+                $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
+
             }
 
 
@@ -202,7 +207,7 @@ class OrderCleaning
                     'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
                     'payment_no'	=> $payInfo['out_payment_no'], //支付平台支付码
                     'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
-                    'refund_back_url' => config('tripartite.API_INNER_URL').'/refundClean', //退款回调URL
+                    'refund_back_url' => config('tripartite.ORDER_API').'/refundClean', //退款回调URL
                 ];
                 $succss =  CommonRefundApi::apply($params);
                 LogApi::info('退款申请接口返回', [$succss, $params]);
@@ -244,7 +249,7 @@ class OrderCleaning
                     'out_trade_no' => $orderCleanData['clean_no'], //业务系统授权码
                     'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
-                    'back_url' => config('tripartite.API_INNER_URL').'/unfreezeAndPayClean', //押金转支付回调URL
+                    'back_url' => config('tripartite.ORDER_API').'/unfreezeAndPayClean', //押金转支付回调URL
                     'user_id' => $orderCleanData['user_id'], //用户id
 
                 ];
@@ -277,7 +282,7 @@ class OrderCleaning
                     'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
                     'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
-                    'back_url' => config('tripartite.API_INNER_URL').'/unFreezeClean', //预授权解冻接口回调url地址
+                    'back_url' => config('tripartite.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);

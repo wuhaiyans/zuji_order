@@ -12,23 +12,23 @@ use App\Lib\Common\Error;
  * @author Administrator
  */
 class Withhold extends \App\Lib\Configurable {
-	
+
 	protected $user_id = 0;
-	
+
 	protected $withhold_no = '';
-	
+
 	protected $out_withhold_no = '';
-	
+
 	protected $withhold_status = '';
-	
+
 	protected $withhold_channel = 0;
-	
+
 	protected $sign_time = 0;
-	
+
 	protected $unsign_time = 0;
-	
+
 	protected $counter = 0;
-	
+
 	protected $update_time = 0;
 
 
@@ -45,7 +45,7 @@ class Withhold extends \App\Lib\Configurable {
 	public function __construct(array $data=[]) {
 		parent::__construct($data);
 	}
-	
+
 	protected function init() {
 		if( $this->user_id<1 ){
 			throw new \Exception('[user_id]初始化失败');
@@ -86,9 +86,9 @@ class Withhold extends \App\Lib\Configurable {
 			Error::setError('[代扣协议]状态禁止');
 			return false;
 		}
-		
+
 		$bwModel = new \App\Order\Models\OrderPayWithholdBusinessModel();
-		
+
 		// 查找 业务是否绑定了协议
 		$wb_info = $bwModel->where([
 			'business_type'	=> $params['business_type'],
@@ -101,7 +101,7 @@ class Withhold extends \App\Lib\Configurable {
 			LogApi::debug('[代扣协议][业务关系]绑定重复操作');
 			return false;
 		}
-		
+
 		// 创建 业务绑定协议
 		$id = $bwModel->insert([
 			'withhold_no'	=> $this->withhold_no,
@@ -115,7 +115,7 @@ class Withhold extends \App\Lib\Configurable {
 			LogApi::type('data-save')::debug('[代扣协议][业务关系]绑定失败');
 			return false;
 		}
-		
+
 		// 增加业务计数
 		$n = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $this->withhold_no,
@@ -128,7 +128,7 @@ class Withhold extends \App\Lib\Configurable {
 		Error::setError('业务计数失败');
 		return false;
 	}
-	
+
 	/**
 	 * 解绑业务
 	 * 减少代扣协议业务数
@@ -149,11 +149,11 @@ class Withhold extends \App\Lib\Configurable {
 			Error::setError('[代扣协议]业务计数超限');
 			return false;
 		}
-		
+
 		$time = time();
-		
+
 		$bwModel = new \App\Order\Models\OrderPayWithholdBusinessModel();
-		
+
 		// 查找 业务是否绑定了协议
 		$wb_info = $bwModel->where([
 			'business_type'	=> $params['business_type'],
@@ -166,14 +166,14 @@ class Withhold extends \App\Lib\Configurable {
 			LogApi::debug('[代扣协议][业务关系]不存在');
 			return false;
 		}
-		
+
 		// 解绑
 		$n = $bwModel->limit(1)
-				->where(['id' =>$wb_info['id']])
-				->update([
-					'unbind_time' => $time,
-				]);
-		
+			->where(['id' =>$wb_info['id']])
+			->update([
+				'unbind_time' => $time,
+			]);
+
 		if( !$n ){
 			Error::setError('[代扣协议][业务关系]解绑失败');
 			LogApi::type('data-save')::error('[代扣协议][业务关系]解绑失败');
@@ -191,15 +191,15 @@ class Withhold extends \App\Lib\Configurable {
 		LogApi::type('data-save')::debug('[代扣协议][业务关系]解绑失败');
 		return false;
 	}
-	
+
 	/**
 	 * 读取代扣协议的业务数
-	 * @return int 
+	 * @return int
 	 */
 	public function getCounter(){
 		return $this->counter;
 	}
-	
+
 	/**
 	 * 解约申请
 	 * @return bool true:申请成功；false：申请失败
@@ -270,7 +270,7 @@ class Withhold extends \App\Lib\Configurable {
 		$this->update_time = $time;
 		return true;
 	}
-	
+
 	private function _unsignBefore(){
 		// 协议状态判断
 		if( !$this->isValid() ){
@@ -292,5 +292,5 @@ class Withhold extends \App\Lib\Configurable {
 			'out_withhold_no'	=> $this->out_withhold_no,
 		];
 	}
-	
+
 }

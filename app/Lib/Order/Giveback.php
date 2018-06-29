@@ -19,7 +19,7 @@ class Giveback extends \App\Lib\BaseApi
 	 */
 	public static function confirmDelivery( $params ) {
 		foreach ($params as $value) {
-			self::request(\env('APPID'), \env('API_INNER_URL'),'api.giveback.confirm.delivery', '1.0', $value);
+			self::request(\env('APPID'), \env('ORDER_API'),'api.giveback.confirm.delivery', '1.0', $value);
 		}
 		return true;
 	}
@@ -37,7 +37,7 @@ class Giveback extends \App\Lib\BaseApi
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
 	public static function confirmEvaluation( $params ) {
-		if( self::request(\env('APPID'), \env('API_INNER_URL'),'api.giveback.confirm.evaluation', '1.0', $params) ){
+		if( self::request(\env('APPID'), \env('ORDER_API'),'api.giveback.confirm.evaluation', '1.0', $params) ){
 			return true;
 		}
 	}

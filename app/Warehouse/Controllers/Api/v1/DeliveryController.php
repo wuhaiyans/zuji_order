@@ -32,6 +32,8 @@ class DeliveryController extends Controller
      * delivery_detail 设备明细
      */
     public function deliveryCreate(){
+		\App\Lib\Common\LogApi::debug('[发货申请]',request()->input());
+		
         $rules = [
             'order_no' => 'required', //单号
             'delivery_detail'   => 'required', //序号
@@ -46,9 +48,10 @@ class DeliveryController extends Controller
         try {
             $this->DeliveryCreate->confirmation($params);
         } catch (\Exception $e) {
+			\App\Lib\Common\LogApi::type('error')::error('[发货申请]失败', $e);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
-
+		\App\Lib\Common\LogApi::debug('[发货申请]成功');
         return \apiResponse([]);
     }
 

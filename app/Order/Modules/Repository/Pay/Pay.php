@@ -548,7 +548,7 @@ class Pay extends \App\Lib\Configurable
 			'withhold_status'	=> WithholdStatus::SIGNED,// 已签约
 			'sign_time'			=> $update_time,
 			'update_time'		=> $update_time,
-			'counter'			=> 1, // 计数
+			'counter'			=> 0, // 计数（在业务与代扣协议绑定时，开始计数）
 		]);
 		if( !$b ){
 			LogApi::error('[支付阶段][代扣签约]保存失败');
@@ -616,7 +616,7 @@ class Pay extends \App\Lib\Configurable
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
 			'fundauth_channel' => $params['fundauth_channel'],
-			'update_time'		=> $params['payment_time'],
+			'update_time'		=> time(),
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );
@@ -888,7 +888,7 @@ class Pay extends \App\Lib\Configurable
 		{
 			$call = $this->_getBusinessCallback();
 			if( !is_callable( $call ) ){
-				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付阶段完成)');
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知不可调用',$call);
 				throw new \Exception( '支付回调设置不可调用-'.$call );
 			}
 			$b = $call( [
@@ -896,11 +896,11 @@ class Pay extends \App\Lib\Configurable
 				'business_no' => $this->businessNo,
 				'status' => 'success',
 			] );
-			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 			if( !$b ){
-				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付阶段完成)');
+				LogApi::type('callback-error')::error('[支付阶段]回调业务通知处理失败');
 				throw new \Exception('支付通知业务回调处理失败');
 			}
+			LogApi::debug('[支付阶段]回调业务通知(支付阶段完成)');
 		}
 		// 支付阶段关闭时，回调业务通知
 		elseif( $this->status == PayStatus::CLOSED )

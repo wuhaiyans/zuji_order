@@ -11,7 +11,6 @@ use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Models\OrderGoods;
 
 class GivebackController extends Controller
 {
@@ -21,28 +20,24 @@ class GivebackController extends Controller
 	 * @param Request $request
 	 * @return array $data
 	 */
-	public function givebackReturn( $params = [] ){
+	public static function givebackReturn( $params = [] ){
 		// 拼接返回参数
 		return array_merge([
 			"business_type" 	=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			"business_name"		=> "还机",
 			"state_flow"		=> [
 				[
-					"status"	=> "A",
-					"name"		=> "申请"
+					'status' => OrderGivebackStatus::VIEW_STATUS_APPLYING,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_APPLYING),
 				],
 				[
-					"status"	=> "B",
-					"name"		=> "审核"
+					'status' => OrderGivebackStatus::VIEW_STATUS_CHECK,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_CHECK),
 				],
 				[
-					"status"	=> "C",
-					"name"		=> "检测"
+					'status' => OrderGivebackStatus::VIEW_STATUS_RETURN_DEPOSTI,
+					'name' => OrderGivebackStatus::getViewStatusName(OrderGivebackStatus::VIEW_STATUS_RETURN_DEPOSTI),
 				],
-				[
-					"status"	=> "D",
-					"name"		=> "完成"
-				]
 			],
 		],$params);
 
@@ -75,44 +70,52 @@ class GivebackController extends Controller
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
+		//商品信息解析
+		$specs = explode(';', $orderGoodsInfo['specs']);
+		$specsStrArr = [];
+		foreach ($specs as $key => $value) {
+			$value = explode(':', $value);
+			$specsStrArr[]= $value[1];
+		}
+		$specsStr = $specsStrArr[3] . '|' . $specsStrArr[1] . '|' . $specsStrArr[4] . '|'  . $specsStrArr[2];
+		$orderGoodsInfo['goods_specs'] = $specsStr;//商品规格信息
+		$orderGoodsInfo['goods_img'] = $orderGoodsInfo['goods_thumb'];//商品缩略图
 		//组合最终返回商品基础数据
-		$data['goods_no'] = $orderGoodsInfo['goods_no'];//商品编号
-		$data['goods_name'] = $orderGoodsInfo['goods_name'];
-		$data['goods_thumb'] = $orderGoodsInfo['goods_thumb'];
-		$data['status'] = OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_APPLYING);
-		$data['zuqi'] = $orderGoodsInfo['zuqi'];
-		$data['zuqi_type'] = $orderGoodsInfo['zuqi_type'];
-		$data['zuqi_begin_date'] = $orderGoodsInfo['begin_time'];
-		$data['zuqi_end_date'] = $orderGoodsInfo['end_time'];
-		$data['order_no'] = $orderGoodsInfo['order_no'];
+		$data['goods_info'] = $orderGoodsInfo;//商品信息
+		$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
+		$data['status_text'] = '还机申请中';//后台状态
+		return apiResponse(self::givebackReturn($data),ApiStatus::CODE_0,'数据获取成功');
 
-		//默认不需要展示已支付和待支付租金价格字段
-		$data['zujin_view_flag'] = 0;
-		//判断商品租期类型【长租代扣支付需要获取分期】
-		if( $orderGoodsInfo['zuqi_type'] == 1 ){
-			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
-		}
-		//获取当前商品是否存在分期列表
-		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
-		if( empty($instalmentList[$goodsNo]) ){
-			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
-		}
-
-		//长租代扣分期，展示已支付租金和待支付租金
-		$data['zujin_view_flag'] = 1;
-		$zujinAlreadyPay = $instalmentAmount = 0;
-		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
-				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
-			}
-			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
-				$instalmentAmount += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
-			}
-		}
-		//组合最终返回价格基础数据
-		$data['zujin_already_pay'] = $zujinAlreadyPay;
-		$data['zujin_need_pay'] = $instalmentAmount;
-		return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+//		//-+--------------------------------------------------------------------
+//		// | 此部分数据数据【已作废】
+//		//-+--------------------------------------------------------------------
+//		//默认不需要展示已支付和待支付租金价格字段
+//		$data['zujin_view_flag'] = 0;
+//		//判断商品租期类型【长租代扣支付需要获取分期】
+//		if( $orderGoodsInfo['zuqi_type'] == 1 ){
+//			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+//		}
+//		//获取当前商品是否存在分期列表
+//		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo], ['limit'=>36,'page'=>1]);
+//		if( empty($instalmentList[$goodsNo]) ){
+//			return apiResponse($data,ApiStatus::CODE_0,'数据获取成功');
+//		}
+//
+//		//长租代扣分期，展示已支付租金和待支付租金
+//		$data['zujin_view_flag'] = 1;
+//		$zujinAlreadyPay = $instalmentAmount = 0;
+//		foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
+//			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::PAYING, OrderInstalmentStatus::SUCCESS]) ) {
+//				$zujinAlreadyPay += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+//			}
+//			if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
+//				$instalmentAmount += $instalmentInfo['amount'] - $instalmentInfo['discount_amount'];
+//			}
+//		}
+//		//组合最终返回价格基础数据
+//		$data['zujin_already_pay'] = $zujinAlreadyPay;
+//		$data['zujin_need_pay'] = $instalmentAmount;
 	}
 	/**
 	 * 生成还机单等相关操作
