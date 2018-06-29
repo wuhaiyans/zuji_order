@@ -9,6 +9,7 @@ use App\Lib\Curl;
  */
 class LogApi {
 		
+	private static $debug;
 	private static $instance;
 	public static function getInstace(){
 		if( self::$instance ){
@@ -52,7 +53,13 @@ class LogApi {
 	 */
 	public static function debug( string $msg, $data=[] )
 	{
-		if(config('logsystem.LOG_REPORT') == 'debug' || \Illuminate\Support\Facades\Redis::get('zuji.common.config.LOG_REPORT')=='debug' ){
+		if( is_null(self::$debug) ){
+			self::$debug = \Illuminate\Support\Facades\Redis::get('zuji.common.config.LOG_REPORT');
+			if( is_null(self::$debug) ){
+				self::$debug = false;
+			}
+		}
+		if(config('logsystem.LOG_REPORT') == 'debug' || self::$debug=='debug' ){
 			return self::log('Debug', $msg, $data);
 		}
 		return self::getInstace();
