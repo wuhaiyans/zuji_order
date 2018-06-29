@@ -734,15 +734,15 @@ class WithholdController extends Controller
         $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
 
         //获取支付的url
-        $payment_url = $payResult->getCurrentUrl($channelId, [
+        $url = $payResult->getCurrentUrl($channelId, [
             'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
             'front_url' => $params['return_url'], //回调URL
         ]);
 
         // 提交事务
         DB::commit();
-
-        return apiResponse($payment_url['url'],ApiStatus::CODE_0);
+        
+        return apiResponse($url,ApiStatus::CODE_0);
 
 
     }
