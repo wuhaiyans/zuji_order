@@ -188,8 +188,10 @@ class Goods {
 	 * 买断开始
 	 * @return bool
 	 */
-    public function buyoutOpen(  ):bool {
-        return true;
+    public function buyoutOpen($data):bool {
+        $this->model->goods_status = OrderGoodStatus::BUY_OFF;
+        $this->model->business_no = $data['business_no'];
+        return $this->model->save();
     }
 	/**
 	 * 买断关闭
