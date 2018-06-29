@@ -247,7 +247,6 @@ class OrderWithhold
                 $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
                 $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
 
-                $recordData['payment_discount_amount']      = $_data['discount_amount'];
                 $recordData['discount_type']                = $counponInfo['coupon_type'];
                 $recordData['discount_value']               = $counponInfo['coupon_no'];
                 $recordData['discount_name']                = "租金抵用券";
@@ -281,8 +280,6 @@ class OrderWithhold
 
             // 创建扣款记录数据
             $recordData['instalment_id']        = $instalmentId;
-            $recordData['type']                 = 2;
-            $recordData['payment_amount']       = $payInfo['payment_amount'];
             $recordData['status']               = OrderInstalmentStatus::SUCCESS;
             $recordData['create_time']          = time();
             $recordData['update_time']          = time();

@@ -130,7 +130,7 @@ class OrderPayIncomeRepository
         }
 
         $result['total'] =  \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($whereArray);
-        
+
         return $result;
     }
 
