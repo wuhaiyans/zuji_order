@@ -616,7 +616,7 @@ class Pay extends \App\Lib\Configurable
 			'status' => $status,
 			'fundauth_status' => FundauthStatus::SUCCESS,// 已授权
 			'fundauth_channel' => $params['fundauth_channel'],
-			'update_time'		=> $params['payment_time'],
+			'update_time'		=> time(),
 		]);
 		if( !$b ){
 			throw new \Exception( '预授权环节完成保存失败' );
