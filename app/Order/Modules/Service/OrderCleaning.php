@@ -5,6 +5,7 @@
  *    date : 2018-05-14
  */
 namespace App\Order\Modules\Service;
+use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
@@ -72,6 +73,10 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
+                //入账来源
+                $channelData = Channel::getChannel($values['app_id']);
+                $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
+
             }
 
 
