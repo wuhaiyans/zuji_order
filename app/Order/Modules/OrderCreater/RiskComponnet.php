@@ -24,7 +24,7 @@ class RiskComponnet implements OrderCreater
     //白骑士
     private $knight;
 
-    public function __construct(OrderCreater $componnet,int $appId,int $userId)
+    public function __construct(OrderCreater $componnet,int $userId)
     {
         $this->componnet = $componnet;
         //获取白骑士信息

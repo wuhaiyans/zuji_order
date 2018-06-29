@@ -70,7 +70,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
@@ -129,8 +129,8 @@ class OrderCreater
                 'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
                 'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
                 'fundauthAmount' => 0.01,//Price 预授权金额（押金），单位：元【必须】<br/>
-                'paymentAmount' => 0.01,//Price 支付金额（总租金），单位：元【必须】<br/>
-                'paymentFenqi' => 0,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                'paymentAmount' => 0.12,//Price 支付金额（总租金），单位：元【必须】<br/>
+                'paymentFenqi' => 12,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
             ]);
 			//支付单创建错误，返回错误
 			if( !$payResult ){
@@ -182,7 +182,7 @@ class OrderCreater
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
 //            $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.API_INNER_URL"), [
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.ORDER_API"), [
             'method' => 'api.inner.miniCancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
@@ -227,7 +227,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
@@ -277,7 +277,7 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列（小程序取消订单队列）
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.API_INNER_URL"), [
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.ORDER_API"), [
                 'method' => 'api.inner.cancelOrder',
 //                'order_no'=>$data['order_no'],
 //                'user_id'=>$data['user_id'],
@@ -339,7 +339,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid'],$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);

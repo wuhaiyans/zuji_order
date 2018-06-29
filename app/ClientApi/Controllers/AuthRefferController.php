@@ -51,9 +51,9 @@ class AuthRefferController extends Controller{
                     'username' =>$checkInfo['data'][0]['mobile']
                 ];
                 $header = ['Content-Type: application/json'];
-                $list=['url'=>config('tripartite.API_INNER_URL'),'data'=>$params];
+                $list=['url'=>env('ORDER_API'),'data'=>$params];
                 Log::debug("验证token",$list);
-                $info = Curl::post(config('tripartite.API_INNER_URL'), json_encode($params),$header);
+                $info = Curl::post(env('ORDER_API'), json_encode($params),$header);
                 Log::debug("验证token".$info);
                 $info =json_decode($info,true);
                 if( is_null($info)
@@ -63,7 +63,7 @@ class AuthRefferController extends Controller{
                     || !isset($info['data']) ){
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
-                        'msg'   => "转发接口错误",
+                        'msg'   => "稍候重试",
                         'data'  =>$info
                     ]);
                 }

@@ -22,7 +22,9 @@ class Contract{
         if(!$orderNo){
             return false;
         }
-        $info = Curl::post(config('tripartite.Contract_Order_NO_Url'), json_encode(['order_no'=>$orderNo]));
+        //$info = Curl::post(config('tripartite.Contract_Order_NO_Url'), json_encode(['order_no'=>$orderNo]));
+		$url = env('OLD_ORDER_API').'?m=contract&c=api&a=orderNoContract';
+        $info = Curl::post($url, json_encode(['order_no'=>$orderNo]));
         if(!$info){
             return false;
         }
@@ -45,7 +47,9 @@ class Contract{
         if(!$orderNo || !$goodsNo){
             return false;
         }
-        $info = Curl::post(config('tripartite.Contract_Goods_NO_Url'), json_encode(['order_no'=>$orderNo,'goods_no'=>$goodsNo]));
+        //$info = Curl::post(config('tripartite.Contract_Goods_NO_Url'), json_encode(['order_no'=>$orderNo,'goods_no'=>$goodsNo]));
+		$url = env('OLD_ORDER_API').'?m=contract&c=api&a=goodsNoContract';
+        $info = Curl::post($url, json_encode(['order_no'=>$orderNo,'goods_no'=>$goodsNo]));
         if(!$info){
             return false;
         }
@@ -106,7 +110,9 @@ class Contract{
         if ($validator->fails()) {
             return false;
         }
-        $info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
+        //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
+		$url = env('OLD_ORDER_API').'?m=contract&c=api&a=create';
+        $info = Curl::post($url, json_encode($params));
         if(!$info){
             return false;
         }
