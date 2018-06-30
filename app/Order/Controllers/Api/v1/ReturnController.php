@@ -84,6 +84,7 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);//修改信息
+        var_dump($return);die;
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
         }
@@ -438,7 +439,7 @@ class ReturnController extends Controller
         if(empty($params['goods_info'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->updateorder($params);
+        $res=$this->OrderReturnCreater->updateorder($params,$orders['userinfo']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }
