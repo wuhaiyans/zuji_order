@@ -51,7 +51,7 @@ class InstalmentComponnet implements OrderCreater
     {
         //统一过滤
         $filter =  $this->componnet->filter();
-        return $this->flag && $filter;
+        return $filter;
     }
 
     /**
