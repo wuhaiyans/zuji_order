@@ -120,8 +120,6 @@ class OrderCreater
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
-                //预授权金额
-                'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 //支付方式
                 'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
@@ -327,8 +325,6 @@ class OrderCreater
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
-                //预授权金额
-                'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 //支付方式
                 'pay_type'=>$data['pay_type'],
                 // 是否需要 信用认证
