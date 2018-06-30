@@ -413,11 +413,15 @@ class ReturnController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * [
-     * order_no
-     * goods_info=>[
-     *   goods_no=>''
-     *  goods_no=>''
-     * ]
+     * ‘order_no ’    =>'', //订单编号
+     * ‘goods_info’   =>[   //商品编号数组
+     *      ‘goods_no’=>''  //商品编号
+     *      ‘goods_no’=>''  //商品编号
+     *     ] ，
+     * ‘status’       =>''  //物流状态
+     *
+     *
+     *
      *
      *
      */
@@ -425,9 +429,13 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'           => 'required',
+            'order_no'    => 'required',
+            'status'      =>'required',
         ]);
-        if(count($param)<1){
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        if(empty($params['goods_info'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->OrderReturnCreater->updateorder($params);
