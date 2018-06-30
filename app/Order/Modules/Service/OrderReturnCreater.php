@@ -307,9 +307,10 @@ class OrderReturnCreater
                     $refund[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
                     //获取商品扩展信息
                     $goodsDelivery[$k]=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDelivery($order,$data);
-                    if( !$goodsDelivery ){
+                    if(!$goodsDelivery[$k]){
                         return false;
                     }
+
                     $goodsDeliveryInfo[$k] = $goodsDelivery[$k]->getData();
                     $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];
                     $goodsDeliveryInfo[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
@@ -581,6 +582,9 @@ class OrderReturnCreater
             foreach($params['refund_no'] as $refund_no){
                 //查询退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($refund_no);
+                if(!$return){
+                   return false;
+                }
                 $return_info[$refund_no]=$return->getData();
                 if($return_info[$refund_no]['user_id']!=$params['user_id']){
                     return false;
@@ -649,6 +653,9 @@ class OrderReturnCreater
         try{
             //获取退款单信息
             $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['refund_no']);
+            if(!$return){
+                return false;
+            }
             $return_info=$return->getData();
             //获取订单信息
             $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
@@ -833,7 +840,7 @@ class OrderReturnCreater
         unset($where['end_time']);
         // order_no 订单编号查询，使用前缀模糊查询
         if( isset($where['order_no']) ){
-            $where1[] = ['order_return.order_no', 'like', '%'.$where['order_no'].'%'];
+            $where1[] = ['order_return.order_no', '=', $where['order_no']];
         }
         if( isset($where['reason_key']) ){
             $where1[] = ['order_return.reason_key', '=',$where['reason_key']];
@@ -843,7 +850,7 @@ class OrderReturnCreater
             $where1[] = ['order_goods.goods_name', 'like', '%'.$where['goods_name'].'%'];
         }
         if(isset($where['mobile'])){
-            $where1[] = ['order_info.mobile','like','%'.$where['mobile'].'%'];
+            $where1[] = ['order_info.mobile','=',$where['mobile']];
         }
         if( isset($where['status']) ){
             $where1[] = ['order_return.status', '=', $where['status']];
@@ -1129,6 +1136,9 @@ class OrderReturnCreater
             $buss->setOrderInfo($orderInfo);
             //获取商品信息
             $goods=\App\Order\Modules\Repository\Order\Goods::getOrderNo($order_no);
+            if(!$goods){
+                return false;
+            }
             $goodsInfo=$goods->getData();
             $buss->setGoodsInfo($goodsInfo);
             //获取换货信息
@@ -1449,7 +1459,7 @@ class OrderReturnCreater
                 return false;
             }
             foreach($params['goods_info'] as $goods_no){
-                //获取换货单信息
+                //获取换货 单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByInfo($params['order_no'],$goods_no);
                 if(!$return){
                     return false;
