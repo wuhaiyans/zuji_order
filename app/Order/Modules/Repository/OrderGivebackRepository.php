@@ -57,7 +57,7 @@ class OrderGivebackRepository
 	 * @return array|false
 	 */
 	public function getNeedpayInfo( $where ) {
-		$result = $this->order_giveback_model->where($where)->select();
+		$result = $this->order_giveback_model->where($where)->get();
 		if( $result ) {
 			return $result->toArray();
 		}
