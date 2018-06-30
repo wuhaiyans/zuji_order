@@ -21,7 +21,7 @@ class Controller extends BaseController
     protected function  validateParams($rules, $params)
     {
 
-        if (empty($params)) return  apiResponseArray(ApiStatus::CODE_10102,[]);
+        if (empty($params)) return  apiResponseArray(ApiStatus::CODE_20001,[]);
 
         if (isset($params['params']) && is_string($params['params'])) {
             $params = json_decode($params['params'], true);
@@ -34,7 +34,7 @@ class Controller extends BaseController
         $validator = app('validator')->make($params, $rules);
 
         if ($validator->fails()) {
-            return apiResponseArray(ApiStatus::CODE_10102,[], $validator->errors()->first());
+            return apiResponseArray(ApiStatus::CODE_20001,[], $validator->errors()->first());
         }
 
         return apiResponseArray(ApiStatus::CODE_0, $params);

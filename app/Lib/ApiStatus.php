@@ -19,7 +19,7 @@ class ApiStatus {
     //-+----------------------------------------------------------------------
     const CODE_10100 = '10100';//空请求
     const CODE_10101 = '10101';//格式错误
-    const CODE_10102 = '10102';//channel_id 错误
+    const CODE_10102 = '10102';//app_id 错误
     const CODE_10103 = '10103';//method 错误
     const CODE_10104 = '10104';//params	 错误
 
@@ -284,7 +284,7 @@ class ApiStatus {
 	public static $errCodes = [
         self::CODE_0     => 'success',
         self::CODE_10100 => '空请求',
-        self::CODE_10102 => '请求格式错误',
+        self::CODE_10102 => '[app_id]错误',
         self::CODE_10103 => '[method]错误',
         self::CODE_10104 => '[params]错误',
 

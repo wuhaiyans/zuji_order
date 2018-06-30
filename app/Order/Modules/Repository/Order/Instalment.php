@@ -301,8 +301,10 @@ class Instalment {
 			}
 
 			$data = [
-				'status'        => OrderInstalmentStatus::SUCCESS,
-				'update_time'   => time(),
+				'status'        	=> OrderInstalmentStatus::SUCCESS,
+				'payment_amount'   	=> $instalmentInfo['amount'],
+				'pay_type'   		=> 0,
+				'update_time'   	=> time(),
 			];
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
@@ -314,8 +316,6 @@ class Instalment {
 			// 创建扣款记录数据
 			$recordData = [
 				'instalment_id'             => $instalmentInfo['id'],   	// 分期ID
-				'type'                      => 1,               			// 类型 1：代扣；2：主动还款
-				'payment_amount'            => $instalmentInfo['amount'],   // 实际支付金额：元
 				'status'        			=> OrderInstalmentStatus::SUCCESS,
 				'create_time'               => time(),          			// 创建时间
 				'update_time'   			=> time(),
