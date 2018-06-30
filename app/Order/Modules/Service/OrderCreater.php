@@ -100,7 +100,7 @@ class OrderCreater
 //            }
             $schemaData = $orderCreater->getDataSchema();
 
-            $b = $orderCreater->create();die;
+            $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
