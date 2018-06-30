@@ -970,7 +970,6 @@ class OrderOperate
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
        if (empty($goodsList)) return [];
-
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
                if ($goodsFirstAmount) {
@@ -985,15 +984,40 @@ class OrderOperate
                } else {
 
                    $goodsList[$keys]['act_goods_state']= $actArray;
-                   //是否处于售后之中
-                   $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
-                   if (((time()+config('web.month_expiry_process_days'))< $values['end_time'] && $values['end_time']>0)
-                       || $expire_process
-                   ) {
-                       $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
-                   }
-                   //无分期或者分期已全部还完不出现提前还款按钮
+                   /**
+                    * 短租：
+                    *   申请售后没有
+                    *   到期处理：当天到期申请，有售后的
+                    *
+                    */
+                   if ($values['zuqi_type']== Inc\OrderStatus::ZUQI_TYPE1) {
 
+                       //申请售后没有
+                       $goodsList[$keys]['act_goods_state']['service_btn'] = false;
+                       //到期处理
+                       if ($values['end_time']>time()+config('web.day_expiry_process_days')) {
+                           $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
+                       }
+
+                   } else {
+
+                       /**
+                        * 长租：
+                        *   申请售后：7天内
+                        *   到期处理：快到期1个月内
+                        */
+                       //超过7天不出现售后
+                       if ($values['begin_time'] > 0 && 　($values['begin_time'] + config('web.month_service_days')) < time()) {
+                           $goodsList[$keys]['act_goods_state']['service_btn'] = false;
+                       }
+
+                       //不在一个月内不出现到期处理
+                       if ($values['end_time'] > 0 && 　($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
+                           $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
+                       }
+                   }
+
+                   //无分期或者分期已全部还完不出现提前还款按钮
                    $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                    if (empty($orderInstalmentData)){
                        $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
@@ -1002,10 +1026,25 @@ class OrderOperate
                    //查询是否有提前还款操作
                    $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
                    if ($aheadInfo) {
-
                        $goodsList[$keys]['act_goods_state']['ahead_buyout'] = true;
-
                    }
+                   //查询是否有还机去支付
+                   $giveBackParam = [
+                       'order_no' => $orderNo,
+                       'goods_no' => $values['goods_no'],
+                   ];
+
+                   $giveBackData = OrderGiveback::getNeedpayInfo($giveBackParam);
+                   if (!empty($giveBackData) && is_array($giveBackData)) {
+                       $goodsList[$keys]['act_goods_state']['giveback_topay'] = true;
+                   }
+
+                   //查询用户是否有买断的去支付
+                   $buyoutInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no'],0,0);
+                   if ($buyoutInfo) {
+                       $goodsList[$keys]['act_goods_state']['buyout_topay'] = true;
+                   }
+
 
                }
 

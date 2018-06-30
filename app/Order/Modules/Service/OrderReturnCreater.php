@@ -179,8 +179,6 @@ class OrderReturnCreater
      * @return bool true：申请成功；false：申请失败
      */
     public function createRefund($params,$userinfo){
-        print_r($params);
-        print_r($userinfo);
         //开启事务
         DB::beginTransaction();
         try {
@@ -1443,12 +1441,19 @@ class OrderReturnCreater
      * @param $params
      * @return string
      * @throws \Exception
-     *[order_no=>'111'
-     * [goods_no=>'222']
-     * [goods_no=>'333']
+     *[order_no =>'111'   //订单编号
+     *   [goods_no=>'222']   //商品编号
+     *   [goods_no=>'333']   //商品编号
+     * status   =>""      //物流状态
+     * ]
+     *  @param array $userinfo 业务参数
+     * [
+     *       'uid'        =>'',【请求参数】 用户id
+     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
+     *      ‘username’  =>‘’，【请求参数】 用户名
      * ]
      */
-    public function updateorder($params){
+    public function updateorder($params,$userinfo){
         //开启事物
        // DB::beginTransaction();
         try{
@@ -1489,6 +1494,8 @@ class OrderReturnCreater
                 //DB::rollBack();
                 return false;
             }
+            //插入操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"换货","用户已收货");
            // DB::commit();
             return true;
 
