@@ -845,7 +845,7 @@ class OrderReturnCreater
             $where1[] = ['order_goods.goods_name', 'like', '%'.$where['goods_name'].'%'];
         }
         if(isset($where['mobile'])){
-            $where1[] = ['order_info.mobile', '=', $where['mobile']];
+            $where1[] = ['order_info.mobile','like','%'.$where['mobile'].'%'];
         }
         if( isset($where['status']) ){
             $where1[] = ['order_return.status', '=', $where['status']];
@@ -1115,7 +1115,7 @@ class OrderReturnCreater
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
-                if($return['status']>3){
+                if($return['status']>1){
                     $buss->setCancel("1");
                 }else{
                     $buss->setCancel("0");
@@ -1440,8 +1440,11 @@ class OrderReturnCreater
      */
     public function updateorder($params){
         //开启事物
-        DB::beginTransaction();
+       // DB::beginTransaction();
         try{
+            if($params['status']!="签收完成"){
+                return  false;  //不允许修改
+            }
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
             if(!$order){
@@ -1456,7 +1459,7 @@ class OrderReturnCreater
                 //更新退货单状态为已换货
                 $updateBarter=$return->barterFinish();
                 if(!$updateBarter){
-                    DB::rollBack();
+                  //  DB::rollBack();
                     return false;
                 }
                 $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
@@ -1466,21 +1469,21 @@ class OrderReturnCreater
                 //更新商品状态为租用中
                 $updateGoods=$goods->barterFinish();
                 if(!$updateGoods){
-                    DB::rollBack();
+                   // DB::rollBack();
                     return false;
                 }
             }
             //订单解冻
             $updateOrder=$order->returnClose();
             if(!$updateOrder){
-                DB::rollBack();
+                //DB::rollBack();
                 return false;
             }
-            DB::commit();
+           // DB::commit();
             return true;
 
         }catch (\Exception $exc) {
-            DB::rollBack();
+          //  DB::rollBack();
             echo $exc->getMessage();
             die;
         }
@@ -1529,10 +1532,31 @@ class OrderReturnCreater
 
 
     }
-    //退款成功更新退款状态
-    public function refundUpdate($params){
+    /**
+     * 退款成功更新退款状态
+     * @param array $params <br/>
+     * $params = [
+     *		'business_type'=> '',//业务类型【
+     *		'business_no' => '',//业务编码
+     *		'status'      => '',//支付状态  processing：处理中；success：支付完成
+     *      'order_no'    => '' //订单编号
+     * ]
+     */
+    public static function refundUpdate($params){
+        //参数过滤
+        $rules = [
+            'business_type'   => 'required',//业务类型
+            'business_no'     => 'required',//业务编码
+            'status'          => 'required',//支付状态
+            'order_no'        => 'order_no' //订单编号
+        ];
+        $validator = app('validator')->make($params, $rules);
+        if ($validator->fails()) {
+            set_apistatus(ApiStatus::CODE_20001, $validator->errors()->first());
+            return false;
+        }
         //开启事物
-        DB::beginTransaction();
+       // DB::beginTransaction();
         try{
             //获取退货单信息
             $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['business_no']);
@@ -1552,7 +1576,7 @@ class OrderReturnCreater
                 //修改退货单状态为已退货
                 $updateReturn=$return->returnFinish($params);
                 if(!$updateReturn){
-                    DB::rollBack();
+                   // DB::rollBack();
                     return false;
                 }
                 //获取商品信息
@@ -1563,7 +1587,7 @@ class OrderReturnCreater
                 //修改商品状态
                $updateGoods= $goods->returnFinish();
                 if(!$updateGoods){
-                    DB::rollBack();
+                  //  DB::rollBack();
                     return false;
                 }
                 //获取此订单的商品是否还有处理中的设备，没有则解冻
@@ -1580,7 +1604,7 @@ class OrderReturnCreater
                     //解冻订单并关闭订单
                     $updateOrder=$order->refundFinish();
                     if(!$updateOrder){
-                        DB::rollBack();
+                     //   DB::rollBack();
                         return false;
                     }
                 }
@@ -1592,13 +1616,13 @@ class OrderReturnCreater
                 //修改退货单状态为已退款
                 $updateReturn=$return->refundFinish($params);
                 if(!$updateReturn){
-                    DB::rollBack();
+                   // DB::rollBack();
                     return false;
                 }
                 //解冻订单并关闭订单
                 $updateOrder=$order->refundFinish($params);
                 if(!$updateOrder){
-                    DB::rollBack();
+                  //  DB::rollBack();
                     return false;
                 }
                 //释放库存
@@ -1606,7 +1630,7 @@ class OrderReturnCreater
                 $orderGoods = OrderRepository::getGoodsListByGoodsId($params);
             }
             if (empty($orderGoods)) {
-                DB::rollBack();
+              //  DB::rollBack();
                 return false;
             }
             //释放库存
@@ -1621,7 +1645,7 @@ class OrderReturnCreater
 
                     $success =Goods::addStock($goods_arr);
                     if (!$success) {
-                        DB::rollBack();
+                     //   DB::rollBack();
                         return false;
                     }
                 }
@@ -1635,7 +1659,7 @@ class OrderReturnCreater
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                         $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                         if (!$success) {
-                            DB::rollBack();
+                           // DB::rollBack();
                             return false;
                         }
 
@@ -1648,16 +1672,16 @@ class OrderReturnCreater
                 if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                     $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                     if (!$success) {
-                        DB::rollBack();
+                      //  DB::rollBack();
                         return false;
                     }
                 }
             }
-            DB::commit();
+           // DB::commit();
             return true;
             //解冻订单
         }catch (\Exception $exc) {
-            DB::rollBack();
+           // DB::rollBack();
             echo $exc->getMessage();
             die;
         }
@@ -1783,12 +1807,15 @@ class OrderReturnCreater
      *    'goods_no'   =>  ''  必选  商品编号
      * ]
      */
-    public function allowReturn($params){
-        if(empty($params['goods_no']) || empty($params['goods_no'])){
+    public static function allowReturn($params){
+        if(empty($params['goods_no']) || empty($params['order_no'])){
            return false;
         }
-        return $this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
-
+        $return= orderReturnRepository::returnList($params['order_no'],$params['goods_no']);
+        if($return){
+            return false;
+        }
+        return true;
     }
 
 }

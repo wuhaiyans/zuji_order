@@ -55,6 +55,8 @@ class DeliveryRepository
             'customer' => isset($data['customer']) ? $data['customer'] : '',
             'customer_mobile' => isset($data['customer_mobile']) ? $data['customer_mobile'] : '',
             'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : '',
+            'business_key' => $data['business_key'],
+            'business_no' => $data['business_no']
         ];
 
         try {
@@ -489,7 +491,7 @@ class DeliveryRepository
      */
     public static function list($params, $logic_params, $limit, $page=null)
     {
-        $query = Delivery::where($params);
+        $query = Delivery::where($params)->orderByDesc('delivery_no');
 
         if (is_array($logic_params) && count($logic_params)>0) {
             foreach ($logic_params as $logic) {

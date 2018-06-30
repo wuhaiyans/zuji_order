@@ -37,6 +37,11 @@ class DeliveryController extends Controller
         $rules = [
             'order_no' => 'required', //单号
             'delivery_detail'   => 'required', //序号
+            'customer'   => 'required', //收货人姓名
+            'customer_mobile'   => 'required', //手机号
+            'customer_address'   => 'required', //地址
+            'business_key'   => 'required', //商业类型
+            'business_no'   => 'required', //类型编号
         ];
 
         $params = $this->_dealParams($rules);

@@ -25,8 +25,7 @@ class OrderListFiler
                     'order_state'=>Inc\OrderStatus::getStatusType(),
                     'kw_type'=>array(
                             'order_no' => '订单编号',
-                            'goods_name' => '手机号',
-                            'mobile' => '设备名称',
+                            'mobile' => '手机号',
                         ),
                     'pay_type_list' =>Inc\PayInc::getPayList(),
                     'visit_type_list' =>Inc\OrderStatus::getVisitType(),

@@ -49,7 +49,8 @@ return [
     //支付宝资金预授权接口
     'api.alipay.fundauth'=>'AlipayController@alipayFundAuth',
     //支付宝代扣+资金预授权接口
-    'api.alipay.withhold.fundauth'=>'AlipayController@withholdFundAuth',
+    'api.alipay.withhold.fundauth'=>'PayController@payment',
+    'api.get.payment.url'=>'PayController@payment',
     //通用支付URL地址接口，满足url跳转支付
     'api.pay.payment.url'=>'PayController@getPaymentUrl',
     //银联已开通银行卡列表查询接口
@@ -238,6 +239,8 @@ return [
     'api.giveback.get.status.list'       => 'GivebackController@getStatusList',
 	//还机获取列表
     'api.giveback.get.list'       => 'GivebackController@getList',
+	//还机获取还机信息
+    'api.giveback.get.info'       => 'GivebackController@getInfo',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口

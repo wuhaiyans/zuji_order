@@ -41,6 +41,8 @@ class OrderCleaning
 
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
 
+        $orderCleanData['order_type_name'] = OrderStatus::getTypeName($orderCleanData['order_type']);
+        $orderCleanData['out_account_name'] = PayInc::getPayName($orderCleanData['out_account']);
 
        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
@@ -72,6 +74,7 @@ class OrderCleaning
             foreach($orderCleanList['data'] as $keys=>$values){
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
+                //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);

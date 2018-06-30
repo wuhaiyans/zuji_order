@@ -32,8 +32,25 @@ class AuthRefferController extends Controller{
     {
         //默认订单都需要验证，除了主动扣款
         $params = $request->all();
+        $header = ['Content-Type: application/json'];
         //是否需要验证
-        if (isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
+        if(in_array($params['method'], config('clientAuth.exceptAuth'))){
+            $info = Curl::post(env('ORDER_API'), json_encode($params),$header);
+            Log::debug("验证token".$info);
+            $info =json_decode($info,true);
+            if( is_null($info)
+                || !is_array($info)
+                || !isset($info['code'])
+                || !isset($info['msg'])
+                || !isset($info['data']) ){
+                return response()->json([
+                    'code'  =>ApiStatus::CODE_20002,
+                    'msg'   => "稍候重试",
+                    'data'  =>$info
+                ]);
+            }
+            return response()->json($info);
+        }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
             $token  =   $params['auth_token'];
             $checkInfo = User::checkToken($token);
             Log::debug("验证token调用第三方User::checkToken返回的结果".print_r($checkInfo,true));
@@ -50,10 +67,9 @@ class AuthRefferController extends Controller{
                     'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
                     'username' =>$checkInfo['data'][0]['mobile']
                 ];
-                $header = ['Content-Type: application/json'];
-                $list=['url'=>config('tripartite.ORDER_API'),'data'=>$params];
+                $list=['url'=>env('ORDER_API'),'data'=>$params];
                 Log::debug("验证token",$list);
-                $info = Curl::post(config('tripartite.ORDER_API'), json_encode($params),$header);
+                $info = Curl::post(env('ORDER_API'), json_encode($params),$header);
                 Log::debug("验证token".$info);
                 $info =json_decode($info,true);
                 if( is_null($info)
@@ -63,7 +79,7 @@ class AuthRefferController extends Controller{
                     || !isset($info['data']) ){
                     return response()->json([
                         'code'  =>ApiStatus::CODE_20002,
-                        'msg'   => "转发接口错误",
+                        'msg'   => "稍候重试",
                         'data'  =>$info
                     ]);
                 }

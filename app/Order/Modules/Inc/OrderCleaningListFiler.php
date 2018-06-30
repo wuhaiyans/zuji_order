@@ -31,7 +31,7 @@ class OrderCleaningListFiler
                     //入账来源
                     'appid_list' => $channlistName,
                     //出账方式
-                    'pay_type_list' =>Inc\PayInc::getPayList(),
+                    'out_account_list' =>Inc\PayInc::getPayList(),
                 );
     }
 
