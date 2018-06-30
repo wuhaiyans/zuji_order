@@ -16,6 +16,7 @@ use App\Order\Modules\OrderCreater\CouponComponnet;
 use App\Order\Modules\OrderCreater\DepositComponnet;
 use App\Order\Modules\OrderCreater\InstalmentComponnet;
 use App\Order\Modules\OrderCreater\OrderComponnet;
+use App\Order\Modules\OrderCreater\OrderPayComponnet;
 use App\Order\Modules\OrderCreater\RiskComponnet;
 use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
@@ -75,8 +76,8 @@ class OrderCreater
             //押金
            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
-            //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            //代扣  -- 可以废弃 用 支付组件
+            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -88,7 +89,11 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
-           $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+
+            //支付
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+
 
 
           $b = $orderCreater->filter();
@@ -107,57 +112,9 @@ class OrderCreater
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
-			
-			
-			//-+----------------------------------------------------------------
-			// | 创建支付单
-			//-+----------------------------------------------------------------
-//			$payResult = self::__createPay([
-//				'payType' => $data['pay_type'],//支付方式 【必须】<br/>
-//				'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
-//				'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
-//				'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-//				'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
-//				'fundauthAmount' => $schemaData['order']['order_yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-//				'paymentAmount' => $schemaData['order']['order_zujin'],//Price 支付金额（总租金），单位：元【必须】<br/>
-//				'paymentFenqi' => $schemaData['order']['order_fenqi'],//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-//			]);
-            $payResult = self::__createPay([
-                'payType' => $data['pay_type'],//支付方式 【必须】<br/>
-                'payChannelId' => $data['pay_channel_id'],//支付渠道 【必须】<br/>
-                'userId' => $data['user_id'],//业务用户ID 【必须】<br/>
-                'businessType' => OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-                'businessNo' => $orderNo,//业务编号（订单编号）【必须】<br/>
-                'fundauthAmount' => 0.01,//Price 预授权金额（押金），单位：元【必须】<br/>
-                'paymentAmount' => 0.12,//Price 支付金额（总租金），单位：元【必须】<br/>
-                'paymentFenqi' => 12,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-            ]);
-			//支付单创建错误，返回错误
-			if( !$payResult ){
-                DB::rollBack();
-				return false;
-			}
-			//如果订单无需支付【不用创建支付单】则修改订单状态为无需支付
-			if(!$payResult['isPay']){
-				//修改订单状态为无需支付
-                    $data['order_status']=OrderStatus::OrderPayed;
-                    $b =Order::where('order_no', '=', $orderNo)->update($data);
-                    if(!$b){
-                        DB::rollBack();
-                        return false;
-                    }
-			}
-			$payResult = [
-				'withholdStatus' => $payResult['withholdStatus'],
-				'paymentStatus' => $payResult['paymentStatus'],
-				'fundauthStatus' => $payResult['fundauthStatus'],
-			];
-			
+
             DB::commit();
-//            $need_to_fundauth ="N";
-//            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
-//                $need_to_fundauth ="Y";
-//            }
+
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
@@ -168,13 +125,10 @@ class OrderCreater
                 //支付方式
                 'pay_type'=>$data['pay_type'],
                 // 是否需要 签收代扣协议
-//                'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-//                //是否需要预授权
-//                'need_to_fundauth'	 => $need_to_fundauth,
-
                 '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
                 'order_no'=>$orderNo,
 
             ];
@@ -190,7 +144,7 @@ class OrderCreater
         ],time()+7200,"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 			
-            return array_merge($result,['pay_info'=>$payResult]);
+            return $result;
 
             } catch (\Exception $exc) {
                 DB::rollBack();
@@ -232,8 +186,8 @@ class OrderCreater
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
-            //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            //代扣  -- 可以废弃 用 支付组件
+            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -344,8 +298,8 @@ class OrderCreater
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
-            //代扣
-            $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            //代扣  -- 可以废弃 用 支付组件
+            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
@@ -356,6 +310,9 @@ class OrderCreater
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
+            //支付
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
@@ -363,11 +320,6 @@ class OrderCreater
 
             }
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
-
-//            $need_to_fundauth ="N";
-//            if($data['pay_type'] == PayInc::WithhodingPay && $schemaData['order']['order_yajin']>0){
-//                $need_to_fundauth ="Y";
-//            }
 
             $result = [
                 'coupon'         => $data['coupon'],
@@ -379,13 +331,10 @@ class OrderCreater
                 'fundauth_amount'=>$schemaData['order']['order_yajin'],
                 //支付方式
                 'pay_type'=>$data['pay_type'],
-                // 是否需要 签收代扣协议
-              //  'need_to_sign_withholding'	 => $schemaData['withholding']['needWithholding'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                //是否需要预授权
-            //    'need_to_fundauth'	 => $need_to_fundauth,
                 '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
