@@ -8,6 +8,7 @@
 
 namespace App\Order\Modules\Repository\Order;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
@@ -288,7 +289,7 @@ class Instalment {
 	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
-
+			LogApi::info("代扣定时任务", $param);
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
