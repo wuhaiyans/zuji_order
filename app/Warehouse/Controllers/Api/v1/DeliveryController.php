@@ -289,7 +289,12 @@ class DeliveryController extends Controller
             $user_info['type'] = $params['type'];
 
             //通知订单接口
-            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+
+
+            Log::error('aaaaaaaaccd');
+            Log::error($a);
+
 
             DB::commit();
         } catch (\Exception $e) {
