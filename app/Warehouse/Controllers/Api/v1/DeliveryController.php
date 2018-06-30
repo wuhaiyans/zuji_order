@@ -273,16 +273,24 @@ class DeliveryController extends Controller
             $this->delivery->send($params);
             $result = $this->_info($params['delivery_no']);
 
+
+            Log::error($result);
+
+
             $orderDetail = [
                 'order_no' => $result['order_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
             ];
+
             //操作员信息,用户或管理员操作有
             $user_info['user_id'] = $params['user_id'];
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
 
+
+
+            Log::error($user_info);
             //通知订单接口
             \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
         } catch (\Exception $e) {
