@@ -266,7 +266,7 @@ class WithholdController extends Controller
                 'name'          => $subject,                //交易备注
                 'user_id'       => $orderInfo['user_id'],   //业务平台用户id
             ];
-
+            \App\Lib\Common\LogApi::error('分期代扣调试', $withholding_data);
             try{
                 // 请求代扣接口
                 $withholding->deduct($withholding_data);
