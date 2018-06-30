@@ -84,6 +84,7 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);//修改信息
+        var_dump($return);die;
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
         }
@@ -413,11 +414,15 @@ class ReturnController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * [
-     * order_no
-     * goods_info=>[
-     *   goods_no=>''
-     *  goods_no=>''
-     * ]
+     * ‘order_no ’    =>'', //订单编号
+     * ‘goods_info’   =>[   //商品编号数组
+     *      ‘goods_no’=>''  //商品编号
+     *      ‘goods_no’=>''  //商品编号
+     *     ] ，
+     * ‘status’       =>''  //物流状态
+     *
+     *
+     *
      *
      *
      */
@@ -425,12 +430,16 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'           => 'required',
+            'order_no'    => 'required',
+            'status'      =>'required',
         ]);
-        if(count($param)<1){
+        if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->updateorder($params);
+        if(empty($params['goods_info'])){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->updateorder($params,$orders['userinfo']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }

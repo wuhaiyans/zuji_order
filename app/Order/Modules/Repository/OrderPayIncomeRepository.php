@@ -122,16 +122,10 @@ class OrderPayIncomeRepository
             ->where($whereArray)
             ->offset($offset)
             ->limit($pageSize)
-            ->get()
-            ->toArray();
+            ->get();
 
-        if (!$result){
-            return [];
-        }
-
-        $result['total'] =  \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($whereArray);
-        
-        return $result;
+        if (!$result) return false;
+        return $result->toArray();
     }
 
     /*

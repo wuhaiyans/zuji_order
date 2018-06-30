@@ -67,7 +67,7 @@ class OrderWithhold
         }
 
         // 商品
-        $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
+        $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
         $amount = $instalmentInfo['amount'] * 100;
@@ -184,7 +184,6 @@ class OrderWithhold
      * @return json
      */
     public static function repaymentNotify($params){
-
         //过滤参数
         $rule = [
             'business_type'     => 'required',//业务类型
@@ -195,10 +194,6 @@ class OrderWithhold
         if ($validator->fails()) {
             return false;
         }
-        if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
-            return false;
-        }
-
 
         // 支付成功
         if($params['status'] == "success"){
@@ -247,7 +242,6 @@ class OrderWithhold
                 $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
                 $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
 
-                $recordData['payment_discount_amount']      = $_data['discount_amount'];
                 $recordData['discount_type']                = $counponInfo['coupon_type'];
                 $recordData['discount_value']               = $counponInfo['coupon_no'];
                 $recordData['discount_name']                = "租金抵用券";
@@ -268,7 +262,6 @@ class OrderWithhold
                 'business_no'   => $params['business_no'],
                 'appid'         => 1,
                 'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                'out_trade_no'  => $params["payment_no"],
                 'amount'        => $payInfo['payment_amount'],
                 'create_time'   => time(),
             ];
@@ -281,8 +274,6 @@ class OrderWithhold
 
             // 创建扣款记录数据
             $recordData['instalment_id']        = $instalmentId;
-            $recordData['type']                 = 2;
-            $recordData['payment_amount']       = $payInfo['payment_amount'];
             $recordData['status']               = OrderInstalmentStatus::SUCCESS;
             $recordData['create_time']          = time();
             $recordData['update_time']          = time();
