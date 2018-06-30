@@ -90,6 +90,7 @@ class OrderCreater
             //分期
            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
+
           $b = $orderCreater->filter();
 //            if(!$b){
 //                DB::rollBack();
@@ -565,7 +566,7 @@ class OrderCreater
 			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
-		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
+		elseif( $param['payType'] == PayInc::FlowerStagePay || $param['payType'] == PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
 			//代扣支付的状态为false
