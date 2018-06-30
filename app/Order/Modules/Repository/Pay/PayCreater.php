@@ -26,7 +26,8 @@ class PayCreater {
 	 * @param	array	$params		普通支付参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
-	 *		'businessType'		=> '',	// 业务类型 
+	 *		'orderNo'			=> '',	// 订单编号
+	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
 	 *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
@@ -41,6 +42,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -67,6 +69,7 @@ class PayCreater {
 	 * @param	array	$params		签约参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
+	 *		'orderNo'			=> '',	// 订单编号
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * ]
@@ -80,6 +83,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -104,6 +108,7 @@ class PayCreater {
 	 * @param	array	$params		资金预授权参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
+	 *		'orderNo'			=> '',	// 订单编号
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
@@ -119,6 +124,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -144,6 +150,7 @@ class PayCreater {
 	 * @param	array	$params		参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
+	 *		'orderNo'			=> '',	// 订单编号
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -161,6 +168,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -190,6 +198,7 @@ class PayCreater {
 	 * @param	array	$params		参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
+	 *		'orderNo'			=> '',	// 订单编号
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -211,6 +220,7 @@ class PayCreater {
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
@@ -241,6 +251,7 @@ class PayCreater {
 	 * @param	array	$params		参数
 	 * [
 	 *		'userId'			=> '',	// 业务用户ID
+	 *		'orderNo'			=> '',	// 订单编号
 	 *		'businessType'		=> '',	// 业务类型
 	 *		'businessNo'		=> '',	// 业务编号
 	 * 
@@ -265,6 +276,7 @@ class PayCreater {
 		//sql_profiler();
 		$data = [
 			'user_id'		=> $params['userId'],
+			'order_no'		=> $params['orderNo'],
 			'business_type'	=> $params['businessType'],
 			'business_no'	=> $params['businessNo'],
 			'status'		=> $params['status'],
