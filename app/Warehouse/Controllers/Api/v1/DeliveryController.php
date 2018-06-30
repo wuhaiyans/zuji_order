@@ -271,7 +271,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            DB::transaction();
+            DB::beginTransaction();
 
 
             $this->delivery->send($params);
