@@ -17,82 +17,59 @@ class PayController extends Controller
     public function __construct()
     {
     }
-	
-//	// 测试 代扣签约
-//	public function testWithholdSign(){
-//		
-//		$business_type = 1; 
-//		$business_no = 'FA52123851726694';
-//		try {
-//			// 查询
-//			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($business_type, $business_no);
-//			
-//			$step = $pay->getCurrentStep();
-//			// echo '当前阶段：'.$step."\n";
-//			
-//			$_params = [
-//				'name'			=> '测试-'.$step,					//【必选】string 交易名称
-//				'front_url'		=> env('APP_URL').'/order/pay/testWithholdSignFront',	//【必选】string 前端回跳地址
-//			];
-//			$url_info = $pay->getCurrentUrl( $_params );
-////			var_dump( $_params, $url_info );exit;
-//			header( 'Location: '.$url_info['url'] );
-//
-//		} catch (\App\Lib\NotFoundException $exc) {
-//			echo $exc->getMessage();
-//		} catch (\Exception $exc) {
-//			echo $exc->getTraceAsString();
-//		}
-//	}
-//		// 测试 前端回跳
-//	public function testWithholdSignFront(){
-//		LogApi::info('代扣签约同步通知', $_GET);
-//		var_dump( $_GET );exit;
-//	}
-//	
-//	// 测试 代扣解约
-//	public function testWithholdUnsign(){
-//
-//		$user_id = '';
-//		
-//		$info = \App\Lib\Payment\CommonWithholdingApi::unSign([
-//    		'user_id'		=> '5', //租机平台用户ID
-//    		'agreement_no'	=> '30A52454197872461', //支付平台签约协议号
-//    		'out_agreement_no'	=> 'WA52440887854569', //业务平台签约协议号
-//    		'back_url'		=> env('APP_URL').'/order/pay/withholdUnsignNotify', //后端回调地址
-//		]);
-//		
-//		var_dump( $info );exit;
-//	}
-//		
-//	/**
-//	 * 
-//	 * @param array $_POST
-//	 * [
-//	 *		'refund_no'		=> '',	//【必选】string 支付系统退款编号
-//	 *		'out_refund_no'	=> '',	//【必选】string 业务系统退款编号
-//	 *		'status'		=> '',	//【必选】string 支付状态； init：初始化； processing：处理中；success：退款成功；failed：退款失败
-//	 *		'amount'		=> '',	//【必选】int 交易金额； 单位：分
-//	 *		'reason'		=> '',	//【必选】stirng 失败原因
-//	 * ]
-//	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
-//	 */
-//	public function refundNotify()
-//	{
-//		$input = file_get_contents("php://input");
-//		LogApi::info('退款异步通知', $input);
-//		
-//		$params = json_decode($input,true);
-//		if( is_null($params) ){
-//			echo 'notice data is null ';exit;
-//		}
-//		if( !is_array($params) ){
-//			echo 'notice data not array ';exit;
-//		}
-//		
-//		
-//	}
-//	
+    /**
+     * 代扣+预授权。。支付单跳转url
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function payment(Request $request){
+//		\App\Lib\Payment\CommonWithholdingApi::unSign([
+//			'user_id' => 0,
+//			'agreement_no'=>'30A53164270253292',
+//			'out_agreement_no'=>'WPA53164269848775',
+//			'back_url' => 'zuji-order.com',
+//		]);exit;
+		
+        $params =$request->all();
+        $rules = [
+            'callback_url'  => 'required',
+            'order_no'  => 'required',
+            'name'  => 'required',
+            'pay_channel_id'  => 'required',
+            'user_id'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if (empty($validateParams) || $validateParams['code']!=0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $params =$params['params'];
+		
+//			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
+//			LogApi::info('获取支付的params', ['params'=>$params]);
+		//-+--------------------------------------------------------------------
+		// | 查询支付单，查询失败则创建
+		//-+--------------------------------------------------------------------
+		try{
+			//验证是否已经创建过，创建成功，返回true,未创建会抛出异常进行创建
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$params['order_no'] );
+		} catch (\App\Lib\NotFoundException $e) {
+            return apiResponse([],ApiStatus::CODE_50004,$e->getMessage());
+		} 
+		
+		//-+--------------------------------------------------------------------
+		// | 获取并返回url
+		//-+--------------------------------------------------------------------
+		try{
+			$paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
+					'name'=> $params['name'],
+					'front_url' => $params['callback_url'],
+			]);
+			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
+		} catch (\Exception $exs) {
+            return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
+		}
+    }
 	
 	/**
 	 * 支付异步通知处理
@@ -680,7 +657,7 @@ class PayController extends Controller
 	 */
 	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info('代扣异步通知', $input);
+//		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){
