@@ -44,6 +44,8 @@ class ReceiveGoodsService
 
         $page = isset($params['page']) ? $params['page'] : 1;
 
+        $type = isset($params['type']) ? $params['type'] : 1;
+
         //组合时间查询
         $logic_params = [];
         if (isset($params['begin_time']) && $params['begin_time']) {
@@ -54,7 +56,7 @@ class ReceiveGoodsService
             array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'])]);
         }
 
-        $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page);
+        $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
         $items = $collect->items();
 
         if (!$items) {

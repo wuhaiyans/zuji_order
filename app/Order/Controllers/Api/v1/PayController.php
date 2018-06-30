@@ -45,6 +45,8 @@ class PayController extends Controller
         }
         $params =$params['params'];
 		
+//			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
+//			LogApi::info('获取支付的params', ['params'=>$params]);
 		//-+--------------------------------------------------------------------
 		// | 查询支付单，查询失败则创建
 		//-+--------------------------------------------------------------------
@@ -655,7 +657,7 @@ class PayController extends Controller
 	 */
 	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info('代扣异步通知', $input);
+//		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){

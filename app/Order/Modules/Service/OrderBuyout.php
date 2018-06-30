@@ -83,7 +83,7 @@ class OrderBuyout
      * @param $data
      * @return id
      */
-    public static function getAheadInfo($orderNo,$goodsNo, $status=0){
+    public static function getAheadInfo($orderNo,$goodsNo, $status=0,$type=1){
         if(!$orderNo || !$goodsNo){
             return false;
         }
@@ -91,7 +91,7 @@ class OrderBuyout
             ['order_no','=', $orderNo],
             ['goods_no','=', $goodsNo],
             ['status' ,'=', $status],
-            ['type' ,'=', 1],
+            ['type' ,'=', $type],
         ];
 //        OrderBuyout::query()->where($where)->first();
         return OrderBuyoutRepository::getInfo($where);
@@ -134,6 +134,7 @@ class OrderBuyout
 				'plat_id'=>'required',
 				'goods_name'=>'required',
 				'buyout_price'=>'required',
+				'amount'=>'required',
 				'create_time'=>'required',
 		]);
 		return OrderBuyoutRepository::create($data);

@@ -51,6 +51,7 @@ class BuyoutController extends Controller
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
+        $goodsInfo['amount'] = $buyoutInfo['amount'];
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
@@ -385,6 +386,7 @@ class BuyoutController extends Controller
         $payInfo = [
             'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
             'userId' => $buyout['user_id'],
+            'orderNo' => $buyout['order_no'],
             'businessNo' => $buyout['buyout_no'],
             'paymentAmount' => $buyout['amount'],
             'paymentFenqi' => 0,

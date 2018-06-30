@@ -257,11 +257,13 @@ class OrderClearingRepository
         }
         $whereArray[] = ['clean_no', '=', $param['clean_no']];
         $orderData =  OrderClearing::where($whereArray)->first();
+
         if (!$orderData) return false;
 
 
         //更新清算状态
         if (isset($param['status']) && !empty($param['status']) && in_array($param['status'],array_keys(OrderCleaningStatus::getOrderCleaningList()))) {
+
 
             $orderData->status  = $param['status'];
 
@@ -303,7 +305,9 @@ class OrderClearingRepository
         }
 
         $orderData->update_time = time();
+
         $success =$orderData->save();
+
         if(!$success){
             return false;
         }

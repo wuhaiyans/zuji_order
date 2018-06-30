@@ -192,7 +192,7 @@ class WithholdController extends Controller
         }
 
         // 商品
-        $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
+        $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
         $amount = $instalmentInfo['amount'] * 100;
@@ -371,7 +371,7 @@ class WithholdController extends Controller
 
 
             // 商品
-            $subject = '商品-' . $instalmentInfo['goods_no'] . '-第' . $instalmentInfo['times'] . '期扣款';
+            $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
             // 价格
             $amount = $instalmentInfo['amount'] * 100;
@@ -525,7 +525,7 @@ class WithholdController extends Controller
             }
 
             // 商品
-            $subject = '订单-' . $item['order_no'] . '-' . $item['goods_no'] . '-第' . $item['times'] . '期扣款';
+            $subject = $item['order_no'].'-'.$item['times'].'-期扣款';
 
             // 价格
             $amount = $item['amount'] * 100;
@@ -709,7 +709,7 @@ class WithholdController extends Controller
         $amount = $instalmentInfo['amount'] - $youhui;
         $amount = $amount > 0 ? $amount : 0.01;
 
-        //修改优惠券信息
+        //优惠券信息
         if($youhui > 0){
 
             // 创建优惠券使用记录
@@ -722,12 +722,12 @@ class WithholdController extends Controller
             \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
         }
 
-
         // 创建支付单
         $payData = [
             'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $trade_no,	// 业务编号
+            'businessNo'		=> $trade_no,	                // 业务编号
+            'order_no'		    => $instalmentInfo['order_no'],	// 订单号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
             'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
         ];

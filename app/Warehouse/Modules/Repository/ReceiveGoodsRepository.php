@@ -26,7 +26,7 @@ class ReceiveGoodsRepository
      *
      * 列表
      */
-    public static function list($params,$logic_params, $limit, $page=null)
+    public static function list($params,$logic_params, $limit, $page=null, $type)
     {
         $query = ReceiveGoods::whereHas('receive', function ($query) use($params) {
             if (is_array($params)) {
@@ -45,7 +45,15 @@ class ReceiveGoodsRepository
         if (isset($params['status'])) {
             $query->where('status', $params['status']);
         } else {
-            $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
+
+            if ($type == 1) {
+                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
+            }
+
+            if ($type = 2) {
+                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_INIT]);
+            }
+
         }
 
         return $query->with(['receive'])->paginate($limit,

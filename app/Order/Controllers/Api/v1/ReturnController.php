@@ -439,7 +439,7 @@ class ReturnController extends Controller
         if(empty($params['goods_info'])){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->OrderReturnCreater->updateorder($params);
+        $res=$this->OrderReturnCreater->updateorder($params,$orders['userinfo']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }
