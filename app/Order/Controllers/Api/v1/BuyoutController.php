@@ -386,6 +386,7 @@ class BuyoutController extends Controller
         $payInfo = [
             'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
             'userId' => $buyout['user_id'],
+            'orderNo' => $buyout['order_no'],
             'businessNo' => $buyout['buyout_no'],
             'paymentAmount' => $buyout['amount'],
             'paymentFenqi' => 0,

@@ -9,6 +9,7 @@ use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use App\Warehouse\Modules\Service\ReceiveGoodsService;
 use App\Warehouse\Modules\Service\ReceiveService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
@@ -283,6 +284,9 @@ class DeliveryController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
+
             $this->delivery->send($params);
             $result = $this->_info($params['delivery_no']);
 
@@ -291,15 +295,24 @@ class DeliveryController extends Controller
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
             ];
+
             //操作员信息,用户或管理员操作有
             $user_info['user_id'] = $params['user_id'];
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
 
             //通知订单接口
-            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+
+
+            Log::error('aaaaaaaaccd');
+            Log::error($a);
+
+
+            DB::commit();
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+            DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
 
