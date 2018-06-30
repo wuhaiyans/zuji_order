@@ -12,8 +12,7 @@ use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
-use App\Order\Modules\Repository\OrderGoodsUnitRepository;
-use App\Order\Modules\Repository\OrderInstalmentRepository;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -236,11 +235,11 @@ class BuyoutController extends Controller
         }
 
         //获取订单商品信息
-        $this->OrderGoodsRepository = new OrderGoodsRepository;
-        $goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($params['goods_no']);
-        if(empty($goodsInfo)){
+        $goodsObj = Goods::getByGoodsNo($params['goods_no']);
+        if(empty($goodsObj)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到该订单商品");
         }
+        $goodsInfo = $goodsObj->getData();
         //获取订单信息
         $this->OrderRepository= new OrderRepository;
         $orderInfo = $this->OrderRepository->getInfoById(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
@@ -254,7 +253,7 @@ class BuyoutController extends Controller
         //获取剩余未支付租金
         $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
         $where[] = ['goods_no','=',$goodsInfo['goods_no']];
-        $instaulment = OrderInstalmentRepository::getSumAmount($where);
+        $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
         $fenqiPrice = $instaulment?$instaulment:0;
         $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
 
@@ -277,11 +276,7 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"买断单创建失败");
         }
-        $goods = [
-            'goods_status' => OrderGoodStatus::BUY_OFF,
-            'business_no' => $data['buyout_no'],
-        ];
-        $ret = $this->OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
+        $ret = $goodsObj->buyoutOpen(['business_no' => $data['buyout_no']]);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");

@@ -68,11 +68,14 @@ class PayincomeController extends Controller
             'end_time'       	=> 'required',
         ]);
 
-        $list = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
-
-        if(!is_array($list)){
+        $incomeList = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
+        if(!is_array($incomeList)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
+        $list['data']   = $incomeList;
+        $list['total']  = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($params);
+
+
         return apiResponse($list,ApiStatus::CODE_0,"success");
     }
 
