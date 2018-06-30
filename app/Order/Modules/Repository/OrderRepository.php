@@ -549,6 +549,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->orderBy('order_info.create_time', 'DESC')
+            ->orderBy('order_info_visit.id','desc')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
 
 //        $orderList = DB::table('order_info')
