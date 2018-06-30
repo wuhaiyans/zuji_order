@@ -45,6 +45,13 @@ class Pay extends \App\Lib\Configurable
 	//-+------------------------------------------------------------------------
 	
 	protected $user_id = 0;
+	
+	/**
+	 * 订单编号
+	 * @var string
+	 */
+	protected $orderNo = '';
+	
 	/**
 	 * 业务类型
 	 * @var string
@@ -476,6 +483,7 @@ class Pay extends \App\Lib\Configurable
 			'name'          => "业务类型" . $this->businessType . "-支付",
 			'business_type' => $this->businessType,
 			'business_no'   => $this->businessNo,
+			'order_no'   => $this->orderNo,
 			'channel'       => $params['payment_channel'],
 			'amount'        => $params['payment_amount'],
 			'create_time'   => $params['payment_time'],
