@@ -73,7 +73,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
+           $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
 
             //代扣
             $orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
@@ -90,7 +90,8 @@ class OrderCreater
             //分期
            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
 
-           $b = $orderCreater->filter();
+
+          $b = $orderCreater->filter();
 //            if(!$b){
 //                DB::rollBack();
 //                //把无法下单的原因放入到用户表中
@@ -98,8 +99,7 @@ class OrderCreater
 //                set_msg($orderCreater->getOrderCreater()->getError());
 //                return false;
 //            }
-            $schemaData = $orderCreater->getDataSchema();
-
+           $schemaData = $orderCreater->getDataSchema();
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
@@ -566,7 +566,7 @@ class OrderCreater
 			$data['paymentStatus'] = false;
 		}
 		//分期方式支付租金
-		elseif( $param['payType'] = PayInc::FlowerStagePay || $param['payType'] = PayInc::UnionPay ){
+		elseif( $param['payType'] == PayInc::FlowerStagePay || $param['payType'] == PayInc::UnionPay ){
 			//然后判断预授权然后创建相关支付单
 			$result = self::__paymentFundAuth($param);
 			//代扣支付的状态为false

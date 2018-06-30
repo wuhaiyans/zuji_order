@@ -77,7 +77,7 @@ class DepositComponnet implements OrderCreater
 
         
         if($this->deposit && $this->payType >0){
-            print_r($this->schema['sku']);die;
+            //print_r($this->schema['sku']);die;
             //支付押金规则
             foreach ($this->schema['sku'] as $k=>$v)
             {

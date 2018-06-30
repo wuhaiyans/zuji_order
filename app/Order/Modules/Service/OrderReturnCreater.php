@@ -1440,6 +1440,9 @@ class OrderReturnCreater
         //开启事物
        // DB::beginTransaction();
         try{
+            if($params['status']!="签收完成"){
+                return  false;  //不允许修改
+            }
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
             if(!$order){
