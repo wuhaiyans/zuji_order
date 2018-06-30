@@ -24,7 +24,7 @@ return [
     'warehouse.delivery.cancel' => 'DeliveryController@cancel', //取消发货
     'warehouse.delivery.cancelDelivery' => 'DeliveryController@cancelDelivery', //取消发货
     'warehouse.delivery.receive' => 'DeliveryController@receive', //签收
-    'warehouse.delivery.show' => 'DeliveryController@show', //清单
+    'warehouse.delivery.show' => 'DeliveryController@show', //发货清单列表
     'warehouse.delivery.imeis' => 'DeliveryController@imeis', //对应发货单imei列表
     'warehouse.delivery.send' => 'DeliveryController@send', //发货反馈
     'warehouse.delivery.logistics' => 'DeliveryController@logistics', //修改快递物流信息
