@@ -63,7 +63,7 @@ class PayController extends Controller
 					'name'=> $params['name'],
 					'front_url' => $params['callback_url'],
 			]);
-			LogApi::debug('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
+			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
