@@ -51,6 +51,7 @@ class BuyoutController extends Controller
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
+        $goodsInfo['amount'] = $buyoutInfo['amount'];
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
