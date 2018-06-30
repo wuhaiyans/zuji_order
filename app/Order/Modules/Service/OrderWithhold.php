@@ -67,7 +67,7 @@ class OrderWithhold
         }
 
         // 商品
-        $subject = '订单-'.$instalmentInfo['order_no'].'-'.$instalmentInfo['goods_no'].'-第'.$instalmentInfo['times'].'期扣款';
+        $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
         $amount = $instalmentInfo['amount'] * 100;

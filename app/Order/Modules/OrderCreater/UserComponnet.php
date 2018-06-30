@@ -128,7 +128,6 @@ class UserComponnet implements OrderCreater
             $this->flag = false;
         }
 
-
         return $this->flag;
     }
     /**
