@@ -40,6 +40,8 @@ class ReceiveGoodsController extends Controller
         return \apiResponse($list);
     }
 
+
+
     /**
      * @return \Illuminate\Http\JsonResponse
      *
@@ -52,6 +54,10 @@ class ReceiveGoodsController extends Controller
             'status'      => [
                 ReceiveGoods::STATUS_ALL_RECEIVE => '待检测',
                 ReceiveGoods::STATUS_ALL_CHECK => '检测完成'
+            ],
+            'receive_status' => [
+                ReceiveGoods::STATUS_INIT => '待收货',
+                ReceiveGoods::STATUS_ALL_RECEIVE => '已发货'
             ]
         ];
 
