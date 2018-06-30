@@ -168,6 +168,7 @@ class OrderCleaning
 
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
 
+
         if (empty($orderCleanData)) return false;
 
         //更新清算状态为支付中
@@ -177,7 +178,9 @@ class OrderCleaning
         ];
         $success = OrderCleaning::upOrderCleanStatus($orderParam);
 
-        if (!$success) return false;
+
+        if ($success) return false;
+
         /**
          * 退款申请接口
          * @param array $params
@@ -194,6 +197,7 @@ class OrderCleaning
          *       'status'
          * ]
          */
+
         if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
 
             //需退款金额大于0，并且属于待退款状态，发起清算，退租金
