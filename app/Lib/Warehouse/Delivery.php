@@ -296,6 +296,13 @@ class Delivery
      */
     public static function delivery($orderDetail, $goods_info, $operatorInfo)
     {
+
+        Log::error('-----------------------');
+        Log::error($orderDetail);
+        Log::error($goods_info);
+        Log::error($operatorInfo);
+
+
       $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
