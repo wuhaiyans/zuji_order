@@ -46,7 +46,7 @@ class PayController extends Controller
         $params =$params['params'];
 		
 //			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
-			LogApi::info('获取支付的params', ['params'=>$params]);
+//			LogApi::info('获取支付的params', ['params'=>$params]);
 		//-+--------------------------------------------------------------------
 		// | 查询支付单，查询失败则创建
 		//-+--------------------------------------------------------------------
