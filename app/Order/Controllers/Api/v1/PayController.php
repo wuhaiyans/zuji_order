@@ -655,7 +655,7 @@ class PayController extends Controller
 	 */
 	public function withholdCreatePayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info('代扣异步通知', $input);
+//		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){
