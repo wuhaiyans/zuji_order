@@ -80,6 +80,29 @@ class OrderGiveback
 		}
 		return $this->order_giveback_repository->getInfoByGoodsNo($goodsNo);
 	}
+	
+    /**
+     * 验证当前设备是否有处于还机状态
+	 * @param string $goodsNo 商品编号
+	 * @return array|false
+	 */
+	public static function verifyGoodsNo( $goodsNo, $userId ) {
+		//初始化数据
+		$result = [
+			'is_have' => false,//是否有还机单
+			'giveback_no' => '',//还机单编号
+		];
+		if( empty($goodsNo) || empty($userId) ) {
+			return $result;
+		}
+		$order_giveback_repository = new OrderGivebackRepository();
+		$givebackInfo = $order_giveback_repository->getInfoByGoodsNo($goodsNo);
+		if( empty( $givebackInfo ) || $givebackInfo['user_id'] != $userId ){
+			return $result;
+		}
+		$result['giveback_no'] = $givebackInfo['giveback_no'];
+		return $result;
+	}
     /**
      * 根据还机编号获取一条还机单数据
 	 * @param string $givebackNo 还机编号
