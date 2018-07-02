@@ -60,9 +60,8 @@ class InstalmentWithhold implements ShortMessage {
         }
 
         // 短息模板
-        $code = $this->getCode($this->business_type);
+        $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
-            LogApi::debug("扣款成功短信-获取短信模板错误",[$this->business_type,$this->business_no]);
             return false;
         }
 
