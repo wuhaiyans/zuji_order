@@ -8,6 +8,16 @@ class TestController extends Controller
 {
 	public function sendSms() {
 
+
+//		//发送短信通知 支付宝内部通知
+//		$notice = new \App\Order\Modules\Service\OrderNotice(
+//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+//			'FA70200698030574',
+//			"InstalmentWithhold");
+//
+//		$notice->notify();
+
+
 //		$a = new \App\Order\Controllers\Api\v1\WithholdController();
 //		$b = $a->crontab_createpay();
 //		v($b);
