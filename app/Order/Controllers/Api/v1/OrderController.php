@@ -56,8 +56,12 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
+
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-        $userId		= $params['params']['user_id'];
+
+
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
@@ -67,8 +71,8 @@ class OrderController extends Controller
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式]");
         }
-        if(empty($userId)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户标识]");
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
         if(empty($payChannelId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
@@ -82,7 +86,7 @@ class OrderController extends Controller
             'pay_type'	=> $payType,
             'sku'		=> $sku,
             'coupon'	=> $coupon,
-            'user_id'	=> $userId,  //增加用户ID
+            'user_id'	=> $params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->confirmation( $data );
@@ -109,10 +113,11 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
 
-        $userId		= $params['params']['user_id'];
         $addressId		= $params['params']['address_id'];
 
         $payChannelId =$params['params']['pay_channel_id'];
@@ -124,8 +129,8 @@ class OrderController extends Controller
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
-        if(empty($userId)){
-            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
         if(empty($addressId)){
             return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
@@ -143,7 +148,7 @@ class OrderController extends Controller
             'address_id'=>$addressId,
             'sku'=>$sku,
             'coupon'=>$coupon,
-            'user_id'=>$userId,  //增加用户ID
+            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->create($data);
