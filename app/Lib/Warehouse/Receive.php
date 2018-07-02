@@ -66,11 +66,13 @@ class Receive
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
-
-
+		\App\Lib\Common\LogApi::debug('申请收货',[
+			'url' => $base_api,
+			'request' => $result,
+			'response' => $res,
+		]);
 
         $obj = json_decode($res, true);
-
 
         if ($obj['code'] != 0 || !isset($obj['data']['receive_no'])) {
             return false;

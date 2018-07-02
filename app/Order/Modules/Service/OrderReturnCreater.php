@@ -1411,20 +1411,19 @@ class OrderReturnCreater
                 }
 
                 //更新物流单号
-                $uploadLogistics= $return->uploadLogistics($params);
-                if(!$uploadLogistics){
+                if( !$return->uploadLogistics($params) ){
                     //事务回滚
                     DB::rollBack();
                     return false;
                 }
-                $receive_no=$return_info['receive_no'];
+                $receive_no = $return_info['receive_no'];
             }
             $data['logistics_id']=$params['logistics_id'];
             $data['logistics_no']=$params['logistics_no'];
             $data['logistics_name']=$params['logistics_name'];
             $data['receive_no']= $receive_no;
             //上传物流单号到收货系统
-            $create_receive= Receive::updateLogistics($data);
+            $create_receive = Receive::updateLogistics($data);
             if(!$create_receive){
                 return false;
             }

@@ -141,7 +141,6 @@ class DeliveryController extends Controller
      */
     public function cancel()
     {
-
         $rules = ['order_no' => 'required'];
         $params = $this->_dealParams($rules);
 
