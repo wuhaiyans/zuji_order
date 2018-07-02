@@ -110,7 +110,7 @@ class OrderCleaning
      * 更新订单清算状态
      * Author: heaven
      * @param $param
-     * @return bool
+     * @return int 0：成功；非0：失败
      */
     public static function upOrderCleanStatus($param)
     {
@@ -358,27 +358,30 @@ class OrderCleaning
      *
      * 订单清算回调业务接口
      * Author: heaven
-     * @return mixed
+     * @return boolean  true：成功；false：失败
      */
-    public static function getBusinessCleanCallback($businessType, $businessNo, $result)
+    public static function getBusinessCleanCallback($businessType, $businessNo, $result, $userinfo=[])
     {
         $callbacks = config('pay_callback.refund');
-        if( isset($callbacks[$businessType]) && $callbacks[$businessType] ){
-
-            $params = [
-                'business_type' => $businessType,
-                'business_no' => $businessNo,
-                'status' => $result
-            ];
-			
-			LogApi::debug('[清算阶段]业务回调通知',[
-				'callback' => $callbacks[$businessType],
-				'params' => $params,
-			]);
-            return call_user_func_array($callbacks[$businessType],[$params]);
+        if( !isset($callbacks[$businessType]) || !$callbacks[$businessType] ){
+			LogApi::error('[清算阶段]业务未设置回调通知');
+			return false;
         }
-        LogApi::error('[清算阶段]业务未设置回调通知');
-        return false;
+        if( !is_callable($callbacks[$businessType]) ){
+			LogApi::error('[清算阶段]业务回调通知不可调用');
+			return false;
+        }
+		$params = [
+			'business_type' => $businessType,
+			'business_no' => $businessNo,
+			'status' => $result
+		];
+
+		LogApi::debug('[清算阶段]业务回调通知',[
+			'callback' => $callbacks[$businessType],
+			'params' => $params,
+		]);
+		return call_user_func_array($callbacks[$businessType],[$params,$userinfo]);
     }
 
     /**

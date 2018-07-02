@@ -1554,15 +1554,20 @@ class OrderReturnCreater
     }
     /**
      * 退款成功更新退款状态
-     * @param array $params <br/>
-     * $params = [
+     * @param array $params 
+	 * [
      *		'business_type'=> '',//业务类型【
      *		'business_no' => '',//业务编码
      *		'status'      => '',//支付状态  processing：处理中；success：支付完成
-     *      'order_no'    => '' //订单编号
+     * ]
+     * @param array $userinfo 
+	 * [
+     *		'uid'		=> '',//操作员用户ID
+     *		'username'	=> '',//操作员用户名
+     *		'type'      => '',//操作员用户类型
      * ]
      */
-    public static function refundUpdate($params){
+    public static function refundUpdate($params,$userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
@@ -1590,6 +1595,11 @@ class OrderReturnCreater
             if(!$order){
                 LogApi::debug("未找到订单记录");
                 return false;
+            }
+            $order_info = $order->getData();
+			// 判断订单状态，已退款完成时，直接返回成功
+            if($order_info['order_status'] == OrderStatus::OrderClosedRefunded){
+               return true;
             }
             //查询此订单的商品
             $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
@@ -1657,11 +1667,12 @@ class OrderReturnCreater
                   //  DB::rollBack();
                     return false;
                 }
+                $param['order_no']=$return_info['order_no'];
                 //释放库存
                 //查询商品的信息
-                $orderGoods = OrderRepository::getGoodsListByGoodsId($params);
+                $orderGoods = OrderRepository::getGoodsListByGoodsId($param);
             }
-            if (empty($orderGoods)) {
+            if (!$orderGoods) {
                 LogApi::debug("未获取到商品信息");
               //  DB::rollBack();
                 return false;
@@ -1715,6 +1726,16 @@ class OrderReturnCreater
             }
            // DB::commit();
             LogApi::debug("退款执行成功");
+            if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
+                //插入操作日志
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
+            }
+            if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
+                //插入操作日志
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退货退款","退款成功");
+
+            }
+
             return true;
             //解冻订单
         }catch (\Exception $exc) {

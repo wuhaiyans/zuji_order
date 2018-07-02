@@ -6,6 +6,7 @@
  */
 
 namespace App\Lib\Order;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use Illuminate\Support\Facades\Log;
 
@@ -104,7 +105,6 @@ class Delivery
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;
-
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
