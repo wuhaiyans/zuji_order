@@ -537,8 +537,7 @@ class OrderRepository
 //            }, null,null,'left')
 //            ->where('a.id','>',1)
 //            ->get();
-
-        sql_profiler();
+        
 
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*','order_info_visit.visit_id')
