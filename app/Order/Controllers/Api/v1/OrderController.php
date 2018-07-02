@@ -456,7 +456,7 @@ class OrderController extends Controller
 
         $res = OrderOperate::orderLog($params['order_no']);
         if(!is_array($res)){
-            return apiResponse([],ApiStatus::CODE_60001);
+            return apiResponse([],ApiStatus::CODE_60001,"无订单日志");
         }
         return apiResponse($res,ApiStatus::CODE_0);
 
