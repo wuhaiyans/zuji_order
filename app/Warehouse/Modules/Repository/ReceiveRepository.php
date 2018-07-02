@@ -116,13 +116,17 @@ class ReceiveRepository
             $time = time();
             $da = [
                 'receive_no' => $receiveNo,
+                'app_id' => $data['app_id'],
                 'order_no'  => $data['order_no'],
                 'logistics_id' => isset($data['logistics_id']) ? $data['logistics_id'] : 0,
                 'logistics_no' => isset($data['logistics_no']) ? $data['logistics_no'] : 0,
+                'customer' => isset($data['customer']) ? $data['customer'] : 0,
+                'customer_mobile' => isset($data['customer_mobile']) ? $data['customer_mobile'] : 0,
+                'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : 0,
                 'status'    => Receive::STATUS_INIT,
                 'create_time' => $time,
                 'type' => isset($data['type']) ? $data['type'] : 0,
-                'app_id' => $data['app_id']
+                'business_key' => $data['business_key']
             ];
 
             $model = new Receive();
