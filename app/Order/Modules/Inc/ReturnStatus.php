@@ -169,7 +169,7 @@ class ReturnStatus {
 	 * @return string
 	 */
     public static function getReturnQuestionName($status){
-        $list = self::getReturnQeustionList();
+        $list = self::getReturnQuestionList();
         foreach($list as $v){
             if( isset($v[$status]) ){
                 return $v[$status];
