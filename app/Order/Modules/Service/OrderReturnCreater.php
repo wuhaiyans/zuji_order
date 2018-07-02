@@ -1013,8 +1013,15 @@ class OrderReturnCreater
                 $buss->setStatus("A");
                 $buss->setStatusText("申请");
                 //获取退换货原因
-                $reason=ReturnStatus::getQuestionList();
-                $buss->setReturnReason($reason['return']);
+                $reasons = ReturnStatus::getReturnQuestionList();
+				$_arr = [];
+				foreach($reasons as $_id => $_name){
+					$_arr[] = [
+						'id'	=> $_id,
+						'name'	=> $_name,
+					];
+				}
+                $buss->setReturnReason($_arr);
             }
             //注入状态流
             $buss->setStateFlow($stateFlow['stateFlow']);
@@ -1119,7 +1126,7 @@ class OrderReturnCreater
                      $buss->setLogisticsForm($channel_list);
 
                 }
-                $quesion['reason_name']=ReturnStatus::getName($return['reason_id']);//退换货原因
+                $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);//退换货原因
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
@@ -1155,8 +1162,8 @@ class OrderReturnCreater
             }
             return $buss->toArray();
         }catch( \Exception $exc){
-            echo $exc->getMessage();
-            die;
+			LogApi::error('退货信息查询失败',$exc);
+            return false;
         }
     }
 

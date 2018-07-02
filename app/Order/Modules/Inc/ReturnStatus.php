@@ -88,13 +88,20 @@ class ReturnStatus {
             self::ReturnCreated => '待审核',
             self::ReturnAgreed => '审核通过',
             self::ReturnDenied => '审核拒绝',
-            self::ReturnCanceled => '取消退货申请',
+            self::ReturnCanceled => '已取消',
             self::ReturnReceive =>'已收货',
             self::ReturnTuiHuo => '已退货',
             self::ReturnHuanHuo => '已换货',
             self::ReturnTuiKuan => '已退款',
             self::ReturnTui =>'退款中',
         ];
+    }
+    public static function getStatusName($status){
+        $list = self::getStatusList();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
     }
     public static function getReturnEvaluationList(){
         return [
@@ -103,95 +110,71 @@ class ReturnStatus {
                 self::ReturnEvaluationFalse => '检测不合格',
             ];
     }
-    public static function getReturnList(){
+	
+	/**
+	 * 获取分组后的状态列表
+	 * @return array
+	 */
+    public static function getStatusGroupList(){
         return [
+			//退款
             'refund'=>[
-                self::ReturnInvalid => '无效状态',
-                self::ReturnCreated => '提交申请',
-                self::ReturnAgreed => '审核通过',
-                self::ReturnDenied => '审核拒绝',
-                self::ReturnTuiKuan => '已退款',
-                self::ReturnTui =>'退款中',
-            ],//退款
+                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
+                self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
+                self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
+                self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
+                self::ReturnTuiKuan => self::getStatusName( self::ReturnTuiKuan ),
+                self::ReturnTui		=> self::getStatusName( self::ReturnTui ),
+            ],
+			//退或
             'return'=>[
-                self::ReturnInvalid => '无效状态',
-                self::ReturnCreated => '提交申请',
-                self::ReturnAgreed => '审核通过',
-                self::ReturnDenied => '审核拒绝',
-                self::ReturnCanceled => '取消退货申请',
-                self::ReturnReceive =>'已收货',
-                self::ReturnTui =>'退款中',
-                self::ReturnTuiHuo => '已退货',
-            ],//退货
+                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
+                self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
+                self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
+                self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
+                self::ReturnCanceled	=> self::getStatusName( self::ReturnCanceled ),
+                self::ReturnReceive	=> self::getStatusName( self::ReturnReceive ),
+                self::ReturnTui	=> self::getStatusName( self::ReturnTui ),
+                self::ReturnTuiHuo	=> self::getStatusName( self::ReturnTuiHuo ),
+            ],
+			//换货
             'barter'=>[
-                self::ReturnInvalid => '无效状态',
-                self::ReturnCreated => '提交申请',
-                self::ReturnAgreed => '审核通过',
-                self::ReturnDenied => '审核拒绝',
-                self::ReturnReceive =>'已收货',
-                self::ReturnHuanHuo => '已换货',
-            ],//换货
+                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
+                self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
+                self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
+                self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
+                self::ReturnCanceled	=> self::getStatusName( self::ReturnCanceled ),
+                self::ReturnReceive	=> self::getStatusName( self::ReturnReceive ),
+                self::ReturnHuanHuo => self::getStatusName( self::ReturnHuanHuo ),
+            ],
 
         ];
 
     }
     /***********退货/换货原因问题******************/
-
-    public static function getReturnQeustionList(){
+    public static function getReturnQuestionList(){
         return [
-            'return'=> [
-                '1'  => '寄错手机型号',
-                '2'  => '不想用了',
-                '3'  => '收到时已经拆封',
-                '4'  => '手机无法正常使用',
-                '5'  => '未收到手机',
-                '6'  => '换货',
-            ]
-
+			'1'  => '寄错手机型号',
+			'2'  => '不想用了',
+			'3'  => '收到时已经拆封',
+			'4'  => '手机无法正常使用',
+			'5'  => '未收到手机',
+			'6'  => '换货',
         ] ;
 
     }
-    /***********退货/换货原因问题******************/
+	/**
+	 * 获取退货原因名称
+	 * @param int $status
+	 * @return string
+	 */
+    public static function getReturnQuestionName($status){
+        $list = self::getReturnQuestionList();
+        foreach($list as $v){
+            if( isset($v[$status]) ){
+                return $v[$status];
+            }
 
-    public static function getQuestionList(){
-        return [
-            'return'=> [
-                [
-                    'id'  =>1,
-                    'name'=>'寄错手机型号',
-                ],
-                [
-                    'id'  =>2,
-                    'name'=>'不想用了',
-                ],
-                [
-                    'id'  =>3,
-                    'name'=>'收到时已经拆封',
-                ],
-                [
-                    'id'  =>4,
-                    'name'=>'手机无法正常使用',
-                ],
-                [
-                    'id'  =>5,
-                    'name'=>'未收到手机',
-                ],
-                [
-                    'id'  =>6,
-                    'name'=>'换货',
-                ],
-
-            ]
-        ];
-
-
-
-    }
-
-    public static function getStatusName($status){
-        $list = self::getStatusList();
-        if( isset($list[$status]) ){
-            return $list[$status];
         }
         return '';
     }
@@ -227,16 +210,6 @@ class ReturnStatus {
         $list = self::business_key();
         if( isset($list[$status]) ){
             return $list[$status];
-        }
-        return '';
-    }
-    public static function getName($status){
-        $list = self::getReturnQeustionList();
-        foreach($list as $v){
-            if( isset($v[$status]) ){
-                return $v[$status];
-            }
-
         }
         return '';
     }

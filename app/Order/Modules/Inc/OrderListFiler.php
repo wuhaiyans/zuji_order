@@ -30,7 +30,7 @@ class OrderListFiler
                     'pay_type_list' =>Inc\PayInc::getPayList(),
                     'visit_type_list' =>Inc\OrderStatus::getVisitType(),
                     'appid_list' => $channlistName,
-                    'refund_list'=> Inc\ReturnStatus::getReturnList()
+                    'refund_list'=> Inc\ReturnStatus::getStatusGroupList()
                 );
     }
 
