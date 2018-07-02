@@ -360,7 +360,7 @@ class OrderCleaning
      * Author: heaven
      * @return boolean  true：成功；false：失败
      */
-    public static function getBusinessCleanCallback($businessType, $businessNo, $result)
+    public static function getBusinessCleanCallback($businessType, $businessNo, $result, $userinfo=[])
     {
         $callbacks = config('pay_callback.refund');
         if( !isset($callbacks[$businessType]) || !$callbacks[$businessType] ){
@@ -381,7 +381,7 @@ class OrderCleaning
 			'callback' => $callbacks[$businessType],
 			'params' => $params,
 		]);
-		return call_user_func_array($callbacks[$businessType],[$params]);
+		return call_user_func_array($callbacks[$businessType],[$params,$userinfo]);
     }
 
     /**

@@ -427,6 +427,12 @@ class PayController extends Controller
             }
             $orderCleanInfo = $orderCleanInfo['data'];
 			
+			// 操作员信息
+			$userinfo = [
+				'uid'		=> $orderCleanInfo['operator_uid'],
+				'username'	=> $orderCleanInfo['operator_username'],
+				'type'		=> $orderCleanInfo['operator_type'],
+			];
 			
             //查看清算状态是否已退款
             if ( $orderCleanInfo['refund_status'] == OrderCleaningStatus::refundUnpayed ){// 待退款状态
@@ -456,7 +462,10 @@ class PayController extends Controller
                                 'business_no'	=> $orderCleanInfo['business_no'],	// 业务编码
                                 'status'		=> $param['status'],	// 支付状态  processing：处理中；success：支付完成
                             ];
-                            $b =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
+                            $b =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'],
+									$businessParam['business_no'],
+									$businessParam['status'],
+									$userinfo);
 							if( !$b ){// 
 								DB::rollBack();
 							}
