@@ -915,12 +915,12 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $adminActBtn = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+				// 有冻结状态时
                 if ($values['freeze_type']>0) {
-                    $adminActBtn['cancel_btn'] = false;
+                    $actArray['cancel_btn'] = false;
                 }
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = $adminActBtn;
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
