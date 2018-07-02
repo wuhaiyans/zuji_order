@@ -172,10 +172,22 @@ class OrderCleaning
 
         if (empty($orderCleanData)) return false;
 
+        //更新业务系统的状态
+        $businessParam = [
+            'business_type' => $orderCleanData['business_type'],	// 业务类型
+            'business_no'	=> $orderCleanData['business_no'],	// 业务编码
+            'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
+        ];
+        $success    = self::getBusinessCleanCallback($orderCleanData['business_type'], $orderCleanData['business_no'], 'success');
+        LogApi::info("调用还机返回的参数及结果",[$businessParam,$success]);
+
         //更新清算状态为支付中
         $orderParam = [
             'clean_no' => $orderCleanData['clean_no'],
-            'status' => OrderCleaningStatus::orderCleaning
+            'status' => OrderCleaningStatus::orderCleaning,
+            'operator_uid' => isset($param['userinfo']['uid']) ? $param['userinfo']['uid']: '',
+            'operator_username' => isset($param['userinfo']['username']) ? $param['userinfo']['username']: '',
+            'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
         ];
         $success = OrderCleaning::upOrderCleanStatus($orderParam);
 
