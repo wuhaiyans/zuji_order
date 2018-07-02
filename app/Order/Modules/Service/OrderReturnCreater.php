@@ -1126,7 +1126,7 @@ class OrderReturnCreater
                      $buss->setLogisticsForm($channel_list);
 
                 }
-                $quesion['reason_name']=ReturnStatus::getName($return['reason_id']);//退换货原因
+                $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);//退换货原因
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
