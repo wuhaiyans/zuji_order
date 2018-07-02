@@ -519,7 +519,7 @@ class OrderRepository
             $whereArray[] = ['order_info.create_time', '<=', strtotime($param['end_time'])];
         }
 
-        if (isset($param['visit_id']) && !empty($param['visit_id']) ) {
+        if (isset($param['visit_id'])) {
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
 
@@ -540,7 +540,7 @@ class OrderRepository
         
 
         $orderList = DB::table('order_info')
-            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id')
+            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')

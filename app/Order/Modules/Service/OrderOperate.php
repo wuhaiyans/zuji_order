@@ -917,6 +917,8 @@ class OrderOperate
 				// 有冻结状态时
                 if ($values['freeze_type']>0) {
                     $actArray['cancel_btn'] = false;
+                    $actArray['modify_address_btn'] = false;
+                    $actArray['confirm_receive'] = false;
                 }
 
                 $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
