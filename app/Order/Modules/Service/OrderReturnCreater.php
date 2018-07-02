@@ -1559,7 +1559,6 @@ class OrderReturnCreater
      *		'business_type'=> '',//业务类型【
      *		'business_no' => '',//业务编码
      *		'status'      => '',//支付状态  processing：处理中；success：支付完成
-     *      'order_no'    => '' //订单编号
      * ]
      */
     public static function refundUpdate($params){
@@ -1657,11 +1656,12 @@ class OrderReturnCreater
                   //  DB::rollBack();
                     return false;
                 }
+                $param['order_no']=$return_info['order_no'];
                 //释放库存
                 //查询商品的信息
-                $orderGoods = OrderRepository::getGoodsListByGoodsId($params);
+                $orderGoods = OrderRepository::getGoodsListByGoodsId($param);
             }
-            if (empty($orderGoods)) {
+            if (!$orderGoods) {
                 LogApi::debug("未获取到商品信息");
               //  DB::rollBack();
                 return false;

@@ -290,7 +290,7 @@ class OrderOperate
                 }
             }
             $params['create_time'] =time();
-            $order = OrderVisit::updateOrCreate($params);
+            $order = OrderVisit::updateOrCreate(['order_no'=>$params['order_no']],$params);
             $id =$order->getQueueableId();
             if(!$id){
                 DB::rollBack();

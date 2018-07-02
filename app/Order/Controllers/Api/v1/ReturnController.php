@@ -534,5 +534,12 @@ class ReturnController extends Controller
         return apiResponse([],ApiStatus::CODE_34008);//不允许进入退换货
 
     }
+    //test
+    public function refundUpdate(Request $request){
+        $orders = $request->all();
+        $aa=$this->OrderReturnCreater->refundUpdate($orders['params']);
+        p($aa);
+
+    }
 
 }
