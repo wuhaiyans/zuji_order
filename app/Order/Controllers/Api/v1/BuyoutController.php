@@ -51,6 +51,7 @@ class BuyoutController extends Controller
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
+        $goodsInfo['zuqi_number'] = $buyoutInfo['zuqi_number'];
         $goodsInfo['amount'] = $buyoutInfo['amount'];
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
@@ -206,7 +207,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         DB::commit();
-        return apiResponse($goodsInfo,ApiStatus::CODE_0);
+        return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
     /*
@@ -255,7 +256,8 @@ class BuyoutController extends Controller
         $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
         $where[] = ['goods_no','=',$goodsInfo['goods_no']];
         $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
-        $fenqiPrice = $instaulment?$instaulment:0;
+        $fenqiPrice = $instaulment['amount']?$instaulment['amount']:0;
+        $fenqishu = $instaulment['fenqishu']?$instaulment['fenqishu']:0;
         $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
 
         DB::beginTransaction();
@@ -269,6 +271,7 @@ class BuyoutController extends Controller
             'plat_id'=>$params['user_id'],
             'buyout_price'=>$buyoutPrice,
             'zujin_price'=>$fenqiPrice,
+            'zuqi_number'=>$fenqishu,
             'amount'=>$buyoutPrice+$fenqiPrice,
             'create_time'=>time()
         ];
@@ -288,7 +291,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         DB::commit();
-        return apiResponse($goodsInfo,ApiStatus::CODE_0);
+        return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
     /*
      * 取消买断
