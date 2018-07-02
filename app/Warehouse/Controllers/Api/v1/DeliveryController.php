@@ -539,7 +539,8 @@ class DeliveryController extends Controller
     public function logisticList()
     {
         $list = $this->delivery->getLogistics();
-        return apiResponse(['list'=>$list]);
+        //return apiResponse(['list'=>$list]);
+        return apiResponse(json_encode($list));
     }
 
 
