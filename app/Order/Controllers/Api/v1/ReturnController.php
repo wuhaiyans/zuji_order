@@ -331,7 +331,7 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $ret = $this->OrderReturnCreater->returnResult($params);
-		\App\Lib\Common\LogApi::debug('退货结果',$ret);
+		//\App\Lib\Common\LogApi::debug('退货结果',$ret);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
         }
