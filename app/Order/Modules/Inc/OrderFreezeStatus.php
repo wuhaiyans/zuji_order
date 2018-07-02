@@ -5,8 +5,7 @@ namespace App\Order\Modules\Inc;
 class OrderFreezeStatus{
 
     //--------------------------------------------------------------------------------------------
-    //--+ 订单冻结状态 --------------------------------------------------------------------------
-    // ---冻结类型：0，不冻结；1，退款退货；2，还货；3，买断；4，换货；5，续租',
+    //--+ 订单冻结状态
     //--------------------------------------------------------------------------------------------
     /**
      * @var int 不冻结
@@ -48,11 +47,12 @@ class OrderFreezeStatus{
     public static function getStatusList(){
         return [
             self::Non => '无',
-            self::Refund => '退款退货',
+            self::Refund => '退款',
             self::Reback => '还货',
             self::Buyout => '买断',
             self::Exchange => '换货',
             self::Relet => '续租',
+            self::GoodsReturn =>'退货'
         ];
     }
 
