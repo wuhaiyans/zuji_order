@@ -370,7 +370,11 @@ class OrderCleaning
                 'business_no' => $businessNo,
                 'status' => $result
             ];
-
+			
+			LogApi::debug('[清算阶段]业务回到',[
+				'callback' => $callbacks[$businessType],
+				'params' => $params,
+			]);
             return call_user_func_array($callbacks[$businessType],$params);
         }
         LogApi::error('[清算阶段]业务未设置回调通知');
