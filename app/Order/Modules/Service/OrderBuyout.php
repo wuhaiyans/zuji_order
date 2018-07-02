@@ -127,6 +127,7 @@ class OrderBuyout
 	public static function create($array)
 	{
 		$data = filter_array($array,[
+				'type'=>'required',
 				'buyout_no'=>'required',
 				'order_no'=>'required',
 				'goods_no'=>'required',
