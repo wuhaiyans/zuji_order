@@ -1013,8 +1013,15 @@ class OrderReturnCreater
                 $buss->setStatus("A");
                 $buss->setStatusText("申请");
                 //获取退换货原因
-                $reason=ReturnStatus::getQuestionList();
-                $buss->setReturnReason($reason['return']);
+                $reasons = ReturnStatus::getReturnQuestionList();
+				$_arr = [];
+				foreach($reasons as $_id => $_name){
+					$_arr[] = [
+						'id'	=> $_id,
+						'name'	=> $_name,
+					];
+				}
+                $buss->setReturnReason($_arr);
             }
             //注入状态流
             $buss->setStateFlow($stateFlow['stateFlow']);

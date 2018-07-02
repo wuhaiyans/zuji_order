@@ -152,59 +152,23 @@ class ReturnStatus {
 
     }
     /***********退货/换货原因问题******************/
-
-    public static function getReturnQeustionList(){
+    public static function getReturnQuestionList(){
         return [
-            'return'=> [
-                '1'  => '寄错手机型号',
-                '2'  => '不想用了',
-                '3'  => '收到时已经拆封',
-                '4'  => '手机无法正常使用',
-                '5'  => '未收到手机',
-                '6'  => '换货',
-            ]
-
+			'1'  => '寄错手机型号',
+			'2'  => '不想用了',
+			'3'  => '收到时已经拆封',
+			'4'  => '手机无法正常使用',
+			'5'  => '未收到手机',
+			'6'  => '换货',
         ] ;
 
     }
-    /***********退货/换货原因问题******************/
-
-    public static function getQuestionList(){
-        return [
-            'return'=> [
-                [
-                    'id'  =>1,
-                    'name'=>'寄错手机型号',
-                ],
-                [
-                    'id'  =>2,
-                    'name'=>'不想用了',
-                ],
-                [
-                    'id'  =>3,
-                    'name'=>'收到时已经拆封',
-                ],
-                [
-                    'id'  =>4,
-                    'name'=>'手机无法正常使用',
-                ],
-                [
-                    'id'  =>5,
-                    'name'=>'未收到手机',
-                ],
-                [
-                    'id'  =>6,
-                    'name'=>'换货',
-                ],
-
-            ]
-        ];
-
-
-
-    }
-
-    public static function getName($status){
+	/**
+	 * 获取退货原因名称
+	 * @param int $status
+	 * @return string
+	 */
+    public static function getReturnQuestionName($status){
         $list = self::getReturnQeustionList();
         foreach($list as $v){
             if( isset($v[$status]) ){
