@@ -863,9 +863,9 @@ class OrderOperate
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
 	        ];
-                    LogApi::debug('客户端订单列表支付信息参数', $params);
+//                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
-                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
+//                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
                 }
 
             }
