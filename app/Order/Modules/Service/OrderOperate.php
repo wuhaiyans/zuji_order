@@ -118,16 +118,16 @@ class OrderOperate
                 }
 
                 //增加确认收货队列
-                if($orderInfo['zuqi_type'] ==1){
-                    $confirmTime = config('web.short_confirm_days');
-                }else{
-                    $confirmTime = config('web.long_confirm_days');
-                }
-
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
-                    'method' => 'api.inner.deliveryReceive',
-                    'order_no'=>$orderDetail['order_no'],
-                ],time()+$confirmTime,"");
+//                if($orderInfo['zuqi_type'] ==1){
+//                    $confirmTime = config('web.short_confirm_days');
+//                }else{
+//                    $confirmTime = config('web.long_confirm_days');
+//                }
+//
+//                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
+//                    'method' => 'api.inner.deliveryReceive',
+//                    'order_no'=>$orderDetail['order_no'],
+//                ],time()+$confirmTime,"");
 
                 DB::commit();
                 return true;

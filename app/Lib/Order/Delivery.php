@@ -105,9 +105,6 @@ class Delivery
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;
-        $n=1;
-        LogApi::error('請求次數',$n);
-        $n++;
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
