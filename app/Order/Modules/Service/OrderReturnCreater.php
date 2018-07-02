@@ -1554,11 +1554,17 @@ class OrderReturnCreater
     }
     /**
      * 退款成功更新退款状态
-     * @param array $params <br/>
-     * $params = [
+     * @param array $params 
+	 * [
      *		'business_type'=> '',//业务类型【
      *		'business_no' => '',//业务编码
      *		'status'      => '',//支付状态  processing：处理中；success：支付完成
+     * ]
+     * @param array $userinfo 
+	 * [
+     *		'uid'		=> '',//操作员用户ID
+     *		'username'	=> '',//操作员用户名
+     *		'type'      => '',//操作员用户类型
      * ]
      */
     public static function refundUpdate($params,$userinfo){
@@ -1590,8 +1596,9 @@ class OrderReturnCreater
                 LogApi::debug("未找到订单记录");
                 return false;
             }
-            $order = $order->getData();
-            if($order['order_status'] == OrderStatus::OrderClosedRefunded){
+            $order_info = $order->getData();
+			// 判断订单状态，已退款完成时，直接返回成功
+            if($order_info['order_status'] == OrderStatus::OrderClosedRefunded){
                return true;
             }
             //查询此订单的商品
