@@ -37,7 +37,9 @@ return [
 	],
 
 	'refund' => [
-		// 业务类型为1的支付回调通知
+		// 退款 业务类型 回调
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_REFUND => '\App\Order\Modules\Service\OrderReturnCreater::refundUpdate',
+		// 退货 业务类型 回调
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\App\Order\Modules\Service\OrderReturnCreater::refundUpdate',
 		// 业务类型为【还机】4的清算回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackClearing',
