@@ -430,9 +430,10 @@ class PayController extends Controller
                             $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
 
                             LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback', $businessParam);
+                            LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback返回的结果', $success);
                         }  else {
 
-                            LogApi::info('退款业务回调更新整体清算的状态失败', $orderParam);
+                            LogApi::error('退款业务回调更新整体清算的状态失败', $orderParam);
                             $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务回调更新整体清算的状态失败');
                         }
                     }
