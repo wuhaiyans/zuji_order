@@ -473,7 +473,7 @@ class DeliveryController extends Controller
     public function lists()
     {
         $params = $this->_dealParams([]);
-        $list = $this->delivery->list($params);
+        $list = $this->delivery->lists($params);
         return \apiResponse($list);
     }
 

@@ -135,6 +135,7 @@ class OrderBuyout
 				'plat_id'=>'required',
 				'goods_name'=>'required',
 				'buyout_price'=>'required',
+				'zujin_price'=>'required',
 				'amount'=>'required',
 				'create_time'=>'required',
 		]);

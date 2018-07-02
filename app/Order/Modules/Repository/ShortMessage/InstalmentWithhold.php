@@ -60,9 +60,8 @@ class InstalmentWithhold implements ShortMessage {
         }
 
         // 短息模板
-        $code = $this->getCode($this->business_type);
+        $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
-            LogApi::debug("扣款成功短信-获取短信模板错误",[$this->business_type,$this->business_no]);
             return false;
         }
 
@@ -73,6 +72,7 @@ class InstalmentWithhold implements ShortMessage {
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
+            'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($dataSms['mobile'], $code, $dataSms);

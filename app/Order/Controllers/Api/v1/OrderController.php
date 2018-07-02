@@ -835,7 +835,7 @@ class OrderController extends Controller
 
                 if ($orderData) {
 
-                    if ($orderData['order_status']==1) {
+                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
                         $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
