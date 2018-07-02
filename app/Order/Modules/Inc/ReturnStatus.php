@@ -86,8 +86,8 @@ class ReturnStatus {
         return [
             self::ReturnInvalid => '无效状态',
             self::ReturnCreated => '待审核',
-            self::ReturnAgreed => '审核通过',
-            self::ReturnDenied => '审核拒绝',
+            self::ReturnAgreed => '收货中(审核通过)',
+            self::ReturnDenied => '关闭（审核拒绝）',
             self::ReturnCanceled => '取消退货申请',
             self::ReturnReceive =>'已收货',
             self::ReturnTuiHuo => '已退货',
