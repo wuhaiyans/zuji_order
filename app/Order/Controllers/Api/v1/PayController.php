@@ -131,7 +131,7 @@ class PayController extends Controller
 			if( ! $pay->needPayment() ){
 				DB::rollBack();
 				echo json_encode([
-					'status' => 'ok',
+					'status' => 'error',
 					'msg' => 'payment not need',
 				]);exit;
 			}
