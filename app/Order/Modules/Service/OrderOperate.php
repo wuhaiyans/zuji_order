@@ -852,9 +852,10 @@ class OrderOperate
 //                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
                $orderOperateData  = self::getOrderOprate($values['order_no']);
-               
+
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
+
                 if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
                     $params = [
                     'payType' => $values['pay_type'],//支付方式 【必须】<br/>
@@ -980,6 +981,7 @@ class OrderOperate
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+
        if (empty($goodsList)) return [];
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
@@ -989,6 +991,8 @@ class OrderOperate
 
                }
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+               $isBuyOut = $values['goods_status']>=Inc\OrderGoodStatus::BUY_OFF && $values['goods_status']<Inc\OrderGoodStatus::RELET;
+               $goodsList[$keys]['is_buyout'] = $isBuyOut ?? 0;
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
@@ -1018,12 +1022,12 @@ class OrderOperate
                         *   到期处理：快到期1个月内
                         */
                        //超过7天不出现售后
-                       if ($values['begin_time'] > 0 && 　($values['begin_time'] + config('web.month_service_days')) < time()) {
+                       if ($values['begin_time'] > 0 &&  ($values['begin_time'] + config('web.month_service_days')) < time()) {
                            $goodsList[$keys]['act_goods_state']['service_btn'] = false;
                        }
 
                        //不在一个月内不出现到期处理
-                       if ($values['end_time'] > 0 && 　($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
+                       if ($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
                    }
