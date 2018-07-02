@@ -9,6 +9,7 @@
 
 namespace App\Lib\Contract;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 
 class Contract{
@@ -87,6 +88,7 @@ class Contract{
      * @return array
      */
     public static function createContract($params){
+        LogApi::error("生成合同参数",$params);
         $rule= [
             'spu_id'=>'required',
             'order_no'=>'required',
@@ -110,6 +112,7 @@ class Contract{
         if ($validator->fails()) {
             return false;
         }
+        LogApi::error("生成合同参数",$rule);
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
 		$url = env('OLD_ORDER_API').'?m=contract&c=api&a=create';
         $info = Curl::post($url, json_encode($params));

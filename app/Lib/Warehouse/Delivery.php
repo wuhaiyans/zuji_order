@@ -307,6 +307,7 @@ class Delivery
 
       Log::error($response);
       $response =json_decode($response,true);
+      var_dump($response);die;
       if($response['code']!=ApiStatus::CODE_0){
           throw new \Exception(ApiStatus::$errCodes[$response['code']]);
       }

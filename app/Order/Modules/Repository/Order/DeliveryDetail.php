@@ -7,6 +7,8 @@
  */
 
 namespace App\Order\Modules\Repository\Order;
+use App\Lib\Common\LogApi;
+use App\Lib\Contract\Contract;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Modules\Inc\OrderGoodStatus;
@@ -97,13 +99,16 @@ class DeliveryDetail {
         ];
 
         $goods = OrderRepository::getGoodsListByOrderId($orderNo);
+
         foreach ($goods as $k=>$v){
+            LogApi::error("goodsinfo",$goodsInfo);
             foreach ($goodsInfo as $key=>$value){
                 $imei ="";
                 if(in_array($v['goods_no'],$value)){
                     $imei = $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
                 }
             }
+            LogApi::error("IMEI",$imei);
             $v['chengse'] = OrderGoodStatus::spec_chengse_value($v['chengse']);
             $goodsData=[
                 'spu_id'=>$v['prod_id'],
@@ -117,6 +122,7 @@ class DeliveryDetail {
                 'yiwaixian'=>$v['insurance'],
                 'market_price'=>$v['market_price'],
             ];
+            LogApi::error("合同",$goodsData);
             $contractData =array_merge($data,$goodsData);
             $b =Contract::createContract($contractData);
             if(!$b){

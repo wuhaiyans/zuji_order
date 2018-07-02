@@ -73,11 +73,13 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
+        LogApi::error("发货时生成合同失败",$orderDetail);
         DB::beginTransaction();
         try{
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
+                LogApi::error("订单查询失败",$orderDetail);
                 DB::rollBack();
                 return false;
             }
@@ -87,6 +89,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
+                    LogApi::error("订单查询失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -94,6 +97,7 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
+                    LogApi::error("订单发货信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -101,12 +105,14 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
+                    LogApi::error("货详情信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
                 $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
                 if(!$b) {
+                    LogApi::error("发货时生成合同失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
