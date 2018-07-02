@@ -546,7 +546,7 @@ class OrderRepository
             }, null,null,'inner')
             ->join('order_info_visit',function($join){
                 $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
-            }, null,null,'left')
+            }, null,null,'inner')
             ->where($whereArray)
             ->orderBy('order_info.create_time', 'DESC')
             ->orderBy('order_info_visit.id','desc')
