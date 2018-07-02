@@ -35,7 +35,7 @@ class OrderGoodsInstalmentRepository
      */
     public static function getSumAmount($params){
         if (empty($params)) return false;
-        $result =  OrderGoodsInstalment::query()->where($params)->sum("amount");
+        $result =  OrderGoodsInstalment::select(DB::raw("count(*) as fenqishu,sum(amount) as amount"))->where($params)->first();
         if (!$result) return false;
         return $result;
     }
