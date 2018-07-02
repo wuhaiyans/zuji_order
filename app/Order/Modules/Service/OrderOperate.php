@@ -73,7 +73,6 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
-        LogApi::error("发货时生成合同失败",$orderDetail);
         DB::beginTransaction();
         try{
             //更新订单状态
@@ -111,11 +110,11 @@ class OrderOperate
                 }
                 //增加发货时生成合同
                 $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
-                if(!$b) {
-                    LogApi::error("发货时生成合同失败",$orderDetail);
-                    DB::rollBack();
-                    return false;
-                }
+//                if(!$b) {
+//                    LogApi::error("发货时生成合同失败",$orderDetail);
+//                    DB::rollBack();
+//                    return false;
+//                }
                 //增加操作日志
                 if(!empty($operatorInfo)){
 
@@ -902,6 +901,8 @@ class OrderOperate
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+                $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
 
                 //设备名称
 
@@ -913,12 +914,12 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $adminActBtn = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+				// 有冻结状态时
                 if ($values['freeze_type']>0) {
-                    $adminActBtn['cancel_btn'] = false;
+                    $actArray['cancel_btn'] = false;
                 }
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = $adminActBtn;
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
