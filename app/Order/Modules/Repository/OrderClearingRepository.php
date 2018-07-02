@@ -172,7 +172,7 @@ class OrderClearingRepository
             $whereArray[] = ['create_time', '>=', $param['begin_time']];
             $whereArray[] = ['create_time', '<=', $param['end_time']];
         }
-        $query = OrderClearing::where($whereArray)->orderby('create_time DESC');
+        $query = OrderClearing::where($whereArray)->orderBy('create_time','DESC');
 
         if (isset($param['size']) && !empty($param['size'])) {
 
