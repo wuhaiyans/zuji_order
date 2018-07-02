@@ -1561,7 +1561,7 @@ class OrderReturnCreater
      *		'status'      => '',//支付状态  processing：处理中；success：支付完成
      * ]
      */
-    public static function refundUpdate($params){
+    public static function refundUpdate($params,$userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
@@ -1589,6 +1589,10 @@ class OrderReturnCreater
             if(!$order){
                 LogApi::debug("未找到订单记录");
                 return false;
+            }
+            $order = $order->getData();
+            if($order['order_status'] == OrderStatus::OrderClosedRefunded){
+               return true;
             }
             //查询此订单的商品
             $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
@@ -1715,6 +1719,16 @@ class OrderReturnCreater
             }
            // DB::commit();
             LogApi::debug("退款执行成功");
+            if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
+                //插入操作日志
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
+            }
+            if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
+                //插入操作日志
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退货退款","退款成功");
+
+            }
+
             return true;
             //解冻订单
         }catch (\Exception $exc) {
