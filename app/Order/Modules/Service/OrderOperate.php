@@ -902,6 +902,8 @@ class OrderOperate
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+                $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
 
                 //设备名称
 
@@ -913,7 +915,12 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                $adminActBtn = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                if ($values['freeze_type']>0) {
+                    $adminActBtn['cancel_btn'] = false;
+                }
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $adminActBtn;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 

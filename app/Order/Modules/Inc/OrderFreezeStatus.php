@@ -47,7 +47,7 @@ class OrderFreezeStatus{
      */
     public static function getStatusList(){
         return [
-            self::Non => '不冻结',
+            self::Non => '无',
             self::Refund => '退款退货',
             self::Reback => '还货',
             self::Buyout => '买断',

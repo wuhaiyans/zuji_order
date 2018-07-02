@@ -91,7 +91,9 @@ class OrderReturnRepository
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
             ->where($where)
-            ->select('order_return.create_time as c_time','order_return.*','order_info.*','order_goods.goods_name','order_goods.zuqi')->get();
+            ->select('order_return.create_time as c_time','order_return.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
+            ->orderBy('order_return.create_time', 'DESC')
+            ->get();
         if($parcels){
             return $parcels->toArray();
         }
