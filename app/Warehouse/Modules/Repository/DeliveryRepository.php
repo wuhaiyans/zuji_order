@@ -511,7 +511,7 @@ class DeliveryRepository
      *
      * 列表
      */
-    public static function list($params, $logic_params, $limit, $page=null)
+    public static function lists($params, $logic_params, $limit, $page=null)
     {
         $query = Delivery::where($params)->orderByDesc('delivery_no');
 
