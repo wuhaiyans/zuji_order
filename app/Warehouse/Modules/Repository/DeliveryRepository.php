@@ -139,6 +139,12 @@ class DeliveryRepository
         if (!$model) {
             throw new NotFoundResourceException('订单号' . $order_no . '未找到');
         }
+
+        foreach ($model->imeis as $key=>$item){
+            //修改IMEI状态为库存中
+            Imei::in($item->imei);
+        }
+
         $model->status = Delivery::STATUS_CANCEL;
         return $model->update();
     }
@@ -154,6 +160,12 @@ class DeliveryRepository
         if (!$model) {
             throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
+
+        foreach ($model->imeis as $key=>$item){
+            //修改IMEI状态为库存中
+            Imei::in($item->imei);
+        }
+
         $model->status = Delivery::STATUS_CANCEL;
         return $model->update();
     }
