@@ -540,7 +540,7 @@ class DeliveryController extends Controller
     {
         $list = $this->delivery->getLogistics();
         //return apiResponse(['list'=>$list]);
-        return apiResponse(json_encode($list));
+        return apiResponse($list);
     }
 
 
