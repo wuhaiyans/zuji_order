@@ -913,7 +913,12 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                $adminActBtn = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+                if ($values['freeze_type']>0) {
+                    $adminActBtn['cancel_btn'] = false;
+                }
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $adminActBtn;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
