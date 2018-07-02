@@ -78,7 +78,6 @@ class OrderOperate
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
-                LogApi::error("订单查询失败",$orderDetail);
                 DB::rollBack();
                 return false;
             }
@@ -88,7 +87,6 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    LogApi::error("订单状态错误",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -96,7 +94,6 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                    LogApi::error("订单发货信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -104,12 +101,11 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                    LogApi::error("货详情信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
-                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+ //              $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
 //                if(!$b) {
 //                    LogApi::error("发货时生成合同失败",$orderDetail);
 //                    DB::rollBack();
@@ -121,16 +117,19 @@ class OrderOperate
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
 
-                DB::commit();
-
                 //增加确认收货队列
-                $confirmTime =$orderInfo['zuqi_type'] ==1?config('web.short_confirm_days'):config('web.long_confirm_days');
+                if($orderInfo['zuqi_type'] ==1){
+                    $confirmTime = config('web.short_confirm_days');
+                }else{
+                    $confirmTime = config('web.long_confirm_days');
+                }
 
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.ORDER_API"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");
 
+                DB::commit();
                 return true;
 
             }else {
@@ -148,8 +147,6 @@ class OrderOperate
             echo $exc->getMessage();
             die;
         }
-
-        return true;
 
     }
 
