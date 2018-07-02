@@ -214,7 +214,7 @@ class DeliveryService
             //return Config::$logistics;
             foreach (Config::$logistics as $k=>$item){
                 $data[] = [
-                    'status'=>$k,
+                    'id'=>$k,
                     'name'=>$item,
                 ];
             }
