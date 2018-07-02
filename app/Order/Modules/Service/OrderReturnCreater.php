@@ -1126,7 +1126,8 @@ class OrderReturnCreater
                      $buss->setLogisticsForm($channel_list);
 
                 }
-                $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);//退换货原因
+				//退换货原因
+                $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮
@@ -1160,6 +1161,7 @@ class OrderReturnCreater
                 $barter['goods_name']=$goodsInfo['goods_name'];
                 $buss->setBarterLogistics($barter);
             }
+			
             return $buss->toArray();
         }catch( \Exception $exc){
 			LogApi::error('退货信息查询失败',$exc);
