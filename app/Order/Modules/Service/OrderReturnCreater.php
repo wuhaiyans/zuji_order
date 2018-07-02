@@ -1162,8 +1162,8 @@ class OrderReturnCreater
             }
             return $buss->toArray();
         }catch( \Exception $exc){
-            echo $exc->getMessage();
-            die;
+			LogApi::error('退货信息查询失败',$exc);
+            return false;
         }
     }
 
