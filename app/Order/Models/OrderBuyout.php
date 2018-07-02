@@ -31,6 +31,7 @@ class OrderBuyout extends Model
 		'user_id', //用户ID
 		'goods_name',//设备名称
 		'buyout_price', //买断价格
+		'zujin_price',//结算租金
 		'amount', //应付总金额
 		'zujin', //结算租金
 		'status', //买断状态
