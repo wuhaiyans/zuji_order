@@ -49,7 +49,6 @@ return [
     //支付宝资金预授权接口
     'api.alipay.fundauth'=>'AlipayController@alipayFundAuth',
     //支付宝代扣+资金预授权接口
-    'api.alipay.withhold.fundauth'=>'PayController@payment',
     'api.get.payment.url'=>'PayController@payment',
     //通用支付URL地址接口，满足url跳转支付
     'api.pay.payment.url'=>'PayController@getPaymentUrl',

@@ -70,7 +70,7 @@ class Imei extends Warehouse
     {
         $model = self::where(['imei'=>$imei])->first();
         if (!$model) {
-            return ;
+            return false;
         }
         $model->status = self::STATUS_IN;
 
