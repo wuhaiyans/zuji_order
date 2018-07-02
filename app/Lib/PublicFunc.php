@@ -248,6 +248,8 @@ function createNo($noType=1){
         8 => 'B',
         9 => 'X',
         10 => 'W',
+        'D' => 'D',// 发货单编号
+        'R' => 'R',// 收货单编号
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
@@ -294,6 +296,21 @@ function creage_withhold_no(){
     return 'W'.createNo(3);
 }
 
+/**
+ * 生成 发货编号
+ * @return string
+ */
+function create_delivery_no(){
+    return 'P'.createNo('D');
+}
+
+/**
+ * 生成 收货编号
+ * @return string
+ */
+function create_receive_no(){
+    return 'P'.createNo('R');
+}
 
 /**
  * 根据key 二维数组分组

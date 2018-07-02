@@ -41,9 +41,16 @@ class DeliveryRepository
     }
 
 
+	/**
+	 * 创建发货单
+	 * @param type $data
+	 * @return boolean
+	 * @throws \Exception
+	 */
     public function create($data)
     {
-        $delivery_no = WarehouseHelper::generateNo();
+		// 发货单号
+        $delivery_no = create_delivery_no();
         $time = time();
 
         $dRow = [
@@ -365,44 +372,59 @@ class DeliveryRepository
     }
 
 
-    /**
-     *
-     * 单品取消配货
-     * @param $params array
-     * [
-     *  delivery_no => 1,
-     *  goods_no => '12323',
-     *  imei => '12123'
-     * ]
-     * @return bool
-     *
-     */
+	/**
+	 * 取消商品的配货信息
+	 * @param type $params
+	 * [
+	 *		'delivery_no'	=> '', //【必选】string 发货单
+	 *		'goods_no'		=> '', //【必选】string 商品编号
+	 * ]
+	 * @return boolean
+	 */
     public static function cancelMatchGoods($params)
     {
-        $goodsModel = DeliveryGoods::where([
-            'delivery_no'=>$params['delivery_no'],
-            'goods_no'=>$params['goods_no']
-        ])->first();
-
-        if (!$goodsModel) return false;
-
         try {
+			// 查询发货的商品信息
+			$where = [
+				'delivery_no'	=> $params['delivery_no'],
+				'goods_no'		=> $params['goods_no']
+			];
+			$goodsModel = DeliveryGoods::where($where)->first();
+			if( !$goodsModel ){
+				\App\Lib\Common\LogApi::type('data-error')::error('商品配货取消失败', $where);
+				return false;
+			}
+			// 重复操作
+			if( $goodsModel->status == DeliveryGoods::STATUS_INIT ){
+				return true;
+			}
             $goodsModel->status = DeliveryGoods::STATUS_INIT;
             $goodsModel->status_time = time();
             $goodsModel->update();
-
-            $goodsImeiModel = DeliveryGoodsImei::where([
-                'delivery_no'=>$params['delivery_no'],
-                'goods_no'=>$params['goods_no'],
-                'imei' => $params['imei']
-            ])->first();
-
-            $goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
-            $goodsImeiModel->status_time = time();
-            $goodsImeiModel->update();
-
-            Imei::in($params['imei']);
+			
+			// 查询商品imei
+			$imei_where = [
+                'delivery_no'	=> $params['delivery_no'],
+                'goods_no'		=> $params['goods_no'],
+                'status'		=> DeliveryGoodsImei::STATUS_YES,
+            ];
+            $goodsImeiModel = DeliveryGoodsImei::where($imei_where)->first();
+			if( !$goodsImeiModel ){
+				\App\Lib\Common\LogApi::type('data-error')::error('商品配货imei取消失败', $imei_where);
+				return false;
+			}
+			$goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
+			$goodsImeiModel->status_time = time();
+			$b = $goodsImeiModel->update();
+			if( !$b ){
+				\App\Lib\Common\LogApi::type('data-save')::error('商品配货imei取消失败', $imei_where);
+				return false;
+			}
+			// 还原 imei 状态
+            Imei::in( $goodsImeiModel->imei );
+			
         } catch (\Exception $e) {
+			\App\Lib\Common\LogApi::error('商品取消配货失败', $e);
             Log::error($e->getMessage());
             return false;
         }

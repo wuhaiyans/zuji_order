@@ -96,7 +96,15 @@ class DeliveryService
         }
     }
 
-
+	/**
+	 * 取消商品的配货信息
+	 * @param type $params
+	 * [
+	 *		'delivery_no'	=> '', //【必选】string 发货单
+	 *		'goods_no'		=> '', //【必选】string 商品编号
+	 * ]
+	 * @throws \Exception
+	 */
     public function cancelMatchGoods($params)
     {
         if (!DeliveryRepository::cancelMatchGoods($params)) {
@@ -203,14 +211,14 @@ class DeliveryService
     public function getLogistics($logisticsId=null)
     {
         if ($logisticsId === null) {
-            return Config::$logistics;
-//            foreach (Config::$logistics as $k=>$item){
-//                $data[] = [
-//                    'status'=>$k,
-//                    'name'=>$item,
-//                ];
-//            }
-//            return $data;
+            //return Config::$logistics;
+            foreach (Config::$logistics as $k=>$item){
+                $data[] = [
+                    'id'=>$k,
+                    'name'=>$item,
+                ];
+            }
+            return $data;
         }
         return isset(Config::$logistics[$logisticsId]) ? Config::$logistics[$logisticsId] : '';
     }
@@ -222,7 +230,7 @@ class DeliveryService
      *
      * 列表
      */
-    public function list($params)
+    public function lists($params)
     {
         $limit = 20;
         if (isset($params['size']) && $params['size']) {
@@ -277,7 +285,7 @@ class DeliveryService
             }
         }
 
-        $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
+        $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
         if (!$items) {
@@ -396,7 +404,7 @@ class DeliveryService
             }
         }
 
-        $collect = DeliveryRepository::list($whereParams, $logic_params, $limit, $page);
+        $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page);
         $items = $collect->items();
 
         if (!$items) {

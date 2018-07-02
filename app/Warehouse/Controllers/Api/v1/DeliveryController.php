@@ -9,6 +9,7 @@ use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use App\Warehouse\Modules\Service\ReceiveGoodsService;
 use App\Warehouse\Modules\Service\ReceiveService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
@@ -27,21 +28,34 @@ class DeliveryController extends Controller
 
     /**
      * 发货单 -- 创建
-     *
-     * order_no 订单号
-     * delivery_detail 设备明细
+     * @param
+	 * [
+	 *		'business_key'	=> '',	//【必选】string 业务类型
+	 *		'business_no'	=> '',	//【必选】string 业务编号
+	 *		'order_no'		=> '',	//【必选】string 订单编号
+	 *		'delivery_detail'	=> [	//【必选】array 发货商品清单
+	 *			[
+	 *				'goods_name'=> '', //【必选】string 商品名称
+	 *				'goods_no'	=> '', //【必选】string 商品编号
+	 *				'quantity'	=> '', //【必选】int 申请发货数量
+	 *			]
+	 *		],
+	 *		'customer'			=> '',	//【必选】string 收货人姓名
+	 *		'customer_mobile'	=> '',	//【必选】string 收货人手机号
+	 *		'customer_address'	=> '',	//【必选】string 收货人地址
+	 * ]
      */
     public function deliveryCreate(){
 		\App\Lib\Common\LogApi::debug('[发货申请]',request()->input());
 		
         $rules = [
-            'order_no' => 'required', //单号
+            'order_no'			=> 'required', //单号
             'delivery_detail'   => 'required', //序号
-            'customer'   => 'required', //收货人姓名
+            'customer'			=> 'required', //收货人姓名
             'customer_mobile'   => 'required', //手机号
-            'customer_address'   => 'required', //地址
-            'business_key'   => 'required', //商业类型
-            'business_no'   => 'required', //类型编号
+            'customer_address'  => 'required', //地址
+            'business_key'		=> 'required', //业务类型
+            'business_no'		=> 'required', //业务编号
         ];
 
         $params = $this->_dealParams($rules);
@@ -270,12 +284,11 @@ class DeliveryController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
+
             $this->delivery->send($params);
             $result = $this->_info($params['delivery_no']);
-
-
-            Log::error($result);
-
 
             $orderDetail = [
                 'order_no' => $result['order_no'],
@@ -288,13 +301,18 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
 
-
-
-            Log::error($user_info);
             //通知订单接口
-            \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+
+
+            Log::error('aaaaaaaaccd');
+            Log::error($a);
+
+
+            DB::commit();
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+            DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
 
@@ -359,7 +377,12 @@ class DeliveryController extends Controller
 
 
     /**
-     * 取消配货 完成后 为待配货状态
+     * 取消商品配货 完成后 为待配货状态
+	 * @param 
+	 * [
+	 *		'delivery_no'	=> '', //【必选】string 发货单
+	 *		'goods_no'		=> '', //【必选】string 商品编号
+	 * ]
      */
     public function cancelMatchGoods()
     {
@@ -447,7 +470,7 @@ class DeliveryController extends Controller
      *
      * 可按创建时间，发货时间，订单号等状态查询
      */
-    public function list()
+    public function lists()
     {
         $params = $this->_dealParams([]);
         $list = $this->delivery->list($params);
@@ -516,7 +539,8 @@ class DeliveryController extends Controller
     public function logisticList()
     {
         $list = $this->delivery->getLogistics();
-        return apiResponse(['list'=>$list]);
+        //return apiResponse(['list'=>$list]);
+        return apiResponse($list);
     }
 
 
