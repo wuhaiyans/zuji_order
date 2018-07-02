@@ -88,7 +88,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    LogApi::error("订单查询失败",$orderDetail);
+                    LogApi::error("订单状态错误",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -148,6 +148,8 @@ class OrderOperate
             echo $exc->getMessage();
             die;
         }
+
+        return true;
 
     }
 
