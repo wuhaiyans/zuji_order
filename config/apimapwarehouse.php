@@ -32,7 +32,7 @@ return [
     'warehouse.delivery.cancelMatch' => 'DeliveryController@cancelMatch', //取消配货
     'warehouse.delivery.addImei' => 'DeliveryController@addImei', //添加imei
     'warehouse.delivery.delImei' => 'DeliveryController@delImei', //删除imei
-    'warehouse.delivery.list' => 'DeliveryController@list', //列表
+    'warehouse.delivery.list' => 'DeliveryController@lists', //列表
     'warehouse.delivery.refuse' => 'DeliveryController@refuse', //拒签   待完成
     'warehouse.delivery.publics' => 'DeliveryController@publics', //发货公用参数
     'warehouse.delivery.export' => 'DeliveryController@export', //导出excel
