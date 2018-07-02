@@ -55,7 +55,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderPaying => [
 
                     //付款
-                    'payment_btn'   => false,
+                    'payment_btn'   => true,
                     //取消
                     'cancel_btn'    => false,
                     //支付后的取消

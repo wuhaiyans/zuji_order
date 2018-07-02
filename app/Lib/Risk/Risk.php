@@ -22,6 +22,7 @@ class Risk{
     const RistKnightMno='knight_mno';//白骑士运营商
     const RistScore='risk_score';//风控系统分数
     const RistZhimaScore='zhima_score';//芝麻分数
+    const RistGrade='risk_grade';//风控整体策略
 
 
     //风控值描述
@@ -46,6 +47,7 @@ class Risk{
             self::RistKnightMno => '白骑士运营商',
             self::RistScore => '风控系统分',
             self::RistZhimaScore => '芝麻',
+            self::RistGrade => '风控整体策略',
         ];
     }
     /**

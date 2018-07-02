@@ -59,7 +59,7 @@ class WithholdWarmed implements ShortMessage {
         }
 
         // 短息模板
-        $code = $this->getCode($this->business_type);
+        $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
             return false;
         }

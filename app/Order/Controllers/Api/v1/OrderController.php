@@ -503,7 +503,7 @@ class OrderController extends Controller
         }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_30012);
+            return apiResponse([],ApiStatus::CODE_30014);
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
@@ -835,7 +835,7 @@ class OrderController extends Controller
 
                 if ($orderData) {
 
-                    if ($orderData['order_status']==1) {
+                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
                         $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
