@@ -105,6 +105,10 @@ class DeliveryDetail {
             foreach ($goodsInfo as $key=>$value){
                 $imei ="";
                 if(in_array($v['goods_no'],$value)){
+                    $value['imei2'] =isset($value['imei2'])?$value['imei2']:'';
+                    $value['imei3'] =isset($value['imei3'])?$value['imei3']:'';
+                    $value['serial_number'] =isset($value['serial_number'])?$value['serial_number']:'';
+                    
                     $imei = $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
                 }
             }
