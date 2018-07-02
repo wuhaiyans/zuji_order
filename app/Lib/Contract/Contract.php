@@ -112,14 +112,15 @@ class Contract{
         if ($validator->fails()) {
             return false;
         }
-        LogApi::error("生成合同参数",$rule);
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
 		$url = env('OLD_ORDER_API').'?m=contract&c=api&a=create';
         $info = Curl::post($url, json_encode($params));
+
         if(!$info){
             return false;
         }
         $info = json_decode($info,true);
+        LogApi::error("生成合同返回请求",$info);
         if(!is_array($info)){
             return false;
         }
