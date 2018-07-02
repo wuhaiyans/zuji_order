@@ -1571,7 +1571,7 @@ class OrderReturnCreater
         ];
         $validator = app('validator')->make($params, $rules);
         if ($validator->fails()) {
-            log::debug("参数错误",$params);
+            LogApi::debug("参数错误",$params);
             //set_apistatus(ApiStatus::CODE_20001, $validator->errors()->first());
             return false;
         }
@@ -1581,37 +1581,41 @@ class OrderReturnCreater
             //获取退货、退款单信息
             $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['business_no']);
             if(!$return){
-                log::debug("未找到此退货、退款记录");
+                LogApi::debug("未找到此退货、退款记录");
                 return false;
             }
             $return_info = $return->getData();
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
             if(!$order){
-                log::debug("未找到订单记录");
+                LogApi::debug("未找到订单记录");
                 return false;
             }
             //查询此订单的商品
             $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
+            if(!$goodInfo){
+                LogApi::debug("未获取到订单的商品信息");
+                return false;
+            }
             $goodsInfo=$goodInfo->toArray();
             if($return_info['goods_no']){
                 //修改退货单状态为已退货
                 $updateReturn=$return->returnFinish($params);
                 if(!$updateReturn){
-                    log::debug("修改退款、退货状态失败");
+                    LogApi::debug("修改退款、退货状态失败");
                    // DB::rollBack();
                     return false;
                 }
                 //获取商品信息
                 $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
                 if(!$goods){
-                    log::debug("获取商品信息失败");
+                    LogApi::debug("获取商品信息失败");
                     return false;
                 }
                 //修改商品状态
                $updateGoods= $goods->returnFinish();
                 if(!$updateGoods){
-                    log::debug("修改商品状态失败");
+                    LogApi::debug("修改商品状态失败");
                   //  DB::rollBack();
                     return false;
                 }
@@ -1629,7 +1633,7 @@ class OrderReturnCreater
                     //解冻订单并关闭订单
                     $updateOrder=$order->refundFinish();
                     if(!$updateOrder){
-                        log::debug("解冻订单失败");
+                        LogApi::debug("解冻订单失败");
                      //   DB::rollBack();
                         return false;
                     }
@@ -1642,14 +1646,14 @@ class OrderReturnCreater
                 //修改退货单状态为已退款
                 $updateReturn=$return->refundFinish($params);
                 if(!$updateReturn){
-                    log::debug("修改退款单状态失败");
+                    LogApi::debug("修改退款单状态失败");
                    // DB::rollBack();
                     return false;
                 }
                 //解冻订单并关闭订单
                 $updateOrder=$order->refundFinish($params);
                 if(!$updateOrder){
-                    log::debug("解冻并且关闭订单失败");
+                    LogApi::debug("解冻并且关闭订单失败");
                   //  DB::rollBack();
                     return false;
                 }
@@ -1658,7 +1662,7 @@ class OrderReturnCreater
                 $orderGoods = OrderRepository::getGoodsListByGoodsId($params);
             }
             if (empty($orderGoods)) {
-                log::debug("未获取到商品信息");
+                LogApi::debug("未获取到商品信息");
               //  DB::rollBack();
                 return false;
             }
@@ -1674,7 +1678,7 @@ class OrderReturnCreater
 
                     $success =Goods::addStock($goods_arr);
                     if (!$success) {
-                        log::debug("释放库存失败");
+                        LogApi::debug("释放库存失败");
                      //   DB::rollBack();
                         return false;
                     }
@@ -1689,7 +1693,7 @@ class OrderReturnCreater
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                         $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                         if (!$success) {
-                            log::debug("关闭商品分期失败");
+                            LogApi::debug("关闭商品分期失败");
                            // DB::rollBack();
                             return false;
                         }
@@ -1703,17 +1707,18 @@ class OrderReturnCreater
                 if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                     $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
                     if (!$success) {
-                        log::debug("关闭订单分期失败");
+                        LogApi::debug("关闭订单分期失败");
                       //  DB::rollBack();
                         return false;
                     }
                 }
             }
            // DB::commit();
-            log::debug("退款执行成功");
+            LogApi::debug("退款执行成功");
             return true;
             //解冻订单
         }catch (\Exception $exc) {
+            LogApi::debug("程序异常");
            // DB::rollBack();
             echo $exc->getMessage();
             die;
