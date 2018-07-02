@@ -1051,14 +1051,16 @@ class OrderReturnCreater
                             || !isset($info['data']) ){
                            return false;
                         }
-                        $i=0;
+                       /* $i=0;
                         foreach($info['data']['list'] as $k=>$id){
 
                             $logistics[$i]['id']=$k;
                             $logistics[$i]['name']=$id;
                             $i=$i+1;
                         }
-                        $buss->setLogisticsInfo($logistics);
+                        $buss->setLogisticsInfo($logistics);*/
+                        $buss->setLogisticsInfo($info['data']);
+
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
                     $buss->setStatus("B");
