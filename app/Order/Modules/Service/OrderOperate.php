@@ -1091,6 +1091,7 @@ class OrderOperate
                 $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                 if ($expire_process) {
                     $goodsList[$keys]['act_goods_state']['buy_off'] = false;
+                    $goodsList[$keys]['act_goods_state']['cancel_btn'] = false;
                 }
                 //是否已经操作过保险
 
