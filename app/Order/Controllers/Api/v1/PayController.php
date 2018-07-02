@@ -91,24 +91,26 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
 		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
 		}
 		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data not array',
+			]);exit;
 		}
-		
-//		$params = [
-//			'payment_no'	=> '10A52108092865700',
-//			'out_payment_no'=> 'FA52108092585030',
-//			'status'		=> 'success',
-//			'amount'		=> '1',
-//		];
-		
+				
 		try {
 			// 校验支付状态
 			$status_info = \App\Lib\Payment\CommonPaymentApi::query($params);
-			if( $status_info['status'] != 'success' ){// 支付成功
-				echo 'payment status not success';exit;
+			if( $status_info['status'] != 'success' ){// 未支付成功
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'payment status not success',
+				]);exit;
 			}
 			
 			// 开启事务
@@ -118,12 +120,20 @@ class PayController extends Controller
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
 			
 			if( $pay->isSuccess() ){// 已经支付成功
-				echo 'payment notice repeated ';exit;
+				DB::rollBack();
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => 'payment notice repeated',
+				]);exit;
 			}
 			
 			// 判断是否需要支付
 			if( ! $pay->needPayment() ){
-				echo 'payment not need ';exit;
+				DB::rollBack();
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => 'payment not need',
+				]);exit;
 			}
 			
 			// 支付处理
@@ -139,9 +149,17 @@ class PayController extends Controller
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
-			echo $exc->getMessage();
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		} catch (\Exception $exc) {
-			echo $exc->getMessage();
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'error',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		}
 		
 		DB::rollBack();
