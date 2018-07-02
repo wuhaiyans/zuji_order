@@ -121,6 +121,7 @@ class OrderPayIncomeRepository
         $result =  OrderPayIncome::query()
             ->where($whereArray)
             ->offset($offset)
+			->orderBy('create_time','DESC')
             ->limit($pageSize)
             ->get();
 
