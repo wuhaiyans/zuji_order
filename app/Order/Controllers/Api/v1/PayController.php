@@ -393,10 +393,10 @@ class PayController extends Controller
      * @param Request $request
      */
     public function refundClean(Request $request){
-
+		LogApi::setSource('callback-refund');
         try{
             $input = file_get_contents("php://input");
-            LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退款回调地址参数:'.$input);
+            LogApi::info('[清算退款]回调接收',$input);
             $param = json_decode($input,true);
             $rule = [
                 'out_refund_no'=>'required', //订单系统退款码
@@ -406,28 +406,39 @@ class PayController extends Controller
             ];
 
             $validateParams = $this->validateParams($rule,$param);
-            if ($validateParams['code']!=0) $this->innerErrMsg($validateParams['msg']);
+			if ($validateParams['code']!=0) {
+                LogApi::error('回调参数校验错误',$validateParams);
+				$this->innerErrMsg($validateParams['msg']);
+			}
             if ($param['status']!='success'){
-                LogApi::info(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
+                LogApi::error('回调状态错误',$param);
             }
+			
+			// 开启事务
+			DB::beginTransaction();
+			
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_refund_no']]);
             if ($orderCleanInfo['code']) {
-                LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+				DB::rollback();
+                LogApi::error("[清算记录]不存在");
                 $this->innerErrMsg(__METHOD__."() ".microtime(true).' 订单清算记录不存在');
-
+				exit;
             }
             $orderCleanInfo = $orderCleanInfo['data'];
-            //查看清算状态是否已支付
-            if ($orderCleanInfo['refund_status']==OrderCleaningStatus::refundUnpayed){
+			
+			
+            //查看清算状态是否已退款
+            if ( $orderCleanInfo['refund_status'] == OrderCleaningStatus::refundUnpayed ){// 待退款状态
 
                 //更新订单清算退款状态
                 $orderParam = [
                     'clean_no' => $param['out_refund_no'],
                     'out_refund_no'     => $param['refund_no'],
-                    'refund_status' => OrderCleaningStatus::refundPayd
+                    'refund_status' => OrderCleaningStatus::refundPayd, // 已退款
                 ];
                 $success = OrderCleaning::upOrderCleanStatus($orderParam);
+				
                 if (!$success) {
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
@@ -438,39 +449,44 @@ class PayController extends Controller
                         ];
                         $success = OrderCleaning::upOrderCleanStatus($orderParam);
 
-                        if (!$success) {
+                        if (!$success) {	// 成功
                             //更新业务系统的状态
                             $businessParam = [
                                 'business_type' => $orderCleanInfo['business_type'],	// 业务类型
                                 'business_no'	=> $orderCleanInfo['business_no'],	// 业务编码
                                 'status'		=> $param['status'],	// 支付状态  processing：处理中；success：支付完成
                             ];
-                            $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-
+                            $b =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
+							if( !$b ){// 
+								DB::rollBack();
+							}
                             LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback', $businessParam);
                             LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback返回的结果', $success);
+							
                         }  else {
-
+							DB::rollBack();
                             LogApi::error('退款业务回调更新整体清算的状态失败', $orderParam);
                             $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
+					DB::rollBack();
                     $this->innerErrMsg();
                     LogApi::info(__METHOD__."() ".microtime(true)." 退款业务状态更新失败");
                     $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务状态更新失败');
                 }
 
-            } else {
-
+            } else { // 非待退款状态
+				DB::rollBack();
                 LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
                 $this->innerErrMsg(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
             }
+			DB::commit();
             $this->innerOkMsg();
 
 
         } catch (\Exception $e)  {
-
+			DB::rollBack();
             LogApi::info(__METHOD__ . "()订单清算退款回调地址异常 " .$e->getMessage(),  $param);
             $this->innerErrMsg(__METHOD__ . "()订单清算退款回调地址异常 " .$e->getMessage());
 

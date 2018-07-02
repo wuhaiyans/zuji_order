@@ -110,7 +110,7 @@ class OrderCleaning
      * 更新订单清算状态
      * Author: heaven
      * @param $param
-     * @return bool
+     * @return int 0：成功；非0：失败
      */
     public static function upOrderCleanStatus($param)
     {
@@ -358,7 +358,7 @@ class OrderCleaning
      *
      * 订单清算回调业务接口
      * Author: heaven
-     * @return mixed
+     * @return boolean  true：成功；false：失败
      */
     public static function getBusinessCleanCallback($businessType, $businessNo, $result)
     {
