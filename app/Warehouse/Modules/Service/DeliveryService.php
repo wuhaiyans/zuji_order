@@ -329,19 +329,18 @@ class DeliveryService
             $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
             $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
 
-            //取消发货
-            if($item->status == Delivery::STATUS_INIT || Delivery::STATUS_WAIT_SEND){
-                $it['buttons']['cancel_delivery'] = true;
-            }else{
-                $it['buttons']['cancel_delivery'] = false;
-            }
+            //取消发货(一期不做先注释)
+            //if($item->status == Delivery::STATUS_INIT || Delivery::STATUS_WAIT_SEND){
+            //    $it['buttons']['cancel_delivery'] = true;
+            //}else{
+            //    $it['buttons']['cancel_delivery'] = false;
+            //}
+            $it['buttons']['cancel_delivery'] = false;
 
             $it['buttons']['already_match'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false;//已配货
 
             array_push($result, $it);
         }
-
-//        p(Delivery::sta());die;
 
         $status_list = Delivery::sta();
         return [
