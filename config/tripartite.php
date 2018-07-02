@@ -35,7 +35,7 @@ return [
         'version'=>'1.0',
     ],
     //收发货
-    'warehouse_api_uri' => env('WAREHOUSE_API_URI', 'http://dev-order-zuji.huishoubao.com/api'),
+    'warehouse_api_uri' => env('WAREHOUSE_API', 'http://dev-order-zuji.huishoubao.com/api'),
 
     /*********电子合同接口***********/
     //电子合同创建
