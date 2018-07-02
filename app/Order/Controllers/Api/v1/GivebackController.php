@@ -426,77 +426,6 @@ class GivebackController extends Controller
 				throw new \Exception('这简直就是一个惊天大bug，天上有漏洞----->你需要一个女娲—.—');
 			}
 
-//			//初始化还机单需要更新的数据
-//			$data = [
-//				'instalment_num' => $instalmentNum,
-//				'instalment_amount' => $instalmentAmount,
-//				'evaluation_status' => $paramsArr['evaluation_status'],
-//				'evaluation_remark' => $paramsArr['evaluation_remark'],
-//				'evaluation_time' => $paramsArr['evaluation_time'],
-//				'compensate_amount' => $paramsArr['compensate_amount'],
-//			];
-//
-//			//需要支付金额和押金均为0时，直接修改还机单和商品单状态
-//			if( $givebackNeedPay == 0 && $yajin == 0 ) {
-//				//解冻订单
-//				//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-//				$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderGivevbackInfo['order_no']);
-//				if( count($givebackUnfinshedList) == 1 ){
-//					$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderGivevbackInfo['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Non);
-//					if( !$orderFreezeResult ){
-//						//事务回滚
-//						DB::rollBack();
-//						return apiResponse([], ApiStatus::CODE_92700, '订单解冻失败!');
-//					}
-//				}
-//				//修改还机单状态
-//				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
-//				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
-//				$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN;
-//				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
-//			}
-//			//需要支付总金额小于等于押金金额：交由清算处理
-//			elseif( $givebackNeedPay <= $yajin ){
-//				//清算处理
-//				$clearData = [
-//					'user_id' => $orderGivevbackInfo['user_id'],
-//					'order_no' => $orderGivevbackInfo['order_no'],
-//					'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-//					'bussiness_no' => $orderGivevbackInfo['giveback_no'],
-//					'auth_deduction_amount' => ''.$givebackNeedPay,//扣除押金金额
-//					'auth_unfreeze_amount' => ''.( $yajin - $givebackNeedPay ),//退还押金金额
-//				];
-//				$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-//				if( !$orderCleanResult ){
-//					//事务回滚
-//					DB::rollBack();
-//					return apiResponse([], ApiStatus::CODE_93200, '押金退还清算单创建失败!');
-//				}
-//				//更新还机单状态
-//				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
-//				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
-//				$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_ON_RETURN;
-//				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
-//			}
-//			//需要支付总金额大于押金金额：交由支付处理，在支付回调验证押金进行清算处理
-//			else{
-//				$payData = [
-//					'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型
-//					'businessNo' => $orderGivevbackInfo['giveback_no'],// 业务编号
-//					'paymentAmount' => $givebackNeedPay,// Price 支付金额，单位：元
-//					'paymentFenqi' => 0,//不分期
-//				];
-//				$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
-//				if( !$payResult->isSuccess() ){
-//					//事务回滚
-//					DB::rollBack();
-//					return apiResponse([], ApiStatus::CODE_93200, '支付单创建失败!');
-//				}
-//				//更新还机单状态
-//				$data['status'] = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-//				$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
-//				$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], $data);
-//			}
 
 			//更新还机表状态失败回滚
 			if( !$dealResult ){
@@ -1048,6 +977,7 @@ class GivebackController extends Controller
 			$payData = [
 				'businessType' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,// 业务类型 
 				'businessNo' => $paramsArr['giveback_no'],// 业务编号
+				'orderNo' => $paramsArr['order_no'],// 订单编号
 				'userId' => $paramsArr['user_id'],// 用户id
 				'paymentAmount' => $paramsArr['instalment_amount']+$paramsArr['compensate_amount'],// Price 支付金额，单位：元
 				'paymentFenqi' => 0,//不分期

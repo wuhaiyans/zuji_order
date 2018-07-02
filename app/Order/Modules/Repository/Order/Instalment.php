@@ -350,7 +350,7 @@ class Instalment {
 			//发送短信通知 支付宝内部通知
 			$notice = new \App\Order\Modules\Service\OrderNotice(
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-				$instalmentInfo['id'],
+				$param['out_trade_no'],
 				"InstalmentWithhold");
 			$notice->notify();
 
