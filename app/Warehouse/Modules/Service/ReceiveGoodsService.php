@@ -85,6 +85,8 @@ class ReceiveGoodsService
             }
             //当前状态
             $it['status']=ReceiveGoods::status($it['status']);
+            //设备归还属性
+            $it['type']=Receive::types($receive_row->type);
 
             array_push($result, $it);
         }
