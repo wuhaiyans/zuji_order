@@ -204,7 +204,7 @@ class OrderCleaning
             //需退款金额大于0，并且属于待退款状态，
             //发起清算，退租金
             if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed
-            && empty($orderCleanData['auth_deduction_amount'] && empty($orderCleanData['auth_unfreeze_amount']))
+            && empty(intval($orderCleanData['auth_deduction_amount']) && empty(intval($orderCleanData['auth_unfreeze_amount'])))
             ) {
                 self::refundRequest($orderCleanData);
             }
@@ -233,8 +233,9 @@ class OrderCleaning
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
-                return false;
+
                 LogApi::info('PayQuery::getPayByFundauthNo获取失败,参数：{$orderCleanData[\'auth_no\']}', $authInfo);
+                return false;
             }
             if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
                 $freezePayParams = [
@@ -253,7 +254,7 @@ class OrderCleaning
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
-                && empty($orderCleanData['auth_deduction_amount'])) {
+                && empty(intval($orderCleanData['auth_deduction_amount']))a) {
                 self::unfreezeRequest($orderCleanData);
             }
 
