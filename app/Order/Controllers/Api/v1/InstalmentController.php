@@ -116,7 +116,7 @@ class InstalmentController extends Controller
      */
     public function info(Request $request){
         $params     = $request->all();
-        $uid        = $params['uid'];
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'goods_no'         => 'required',  //商品编号
@@ -188,7 +188,7 @@ class InstalmentController extends Controller
     */
     public function queryInfo(Request $request){
         $params     = $request->all();
-        $uid        = $params['uid'];
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'instalment_id'         => 'required',  //商品编号
