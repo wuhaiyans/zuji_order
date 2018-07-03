@@ -35,9 +35,7 @@ class PayController extends Controller
         $rules = [
             'callback_url'  => 'required',
             'order_no'  => 'required',
-            'name'  => 'required',
             'pay_channel_id'  => 'required',
-            'user_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
@@ -61,8 +59,18 @@ class PayController extends Controller
 		// | 获取并返回url
 		//-+--------------------------------------------------------------------
 		try{
+			$step = $pay->getCurrentStep();
+			if( $step == 'payment' ){
+				$name = '【拿趣用】订单:' . $params['order_no'] . '-支付';
+			}elseif( $step == 'withhold_sign' ){
+				$name = '【拿趣用】订单:' . $params['order_no'] . '-签约代扣';
+			}elseif( $step == 'fundauth' ){
+				$name = '【拿趣用】订单:' . $params['order_no'] . '-预授权';
+			}else{
+				$name = '【拿趣用】订单:' . $params['order_no'] . '-交易';
+			}
 			$paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
-					'name'=> $params['name'],
+					'name'=> $name,
 					'front_url' => $params['callback_url'],
 			]);
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);

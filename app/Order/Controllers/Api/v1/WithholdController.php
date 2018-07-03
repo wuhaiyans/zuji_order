@@ -84,7 +84,7 @@ class WithholdController extends Controller
      */
     public function unsign(Request $request){
         $params     = $request->all();
-
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'user_id'         => 'required|int',  //前端跳转地址
@@ -97,6 +97,11 @@ class WithholdController extends Controller
 
         $userId         = $params['params']['user_id'];
         $channel        = $params['params']['channel'];
+
+        // 用户验证
+        if($uid != $userId){
+            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
+        }
 
         try{
 
@@ -636,6 +641,8 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
+        $uid        = $params['userinfo']['uid'];
+
         $rules = [
             'return_url'        => 'required',
             'instalment_id'     => 'required|int',
@@ -657,6 +664,11 @@ class WithholdController extends Controller
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
+        }
+
+        // 用户验证
+        if($uid != $instalmentInfo['user_id']){
+            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
         }
 
         // 生成交易码
