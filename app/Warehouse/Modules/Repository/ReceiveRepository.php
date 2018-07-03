@@ -195,14 +195,14 @@ class ReceiveRepository
 //            throw new \Exception('收货单' . $receive_no . '非待收货状态，收货失败');
 //        }
 
-        $goods = $model->goods;
+//        $goods = $model->goods;
 
         $status = Receive::STATUS_RECEIVED;
-        foreach ($goods as $g) {
-            if ($g->status == ReceiveGoods::STATUS_INIT || $g->status == ReceiveGoods::STATUS_PART_RECEIVE) {
-                $status = Receive::STATUS_INIT;
-            }
-        }
+//        foreach ($goods as $g) {
+//            if ($g->status == ReceiveGoods::STATUS_INIT || $g->status == ReceiveGoods::STATUS_PART_RECEIVE) {
+//                $status = Receive::STATUS_INIT;
+//            }
+//        }
 
         $model->status = $status;
         $model->receive_time = time();
