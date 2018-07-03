@@ -18,6 +18,18 @@ class SceneConfig {
      * 场景:<b>【支付成功】</b>
      */
     const ORDER_PAY = 'OrderPay';
+    /**
+     * 场景:<b>【订单发货】</b>
+     */
+    const ORDER_DELIVERY = 'OrderDelivery';
+    /**
+     * 场景:<b>【订单签收-日租】</b>
+     */
+    const ORDER_DAY_RECEIVE = 'OrderDayReceive';
+    /**
+     * 场景:<b>【订单签收-月租】</b>
+     */
+    const ORDER_MONTH_RECEIVE = 'OrderMonthReceive';
 
 	/**
 	 * 场景:<b>【分期扣款】</b>

@@ -9,7 +9,7 @@ use App\Order\Modules\Repository\Pay\Channel;
 /**
  * OrderPay
  *
- * @author Administrator
+ * @author wuhaiyan
  */
 class OrderPay implements ShortMessage {
 	

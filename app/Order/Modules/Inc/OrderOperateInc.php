@@ -264,7 +264,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderWaitPaying => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -282,14 +282,30 @@ class OrderOperateInc
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
-                    'return_visit_btn'   => '回访',
+                    'return_visit_btn'   => false,
+                    //取消订单
+                    'refund_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
                     //回访
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => true,
+                    'refund_btn'   => true,
                     //确认订单
                     'confirm_btn'   => true,
                     //修改收货信息
@@ -310,7 +326,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderInStock => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -330,7 +346,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderDeliveryed => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -350,7 +366,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderInService => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -368,7 +384,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderCancel => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -388,7 +404,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderClosedRefunded => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
@@ -408,7 +424,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderCompleted => [
                     'return_visit_btn'   => true,
                     //取消订单
-                    'cancel_btn'   => false,
+                    'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
