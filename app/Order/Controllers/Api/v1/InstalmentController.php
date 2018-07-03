@@ -136,7 +136,9 @@ class InstalmentController extends Controller
             'goods_no' => $goodsNo,
         ];
         $instalmentList = \App\Order\Modules\Service\OrderGoodsInstalment::queryList($where);
-
+        if($instalmentList == []){
+            return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
+        }
         $instalmentList = $instalmentList[$goodsNo];
 
         foreach($instalmentList as &$item){
@@ -221,7 +223,7 @@ class InstalmentController extends Controller
         }
 
         // 分期金额
-        $instalmentInfo['fenqi_amount']     = $instalmentInfo['original_amount'];
+        $instalmentInfo['fenqi_amount']     = $goodInfo['zujin'];//$instalmentInfo['original_amount'];
 
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
