@@ -205,11 +205,12 @@ class GivebackController extends Controller
 				}
 				//获取用户信息
 				$userInfo = \App\Order\Modules\Repository\OrderUserAddressRepository::getUserAddressInfo($paramsArr['order_no']);
+				$orderGoodsInfo = $orderGoods->getData();
 				//推送到收发货系统
 				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], 1, [
 					[
 						'goods_no'=>$goodsNo,
-						'goods_name'=>$orderGoods['goods_name'],
+						'goods_name'=>$orderGoodsInfo['goods_name'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
