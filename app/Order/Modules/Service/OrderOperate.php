@@ -211,6 +211,7 @@ class OrderOperate
     {
         DB::beginTransaction();
         try{
+            //增加订单出险标识
             $extendData= [
                 'order_no'=>$params['order_no'],
                 'field_name'=>Inc\OrderExtendFieldName::FieldInsurance,
@@ -221,6 +222,7 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            //增加出险记录
             $params['create_time'] =time();
             $order = OrderInsurance::updateOrCreate($params);
             $id =$order->getQueueableId();
@@ -279,6 +281,7 @@ class OrderOperate
     {
         DB::beginTransaction();
         try{
+            //更新订单是否回访标识
             $res=OrderRepository::getOrderExtends($params['order_no'],Inc\OrderExtendFieldName::FieldVisit);
             if(empty($res)){
                 $extendData= [
@@ -293,6 +296,7 @@ class OrderOperate
                     return false;
                 }
             }
+            //增加或更新 订单回访记录
             $params['create_time'] =time();
             $order = OrderVisit::updateOrCreate(['order_no'=>$params['order_no']],$params);
             $id =$order->getQueueableId();
@@ -390,6 +394,15 @@ class OrderOperate
                     return false;
                 }
             }
+            //更新订单商品的状态
+            $goods = \App\Order\Modules\Repository\Order\Goods::getByOrderNo($orderNo);
+            foreach ($goods as $k=>$v){
+                $b=$v->updateStatusInService();
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+            }
 
             if($system==1){
                 $remark="系统自动执行任务";
@@ -402,13 +415,14 @@ class OrderOperate
                 $userId =$userInfo['uid'];
                 $userName =$userInfo['username'];
             }
-
+            //插入操作日志
+            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
 
             $params=[
-                    'order_no'=>$orderNo,//
-                    'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
-                    'user_id'=>$userId,//
-                    'user_name'=>$userName,//
+                'order_no'=>$orderNo,//
+                'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+                'user_id'=>$userId,//
+                'user_name'=>$userName,//
             ];
 
             //通知给收发货系统
@@ -418,8 +432,6 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            //插入操作日志
-            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
 
             DB::commit();
             //签收后发送短信

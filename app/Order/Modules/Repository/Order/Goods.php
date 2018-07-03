@@ -77,6 +77,14 @@ class Goods {
         $this->model->update_time =time();
         return $this->model->save();
     }
+    /**
+     * 修改商品状态为租用中
+     */
+    public function updateStatusInService(){
+        $this->model->goods_status =OrderGoodStatus::RENTING_MACHINE;
+        $this->model->update_time =time();
+        return $this->model->save();
+    }
 
     //-+------------------------------------------------------------------------
     // | 退货
