@@ -81,7 +81,7 @@ return [
 
 
     //订单结算清单列表接口
-    'api.orderClean.list'=>'OrderCleaningController@list',
+    'api.orderClean.list'=>'OrderCleaningController@cleanList',
     //订单结算清单详情接口
     'api.orderClean.detail'=>'OrderCleaningController@detail',
     //订单结算清单取消接口
