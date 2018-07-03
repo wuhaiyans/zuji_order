@@ -66,6 +66,7 @@ class Config {
                 SceneConfig::RETURN_CHECK_OUT 		=> 'hsb_sms_1607a', //退货检测合格
                 SceneConfig::RETURN_UNQUALIFIED 	=> 'hsb_sms_1c8bf', //退货检测不合格
                 SceneConfig::RETURN_DELIVERY 		=> 'hsb_sms_e36c8', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 		=> 'SMS_113461060', //退款成功
 				SceneConfig::WITHHOLD_FAIL 			=> 'hsb_sms_99a6f', //扣款失败
 				SceneConfig::WITHHOLD_WARMED	 	=> 'hsb_sms_16f75', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		=> 'hsb_sms_7326b', //扣款失败生成逾期

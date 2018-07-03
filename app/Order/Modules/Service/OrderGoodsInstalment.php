@@ -193,5 +193,24 @@ class OrderGoodsInstalment
     }
 
 
+    /**
+     * 关闭分期
+     * @param string $params 条件
+     * @param string $data	 参数数组
+     * @return mixed  false：更新失败；int：受影响记录数
+     */
+    public static function close($params){
+        if ( !is_array($params) || $params == []) {
+            return false;
+        }
+
+        $data = [
+            'status'    =>OrderInstalmentStatus::CANCEL,
+        ];
+        $result =  OrderGoodsInstalmentRepository::save($params, $data);
+        return $result;
+    }
+
+
 
 }

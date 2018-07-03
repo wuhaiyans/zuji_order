@@ -80,13 +80,15 @@ class OrderReturnCreater
                     return false;
                 }
                 //用户必须在收货后7天内才可以申请退换货
-                $nowdata=time();
+                $nowdata=time()+3600*8;
                 if( $order_info['delivery_time'] !=0 ){
                     $time = $nowdata-$order_info['delivery_time'];
-                    if( abs($time)>86400 ){
+                    if( abs($time)>604800 ){
                         return false;
                     }
                 }
+
+                //修改商品状态为退货
                 $returnOpen = $goods->returnOpen();
                 // 商品退货
                 if( !$returnOpen ) {
@@ -211,6 +213,7 @@ class OrderReturnCreater
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
             $data['user_id'] = $params['user_id'];
+            $data['refund_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//应退金额=订单实际总租金+押金+意外险
             $data['pay_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//实际支付金额=订单实际总租金+押金+意外险
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
@@ -1484,11 +1487,8 @@ class OrderReturnCreater
      */
     public function updateorder($params,$userinfo){
         //开启事物
-       // DB::beginTransaction();
+       DB::beginTransaction();
         try{
-            if($params['status']!="签收完成"){
-                return  false;  //不允许修改
-            }
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
             if(!$order){
@@ -1496,14 +1496,14 @@ class OrderReturnCreater
             }
             foreach($params['goods_info'] as $goods_no){
                 //获取换货 单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByInfo($params['order_no'],$goods_no);
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnInfo($params['order_no'],$goods_no);
                 if(!$return){
                     return false;
                 }
                 //更新退货单状态为已换货
                 $updateBarter=$return->barterFinish();
                 if(!$updateBarter){
-                  //  DB::rollBack();
+                    DB::rollBack();
                     return false;
                 }
                 $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
@@ -1513,23 +1513,23 @@ class OrderReturnCreater
                 //更新商品状态为租用中
                 $updateGoods=$goods->barterFinish();
                 if(!$updateGoods){
-                   // DB::rollBack();
+                    DB::rollBack();
                     return false;
                 }
             }
             //订单解冻
             $updateOrder=$order->returnClose();
             if(!$updateOrder){
-                //DB::rollBack();
+                DB::rollBack();
                 return false;
             }
             //插入操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"换货","用户已收货");
-           // DB::commit();
+            DB::commit();
             return true;
 
         }catch (\Exception $exc) {
-          //  DB::rollBack();
+            DB::rollBack();
             echo $exc->getMessage();
             die;
         }

@@ -48,28 +48,6 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
-//		$params = [
-//			
-//     		'name'		=> '解冻20A63050560131376', //交易名称
-//     		'out_trade_no' => time().rand(10,99), //订单系统交易码
-//     		'fundauth_no' => '20A63050560131376', //支付系统授权码
-//     		'amount' => 1, //解冻金额 单位：分
-//     		'back_url' => 'zuji-order.com', //后台通知地址
-//     		'user_id' => 18, //用户id
-//		];
-//		
-//		\App\Lib\Payment\CommonFundAuthApi::unfreeze($params);
-		$params = [
-			
-     		'name'		=> '解冻20A60124088730509', //交易名称
-     		'out_trade_no' => time().rand(10,99), //订单系统交易码
-     		'fundauth_no' => '20A60124088730509', //支付系统授权码
-     		'amount' => 1, //解冻金额 单位：分
-     		'back_url' => 'zuji-order.com', //后台通知地址
-     		'user_id' => 113, //用户id
-		];
-		
-		\App\Lib\Payment\CommonFundAuthApi::unfreeze($params);exit;
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
@@ -226,7 +204,7 @@ class GivebackController extends Controller
 					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
 				}
 				//推送到收发货系统
-				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, [['goods_no'=>$goodsNo]]);
+				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, [['goods_no'=>$goodsNo]],[]);
 				if( !$warehouseResult ){
 					//事务回滚
 					DB::rollBack();
@@ -292,7 +270,7 @@ class GivebackController extends Controller
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
-			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					OrderWithhold::instalment_withhold($instalmentInfo['id']);
@@ -378,7 +356,7 @@ class GivebackController extends Controller
 		}
 
 		//获取当前商品未完成分期列表数据
-		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 		//剩余分期需要支付的总金额、还机需要支付总金额
 		$instalmentAmount = $givebackNeedPay = 0;
 		//剩余分期数
@@ -407,7 +385,7 @@ class GivebackController extends Controller
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = OrderGoodsInstalment::close(['goods_no'=>$goodsNo]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {

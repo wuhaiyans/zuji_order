@@ -77,6 +77,14 @@ class Goods {
         $this->model->update_time =time();
         return $this->model->save();
     }
+    /**
+     * 修改商品状态为租用中
+     */
+    public function updateStatusInService(){
+        $this->model->goods_status =OrderGoodStatus::RENTING_MACHINE;
+        $this->model->update_time =time();
+        return $this->model->save();
+    }
 
     //-+------------------------------------------------------------------------
     // | 退货
@@ -87,9 +95,9 @@ class Goods {
      */
     public function returnOpen( ){
         //商品必须为租用中
-       // if( $this->model->goods_status!=OrderGoodStatus::RENTING_MACHINE ){
-        //    return false;
-       // }
+       // if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
+        //   return false;
+      //  }
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
