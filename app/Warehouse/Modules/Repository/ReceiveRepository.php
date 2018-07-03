@@ -198,14 +198,18 @@ class ReceiveRepository
         $goods = $model->goods;
 
         $status = Receive::STATUS_RECEIVED;
+        $t = time();
         foreach ($goods as $g) {
-            if ($g->status == ReceiveGoods::STATUS_INIT || $g->status == ReceiveGoods::STATUS_PART_RECEIVE) {
-                $status = Receive::STATUS_INIT;
-            }
+//            if ($g->status == ReceiveGoods::STATUS_INIT || $g->status == ReceiveGoods::STATUS_PART_RECEIVE) {
+//                $status = Receive::STATUS_INIT;
+//            }
+            $g->status = ReceiveGoods::STATUS_ALL_RECEIVE;
+            $g->status_time = $t;
+            $g->update();
         }
 
         $model->status = $status;
-        $model->receive_time = time();
+        $model->receive_time = $t;
         return $model->update();
     }
 

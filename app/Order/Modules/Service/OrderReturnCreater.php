@@ -220,6 +220,7 @@ class OrderReturnCreater
             if($order_info['pay_type']==PayInc::FlowerStagePay || $order_info['pay_type']==PayInc::UnionPay){
                 $data['pay_amount'] =$order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                $data['refund_amount'] =$order_info['order_amount']+$order_info['order_insurance'];//应退金额
                 //如果押金为0 或者实付租金和意外险的总和为0
                 if($data['auth_unfreeze_amount']==0 && $data['pay_amount']==0){
                     //取消订单
@@ -541,7 +542,7 @@ class OrderReturnCreater
                 $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                 $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                 $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
-                $create_data['refund_amount']=$return_info['refund_amount'];//应退金额
+                $create_data['refund_amount']=$return_info['pay_amount'];//应退金额
                 $create_data['auth_unfreeze_amount']=$return_info['auth_unfreeze_amount'];//应退押金
                 $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金
                 //退款：直接支付
