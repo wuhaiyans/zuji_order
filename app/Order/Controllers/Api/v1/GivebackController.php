@@ -48,17 +48,17 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
-		$params = [
-			
-     		'name'		=> '解冻20A63050560131376', //交易名称
-     		'out_trade_no' => time().rand(10,99), //订单系统交易码
-     		'fundauth_no' => '20A63050560131376', //支付系统授权码
-     		'amount' => 1, //解冻金额 单位：分
-     		'back_url' => 'zuji-order.com', //后台通知地址
-     		'user_id' => 18, //用户id
-		];
-		
-		\App\Lib\Payment\CommonFundAuthApi::unfreeze($params);
+//		$params = [
+//			
+//     		'name'		=> '解冻20A63050560131376', //交易名称
+//     		'out_trade_no' => time().rand(10,99), //订单系统交易码
+//     		'fundauth_no' => '20A63050560131376', //支付系统授权码
+//     		'amount' => 1, //解冻金额 单位：分
+//     		'back_url' => 'zuji-order.com', //后台通知地址
+//     		'user_id' => 18, //用户id
+//		];
+//		
+//		\App\Lib\Payment\CommonFundAuthApi::unfreeze($params);
 		$params = [
 			
      		'name'		=> '解冻20A60124088730509', //交易名称
