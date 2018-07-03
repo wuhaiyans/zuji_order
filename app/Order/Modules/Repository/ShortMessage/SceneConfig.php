@@ -9,6 +9,10 @@ class SceneConfig {
 	 * 场景:<b>【订单下单】</b>
 	 */
 	const ORDER_CREATE = 'OrderCreate';
+    /**
+     * 场景:<b>【订单未支付取消】</b>
+     */
+    const ORDER_CANCEL = 'OrderCancel';
 
     /**
      * 场景:<b>【支付成功】</b>
