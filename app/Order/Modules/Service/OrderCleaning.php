@@ -254,7 +254,7 @@ class OrderCleaning
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
-                && empty(intval($orderCleanData['auth_deduction_amount']))a) {
+                && empty(intval($orderCleanData['auth_deduction_amount']))) {
                 self::unfreezeRequest($orderCleanData);
             }
 
