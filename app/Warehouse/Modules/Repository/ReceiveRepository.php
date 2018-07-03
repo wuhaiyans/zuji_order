@@ -149,6 +149,7 @@ class ReceiveRepository
                 $gmodel->create($detail);
 
                 if (!isset($detail['imei']) || !$detail['imei']) continue;
+                //unset($detail['goods_name']);
                 $mmodel = new ReceiveGoodsImei();
                 $mmodel->create($detail);
             }
