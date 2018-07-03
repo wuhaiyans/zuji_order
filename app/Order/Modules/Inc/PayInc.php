@@ -17,7 +17,7 @@ class PayInc{
      */
     const FlowerDepositPay = 3;
     /**
-     * @var int 支付方式(花呗分期)
+//     * @var int 支付方式(花呗分期)  租金+意外险   押金
      */
     const FlowerStagePay = 2;
     /**
