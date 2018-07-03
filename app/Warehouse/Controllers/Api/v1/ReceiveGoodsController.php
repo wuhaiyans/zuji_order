@@ -8,6 +8,7 @@
  */
 
 namespace App\Warehouse\Controllers\Api\v1;
+use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Service\ReceiveGoodsService;
 use App\Warehouse\Config;
@@ -58,7 +59,9 @@ class ReceiveGoodsController extends Controller
             'receive_status' => [
                 ReceiveGoods::STATUS_INIT => '待收货',
                 ReceiveGoods::STATUS_ALL_RECEIVE => '已发货'
-            ]
+            ],
+            'receive_goods_status' => ReceiveGoods::status(),
+            'receive_type' => Receive::types(),
         ];
 
         return apiResponse($data);
