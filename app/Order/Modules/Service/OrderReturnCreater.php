@@ -83,10 +83,11 @@ class OrderReturnCreater
                 $nowdata=time()+3600*8;
                 if( $order_info['delivery_time'] !=0 ){
                     $time = $nowdata-$order_info['delivery_time'];
-                    if( abs($time)>86400*7 ){
+                    if( abs($time)>604800 ){
                         return false;
                     }
                 }
+
                 //修改商品状态为退货
                 $returnOpen = $goods->returnOpen();
                 // 商品退货
@@ -1037,7 +1038,7 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);
             }
-            //注入状态流
+            //正常状态流
             $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
             if(isset($return['refund_no'])){
@@ -1086,8 +1087,10 @@ class OrderReturnCreater
                         $buss->setLogisticsInfo($info['data']);
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
-                    $buss->setStatus("B");
-                    $buss->setStatusText("审核拒绝");
+					//已经拒绝的状态流
+					$buss->setStateFlow($stateFlow['deniedStateFlow']);
+                    $buss->setStatus("D");
+                    $buss->setStatusText("审核被拒绝");
                 }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测不合格");
