@@ -83,10 +83,11 @@ class OrderReturnCreater
                 $nowdata=time()+3600*8;
                 if( $order_info['delivery_time'] !=0 ){
                     $time = $nowdata-$order_info['delivery_time'];
-                    if( abs($time)>86400*7 ){
+                    if( abs($time)>604800 ){
                         return false;
                     }
                 }
+
                 //修改商品状态为退货
                 $returnOpen = $goods->returnOpen();
                 // 商品退货
@@ -212,6 +213,7 @@ class OrderReturnCreater
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
             $data['user_id'] = $params['user_id'];
+            $data['refund_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//应退金额=订单实际总租金+押金+意外险
             $data['pay_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//实际支付金额=订单实际总租金+押金+意外险
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
