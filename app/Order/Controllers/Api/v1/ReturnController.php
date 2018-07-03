@@ -41,18 +41,15 @@ class ReturnController extends Controller
         $data= filter_array($params,[
             'user_id'=>'required',
             'business_key'=>'required',
+            'reason_id'=>'required',
+            'reason_text'=>'required',
+
         ]);
-        if(count($data)<2){
+        if(count($data)<4){
             return ApiStatus::CODE_20001;
         }
         if(empty($params['goods_no'])){
             return ApiStatus::CODE_20001;
-        }
-        if($params['reason_id']){
-            $params['reason_text'] = "";
-        }
-        if (empty($params['reason_id']) && empty($params['reason_text'])){
-            return apiResponse([],ApiStatus::CODE_20001,"退换货原因不能为空");
         }
         //验证是全新未拆封还是已拆封已使用
        // if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
