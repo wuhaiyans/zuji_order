@@ -248,6 +248,7 @@ class OrderCreater
     public static function dataSchemaFormate($schemaData){
 
         $first_amount =0;
+        $total_amount =0;
         if($schemaData['order']['zuqi_type'] ==1){
             //短租
             foreach ($schemaData['sku'] as $key=>$value){
@@ -255,13 +256,19 @@ class OrderCreater
                     $first_amount+=$v['amount'];
                 }
                 $schemaData['sku'][$key]['first_amount'] =$first_amount;
+                $schemaData['sku'][$key]['instalment_total_amount'] =$first_amount;
             }
         }else{
             //长租
             foreach ($schemaData['sku'] as $key=>$value){
 
                 $schemaData['sku'][$key]['first_amount'] =$value['instalment'][0]['amount'];
+                foreach ($value['instalment'] as $k=>$v){
+                    $total_amount +=$v['amount'];
+                }
+
             }
+            $schemaData['sku'][$key]['instalment_total_amount'] =$total_amount;
 
         }
 
