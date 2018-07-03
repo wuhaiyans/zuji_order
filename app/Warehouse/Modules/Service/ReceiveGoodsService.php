@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Config;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
@@ -87,6 +88,12 @@ class ReceiveGoodsService
             $it['status']=ReceiveGoods::status($it['status']);
             //设备归还属性
             $it['type']=Receive::types($receive_row->type);
+            //物流名称
+            if($it['receive']['logistics_id']==0){
+                $it['receive']['logistics_name'] = '无';
+            }else{
+                $it['receive']['logistics_name'] = Config::$logistics[$it['receive']['logistics_id']];
+            }
 
             array_push($result, $it);
         }
