@@ -203,8 +203,22 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
 				}
+				//获取用户信息
+				$userInfo = \App\Order\Modules\Repository\OrderUserAddressRepository::getUserAddressInfo($paramsArr['order_no']);
 				//推送到收发货系统
-				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN, [['goods_no'=>$goodsNo]],[]);
+				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], 1, [
+					[
+						'goods_no'=>$goodsNo,
+						'goods_name'=>$orderGoods['goods_name'],
+					],
+				],[
+					'logistics_id' => $paramsArr['logistics_id'],
+					'logistics_no' => $paramsArr['logistics_no'],
+					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'customer' => $userInfo['name'],
+					'customer_mobile' => $userInfo['consignee_mobile'],
+					'customer_address' => $userInfo['address_info'],
+				]);
 				if( !$warehouseResult ){
 					//事务回滚
 					DB::rollBack();
