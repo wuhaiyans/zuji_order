@@ -6,11 +6,11 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderCreate
+ * OrderCancel
  *
  * @author wuhaiyan
  */
-class OrderCreate implements ShortMessage {
+class OrderCancel implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -53,7 +53,10 @@ class OrderCreate implements ShortMessage {
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
             'goodsName'=>$goodsName,
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
 		]);
 	}
 

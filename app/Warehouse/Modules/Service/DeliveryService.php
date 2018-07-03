@@ -8,6 +8,7 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Order\Modules\Inc\OrderStatus;
 use App\Warehouse\Config;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
@@ -325,7 +326,13 @@ class DeliveryService
                 $it['goods'] = $goods_list;
             }
 
-            $it['buttons']['confirm_receive'] = $item->status == Delivery::STATUS_SEND ? true : false;//确认收货
+            //确认收货
+            if($item->status == Delivery::STATUS_SEND && $item->business_key == OrderStatus::BUSINESS_BARTER){
+                $it['buttons']['confirm_receive'] = true;
+            }else{
+                $it['buttons']['confirm_receive'] = false;
+            }
+
             $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
             $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
 

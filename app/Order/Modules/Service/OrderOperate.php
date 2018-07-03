@@ -35,6 +35,7 @@ use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
@@ -116,6 +117,7 @@ class OrderOperate
 
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
+                DB::commit();
 
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
@@ -123,13 +125,18 @@ class OrderOperate
                 }else{
                     $confirmTime = config('web.long_confirm_days');
                 }
-
+                //订单确认收货队列
                 $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.ORDER_API"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");
 
-                DB::commit();
+                // 订单发货成功后 发送短信
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
+                $orderNoticeObj->notify();
+
+
+
                 return true;
 
             }else {
@@ -414,8 +421,16 @@ class OrderOperate
             //插入操作日志
             OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
 
-
             DB::commit();
+            //签收后发送短信
+            if($orderInfo['zuqi_type'] ==1){
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
+                $orderNoticeObj->notify();
+            }else{
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
+                $orderNoticeObj->notify();
+            }
+            
             return true;
         }catch (\Exception $exc){
             DB::rollBack();
@@ -602,6 +617,9 @@ class OrderOperate
 
 
             DB::commit();
+            // 订单取消后发送取消短息。;
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CANCEL);
+            $orderNoticeObj->notify();
             return ApiStatus::CODE_0;
 
         } catch (\Exception $exc) {
@@ -916,7 +934,7 @@ class OrderOperate
 
 				// 有冻结状态时
                 if ($values['freeze_type']>0) {
-                    $actArray['cancel_btn'] = false;
+                    $actArray['refund_btn'] = false;
                     $actArray['modify_address_btn'] = false;
                     $actArray['confirm_btn'] = false;
                     $actArray['confirm_receive'] = false;
@@ -1106,7 +1124,7 @@ class OrderOperate
                 $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                 if ($expire_process) {
                     $goodsList[$keys]['act_goods_state']['buy_off'] = false;
-                    $goodsList[$keys]['act_goods_state']['cancel_btn'] = false;
+                    $goodsList[$keys]['act_goods_state']['refund_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['modify_address_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['confirm_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['confirm_receive'] = false;
