@@ -270,7 +270,7 @@ class GivebackController extends Controller
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
-			$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					OrderWithhold::instalment_withhold($instalmentInfo['id']);
@@ -356,7 +356,7 @@ class GivebackController extends Controller
 		}
 
 		//获取当前商品未完成分期列表数据
-		$instalmentList = OrderInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 		//剩余分期需要支付的总金额、还机需要支付总金额
 		$instalmentAmount = $givebackNeedPay = 0;
 		//剩余分期数
@@ -385,7 +385,7 @@ class GivebackController extends Controller
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = OrderInstalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = OrderGoodsInstalment::close(['goods_no'=>$goodsNo]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {
