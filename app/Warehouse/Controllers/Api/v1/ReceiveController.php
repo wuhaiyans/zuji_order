@@ -247,8 +247,8 @@ class ReceiveController extends Controller
 
         try {
             $items = $this->receive->checkItemsFinish($params['receive_no']);
-
-            Receive::checkItemsResult($items);
+            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            Receive::checkItemsResult($items,$receive_row['business_key']);
 
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
