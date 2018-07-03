@@ -192,7 +192,7 @@ class Receive
      * ]
      *
      */
-    public static function checkItemsResult($params)
+    public static function checkItemsResult($params,$business_key=0)
     {
         if (!$params || !is_array($params)) return ;
 
