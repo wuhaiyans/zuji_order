@@ -60,5 +60,10 @@ class SceneConfig {
      * 场景：<b>【收到客户退货手机】</b>
      */
     const RETURN_DELIVERY = 'ReturnDelivery';
+    /**
+     * 场景：<b>【退款成功】</b>
+     */
+    const REFUND_SUCCESS = 'RefundSuccess';
+
 
 }

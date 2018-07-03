@@ -84,7 +84,7 @@ class WithholdController extends Controller
      */
     public function unsign(Request $request){
         $params     = $request->all();
-        $uid        = $params['uid'];
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'user_id'         => 'required|int',  //前端跳转地址
@@ -641,7 +641,7 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
-        $uid        = $params['uid'];
+        $uid        = $params['userinfo']['uid'];
 
         $rules = [
             'return_url'        => 'required',
