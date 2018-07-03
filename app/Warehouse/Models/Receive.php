@@ -108,6 +108,24 @@ class Receive extends Warehouse
     }
 
     /**
+     * @param null $type
+     * @return array|mixed|string
+     * 归还属性
+     */
+    public static function types($type=null)
+    {
+        $tp = [
+            self::TYPE_BACK     => '还机用户',
+            self::TYPE_RETURN   => '退货用户',
+            self::TYPE_EXCHANGE => '换货用户'
+        ];
+
+        if ($type === null) return $tp;
+
+        return isset($tp[$type]) ? $tp[$type] : '';
+    }
+
+    /**
      * @return array|mixed|string
      * 取检测状态
      */

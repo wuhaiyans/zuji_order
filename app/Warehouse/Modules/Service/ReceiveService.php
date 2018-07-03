@@ -111,17 +111,6 @@ class ReceiveService
             $it['imeis'] = $item->imeis->toArray();
             $it['goods'] = $goods_list;
 
-            //确认收货按钮
-            $it['shouhuo']=($it['status']==Receive::STATUS_INIT)?true:false;
-            //确认同意换货操作
-            if($it['status']==Receive::STATUS_FINISH && $it['type']==Receive::TYPE_EXCHANGE){
-                $it['huanhuo']=true;
-            }else{
-                $it['huanhuo']=false;
-            }
-            //当前状态
-            $it['status']=Receive::status($it['status']);
-
             array_push($result, $it);
         }
 
