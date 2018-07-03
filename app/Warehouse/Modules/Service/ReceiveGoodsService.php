@@ -7,6 +7,8 @@
 
 namespace App\Warehouse\Modules\Service;
 
+use App\Warehouse\Config;
+use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
 use App\Warehouse\Modules\Repository\ReceiveGoodsRepository;
@@ -72,6 +74,26 @@ class ReceiveGoodsService
             $it['receive_time'] = $item->receive->receive_time;
             $it['imei'] = '';
             $it['serial_number'] = '';
+
+            //确认收货按钮
+            $it['shouhuo']=($it['status']==ReceiveGoods::STATUS_INIT)?true:false;
+            //确认同意换货操作
+            $receive_row = $item->receive;
+            if($it['status']==ReceiveGoods::STATUS_ALL_CHECK && $receive_row->type==Receive::TYPE_EXCHANGE){
+                $it['huanhuo']=true;
+            }else{
+                $it['huanhuo']=false;
+            }
+            //当前状态
+            $it['status']=ReceiveGoods::status($it['status']);
+            //设备归还属性
+            $it['type']=Receive::types($receive_row->type);
+            //物流名称
+            if($it['receive']['logistics_id']==0){
+                $it['receive']['logistics_name'] = '无';
+            }else{
+                $it['receive']['logistics_name'] = Config::$logistics[$it['receive']['logistics_id']];
+            }
 
             array_push($result, $it);
         }

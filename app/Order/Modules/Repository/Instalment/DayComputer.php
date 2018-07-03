@@ -16,8 +16,9 @@ class DayComputer extends Computer {
 	 * @param array $params
 	 * [
 	 *		'zujin'		=> '',	//【必选】price 每期租金
-	 *		'zuqi'		=> '',	//【必选】price 租期（必选保证大于0）
+	 *		'zuqi'		=> '',	//【必选】int 租期（必选保证大于0）
 	 *		'insurance' => '',	//【必选】price 保险金额
+	 *		'begin_time'	=> '',	//【可选】int 开始日期时间戳
 	 * ]
 	 */
 	public function __construct( $params ) {

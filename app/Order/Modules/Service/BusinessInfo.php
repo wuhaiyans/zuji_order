@@ -199,6 +199,24 @@ class BusinessInfo
                         'status' => 'C',
                         'name' => '取消',
                     ],
+                ],
+                'deniedStateFlow'  => [
+                    [
+                        'status' => 'A',
+                        'name' => '申请',
+                    ],
+                    [
+                        'status' => 'B',
+                        'name' => '审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '拒绝',
+                    ],
+                    [
+                        'status' => 'D',
+                        'name' => '完成',
+                    ],
                 ]
 
 

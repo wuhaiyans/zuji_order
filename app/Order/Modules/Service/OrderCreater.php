@@ -97,13 +97,13 @@ class OrderCreater
 
 
           $b = $orderCreater->filter();
-//            if(!$b){
-//                DB::rollBack();
-//                //把无法下单的原因放入到用户表中
-//                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-//                set_msg($orderCreater->getOrderCreater()->getError());
-//                return false;
-//            }
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
            $schemaData = $orderCreater->getDataSchema();
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
@@ -131,8 +131,8 @@ class OrderCreater
 
             ];
            // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
             //发送取消订单队列
         $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.ORDER_API"), [
             'method' => 'api.inner.miniCancelOrder',

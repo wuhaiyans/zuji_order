@@ -1036,10 +1036,11 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);
             }
-            //注入状态流
+            //正常状态流
             $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
             if(isset($return['refund_no'])){
+
                 //获取退换货单信息
                // $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($return['refund_no']);
               //  if(!$return){
@@ -1072,7 +1073,7 @@ class OrderReturnCreater
                             || !isset($info['data']) ){
                            return false;
                         }
-                       /**/
+                       /*
 						$i=0;
 						$logistics = [];
                         foreach($info['data']['list'] as $k=>$id){
@@ -1080,12 +1081,14 @@ class OrderReturnCreater
                             $logistics[$i]['id']=$k;
                             $logistics[$i]['name']=$id;
                             $i=$i+1;
-                        }
-                        $buss->setLogisticsInfo($logistics);
+                        }*/
+                        $buss->setLogisticsInfo($info['data']);
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
-                    $buss->setStatus("B");
-                    $buss->setStatusText("审核拒绝");
+					//已经拒绝的状态流
+					$buss->setStateFlow($stateFlow['deniedStateFlow']);
+                    $buss->setStatus("D");
+                    $buss->setStatusText("审核被拒绝");
                 }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测不合格");
@@ -1151,8 +1154,10 @@ class OrderReturnCreater
                 }
 
             }
+
             //查询订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
+
             if(!$order){
                 return false;
             }

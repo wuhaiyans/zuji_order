@@ -2,15 +2,16 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Order\Modules\Repository\OrderDeliveryRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderCreate
+ * OrderDelivery
  *
  * @author wuhaiyan
  */
-class OrderCreate implements ShortMessage {
+class OrderDelivery implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -42,18 +43,13 @@ class OrderCreate implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
-        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
-		if(!$goods){
-		    return false;
-        }
-        $goodsName ="";
-        foreach ($goods as $k=>$v){
-            $goodsName.=$v['goods_name']." ";
-        }
+		$orderDelivery = OrderDeliveryRepository::getOrderDelivery($this->business_no);
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'goodsName'=>$goodsName,
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
+            'logisticsNo'=>$orderDelivery['logistics_no'],
 		]);
 	}
 
