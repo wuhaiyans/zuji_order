@@ -16,6 +16,7 @@ use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
 
@@ -109,6 +110,10 @@ class CronOperate
                 }
 
             }
+
+                // 订单取消后发送取消短息。;
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_CANCEL);
+                $orderNoticeObj->notify();
 
         }
         return true;

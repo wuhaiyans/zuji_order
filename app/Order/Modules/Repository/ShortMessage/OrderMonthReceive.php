@@ -2,15 +2,16 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderCreate
+ * OrderDayReceive
  *
  * @author wuhaiyan
  */
-class OrderCreate implements ShortMessage {
+class OrderMonthReceive implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -49,11 +50,31 @@ class OrderCreate implements ShortMessage {
         $goodsName ="";
         foreach ($goods as $k=>$v){
             $goodsName.=$v['goods_name']." ";
+            $beginTime =$v['begin_time'];
+            $endTime =$v['end_time'];
+            $zuqi =$v['zuqi'];
+            $zujin =$v['zujin'];
+        }
+
+        $instalment = OrderGoodsInstalmentRepository::getInfo(['order_no'=>$this->business_no]);
+        if(!$instalment){
+            return false;
+        }
+        foreach ($instalment as $k=>$v){
+            $createTime =$v['term'].$v['day'];
+            continue;
         }
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
             'goodsName'=>$goodsName,
+            'beginTime'=>date("Y-m-d H:i:s",$beginTime),
+            'zuQi'=>$zuqi,
+            'endTime'=>date("Y-m-d H:i:s",$endTime),
+            'zuJin'=>$zujin,
+            'createTime'=>$createTime, //扣款日期
 		]);
 	}
 
