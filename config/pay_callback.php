@@ -1,11 +1,18 @@
 <?php
 
 // 支付阶段完成时业务的回调配置
-// 回调接收一个参数，关联数组类型：
+// 回调：
+// 接收第一个参数，关联数组类型：
 // [
 //		'business_type' => '',	// 业务类型
 //		'business_no'	=> '',	// 业务编码
 //		'status'		=> '',	// 支付状态  processing：处理中；success：支付完成
+// ]
+// 接收第二个参数，关联数组类型：
+// [
+//		'uid'		=> '',	// 用户ID
+//		'username'	=> '',	// 用户名
+//		'type'		=> '',	// 用户类型
 // ]
 // 支付阶段分3个环节，一次是：直接支付 -> 代扣签约 -> 资金预授权
 // 所有业务回调有可能收到两种通知：
@@ -37,7 +44,9 @@ return [
 	],
 
 	'refund' => [
-		// 业务类型为1的支付回调通知
+		// 退款 业务类型 回调
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_REFUND => '\App\Order\Modules\Service\OrderReturnCreater::refundUpdate',
+		// 退货 业务类型 回调
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN => '\App\Order\Modules\Service\OrderReturnCreater::refundUpdate',
 		// 业务类型为【还机】4的清算回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackClearing',

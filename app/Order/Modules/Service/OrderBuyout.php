@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
@@ -127,6 +128,7 @@ class OrderBuyout
 	public static function create($array)
 	{
 		$data = filter_array($array,[
+				'type'=>'required',
 				'buyout_no'=>'required',
 				'order_no'=>'required',
 				'goods_no'=>'required',
@@ -134,6 +136,8 @@ class OrderBuyout
 				'plat_id'=>'required',
 				'goods_name'=>'required',
 				'buyout_price'=>'required',
+				'zujin_price'=>'required',
+				'zujin_number'=>'required',
 				'amount'=>'required',
 				'create_time'=>'required',
 		]);
@@ -190,7 +194,7 @@ class OrderBuyout
 				'order_no'=>$buyout['order_no'],
 				'goods_no'=>$buyout['goods_no'],
 		];
-		$ret = \App\Order\Modules\Repository\OrderInstalmentRepository::closeInstalment($data);
+		$ret = Instalment::close($data);
 		if(!$ret){
 			//return false;
 		}

@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
+use App\Lib\Common\LogApi;
 use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
 use App\Order\Models\OrderUserAddress;
@@ -55,8 +56,12 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
+
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-        $userId		= $params['params']['user_id'];
+
+
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
@@ -66,8 +71,8 @@ class OrderController extends Controller
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式]");
         }
-        if(empty($userId)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户标识]");
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
         if(empty($payChannelId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
@@ -81,7 +86,7 @@ class OrderController extends Controller
             'pay_type'	=> $payType,
             'sku'		=> $sku,
             'coupon'	=> $coupon,
-            'user_id'	=> $userId,  //增加用户ID
+            'user_id'	=> $params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->confirmation( $data );
@@ -108,10 +113,11 @@ class OrderController extends Controller
         $appid		= $params['appid'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
 
-        $userId		= $params['params']['user_id'];
         $addressId		= $params['params']['address_id'];
 
         $payChannelId =$params['params']['pay_channel_id'];
@@ -123,8 +129,8 @@ class OrderController extends Controller
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
-        if(empty($userId)){
-            return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
         if(empty($addressId)){
             return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
@@ -142,7 +148,7 @@ class OrderController extends Controller
             'address_id'=>$addressId,
             'sku'=>$sku,
             'coupon'=>$coupon,
-            'user_id'=>$userId,  //增加用户ID
+            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->create($data);
@@ -492,7 +498,6 @@ class OrderController extends Controller
     public function delivery(Request $request)
     {
         $params =$request->all();
-
         $params =$params['params'];
         if(count($params['order_info']) <3){
             return  apiResponse([],ApiStatus::CODE_20001);
@@ -503,7 +508,7 @@ class OrderController extends Controller
         }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_30012);
+            return apiResponse([],ApiStatus::CODE_30014);
         }
         return apiResponse([],ApiStatus::CODE_0);
     }
@@ -835,7 +840,7 @@ class OrderController extends Controller
 
                 if ($orderData) {
 
-                    if ($orderData['order_status']==1) {
+                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
                         $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>

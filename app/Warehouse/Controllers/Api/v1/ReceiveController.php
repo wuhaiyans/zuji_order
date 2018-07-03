@@ -72,6 +72,13 @@ class ReceiveController extends Controller
     {
         $rules = [
             'order_no' => 'required',
+            'logistics_id' => 'required',
+            'logistics_no' => 'required',
+            'type' => 'required',
+            'business_key' => 'required',
+            'customer' => 'required',
+            'customer_mobile' => 'required',
+            'customer_address' => 'required',
             'receive_detail' => 'required'
         ];
         $params = $this->_dealParams($rules);

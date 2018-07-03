@@ -139,6 +139,14 @@ class DeliveryRepository
         if (!$model) {
             throw new NotFoundResourceException('订单号' . $order_no . '未找到');
         }
+
+        //修改IMEI状态为库存中
+        if($model->imeis){
+            foreach ($model->imeis as $key=>$item){
+                Imei::in($item->imei);
+            }
+        }
+
         $model->status = Delivery::STATUS_CANCEL;
         return $model->update();
     }
@@ -154,6 +162,14 @@ class DeliveryRepository
         if (!$model) {
             throw new NotFoundResourceException('发货单' . $delivery_no . '未找到');
         }
+
+        //修改IMEI状态为库存中
+        if($model->imeis){
+            foreach ($model->imeis as $key=>$item){
+                Imei::in($item->imei);
+            }
+        }
+
         $model->status = Delivery::STATUS_CANCEL;
         return $model->update();
     }
@@ -511,7 +527,7 @@ class DeliveryRepository
      *
      * 列表
      */
-    public static function list($params, $logic_params, $limit, $page=null)
+    public static function lists($params, $logic_params, $limit, $page=null)
     {
         $query = Delivery::where($params)->orderByDesc('delivery_no');
 

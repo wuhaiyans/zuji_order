@@ -28,12 +28,12 @@ class Receive
      *
      *
      */
-    public static function create($order_no, $type, $goods_info)
+    public static function create($order_no, $type, $goods_info,$data)
     {
         $receive_detail = [];
 
-//        $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
-//        $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
+        $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
+        $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
 //
 //        $detail = $data['receive_detail'];
 
@@ -53,9 +53,13 @@ class Receive
         $result = [
             'order_no' => $order_no,
             'receive_detail' => $receive_detail,
-//            'logistics_id' => $logistics_id,
-//            'logistics_no' => $logistics_no,
-            'type' => $type
+            'logistics_id' => $logistics_id,
+            'logistics_no' => $logistics_no,
+            'type' => $type,
+            'business_key' => $data['business_key'],
+            'customer' => $data['customer'],
+            'customer_mobile' => $data['customer_mobile'],
+            'customer_address' => $data['customer_address'],
         ];
 
         $base_api = config('tripartite.warehouse_api_uri');
@@ -66,11 +70,13 @@ class Receive
             'method'=> 'warehouse.receive.create',//模拟
             'params' => json_encode($result)
         ]);
-
-
+		\App\Lib\Common\LogApi::debug('申请收货',[
+			'url' => $base_api,
+			'request' => $result,
+			'response' => $res,
+		]);
 
         $obj = json_decode($res, true);
-
 
         if ($obj['code'] != 0 || !isset($obj['data']['receive_no'])) {
             return false;

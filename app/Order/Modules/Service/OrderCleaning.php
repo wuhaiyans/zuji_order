@@ -76,6 +76,7 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
+                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
@@ -109,7 +110,7 @@ class OrderCleaning
      * 更新订单清算状态
      * Author: heaven
      * @param $param
-     * @return bool
+     * @return int 0：成功；非0：失败
      */
     public static function upOrderCleanStatus($param)
     {
@@ -165,16 +166,16 @@ class OrderCleaning
     public static function orderCleanOperate($param)
     {
         //查询清算表根据业务平台退款码out_refund_no
-
         $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
-
-
         if (empty($orderCleanData)) return false;
 
         //更新清算状态为支付中
         $orderParam = [
             'clean_no' => $orderCleanData['clean_no'],
-            'status' => OrderCleaningStatus::orderCleaning
+            'status' => OrderCleaningStatus::orderCleaning,
+            'operator_uid' => isset($param['userinfo']['uid']) ? $param['userinfo']['uid']: '',
+            'operator_username' => isset($param['userinfo']['username']) ? $param['userinfo']['username']: '',
+            'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
         ];
         $success = OrderCleaning::upOrderCleanStatus($orderParam);
 
@@ -200,27 +201,13 @@ class OrderCleaning
 
         if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
 
-            //需退款金额大于0，并且属于待退款状态，发起清算，退租金
-            if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed) {
-
-                //根据支付编号查找支付相关数据
-                $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);
-                if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
-
-                    return false;
-                    LogApi::info('PayQuery::getPayByPaymentNo获取失败,参数：{$orderCleanData[\'payment_no\']}', $payInfo);
-                }
-                $params = [
-                    'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
-                    'payment_no'	=> $payInfo['out_payment_no'], //支付平台支付码
-                    'amount'		=> $orderCleanData['refund_amount']*100, //支付金额
-                    'refund_back_url' => config('tripartite.ORDER_API').'/refundClean', //退款回调URL
-                ];
-                $succss =  CommonRefundApi::apply($params);
-                LogApi::info('退款申请接口返回', [$succss, $params]);
-
+            //需退款金额大于0，并且属于待退款状态，
+            //发起清算，退租金
+            if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed
+            && empty($orderCleanData['auth_deduction_amount'] && empty($orderCleanData['auth_unfreeze_amount']))
+            ) {
+                self::refundRequest($orderCleanData);
             }
-
             //需扣除金额大于0，并且属于待扣押金状态，发起带扣押金请求
             /**
              * 预授权转支付接口
@@ -265,37 +252,10 @@ class OrderCleaning
             }
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
-            /**
-             * 预授权解冻接口
-             * @param array $params
-             * [
-             *		'name'		=> 解冻资金, //交易名称
-             *		'out_trade_no' => '', //订单系统交易码
-             *		'auth_no' => '', //支付系统授权码
-             *		'amount' => '', //解冻金额 单位：分
-             *		'back_url' => '', //后台通知地址
-             *		'user_id' => '', //用户id
-             * ]
-             * @return mixed false：失败；array：成功
-             * [
-             *		'out_trade_no' => '',//支付系统交易码
-             *		'trade_no' => '',//业务系统交易码
-             *		'out_auth_no' => '',//支付系统授权码
-             * ]
-             */
-            if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
-                $unFreezeParams = [
-                    'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
-                    'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
-                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
-                    'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
-                    'back_url' => config('tripartite.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
-                    'user_id' => $orderCleanData['user_id'],//用户id
-                ];
-                $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
+            if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
+                && empty($orderCleanData['auth_deduction_amount'])) {
+                self::unfreezeRequest($orderCleanData);
             }
-
 
         } else {
 
@@ -343,36 +303,175 @@ class OrderCleaning
             }
 
         }
-
-
         return true;
 
     }
 
 
+    /**
+     *
+     * 发起退款的请求
+     * Author: heaven
+     * @param $param
+     * @param $orderCleanData  array 清算详情数组
+     * @return bool
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function refundRequest($orderCleanData)
+    {
 
+        //查询清算表根据业务平台退款码out_refund_no
+        if (empty($orderCleanData)) return false;
+
+        /**
+         * 退款申请接口
+         * @param array $params
+         * [
+         *		'out_refund_no' => '', //订单系统退款码
+         *		'payment_no'	=> '', //业务系统支付码
+         *		'amount'		=> '', //支付金额
+         *		'refund_back_url' => '', //退款回调URL
+         * ]
+         * @return mixed false：失败；array：成功
+         * [
+         * 		'out_refund_no'=>'', //订单系统退款码
+         * 		'refund_no'=>'', //支付系统退款码
+         *       'status'
+         * ]
+         */
+
+        if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
+            //需退款金额大于0，并且属于待退款状态，
+            //发起清算，退租金
+            if ($orderCleanData['refund_amount'] > 0 && $orderCleanData['refund_status'] == OrderCleaningStatus::refundUnpayed) {
+
+                //根据支付编号查找支付相关数据
+                $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);
+                if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
+
+                    return false;
+                    LogApi::info('PayQuery::getPayByPaymentNo获取失败,参数：{$orderCleanData[\'payment_no\']}', $payInfo);
+                }
+                $params = [
+                    'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
+                    'payment_no' => $payInfo['out_payment_no'], //支付平台支付码
+                    'amount' => $orderCleanData['refund_amount'] * 100, //支付金额
+                    'refund_back_url' => config('tripartite.ORDER_API') . '/refundClean', //退款回调URL
+                ];
+                $succss = CommonRefundApi::apply($params);
+                LogApi::info('退款申请接口返回', [$succss, $params]);
+
+            }
+        }
+
+    }
+
+
+    /**
+     * 发起解除预授权的请求
+     * Author: heaven
+     * @param $orderCleanData 清算详情数据 array
+     * @return bool
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function unfreezeRequest($orderCleanData)
+    {
+
+        if (empty($orderCleanData)) return false;
+
+        /**
+         * 退款申请接口
+         * @param array $params
+         * [
+         *		'out_refund_no' => '', //订单系统退款码
+         *		'payment_no'	=> '', //业务系统支付码
+         *		'amount'		=> '', //支付金额
+         *		'refund_back_url' => '', //退款回调URL
+         * ]
+         * @return mixed false：失败；array：成功
+         * [
+         * 		'out_refund_no'=>'', //订单系统退款码
+         * 		'refund_no'=>'', //支付系统退款码
+         *       'status'
+         * ]
+         */
+
+        if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
+            //根据预授权编号查找预授权相关数据
+            if (empty($orderCleanData['auth_no'])) return true;
+            $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
+            if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
+                return false;
+                LogApi::info('PayQuery::getPayByFundauthNo获取失败,参数：{$orderCleanData[\'auth_no\']}', $authInfo);
+            }
+
+            //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
+            /**
+             * 预授权解冻接口
+             * @param array $params
+             * [
+             *		'name'		=> 解冻资金, //交易名称
+             *		'out_trade_no' => '', //订单系统交易码
+             *		'auth_no' => '', //支付系统授权码
+             *		'amount' => '', //解冻金额 单位：分
+             *		'back_url' => '', //后台通知地址
+             *		'user_id' => '', //用户id
+             * ]
+             * @return mixed false：失败；array：成功
+             * [
+             *		'out_trade_no' => '',//支付系统交易码
+             *		'trade_no' => '',//业务系统交易码
+             *		'out_auth_no' => '',//支付系统授权码
+             * ]
+             */
+            if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+                $unFreezeParams = [
+                    'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
+                    'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
+                    'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                    'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
+                    'back_url' => config('tripartite.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
+                    'user_id' => $orderCleanData['user_id'],//用户id
+                ];
+                $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
+                LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
+            }
+
+
+        }
+
+
+    }
 
 
     /**
      *
      * 订单清算回调业务接口
      * Author: heaven
-     * @return mixed
+     * @return boolean  true：成功；false：失败
      */
-    public static function getBusinessCleanCallback($businessType, $businessNo, $result)
+    public static function getBusinessCleanCallback($businessType, $businessNo, $result, $userinfo=[])
     {
         $callbacks = config('pay_callback.refund');
-        if( isset($callbacks[$businessType]) && $callbacks[$businessType] ){
-
-            $params = [
-                'business_type' => $businessType,
-                'business_no' => $businessNo,
-                'status' => $result
-            ];
-
-            return call_user_func_array($callbacks[$businessType],$params);
+        if( !isset($callbacks[$businessType]) || !$callbacks[$businessType] ){
+			LogApi::error('[清算阶段]业务未设置回调通知');
+			return false;
         }
-        Log::error('[清算阶段]业务未设置回调通知');
+        if( !is_callable($callbacks[$businessType]) ){
+			LogApi::error('[清算阶段]业务回调通知不可调用');
+			return false;
+        }
+		$params = [
+			'business_type' => $businessType,
+			'business_no' => $businessNo,
+			'status' => $result
+		];
+
+		LogApi::debug('[清算阶段]业务回调通知',[
+			'callback' => $callbacks[$businessType],
+			'params' => $params,
+		]);
+		return call_user_func_array($callbacks[$businessType],[$params,$userinfo]);
     }
 
     /**

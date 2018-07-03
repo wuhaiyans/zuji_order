@@ -73,13 +73,11 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
-        LogApi::error("发货时生成合同失败",$orderDetail);
         DB::beginTransaction();
         try{
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
-                LogApi::error("订单查询失败",$orderDetail);
                 DB::rollBack();
                 return false;
             }
@@ -89,7 +87,6 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    LogApi::error("订单查询失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -97,7 +94,6 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                    LogApi::error("订单发货信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -105,33 +101,35 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                    LogApi::error("货详情信息失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
-                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
-                if(!$b) {
-                    LogApi::error("发货时生成合同失败",$orderDetail);
-                    DB::rollBack();
-                    return false;
-                }
+ //              $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+//                if(!$b) {
+//                    LogApi::error("发货时生成合同失败",$orderDetail);
+//                    DB::rollBack();
+//                    return false;
+//                }
                 //增加操作日志
                 if(!empty($operatorInfo)){
 
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
 
-                DB::commit();
-
                 //增加确认收货队列
-                $confirmTime =$orderInfo['zuqi_type'] ==1?config('web.short_confirm_days'):config('web.long_confirm_days');
+                if($orderInfo['zuqi_type'] ==1){
+                    $confirmTime = config('web.short_confirm_days');
+                }else{
+                    $confirmTime = config('web.long_confirm_days');
+                }
 
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.API_INNER_URL"), [
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.ORDER_API"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");
 
+                DB::commit();
                 return true;
 
             }else {
@@ -289,7 +287,7 @@ class OrderOperate
                 }
             }
             $params['create_time'] =time();
-            $order = OrderVisit::updateOrCreate($params);
+            $order = OrderVisit::updateOrCreate(['order_no'=>$params['order_no']],$params);
             $id =$order->getQueueableId();
             if(!$id){
                 DB::rollBack();
@@ -854,9 +852,10 @@ class OrderOperate
 //                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
                $orderOperateData  = self::getOrderOprate($values['order_no']);
-               
+
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
+
                 if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
                     $params = [
                     'payType' => $values['pay_type'],//支付方式 【必须】<br/>
@@ -864,9 +863,9 @@ class OrderOperate
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
 	        ];
-                    LogApi::debug('客户端订单列表支付信息参数', $params);
+//                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
-                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
+//                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
                 }
 
             }
@@ -902,6 +901,8 @@ class OrderOperate
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+                $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
 
                 //设备名称
 
@@ -913,7 +914,17 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
-                $orderListArray['data'][$keys]['admin_Act_Btn'] = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+				// 有冻结状态时
+                if ($values['freeze_type']>0) {
+                    $actArray['cancel_btn'] = false;
+                    $actArray['modify_address_btn'] = false;
+                    $actArray['confirm_btn'] = false;
+                    $actArray['confirm_receive'] = false;
+                    $actArray['buy_off'] = false;
+                    $actArray['Insurance'] = false;
+                }
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
@@ -975,6 +986,7 @@ class OrderOperate
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+
        if (empty($goodsList)) return [];
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
@@ -984,6 +996,8 @@ class OrderOperate
 
                }
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+               $isBuyOut = $values['goods_status']>=Inc\OrderGoodStatus::BUY_OFF && $values['goods_status']<Inc\OrderGoodStatus::RELET;
+               $goodsList[$keys]['is_buyout'] = $isBuyOut ?? 0;
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
@@ -1013,12 +1027,12 @@ class OrderOperate
                         *   到期处理：快到期1个月内
                         */
                        //超过7天不出现售后
-                       if ($values['begin_time'] > 0 && 　($values['begin_time'] + config('web.month_service_days')) < time()) {
+                       if ($values['begin_time'] > 0 &&  ($values['begin_time'] + config('web.month_service_days')) < time()) {
                            $goodsList[$keys]['act_goods_state']['service_btn'] = false;
                        }
 
                        //不在一个月内不出现到期处理
-                       if ($values['end_time'] > 0 && 　($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
+                       if ($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
                    }
@@ -1088,9 +1102,16 @@ class OrderOperate
 
                 $goodsList[$keys]['act_goods_state']= $actArray;
                 //是否处于售后之中
+
                 $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                 if ($expire_process) {
                     $goodsList[$keys]['act_goods_state']['buy_off'] = false;
+                    $goodsList[$keys]['act_goods_state']['cancel_btn'] = false;
+                    $goodsList[$keys]['act_goods_state']['modify_address_btn'] = false;
+                    $goodsList[$keys]['act_goods_state']['confirm_btn'] = false;
+                    $goodsList[$keys]['act_goods_state']['confirm_receive'] = false;
+                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+                 
                 }
                 //是否已经操作过保险
 

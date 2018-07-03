@@ -141,7 +141,6 @@ class DeliveryController extends Controller
      */
     public function cancel()
     {
-
         $rules = ['order_no' => 'required'];
         $params = $this->_dealParams($rules);
 
@@ -286,8 +285,9 @@ class DeliveryController extends Controller
         try {
             DB::beginTransaction();
 
-
+            //修改发货信息
             $this->delivery->send($params);
+
             $result = $this->_info($params['delivery_no']);
 
             $orderDetail = [
@@ -304,10 +304,8 @@ class DeliveryController extends Controller
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
 
-
-            Log::error('aaaaaaaaccd');
+            //Log::error('aaaaaaaaccd');
             Log::error($a);
-
 
             DB::commit();
         } catch (\Exception $e) {
@@ -473,7 +471,7 @@ class DeliveryController extends Controller
     public function lists()
     {
         $params = $this->_dealParams([]);
-        $list = $this->delivery->list($params);
+        $list = $this->delivery->lists($params);
         return \apiResponse($list);
     }
 
@@ -539,7 +537,8 @@ class DeliveryController extends Controller
     public function logisticList()
     {
         $list = $this->delivery->getLogistics();
-        return apiResponse(['list'=>$list]);
+        //return apiResponse(['list'=>$list]);
+        return apiResponse($list);
     }
 
 

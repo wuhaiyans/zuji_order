@@ -115,7 +115,8 @@ class InstalmentController extends Controller
 	 * @return array instalmentList
      */
     public function info(Request $request){
-        $params    = $request->all();
+        $params     = $request->all();
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'goods_no'         => 'required',  //商品编号
@@ -131,12 +132,21 @@ class InstalmentController extends Controller
         $orderGoodsService = new OrderGoods();
         $orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 
+
+        // 用户验证
+        if($uid != $orderGoodsInfo['user_id']){
+            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
+        }
+
+
         // 分期列表
         $where = [
             'goods_no' => $goodsNo,
         ];
         $instalmentList = \App\Order\Modules\Service\OrderGoodsInstalment::queryList($where);
-
+        if($instalmentList == []){
+            return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
+        }
         $instalmentList = $instalmentList[$goodsNo];
 
         foreach($instalmentList as &$item){
@@ -177,8 +187,8 @@ class InstalmentController extends Controller
     * @return array instalmentList
     */
     public function queryInfo(Request $request){
-        $params    = $request->all();
-
+        $params     = $request->all();
+        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'instalment_id'         => 'required',  //商品编号
@@ -195,6 +205,10 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
         }
 
+        // 用户验证
+        if($uid != $instalmentInfo['user_id']){
+            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
+        }
 
         // 订单详情
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getOrderInfo(['order_no'=>$instalmentInfo['order_no']]);
@@ -221,7 +235,7 @@ class InstalmentController extends Controller
         }
 
         // 分期金额
-        $instalmentInfo['fenqi_amount']     = $instalmentInfo['original_amount'];
+        $instalmentInfo['fenqi_amount']     = $goodInfo['zujin'];//$instalmentInfo['original_amount'];
 
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
