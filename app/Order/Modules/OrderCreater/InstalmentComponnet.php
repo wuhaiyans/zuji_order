@@ -62,7 +62,10 @@ class InstalmentComponnet implements OrderCreater
     {
         $schema =$this->componnet->getDataSchema();
         foreach ($schema['sku'] as $k=>$sku){
+			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
+			// 开始日期，只有日租有，月租没有
+            $skuInfo['begin_time'] = $sku['begin_time'];
             $skuInfo['discount_info'] = [
                 [
                     'discount_amount' =>$sku['first_coupon_amount'],
@@ -83,13 +86,20 @@ class InstalmentComponnet implements OrderCreater
          		'zuqi'		    => $sku['zuqi'],	    //【必选】int 租期（必选保证大于0）
          		'insurance'    => $sku['insurance'],	//【必选】price 保险金额
             ];
-            $instalment =$this->discountInstalment($_data,$skuInfo);
+            $instalment = $this->discountInstalment($_data,$skuInfo);
             $schema['sku'][$k]['instalment'] = $instalment;
         }
         return $schema;
     }
 
-    public function discountInstalment($_data,$sku){
+	/**
+	 * 计算订单分期
+	 * @param array		$_data
+	 * @param array		$sku
+	 * @return array
+	 * @throws \Exception
+	 */
+    private function discountInstalment($_data,$sku){
         try{
             // 月租，分期计算器
             if($sku['zuqi_type'] == 2){
@@ -97,6 +107,7 @@ class InstalmentComponnet implements OrderCreater
             }
             // 日租，分期计算器
             elseif($sku['zuqi_type'] == 1){
+				$_data['begin_time'] = $sku['begin_time'];
                 $computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $_data );
             }
             // 优惠策略

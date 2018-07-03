@@ -49,15 +49,18 @@ abstract class Computer {
 	 * @param array $params
 	 * [
 	 *		'zujin'		=> '',	//【必选】price 每期租金
-	 *		'zuqi'		=> '',	//【必选】price 租期（必选保证大于0）
+	 *		'zuqi'		=> '',	//【必选】int 租期（必选保证大于0）
 	 *		'insurance' => '',	//【必选】price 保险金额
+	 *		'begin_time'	=> '',	//【可选】int 开始日期时间戳
 	 * ]
 	 */
 	public function __construct( $params ) {
+		$begin_time = time();//默认时间戳
 		$this->params = $params;
-		$this->year = intval( date('Y') );
-		$this->month = intval( date('m',strtotime('+1 month')) );
-		$this->day = intval( date('d') );
+		if( isset($params['begin_time']) && $params['begin_time']>0 ){
+			$begin_time = $params['begin_time'];
+		}
+		$this->setBeginTime( $begin_time );
 	}
 	
 	/**

@@ -318,11 +318,13 @@ class OrderReturnCreater
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
                     if($params['business_key'] == OrderStatus::BUSINESS_RETURN ){
+                        $type=2;
                          //插入操作日志
                          OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order,"退货","审核同意");
                     }
                     //换货
                     if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ) {
+                        $type=3;
                        //插入操作日志
                        OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order,"换货","审核同意");
                     }
@@ -382,18 +384,29 @@ class OrderReturnCreater
             }
             //存在审核同意商品
             if(isset($goodsDeliveryInfo)){
+                //获取用户下单信息
+                $userAddress=\App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
+                if(!$userAddress){
+                    return false;
+                }
+                $user_info=$userAddress->getData();
+
+                $user_data['customer_mobile']=$user_info['consignee_mobile'];//用户手机号
+                $user_data['customer']=$user_info['name'];             //用户名
+                $user_data['customer_address']=$user_info['address_info']; //用户地址
+                $user_data['business_key']=$params['business_key'];//业务类型
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no'  => $goodsDeliveryInfo[$k]['goods_no'],
                         'refund_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
-                        'imei1'     =>$goodsDeliveryInfo[$k]['imei1'],
-                        'imei2'     =>$goodsDeliveryInfo[$k]['imei2'],
-                        'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
+                        'imei'     =>$goodsDeliveryInfo[$k]['imei1'],
+                      //  'imei2'     =>$goodsDeliveryInfo[$k]['imei2'],
+                       // 'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
                     ];
                 }
-                $create_receive = Receive::create($order,$params['business_key'],$receive_data);//创建待收货单
+                $create_receive = Receive::create($order,$type,$receive_data,$user_data);//创建待收货单
                 if(!$create_receive){
                     //事务回滚
                     DB::rollBack();
@@ -1027,6 +1040,7 @@ class OrderReturnCreater
             $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
             if(isset($return['refund_no'])){
+
                 //获取退换货单信息
                // $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($return['refund_no']);
               //  if(!$return){
@@ -1059,7 +1073,7 @@ class OrderReturnCreater
                             || !isset($info['data']) ){
                            return false;
                         }
-                       /**/
+                       /*
 						$i=0;
 						$logistics = [];
                         foreach($info['data']['list'] as $k=>$id){
@@ -1067,8 +1081,8 @@ class OrderReturnCreater
                             $logistics[$i]['id']=$k;
                             $logistics[$i]['name']=$id;
                             $i=$i+1;
-                        }
-                        $buss->setLogisticsInfo($logistics);
+                        }*/
+                        $buss->setLogisticsInfo($info['data']);
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
                     $buss->setStatus("B");
@@ -1138,8 +1152,10 @@ class OrderReturnCreater
                 }
 
             }
+
             //查询订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
+
             if(!$order){
                 return false;
             }
@@ -1429,7 +1445,7 @@ class OrderReturnCreater
             }
             $data['logistics_id']=$params['logistics_id'];
             $data['logistics_no']=$params['logistics_no'];
-            $data['logistics_name']=$params['logistics_name'];
+           // $data['logistics_name']=$params['logistics_name'];
             $data['receive_no']= $receive_no;
             //上传物流单号到收货系统
             $create_receive = Receive::updateLogistics($data);

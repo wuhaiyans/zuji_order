@@ -26,6 +26,22 @@ class Config {
 	 * @var int 15
 	 */
 	const CHANNELID_MINI_JIMI = '15';
+    /**
+     * 渠道配置<b>【努比亚渠道】</b>
+     * @var int 16
+     */
+    const CHANNELID_NUBIYA = '16';
+    /**
+     * 渠道配置<b>【IOS渠道】</b>
+     * @var int 22
+     */
+    const CHANNELID_IOS = '22';
+    /**
+     * 渠道配置<b>【安卓渠道】</b>
+     * @var int 23
+     */
+    const CHANNELID_ANDROID = '23';
+
 	
 	/**
 	 * 短息模板ID
@@ -39,6 +55,9 @@ class Config {
 			self::CHANNELID_OFFICAL => [
 				SceneConfig::ORDER_CREATE 			=> 'SMS_113461042', //用户下单
                 SceneConfig::ORDER_PAY 				=> 'SMS_113461043', //用户支付或授权 成功
+                SceneConfig::ORDER_CANCEL           => 'SMS_113461044', //用户/后台/自动任务取消订单
+
+
 				SceneConfig::INSTALMENT_WITHHOLD 	=> 'hsb_sms_b427f', //代扣扣款短信
                 SceneConfig::RETURN_APPLY 			=> 'hsb_sms_771f7', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	=> 'SMS_113455999', //退货审核通过
@@ -62,17 +81,38 @@ class Config {
 			self::CHANNELID_MINI_DAJIANG => [
 				SceneConfig::ORDER_CREATE => 'SMS_113460977',//用户下单
                 SceneConfig::ORDER_PAY =>'SMS_113460978',//用户支付或授权 成功
+                SceneConfig::ORDER_CANCEL=>'SMS_113460979',//用户/后台/自动任务取消订单
 			],
 			// 极米
 			self::CHANNELID_MINI_JIMI => [
-				SceneConfig::ORDER_CREATE => 'SMS_113461002',//用户下单
-                SceneConfig::ORDER_PAY =>'SMS_113461003',//用户支付或授权 成功
+				SceneConfig::ORDER_CREATE            => 'SMS_113461002',//用户下单
+                SceneConfig::ORDER_PAY               =>'SMS_113461003',//用户支付或授权 成功
+                SceneConfig::ORDER_CANCEL            =>'SMS_113461004',//用户/后台/自动任务取消订单
 			],
+            // 努比亚
+            self::CHANNELID_NUBIYA => [
+                SceneConfig::ORDER_CREATE 			 => 'SMS_113461022', //用户下单
+                SceneConfig::ORDER_CANCEL            =>'SMS_113461024',//用户/后台/自动任务取消订单
+
+            ],
+            // IOS
+            self::CHANNELID_IOS => [
+
+            ],
+            // 安卓
+            self::CHANNELID_ANDROID => [
+
+            ],
 		];
-		if( !isset($arr[$channelId][$scene]) ){
-			return false;
+		if( isset($arr[$channelId][$scene]) ){
+			return $arr[$channelId][$scene];
 		}
-		return $arr[$channelId][$scene];
+		if( isset($arr[self::CHANNELID_OFFICAL][$scene])){
+            return $arr[self::CHANNELID_OFFICAL][$scene];
+        }
+
+        return false;
+
 	}
 	
 }
