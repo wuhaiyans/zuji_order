@@ -916,7 +916,7 @@ class OrderOperate
 
 				// 有冻结状态时
                 if ($values['freeze_type']>0) {
-                    $actArray['cancel_btn'] = false;
+                    $actArray['refund_btn'] = false;
                     $actArray['modify_address_btn'] = false;
                     $actArray['confirm_btn'] = false;
                     $actArray['confirm_receive'] = false;
@@ -1106,7 +1106,7 @@ class OrderOperate
                 $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                 if ($expire_process) {
                     $goodsList[$keys]['act_goods_state']['buy_off'] = false;
-                    $goodsList[$keys]['act_goods_state']['cancel_btn'] = false;
+                    $goodsList[$keys]['act_goods_state']['refund_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['modify_address_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['confirm_btn'] = false;
                     $goodsList[$keys]['act_goods_state']['confirm_receive'] = false;
