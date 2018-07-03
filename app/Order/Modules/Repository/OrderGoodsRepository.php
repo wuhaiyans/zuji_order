@@ -133,4 +133,12 @@ class OrderGoodsRepository
 	public function update( $where, $data ) {
 		return $this->orderGoods->where($where)->update($data);
 	}
+	/**
+     * 更新商品状态为租用中
+     * @param $orderNo
+     * @return boolean
+     */
+	public static function setGoodsInService($orderNo){
+
+    }
 }
