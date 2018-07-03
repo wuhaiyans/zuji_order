@@ -1087,7 +1087,7 @@ class OrderReturnCreater
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
 					//已经拒绝的状态流
 					$buss->setStateFlow($stateFlow['deniedStateFlow']);
-                    $buss->setStatus("C");
+                    $buss->setStatus("D");
                     $buss->setStatusText("审核被拒绝");
                 }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");

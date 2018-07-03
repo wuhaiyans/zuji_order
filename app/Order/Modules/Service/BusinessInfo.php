@@ -213,6 +213,10 @@ class BusinessInfo
                         'status' => 'C',
                         'name' => '拒绝',
                     ],
+                    [
+                        'status' => 'D',
+                        'name' => '完成',
+                    ],
                 ]
 
 
