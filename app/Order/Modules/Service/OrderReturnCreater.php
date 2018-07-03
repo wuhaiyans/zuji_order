@@ -1649,7 +1649,7 @@ class OrderReturnCreater
                 return false;
             }
             $goodsInfo=$goodInfo->toArray();
-            if($return_info['goods_no']){
+            if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 //修改退货单状态为已退货
                 $updateReturn=$return->returnFinish($params);
                 if(!$updateReturn){
@@ -1717,6 +1717,26 @@ class OrderReturnCreater
                 LogApi::debug("未获取到商品信息");
               //  DB::rollBack();
                 return false;
+            }
+            //支付方式为代扣 需要解除订单代扣
+            if($order_info['pay_type'] == PayInc::WithhodingPay){
+                //查询是否签约代扣 如果签约 解除代扣
+                try{
+                    $withhold = WithholdQuery::getByBusinessNo($params['business_type'],$order_info['order_no']);
+                    $param =[
+                        'business_type' =>$params['business_type'],  // 【必须】int    业务类型
+                        'business_no'  =>$order_info['order_no'],  // 【必须】string  业务编码
+                    ];
+                    $b =$withhold->unbind($param);
+                    if(!$b){
+                        DB::rollBack();
+                        return ApiStatus::CODE_31008;
+                    }
+
+                }catch (\Exception $e){
+                    //未签约 不解除
+                }
+
             }
             //释放库存
             if ($orderGoods){
