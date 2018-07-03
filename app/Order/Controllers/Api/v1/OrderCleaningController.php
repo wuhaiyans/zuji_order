@@ -33,7 +33,7 @@ class OrderCleaningController extends Controller
              }
      * @return \Illuminate\Http\JsonResponse
      */
-    public function list(Request $request){
+    public function cleanList(Request $request){
 //        LogApi::info('订单清算列表接口调用参数：', $request->all());
         $params = $request->input('params');
 

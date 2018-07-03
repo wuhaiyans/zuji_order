@@ -140,7 +140,7 @@ class OrderGoodsInstalment
         }
 
         // 查询分期信息
-        $instalmentInfo = \APp\Order\Modules\Service\OrderInstalment::queryByInstalmentId($instalment_id);
+        $instalmentInfo = \APp\Order\Modules\Service\OrderGoodsInstalment::queryByInstalmentId($instalment_id);
         if( !is_array($instalmentInfo)){
             // 提交事务
             return false;
