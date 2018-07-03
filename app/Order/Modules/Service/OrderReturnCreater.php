@@ -7,6 +7,7 @@ use App\Lib\Warehouse\Receive;
 use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
 use \App\Order\Modules\Inc\OrderCleaningStatus;
@@ -202,6 +203,35 @@ class OrderReturnCreater
                     return false;//取消发货失败
                 }
             }
+            //代扣+预授权
+            if($order_info['pay_type']==PayInc::WithhodingPay){
+                $data['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                //如果押金为0
+                if($data['auth_unfreeze_amount']==0){
+                   //取消订单
+                    $cancelOrder=$order->refundFinish();
+                    if(!$cancelOrder){
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            //直接支付
+            if($order_info['pay_type']==PayInc::FlowerStagePay || $order_info['pay_type']==PayInc::UnionPay){
+                $data['pay_amount'] =$order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                $data['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                //如果押金为0 或者实付租金和意外险的总和为0
+                if($data['auth_unfreeze_amount']==0 && $data['pay_amount']==0){
+                    //取消订单
+                    $cancelOrder=$order->refundFinish();
+                    if(!$cancelOrder){
+                        return false;
+                    }
+                    return true;
+                }
+            }
+
+
             //冻结订单
             $orderFreeze=$order->refundOpen();
             if( !$orderFreeze ){
@@ -213,8 +243,7 @@ class OrderReturnCreater
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
             $data['user_id'] = $params['user_id'];
-            $data['refund_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//应退金额=订单实际总租金+押金+意外险
-            $data['pay_amount'] = $order_info['order_amount']+$order_info['order_yajin']+$order_info['order_insurance'];//实际支付金额=订单实际总租金+押金+意外险
+
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
             $data['create_time'] = time();
