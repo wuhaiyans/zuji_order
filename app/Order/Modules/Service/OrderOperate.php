@@ -1028,6 +1028,10 @@ class OrderOperate
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                $isBuyOut = $values['goods_status']>=Inc\OrderGoodStatus::BUY_OFF && $values['goods_status']<Inc\OrderGoodStatus::RELET;
                $goodsList[$keys]['is_buyout'] = $isBuyOut ?? 0;
+
+               $isGiveBack = $values['goods_status']>=Inc\OrderGoodStatus::BACK_IN_THE_MACHINE && $values['goods_status']<Inc\OrderGoodStatus::BUY_OFF;
+               $goodsList[$keys]['is_giveback'] = $isGiveBack ?? 0;
+
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
