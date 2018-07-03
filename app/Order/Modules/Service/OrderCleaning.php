@@ -76,7 +76,7 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
-                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4)) ?? 0;
+                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
@@ -254,7 +254,7 @@ class OrderCleaning
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
-                && empty(intval($orderCleanData['auth_deduction_amount']))a) {
+                && empty(intval($orderCleanData['auth_deduction_amount']))) {
                 self::unfreezeRequest($orderCleanData);
             }
 
