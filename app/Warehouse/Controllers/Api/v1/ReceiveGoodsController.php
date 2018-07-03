@@ -38,7 +38,7 @@ class ReceiveGoodsController extends Controller
     {
         $params = $this->_dealParams([]);
         $list = $this->goods->list($params);
-        return \apiResponse($params);
+        return \apiResponse($list);
     }
 
 
