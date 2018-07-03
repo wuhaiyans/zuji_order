@@ -43,7 +43,7 @@ class ReceiveGoodsRepository
         }
 
         if (isset($params['status'])) {
-            $query->where('status', $params['status']);
+            $query->where('status', '=', $params['status']);
         } else {
 
             if ($type == 1) {
