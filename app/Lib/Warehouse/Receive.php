@@ -9,6 +9,8 @@
 namespace App\Lib\Warehouse;
 use App\Lib\Curl;
 use App\Lib\Order\Giveback;
+use App\Lib\Order\ReturnGoods;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Warehouse\Models\ReceiveGoods;
 use Illuminate\Support\Facades\Log;
 
@@ -148,7 +150,7 @@ class Receive
     ];
      */
 
-    public static function checkResult($order_no, $business_key,$data)
+   /* public static function checkResult($order_no, $business_key,$data)
     {
         try{
             $base_api = config('tripartitle.ORDER_API');
@@ -168,7 +170,7 @@ class Receive
         }
         return true;
 
-    }
+    }*/
 
 
     /**
@@ -206,7 +208,12 @@ class Receive
             ];
         }
         try {
-            Giveback::confirmEvaluation($result);
+           if($business_key == OrderStatus::BUSINESS_GIVEBACK){
+               Giveback::confirmEvaluation($result);
+           }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
+               ReturnGoods::checkResult($result,$business_key);
+           }
+
         } catch (\Exception $e) {
             Log::error(__METHOD__ . '检测项反馈失败');
         }
