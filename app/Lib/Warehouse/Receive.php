@@ -217,6 +217,7 @@ class Receive
            }
 
         } catch (\Exception $e) {
+			throw new \Exception( $e->getMessage());
             Log::error(__METHOD__ . '检测项反馈失败');
         }
 

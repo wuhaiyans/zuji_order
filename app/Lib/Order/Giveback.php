@@ -41,5 +41,23 @@ class Giveback extends \App\Lib\BaseApi
 			return true;
 		}
 	}
+	/**
+	 * 确认检测结果【接收二维参数】
+	 * @param array $params
+	 * $params = [<br/>
+	 *		'goods_no' => '',//商品编号<br/>
+	 *		'evaluation_status' => '',//检测状态【必须】【1：合格；2：不合格】<br/>
+	 *		'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
+	 *		'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
+	 *		'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+	 * ]<br/>
+	 * @return mixed boolen：true成功；obj:\exception
+	 */
+	public static function confirmEvaluationArr( $params ) {
+		foreach ( $params as $param ){
+			self::confirmEvaluation($param);
+		}
+		return true;
+	}
 
 }

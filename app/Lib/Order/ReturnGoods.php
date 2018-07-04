@@ -36,13 +36,14 @@ class ReturnGoods
     {
         try{
             $base_api = config('tripartitle.ORDER_API');
-            $response = Curl::post($base_api, [
+            $header = ['Content-Type: application/json'];
+            $response = Curl::post($base_api,json_encode([
                 'appid'=> 1,
                 'version' => 1.0,
                 'method'=> 'api.Return.isQualified',//模拟
                 'params' => ['business_key'=>$business_key,'data'=>$data]
-            ]);
-            $res = json_decode($response);
+            ]) ,$header);
+            $res = json_decode($response,true);
             if ($res->code != 0) {
                 return false;
             }
