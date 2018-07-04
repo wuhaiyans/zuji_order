@@ -1281,10 +1281,11 @@ class OrderReturnCreater
                     return false;
                 }
                 $goods_info=$goods->getData();
+                LogApi::debug("获取商品信息",$goods_info);
                 $params['evaluation_remark'] = $data[$k]['evaluation_description'];
                 $params['evaluation_amount'] =$data[$k]['compensate_amount'];
                 $params['evaluation_time'] =$data[$k]['evaluation_time'];
-                LogApi::debug("检测合格",$data[$k]['evaluation_status']);
+                LogApi::debug("检测合格",$params);
                 if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
                     $order_no=$return_info['order_no'];//订单编号
