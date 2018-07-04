@@ -115,4 +115,13 @@ class ImeiRepository
         return $list;
     }
 
+    /**
+     * 修改IMEI状态仓库中(确认收货入库)
+     */
+    public static function updateStatus($imei){
+        $imei = Imei::find($imei);
+        $imei->status = Imei::STATUS_IN;
+        $imei->update_time = time();
+    }
+
 }

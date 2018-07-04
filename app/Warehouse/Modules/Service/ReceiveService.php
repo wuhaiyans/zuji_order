@@ -11,6 +11,7 @@ namespace App\Warehouse\Modules\Service;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
+use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Repository\ReceiveRepository;
 use PHPUnit\Framework\MockObject\Stub\Exception;
 
@@ -172,19 +173,33 @@ class ReceiveService
         }
     }
 
-
+    /**
+     * @param $receive_no
+     * @throws \Exception
+     * 收发货签收
+     */
     public function received($receive_no)
     {
         if (!ReceiveRepository::received($receive_no)) {
             throw new \Exception($receive_no . '号收货单签收失败');
         }
+        //IMEI入库
+//        if (!ImeiRepository::received($receive_no)) {
+//            throw new \Exception($receive_no . '号收货单签收失败');
+//        }
     }
 
+    /**
+     * @param $params
+     * @throws \Exception
+     * 订单签收
+     */
     public function receiveDetail($params)
     {
         if (!ReceiveRepository::receiveDetail($params)) {
             throw new \Exception($params['receive_no'] . '号收货单商品签收失败');
         }
+        //IMEI入库
     }
 
     /**
@@ -278,12 +293,15 @@ class ReceiveService
      */
     public function checkItem($params)
     {
+        //创建检测单
         if (!ReceiveRepository::checkItem($params)) {
             throw new \Exception( '检测单:'.$params['receive_no'].'添加失败');
         }
+        //修改收货单检测状态
         if (!ReceiveRepository::checkReceive($params)) {
             throw new \Exception( '收货单'.$params['receive_no'].'检测修改失败');
         }
+        //修改收货清单检测状态
         if (!ReceiveRepository::checkReceiveGoods($params)) {
             throw new \Exception( '收货清单:'.$params['receive_no'].'检测修改失败');
         }
