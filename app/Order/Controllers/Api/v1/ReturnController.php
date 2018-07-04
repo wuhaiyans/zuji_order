@@ -13,6 +13,7 @@ use App\Order\Modules\Repository\ThirdInterface;
 use App\Lib\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Lib\Common\LogApi;
 class ReturnController extends Controller
 {
     protected $OrderCreate;
@@ -392,6 +393,7 @@ class ReturnController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->all();
+        LogApi::debug("退货检测接受数据".$params);
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])

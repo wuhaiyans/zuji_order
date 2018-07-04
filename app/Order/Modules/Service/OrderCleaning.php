@@ -165,11 +165,15 @@ class OrderCleaning
      */
     public static function orderCleanOperate($param)
     {
+
+
+
+        LogApi::info(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
         //查询清算表根据业务平台退款码out_refund_no
-        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
+        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
         if (empty($orderCleanData)) return false;
 
-        //更新清算状态为支付中
+        //更新清算状态为清算中
         $orderParam = [
             'clean_no' => $orderCleanData['clean_no'],
             'status' => OrderCleaningStatus::orderCleaning,
@@ -178,7 +182,7 @@ class OrderCleaning
             'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
         ];
         $success = OrderCleaning::upOrderCleanStatus($orderParam);
-
+        LogApi::info(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
         if ($success) return false;
 
@@ -232,9 +236,7 @@ class OrderCleaning
             if (empty($orderCleanData['auth_no'])) return true;
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
-
-
-                LogApi::info('PayQuery::getPayByFundauthNo获取失败,参数：{$orderCleanData[\'auth_no\']}', $authInfo);
+                LogApi::info(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
                 return false;
             }
             if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
@@ -351,8 +353,8 @@ class OrderCleaning
                 $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);
                 if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
 
+                    LogApi::info(__method__.'财务发起退款申请前，发现out_payment_no失败：', $payInfo);
                     return false;
-                    LogApi::info('PayQuery::getPayByPaymentNo获取失败,参数：{$orderCleanData[\'payment_no\']}', $payInfo);
                 }
                 $params = [
                     'out_refund_no' => $orderCleanData['clean_no'], //业务平台退款码
@@ -361,7 +363,7 @@ class OrderCleaning
                     'refund_back_url' => config('tripartite.ORDER_API') . '/refundClean', //退款回调URL
                 ];
                 $succss = CommonRefundApi::apply($params);
-                LogApi::info('退款申请接口返回', [$succss, $params]);
+                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：', [$params,$succss]);
 
             }
         }
@@ -403,8 +405,9 @@ class OrderCleaning
             if (empty($orderCleanData['auth_no'])) return true;
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
+
+                LogApi::info(__method__.'财务发起预授权解除前，发现out_fundauth_no失败：', $authInfo);
                 return false;
-                LogApi::info('PayQuery::getPayByFundauthNo获取失败,参数：{$orderCleanData[\'auth_no\']}', $authInfo);
             }
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
@@ -436,7 +439,7 @@ class OrderCleaning
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info('预授权解冻接口返回', [$succss, $unFreezeParams]);
+                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：', [$succss, $unFreezeParams]);
             }
 
 
