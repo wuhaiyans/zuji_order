@@ -39,7 +39,7 @@ class ApiResponse {
 		if ($jsonStr == '') {
 			return;
 		}
-		Common\LogApi::debug('ApiResponse初始化', $jsonStr);
+		//Common\LogApi::debug('ApiResponse初始化', $jsonStr);
 		//-+--------------------------------------------------------------------
 		// | 解析响应数据
 		//-+--------------------------------------------------------------------
