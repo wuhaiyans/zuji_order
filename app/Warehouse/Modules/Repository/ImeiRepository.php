@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Modules\Repository;
 
+use App\Warehouse\Models\Receive;
 use Illuminate\Support\Facades\DB;
 use App\Warehouse\Models\Imei;
 class ImeiRepository
@@ -118,10 +119,16 @@ class ImeiRepository
     /**
      * 修改IMEI状态仓库中(确认收货入库)
      */
-    public static function updateStatus($imei){
-        $imei = Imei::find($imei);
+    public static function updateStatus($receive_no){
+        $model = Receive::find($receive_no);
+        //目前是一个收货单对应一个商品一个IMEI
+        $imei = $model->imeis;
+        if(!$imei) {
+            return false;
+        }
         $imei->status = Imei::STATUS_IN;
         $imei->update_time = time();
+        return $imei->update();
     }
 
 }
