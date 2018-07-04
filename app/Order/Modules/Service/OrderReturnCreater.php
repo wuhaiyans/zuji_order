@@ -224,6 +224,10 @@ class OrderReturnCreater
                     return false;//取消发货失败
                 }
             }
+            //订单必须是不冻结状态
+            if($order_info['freeze_type'] != OrderFreezeStatus::Non){
+                return false;//订单正在操作中
+            }
             //代扣+预授权
             if($order_info['pay_type']==PayInc::WithhodingPay){
                 $data['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
@@ -532,18 +536,18 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            //获取订单信息
-            $order = \App\Order\Modules\Repository\Order\Order::getByNo($param['order_no']);
-            if(!$order){
-                return false;
-            }
-            $order_info = $order->getData();
             //获取退款单信息
-            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo($param['order_no']);
+            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo($param['refund_no']);
             if(!$return){
                 return false;
             }
             $return_info = $return->getData();
+            //获取订单信息
+            $order = \App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
+            if(!$order){
+                return false;
+            }
+            $order_info = $order->getData();
             if($param['status'] == 0){
                 //更新退款单状态为同意
                 $returnApply = $return->refundAgree($param['remark']);
@@ -554,7 +558,7 @@ class OrderReturnCreater
                     return false;
                 }
                 //获取订单的支付信息
-                $pay_result = $this->orderReturnRepository->getPayNo(1,$param['order_no']);
+                $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
                 if(!$pay_result){
                     return false;
                 }
@@ -588,7 +592,7 @@ class OrderReturnCreater
                     }
                 }
                 //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$param['order_no'],"退款","审核同意");
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核同意");
 
             }else{
                 //更新退款单状态为审核拒绝
@@ -602,7 +606,7 @@ class OrderReturnCreater
                     return false;
                 }
                 //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$param['order_no'],"退款","审核拒绝");
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核拒绝");
 
             }
 
@@ -811,7 +815,7 @@ class OrderReturnCreater
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_RETURN){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_BARTER){
-                if($data['data'][$k]->status = ReturnStatus::ReturnDelivery){
+                if($data['data'][$k]->status == ReturnStatus::ReturnDelivery){
                     $data['data'][$k]->receive_button=true;
                 }else{
                     $data['data'][$k]->receive_button=false;
