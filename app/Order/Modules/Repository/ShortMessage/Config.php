@@ -53,24 +53,26 @@ class Config {
 		$arr = [
 			// 机市短息模板配置
 			self::CHANNELID_OFFICAL => [
-				SceneConfig::ORDER_CREATE 			=> 'SMS_113461042', //用户下单
-                SceneConfig::ORDER_PAY 				=> 'SMS_113461043', //用户支付或授权 成功
+				SceneConfig::ORDER_CREATE 			 => 'SMS_113461042', //用户下单
+                SceneConfig::ORDER_PAY 				 => 'SMS_113461043', //用户支付或授权 成功
                 SceneConfig::ORDER_CANCEL           => 'SMS_113461044', //用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY         => 'SMS_113461046', //订单发货短信
                 SceneConfig::ORDER_MONTH_RECEIVE    => 'SMS_113461047', //订单月租签收短信
 
-				SceneConfig::INSTALMENT_WITHHOLD 	=> 'hsb_sms_b427f', //代扣扣款短信
-                SceneConfig::RETURN_APPLY 			=> 'hsb_sms_771f7', //申请退货
-                SceneConfig::RETURN_APPLY_AGREE 	=> 'SMS_113455999', //退货审核通过
-                SceneConfig::RETURN_APPLY_DISAGREE 	=> 'hsb_sms_d284d', //退货审核不通过
-                SceneConfig::RETURN_CHECK_OUT 		=> 'hsb_sms_1607a', //退货检测合格
-                SceneConfig::RETURN_UNQUALIFIED 	=> 'hsb_sms_1c8bf', //退货检测不合格
-                SceneConfig::RETURN_DELIVERY 		=> 'hsb_sms_e36c8', //退货收到客户手机
-                SceneConfig::REFUND_SUCCESS 		=> 'SMS_113461060', //退款成功
-				SceneConfig::WITHHOLD_FAIL 			=> 'hsb_sms_99a6f', //扣款失败
-				SceneConfig::WITHHOLD_WARMED	 	=> 'hsb_sms_16f75', //即将逾期
-				SceneConfig::WITHHOLD_OVERDUE 		=> 'hsb_sms_7326b', //扣款失败生成逾期
-				SceneConfig::REPAYMENT 				=> 'SMS_113461067', //提前还款短信
+				SceneConfig::INSTALMENT_WITHHOLD 	 => 'hsb_sms_b427f', //代扣扣款短信
+
+                SceneConfig::RETURN_APPLY 			 => 'hsb_sms_771f7', //申请退货
+                SceneConfig::RETURN_APPLY_AGREE 	 => 'SMS_113455999', //退货审核通过
+                SceneConfig::RETURN_APPLY_DISAGREE => 'hsb_sms_d284d', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 => 'hsb_sms_1607a', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 => 'hsb_sms_1c8bf', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 => 'hsb_sms_e36c8', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461060', //退款成功
+
+				SceneConfig::WITHHOLD_FAIL 		 => 'hsb_sms_99a6f', //扣款失败
+				SceneConfig::WITHHOLD_WARMED	 	 => 'hsb_sms_16f75', //即将逾期
+				SceneConfig::WITHHOLD_OVERDUE 		 => 'hsb_sms_7326b', //扣款失败生成逾期
+				SceneConfig::REPAYMENT 				 => 'SMS_113461067', //提前还款短信
 
 
 			],
@@ -78,6 +80,7 @@ class Config {
 			// 小程序
 			self::CHANNELID_MINI_ZHIMA => [
 				SceneConfig::ORDER_CREATE           =>'SMS_113461066',//用户下单
+                SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461060', //（取消订单、退货退款）退款成功
 			],
 			// 大疆
 			self::CHANNELID_MINI_DAJIANG => [
@@ -86,6 +89,8 @@ class Config {
                 SceneConfig::ORDER_CANCEL           =>'SMS_113460979',//用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY         =>'SMS_113460981', //订单发货短信
                 SceneConfig::ORDER_DAY_RECEIVE      =>'SMS_113460982', //订单日租签收短信
+                SceneConfig::REFUND_SUCCESS 		 => 'SMS_113460991', //（取消订单、退货退款）退款成功
+
 			],
 			// 极米
 			self::CHANNELID_MINI_JIMI => [
@@ -94,6 +99,8 @@ class Config {
                 SceneConfig::ORDER_CANCEL            =>'SMS_113461004',//用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY          =>'SMS_113461006', //订单发货短信
                 SceneConfig::ORDER_DAY_RECEIVE       =>'SMS_113461007', //订单日租签收短信
+                SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461016', //（取消订单、退货退款）退款成功
+
 			],
             // 努比亚
             self::CHANNELID_NUBIYA => [
@@ -102,6 +109,8 @@ class Config {
                 SceneConfig::ORDER_CANCEL            =>'SMS_113461024',//用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY          =>'SMS_113461026', //订单发货短信
                 SceneConfig::ORDER_MONTH_RECEIVE     =>'SMS_113461027', //订单月租签收短信
+                SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461036', //（取消订单、退货退款）退款成功
+
 
             ],
             // IOS
