@@ -149,6 +149,7 @@ class OrderStatus{
             self::BUSINESS_GIVEBACK => '还机业务',
             self::BUSINESS_BUYOUT => '买断业务',
             self::BUSINESS_RELET => '续租业务',
+            self::BUSINESS_FENQI => '分期业务',
         ];
     }
 
