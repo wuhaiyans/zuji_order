@@ -129,9 +129,9 @@ class OrderController extends Controller
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
-        if($userType!=2 && empty($userInfo)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-        }
+//        if($userType!=2 && empty($userInfo)){
+//            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+//        }
         if(empty($addressId)){
             return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
         }
@@ -148,7 +148,7 @@ class OrderController extends Controller
             'address_id'=>$addressId,
             'sku'=>$sku,
             'coupon'=>$coupon,
-            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
+            'user_id'=>18,//$params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->create($data);

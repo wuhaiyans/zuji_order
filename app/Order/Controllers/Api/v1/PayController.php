@@ -569,7 +569,7 @@ class PayController extends Controller
                     OrderCleaning::refundRequest($orderCleanInfo);
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
-                        $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+                        $orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed){
                         $orderParam = [
                             'clean_no' => $param['out_trade_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
@@ -605,7 +605,8 @@ class PayController extends Controller
 
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param}订单清算退款状态无效");
+               // DB::rollBack();
+                LogApi::info(__METHOD__ . "() " . microtime(true) . " 订单清算退款状态无效",$param);
                 $this->innerErrMsg('订单清算解押状态无效');
             }
             DB::commit();
@@ -615,7 +616,7 @@ class PayController extends Controller
         } catch (\Exception $e) {
 
             DB::rollBack();
-            LogApi::info(__METHOD__ . "()订单清算退押金回调接口异常 " .$e->getMessage(),$param);
+            LogApi::info(__METHOD__ . "()订单清算退押金回调接口异常 " ,$e);
             $this->innerErrMsg(__METHOD__ . "()订单清算退押金回调接口异常 ");
 
         }
@@ -681,7 +682,7 @@ class PayController extends Controller
                     //发起退款的数据
                     OrderCleaning::refundRequest($orderCleanInfo);
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
-                    if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
+                    if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                         $orderParam = [
                             'clean_no' => $param['out_trade_no'],

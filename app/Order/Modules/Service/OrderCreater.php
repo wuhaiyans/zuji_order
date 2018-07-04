@@ -60,7 +60,7 @@ class OrderCreater
             DB::beginTransaction();
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -75,9 +75,6 @@ class OrderCreater
 
             //押金
            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -168,7 +165,7 @@ class OrderCreater
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
@@ -183,9 +180,6 @@ class OrderCreater
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
-
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -287,7 +281,7 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type'],$data['appid'],OrderStatus::orderOnlineService);
+            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['appid'],OrderStatus::orderOnlineService);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id']);
@@ -302,9 +296,6 @@ class OrderCreater
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
