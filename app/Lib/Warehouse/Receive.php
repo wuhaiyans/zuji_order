@@ -198,29 +198,14 @@ class Receive
     public static function checkItemsResult($params,$business_key=0)
     {
         if (!$params || !is_array($params)) return ;
-
-        foreach ($params as $v) {
-//            $result[] = [
-//                'goods_no' => $v['goods_no'],
-//                'evaluation_status' => $v['check_result'],
-//                'evaluation_time' => $v['create_time'],
-//                'evaluation_remark' => $v['check_description'],
-//                'compensate_amount' => $v['check_price']
-//            ];
-            $result[] = $v;
-        }
-        try {
-           if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-               Giveback::confirmEvaluation($result);
-           }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
-               ReturnGoods::checkResult($result,$business_key);
-           }
-
-        } catch (\Exception $e) {
-			throw new \Exception( $e->getMessage());
-            Log::error(__METHOD__ . '检测项反馈失败');
-        }
-
+		if($business_key == OrderStatus::BUSINESS_GIVEBACK){
+			Giveback::confirmEvaluationArr($params);
+		}elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
+			ReturnGoods::checkResult($params,$business_key);
+		} else {
+			throw new \Exception( '检测结果推送不支持的业务类型'.$business_key);
+		}
+		
     }
 
 

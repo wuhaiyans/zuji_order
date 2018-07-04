@@ -251,7 +251,7 @@ class ReceiveController extends Controller
 
         try {
             $params['create_time'] = time();
-            //$this->receive->checkItem($params);
+            $this->receive->checkItem($params);
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $items[] = [
                 'goods_no'=>$params['goods_no'],
@@ -260,7 +260,6 @@ class ReceiveController extends Controller
                 'evaluation_remark'=>$params['check_description'],
                 'compensate_amount'=>$params['compensate_amount'],
             ];
-			return apiResponse(['items'=>$items]);
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
             Receive::checkItemsResult($items,$receive_row['business_key']);
 
