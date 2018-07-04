@@ -82,9 +82,16 @@ class ReceiveGoodsService
 //            if($it['status']==ReceiveGoods::STATUS_ALL_CHECK && $receive_row->type==Receive::TYPE_EXCHANGE){
 //                $it['huanhuo']=true;
 //            }else{
-//                $it['huanhuo']=false;
+//                $it['huanhuo']=false;收货签收
 //            }
             $it['huanhuo']=false;
+            //检测操作
+            if($it['status']==ReceiveGoods::STATUS_ALL_RECEIVE && $it['status']!=ReceiveGoods::STATUS_ALL_CHECK){
+                $it['jiance']=true;
+            }else{
+                $it['jiance']=true;
+            }
+
             //当前状态
             $it['status']=ReceiveGoods::status($it['status']);
             //设备归还属性
