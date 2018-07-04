@@ -100,6 +100,23 @@ class OrderReturnCreater
                 }
                 //获取商品数组
                 $goods_info = $goods->getData();
+                //代扣+预授权
+                if($order_info['pay_type']==PayInc::WithhodingPay){
+                    if($order_info['order_yajin']>0){
+                        $result['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                    }
+                }
+                //直接支付
+                if($order_info['pay_type']==PayInc::FlowerStagePay || $order_info['pay_type']==PayInc::UnionPay) {
+                    if (($order_info['order_amount'] + $order_info['order_insurance']) > 0) {
+                        $result['pay_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                        $result['refund_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//应退金额
+                    }
+                    if ($order_info['order_yajin'] > 0) {
+                        $result['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                    }
+                }
+
                 // 创建退货单
                 $data = [
                     'goods_no'      => $goods_info['goods_no'],
@@ -110,6 +127,9 @@ class OrderReturnCreater
                     'user_id'       => $params['user_id'],
                     'status'        => ReturnStatus::ReturnCreated,
                     'refund_no'     => create_return_no(),
+                    'pay_amount'    =>isset($result['pay_amount']) ?$result['pay_amount']: 0.00 ,            //实付金额
+                    'auth_unfreeze_amount'  => isset($result['auth_unfreeze_amount']) ?$result['auth_unfreeze_amount']: 0.00,   //应退押金
+                    'refund_amount'  => isset($result['refund_amount']) ?$result['refund_amount']: 0.00 ,           //应退金额
                     'create_time'   => time(),
                 ];
                 $create = OrderReturnRepository::createReturn($data);
@@ -1940,5 +1960,6 @@ class OrderReturnCreater
         }
         return true;
     }
+
 
 }
