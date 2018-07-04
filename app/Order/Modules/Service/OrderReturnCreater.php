@@ -1283,7 +1283,7 @@ class OrderReturnCreater
                 $goods_info=$goods->getData();
                 LogApi::debug("获取商品信息",$goods_info);
                 LogApi::debug("参数",$v);
-                $params['evaluation_remark'] = $v['evaluation_description'];
+                $params['evaluation_remark'] = $v['evaluation_remark'];
                 $params['evaluation_amount'] =$v['compensate_amount'];
                 $params['evaluation_time'] =$v['evaluation_time'];
                 LogApi::debug("检测合格",$params);
