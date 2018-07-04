@@ -1282,9 +1282,9 @@ class OrderReturnCreater
                 }
                 $goods_info=$goods->getData();
                 LogApi::debug("获取商品信息",$goods_info);
-                $params['evaluation_remark'] = $data[$k]['evaluation_description'];
-                $params['evaluation_amount'] =$data[$k]['compensate_amount'];
-                $params['evaluation_time'] =$data[$k]['evaluation_time'];
+                $params['evaluation_remark'] = $v['evaluation_description'];
+                $params['evaluation_amount'] =$v['compensate_amount'];
+                $params['evaluation_time'] =$v['evaluation_time'];
                 LogApi::debug("检测合格",$params);
                 if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
