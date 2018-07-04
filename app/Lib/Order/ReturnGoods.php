@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
  * Class Delivery
  * 与退换货相关
  */
-class ReturnGoods
+class ReturnGoods extends \App\Lib\BaseApi
 {
 
     /**
@@ -34,15 +34,24 @@ class ReturnGoods
 
     public static function checkResult($data,$business_key)
     {
-        try{
-            $base_api = config('tripartitle.ORDER_API');
-            $header = ['Content-Type: application/json'];
+
+
+        $params['params'][]=$business_key;
+        $params['params']['data']=$data;
+        if( self::request(\env('APPID'), \env('ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
+            return true;
+        }else{
+            throw new \Exception('退换货检测失败');
+        }
+
+        /*try{
+            $base_api = config('tripartite.ORDER_API');
             $response = Curl::post($base_api,json_encode([
                 'appid'=> 1,
                 'version' => 1.0,
                 'method'=> 'api.Return.isQualified',//模拟
                 'params' => ['business_key'=>$business_key,'data'=>$data]
-            ]) ,$header);
+            ]));
             $res = json_decode($response,true);
             if ($res->code != 0) {
                 return false;
@@ -51,7 +60,7 @@ class ReturnGoods
             LogApi::error($e->getMessage());
             return false;
         }
-        return true;
+        return true;*/
 
     }
 
