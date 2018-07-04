@@ -1018,12 +1018,32 @@ class OrderOperate
        if (empty($goodsList)) return [];
            //到期时间多于1个月不出现到期处理
            foreach($goodsList as $keys=>$values) {
+
+               $goodsList[$keys]['left_zujin'] = '';
                if ($goodsExtendArray) {
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
                    $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
 
                }
+
+
+               //处于租期中，获取剩余未支付租金
+               if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
+                   $where = array();
+                   $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
+                   $where[] = ['goods_no','=',$values['goods_no']];
+                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+                   if ($instaulment){
+
+                       $goodsList[$keys]['left_zujin'] = $instaulment['amount'];
+                   }
+
+               }
+
+
+
+
                //显示花期还款总金额及每月支付金额
                $repaymentAmount =   normalizeNum($values['amount_after_discount']+$values['insurance']);
                $goodsList[$keys]['repayment_amount'] =  $repaymentAmount;
