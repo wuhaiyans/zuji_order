@@ -131,7 +131,15 @@ class InstalmentController extends Controller
         // 订单详情
         $orderGoodsService = new OrderGoods();
         $orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+        if($orderGoodsInfo == []){
+            return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
+        }
 
+        // 订单详情
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getOrderInfo(['order_no'=>$orderGoodsInfo['order_no']]);
+        if(!$orderInfo){
+            return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
+        }
 
         // 用户验证
         if($uid != $orderGoodsInfo['user_id']){
@@ -153,8 +161,10 @@ class InstalmentController extends Controller
 
             // 是否允许扣款
             $item['allow_pay']  = 0;
-            if($item['term'] <= date('Ym') && ($item['status']==OrderInstalmentStatus::UNPAID || $item['status']==OrderInstalmentStatus::FAIL)){
-                $item['allow_pay']  = 1;
+            if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
+                if($item['term'] <= date('Ym') && ($item['status']==OrderInstalmentStatus::UNPAID || $item['status']==OrderInstalmentStatus::FAIL)){
+                    $item['allow_pay']  = 1;
+                }
             }
 
             // 是否扣款

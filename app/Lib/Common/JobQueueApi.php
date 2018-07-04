@@ -101,14 +101,31 @@ class JobQueueApi {
 		// 请求
 		$res = Curl::post(config('jobsystem.JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
+			LogApi::type('third-api')::error('任务系统请求失败', [
+				'url' => config('jobsystem.JOB_API'),
+				'params' => $_config,
+			]);
 			return false;
 		}
 		$res = json_decode($res,true);
 		if( !$res ){
+			LogApi::type('third-api')::error('任务系统请求结果错误', [
+				'url' => config('jobsystem.JOB_API'),
+				'params' => $_config,
+				'result' => $res,
+			]);
 			return false;
 		}
 		if( $res['status']=='ok'){
 			return true;
+		}
+		if( !$res ){
+			LogApi::type('third-api')::error('任务系统请求状态失败', [
+				'url' => config('jobsystem.JOB_API'),
+				'params' => $_config,
+				'result' => $res,
+			]);
+			return false;
 		}
 		return false;
 	}
