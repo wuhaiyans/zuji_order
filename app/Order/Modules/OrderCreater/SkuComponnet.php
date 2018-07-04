@@ -61,14 +61,18 @@ class SkuComponnet implements OrderCreater
 	 */
     public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
+        throw new Exception("获取商品接口失败");
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
+        var_dump($goodsArr[353]['spu_info']);die;
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
-
+            if(empty($goodsArr[$skuId]['sku_info']['payment_list'])){
+                throw new Exception("商品支付方式错误");
+            }
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])&&$this->zuqiType == 1?$sku[$i]['begin_time']:"";
