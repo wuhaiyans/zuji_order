@@ -492,7 +492,7 @@ class ReceiveRepository
      * 检测完成修改收货单商品状态
      */
     public static function checkReceiveGoods($params){
-        $row = ReceiveGoods::where('receive_no','=',$params['receive_no']);
+        $row = ReceiveGoods::where('receive_no','=',$params['receive_no'])->first();
         if(!$row){
             return false;
         }
