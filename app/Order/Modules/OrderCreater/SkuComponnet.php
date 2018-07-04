@@ -56,26 +56,31 @@ class SkuComponnet implements OrderCreater
 	 *		'sku_id' => '',		//【必选】SKU ID
 	 *		'sku_num' => '',	//【必选】SKU 数量
 	 * ]
-	 * @param int $payType
+	 * @param int $payType  //创建订单才有支付方式
 	 * @throws Exception
 	 */
-    public function __construct(OrderCreater $componnet, array $sku,int $payType)
+    public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
         if (!is_array($goodsArr)) {
             throw new Exception("获取商品接口失败");
         }
+
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
-
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
+            if(empty($goodsArr[$skuId]['spu_info']['payment_list'])){
+                throw new Exception("商品支付方式错误");
+            }
+            $this->payType =$payType?$payType:$goodsArr[$skuId]['spu_info']['payment_list'][0]['id'];
+            $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
             $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])&&$this->zuqiType == 1?$sku[$i]['begin_time']:"";
             $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])&&$this->zuqiType == 1?$sku[$i]['end_time']:"";
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
             $goodsArr[$skuId]['sku_info']['goods_no'] = createNo(6);
-            $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
+
             if ($this->zuqiType == 1) {
                 $this->zuqiTypeName = "day";
                 $goodsArr[$skuId]['sku_info']['zuqi'] = (strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400;
@@ -96,8 +101,6 @@ class SkuComponnet implements OrderCreater
 
         }
         $this->goodsArr =$goodsArr;
-        $this->payType=$payType;
-
     }
 
 
@@ -192,6 +195,17 @@ class SkuComponnet implements OrderCreater
         return $this->flag;
     }
 
+    /**
+     * 获取支付方式
+     * @return int
+     */
+    public function getPayType(){
+        return $this->payType;
+    }
+    /**
+     * 获取租期类型
+     * @return int
+     */
     public function getZuqiType(){
         return $this->zuqiType;
     }

@@ -26,10 +26,10 @@ class InstalmentComponnet implements OrderCreater
     private $payType;
 
 
-    public function __construct(OrderCreater $componnet,int $payType)
+    public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
-        $this->payType =$payType;
+        $this->payType =$this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
     }
     /**
      * 获取订单创建器

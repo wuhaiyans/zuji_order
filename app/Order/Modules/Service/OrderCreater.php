@@ -60,7 +60,7 @@ class OrderCreater
             DB::beginTransaction();
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
@@ -74,10 +74,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
-           $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+           $orderCreater = new DepositComponnet($orderCreater);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -89,10 +86,10 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
-            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater);
 
             //支付
-            $orderCreater = new OrderPayComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
 
 
@@ -146,7 +143,7 @@ class OrderCreater
 
             } catch (\Exception $exc) {
                 DB::rollBack();
-                echo $exc->getMessage();
+                set_msg($exc->getMessage());
                 die;
             }
 
@@ -168,7 +165,7 @@ class OrderCreater
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['pay_type'],$data['appid'],$orderType);
+            $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
@@ -184,9 +181,6 @@ class OrderCreater
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
-
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
 
@@ -197,7 +191,7 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
-            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater);
             $b = $orderCreater->filter();
             if(!$b){
                 DB::rollBack();
@@ -240,7 +234,7 @@ class OrderCreater
 
         } catch (\Exception $exc) {
             DB::rollBack();
-            echo $exc->getMessage();
+            set_msg($exc->getMessage());
             die;
         }
     }
@@ -249,26 +243,23 @@ class OrderCreater
 
         $first_amount =0;
         $total_amount =0;
-        if($schemaData['order']['zuqi_type'] ==1){
-            //短租
+        $payType =$schemaData['order']['pay_type'];
+        if($payType == PayInc::WithhodingPay){
             foreach ($schemaData['sku'] as $key=>$value){
-                foreach ($value['instalment'] as $k=>$v){
-                    $first_amount+=$v['amount'];
-                }
-                $schemaData['sku'][$key]['first_amount'] =$first_amount;
-                $schemaData['sku'][$key]['instalment_total_amount'] =$first_amount;
+                $schemaData['sku'][$key]['first_amount'] = $value['instalment'][0]['amount']; //首期支付金额
+                $schemaData['sku'][$key]['instalment_total_amount'] = $value['amount_after_discount'] +$value['insurance'];
             }
+
         }else{
-            //长租
             foreach ($schemaData['sku'] as $key=>$value){
-
-                $schemaData['sku'][$key]['first_amount'] =$value['instalment'][0]['amount'];
-                foreach ($value['instalment'] as $k=>$v){
-                    $total_amount +=$v['amount'];
+                if($schemaData['order']['zuqi_type']==1){
+                    $schemaData['sku'][$key]['first_amount'] = $value['amount_after_discount'] +$value['insurance'];
+                }else{
+                    $schemaData['sku'][$key]['first_amount'] = number_format(($value['amount_after_discount'] +$value['insurance'])/$value['zuqi'],2); //首期支付金额
                 }
 
+                $schemaData['sku'][$key]['instalment_total_amount'] = $value['amount_after_discount'] +$value['insurance'];
             }
-            $schemaData['sku'][$key]['instalment_total_amount'] =$total_amount;
 
         }
 
@@ -287,24 +278,21 @@ class OrderCreater
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['pay_type'],$data['appid'],OrderStatus::orderOnlineService);
+            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['appid'],OrderStatus::orderOnlineService);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id']);
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
 
             //押金
-            $orderCreater = new DepositComponnet($orderCreater,$data['pay_type']);
-
-            //代扣  -- 可以废弃 用 支付组件
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            $orderCreater = new DepositComponnet($orderCreater);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
@@ -313,10 +301,10 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
-            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater);
 
             //支付
-            $orderCreater = new OrderPayComponnet($orderCreater,$data['pay_type'],$data['user_id'],$data['pay_channel_id']);
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
             $b = $orderCreater->filter();
             if(!$b){
@@ -333,7 +321,7 @@ class OrderCreater
                 'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
                 //支付方式
-                'pay_type'=>$data['pay_type'],
+                'pay_type'=>$schemaData['order']['pay_type'],
                 // 是否需要 信用认证
                 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 '_order_info' => $schemaData,
@@ -344,7 +332,8 @@ class OrderCreater
             return $result;
         } catch (\Exception $exc) {
             echo $exc->getMessage();
-            die;
+            set_msg($exc->getMessage());
+            return false;
         }
     }
 
@@ -360,7 +349,7 @@ class OrderCreater
             $data['pay_type'] = intval($data['pay_type']);
             $data['appid'] = intval($data['appid']);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['pay_type']),($data['appid']),($orderType));
+            $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['appid']),($orderType));
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
@@ -389,7 +378,7 @@ class OrderCreater
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
-            $orderCreater = new InstalmentComponnet($orderCreater,$data['pay_type']);
+            $orderCreater = new InstalmentComponnet($orderCreater);
 
             $b = $orderCreater->filter();
             if(!$b){

@@ -388,18 +388,20 @@ class ReturnController extends Controller
      *
      */
     public function isQualified(Request $request){
-        $orders =$request->all();
-        $params = $orders['params'];
-        $param = filter_array($params,[
-            'business_key'             =>'required',
-        ]);
-        if(count($param)<1){
-            return  apiResponse([],ApiStatus::CODE_20001);
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->all();
+        $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
+        foreach($paramsArr as $param){
+            if(empty($param['goods_no'])
+                || empty($param['evaluation_status'])
+                || empty($param['evaluation_time'])
+                ||empty($params['params']['business_key'])){
+                return  apiResponse([],ApiStatus::CODE_20001);
+            }
         }
-        if(empty($params['data'])){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->isQualified($param['business_key'],$params['data']);
+        $res=$this->OrderReturnCreater->isQualified($params['params']['business_key'],$params['params']['data']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33008);//修改检测结果失败
         }
@@ -535,7 +537,7 @@ class ReturnController extends Controller
     //test
     public function refundUpdate(Request $request){
         $orders = $request->all();
-        $aa=$this->OrderReturnCreater->refundUpdate($orders['params']);
+        $aa=$this->OrderReturnCreater->refundUpdate($orders['params'],$orders['userinfo']);
         p($aa);
 
     }
