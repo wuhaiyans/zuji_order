@@ -50,10 +50,10 @@ class OrderPayComponnet implements OrderCreater
     private $isWithholdStatus=false;
 
 
-    public function __construct(OrderCreater $componnet,int $payType,int $userId,int $payChannelId)
+    public function __construct(OrderCreater $componnet,int $userId,int $payChannelId)
     {
         $this->componnet = $componnet;
-        $this->payType = $payType;
+        $this->payType = $this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
         $this->userId = $userId;
         $this->payChannelId = $payChannelId;
     }
@@ -151,6 +151,10 @@ class OrderPayComponnet implements OrderCreater
         $b = $this->componnet->create();
         if( !$b ){
             return false;
+        }
+        $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
+        if($zuqiType ==1){
+            $this->orderFenqi =0;
         }
         $param =[
             'payType' => $this->payType,//支付方式 【必须】<br/>
