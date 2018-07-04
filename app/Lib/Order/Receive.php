@@ -6,7 +6,7 @@
  */
 
 namespace App\Lib\Order;
-
+use App\Lib\Curl;
 /**
  * Class Delivery
  * 与收发货相关
