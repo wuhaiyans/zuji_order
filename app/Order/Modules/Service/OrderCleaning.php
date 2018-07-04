@@ -364,8 +364,9 @@ class OrderCleaning
                     'amount' => $orderCleanData['refund_amount'] * 100, //支付金额
                     'refund_back_url' => config('tripartite.ORDER_API') . '/refundClean', //退款回调URL
                 ];
+                LogApi::info(__method__.'财务发起退款请求前，请求的参数：', $params);
                 $succss = CommonRefundApi::apply($params);
-                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：', [$params,$succss]);
+                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：'.$succss);
 
             }
         }
