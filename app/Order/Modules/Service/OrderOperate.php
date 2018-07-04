@@ -738,7 +738,6 @@ class OrderOperate
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
-
             foreach ($goodsExtendData as &$goodsValues) {
                 if (is_array($goodsValues)) {
                     foreach($goodsValues as &$values) {
@@ -746,14 +745,8 @@ class OrderOperate
                         $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
                         $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
                         $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
-                        if($values['times'] == 1){
-
-
-
-                        }
                         if ($values['times']==1)
                         {
-
                             $goodsExtendArray[$values['goods_no']]['firstAmount'] =$values['amount'];
                             $year   = substr($values['term'], 0, 4);
                             $month  = substr($values['term'], -2);
@@ -771,7 +764,6 @@ class OrderOperate
                             $instalmentUnpayAmount+=$values['amount'];
                         }
                     }
-
 
                 }
             }
@@ -792,7 +784,6 @@ class OrderOperate
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
 
-
         //订单金额
         $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
         //支付金额
@@ -805,7 +796,6 @@ class OrderOperate
         $orderData['zujin_amount']  =   $orderData['order_yajin'];
 
         $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
-        //
 
         $order['order_info'] = $orderData;
 
@@ -818,13 +808,12 @@ class OrderOperate
 
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
-
         $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
-//        p($goodsExtendData);
         $order['goods_extend_info'] = $goodsExtendData;
-
+        //优惠券信息
+        $couponInfo =    OrderRepository::getCouponByOrderNo($orderNo);
+        $order['coupon_info'] =   $couponInfo;
         return apiResponseArray(ApiStatus::CODE_0,$order);
-//        return $orderData;
 
     }
 
@@ -1034,6 +1023,18 @@ class OrderOperate
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
                    $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
 
+               }
+               //显示花期还款总金额及每月支付金额
+               $repaymentAmount =   normalizeNum($values['amount_after_discount']+$values['insurance']);
+               $goodsList[$keys]['repayment_amount'] =  $repaymentAmount;
+               if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
+
+
+                   $goodsList[$keys]['repayment_month'] =   $repaymentAmount;
+
+               } else {
+
+                   $goodsList[$keys]['repayment_month'] =   normalizeNum($repaymentAmount/$values['zuqi']);
                }
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                $isBuyOut = $values['goods_status']>=Inc\OrderGoodStatus::BUY_OFF && $values['goods_status']<Inc\OrderGoodStatus::RELET;

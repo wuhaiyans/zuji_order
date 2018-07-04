@@ -241,6 +241,7 @@ class GoodsReturn {
     public function barterDelivery(array $data ){
         $this->model->barter_logistics_id=$data['logistics_id'];
         $this->model->barter_logistics_no=$data['logistics_no'];
+        $this->model->status = ReturnStatus::ReturnDelivery;
         return $this->model->save();
     }
     /**

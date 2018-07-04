@@ -50,6 +50,8 @@ class ReturnStatus {
     const ReturnTuiKuan= 9;
     //退款中
     const ReturnTui= 10;
+    //已发货
+    const ReturnDelivery= 11;
 
 
     /***********退换货审核原因******************/
@@ -94,6 +96,8 @@ class ReturnStatus {
             self::ReturnHuanHuo => '已换货',
             self::ReturnTuiKuan => '已退款',
             self::ReturnTui =>'退款中',
+            self::ReturnDelivery =>'已发货',
+
         ];
     }
     public static function getStatusName($status){

@@ -804,13 +804,14 @@ class OrderReturnCreater
             }else{
                 $data['data'][$k]->operate_status=true;
             }
+            $data['data'][$k]->receive_button=false;
             //业务类型
             if($data['data'][$k]->business_key==OrderStatus::BUSINESS_REFUND){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_REFUND);//退款业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_RETURN){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_BARTER){
-                if($data['data'][$k]->status != ReturnStatus::ReturnHuanHuo || $data['data'][$k]->status != ReturnStatus::ReturnCanceled){
+                if($data['data'][$k]->status = ReturnStatus::ReturnDelivery){
                     $data['data'][$k]->receive_button=true;
                 }else{
                     $data['data'][$k]->receive_button=false;
