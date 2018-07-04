@@ -343,6 +343,27 @@ class GoodsReturn {
         return new self( $order_info );
     }
 
+    /**
+     * 获取订单
+     * <p>当订单不存在时，抛出异常</p>
+     * @param string $goods_no	商品编号
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getReturnGoodsInfo(string $goods_no,int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['goods_no', '=', $goods_no],['status','!=',ReturnStatus::ReturnCanceled]
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
+        }
+        return new self( $order_info );
+    }
 
 
 

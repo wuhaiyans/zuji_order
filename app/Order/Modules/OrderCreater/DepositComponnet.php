@@ -31,10 +31,9 @@ class DepositComponnet implements OrderCreater
 
     private $flag = true;
 
-    public function __construct(OrderCreater $componnet,int $payType,$certifiedFlag=true,$miniCreditAmount = 0)
+    public function __construct(OrderCreater $componnet,$certifiedFlag=true,$miniCreditAmount = 0)
     {
         $this->componnet = $componnet;
-        $this->payType =$payType;
         $this->certifiedFlag =$certifiedFlag;
         $this->miniCreditAmount =$miniCreditAmount;
 
@@ -78,6 +77,7 @@ class DepositComponnet implements OrderCreater
         if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
             $this->deposit = false;
         }
+        $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
             //print_r($this->schema['sku']);die;
