@@ -41,10 +41,9 @@ class OrderComponnet implements OrderCreater
     private $appid;
     private $mianyaStatus = 0;
 
-    public function __construct( $orderNo='' ,int $userId,int $payType,int $appid,int $orderType) {
+    public function __construct( $orderNo='' ,int $userId,int $appid,int $orderType) {
         $this->orderNo = $orderNo;
         $this->userId =$userId;
-        $this->payType=$payType;
         $this->appid=$appid;
         $this->orderType =$orderType;
     }
@@ -181,6 +180,7 @@ class OrderComponnet implements OrderCreater
     public function filter(): bool
     {
         //判断是否有其他活跃 未完成订单(小程序不限制)
+        $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
         if( $this->payType !=  PayInc::MiniAlipay){
             $b =OrderRepository::unCompledOrder($this->userId);
             if($b) {

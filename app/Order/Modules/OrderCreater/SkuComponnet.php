@@ -59,7 +59,7 @@ class SkuComponnet implements OrderCreater
 	 * @param int $payType
 	 * @throws Exception
 	 */
-    public function __construct(OrderCreater $componnet, array $sku,int $payType)
+    public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
@@ -192,6 +192,17 @@ class SkuComponnet implements OrderCreater
         return $this->flag;
     }
 
+    /**
+     * 获取支付方式
+     * @return int
+     */
+    public function getPayType(){
+        return $this->payType;
+    }
+    /**
+     * 获取租期类型
+     * @return int
+     */
     public function getZuqiType(){
         return $this->zuqiType;
     }
