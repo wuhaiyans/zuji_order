@@ -369,6 +369,8 @@ class OrderReturnCreater
                     $goodsDeliveryInfo[$k] = $goodsDelivery[$k]->getData();
                     $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];
                     $goodsDeliveryInfo[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
+                    $goodsDeliveryInfo[$k]['goods_name'] = $goods_info['goods_name'];
+
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
                     if($params['business_key'] == OrderStatus::BUSINESS_RETURN ){
@@ -452,6 +454,7 @@ class OrderReturnCreater
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no'  => $goodsDeliveryInfo[$k]['goods_no'],
+                        'goods_name'  => $goodsDeliveryInfo[$k]['goods_name'],
                         'refund_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
@@ -807,6 +810,11 @@ class OrderReturnCreater
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_RETURN){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_BARTER){
+                if($data['data'][$k]->status != ReturnStatus::ReturnHuanHuo || $data['data'][$k]->status != ReturnStatus::ReturnCanceled){
+                    $data['data'][$k]->receive_button=true;
+                }else{
+                    $data['data'][$k]->receive_button=false;
+                }
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_BARTER);//换货业务
             }
             //订单状态
