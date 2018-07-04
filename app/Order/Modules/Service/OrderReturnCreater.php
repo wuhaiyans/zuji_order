@@ -1253,7 +1253,6 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            LogApi::debug("退货检测接受数据".$data);
             //检测不合格的状态
            // $list=[];
             //检测合格的退换货编号
