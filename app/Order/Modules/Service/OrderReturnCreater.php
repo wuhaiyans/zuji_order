@@ -1267,12 +1267,14 @@ class OrderReturnCreater
                     return false;
                 }
                 $return_info=$return->getData();
+                LogApi::debug("获取退货单信息",$return_info);
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
                     return false;
                 }
                 $order_info=$order->getData();
+                LogApi::debug("获取订单信息",$order_info);
                 //获取商品信息
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($v['goods_no']);
                 if(!$goods){
@@ -1282,7 +1284,8 @@ class OrderReturnCreater
                 $params['evaluation_remark'] = $data[$k]['evaluation_description'];
                 $params['evaluation_amount'] =$data[$k]['compensate_amount'];
                 $params['evaluation_time'] =$data[$k]['evaluation_time'];
-                if($data[$k]['evaluation_status']=="1") {
+                LogApi::debug("检测合格",$data[$k]['evaluation_status']);
+                if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
                     $order_no=$return_info['order_no'];//订单编号
                     $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
