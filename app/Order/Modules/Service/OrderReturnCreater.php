@@ -1267,7 +1267,6 @@ class OrderReturnCreater
                     return false;
                 }
                 $return_info=$return->getData();
-                LogApi::debug("获取退货单信息",$return_info);
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
@@ -1281,19 +1280,15 @@ class OrderReturnCreater
                     return false;
                 }
                 $goods_info=$goods->getData();
-                LogApi::debug("获取商品信息",$goods_info);
-                LogApi::debug("参数",$v);
                 $params['evaluation_remark'] = $v['evaluation_remark'];
                 $params['evaluation_amount'] =$v['compensate_amount'];
                 $params['evaluation_time'] =$v['evaluation_time'];
-                LogApi::debug("检测合格",$params);
                 if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
                     $order_no=$return_info['order_no'];//订单编号
                     $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
                     //更新退换货单信息
                     $updateReturn=$return->returnCheckOut($params);
-                    LogApi::debug("更新退换单信息",$updateReturn);
                     if(!$updateReturn){
                         DB::rollBack();
                         return false;
@@ -1301,7 +1296,6 @@ class OrderReturnCreater
                     if($business_key ==OrderStatus::BUSINESS_RETURN){
                         //获取订单的支付信息
                         $pay_result=$this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
-                        LogApi::debug("获取订单的支付信息",$pay_result);
                         if(!$pay_result){
                             return false;
                         }
@@ -1324,7 +1318,6 @@ class OrderReturnCreater
                             }*/
 
                         }
-                        LogApi::debug("创建清单数据",$create_data);
                         //退款：代扣+预授权
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
                             $create_data['deposit_unfreeze_status']=OrderCleaningStatus::depositUnfreezeStatusCancel;//退还押金状态
@@ -1397,7 +1390,6 @@ class OrderReturnCreater
                     return false;
                 }
                 $goodsStatus[$k]=$goodsInfo->getData();
-                LogApi::debug("获取商品信息",$goodsStatus);
             }
             if($business_key==OrderStatus::BUSINESS_BARTER){
                 //获取此订单的商品是否还有处理中的设备，没有则解冻
@@ -1462,9 +1454,10 @@ class OrderReturnCreater
 
             return true;
         }catch( \Exception $exc){
-            echo $exc->getMessage();
-            die;
+            throw new \Exception( $exc->getMessage());
         }
+
+
     }
 
 
