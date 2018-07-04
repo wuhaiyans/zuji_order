@@ -383,7 +383,7 @@ class OrderCleaning
     public static function unfreezeRequest($orderCleanData)
     {
 
-        LogApi::info(__method__.'财务进入解除预授权请求的逻辑');
+        LogApi::info(__method__.'财务进入解除预授权请求的逻辑',$orderCleanData);
         if (empty($orderCleanData)) return false;
 
         /**
@@ -404,8 +404,10 @@ class OrderCleaning
          */
 
         if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
+
             //根据预授权编号查找预授权相关数据
-            if (empty($orderCleanData['auth_no'])) return true;
+            if (empty($orderCleanData['auth_no'])) return false;
+
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
             if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
@@ -433,6 +435,7 @@ class OrderCleaning
              * ]
              */
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+
                 $unFreezeParams = [
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                     'out_trade_no' => $orderCleanData['clean_no'], //订单系统交易码
@@ -441,8 +444,9 @@ class OrderCleaning
                     'back_url' => config('tripartite.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
+                LogApi::info(__method__.'财务发起预授权解冻请求前，请求的参数：', $unFreezeParams);
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：', [$succss, $unFreezeParams]);
+                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：'.$succss);
             }
 
 
