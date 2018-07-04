@@ -237,6 +237,10 @@ class ReceiveController extends Controller
     {
         $rules = [
             'receive_no' => 'required',
+            'check_description' => 'required',
+            'check_result' => 'required',
+            'compensate_amount' => 'required',
+            'goods_no' => 'required',
         ];
 
         $params = $this->_dealParams($rules);
@@ -246,7 +250,16 @@ class ReceiveController extends Controller
         }
 
         try {
-            $items = $this->receive->checkItemsFinish($params['receive_no']);
+            $params['create_time'] = time();
+            $this->receive->checkItem($params);
+            //$items = $this->receive->checkItemsFinish($params['receive_no']);
+            $items[] = [
+                'goods_no'=>$params['goods_no'],
+                'evaluation_status'=>$params['check_result'],
+                'evaluation_time'=>$params['create_time'],
+                'evaluation_remark'=>$params['check_description'],
+                'compensate_amount'=>$params['compensate_amount'],
+            ];
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
             Receive::checkItemsResult($items,$receive_row['business_key']);
 

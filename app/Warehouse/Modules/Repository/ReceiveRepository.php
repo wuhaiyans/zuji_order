@@ -444,6 +444,20 @@ class ReceiveRepository
     }
 
     /**
+     * 录入检测单
+     */
+    public static function checkItem($params)
+    {
+        //$params['create_time'] = time();
+        $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
+        $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
+        $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
+
+        $model = new CheckItems();
+        return $model->create($params);
+    }
+
+    /**
      * 录入检测项
      */
     public static function checkItems($params)

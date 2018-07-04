@@ -272,6 +272,16 @@ class ReceiveService
         return $detail;
     }
 
+    /**
+     * @param $params
+     * 检测单
+     */
+    public function checkItem($params)
+    {
+        if (!ReceiveRepository::checkItem($params)) {
+            throw new \Exception( '检测单:'.$params['receive_no'].'添加失败');
+        }
+    }
 
     /**
      * @param $params

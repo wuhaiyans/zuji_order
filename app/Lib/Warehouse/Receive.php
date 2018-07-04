@@ -200,13 +200,14 @@ class Receive
         if (!$params || !is_array($params)) return ;
 
         foreach ($params as $v) {
-            $result[] = [
-                'goods_no' => $v['goods_no'],
-                'evaluation_status' => $v['check_result'],
-                'evaluation_time' => $v['create_time'],
-                'evaluation_remark' => $v['check_description'],
-                'compensate_amount' => $v['check_price']
-            ];
+//            $result[] = [
+//                'goods_no' => $v['goods_no'],
+//                'evaluation_status' => $v['check_result'],
+//                'evaluation_time' => $v['create_time'],
+//                'evaluation_remark' => $v['check_description'],
+//                'compensate_amount' => $v['check_price']
+//            ];
+            $result[] = $v;
         }
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
