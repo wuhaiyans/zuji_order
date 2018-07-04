@@ -474,10 +474,12 @@ class PayController extends Controller
 									$businessParam['business_no'],
 									$businessParam['status'],
 									$userinfo);
-							if( !$b ){// 
-								DB::rollBack();
+							if( !$b ){
+                                DB::rollBack();
+                                LogApi::info('退款回调业务接口失败OrderCleaning::getBusinessCleanCallback', $businessParam);
+                                $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款回调业务接口失败');
 							}
-                            LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback', $businessParam);
+
                             LogApi::info('退款回调业务接口OrderCleaning::getBusinessCleanCallback返回的结果', $success);
 							
                         }  else {
@@ -521,6 +523,7 @@ class PayController extends Controller
      */
     public function unFreezeClean(Request $request)
     {
+
         try{
 
             $input = file_get_contents("php://input");
@@ -584,8 +587,11 @@ class PayController extends Controller
                             ];
                             $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'],
                                 $businessParam['status'],$userinfo);
-                            if( !$success ){//
+                            if( !$success ){
+
                                 DB::rollBack();
+                                LogApi::info(__METHOD__.'押金解押回调业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $success]);
+                                $this->innerErrMsg('押金解押业务回调更新整体清算的状态失败');
                             }
 
                             LogApi::info('押金解押回调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam, $success]);
@@ -701,6 +707,8 @@ class PayController extends Controller
                                 $businessParam['status'],$userinfo);
                             if( !$success ){//
                                 DB::rollBack();
+                                LogApi::info('押金转支付回调业务业务失败参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
+                                $this->innerErrMsg('押金转支付回调业务业务失败');
                             }
                             LogApi::info('押金转支付回调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
                         }  else {
