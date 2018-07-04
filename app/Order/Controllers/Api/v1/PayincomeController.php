@@ -20,11 +20,7 @@ class PayincomeController extends Controller
     public function payIncomeWhere(){
         $list = [
             'create_time'       => "",  //日期范围
-            'business_type'     => [    //入账类型
-                1   => '下单支付',
-                2   => '分期代扣',
-                3   => '主动还款',
-            ],
+            'business_type'     =>  \App\Order\Modules\Inc\OrderStatus::getBusinessType(),             
             'appid'             => [    //入账渠道
                 1   => '生活号',
                 2   => '分期代扣',

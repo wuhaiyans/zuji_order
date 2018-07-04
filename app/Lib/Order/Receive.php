@@ -6,7 +6,7 @@
  */
 
 namespace App\Lib\Order;
-
+use App\Lib\Curl;
 /**
  * Class Delivery
  * 与收发货相关
@@ -19,7 +19,7 @@ class Receive
      * $business_key业务类型
      * @param $data
      *
-     * 收货系统 检测结果反馈
+     * 收货系统 检测结果反馈   //废弃
      *  $data = [
     [
     'refund_no' => '123',
@@ -47,7 +47,7 @@ class Receive
                 'appid'=> 1,
                 'version' => 1.0,
                 'method'=> 'api.Return.isQualified',//模拟
-                'data' => json_encode(['order'=>$order_no,'business_key'=>$business_key,'data'=>$data])
+                'data' => ['order'=>$order_no,'business_key'=>$business_key,'data'=>$data]
             ]);
             $res = json_decode($response);
             if ($res->code != 0) {
