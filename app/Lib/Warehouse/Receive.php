@@ -209,7 +209,6 @@ class Receive
 //            ];
             $result[] = $v;
         }
-		var_dump($result);exit;
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
                Giveback::confirmEvaluation($result);
