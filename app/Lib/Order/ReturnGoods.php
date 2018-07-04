@@ -40,7 +40,7 @@ class ReturnGoods
                 'appid'=> 1,
                 'version' => 1.0,
                 'method'=> 'api.Return.isQualified',//模拟
-                'params' => json_encode(['business_key'=>$business_key,'data'=>$data])
+                'params' => ['business_key'=>$business_key,'data'=>$data]
             ]);
             $res = json_decode($response);
             if ($res->code != 0) {

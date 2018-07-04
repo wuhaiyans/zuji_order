@@ -134,7 +134,7 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'=> 'required',
+            'refund_no'=> 'required',
             'remark'=> 'required',
             'status'=> 'required',
         ]);

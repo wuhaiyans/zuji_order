@@ -137,11 +137,14 @@ class LogApi {
 			$data = json_encode($data);
 		}
 		$traces = debug_backtrace();
+		$file = substr( $traces[1]['file'], strlen(app_path() ) );
+		$line = $traces[1]['line'];
+		$function = $traces[2]['function'];
 		$str = sprintf("%s\t%s:(%d):%s\t[%s]:\t%s\t%s\n", 
 				date('Y-m-d H:i:s'),
-				substr( $traces[1]['file'], strlen(app_path() ) ),
-				$traces[1]['line'],
-				$traces[2]['function'],
+				$file,
+				$line,
+				$function,
 				$level,
 				$msg,
 				trim($data));
@@ -160,6 +163,7 @@ class LogApi {
 				'user_id' => '',						// 用户ID
 				'serial_no' => self::_autoincrement(),	// 序号
 				'content' => $data,						// 内容
+				'trace' => $file.'('.$line.'):'.$function,// 位置信息
 			],
 		];
 		// Redis 发布
