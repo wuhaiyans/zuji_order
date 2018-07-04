@@ -5,6 +5,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -134,9 +135,12 @@ class ReceiveController extends Controller
         }
 
         try {
+            DB::beginTransaction();
             $this->receive->received($params['receive_no']);
             Receive::receive($params['receive_no']);
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
