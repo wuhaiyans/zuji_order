@@ -478,6 +478,9 @@ class ReceiveRepository
      */
     public static function checkReceive($params){
         $row = Receive::find($params['receive_no']);
+        if(!$row){
+            return false;
+        }
         $row->status = Receive::STATUS_FINISH;
         $row->status_time = $params['create_time'];
         $row->check_time = $params['create_time'];
@@ -490,6 +493,9 @@ class ReceiveRepository
      */
     public static function checkReceiveGoods($params){
         $row = ReceiveGoods::find($params['receive_no']);
+        if(!$row){
+            return false;
+        }
         $row->status = ReceiveGoods::STATUS_ALL_CHECK;
         $row->status_time = $params['create_time'];
         $row->check_time = $params['create_time'];
