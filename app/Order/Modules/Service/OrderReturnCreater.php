@@ -224,6 +224,10 @@ class OrderReturnCreater
                     return false;//取消发货失败
                 }
             }
+            //订单必须是不冻结状态
+            if($order_info['freeze_type'] != OrderFreezeStatus::Non){
+                return false;//订单正在操作中
+            }
             //代扣+预授权
             if($order_info['pay_type']==PayInc::WithhodingPay){
                 $data['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
