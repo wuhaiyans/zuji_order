@@ -473,4 +473,30 @@ class ReceiveRepository
         return $model->create($params);
     }
 
+    /**
+     * 检测完成修改收货单状态
+     */
+    public static function checkReceive($params){
+        $row = Receive::find($params['receive_no']);
+        $row->status = Receive::STATUS_FINISH;
+        $row->status_time = $params['create_time'];
+        $row->check_time = $params['create_time'];
+        $row->check_result = $params['check_result'];
+        $row->check_description = $params['check_description'];
+        return $row->update();
+    }
+    /**
+     * 检测完成修改收货单商品状态
+     */
+    public static function checkReceiveGoods($params){
+        $row = ReceiveGoods::find($params['receive_no']);
+        $row->status = ReceiveGoods::STATUS_ALL_CHECK;
+        $row->status_time = $params['create_time'];
+        $row->check_time = $params['create_time'];
+        $row->check_result = $params['check_result'];
+        $row->check_description = $params['check_description'];
+        $row->check_price = $params['compensate_amount'];
+        return $row->update();
+    }
+
 }

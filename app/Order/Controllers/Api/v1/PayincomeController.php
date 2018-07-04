@@ -131,11 +131,7 @@ class PayincomeController extends Controller
         }
 
         // 入账类型
-        $type = [
-            1 => "下单支付",
-            2 => "分期代扣",
-            3 => "主动还款",
-        ];
+        $type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
 
         // 入账方式
         $channel = [

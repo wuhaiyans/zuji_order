@@ -281,6 +281,12 @@ class ReceiveService
         if (!ReceiveRepository::checkItem($params)) {
             throw new \Exception( '检测单:'.$params['receive_no'].'添加失败');
         }
+        if (!ReceiveRepository::checkReceive($params)) {
+            throw new \Exception( '收货单'.$params['receive_no'].'检测修改失败');
+        }
+        if (!ReceiveRepository::checkReceiveGoods($params)) {
+            throw new \Exception( '收货清单:'.$params['receive_no'].'检测修改失败');
+        }
     }
 
     /**
