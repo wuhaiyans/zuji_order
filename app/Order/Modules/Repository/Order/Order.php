@@ -336,7 +336,7 @@ class Order {
      */
     public function returnClose( ):bool{
         //订单必须是冻结
-        if( $this->model->freeze_type ==0 ){
+        if( $this->model->freeze_type == 0 ){
             return false;
         }
         $this->model->freeze_type = OrderFreezeStatus::Non;

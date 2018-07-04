@@ -250,6 +250,7 @@ class ReceiveController extends Controller
         }
 
         try {
+            DB::beginTransaction();
             $params['create_time'] = time();
             $this->receive->checkItem($params);
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
@@ -262,8 +263,9 @@ class ReceiveController extends Controller
             ];
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
             Receive::checkItemsResult($items,$receive_row['business_key']);
-
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
