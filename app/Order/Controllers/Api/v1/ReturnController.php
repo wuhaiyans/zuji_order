@@ -392,6 +392,7 @@ class ReturnController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->all();
+        LogApi::debug("退货检测接受数据".$params);
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])
