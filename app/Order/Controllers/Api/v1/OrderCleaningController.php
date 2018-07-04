@@ -286,7 +286,7 @@ class OrderCleaningController extends Controller
                 return apiResponse([],$validateParams['code']);
             }
 
-            $res = OrderCleaning::orderCleanOperate($params['params']);
+            $res = OrderCleaning::orderCleanOperate($params);
 
             if ($res) return apiResponse($res,ApiStatus::CODE_0,"success");
             return apiResponse([],ApiStatus::CODE_31202);
