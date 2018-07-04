@@ -393,6 +393,7 @@ class ReturnController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->input();
+        LogApi::debug("检测接受参数",$params);
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])
@@ -404,9 +405,9 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->isQualified($params['params']['business_key'],$params['params']['data']);
         if(!$res){
-            return  apiResponse([],ApiStatus::CODE_33008);//修改检测结果失败
+            return  apiResponse([],ApiStatus::CODE_33008,"修改失败");//修改检测结果失败
         }
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse([],ApiStatus::CODE_0,'检测合格');
     }
 
     /**
