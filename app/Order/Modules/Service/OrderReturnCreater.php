@@ -537,7 +537,7 @@ class OrderReturnCreater
         DB::beginTransaction();
         try{
             //获取退款单信息
-            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo($param['refund_no']);
+            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($param['refund_no']);
             if(!$return){
                 return false;
             }
