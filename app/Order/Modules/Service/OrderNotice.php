@@ -107,7 +107,7 @@ class OrderNotice{
 			// 短信
 			$short_message = $this->getShortMessage( );
 			if( !$short_message ){
-				\App\Lib\Common\LogApi::error('订单短息模板不存在', [
+				\App\Lib\Common\LogApi::error('订单短新模板不存在', [
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,

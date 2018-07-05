@@ -2,6 +2,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Service\ReceiveService;
@@ -87,7 +88,7 @@ class ReceiveController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
-
+        LogApi::debug("创建收货参数",$params);
         try {
             $receiveNo = $this->receive->create($params);
         } catch (\Exception $e) {

@@ -133,7 +133,6 @@ class ReceiveRepository
             $model->create($da);
 
             $details = $data['receive_detail'];
-
             if (!is_array($details)) {
                 throw new \Exception("缺少相关参数");
             }
