@@ -357,7 +357,7 @@ class PayController extends Controller
 			if( $pay->isSuccess() ){// 已经支付成功
 				DB::rollBack();
 				echo json_encode([
-					'status' => 'error',
+					'status' => 'ok',
 					'msg' => 'fundauth notice repeated',
 				]);exit;
 			}
@@ -386,12 +386,14 @@ class PayController extends Controller
 			]);exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::type('data-error')::error('数据未找到',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'ok',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		} catch (\Exception $exc) {
+			LogApi::error('预授权通知处理异常',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'ok',
