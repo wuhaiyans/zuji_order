@@ -141,6 +141,7 @@ class ReceiveController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            return apiResponse(json_decode(json_encode($e),true), ApiStatus::CODE_60002, $e->getMessage());
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
