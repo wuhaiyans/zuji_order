@@ -35,7 +35,7 @@ class Delivery
     public static function receive($orderNo,$row)
     {
         try{
-            $base_api = config('tripartite.ORDER_API');
+            $base_api = config('ordersystem.ORDER_API');
             $params['order_no'] =$orderNo;
             $params['row'] =$row;
 
@@ -59,7 +59,7 @@ class Delivery
 
     public static function user_receive($params)
     {
-        $base_api = config('tripartite.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
@@ -101,7 +101,7 @@ class Delivery
      */
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo)
     {
-        $base_api = config('tripartite.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;

@@ -42,7 +42,7 @@ class Receive
      */
     public static function checkResult($order_no, $business_key,$data)
     {
-        $base_api = config('tripartitle.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,

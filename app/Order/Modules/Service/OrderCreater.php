@@ -131,7 +131,7 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("tripartite.ORDER_API"), [
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API"), [
             'method' => 'api.inner.miniCancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],
@@ -223,7 +223,7 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列（小程序取消订单队列）
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("tripartite.ORDER_API"), [
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API"), [
                 'method' => 'api.inner.cancelOrder',
 //                'order_no'=>$data['order_no'],
 //                'user_id'=>$data['user_id'],
