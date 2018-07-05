@@ -48,6 +48,7 @@ class ReturnApply implements ShortMessage {
         LogApi::debug("短信查询订单",$orderInfo);
 		// 短息模板
 		$code = $this->getCode($orderInfo['channel_id']);
+        LogApi::debug("短息模板",$code);
 		if( !$code ){
 			return false;
 		}
