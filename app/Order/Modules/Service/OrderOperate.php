@@ -359,9 +359,11 @@ class OrderOperate
             }
             $b =$order->sign();
             if(!$b){
+                LogApi::info("订单确认收货",[]);
                 DB::rollBack();
                 return false;
             }
+
 
             $orderInfo = $order->getData();
 
