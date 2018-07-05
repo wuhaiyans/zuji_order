@@ -1683,6 +1683,7 @@ class OrderReturnCreater
             if($order_info['order_status'] == OrderStatus::OrderClosedRefunded){
                return true;
             }
+
             //查询此订单的商品
             $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
             if(!$goodInfo){
@@ -1721,7 +1722,7 @@ class OrderReturnCreater
                         break;
                     }
                 }
-                if($status==true){
+                if($status=true){
                     //解冻订单并关闭订单
                     $updateOrder=$order->refundFinish();
                     if(!$updateOrder){
@@ -1764,15 +1765,15 @@ class OrderReturnCreater
             if($order_info['pay_type'] == PayInc::WithhodingPay){
                 //查询是否签约代扣 如果签约 解除代扣
                 try{
-                    $withhold = WithholdQuery::getByBusinessNo($params['business_type'],$order_info['order_no']);
+                    $withhold = WithholdQuery::getByBusinessNo(OrderStatus::BUSINESS_ZUJI,$order_info['order_no']);
                     $param =[
-                        'business_type' =>$params['business_type'],  // 【必须】int    业务类型
+                        'business_type' =>OrderStatus::BUSINESS_ZUJI,  // 【必须】int    业务类型
                         'business_no'  =>$order_info['order_no'],  // 【必须】string  业务编码
                     ];
                     $b =$withhold->unbind($param);
                     if(!$b){
-                        DB::rollBack();
-                        return ApiStatus::CODE_31008;
+                       // DB::rollBack();
+                        return false;
                     }
 
                 }catch (\Exception $e){

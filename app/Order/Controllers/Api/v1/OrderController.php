@@ -532,7 +532,7 @@ class OrderController extends Controller
 
         $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_30012);
+            return apiResponse([],ApiStatus::CODE_30012,get_msg());
         }
         return apiResponse([],ApiStatus::CODE_0);
     }

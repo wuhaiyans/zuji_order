@@ -348,18 +348,20 @@ class OrderOperate
         $orderNo =$params['order_no'];
         $remark = isset($params['remark'])?$params['remark']:'';
 
-        if(empty($orderNo)){return false;}
+        if(empty($orderNo)){set_msg("参数错误");return false;}
         DB::beginTransaction();
         try{
             //更新订单状态
             $order = Order::getByNo($orderNo);
             if(!$order){
                 DB::rollBack();
+                set_msg("订单查询失败");
                 return false;
             }
             $b =$order->sign();
             if(!$b){
                 DB::rollBack();
+                set_msg("更新订单状态失败");
                 return false;
             }
 
@@ -376,6 +378,7 @@ class OrderOperate
                 $b =$goods->updateGoodsServiceTime($goodsData);
                 if(!$b){
                     DB::rollBack();
+                    set_msg("更新商品周期失败");
                     return false;
                 }
                 //增加商品租期表
@@ -391,6 +394,7 @@ class OrderOperate
                 $b =ServicePeriod::createService($unitData);
                 if(!$b){
                     DB::rollBack();
+                    set_msg("生成周期表失败");
                     return false;
                 }
             }
@@ -398,6 +402,7 @@ class OrderOperate
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
             if(!$b){
                 DB::rollBack();
+                set_msg("通知收发货系统失败");
                 return false;
             }
 
@@ -426,24 +431,35 @@ class OrderOperate
             $b =Delivery::orderReceive($params);
             if(!$b){
                 DB::rollBack();
+                set_msg("通知收发货系统失败");
                 return false;
             }
 
-            DB::commit();
+           // DB::commit();
             //签收后发送短信
             if($orderInfo['zuqi_type'] ==1){
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
-                $orderNoticeObj->notify();
+                $b =$orderNoticeObj->notify();
+                if(!$b){
+                    DB::rollBack();
+                    set_msg("短信发送失败");
+                    return false;
+                }
             }else{
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
-                $orderNoticeObj->notify();
+                $b =$orderNoticeObj->notify();
+                if(!$b){
+                    DB::rollBack();
+                    set_msg("短信发送失败");
+                    return false;
+                }
             }
-            
+            DB::rollBack();
             return true;
         }catch (\Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
-            die;
+            set_msg(json_encode($exc));
+            return false;
 
         }
 

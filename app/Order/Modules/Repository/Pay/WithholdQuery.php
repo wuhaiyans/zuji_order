@@ -66,13 +66,17 @@ class WithholdQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getByBusinessNo( int $bu_type, string $bu_no ){
-
-		$info = \App\Order\Models\OrderPayWithholdBusinessModel::where([
+	    $where[]=['business_type','=',$bu_type];
+        $where[]=['business_no','=',$bu_no];
+        $where[]=['bind_time','>',0];
+        $where[]=['unbind_time','=',0];
+        $info = \App\Order\Models\OrderPayWithholdBusinessModel::where($where)->first();
+		/*$info = \App\Order\Models\OrderPayWithholdBusinessModel::where([
 			'business_type'	=> $bu_type,
 			'business_no'	=> $bu_no,
 			'bind_time'		=> ['>',0],
 			'unbind_time'	=> 0,
-		])->first();
+		])->first();*/
 		if( $info ){
 			return self::getByWithholdNo( $info->withhold_no );
 		}
