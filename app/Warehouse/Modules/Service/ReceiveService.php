@@ -181,12 +181,17 @@ class ReceiveService
     public function received($receive_no)
     {
         if (!ReceiveRepository::received($receive_no)) {
+
+            return false;
             throw new \Exception($receive_no . '号收货单签收失败');
         }
+
         //IMEI入库
         if (!ImeiRepository::updateStatus($receive_no)) {
+            return false;
             throw new \Exception($receive_no . 'IMEI入库状态修改失败');
         }
+        return true;
     }
 
     /**

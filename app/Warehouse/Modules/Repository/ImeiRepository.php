@@ -123,12 +123,22 @@ class ImeiRepository
         $model = Receive::find($receive_no);
         //目前是一个收货单对应一个商品一个IMEI
         $imei = $model->imeis;
+
         if(!$imei) {
             return false;
         }
-        $imei->status = Imei::STATUS_IN;
-        $imei->update_time = time();
-        return $imei->update();
+        foreach($imei as $imeModel) {
+
+            $imeModel->status = Imei::STATUS_IN;
+            if (!$imeModel->update()){
+
+                return false;
+            }
+
+        }
+
+        return true;
+
     }
 
 }
