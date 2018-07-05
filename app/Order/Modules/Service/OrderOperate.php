@@ -425,7 +425,6 @@ class OrderOperate
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
             if(!$b){
-                LogApi::info("收发货系统确认收货失败");
                 DB::rollBack();
                 return false;
             }
