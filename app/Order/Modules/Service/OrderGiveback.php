@@ -306,53 +306,45 @@ class OrderGiveback
 		}
 		
 		//创建服务层对象
-		$orderGoodsService = new OrderGoods();
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单信息
 		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivevbackInfo ) {
+		if( !$orderGivevbackInfo ) {			
+			set_msg('还机单信息获取失败');
 			return false;
 		}
 		
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
-//		//开启事务
-//		DB::beginTransaction();
 		try{
 			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
 			]);
 			if( !$orderGivebackResult ){
-//				//事务回滚
-//				DB::rollBack();
+				set_msg('还机单状态更新失败');
 				return false;
 			}
 			//解冻订单
 			if(!self::__unfreeze($params['business_no'])){
 				return false;
 			}
-//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_DONE]);
-			
 			//更新商品表状态
 			$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
 			if( !$orderGoods ){
+				set_msg('商品仓库获取失败');
 				return false;
 			}
 			$orderGoodsResult = $orderGoods->givebackFinish();
 			if( !$orderGoodsResult ){
-//				//事务回滚
-//				DB::rollBack();
+				set_msg('商品仓库更新状态失败');
 				return false;
 			}
 		} catch (\Exception $ex) {
-//			//事务回滚
-//			DB::rollBack();
+			set_msg($ex->getMessage());
 			return false;
 		}
-//		//事务提交
-//		DB::commit();
 		return true;
 	}
 	
@@ -378,7 +370,10 @@ class OrderGiveback
 			return false;
 		}
 		//创建服务层对象
-		$orderGoodsService = new OrderGoods();
+		$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
+		if( !$orderGoods ){
+			return false;
+		}
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单信息
 		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
@@ -386,7 +381,7 @@ class OrderGiveback
 			return false;
 		}
 		//获取商品信息
-		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($orderGivevbackInfo['goods_no']);
+		$orderGoodsInfo = $orderGoods->getData();
 		if( !$orderGoodsInfo ) {
 			return false;
 		}
@@ -453,20 +448,11 @@ class OrderGiveback
 			
 			//更新商品表状态
 			if( $status == OrderGivebackStatus::STATUS_DEAL_DONE ){
-				$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
-				if( !$orderGoods ){
-					return false;
-				}
 				$orderGoodsResult = $orderGoods->givebackFinish();
 				if(!$orderGoodsResult){
 					return false;
 				}
 			}
-//			//同步到商品状态
-//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$orderGivevbackInfo['goods_no']], ['goods_status'=> $status]);
-//			if( !$orderGoodsResult ){
-//				return false;
-//			}
 		} catch (\Exception $ex) {
 			return false;
 		}
@@ -478,7 +464,7 @@ class OrderGiveback
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
 		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($givebackNo);
 		if( count($givebackUnfinshedList) != 1 ){
-				return false;
+			return true;
 		} 
 		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($givebackNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if( !$orderFreezeResult ){
