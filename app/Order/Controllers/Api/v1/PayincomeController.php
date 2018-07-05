@@ -126,7 +126,7 @@ class PayincomeController extends Controller
         $type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
 
         // 入账方式
-        $channel = \App\Order\Modules\Repository\Pay\Channel::getChannelType();
+        $channel = \App\Order\Modules\Repository\Pay\Channel::getBusinessType();
 
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
