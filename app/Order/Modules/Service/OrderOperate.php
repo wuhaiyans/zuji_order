@@ -442,7 +442,7 @@ class OrderOperate
                 $b =$orderNoticeObj->notify();
                 if(!$b){
                     DB::rollBack();
-                    set_msg("通知收发货系统失败");
+                    set_msg("短信发送失败");
                     return false;
                 }
             }else{
@@ -450,7 +450,7 @@ class OrderOperate
                 $b =$orderNoticeObj->notify();
                 if(!$b){
                     DB::rollBack();
-                    set_msg("通知收发货系统失败");
+                    set_msg("短信发送失败");
                     return false;
                 }
             }
@@ -458,7 +458,7 @@ class OrderOperate
             return true;
         }catch (\Exception $exc){
             DB::rollBack();
-            set_msg($exc->getMessage());
+            set_msg(json_encode($exc));
             return false;
 
         }
