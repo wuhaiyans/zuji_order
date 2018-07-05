@@ -116,7 +116,7 @@ class OrderCleaning
     {
 
         $success= OrderClearingRepository::upOrderCleanStatus($param);
-        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_CODE_31202;
+        return $success  ?   ApiStatus::CODE_0 : ApiStatus::CODE_31202;
 
 
     }
