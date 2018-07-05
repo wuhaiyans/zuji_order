@@ -21,6 +21,19 @@ class Channel {
 	 * 京东支付
 	 */
 	const Jdpay = 3;
-	
-	
+
+
+	/**
+	 * 订单入账方式
+	 * @return array
+	 */
+	public static function getBusinessType(){
+		return [
+			self::Unionpay 	=> '银联',
+			self::Alipay 	=> '支付宝',
+			self::Jdpay 	=> '京东支付',
+		];
+	}
+
+
 }

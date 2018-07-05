@@ -1263,6 +1263,7 @@ class OrderReturnCreater
             $yes_list=[];
             //检测不合格的状态
             $no_list=[];
+            LogApi::debug("service接收检测参数",$data);
             foreach($data as $k=>$v){
                 $order_no='';
                 //获取退货单信息
@@ -1271,6 +1272,7 @@ class OrderReturnCreater
                     return false;
                 }
                 $return_info=$return->getData();
+                LogApi::debug("获取退货单信息",$return_info);
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
@@ -1284,9 +1286,11 @@ class OrderReturnCreater
                     return false;
                 }
                 $goods_info=$goods->getData();
+                LogApi::debug("获取商品信息",$goods_info);
                 $params['evaluation_remark'] = $v['evaluation_remark'];
                 $params['evaluation_amount'] =$v['compensate_amount'];
                 $params['evaluation_time'] =$v['evaluation_time'];
+                LogApi::debug("参数",$params);
                 if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
                     $order_no=$return_info['order_no'];//订单编号
@@ -1309,6 +1313,7 @@ class OrderReturnCreater
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
                         $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                         $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                        LogApi::debug("创建清单数据",$create_data);
                         //退款：直接支付
                         if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
                             if($goods_info['yajin'] >0){
@@ -1394,6 +1399,7 @@ class OrderReturnCreater
                     return false;
                 }
                 $goodsStatus[$k]=$goodsInfo->getData();
+                LogApi::debug("获取最新状态商品信息",$goodsStatus);
             }
             if($business_key==OrderStatus::BUSINESS_BARTER){
                 //获取此订单的商品是否还有处理中的设备，没有则解冻
@@ -1458,7 +1464,7 @@ class OrderReturnCreater
 
             return true;
         }catch( \Exception $exc){
-            throw new \Exception( $exc->getMessage());
+             throw new \Exception( $exc->getMessage());
         }
 
 

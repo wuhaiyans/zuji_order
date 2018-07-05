@@ -20,17 +20,9 @@ class PayincomeController extends Controller
     public function payIncomeWhere(){
         $list = [
             'create_time'       => "",  //日期范围
-            'business_type'     =>  \App\Order\Modules\Inc\OrderStatus::getBusinessType(),             
-            'appid'             => [    //入账渠道
-                1   => '生活号',
-                2   => '分期代扣',
-                3   => '主动还款',
-            ],
-            'channel'           => [    //入账方式
-                1   => '银联',
-                2   => '支付宝',
-                3   => '京东支付',
-            ],
+            'business_type'     => \App\Order\Modules\Inc\OrderStatus::getBusinessType(),
+            'appid'             => \App\Order\Modules\Inc\OrderPayIncomeStatus::getBusinessType(),
+            'channel'           => \App\Order\Modules\Repository\Pay\Channel::getBusinessType(),
             'amount'            => "",  //金额范围
         ];
 
@@ -134,11 +126,8 @@ class PayincomeController extends Controller
         $type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
 
         // 入账方式
-        $channel = [
-            1 => "银联",
-            2 => "支付宝",
-            3 => "京东支付",
-        ];
+        $channel = \App\Order\Modules\Repository\Pay\Channel::getBusinessType();
+
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
         // 入账类型
