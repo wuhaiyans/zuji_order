@@ -850,7 +850,10 @@ class PayController extends Controller
 			if( $b ){
 				// 提交事务
 				DB::commit();
-				echo '{"status":"ok"}';exit;
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => "代扣扣款通知处理成功",
+				]);exit;
 
 			}else{
 				// 提交事务
