@@ -523,12 +523,12 @@ class PayController extends Controller
      */
     public function unFreezeClean(Request $request)
     {
-
         try{
 
             $input = file_get_contents("php://input");
             LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
+
             $rule = [
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
@@ -542,9 +542,12 @@ class PayController extends Controller
 
             // 开启事务
             DB::beginTransaction();
-            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
+//            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
+
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>'CA70407132618675']);
 
             if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
+                echo 2344;exit;
                 LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 $this->innerErrMsg('订单清算记录不存在');
 				exit;

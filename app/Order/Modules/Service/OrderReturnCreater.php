@@ -1805,7 +1805,7 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
+                        $success =\App\Order\Modules\Repository\Order\Instalment::close($returnData);
                         if (!$success) {
                             LogApi::debug("关闭商品分期失败");
                            // DB::rollBack();
@@ -1819,7 +1819,8 @@ class OrderReturnCreater
                 //查询订单的状态
                 $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
                 if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                    $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
+                    $orderParams['order_no']=$return_info['order_no'];
+                    $success =\App\Order\Modules\Repository\Order\Instalment::close($orderParams);
                     if (!$success) {
                         LogApi::debug("关闭订单分期失败");
                       //  DB::rollBack();
