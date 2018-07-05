@@ -327,7 +327,7 @@ class OrderGiveback
 				return false;
 			}
 			//解冻订单
-			if(!self::__unfreeze($params['business_no'])){
+			if(!self::__unfreeze($orderGivevbackInfo['order_no'])){
 				return false;
 			}
 			//更新商品表状态
@@ -403,7 +403,7 @@ class OrderGiveback
 				]);
 				
 				//解冻订单
-				if(!self::__unfreeze($params['business_no'])){
+				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
 					return false;
 				}
 				//需要记录清算，清算数据为空即可
@@ -458,15 +458,15 @@ class OrderGiveback
 		}
 		return true;
 	}
-	public static function __unfreeze($givebackNo) {
+	public static function __unfreeze($orderNo) {
 		$orderGivebackService = new OrderGiveback();
 		//解冻订单
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($givebackNo);
+		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderNo);
 		if( count($givebackUnfinshedList) != 1 ){
 			return true;
 		} 
-		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($givebackNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
+		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if( !$orderFreezeResult ){
 			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
 			return false;
