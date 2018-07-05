@@ -359,87 +359,85 @@ class OrderOperate
             }
             $b =$order->sign();
             if(!$b){
-                LogApi::info("订单确认收货",[]);
                 DB::rollBack();
                 return false;
             }
 
-
             $orderInfo = $order->getData();
 
-//            //查询订单 如果是长租 生成租期周期表 更新商品表
-//            if($orderInfo['zuqi_type'] ==2){
-//                //查询商品信息
-//                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
-//                //更新商品表
-//                $goodsData['begin_time'] = time();
-//                $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[0]['zuqi']);
-//                $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[0]['goods_no']);
-//                $b =$goods->updateGoodsServiceTime($goodsData);
-//                if(!$b){
-//                    DB::rollBack();
-//                    return false;
-//                }
-//                //增加商品租期表
-//                $unitData =[
-//                    'order_no'=>$orderNo,
-//                    'goods_no'=>$goodsInfo[0]['goods_no'],
-//                    'user_id'=>$orderInfo['user_id'],
-//                    'unit'=>2,
-//                    'unit_value'=>$goodsInfo[0]['zuqi'],
-//                    'begin_time'=>$goodsData['begin_time'],
-//                    'end_time'=>$goodsData['end_time'],
-//                ];
-//                $b =ServicePeriod::createService($unitData);
-//                if(!$b){
-//                    DB::rollBack();
-//                    return false;
-//                }
-//            }
-//            //更新订单商品的状态
-//            $b = OrderGoodsRepository::setGoodsInService($orderNo);
-//            if(!$b){
-//                DB::rollBack();
-//                return false;
-//            }
-//
-//            if($system==1){
-//                $remark="系统自动执行任务";
-//                $userId =1;
-//                $userName ="系统";
-//                $userType =\App\Lib\PublicInc::Type_System;
-//            }else{
-//                $userInfo =$params['userinfo'];
-//                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
-//                $userId =$userInfo['uid'];
-//                $userName =$userInfo['username'];
-//            }
-//            //插入操作日志
-//            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
-//
-//            $params=[
-//                'order_no'=>$orderNo,//
-//                'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
-//                'user_id'=>$userId,//
-//                'user_name'=>$userName,//
-//            ];
+            //查询订单 如果是长租 生成租期周期表 更新商品表
+            if($orderInfo['zuqi_type'] ==2){
+                //查询商品信息
+                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
+                //更新商品表
+                $goodsData['begin_time'] = time();
+                $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[0]['zuqi']);
+                $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[0]['goods_no']);
+                $b =$goods->updateGoodsServiceTime($goodsData);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+                //增加商品租期表
+                $unitData =[
+                    'order_no'=>$orderNo,
+                    'goods_no'=>$goodsInfo[0]['goods_no'],
+                    'user_id'=>$orderInfo['user_id'],
+                    'unit'=>2,
+                    'unit_value'=>$goodsInfo[0]['zuqi'],
+                    'begin_time'=>$goodsData['begin_time'],
+                    'end_time'=>$goodsData['end_time'],
+                ];
+                $b =ServicePeriod::createService($unitData);
+                if(!$b){
+                    DB::rollBack();
+                    return false;
+                }
+            }
+            //更新订单商品的状态
+            $b = OrderGoodsRepository::setGoodsInService($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
+
+            if($system==1){
+                $remark="系统自动执行任务";
+                $userId =1;
+                $userName ="系统";
+                $userType =\App\Lib\PublicInc::Type_System;
+            }else{
+                $userInfo =$params['userinfo'];
+                $userType =$userInfo['type']==1?\App\Lib\PublicInc::Type_User:\App\Lib\PublicInc::Type_Admin;
+                $userId =$userInfo['uid'];
+                $userName =$userInfo['username'];
+            }
+            //插入操作日志
+            OrderLogRepository::add($userId,$userName,$userType,$orderNo,"确认收货",$remark);
+
+            $params=[
+                'order_no'=>$orderNo,//
+                'receive_type'=>$userType,//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+                'user_id'=>$userId,//
+                'user_name'=>$userName,//
+            ];
 
             //通知给收发货系统
-//            $b =Delivery::orderReceive($params);
-//            if(!$b){
-//                DB::rollBack();
-//                return false;
-//            }
+            $b =Delivery::orderReceive($params);
+            if(!$b){
+                DB::rollBack();
+                return false;
+            }
 
             DB::commit();
             //签收后发送短信
-//            if($orderInfo['zuqi_type'] ==1){
-//                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
-//                $orderNoticeObj->notify();
-//            }else{
-//                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
-//                $orderNoticeObj->notify();
-//            }
+            if($orderInfo['zuqi_type'] ==1){
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
+                $orderNoticeObj->notify();
+            }else{
+                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
+                $orderNoticeObj->notify();
+            }
             
             return true;
         }catch (\Exception $exc){
