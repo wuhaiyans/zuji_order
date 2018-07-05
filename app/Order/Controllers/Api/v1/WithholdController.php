@@ -100,7 +100,7 @@ class WithholdController extends Controller
         $userId         = $params['params']['user_id'];
         $channel        = $params['params']['channel'];
         // 用户验证
-        if($uid != $instalmentInfo['user_id']){
+        if($uid != $userId){
             return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
         }
         try{
