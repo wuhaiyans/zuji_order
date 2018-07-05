@@ -1109,7 +1109,7 @@ class OrderOperate
 
                    //查询是否有提前还款操作
                    $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
-                   if ($aheadInfo) {
+                   if ($aheadInfo && $values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
                        $goodsList[$keys]['act_goods_state']['ahead_buyout'] = true;
                    }
                    //查询是否有还机去支付
