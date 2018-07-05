@@ -423,11 +423,11 @@ class OrderOperate
             ];
 
             //通知给收发货系统
-            $b =Delivery::orderReceive($params);
-            if(!$b){
-                DB::rollBack();
-                return false;
-            }
+//            $b =Delivery::orderReceive($params);
+//            if(!$b){
+//                DB::rollBack();
+//                return false;
+//            }
 
             DB::commit();
             //签收后发送短信
