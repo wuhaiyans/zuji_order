@@ -238,8 +238,13 @@ class SkuComponnet implements OrderCreater
             $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
             $this->orderYajin =$deposit_yajin;
             $amount_after_discount =$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount;
+            if($amount_after_discount <0){
+                $amount_after_discount =0.00;
+            }
+
             $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
+
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
                     'spu_id' => intval($skuInfo['spu_id']),
@@ -278,7 +283,7 @@ class SkuComponnet implements OrderCreater
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?$this->deposit[$skuInfo['sku_id']]['mianyajin']:0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
                     'deposit_yajin' => $deposit_yajin,
-                    'amount_after_discount'=>$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount,
+                    'amount_after_discount'=>$amount_after_discount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
             ];
