@@ -36,37 +36,43 @@ class RefundSuccess implements ShortMessage {
             return false;
         }
        $returnInfo=$return->getData();
-
+        LogApi::debug("短信获取退货单信息",$returnInfo);
 		// 查询订单
         $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
         if( !$order ){
             return false;
         }
         $orderInfo=$order->getData();
-
+        LogApi::debug("短信查询订单",$orderInfo);
 		// 短息模板
 		$code = $this->getCode($orderInfo['channel_id']);
 		if( !$code ){
 			return false;
 		}
+        LogApi::debug("短息模板",$code);
 		//获取商品信息
-        $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo['goods_no']);
+        $goods = OrderRepository::getGoodsListByOrderId($orderInfo['order_no']);
         if(!$goods){
             return false;
         }
-		$goodsInfo=$goods->getData();
+        LogApi::debug("短信获取商品信息",$goods);
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
         //获取用户认证信息
-        $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
+        $userInfo=OrderRepository::getUserCertified($orderInfo['order_no']);
         if(!$userInfo){
             return false;
         }
+        LogApi::debug("获取用户认证信息",$userInfo);
         // 发送短息
         $res=\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName' => $userInfo['realname'],
-            'orderNo' => $goodsInfo['order_no'],
-            'goodsName' => $goodsInfo['goods_name'],
+            'orderNo' => $orderInfo['order_no'],
+            'goodsName' => $goodsName,
             'serviceTel'=>config('tripartite.Customer_Service_Phone'),
-        ],$goodsInfo['order_no']);
+        ],$orderInfo['order_no']);
         return $res;
 	}
 

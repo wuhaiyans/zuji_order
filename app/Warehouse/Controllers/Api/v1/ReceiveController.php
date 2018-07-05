@@ -88,7 +88,7 @@ class ReceiveController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
-        LogApi::debug("创建收货参数",$params);
+        LogApi::debug("创建收货单参数",$params);
         try {
             $receiveNo = $this->receive->create($params);
         } catch (\Exception $e) {
