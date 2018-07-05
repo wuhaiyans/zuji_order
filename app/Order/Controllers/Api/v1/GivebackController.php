@@ -477,7 +477,7 @@ class GivebackController extends Controller
 		DB::commit();
 
 //		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
-		return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
+		return apiResponse([], ApiStatus::CODE_0, '检测结果同步成功');
 	}
 
 	/**
