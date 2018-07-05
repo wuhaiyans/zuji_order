@@ -601,7 +601,6 @@ class PayController extends Controller
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>'CA70407132618675']);
 
             if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
-                echo 2344;exit;
                 LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 $this->innerErrMsg('订单清算记录不存在');
 				exit;

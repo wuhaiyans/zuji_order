@@ -138,14 +138,7 @@ class OrderCreater
             'user_id'=>$data['user_id'],
             'time' => time(),
         ],time()+7200,"");
-            if(!$b){
-                LogApi::debug("下单取消队列添加失败",[
-                    'method' => 'api.inner.cancelOrder',
-                    'order_no'=>$orderNo,
-                    'user_id'=>$data['user_id'],
-                    'time' => time(),
-                ]);
-        }
+
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 			
             return $result;
