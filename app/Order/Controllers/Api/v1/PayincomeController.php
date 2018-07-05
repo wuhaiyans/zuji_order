@@ -26,11 +26,7 @@ class PayincomeController extends Controller
                 2   => '分期代扣',
                 3   => '主动还款',
             ],
-            'channel'           => [    //入账方式
-                1   => '银联',
-                2   => '支付宝',
-                3   => '京东支付',
-            ],
+            'channel'           => \App\Order\Modules\Repository\Pay\Channel::getChannelType(),
             'amount'            => "",  //金额范围
         ];
 
