@@ -467,6 +467,7 @@ class OrderReturnCreater
                        // 'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
                     ];
                 }
+                LogApi::debug("创建收货单参数",$user_data);
                 $create_receive = Receive::create($order,$type,$receive_data,$user_data);//创建待收货单
                 if(!$create_receive){
                     //事务回滚
