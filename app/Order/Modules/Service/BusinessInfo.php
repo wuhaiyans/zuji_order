@@ -167,9 +167,74 @@ class BusinessInfo
     public  static function getStateFlow(){
         // 业务状态
         return [
-                'stateFlow'  => [
+                'returnStateFlow'  => [    //退货状态流
 
                  [
+                        'status' => 'A',
+                        'name' => '退货申请',
+                    ],
+                    [
+                        'status' => 'B',
+                        'name' => '退货审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '退货检测',
+                    ],
+                    [
+                        'status' => 'D',
+                        'name' => '退货完成',
+                    ]
+                 ],
+                'barterStateFlow'  => [        //换货状态流
+
+                [
+                    'status' => 'A',
+                    'name' => '换货申请',
+                ],
+                [
+                    'status' => 'B',
+                    'name' => '换货审核',
+                ],
+                [
+                    'status' => 'C',
+                    'name' => '换货检测',
+                ],
+                [
+                    'status' => 'D',
+                    'name' => '换货完成',
+                ]
+                ],
+                'returnCancelStateFlow'  => [     //退货取消状态流
+                    [
+                        'status' => 'A',
+                        'name' => '退货申请',
+                    ],
+                    [
+                        'status' => 'B',
+                        'name' => '退货审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '退货取消',
+                    ],
+                ],
+                'barterCancelStateFlow'  => [     //h换货取消状态流
+                    [
+                        'status' => 'A',
+                        'name' => '换货申请',
+                    ],
+                    [
+                        'status' => 'B',
+                        'name' => '换货审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '换货取消',
+                    ],
+                ],
+                'returnDeniedStateFlow'  => [   //退货拒绝状态流
+                    [
                         'status' => 'A',
                         'name' => '申请',
                     ],
@@ -179,28 +244,14 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'C',
-                        'name' => '检测',
+                        'name' => '拒绝',
                     ],
                     [
                         'status' => 'D',
                         'name' => '完成',
-                    ]
-                 ],
-                'cancelStateFlow'  => [
-                    [
-                        'status' => 'A',
-                        'name' => '申请',
-                    ],
-                    [
-                        'status' => 'B',
-                        'name' => '审核',
-                    ],
-                    [
-                        'status' => 'C',
-                        'name' => '取消',
                     ],
                 ],
-                'deniedStateFlow'  => [
+                'barterDeniedStateFlow'  => [           //换货拒绝状态流
                     [
                         'status' => 'A',
                         'name' => '申请',

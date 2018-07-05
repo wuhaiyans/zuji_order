@@ -501,7 +501,7 @@ class PayController extends Controller
 
                 //更新订单清算退款状态
                 $orderParam = [
-                    'clean_no' => $param['out_refund_no'],
+                    'clean_no' => $orderCleanInfo['clean_no'],
                     'out_refund_no'     => $param['refund_no'],
                     'refund_status' => OrderCleaningStatus::refundPayd, // 已退款
                 ];
@@ -512,7 +512,7 @@ class PayController extends Controller
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                         $orderParam = [
-                            'clean_no' => $param['out_refund_no'],
+                            'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
                         $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -618,7 +618,7 @@ class PayController extends Controller
 
                 //更新订单退押金状态
                 $orderParam = [
-                    'clean_no' => $param['out_trade_no'],
+                    'clean_no' => $orderCleanInfo['clean_no'],
                     'out_unfreeze_trade_no'     => $param['trade_no'],
                     'auth_unfreeze_status' => OrderCleaningStatus::depositUnfreezeStatusPayd
                 ];
@@ -630,7 +630,7 @@ class PayController extends Controller
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed){
                         $orderParam = [
-                            'clean_no' => $param['out_trade_no'],
+                            'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
                         $success = OrderCleaning::upOrderCleanStatus($orderParam);
@@ -733,7 +733,7 @@ class PayController extends Controller
 
                 //更新订单清算退款状态
                 $orderParam = [
-                    'clean_no' => $param['out_trade_no'],
+                    'clean_no' => $orderCleanInfo['clean_no'],
                     'out_unfreeze_pay_trade_no'     => $param['trade_no'],
                     'auth_deduction_status' => OrderCleaningStatus::depositDeductionStatusPayd
                 ];
@@ -747,7 +747,7 @@ class PayController extends Controller
                     if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
                         $orderParam = [
-                            'clean_no' => $param['out_trade_no'],
+                            'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
                         $success = OrderCleaning::upOrderCleanStatus($orderParam);
