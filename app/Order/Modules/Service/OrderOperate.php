@@ -790,7 +790,7 @@ class OrderOperate
         //碎屏意外险
         $orderData['order_insurance_amount']  =   $orderData['order_insurance'];
         //授权总金额
-        $orderData['zujin_amount']  =   $orderData['order_yajin'];
+        $orderData['yajin_amount']  =   $orderData['order_yajin'];
 
         $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
 
