@@ -17,5 +17,16 @@ class OrderPayIncomeStatus{
     const REPAYMENT = 3;
 
 
+    /**
+     * 入账渠道
+     * @return array
+     */
+    public static function getBusinessType(){
+        return [
+            self::ORDERPAY 	    => '下单支付',
+            self::WITHHOLD 	    => '分期代扣',
+            self::REPAYMENT 	=> '主动还款',
+        ];
+    }
 }
 

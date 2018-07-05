@@ -27,7 +27,7 @@ class Channel {
 	 * 订单入账方式
 	 * @return array
 	 */
-	public static function getChannelType(){
+	public static function getBusinessType(){
 		return [
 			self::Unionpay 	=> '银联',
 			self::Alipay 	=> '支付宝',
