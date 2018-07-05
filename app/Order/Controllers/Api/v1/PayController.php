@@ -240,7 +240,7 @@ class PayController extends Controller
 			}
 			
 			// 判断是否需要支付
-			if( $pay->withholdIsSuccess() ){
+			if( !$pay->needWithhold() ){
 				echo json_encode([
 					'status' => 'ok',
 					'msg' => 'withhold notice repeated',
