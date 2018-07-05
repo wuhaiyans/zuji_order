@@ -55,6 +55,7 @@ class Receive extends Warehouse
         'logistics_id',
         'logistics_no',
         'type',
+        'business_key',
         'customer',
         'customer_mobile',
         'customer_address',
