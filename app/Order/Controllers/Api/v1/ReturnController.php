@@ -394,7 +394,6 @@ class ReturnController extends Controller
         //-+--------------------------------------------------------------------
         $params = $request->input();
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
-        LogApi::debug("接收检测参数",$paramsArr);
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])
                 || empty($param['evaluation_status'])
