@@ -400,7 +400,7 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            
+
             if($system==1){
                 $remark="系统自动执行任务";
                 $userId =1;
@@ -425,7 +425,6 @@ class OrderOperate
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
             if(!$b){
-                LogApi::info("收发货系统确认收货失败");
                 DB::rollBack();
                 return false;
             }
