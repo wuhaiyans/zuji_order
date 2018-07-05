@@ -320,15 +320,23 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
 		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
 		}
 		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data not array',
+			]);exit;
 		}
 		
+		// 提交事务
+		DB::beginTransaction();
 		try {
 			
-			// 查询本地支付单
+			// 查询本地预授权的支付单
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByFundauthNo( $params['out_fundauth_no'] );
 						
 			// 校验状态
@@ -339,20 +347,29 @@ class PayController extends Controller
 			]);
 			// 状态
 			if( $status_info['status'] != 'success' ){// 未授权
-				echo 'fundauth status not success';exit;
+				DB::rollBack();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'fundauth status not success',
+				]);exit;
 			}
 			
 			if( $pay->isSuccess() ){// 已经支付成功
-				echo 'fundauth notice repeated ';exit;
+				DB::rollBack();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'fundauth notice repeated',
+				]);exit;
 			}
 			
 			// 判断是否需要支付
 			if( ! $pay->needFundauth() ){
-				echo 'fundauth not need ';exit;
+				DB::rollBack();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'fundauth not need',
+				]);exit;
 			}
-			
-			// 提交事务
-			DB::beginTransaction();
 			
 			// 代扣签约处理
 			$pay->fundauthSuccess([
@@ -363,15 +380,25 @@ class PayController extends Controller
 			
 			// 提交事务
             DB::commit();	
-			echo '{"status":"ok"}';exit;
+			echo json_encode([
+				'status' => 'ok',
+				'msg' => 'ok',
+			]);exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
-			echo $exc->getMessage();
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'ok',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		} catch (\Exception $exc) {
-			echo $exc->getMessage();
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'ok',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		}
 		
-		DB::rollBack();
 		exit;
 		
 	}
