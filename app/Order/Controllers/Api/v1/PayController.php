@@ -234,15 +234,15 @@ class PayController extends Controller
 			
 			if( $pay->isSuccess() ){// 已经支付成功
 				echo json_encode([
-					'status' => 'error',
+					'status' => 'ok',
 					'msg' => 'withhold notice repeated',
 				]);exit;
 			}
 			
 			// 判断是否需要支付
-			if( ! $pay->withholdIsSuccess() ){
+			if( $pay->withholdIsSuccess() ){
 				echo json_encode([
-					'status' => 'error',
+					'status' => 'ok',
 					'msg' => 'withhold notice repeated',
 				]);exit;
 			}
