@@ -2,6 +2,7 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Repository\OrderReturnRepository;
@@ -36,6 +37,7 @@ class ReturnApply implements ShortMessage {
             return false;
         }
        $returnInfo=$return->getData();
+        LogApi::debug("短信获取退货单信息",$returnInfo);
 
 		// 查询订单
         $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
@@ -43,7 +45,7 @@ class ReturnApply implements ShortMessage {
             return false;
         }
         $orderInfo=$order->getData();
-
+        LogApi::debug("短信查询订单",$orderInfo);
 		// 短息模板
 		$code = $this->getCode($orderInfo['channel_id']);
 		if( !$code ){
@@ -55,11 +57,13 @@ class ReturnApply implements ShortMessage {
             return false;
         }
 		$goodsInfo=$goods->getData();
+        LogApi::debug("短信获取商品信息",$goodsInfo);
         //获取用户认证信息
         $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
         if(!$userInfo){
             return false;
         }
+        LogApi::debug("短信获取用户认证信息",$userInfo);
         // 发送短息
         $res=\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName' => $userInfo['realname'],

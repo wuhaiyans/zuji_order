@@ -1066,16 +1066,20 @@ class OrderReturnCreater
         try{
             $order_no=$params['order_no'];
             $buss=new \App\Order\Modules\Service\BusinessInfo();
+            //获取状态流
+            $stateFlow=$buss->getStateFlow();
             //业务类型
             $buss->setBusinessType($params['business_key']);
             if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                 $buss->setBusinessName(OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN));
+                //退货状态流
+                $buss->setStateFlow($stateFlow['returnStateFlow']);
             }
             if($params['business_key']==OrderStatus::BUSINESS_BARTER){
                 $buss->setBusinessName(OrderStatus::getBusinessName(OrderStatus::BUSINESS_BARTER));
+                //换货状态流
+                $buss->setStateFlow($stateFlow['barterStateFlow']);
             }
-            //获取状态流
-            $stateFlow=$buss->getStateFlow();
             //根据order_no和goods_no获取退货单信息
             $return=$this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
             if(!$return){
@@ -1092,8 +1096,6 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);
             }
-            //正常状态流
-            $buss->setStateFlow($stateFlow['stateFlow']);
             //  foreach($params as $k=>$v){
             if(isset($return['refund_no'])){
 
@@ -1142,7 +1144,15 @@ class OrderReturnCreater
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
 					//已经拒绝的状态流
-					$buss->setStateFlow($stateFlow['deniedStateFlow']);
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        //退货状态流
+                        $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                    }
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        //换货状态流
+                        $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                    }
+					//$buss->setStateFlow($stateFlow['deniedStateFlow']);
                     $buss->setStatus("D");
                     $buss->setStatusText("审核被拒绝");
                 }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
