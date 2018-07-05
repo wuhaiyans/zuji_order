@@ -395,15 +395,12 @@ class OrderOperate
                 }
             }
             //更新订单商品的状态
-            $goods = \App\Order\Modules\Repository\Order\Goods::getByOrderNo($orderNo);
-            foreach ($goods as $k=>$v){
-                $b=$v->updateStatusInService();
-                if(!$b){
-                    DB::rollBack();
-                    return false;
-                }
+            $b = OrderGoodsRepository::setGoodsInService($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
             }
-
+            
             if($system==1){
                 $remark="系统自动执行任务";
                 $userId =1;
