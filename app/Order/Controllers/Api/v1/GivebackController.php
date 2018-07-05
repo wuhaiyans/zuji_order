@@ -369,6 +369,10 @@ class GivebackController extends Controller
 		if( !$orderGivevbackInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
+		
+		if( $orderGivevbackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
+			return apiResponse([], ApiStatus::CODE_92500, '当前还机单不处于待检测状态，不能进行检测处理!');
+		}
 
 		//获取当前商品未完成分期列表数据
 		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
@@ -477,7 +481,7 @@ class GivebackController extends Controller
 		DB::commit();
 
 //		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
-		return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
+		return apiResponse([], ApiStatus::CODE_0, '检测结果同步成功');
 	}
 
 	/**
