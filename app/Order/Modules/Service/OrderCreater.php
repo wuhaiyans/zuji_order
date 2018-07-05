@@ -144,7 +144,7 @@ class OrderCreater
             } catch (\Exception $exc) {
                 DB::rollBack();
                 set_msg($exc->getMessage());
-                die;
+                return false;
             }
 
     }
@@ -331,7 +331,6 @@ class OrderCreater
             ];
             return $result;
         } catch (\Exception $exc) {
-            echo $exc->getMessage();
             set_msg($exc->getMessage());
             return false;
         }
