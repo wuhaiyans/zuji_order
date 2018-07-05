@@ -87,7 +87,7 @@ class OrderController extends Controller
         ];
         $res = $this->OrderCreate->confirmation( $data );
         if(!is_array($res)){
-            return apiResponse([],$res,ApiStatus::$errCodes[$res]);
+            return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
         return apiResponse($res,ApiStatus::CODE_0);
 
@@ -592,8 +592,6 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_30011);
         }
         return apiResponse($res,ApiStatus::CODE_0);
-        die;
-
     }
 
     /**

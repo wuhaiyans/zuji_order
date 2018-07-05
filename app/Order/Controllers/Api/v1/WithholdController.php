@@ -60,14 +60,15 @@ class WithholdController extends Controller
             ];
 
             $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
-            if(!$withholdInfo){
-                return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
+            if($withholdInfo['status'] == "signed"){
+
+                $withholdStatus = [ "withholding" => "Y" ];
+                return apiResponse($withholdStatus, ApiStatus::CODE_0);
             }
-
-            return apiResponse($withholdInfo,ApiStatus::CODE_0);
-
         }catch(\Exception $exc){
-            return apiResponse([],ApiStatus::CODE_50000, "查询协议错误");
+            $withholdStatus = [ "withholding" => "N" ];
+
+            return apiResponse($withholdStatus,ApiStatus::CODE_0);
         }
 
     }
@@ -84,7 +85,7 @@ class WithholdController extends Controller
      */
     public function unsign(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
+        $uid        = $params['uid'];
         // 参数过滤
         $rules = [
             'user_id'         => 'required|int',  //前端跳转地址
@@ -95,14 +96,13 @@ class WithholdController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
+
         $userId         = $params['params']['user_id'];
         $channel        = $params['params']['channel'];
-
         // 用户验证
         if($uid != $userId){
             return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
         }
-
         try{
 
             //开启事务
@@ -641,7 +641,7 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
+        $uid        = $params['uid'];
 
         $rules = [
             'return_url'        => 'required',

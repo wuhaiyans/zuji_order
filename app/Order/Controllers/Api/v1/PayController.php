@@ -194,10 +194,16 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
 		if( is_null($params) ){
-			echo 'notice data is null ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
 		}
 		if( !is_array($params) ){
-			echo 'notice data not array ';exit;
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data not array',
+			]);exit;
 		}
 		
 		try {
@@ -206,7 +212,10 @@ class PayController extends Controller
 			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByWithholdNo( $params['out_agreement_no'] );
 			
 			if( $pay->getUserId() != $params['user_id'] ){
-				echo 'notice [user_id] not error';exit;
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'notice [user_id] error',
+				]);exit;
 			}
 			
 			// 校验状态
@@ -217,16 +226,25 @@ class PayController extends Controller
 			]);
 			// 签约状态
 			if( $status_info['status'] != 'signed' ){// 已签约
-				echo 'withhold status not signed';exit;
+				echo json_encode([
+					'status' => 'error',
+					'msg' => 'withhold status not signed',
+				]);exit;
 			}
 			
 			if( $pay->isSuccess() ){// 已经支付成功
-				echo 'withhold notice repeated ';exit;
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => 'withhold notice repeated',
+				]);exit;
 			}
 			
 			// 判断是否需要支付
-			if( ! $pay->needWithhold() ){
-				echo 'withhold not need ';exit;
+			if( !$pay->needWithhold() ){
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => 'withhold notice repeated',
+				]);exit;
 			}
 			
 			// 提交事务
@@ -243,14 +261,21 @@ class PayController extends Controller
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
-			LogApi::error('代扣签约异步通知处理失败', $exc);
-			echo $exc->getMessage();
+			LogApi::type('data-error')::error('数据未找到',$exc);
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'ok',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		} catch (\Exception $exc) {
-			LogApi::error('代扣签约异步通知处理失败', $exc);
-			echo $exc->getMessage();
+			LogApi::error('代扣签约通知处理异常',$exc);
+			DB::rollBack();
+			echo json_encode([
+				'status' => 'ok',
+				'msg' => $exc->getMessage(),
+			]);exit;
 		}
 		
-		DB::rollBack();
 		exit;
 	}
 	/**
@@ -357,7 +382,7 @@ class PayController extends Controller
 			if( $pay->isSuccess() ){// 已经支付成功
 				DB::rollBack();
 				echo json_encode([
-					'status' => 'error',
+					'status' => 'ok',
 					'msg' => 'fundauth notice repeated',
 				]);exit;
 			}
@@ -386,12 +411,14 @@ class PayController extends Controller
 			]);exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::type('data-error')::error('数据未找到',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'ok',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		} catch (\Exception $exc) {
+			LogApi::error('预授权通知处理异常',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'ok',
@@ -823,7 +850,10 @@ class PayController extends Controller
 			if( $b ){
 				// 提交事务
 				DB::commit();
-				echo '{"status":"ok"}';exit;
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => "代扣扣款通知处理成功",
+				]);exit;
 
 			}else{
 				// 提交事务
