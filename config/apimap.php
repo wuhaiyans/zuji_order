@@ -46,6 +46,7 @@ return [
 
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
+    'api.alipay.initialize'=>'AlipayController@alipayInitialize',
     //支付宝资金预授权接口
     'api.alipay.fundauth'=>'AlipayController@alipayFundAuth',
     //支付宝代扣+资金预授权接口

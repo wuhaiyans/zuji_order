@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
+use App\Order\Modules\Inc\OrderGoodStatus;
 
 class OrderGoodsRepository
 {
@@ -139,6 +140,8 @@ class OrderGoodsRepository
      * @return boolean
      */
 	public static function setGoodsInService($orderNo){
-
+        return OrderGoods::where([
+            ['order_no', '=', $orderNo],
+        ])->update(['goods_status'=>OrderGoodStatus::RENTING_MACHINE]);
     }
 }
