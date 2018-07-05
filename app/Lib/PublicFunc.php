@@ -250,6 +250,9 @@ function createNo($noType=1){
         10 => 'W',
         'D' => 'D',// 发货单编号
         'R' => 'R',// 收货单编号
+        'AD' => 'AD',//预授权支付编号
+        'AU' => 'AU',//预授权解除编号
+        'RC' => 'RC',//退款清算编号
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {

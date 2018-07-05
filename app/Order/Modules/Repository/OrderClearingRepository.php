@@ -32,9 +32,21 @@ class OrderClearingRepository
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
-        if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-        if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0) $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+        $authDeductionNo    =   0;
+        $authUnfreezeNo     =   0;
+        $refundCleanNo      =   0;
+        if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) {
+            $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $authDeductionNo    = createNo('AD');
+        }
+        if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0)    {
+            $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $authUnfreezeNo    = createNo('AU');
+        }
+        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) {
+            $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $refundCleanNo    = createNo('RC');
+        }
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
         if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && empty($param['refund_amount']))
@@ -83,6 +95,9 @@ class OrderClearingRepository
             'out_refund_no'=>   $param['out_refund_no'] ??  '',
             'out_unfreeze_trade_no'=> $param['out_unfreeze_trade_no'] ??  '',
             'out_unfreeze_pay_trade_no'=> $param['out_unfreeze_pay_trade_no'] ??  '',
+            'auth_deduction_no'=>    $authDeductionNo ?? 0 ,
+            'auth_unfreeze_no'=>    $authUnfreezeNo ?? 0 ,
+            'refund_clean_no'=>    $refundCleanNo ?? 0 ,
 
         ];
       // sql_profiler();
@@ -110,6 +125,15 @@ class OrderClearingRepository
         }
         if (isset($param['order_no'])) {
             $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+        if (isset($param['auth_unfreeze_no'])) {
+            $whereArray[] = ['auth_unfreeze_no', '=', $param['auth_unfreeze_no']];
+        }
+        if (isset($param['auth_deduction_no'])) {
+            $whereArray[] = ['auth_deduction_no', '=', $param['auth_deduction_no']];
+        }
+        if (isset($param['refund_clean_no'])) {
+            $whereArray[] = ['refund_clean_no', '=', $param['refund_clean_no']];
         }
         if (isset($param['order_type'])) {
             $whereArray[] = ['order_type', '=', $param['order_type']];

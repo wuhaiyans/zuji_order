@@ -480,7 +480,7 @@ class PayController extends Controller
 			DB::beginTransaction();
 			
             //更新查看清算表的状态
-            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_refund_no']]);
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['out_refund_no']]);
             if ($orderCleanInfo['code']) {
 				DB::rollback();
                 LogApi::error("[清算记录]不存在");
@@ -596,9 +596,9 @@ class PayController extends Controller
 
             // 开启事务
             DB::beginTransaction();
-//            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['auth_unfreeze_no'=>$param['out_trade_no']]);
 
-            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>'CA70407132618675']);
+//            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>'CA70407132618675']);
 
             if (!isset($orderCleanInfo['code']) || $orderCleanInfo['code']) {
                 LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
@@ -715,7 +715,7 @@ class PayController extends Controller
             // 开启事务
             DB::beginTransaction();
             //更新查看清算表的状态
-            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>$param['out_trade_no']]);
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['auth_deduction_no'=>$param['out_trade_no']]);
             if ($orderCleanInfo['code']) {
                 LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 $this->innerErrMsg('订单清算记录不存在');

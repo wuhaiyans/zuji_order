@@ -56,14 +56,13 @@ class OrderMonthReceive implements ShortMessage {
             $zujin =$v['zujin'];
         }
 
-        $instalment = OrderGoodsInstalmentRepository::getInfo(['order_no'=>$this->business_no]);
+        $instalment = OrderGoodsInstalmentRepository::getInfo(['order_no'=>$this->business_no,'times'=>1]);
         if(!$instalment){
             return false;
         }
-        foreach ($instalment as $k=>$v){
-            $createTime =$v['term'].$v['day'];
-            continue;
-        }
+
+         $createTime =$instalment['term'].$instalment['day'];
+
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
