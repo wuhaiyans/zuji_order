@@ -232,14 +232,14 @@ class OrderCleaning
                  * ]
                  */
                 //根据预授权编号查找预授权相关数据
-                if (empty($orderCleanData['auth_no'])) return true;
+                if (empty($orderCleanData['auth_no'])) return false;
                 $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
-                if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
-                    LogApi::info(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
-                    return false;
-                }
                 if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
                     LogApi::info(__method__.'财务进入预授权转支付请求的逻辑');
+                    if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
+                        LogApi::info(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
+                        return false;
+                    }
                     $freezePayParams = [
 
                         'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
@@ -310,8 +310,8 @@ class OrderCleaning
             return true;
 
         } catch (\Exception $e) {
-            return false;
             LogApi::info(__method__.'操作请求异常'.$e->getMessage());
+            return false;
 
         }
 
@@ -416,11 +416,7 @@ class OrderCleaning
             if (empty($orderCleanData['auth_no'])) return false;
 
             $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
-            if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
-                LogApi::info(__method__.'财务发起预授权解除前，发现out_fundauth_no失败：', $authInfo);
-                return false;
-            }
 
             //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
             /**
@@ -442,7 +438,11 @@ class OrderCleaning
              * ]
              */
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+                if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
+                    LogApi::info(__method__.'财务发起预授权解除前，发现out_fundauth_no失败：', $authInfo);
+                    return false;
+                }
                 $unFreezeParams = [
                     'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                     'out_trade_no' => $orderCleanData['auth_unfreeze_no'], //订单系统交易码
