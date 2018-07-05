@@ -119,14 +119,11 @@ class JobQueueApi {
 		if( $res['status']=='ok'){
 			return true;
 		}
-		if( !$res ){
-			LogApi::type('third-api')::error('任务系统请求状态失败', [
-				'url' => config('jobsystem.JOB_API'),
-				'params' => $_config,
-				'result' => $res,
-			]);
-			return false;
-		}
+		LogApi::type('third-api')::error('任务系统请求状态失败', [
+			'url' => config('jobsystem.JOB_API'),
+			'params' => $_config,
+			'result' => $res,
+		]);
 		return false;
 	}
 	/**
@@ -137,11 +134,11 @@ class JobQueueApi {
 	public static function cancel( string $key):bool{
 		$_config = [
 			'interface' => 'jobDelAsync',
-			'auth' => env('JOB_AUTH'),
+			'auth' => config('jobsystem.JOB_AUTH'),
 			'name' => $key,
 		];
 		// 请求
-		$res = Curl::post(env('JOB_API'), json_encode($_config), ['Content-Type: application/json']);
+		$res = Curl::post(config('jobsystem.JOB_API'), json_encode($_config), ['Content-Type: application/json']);
 		if( !$res ){
 			return false;
 		}

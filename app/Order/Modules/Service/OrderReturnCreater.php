@@ -1830,7 +1830,7 @@ class OrderReturnCreater
                 }
             }
             //发送短信
-            $orderNoticeObj = new OrderNotice($params['business_type'], $return_info['refund_no'] ,SceneConfig::RETURN_APPLY);
+            $orderNoticeObj = new OrderNotice(OrderStatus::ZUQI_TYPE_MONTH, $return_info['refund_no'] ,SceneConfig::RETURN_APPLY);
             $b=$orderNoticeObj->notify();
             Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
            // DB::commit();

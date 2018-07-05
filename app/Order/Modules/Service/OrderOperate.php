@@ -126,7 +126,7 @@ class OrderOperate
                     $confirmTime = config('web.long_confirm_days');
                 }
                 //订单确认收货队列
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("tripartite.ORDER_API"), [
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("ordersystem.ORDER_API"), [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");
@@ -400,7 +400,7 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            
+
             if($system==1){
                 $remark="系统自动执行任务";
                 $userId =1;
@@ -425,7 +425,6 @@ class OrderOperate
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
             if(!$b){
-                LogApi::info("收发货系统确认收货失败");
                 DB::rollBack();
                 return false;
             }
@@ -790,7 +789,7 @@ class OrderOperate
         //碎屏意外险
         $orderData['order_insurance_amount']  =   $orderData['order_insurance'];
         //授权总金额
-        $orderData['zujin_amount']  =   $orderData['order_yajin'];
+        $orderData['yajin_amount']  =   $orderData['order_yajin'];
 
         $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
 

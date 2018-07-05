@@ -35,7 +35,7 @@ class AuthRefferController extends Controller{
         $header = ['Content-Type: application/json'];
         //是否需要验证
         if(in_array($params['method'], config('clientAuth.exceptAuth'))){
-            $info = Curl::post(env('ORDER_API'), json_encode($params),$header);
+            $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
             Log::debug("验证token".$info);
             $info =json_decode($info,true);
             if( is_null($info)
@@ -67,9 +67,9 @@ class AuthRefferController extends Controller{
                     'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
                     'username' =>$checkInfo['data'][0]['mobile']
                 ];
-                $list=['url'=>env('ORDER_API'),'data'=>$params];
+                $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
                 Log::debug("验证token",$list);
-                $info = Curl::post(env('ORDER_API'), json_encode($params),$header);
+                $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
                 Log::debug("验证token".$info);
                 $info =json_decode($info,true);
                 if( is_null($info)

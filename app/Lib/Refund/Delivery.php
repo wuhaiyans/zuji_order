@@ -22,7 +22,7 @@ class Delivery
      */
     public static function receive($params)
     {
-        $base_api = config('tripartitle.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
@@ -41,7 +41,7 @@ class Delivery
       */
     public static function user_receive($params)
     {
-        $base_api = config('tripartitle.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,
@@ -69,7 +69,7 @@ class Delivery
     {
 
 
-        $base_api = config('tripartitle.ORDER_API');
+        $base_api = config('ordersystem.ORDER_API');
 
         $response = Curl::post($base_api, [
             'appid'=> 1,

@@ -37,12 +37,12 @@ class ReturnGoods extends \App\Lib\BaseApi
 
         $params['business_key']=$business_key;
         $params['data']=$data;
-        if( self::request(\env('APPID'), \env('ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
+        if( self::request(\env('APPID'), \config('ordersystem.ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
             return true;
         }
 
         /*try{
-            $base_api = config('tripartite.ORDER_API');
+            $base_api = config('ordersystem.ORDER_API');
             $response = Curl::post($base_api,json_encode([
                 'appid'=> 1,
                 'version' => 1.0,

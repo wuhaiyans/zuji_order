@@ -22,7 +22,7 @@ class Refund
      */
     public function refundUpdate($params){
         try{
-            $base_api = config('tripartitle.ORDER_API');
+            $base_api = config('ordersystem.ORDER_API');
             $response = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,

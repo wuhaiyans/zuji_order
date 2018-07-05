@@ -28,7 +28,7 @@ class OrderInfo {
                 $data['params'] = [
                     'order_no'=>$param['order_no'],
                 ];
-                $baseUrl = config("tripartite.ORDER_API");
+                $baseUrl = config("ordersystem.ORDER_API");
                 $info = Curl::post($baseUrl, $data);
                 return $info;
 //                return apiResponse($info,ApiStatus::CODE_0);
@@ -50,7 +50,7 @@ class OrderInfo {
      */
      public function updateStatus($params){
          try{
-            $base_api = config('tripartitle.ORDER_API');
+            $base_api = config('ordersystem.ORDER_API');
             $response = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
