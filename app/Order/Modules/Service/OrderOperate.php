@@ -395,15 +395,12 @@ class OrderOperate
                 }
             }
             //更新订单商品的状态
-            $goods = \App\Order\Modules\Repository\Order\Goods::getByOrderNo($orderNo);
-            foreach ($goods as $k=>$v){
-                $b=$v->updateStatusInService();
-                if(!$b){
-                    DB::rollBack();
-                    return false;
-                }
+            $b = OrderGoodsRepository::setGoodsInService($orderNo);
+            if(!$b){
+                DB::rollBack();
+                return false;
             }
-
+            
             if($system==1){
                 $remark="系统自动执行任务";
                 $userId =1;
@@ -1109,7 +1106,7 @@ class OrderOperate
 
                    //查询是否有提前还款操作
                    $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
-                   if ($aheadInfo) {
+                   if ($aheadInfo && $values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
                        $goodsList[$keys]['act_goods_state']['ahead_buyout'] = true;
                    }
                    //查询是否有还机去支付

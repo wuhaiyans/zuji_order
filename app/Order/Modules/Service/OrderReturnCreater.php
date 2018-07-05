@@ -598,11 +598,15 @@ class OrderReturnCreater
                 //更新退款单状态为审核拒绝
                 $returnApply=$return->refundAccept($param['remark']);
                 if(!$returnApply){
+                    //事务回滚
+                    DB::rollBack();
                     return false;
                 }
                 //更新订单状态
                 $orderApply=$order->returnClose();
                 if(!$orderApply){
+                    //事务回滚
+                    DB::rollBack();
                     return false;
                 }
                 //插入操作日志
@@ -1273,7 +1277,6 @@ class OrderReturnCreater
                     return false;
                 }
                 $order_info=$order->getData();
-                LogApi::debug("获取订单信息",$order_info);
                 //获取商品信息
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($v['goods_no']);
                 if(!$goods){
@@ -1454,7 +1457,7 @@ class OrderReturnCreater
 
             return true;
         }catch( \Exception $exc){
-            throw new \Exception( $exc->getMessage());
+             throw new \Exception( $exc->getMessage());
         }
 
 
@@ -1688,7 +1691,6 @@ class OrderReturnCreater
             }
             $goodsInfo=$goodInfo->toArray();
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
-                $status=OrderStatus::BUSINESS_RETURN;
                 //修改退货单状态为已退货
                 $updateReturn=$return->returnFinish($params);
                 if(!$updateReturn){
@@ -1728,12 +1730,12 @@ class OrderReturnCreater
                         return false;
                     }
                 }
-                $params['goods_no']=$return_info['goods_no'];
+                $returnData['goods_no']=$return_info['goods_no'];
+                $returnData['order_no']=$return_info['order_no'];
                 //释放库存
                 //查询商品的信息
-                $orderGoods = OrderRepository::getGoodsListByGoodsId($params);
+                $orderGoods = OrderRepository::getGoodsListByGoodsId($returnData);
             }else{
-                $status=OrderStatus::BUSINESS_REFUND;
                 //修改退货单状态为已退款
                 $updateReturn=$return->refundFinish($params);
                 if(!$updateReturn){
@@ -1800,7 +1802,7 @@ class OrderReturnCreater
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
-            if($return_info['goods_no']){
+            if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                         $success =\App\Order\Modules\Repository\Order\Instalment::close($params);
@@ -1826,7 +1828,7 @@ class OrderReturnCreater
                 }
             }
             //发送短信
-            $orderNoticeObj = new OrderNotice($status, $return_info['refund_no'] ,SceneConfig::RETURN_APPLY);
+            $orderNoticeObj = new OrderNotice($params['business_type'], $return_info['refund_no'] ,SceneConfig::RETURN_APPLY);
             $b=$orderNoticeObj->notify();
             Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
            // DB::commit();
