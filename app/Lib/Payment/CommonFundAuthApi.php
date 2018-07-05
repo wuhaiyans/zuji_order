@@ -22,8 +22,8 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      * @return array	预授权地址信息
      * [
-     *		'url' => '',	// 预授权地址
-     *		'params' => '',	// 预授权地址
+     *		'url'		=> '',	// 预授权地址
+     *		'params'	=> '',	// 预授权地址
      * ]
      */
     public static function fundAuthUrl( array $params ){
@@ -37,18 +37,18 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * [
      *		'fundauth_no'		=> '', //支付系统授权码
      *		'out_fundauth_no'	=> '', //业务系统授权码
-     *		'user_id'		=> '', //用户id
+     *		'user_id'			=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
      *		'fundauth_no'			=> '',//支付系统授权码
      *		'out_fundauth_no'		=> '',//业务系统授权码
-     *		'total_freeze_amount' => '',//累计授权金额；单位：分
+     *		'total_freeze_amount'	=> '',//累计授权金额；单位：分
      *		'total_unfreeze_amount' => '',//累计解冻金额；单位：分
-     *		'total_pay_amount' => '',//累计转支付金额；单位：分
-     *		'status' => '',//状态；0：已取消；1：授权处理中；2：授权完成；3：关闭；4：完成
-     *		'user_id' => '',//用户id
-     *		'auth_time' => '',//授权完成时间
+     *		'total_pay_amount'		=> '',//累计转支付金额；单位：分
+     *		'status'				=> '',//状态；0：已取消；1：授权处理中；2：授权完成；3：关闭；4：完成
+     *		'user_id'				=> '',//用户id
+     *		'auth_time'				=> '',//授权完成时间
      * ]
      */
     public static function queryFundAuthStatus( array $params ){
@@ -67,14 +67,14 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'trade_no' => '',//支付系统交易码
-     *		'out_trade_no' => '',//订单系统交易码
-     *		'fundauth_no' => '',//支付系统授权码
-     *		'amount' => '',//交易金额；单位：分
-     *		'status' => '',//状态；0：初始化；1：授权完成；2：授权失败；3：关闭；4：完成
-     *		'user_id' => '',//用户id
-     *		'trade_time' => '',//交易成功时间戳
-     *		'type' => '',//请求类型 1:转支付 ;2:解冻 ;
+     *		'trade_no'		=> '',//支付系统交易码
+     *		'out_trade_no'	=> '',//业务系统交易码
+     *		'fundauth_no'	=> '',//支付系统授权码
+     *		'amount'		=> '',//交易金额；单位：分
+     *		'status'		=> '',//状态；0：初始化；1：授权完成；2：授权失败；3：关闭；4：完成
+     *		'user_id'		=> '',//用户id
+     *		'trade_time'	=> '',//交易成功时间戳
+     *		'type'			=> '',//请求类型 1:转支付 ;2:解冻 ;
      * ]
      */
     public static function unfreezeAndPayStatus( array $params ){
@@ -97,18 +97,18 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * 预授权解冻接口
      * @param array $params
      * [
-     *		'name'		=> '', //交易名称
-     *		'out_trade_no' => '', //订单系统交易码
-     *		'fundauth_no' => '', //支付系统授权码
-     *		'amount' => '', //解冻金额 单位：分
-     *		'back_url' => '', //后台通知地址
-     *		'user_id' => '', //用户id
+     *		'name'			=> '', //交易名称
+     *		'out_trade_no'	=> '', //业务系统交易码
+     *		'fundauth_no'	=> '', //支付系统授权码
+     *		'amount'		=> '', //解冻金额 单位：分
+     *		'back_url'		=> '', //后台通知地址
+     *		'user_id'		=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
      * [
-     *		'out_trade_no' => '',//支付系统交易码
-     *		'trade_no' => '',//业务系统交易码
-     *		'out_auth_no' => '',//支付系统授权码
+     *		'out_trade_no'	=> '',//支付系统交易码
+     *		'trade_no'		=> '',//业务系统交易码
+     *		'out_auth_no'	=> '',//支付系统授权码
      * ]
      */
     public static function unfreeze( array $params ){
