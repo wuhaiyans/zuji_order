@@ -495,6 +495,7 @@ class OrderController extends Controller
 
     public function delivery(Request $request)
     {
+        Log::debug("訂單系統");
         $params =$request->all();
         $params =$params['params'];
         if(count($params['order_info']) <3){
