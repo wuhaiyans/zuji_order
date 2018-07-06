@@ -78,13 +78,13 @@ class ReceiveGoodsService
             //确认收货按钮
             $it['shouhuo']=($it['status']==ReceiveGoods::STATUS_INIT)?true:false;
             $receive_row = $item->receive;
-            //确认同意换货操作(暂时不需要)换货类型并且发货未收货
-//            if($it['status']==ReceiveGoods::STATUS_ALL_CHECK && $receive_row->type==Receive::TYPE_EXCHANGE){
-//                $it['huanhuo']=true;
-//            }else{
-//                $it['huanhuo']=false;收货签收
-//            }
-            $it['huanhuo']=false;
+            //确认同意换货操作(暂时不需要)换货类型并且检测完成
+            if($it['status']==ReceiveGoods::STATUS_ALL_CHECK && $receive_row->type==Receive::TYPE_EXCHANGE){
+                $it['huanhuo']=true;
+            }else{
+                $it['huanhuo']=false;//收货签收
+            }
+            //$it['huanhuo']=false;
             //检测操作
             if($it['status']==ReceiveGoods::STATUS_ALL_RECEIVE && $it['status']!=ReceiveGoods::STATUS_ALL_CHECK){
                 $it['jiance']=true;
