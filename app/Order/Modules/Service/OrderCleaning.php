@@ -310,7 +310,7 @@ class OrderCleaning
             return true;
 
         } catch (\Exception $e) {
-            LogApi::info(__method__.'操作请求异常'.$e->getMessage());
+            LogApi::info(__method__.'操作请求异常',$e);
             return false;
 
         }
