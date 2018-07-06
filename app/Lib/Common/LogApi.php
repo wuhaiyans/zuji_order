@@ -166,9 +166,9 @@ class LogApi {
 				'trace' => $file.'('.$line.'):'.$function,// 位置信息
 			],
 		];
-		// Redis 发布
-		$job = new \App\Jobs\Log2Job( $_data );
-		dispatch( $job );
+//		// Redis 发布
+//		$job = new \App\Jobs\Log2Job( $_data );
+//		dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
 		
 		// 日志系统接口
