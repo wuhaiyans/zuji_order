@@ -139,6 +139,7 @@ class OrderReturnCreater
                     return false;//创建失败
                 }
                 $no_list[$k]['refund_no'] = $data['refund_no'];
+                $no_list[$k]['goods_no'] = $goods_no;
             }
             //修改冻结状态为退货中
             if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
@@ -160,25 +161,40 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;
             }
-           //退货
-           if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
-                //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退货","申请退货");
-            }
-            //换货
-            if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ) {
-               //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"换货","申请换货");
-            }
-
             DB::commit();
            foreach( $no_list as $no ){
                 //短信
                 if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
+                    //插入操作日志
+                    \App\Order\Modules\Repository\GoodsLogRepository::add([
+                        'order_no'=>$params['order_no'],
+                        'action'=>'退货单生成',
+                        'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
+                        'business_no'=>$no['refund_no'],
+                        'goods_no'=>$no['goods_no'],
+                        'operator_id'=>$userinfo['uid'],
+                        'operator_name'=>$userinfo['username'],
+                        'operator_type'=>$userinfo['type'],
+                        'msg'=>'用户申请退货',
+                    ],$isCorntab=FALSE);
                     $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $no['refund_no'] ,SceneConfig::RETURN_APPLY);
                     $b=$orderNoticeObj->notify();
                     Log::debug($b?"Order :".$goods_info['order_no']." IS OK":"IS error");
                 }
+               if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ) {
+                    //插入操作日志
+                   \App\Order\Modules\Repository\GoodsLogRepository::add([
+                       'order_no'=>$params['order_no'],
+                       'action'=>'换货单生成',
+                       'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                       'business_no'=>$no['refund_no'],
+                       'goods_no'=>$no['goods_no'],
+                       'operator_id'=>$userinfo['uid'],
+                       'operator_name'=>$userinfo['username'],
+                       'operator_type'=>$userinfo['type'],
+                       'msg'=>'用户申请换货',
+                   ],$isCorntab=FALSE);
+               }
            }
             return $no_list;
         }catch( \Exception $exc){
