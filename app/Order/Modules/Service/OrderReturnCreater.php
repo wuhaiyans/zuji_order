@@ -1319,7 +1319,7 @@ class OrderReturnCreater
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
                         $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                         $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
-                        $create_data['auth_deduction_amount']=$pay_result['auth_deduction_amount'];//应扣押金金额
+                        $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金金额
                         $create_data['auth_deduction_time']=0;//扣除押金时间
                         $create_data['auth_unfreeze_time']=0;//退还时间
                         $create_data['refund_time']=0;//退款时间
