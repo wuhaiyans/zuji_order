@@ -78,7 +78,7 @@ class OrderPay implements ShortMessage {
             ];
             $b = $MessageSingleSendWord->OrderFreezing($message_arr);
             if ($b === false) {
-                LogApi::error("OrderFreezing 推送失败",$message_arr);
+                LogApi::error("支付宝消息推送失败",$message_arr);
             }
         }
         return true;
