@@ -3,6 +3,7 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
+use App\Lib\User\User;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
@@ -63,16 +64,19 @@ class OrderPay implements ShortMessage {
 
 	// 支付宝 短信通知
 	public function alipay_notify(){
-	    return true;
         //通过用户id查询支付宝用户id
         // 查询订单
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
         if( !$orderInfo ){
             return false;
         }
-        if(!empty($orderInfo['user_id'])) {
+        $userAlipay = User::getUserAlipayId($orderInfo['user_id']);
+        if(!is_array($userAlipay)){
+            return false;
+        }
+        if(!empty($userAlipay['alipay_user_id'])) {
             //通过用户id查询支付宝用户id
-            $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($orderInfo['user_id']);
+            $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($userAlipay['alipay_user_id']);
             $message_arr = [
                 'order_no' => $orderInfo['order_no'],
                 'freeze_yaji' => $orderInfo['order_yajin'],

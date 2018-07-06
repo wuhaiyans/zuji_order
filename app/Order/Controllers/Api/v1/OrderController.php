@@ -6,6 +6,7 @@ use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
+use App\Lib\User\User;
 use App\Order\Models\OrderUserAddress;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
@@ -49,6 +50,7 @@ class OrderController extends Controller
 	 * @return type
 	 */
     public function confirmation(Request $request){
+        User::getUserAlipayId(18);die;
         $params = $request->all();
 
         //获取appid

@@ -134,6 +134,7 @@ class OrderOperate
                 // 订单发货成功后 发送短信
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
 
 
 
@@ -433,9 +434,11 @@ class OrderOperate
             if($orderInfo['zuqi_type'] ==1){
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
             }else{
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
             }
             DB::commit();
             return true;

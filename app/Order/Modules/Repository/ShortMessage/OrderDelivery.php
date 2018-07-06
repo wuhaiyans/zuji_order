@@ -56,21 +56,45 @@ class OrderDelivery implements ShortMessage {
 	// 支付宝 短信通知
 	public function alipay_notify(){
         //通过用户id查询支付宝用户id
-        $this->certification_alipay = $this->load->service('member2/certification_alipay');
-        $to_user_id = $this->certification_alipay->get_last_info_by_user_id($order_info['user_id']);
-        if(!empty($to_user_id['user_id'])) {
-            $MessageSingleSendWord = new \alipay\MessageSingleSendWord($to_user_id['user_id']);
+        // 查询订单
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+        if( !$orderInfo ){
+            return false;
+        }
+        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+        if(!$goods){
+            return false;
+        }
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
+        //获取物流单号
+        $delivery_info = OrderDeliveryRepository::getOrderDelivery($this->business_no);
+        if(!$delivery_info){
+            return false;
+        }
+
+        $userAlipay = User::getUserAlipayId($orderInfo['user_id']);
+        if(!is_array($userAlipay)){
+            return false;
+        }
+        if(!empty($userAlipay['alipay_user_id'])) {
+            //通过用户id查询支付宝用户id
+            $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($userAlipay['alipay_user_id']);
             $message_arr = [
-                'goods_name' => $order_info['goods_name'],
-                'amount' => $order_info['amount'],
-                'order_no' => $order_info['order_no'],
-                'fast_mail_no' => $_POST['logistics_sn'],
+                'goods_name' => $goodsName,
+                'amount' => $orderInfo['order_amount']+$orderInfo['order_yajin']+$orderInfo['order_insurance'],
+                'order_no' => $orderInfo['order_no'],
+                'fast_mail_no' => $delivery_info['logistics_no'],
             ];
             $b = $MessageSingleSendWord->SendGoods($message_arr);
             if ($b === false) {
-                \zuji\debug\Debug::error(\zuji\debug\Location::L_Trade, 'SendGoods', $MessageSingleSendWord->getError());
+                LogApi::error("支付宝消息推送失败",$message_arr);
             }
         }
+        return true;
+
 	}
 //	public function notify($data=[]){
 //		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
