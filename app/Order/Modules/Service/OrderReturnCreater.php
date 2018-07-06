@@ -172,14 +172,14 @@ class OrderReturnCreater
             }
 
             DB::commit();
-        /*    foreach( $no_list as $no ){
+            foreach( $no_list as $no ){
                 //短信
                 if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
-                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN, $no['refund_no'] ,SceneConfig::RETURN_APPLY);
+                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $no['refund_no'] ,SceneConfig::RETURN_APPLY);
                     $b=$orderNoticeObj->notify();
                     Log::debug($b?"Order :".$goods_info['order_no']." IS OK":"IS error");
                 }
-            }*/
+            }
             return $no_list;
         }catch( \Exception $exc){
             DB::rollBack();
@@ -491,11 +491,11 @@ class OrderReturnCreater
             //事务提交
             DB::commit();
             //审核发送短信
-          /*  if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+            if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                 if($yes_list){
                     foreach( $yes_list as $no ) {
                         //短信
-                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_AGREE);
+                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$no,SceneConfig::RETURN_APPLY_AGREE);
                         $b=$orderNoticeObj->notify();
                         Log::debug($b?"Order :".$order." IS OK":"IS error");
                     }
@@ -503,12 +503,12 @@ class OrderReturnCreater
                 if($no_list){
                     foreach( $no_list as $no ){
                             //短信
-                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_APPLY_DISAGREE);
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$no,SceneConfig::RETURN_APPLY_DISAGREE);
                             $b=$orderNoticeObj->notify();
                             Log::debug($b?"Order :".$order." IS OK":"IS error");
                     }
                 }
-            }*/
+            }
 
             return true;
 
@@ -1369,7 +1369,7 @@ class OrderReturnCreater
 
                 }else{
                     //$list[]=$return_info['status'];
-                    $no_list[]=$return_info['status'];
+                    $no_list[]=$return_info['refund_no'];
                     if($business_key ==OrderStatus::BUSINESS_RETURN){
                         //更新退货单检测信息
                         $updateCheck=$return->returnUnqualified($params);
@@ -1447,11 +1447,11 @@ class OrderReturnCreater
             }*/
 
             //发短信
-           /* if($business_key==OrderStatus::BUSINESS_RETURN){
+            if($business_key==OrderStatus::BUSINESS_RETURN){
                 if($yes_list){
                     foreach( $yes_list as $no ) {
                         //短信
-                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_CHECK_OUT);
+                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$no,SceneConfig::RETURN_CHECK_OUT);
                         $b=$orderNoticeObj->notify();
                         Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
                     }
@@ -1459,12 +1459,12 @@ class OrderReturnCreater
                 if($no_list){
                     foreach( $no_list as $no ){
                         //短信
-                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_RETURN,$no,SceneConfig::RETURN_UNQUALIFIED);
+                        $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$no,SceneConfig::RETURN_UNQUALIFIED);
                         $b=$orderNoticeObj->notify();
                         Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
                     }
                 }
-            }*/
+            }
 
             return true;
         }catch( \Exception $exc){
