@@ -34,6 +34,7 @@ class Receive extends Warehouse
     const STATUS_INIT = 1;//待收货
     const STATUS_RECEIVED = 2;//已收货
     const STATUS_FINISH = 3;//检测完成
+    const STATUS_CONFIRM_RECEIVE = 4;//确认换货
 
     /**
      * 设备检查状态
