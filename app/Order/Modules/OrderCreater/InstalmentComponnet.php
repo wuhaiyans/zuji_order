@@ -65,22 +65,21 @@ class InstalmentComponnet implements OrderCreater
 			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
 			// 开始日期，只有日租有，月租没有
-            $skuInfo['begin_time'] = $sku['begin_time'];
+            $skuInfo['begin_time'] = strtotime($sku['begin_time']);
             $skuInfo['discount_info'] = [
                 [
-                    'discount_amount' =>$sku['first_coupon_amount'],
+                    'discount_amount' =>(float)$sku['first_coupon_amount'],
                     'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize:商品券
                 ],
                 [
-                    'discount_amount' =>$sku['order_coupon_amount'],
+                    'discount_amount' =>(float)$sku['order_coupon_amount'],
                     'zuqi_policy' =>CouponStatus::CouponTypeAvg,
                 ],
                 [
-                    'discount_amount' =>$sku['discount_amount'],
+                    'discount_amount' =>(float)$sku['discount_amount'],
                     'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
                 ]
             ];
-
             $_data = [
          		'zujin'		    => $sku['zujin'],	    //【必选】price 每期租金
          		'zuqi'		    => $sku['zuqi'],	    //【必选】int 租期（必选保证大于0）
