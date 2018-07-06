@@ -284,6 +284,8 @@ class OrderController extends Controller
 
         $params = $request->input('params');
 
+        $params['page'] = 1;
+        $params['size'] = 10000;
         $orderData = Service\OrderOperate::getOrderList($params);
 
         if ($orderData['code']===ApiStatus::CODE_0) {
