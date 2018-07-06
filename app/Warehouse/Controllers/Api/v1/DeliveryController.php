@@ -82,16 +82,12 @@ class DeliveryController extends Controller
      */
     public function matchGoods()
     {
-        /**
-         * $params 数组中需要包含以下字段
-         * delivery_no 发货单号
-         * serial_no 设备序号
-         * quantity  设备数量
-         */
         $rules = [
             'delivery_no' => 'required', //单号
             'goods_no'   => 'required', //序号
-            'quantity'    => 'required', //数量
+            'imei'    => 'required', //imei
+            'price'    => 'required', //采购价
+            'apple_serial'    => 'required', //苹果手机序列号
         ];
         $params = $this->_dealParams($rules);
 
@@ -284,7 +280,6 @@ class DeliveryController extends Controller
 
         try {
             DB::beginTransaction();
-
             //修改发货信息
             $this->delivery->send($params);
 
@@ -305,11 +300,9 @@ class DeliveryController extends Controller
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
 
             //Log::error('aaaaaaaaccd');
-            Log::error($a);
-
+            //Log::error($a);
             DB::commit();
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
             DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }

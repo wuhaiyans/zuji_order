@@ -94,9 +94,15 @@ class InstalmentWithhold implements ShortMessage {
             return false;
         }
 
-        $alipayUserId = $userInfo['alipay_user_id'];
+        // 查询用户在支付宝的ID
+        $userAlipay = \App\Lib\User\User::getUserAlipayId($instalmentInfo['user_id']);
+        if(!is_array($userAlipay)){
+            return false;
+        }
+
+
         //通过用户id查询支付宝用户id
-        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($alipayUserId);
+        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($userAlipay['alipay_user_id']);
         //查询账单
         $year = substr($instalmentInfo['term'], 0, 4);
         $month = substr($instalmentInfo['term'], -2);

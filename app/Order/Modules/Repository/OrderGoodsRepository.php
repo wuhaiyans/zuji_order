@@ -156,6 +156,6 @@ class OrderGoodsRepository
     public static function setGoodsRefund($orderNo){
         return OrderGoods::where([
             ['order_no', '=', $orderNo],
-        ])->update(['goods_status'=>OrderGoodStatus::REFUNDED]);
+        ])->update(['goods_status'=>OrderGoodStatus::EXCHANGE_REFUND]);
     }
 }

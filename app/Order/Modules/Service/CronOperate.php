@@ -144,16 +144,6 @@ class CronOperate
             }
 
     }
-    /**
-     *  定时任务  查询订单是否完成
-     * @return bool
-     */
-    public static function cronOrderComplete()
-    {
-        //查询 未冻结 租用中的订单
-
-    }
-
 
 
 }

@@ -57,7 +57,8 @@ class WithholdController extends Controller
         try{
             // 查询用户协议
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
-            $payWithhold = $withhold->getData();
+            $payWithhold  = $withhold->getData();
+            $allowUnsign  = $withhold->getCounter() == 0 ? "Y" : "N";
 
             $data = [
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
@@ -68,11 +69,18 @@ class WithholdController extends Controller
             $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
             if($withholdInfo['status'] == "signed"){
 
-                $withholdStatus = [ "withholding" => "Y" ];
+                $withholdStatus = [
+                    "withholding" => "Y",
+                    "allowUnsign" => $allowUnsign
+                ];
                 return apiResponse($withholdStatus, ApiStatus::CODE_0);
             }
         }catch(\Exception $exc){
-            $withholdStatus = [ "withholding" => "N" ];
+
+            $withholdStatus = [
+                "withholding" => "N",
+                "allowUnsign" => "N"
+            ];
 
             return apiResponse($withholdStatus,ApiStatus::CODE_0);
         }
