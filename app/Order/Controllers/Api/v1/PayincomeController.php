@@ -20,6 +20,7 @@ class PayincomeController extends Controller
     public function payIncomeWhere(){
         $list = [
             'create_time'       => "",  //日期范围
+            'order_no'          => "",  //日期范围
             'business_type'     => \App\Order\Modules\Inc\OrderStatus::getBusinessType(),
             'appid'             => \App\Order\Modules\Inc\OrderPayIncomeStatus::getBusinessType(),
             'channel'           => \App\Order\Modules\Repository\Pay\Channel::getBusinessType(),
@@ -49,6 +50,7 @@ class PayincomeController extends Controller
 
         $params         = filter_array($request, [
             'appid'            	=> 'required',
+            'order_no'        	=> 'required',
             'business_type'     => 'required',
             'channel'      		=> 'required',
             'amount'  			=> 'required',

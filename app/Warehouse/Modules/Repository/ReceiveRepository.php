@@ -195,7 +195,6 @@ class ReceiveRepository
 //        }
 
         $goods = $model->goods;
-
         $status = Receive::STATUS_RECEIVED;
         $t = time();
         foreach ($goods as $g) {

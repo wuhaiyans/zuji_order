@@ -27,7 +27,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function fundAuthUrl( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.url', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.url', '1.0', $params);
     }
 
     /**
@@ -52,7 +52,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function queryFundAuthStatus( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.query', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.query', '1.0', $params);
     }
 
     /**
@@ -79,18 +79,19 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      */
     public static function unfreezeAndPayStatus( array $params ){
 		
-		
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.api.unfreezeandpaystatus');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '查询授权解冻 转支付 状态失败';
-            return false;
-        }
-        return $Response->getData();
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.api.unfreezeandpaystatus', '1.0', $params);
+//		
+//        $ApiRequest = new ApiRequest();
+//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.api.unfreezeandpaystatus');
+//        $ApiRequest->setParams($params);
+//        $Response = $ApiRequest->send();
+//        if( !$Response->isSuccessed() ){
+//            self::$error = '查询授权解冻 转支付 状态失败';
+//            return false;
+//        }
+//        return $Response->getData();
     }
 
     /**
@@ -112,7 +113,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function unfreeze( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.unfreeze', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.unfreeze', '1.0', $params);
 		
 //        $ApiRequest = new ApiRequest();
 //        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
@@ -147,18 +148,18 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      * ]
      */
     public static function unfreezeAndPay( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.fundauth.topay.apply', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.topay.apply', '1.0', $params);
 		
-        $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
-        $ApiRequest->setMethod('pay.api.unfreezeandpay');
-        $ApiRequest->setParams($params);
-        $Response = $ApiRequest->send();
-        if( !$Response->isSuccessed() ){
-            self::$error = '支付宝预授权转支付失败';
-            return false;
-        }
-        return $Response->getData();
+//        $ApiRequest = new ApiRequest();
+//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
+//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setMethod('pay.api.unfreezeandpay');
+//        $ApiRequest->setParams($params);
+//        $Response = $ApiRequest->send();
+//        if( !$Response->isSuccessed() ){
+//            self::$error = '支付宝预授权转支付失败';
+//            return false;
+//        }
+//        return $Response->getData();
     }
 }
