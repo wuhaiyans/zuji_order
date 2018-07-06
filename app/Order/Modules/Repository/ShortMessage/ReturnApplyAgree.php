@@ -2,6 +2,7 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\Pay\Channel;
@@ -48,6 +49,7 @@ class ReturnApplyAgree implements ShortMessage {
 
         // 短息模板
         $code = $this->getCode($orderInfo['channel_id']);
+        LogApi::debug("退货审核同意短信模板",$code);
         if( !$code ){
             return false;
         }
@@ -58,7 +60,7 @@ class ReturnApplyAgree implements ShortMessage {
         }
         $goodsInfo=$goods->getData();
         //获取用户认证信息
-        $userInfo=OrderRepository::getUserCertified($goodsInfo['order_no']);
+        $userInfo=OrderRepository::getUserCertified($returnInfo['order_no']);
         if(!$userInfo){
             return false;
         }
