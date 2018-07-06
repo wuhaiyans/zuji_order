@@ -28,7 +28,7 @@ class OrderGoodStatus{
      */
     const REFUNDS = 20;
     /**
-	 * 已退款
+	 * 已退货
      * @var int 3
      */
     const REFUNDED = 21;
@@ -77,6 +77,10 @@ class OrderGoodStatus{
      * @var int 6
      */
     const RENEWAL_OF_RENT = 61;
+    /**
+     * 已退款
+     */
+    const EXCHANGE_REFUND = 71;
 
 
 
@@ -86,18 +90,19 @@ class OrderGoodStatus{
      */
     public static function getStatusList(){
         return [
-            self::INIT => '非启用',
-            self::RENTING_MACHINE => '租机中',
-            self::REFUNDS => '退货退款中',
-            self::REFUNDED => '已退款',
-            self::EXCHANGE_GOODS => '换货中',
-            self::EXCHANGE_OF_GOODS => '已换货',
-            self::BACK_IN_THE_MACHINE => '还机中',
+            self::INIT                => '非启用',
+            self::RENTING_MACHINE    => '租机中',
+            self::REFUNDS             => '退货退款中',
+            self::REFUNDED            => '已退货',
+            self::EXCHANGE_GOODS      => '换货中',
+            self::EXCHANGE_OF_GOODS    => '已换货',
+            self::BACK_IN_THE_MACHINE  => '还机中',
             self::COMPLETE_THE_MACHINE => '已还机',
-            self::BUY_OFF => '买断中',
-            self::BUY_OUT => '买断完成',
-            self::RELET => '续租中',
-            self::RENEWAL_OF_RENT => '续租完成',
+            self::BUY_OFF              => '买断中',
+            self::BUY_OUT              => '买断完成',
+            self::RELET                => '续租中',
+            self::RENEWAL_OF_RENT     => '续租完成',
+            self::EXCHANGE_REFUND     =>'已退款',
         ];
     }
 

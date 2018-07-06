@@ -712,7 +712,7 @@ class GivebackController extends Controller
 			$data['evaluation_info']['compensate_amount'] = $orderGivebackInfo['compensate_amount'];//赔偿金额
 		}
 		//退还押金
-		if( $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION ){
+		if( $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN || $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION ){
 			$data['yajin_info'] = [
 				'yajin_status_name' => $orderGivebackInfo['yajin_status_name'],
 			];
@@ -762,6 +762,7 @@ class GivebackController extends Controller
 			//拼接需要更新还机单状态
 			$data['status'] = $status =$goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+			$data['payment_time'] = time();
 			$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
 		}
 		//-+--------------------------------------------------------------------
@@ -776,6 +777,7 @@ class GivebackController extends Controller
 			//拼接需要更新还机单状态
 			$data['status'] = $status = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+			$data['payment_time'] = time();
 			$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN;
 		}
 
@@ -820,6 +822,7 @@ class GivebackController extends Controller
 		//拼接需要更新还机单状态
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+		$data['payment_time'] = time();
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
@@ -860,6 +863,7 @@ class GivebackController extends Controller
 			//拼接需要更新还机单状态更新还机单状态
 			$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+			$data['payment_time'] = time();
 			$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
 		}
 		//押金<赔偿金：还机支付
@@ -869,6 +873,7 @@ class GivebackController extends Controller
 			//拼接需要更新还机单状态更新还机单状态
 			$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+			$data['payment_time'] = time();
 		}
 		//清算或者支付结果失败，返回错误
 		if( !$tradeResult ){
@@ -917,6 +922,7 @@ class GivebackController extends Controller
 		//拼接需要更新还机单状态
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+		$data['payment_time'] = time();
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
