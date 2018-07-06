@@ -7,7 +7,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderPay
+ * OrderPay 支付成功
  *
  * @author wuhaiyan
  */
@@ -63,6 +63,7 @@ class OrderPay implements ShortMessage {
 
 	// 支付宝 短信通知
 	public function alipay_notify(){
+	    return true;
         //通过用户id查询支付宝用户id
         // 查询订单
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));

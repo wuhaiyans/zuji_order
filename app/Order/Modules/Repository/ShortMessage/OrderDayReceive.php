@@ -6,7 +6,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderDayReceive
+ * OrderDayReceive 短租确认收货
  *
  * @author wuhaiyan
  */
@@ -69,6 +69,24 @@ class OrderDayReceive implements ShortMessage {
 
 	// 支付宝 短信通知
 	public function alipay_notify(){
+        //通过用户id查询支付宝用户id
+        $this->certification_alipay = $this->load->service('member2/certification_alipay');
+        $to_user_id = $this->certification_alipay->get_last_info_by_user_id($order_info['user_id']);
+        if(!empty($to_user_id['user_id'])) {
+            //获取物流信息
+            $MessageSingleSendWord = new \alipay\MessageSingleSendWord($to_user_id['user_id']);
+            $message_arr = [
+                'goods_name' => $order_info['goods_name'],
+                'fast_mail_company' => '顺丰速运',
+                'fast_mail_no' => $delivery_info['wuliu_no'],
+                'sing_time' => date('Y-m-d H:i:s'),
+                'order_no' => $order_info['order_no'],
+            ];
+            $b = $MessageSingleSendWord->SignIn($message_arr);
+            if ($b === false) {
+                Debug::error(Location::L_Order, 'SignIn', $MessageSingleSendWord->getError());
+            }
+        }
 		return true;
 	}
 //	public function notify($data=[]){
