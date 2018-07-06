@@ -688,6 +688,63 @@ class OrderOperate
 
         return $riskArray;
     }
+    /**
+     * 查询订单的商品的状态是否全部完成 完成后更新状态
+     * @param $orderNo 订单编号
+     * @return boolean
+     */
+    public static function isOrderComplete($orderNo){
+        //查询订单商品信息
+        $goods = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
+        if(!$goods){
+            return false;
+        }
+        $goods = objectToArray($goods);
+        $orderStatus =0;
+        foreach ($goods as $k=>$v){
+            //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
+            if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED){
+                $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
+            }
+            if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
+                $orderStatus = Inc\OrderStatus::OrderCompleted;
+            }
+            if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT){
+                return true;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 根据支付方式 解除订单代扣信息
+     * @param $orderInfo 订单信息
+     * @return bool
+     */
+
+    public static function orderUnblind($orderInfo){
+        //支付方式为代扣 需要解除订单代扣
+        if($orderInfo['pay_type'] == Inc\PayInc::WithhodingPay){
+            //查询是否签约代扣 如果签约 解除代扣
+            try{
+                $withhold = WithholdQuery::getByBusinessNo(Inc\OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no']);
+                $params =[
+                    'business_type' =>Inc\OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
+                    'business_no'	=>$orderInfo['order_no'],	// 【必须】string	业务编码
+                ];
+                $b =$withhold->unbind($params);
+                if(!$b){
+                    return false;
+                }
+
+            }catch (\Exception $e){
+                //未签约 不解除
+            }
+
+        }
+        return true;
+    }
+
 
 
     /**
