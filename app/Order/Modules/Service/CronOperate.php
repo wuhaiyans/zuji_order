@@ -1,8 +1,8 @@
 <?php
 /**
  *    订单操作类
- *    author: heaven
- *    date : 2018-05-04
+ *    author: wuhaiyan
+ *    date : 2018-06-04
  */
 namespace App\Order\Modules\Service;
 
@@ -77,24 +77,10 @@ class CronOperate
                 }
 
                 //支付方式为代扣 需要解除订单代扣
-                if($v['pay_type'] == Inc\PayInc::WithhodingPay){
-                    //查询是否签约代扣 如果签约 解除代扣
-                    try{
-                        $withhold = WithholdQuery::getByBusinessNo(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no']);
-                        $params =[
-                            'business_type' =>Inc\OrderStatus::BUSINESS_ZUJI,	// 【必须】int		业务类型
-                            'business_no'	=>$v['order_no'],	// 【必须】string	业务编码
-                        ];
-                        $b =$withhold->unbind($params);
-                        if(!$b){
-                            DB::rollBack();
-                            return ApiStatus::CODE_31008;
-                        }
-
-                    }catch (\Exception $e){
-                        //未签约 不解除
-                    }
-
+                $b = OrderOperate::orderUnblind($v);
+                if(!$b){
+                    DB::rollBack();
+                    return ApiStatus::CODE_31008;
                 }
 
             //优惠券归还
@@ -116,7 +102,7 @@ class CronOperate
                 $orderNoticeObj->notify();
 
         }
-        return true;
+             return true;
 
         } catch (\Exception $exc) {
             DB::rollBack();
@@ -126,7 +112,7 @@ class CronOperate
     }
 
     /**
-     *  定时任务确认订单
+     *  定时任务确认收货
      * @return bool
      */
     public static function cronDeliveryReceive()
@@ -151,7 +137,6 @@ class CronOperate
                 $params['order_no'] =$v['order_no'];
 
                 $b =OrderOperate::deliveryReceive($params,1);
-                var_dump($b);die;
                 if(!$b){
                     LogApi::debug("订单确认收货失败:" . $v['order_no']);
                 }
@@ -159,6 +144,16 @@ class CronOperate
             }
 
     }
+    /**
+     *  定时任务  查询订单是否完成
+     * @return bool
+     */
+    public static function cronOrderComplete()
+    {
+        //查询 未冻结 租用中的订单
+
+    }
+
 
 
 }
