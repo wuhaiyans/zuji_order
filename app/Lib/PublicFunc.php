@@ -453,3 +453,20 @@ function array_keys_arrange($array,$value){
     return $list;
 }
 
+/**
+ * 计算扣款日期
+ * @param $term 分期
+ * @param $day  天
+ * @return string
+ */
+function withholdDate($term, $day, $pre="-"){
+    if($term == "" || $day == ""){
+        return "";
+    }
+    $year   = substr($term, 0, 4);
+    $month  = substr($term, -2);
+    $day    = str_pad($day, 2, "0", STR_PAD_LEFT);
+    $_date     =   $year . $pre . $month . $pre . $day ;
+    return $_date;
+}
+

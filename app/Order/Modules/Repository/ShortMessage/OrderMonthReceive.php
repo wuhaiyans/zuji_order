@@ -2,12 +2,15 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Lib\Common\LogApi;
+use App\Lib\User\User;
+use App\Order\Modules\Repository\OrderDeliveryRepository;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderDayReceive
+ * OrderDayReceive 长租确认收货
  *
  * @author wuhaiyan
  */
@@ -60,6 +63,9 @@ class OrderMonthReceive implements ShortMessage {
         if(!$instalment){
             return false;
         }
+        if(strlen($instalment['day'])){
+            $instalment['day'] ="0".$instalment['day'];
+        }
 
          $createTime =$instalment['term'].$instalment['day'];
 
@@ -79,7 +85,46 @@ class OrderMonthReceive implements ShortMessage {
 
 	// 支付宝 短信通知
 	public function alipay_notify(){
-		return true;
+        //通过用户id查询支付宝用户id
+        // 查询订单
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+        if( !$orderInfo ){
+            return false;
+        }
+        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+        if(!$goods){
+            return false;
+        }
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
+        //获取物流单号
+        $delivery_info = OrderDeliveryRepository::getOrderDelivery($this->business_no);
+        if(!$delivery_info){
+            return false;
+        }
+
+        $userAlipay = User::getUserAlipayId($orderInfo['user_id']);
+        if(!is_array($userAlipay)){
+            return false;
+        }
+        if(!empty($userAlipay['alipay_user_id'])) {
+            //通过用户id查询支付宝用户id
+            $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($userAlipay['alipay_user_id']);
+            $message_arr = [
+                'goods_name' => $goodsName,
+                'fast_mail_company' => '顺丰速运',
+                'fast_mail_no' => $delivery_info['logistics_no'],
+                'sing_time' => date('Y-m-d H:i:s'),
+                'order_no' => $orderInfo['order_no'],
+            ];
+            $b = $MessageSingleSendWord->SignIn($message_arr);
+            if ($b === false) {
+                LogApi::error("支付宝消息推送失败",$message_arr);
+            }
+        }
+        return true;
 	}
 //	public function notify($data=[]){
 //		$result = \App\Lib\Common\SmsApi::sendMessage('18201062343', $this->getCode(1), ['goodsName'=>'iphone x']);
