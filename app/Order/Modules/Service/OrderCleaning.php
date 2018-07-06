@@ -167,7 +167,7 @@ class OrderCleaning
     {
         try {
 
-            LogApi::info(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
+            LogApi::debug(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
             //查询清算表根据业务平台退款码out_refund_no
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
             if (empty($orderCleanData)) return false;
@@ -181,7 +181,7 @@ class OrderCleaning
                 'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
-            LogApi::info(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
+            LogApi::debug(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
             if ($success) return false;
 
@@ -285,7 +285,7 @@ class OrderCleaning
                             'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
                         ];
                         $succss =  miniApi::OrderClose($params);
-                        LogApi::info('支付小程序解冻押金', [$succss,  $params]);
+                        LogApi::debug('支付小程序解冻押金', [$succss,  $params]);
                     } else {
                         /*
                           * 订单取消
@@ -301,7 +301,7 @@ class OrderCleaning
                             'app_id'=>config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
                         ];
                         $success =  miniApi::OrderCancel($orderParams);
-                        LogApi::info('支付小程序解冻押金', [$success,  $orderParams]);
+                        LogApi::debug('支付小程序解冻押金', [$success,  $orderParams]);
                     }
 
                 }
@@ -310,7 +310,7 @@ class OrderCleaning
             return true;
 
         } catch (\Exception $e) {
-            LogApi::info(__method__.'操作请求异常',$e);
+            LogApi::error(__method__.'操作请求异常',$e);
             return false;
 
         }
@@ -503,7 +503,7 @@ class OrderCleaning
     public static function miniUnfreezeAndPayClean($param)
     {
         try{
-            LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:', $param);
+            LogApi::debug(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:', $param);
             /**
             支付宝小程序解压预授权成功后返回的值
             pay_amount（单位元）
@@ -518,7 +518,7 @@ class OrderCleaning
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
             if ($orderCleanInfo['code']) {
-                LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 return false;
             }
             $orderCleanInfo = $orderCleanInfo['data'];
@@ -539,21 +539,21 @@ class OrderCleaning
                         'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
                     ];
                     $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-                    LogApi::info(__METHOD__.'() '.microtime(true).'小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
+                    LogApi::debug(__METHOD__.'() '.microtime(true).'小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
                     return $success ?? false;
                 } else {
 
-                        LogApi::info(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
+                        LogApi::error(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
                         return false;
                      }
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                LogApi::error(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
             }
             return true;
 
         } catch (\Exception $e) {
-            LogApi::info(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
+            LogApi::error(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
             return false;
 
         }
