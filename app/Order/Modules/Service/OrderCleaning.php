@@ -252,7 +252,7 @@ class OrderCleaning
                     ];
                     LogApi::info(__method__.'财务发起预授权转支付请求以前，请求的参数：',$freezePayParams);
                     $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
-                    LogApi::info(__method__.'财务已经预授权转支付请求以后，返回的结果：'.$succss);
+                    LogApi::info(__method__.'财务已经预授权转支付请求以后，返回的结果：',$succss);
                 }
 
                 //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
@@ -372,7 +372,7 @@ class OrderCleaning
                 ];
                 LogApi::info(__method__.'财务发起退款请求前，请求的参数：', $params);
                 $succss = CommonRefundApi::apply($params);
-                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：'.$succss);
+                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：',$succss);
 
             }
         }
@@ -453,7 +453,7 @@ class OrderCleaning
                 ];
                 LogApi::info(__method__.'财务发起预授权解冻请求前，请求的参数：', $unFreezeParams);
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：'.$succss);
+                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：', $succss);
             }
 
 

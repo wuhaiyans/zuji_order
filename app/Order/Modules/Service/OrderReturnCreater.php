@@ -1669,6 +1669,7 @@ class OrderReturnCreater
         ];
         $validator = app('validator')->make($params, $rules);
         LogApi::debug("退款成功回调参数",$params);
+        LogApi::debug("退款成功回调用户信息参数",$userinfo);
         if ($validator->fails()) {
             LogApi::debug("参数错误",$params);
             return false;
