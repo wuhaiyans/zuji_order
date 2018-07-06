@@ -807,14 +807,11 @@ class OrderOperate
                         $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
                         $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
                         $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
+                        $values['withhold_time']  = withholdDate($values['term'], $values['day']);
                         if ($values['times']==1)
                         {
                             $goodsExtendArray[$values['goods_no']]['firstAmount'] =$values['amount'];
-                            $year   = substr($values['term'], 0, 4);
-                            $month  = substr($values['term'], -2);
-                            $day    = str_pad($values['day'],2,"0",STR_PAD_LEFT);
-                            $first_date     =   $year."-".$month."-".$day ;
-                            $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'] = $first_date;
+                            $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'] = withholdDate($values['term'], $values['day']);
                         }
 
                         if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
