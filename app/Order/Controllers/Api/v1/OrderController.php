@@ -49,6 +49,9 @@ class OrderController extends Controller
 	 * @return type
 	 */
     public function confirmation(Request $request){
+        var_dump(OrderOperate::isOrderComplete("A705178613466177"));
+        die;
+
         $params = $request->all();
 
         //获取appid

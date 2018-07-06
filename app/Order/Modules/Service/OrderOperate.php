@@ -713,6 +713,19 @@ class OrderOperate
                 return true;
             }
         }
+        if($orderStatus!=0){
+            //如果订单完成 更新订单状态
+            $order = Order::getByNo($orderNo);
+            $b =$order->updateStatus($orderStatus,0);
+            if(!$b){
+                return false;
+            }
+            $orderInfo =$order->getData();
+            $b =self::orderUnblind($orderInfo);
+            if(!$b){
+                return false;
+            }
+        }
         return true;
     }
 
