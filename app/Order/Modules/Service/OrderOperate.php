@@ -703,7 +703,7 @@ class OrderOperate
         $orderStatus =0;
         foreach ($goods as $k=>$v){
             //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
-            if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED){
+            if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED || $v['goods_status'] == Inc\OrderGoodStatus::EXCHANGE_REFUND){
                 $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
             }
             if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
