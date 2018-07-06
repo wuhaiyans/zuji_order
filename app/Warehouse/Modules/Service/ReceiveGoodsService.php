@@ -89,7 +89,7 @@ class ReceiveGoodsService
             if($it['status']==ReceiveGoods::STATUS_ALL_RECEIVE && $it['status']!=ReceiveGoods::STATUS_ALL_CHECK){
                 $it['jiance']=true;
             }else{
-                $it['jiance']=true;
+                $it['jiance']=false;
             }
 
             //当前状态

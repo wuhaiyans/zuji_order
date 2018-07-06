@@ -69,7 +69,8 @@ class ReceiveGoods extends Warehouse
             self::STATUS_PART_RECEIVE   => '部分收货完成',
             self::STATUS_ALL_RECEIVE    => '全部收货完成',
             self::STATUS_PART_CHECK     => '部分检测完成',
-            self::STATUS_ALL_CHECK      => '全部检测完成'
+            self::STATUS_ALL_CHECK      => '全部检测完成',
+            self::STATUS_CONFIRM_RECEIVE      => '确认换货'
         ];
 
         if ($status === null) return $st;

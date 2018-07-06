@@ -301,11 +301,11 @@ class DeliveryController extends Controller
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
 
             //Log::error('aaaaaaaaccd');
-            Log::error($a);
+            //Log::error($a);
 
             DB::commit();
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+
             DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
