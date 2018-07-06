@@ -9,6 +9,7 @@
 namespace App\Warehouse\Modules\Service;
 
 use App\Warehouse\Models\Receive;
+use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use App\Warehouse\Modules\Repository\ImeiRepository;
@@ -339,6 +340,9 @@ class ReceiveService
     /**
      * 确认同意换货
      *      创建发货单
+     *      1.换货类型
+     *      2.检测完成
+     *      3.全部合格
      */
     public function createDelivery($receive_no){
         $model = Receive::find($receive_no);
@@ -359,7 +363,14 @@ class ReceiveService
                     'goods_no'=>$item->goods_no,
                     'quantity'=>$item->quantity,
                 ];
+                $item->status=ReceiveGoods::STATUS_CONFIRM_RECEIVE;
+                $item->status_time=time();
+                $item->update();
             }
+            $model->status=Receive::STATUS_CONFIRM_RECEIVE;
+            $model->status_time=time();
+            $model->update();
+
             //创建发货单
             if (!DeliveryRepository::create($data)) {
                 throw new \Exception('创建发货单失败');

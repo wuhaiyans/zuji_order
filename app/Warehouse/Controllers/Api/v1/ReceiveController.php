@@ -419,8 +419,11 @@ class ReceiveController extends Controller
         }
 
         try {
+            DB::beginTransaction();
             $this->receive->createDelivery($params['receive_no']);
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
         return \apiResponse([]);
