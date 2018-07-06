@@ -238,8 +238,6 @@ class Withhold extends \App\Lib\Configurable {
 		} catch (\App\Lib\ApiException $exc) {
 				LogApi::type('data-save')::error('[代扣协议][解约申请]失败',$exc);
 				Error::exception( $exc );
-		} finally {
-			LogApi::error('代扣协议解绑失败');
 			return false;
 		}
 

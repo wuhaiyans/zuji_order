@@ -5,6 +5,7 @@ use App\Order\Modules\Repository\OrderGivebackRepository;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use Illuminate\Support\Facades\DB;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Lib\ApiStatus;
 
 class OrderGiveback
 {
@@ -469,6 +470,12 @@ class OrderGiveback
 		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if( !$orderFreezeResult ){
 			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
+			return false;
+		}
+		//解冻成功，调用订单是否完成接口
+		$orderComplete = OrderOperate::isOrderComplete($orderNo);
+		if( !$orderComplete ){
+			set_apistatus(ApiStatus::CODE_92700, '订单关闭失败!');
 			return false;
 		}
 		return true;
