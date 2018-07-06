@@ -206,9 +206,29 @@ class Withhold extends \App\Lib\Configurable {
 	 * @throws \Exception
 	 */
 	public function unsignApply(){
-		if( !$this->_unsignBefore() ){
+		
+		// 协议状态判断
+		if( $this->withhold_status == WithholdStatus::UNSIGNED ){	// 已解约，重复请求
+			LogApi::debug('代扣解约申请重复，忽略',[
+				'withhold_no' => $this->withhold_no,
+				'withhold_status' => $this->withhold_status,
+			]);
+			return true;
+		}
+		elseif( $this->withhold_status != WithholdStatus::SIGNED ){	// 已签约
+			LogApi::debug('代扣解约状态禁止',[
+				'withhold_no' => $this->withhold_no,
+				'withhold_status' => $this->withhold_status,
+			]);
+			Error::setError('代扣协议状态错误');
 			return false;
 		}
+		// 无在用业务
+		if( $this->counter > 0 ){
+			Error::setError('代扣协议正在使用');
+			return false;
+		}
+		
 		$time = time();
 		try {
 
@@ -246,9 +266,18 @@ class Withhold extends \App\Lib\Configurable {
 	 * 解约成功
 	 */
 	public function unsignSuccess(){
-		if( !$this->_unsignBefore() ){
+		// 协议状态判断
+		if( $this->withhold_status != WithholdStatus::SIGNED	// 已签约
+				&& $this->withhold_status != WithholdStatus::UNSIGNING ){	// 解约中
+			Error::setError('代扣协议状态错误');
 			return false;
 		}
+		// 无在用业务
+		if( $this->counter > 0 ){
+			Error::setError('代扣协议正在使用');
+			return false;
+		}
+		
 		$time = time();
 		// 修改状态
 		//sql_profiler();

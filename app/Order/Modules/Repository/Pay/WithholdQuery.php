@@ -14,6 +14,7 @@ class WithholdQuery {
 	//-+------------------------------------------------------------------------
 	/**
 	 * 根据用户ID+支付渠道，查询代扣协议
+	 * 当前有效的代扣协议
 	 * @param int		$user_id		用户ID
 	 * @param int		$channel		支付渠道
 	 * @return \App\Order\Modules\Repository\Pay\Withhold
@@ -38,6 +39,7 @@ class WithholdQuery {
 
 	/**
 	 * 根据代扣协议编号 ，查询代扣协议
+	 * 允许查询已经解约的代扣协议
 	 * @param string		$withhold_no		代扣协议编号
 	 * @return \App\Order\Modules\Repository\Pay\Withhold
 	 * @throws \App\Lib\NotFoundException
@@ -46,7 +48,6 @@ class WithholdQuery {
 
 		$builder = \App\Order\Models\OrderPayWithholdModel::where([
 			'withhold_no'	=> $withhold_no,
-			'withhold_status'	=> WithholdStatus::SIGNED,
 		])->limit(1);
 		if( $lock ){
 			$builder->lockForUpdate();
