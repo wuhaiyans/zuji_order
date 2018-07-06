@@ -228,17 +228,18 @@ class Withhold extends \App\Lib\Configurable {
 				'update_time' => $time,
 			]);
 			if( !$n ){
-				Error::setError('[代扣协议][解约申请]状态更新失败');
 				LogApi::type('data-save')::error('[代扣协议][解约申请]状态更新失败');
+				Error::setError('[代扣协议][解约申请]状态更新失败');
 				return false;
 			};
 			$this->withhold_status = WithholdStatus::UNSIGNING;
 			$this->update_time = $time;
 			return true;
 		} catch (\App\Lib\ApiException $exc) {
-			Error::exception( $exc );
+				LogApi::type('data-save')::error('[代扣协议][解约申请]失败',$exc);
+				Error::exception( $exc );
 		} finally {
-			LogApi::error('[代扣协议][解约申请]操作失败');
+			LogApi::error('代扣协议解绑失败');
 			return false;
 		}
 
