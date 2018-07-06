@@ -302,7 +302,7 @@ class Delivery
       $response =json_decode($response,true);
       var_dump($response);die;
       if($response['code']!=ApiStatus::CODE_0){
-          throw new \Exception('订单发货系统更新失败1111');
+          throw new \Exception('订单发货系统更新失败');
       }
       return $response;
     }

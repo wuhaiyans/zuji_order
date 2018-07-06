@@ -150,8 +150,7 @@ class OrderOperate
             }
         }catch (\Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
-            die;
+            return false;
         }
 
     }
