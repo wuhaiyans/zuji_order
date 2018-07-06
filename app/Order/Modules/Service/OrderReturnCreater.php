@@ -138,7 +138,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;//创建失败
                 }
-                $no_list['refund_no'] = $data['refund_no'];
+                $no_list[$k]['refund_no'] = $data['refund_no'];
             }
             //修改冻结状态为退货中
             if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
@@ -172,14 +172,14 @@ class OrderReturnCreater
             }
 
             DB::commit();
-            foreach( $no_list as $no ){
+           foreach( $no_list as $no ){
                 //短信
                 if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
                     $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $no['refund_no'] ,SceneConfig::RETURN_APPLY);
                     $b=$orderNoticeObj->notify();
                     Log::debug($b?"Order :".$goods_info['order_no']." IS OK":"IS error");
                 }
-            }
+           }
             return $no_list;
         }catch( \Exception $exc){
             DB::rollBack();
