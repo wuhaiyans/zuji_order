@@ -50,7 +50,6 @@ class OrderController extends Controller
 	 * @return type
 	 */
     public function confirmation(Request $request){
-        User::getUserAlipayId(18);die;
         $params = $request->all();
 
         //获取appid

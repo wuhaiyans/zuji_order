@@ -63,6 +63,9 @@ class OrderMonthReceive implements ShortMessage {
         if(!$instalment){
             return false;
         }
+        if(strlen($instalment['day'])){
+            $instalment['day'] ="0".$instalment['day'];
+        }
 
          $createTime =$instalment['term'].$instalment['day'];
 
