@@ -1188,6 +1188,11 @@ class OrderOperate
                        $goodsList[$keys]['act_goods_state']['buyout_topay'] = true;
                    }
 
+                  $isAllowReturn = OrderReturnCreater::allowReturn(['order_no'=>$orderNo, 'goods_no'=>$values['goods_no']]);
+                   if ($isAllowReturn) {
+
+                       $goodsList[$keys]['is_allow_return'] = $isAllowReturn ?? 0;
+                   }
 
                }
 
