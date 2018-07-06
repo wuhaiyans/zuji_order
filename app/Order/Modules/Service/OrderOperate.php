@@ -1194,6 +1194,11 @@ class OrderOperate
                        $goodsList[$keys]['is_allow_return'] = $isAllowReturn ?? 0;
                    }
 
+                   $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
+                   $goodsList[$keys]['is_return_btn'] = $isReturnBtn ?? 0;
+                   $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
+                   $goodsList[$keys]['is_exchange_btn'] = $isExchange ?? 0;
+
                }
 
            }
