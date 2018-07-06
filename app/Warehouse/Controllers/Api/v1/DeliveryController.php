@@ -82,16 +82,12 @@ class DeliveryController extends Controller
      */
     public function matchGoods()
     {
-        /**
-         * $params 数组中需要包含以下字段
-         * delivery_no 发货单号
-         * serial_no 设备序号
-         * quantity  设备数量
-         */
         $rules = [
             'delivery_no' => 'required', //单号
             'goods_no'   => 'required', //序号
-            'quantity'    => 'required', //数量
+            'imei'    => 'required', //imei
+            'price'    => 'required', //采购价
+            'apple_serial'    => 'required', //苹果手机序列号
         ];
         $params = $this->_dealParams($rules);
 
