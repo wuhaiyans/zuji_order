@@ -300,9 +300,9 @@ class Delivery
       $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
 
       $response =json_decode($response,true);
-      var_dump($response);die;
+      var_dump($response);
       if($response['code']!=ApiStatus::CODE_0){
-          throw new \Exception('订单发货系统更新失败1111');
+          throw new \Exception('订单发货系统更新失败');
       }
       return $response;
     }

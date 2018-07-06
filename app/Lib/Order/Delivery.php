@@ -105,13 +105,14 @@ class Delivery
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;
-
+        var_dump($params);
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'api.order.delivery',//模拟
             'params' => $params
         ]);
+        var_dump($response);
 
         return $response;
 
