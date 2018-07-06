@@ -45,7 +45,7 @@ class OrderPayIncomeRepository
         }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['goods_no', '=', $param['goods_no']];
+            $whereArray[] = ['order_no', '=', $param['order_no']];
         }
 
         if (isset($param['appid']) && !empty($param['appid'])) {

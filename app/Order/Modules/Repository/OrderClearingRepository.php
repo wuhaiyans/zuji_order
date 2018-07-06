@@ -49,20 +49,20 @@ class OrderClearingRepository
         }
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
-        if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && empty($param['refund_amount']))
+        if (empty(intval($param['auth_deduction_amount'])) && empty(intval($param['auth_unfreeze_amount'])) && empty(intval($param['refund_amount'])))
         {
             $status    =   OrderCleaningStatus::orderCleaningComplete;
             //预授权转支付不为空，为待押金转支付状态
-        } else if (!empty($param['auth_deduction_amount'])){
+        } else if (!empty(intval($param['auth_deduction_amount']))){
 
             $status    =   OrderCleaningStatus::orderCleaningDeposit;
 
             //预授权转支付不为空，为待押金转支付状态
-        }   else if (empty($param['auth_deduction_amount']) && !empty($param['auth_unfreeze_amount'])){
+        }   else if (empty(intval($param['auth_deduction_amount'])) && !empty(intval($param['auth_unfreeze_amount']))){
 
             $status    =   OrderCleaningStatus::orderCleaningUnfreeze;
 
-        }   else if (empty($param['auth_deduction_amount']) && empty($param['auth_unfreeze_amount']) && !empty($param['refund_amount'])){
+        }   else if (empty(intval($param['auth_deduction_amount'])) && empty(intval($param['auth_unfreeze_amount'])) && !empty(intval($param['refund_amount']))){
 
             $status    =   OrderCleaningStatus::orderCleaningUnRefund;
         }
