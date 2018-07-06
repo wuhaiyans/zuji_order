@@ -136,8 +136,6 @@ class OrderOperate
                 $orderNoticeObj->notify();
                 $orderNoticeObj->alipay_notify();
 
-
-
                 return true;
 
             }else {
