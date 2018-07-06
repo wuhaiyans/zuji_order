@@ -58,7 +58,11 @@ class WithholdController extends Controller
             // 查询用户协议
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
             $payWithhold = $withhold->getData();
-
+            $getCounter  = $withhold->getCounter();
+            if($getCounter > 0){
+                $withholdStatus = [ "withholding" => "N" ];
+                return apiResponse($withholdStatus,ApiStatus::CODE_0);
+            }
             $data = [
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
                 'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
