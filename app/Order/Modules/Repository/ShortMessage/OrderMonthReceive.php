@@ -63,7 +63,7 @@ class OrderMonthReceive implements ShortMessage {
         if(!$instalment){
             return false;
         }
-        if(strlen($instalment['day'])){
+        if(strlen($instalment['day'])==1){
             $instalment['day'] ="0".$instalment['day'];
         }
 
