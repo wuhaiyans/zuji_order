@@ -532,6 +532,16 @@ class Order {
         }
     }
 
+    /**
+     *  修改订单状态
+     * @return boolean
+     */
+    public function updateStatus($orderStatus,$freezeType):bool {
+         $this->model->order_status =$orderStatus;
+         $this->model->freeze_type =$freezeType;
+         return $this->model->save();
+    }
+
 	
 	/**
 	 * 获取订单
