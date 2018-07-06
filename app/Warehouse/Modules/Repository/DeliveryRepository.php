@@ -93,7 +93,7 @@ class DeliveryRepository
      *
      * 存设备
      */
-    public function storeGoods($delivery_no, $data)
+    public static function storeGoods($delivery_no, $data)
     {
         $time = time();
         foreach ($data as $k=>$val){
@@ -117,7 +117,7 @@ class DeliveryRepository
      *
      * 存日志
      */
-    public function storeLog($delivery_no)
+    public static function storeLog($delivery_no)
     {
         $log_row = [
             'delivery_no'   =>  $delivery_no,
