@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
-
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
@@ -30,29 +30,48 @@ class ReturnDelivery implements ShortMessage {
 	
 	public function notify($data=[]){
 		// 根据业务，获取短息需要的数据
-		
-		// 查询订单
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
-		if( !$orderInfo ){
-			return false;
-		}
-		// 短息模板
-		$code = $this->getCode($orderInfo['channel_id']);
-		if( !$code ){
-			return false;
-		}
-        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
-		if(!$goods){
-		    return false;
-        }
 
-		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage('13020059043', $code, [
-            'realName' => $data['realName'],
-            'orderNo' => $data['orderNo'],
-            'goodsName' => $data['goodsName'],
-            'serviceTel'=>Config::Customer_Service_Phone,
-        ],$data['orderNo']);
+        //获取退货单信息
+        $return= \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($this->business_no);
+        if( !$return ){
+            return false;
+        }
+        $returnInfo=$return->getData();
+        LogApi::debug("短信获取退货单信息",$returnInfo);
+        // 查询订单
+        $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
+        if( !$order ){
+            return false;
+        }
+        $orderInfo=$order->getData();
+        LogApi::debug("短信查询订单",$orderInfo);
+        // 短息模板
+        $code = $this->getCode($orderInfo['channel_id']);
+        LogApi::debug("短息模板",$code);
+        if( !$code ){
+            return false;
+        }
+        //获取商品信息
+        $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($returnInfo['goods_no']);
+        if(!$goods){
+            return false;
+        }
+        $goodsInfo=$goods->getData();
+        LogApi::debug("短信获取商品信息",$goodsInfo);
+        //获取用户认证信息
+        $userInfo=OrderRepository::getUserCertified($returnInfo['order_no']);
+        if(!$userInfo){
+            return false;
+        }
+        LogApi::debug("短信获取用户认证信息",$userInfo);
+       // 发送短息
+        $res=\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
+            'realName' => $userInfo['realname'],
+            'orderNo' => $goodsInfo['order_no'],
+            'goodsName' => $goodsInfo['goods_name'],
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+        ],$goodsInfo['order_no']);
+        return $res;
 	}
 
 	// 支付宝 短信通知
