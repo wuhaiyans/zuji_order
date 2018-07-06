@@ -148,4 +148,14 @@ class OrderGoodsRepository
             ['order_no', '=', $orderNo],
         ])->update(['goods_status'=>OrderGoodStatus::RENTING_MACHINE]);
     }
+    /**
+     * 更新商品状态为已退款
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function setGoodsRefund($orderNo){
+        return OrderGoods::where([
+            ['order_no', '=', $orderNo],
+        ])->update(['goods_status'=>OrderGoodStatus::REFUNDED]);
+    }
 }

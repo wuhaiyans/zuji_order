@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
-
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
@@ -38,7 +37,6 @@ class ReturnApply implements ShortMessage {
         }
        $returnInfo=$return->getData();
         LogApi::debug("短信获取退货单信息",$returnInfo);
-
 		// 查询订单
         $order = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo['order_no']);
         if( !$order ){

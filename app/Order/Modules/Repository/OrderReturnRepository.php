@@ -127,6 +127,12 @@ class OrderReturnRepository
         }
         return $return_result;
     }
+
+    /**
+     * 获取订单的商品信息
+     * @param $order_no
+     * @return bool|\Illuminate\Support\Collection
+     */
     public static function getGoodsInfo($order_no){
         $where[]=['order_no','=',$order_no];
         $getGoods=OrderGoods::where($where)->get();
