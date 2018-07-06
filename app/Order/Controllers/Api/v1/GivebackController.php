@@ -523,7 +523,7 @@ class GivebackController extends Controller
 				'operator_id'=>$operateUserInfo['uid'],
 				'operator_name'=>$operateUserInfo['username'],
 				'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
-				'msg'=>'还机单进行检测',
+				'msg'=>'还机单提交检测结果',
 			]);
 			if( !$goodsLog ){
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
