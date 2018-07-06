@@ -128,7 +128,7 @@ class ReceiveService
      */
     public function getLogisticsName($id)
     {
-        return '顺风';
+        return '顺丰';
     }
 
     /**

@@ -38,7 +38,7 @@ class WarehouseHelper
      */
     public function get($id, $no) {
 
-        if (!$id || !$no) return false;//暂时id没用,因为只有一个顺风
+        if (!$id || !$no) return false;//暂时id没用,因为只有一个顺丰
 
         $result = Curl::post(config('url'), json_encode(['mailno'=>$no]));
 

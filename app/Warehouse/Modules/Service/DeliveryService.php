@@ -463,7 +463,7 @@ class DeliveryService
      */
     public function getLogisticsName($id)
     {
-        return '顺风';
+        return '顺丰';
     }
 
     /**

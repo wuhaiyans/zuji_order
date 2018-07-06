@@ -29,16 +29,16 @@ use Symfony\Component\Translation\Exception\NotFoundResourceException;
 class DeliveryRepository
 {
 
-    private $delivery;
-    private $deliveryGoods;
-    private $deliveryLog;
-
-    public function __construct(Delivery $delivery, DeliveryGoods $deliveryGoods, DeliveryLog $deliveryLog)
-    {
-        $this->delivery = $delivery;
-        $this->deliveryGoods = $deliveryGoods;
-        $this->deliveryLog = $deliveryLog;
-    }
+//    private $delivery;
+//    private $deliveryGoods;
+//    private $deliveryLog;
+//
+//    public function __construct(Delivery $delivery, DeliveryGoods $deliveryGoods, DeliveryLog $deliveryLog)
+//    {
+//        $this->delivery = $delivery;
+//        $this->deliveryGoods = $deliveryGoods;
+//        $this->deliveryLog = $deliveryLog;
+//    }
 
 
 	/**
