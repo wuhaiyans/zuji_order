@@ -226,25 +226,36 @@ class DeliveryRepository
 
             $time = time();
             $imei_data = [
-                'delivery_no' => $delivery_no,
-                'goods_no'   => $goods_no,
-                'status'      => DeliveryGoodsImei::STATUS_YES,
-                'create_time' => $time
+                'delivery_no'   => $delivery_no,
+                'goods_no'      => $goods_no,
+                'status'        => DeliveryGoodsImei::STATUS_YES,
+                'imei'          => $params['imei'],
+                'apple_serial'  => $params['apple_serial'],
+                'price'         => $params['price'],
+                'create_time'   => $time
             ];
 
             #1修改delivery_imei表
             if (isset($params['imei']) && $params['imei']) {
                 $goods_imei_model = DeliveryGoodsImei::where([
                     'delivery_no'=>$delivery_no,
-                    'goods_no'=>$goods_no,
-                    'imei'=>$params['imei']
+                    'goods_no'=>$goods_no
                 ])->first();
 
                 if (!$goods_imei_model) {
                     #goods_imei表添加
-                    $imei_data['imei'] = $params['imei'];
                     $model = new DeliveryGoodsImei();
                     $model->create($imei_data);
+                }else{
+                    //入库
+                    Imei::in($goods_imei_model->imei);
+                    //存在修改
+                    $goods_imei_model->imei = $imei_data['imei'];
+                    $goods_imei_model->status = $imei_data['status'];
+                    $goods_imei_model->price = $imei_data['price'];
+                    $goods_imei_model->apple_serial = $imei_data['apple_serial'];
+                    $goods_imei_model->status_time = $time;
+                    $goods_imei_model->update();
                 }
 
                 Imei::out($params['imei']);
@@ -394,7 +405,7 @@ class DeliveryRepository
 	 * [
 	 *		'delivery_no'	=> '', //【必选】string 发货单
 	 *		'goods_no'		=> '', //【必选】string 商品编号
-	 * ]
+	 * ]取消
 	 * @return boolean
 	 */
     public static function cancelMatchGoods($params)
