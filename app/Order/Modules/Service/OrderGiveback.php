@@ -309,8 +309,8 @@ class OrderGiveback
 		//创建服务层对象
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单信息
-		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivevbackInfo ) {			
+		$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivebackInfo ) {			
 			set_msg('还机单信息获取失败');
 			return false;
 		}
@@ -328,11 +328,11 @@ class OrderGiveback
 				return false;
 			}
 			//解冻订单
-			if(!self::__unfreeze($orderGivevbackInfo['order_no'])){
+			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
 				return false;
 			}
 			//更新商品表状态
-			$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
+			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
 			if( !$orderGoods ){
 				set_msg('商品仓库获取失败');
 				return false;
@@ -340,6 +340,22 @@ class OrderGiveback
 			$orderGoodsResult = $orderGoods->givebackFinish();
 			if( !$orderGoodsResult ){
 				set_msg('商品仓库更新状态失败');
+				return false;
+			}
+			//记录日志
+			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+				'order_no'=>$orderGivebackInfo['order_no'],
+				'action'=>'还机单清算',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+				'business_no'=>$orderGivebackInfo['giveback_no'],
+				'goods_no'=>$orderGivebackInfo['goods_no'],
+				'operator_id'=>0,
+				'operator_name'=>'支付回调',
+				'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
+				'msg'=>'还机单支付完成',
+			]);
+			if( !$goodsLog ){
+				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
 				return false;
 			}
 		} catch (\Exception $ex) {
@@ -371,14 +387,14 @@ class OrderGiveback
 			return false;
 		}
 		//创建服务层对象
-		$orderGoods = Goods::getByGoodsNo($orderGivevbackInfo['goods_no']);
+		$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
 		if( !$orderGoods ){
 			return false;
 		}
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单信息
-		$orderGivevbackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivevbackInfo ) {
+		$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+		if( !$orderGivebackInfo ) {
 			return false;
 		}
 		//获取商品信息
@@ -453,6 +469,22 @@ class OrderGiveback
 				if(!$orderGoodsResult){
 					return false;
 				}
+			}
+			//记录日志
+			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+				'order_no'=>$orderGivebackInfo['order_no'],
+				'action'=>'还机单支付',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+				'business_no'=>$orderGivebackInfo['giveback_no'],
+				'goods_no'=>$orderGivebackInfo['goods_no'],
+				'operator_id'=>0,
+				'operator_name'=>'支付回调',
+				'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
+				'msg'=>'还机单支付完成',
+			]);
+			if( !$goodsLog ){
+				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
+				return false;
 			}
 		} catch (\Exception $ex) {
 			return false;

@@ -1677,27 +1677,36 @@ class OrderReturnCreater
      * 备注：不要加事务 外面调用 已经嵌套事务
      */
     public static function createchange($detail,$goods_info){
+        LogApi::debug("换货发货接收参数detail",$detail);
+        LogApi::debug("换货发货接收参数goods_info",$goods_info);
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
                 //获取设备信息
                 $delivery=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDeliveryInfo($detail['order_no'],$v['goods_no']);
+                LogApi::debug("获取设备信息",$delivery);
                 //更新原设备为无效
                 $updateDelivery=$delivery->barterDelivery();
                 if(!$updateDelivery){
+                    LogApi::debug("更新原设备为无效失败");
                     return false;
                 }
-                //更新换货物流信息
+                //换货物流信息
                 $return=GoodsReturn::getReturnByInfo($detail['order_no'],$v['goods_no']);
+                LogApi::debug("换货物流信息参数",$detail['order_no']);
+                LogApi::debug("换货物流信息参数goods_no",$v['goods_no']);
                 if(!$return){
+                    LogApi::debug("更新换货物流信息失败",$return);
                     return false;
                 }
                 $updateReturn=$return->barterDelivery($v);
+                LogApi::debug("更新换货物流信息参数goods_no",$v['goods_no']);
                 if(!$updateReturn){
                    return false;
                 }
             }
             $goods_result= \App\Order\Modules\Repository\Order\DeliveryDetail::addGoodsDeliveryDetail($detail['order_no'],$goods_info);
+            LogApi::debug("创建换货记录",$goods_result);
             if(!$goods_result){
                 return false;//创建换货记录失败
             }
