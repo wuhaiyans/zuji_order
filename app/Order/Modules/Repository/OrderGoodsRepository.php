@@ -38,6 +38,10 @@ class OrderGoodsRepository
 		return $this->orderGoods->where('goods_no','=',$goodsNo)->update($data);
 	}
 
+	public static function getGoodsByOrderNo($orderNo){
+	    return OrderGoods::query()->where(['order_no'=>$orderNo])->get();
+    }
+
 	/**
 	 * 执行where查询并获得第一个结果。
 	 *

@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Order\Models\Order;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
@@ -279,6 +280,7 @@ class OrderComponnet implements OrderCreater
             $this->getOrderCreater()->setError('保存订单数据失败');
             return false;
         }
+
         return true;
     }
 
