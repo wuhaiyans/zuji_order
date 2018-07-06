@@ -134,6 +134,7 @@ class OrderOperate
                 // 订单发货成功后 发送短信
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
 
 
 
@@ -433,9 +434,11 @@ class OrderOperate
             if($orderInfo['zuqi_type'] ==1){
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_DAY_RECEIVE);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
             }else{
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_MONTH_RECEIVE);
                 $orderNoticeObj->notify();
+                $orderNoticeObj->alipay_notify();
             }
             DB::commit();
             return true;
@@ -703,7 +706,7 @@ class OrderOperate
         $orderStatus =0;
         foreach ($goods as $k=>$v){
             //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
-            if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED){
+            if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED || $v['goods_status'] == Inc\OrderGoodStatus::EXCHANGE_REFUND){
                 $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
             }
             if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
@@ -1188,6 +1191,16 @@ class OrderOperate
                        $goodsList[$keys]['act_goods_state']['buyout_topay'] = true;
                    }
 
+                  $isAllowReturn = OrderReturnCreater::allowReturn(['order_no'=>$orderNo, 'goods_no'=>$values['goods_no']]);
+                   if ($isAllowReturn) {
+
+                       $goodsList[$keys]['is_allow_return'] = $isAllowReturn ?? 0;
+                   }
+
+                   $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
+                   $goodsList[$keys]['is_return_btn'] = $isReturnBtn ?? 0;
+                   $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
+                   $goodsList[$keys]['is_exchange_btn'] = $isExchange ?? 0;
 
                }
 

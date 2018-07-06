@@ -39,6 +39,23 @@ class User{
         return $info['data'];
     }
 
+    public static function getUserAlipayId($user_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.user.query.alipayid';
+        $data['params'] = [
+            'user_id'=>$user_id,
+        ];
+        //var_dump($data);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+    }
+
     public static function setRemark($user_id,$remark){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.user.remark.set';

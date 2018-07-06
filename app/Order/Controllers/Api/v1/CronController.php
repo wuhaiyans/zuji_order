@@ -28,14 +28,5 @@ class CronController extends Controller
         Service\CronOperate::cronDeliveryReceive();
         echo "complete";die;
     }
-    /**
-     * 定时任务 查询订单是否完成
-     * @return bool
-     */
-    public function cronOrderComplete(){
-        Service\CronOperate::cronOrderComplete();
-        echo "complete";die;
-    }
-
 
 }
