@@ -7,6 +7,7 @@ use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
+use App\Order\Modules\Repository\OrderLogRepository;
 
 class OrderBuyout
 {
@@ -168,7 +169,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public static function callbackPaid($params){
+	public static function callbackPaid($params,$userInfo){
 		//过滤参数
 		$rule = [
 				'business_type'     => 'required',//业务类型
@@ -238,9 +239,13 @@ class OrderBuyout
 					'status'     => 'success',//支付状态
 			];
 			$result = self::callbackOver($params);
-			if(!$result){return false;
+			if(!$result){
+				return false;
 			}
 		}
+		//插入日志
+		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断支付成功");
+
 		return true;
 	}
 	/*
@@ -253,7 +258,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public static function callbackOver($params){
+	public static function callbackOver($params,$userInfo){
 		//过滤参数
 		$rule = [
 				'business_type'     => 'required',//业务类型
@@ -301,6 +306,9 @@ class OrderBuyout
 		if(!$ret){
 			return false;
 		}
+		OrderOperate::isOrderComplete($buyout['order_no']);
+		//插入日志
+		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断完成");
 		return true;
 	}
 

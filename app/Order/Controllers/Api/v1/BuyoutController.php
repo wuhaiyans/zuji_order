@@ -15,6 +15,7 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Illuminate\Support\Facades\DB;
+use App\Order\Modules\Repository\OrderLogRepository;
 
 /**
  * 订单买断接口控制器
@@ -136,12 +137,13 @@ class BuyoutController extends Controller
         $rule= [
             'goods_no'=>'required',
             'user_id'=>'required',
+            'user_info'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-
+        $userInfo = $params['user_info'];
         if (empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
         }
@@ -206,6 +208,9 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
+        //插入日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断");
+
         DB::commit();
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
@@ -230,12 +235,13 @@ class BuyoutController extends Controller
             'goods_no'=>'required',
             'user_id'=>'required',
             'buyout_price'=>'required',
+            'user_info'=>'required',
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-
+        $userInfo = $params['user_info'];
         //获取订单商品信息
         $goodsObj = Goods::getByGoodsNo($params['goods_no']);
         if(empty($goodsObj)){
@@ -290,6 +296,9 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
+        //插入日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断");
+
         DB::commit();
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
@@ -310,11 +319,13 @@ class BuyoutController extends Controller
         $rule= [
             'buyout_no'=>'required',
             'user_id'=>'required',
+            'user_info'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
+        $userInfo = $params['user_info'];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no']);
         if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
@@ -347,7 +358,11 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_50001,"取消失败");
         }
+        //插入日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服取消买断");
+
         DB::commit();
+
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
@@ -368,12 +383,14 @@ class BuyoutController extends Controller
         $rule= [
             'buyout_no'=>'required',
             'user_id'=>'required',
-            'callback_url'=>'required'
+            'callback_url'=>'required',
+            'user_info'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
+        $userInfo = $params['user_info'];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
         if(!$buyout){
@@ -402,6 +419,9 @@ class BuyoutController extends Controller
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
         ]);
+        //插入日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户发起支付");
+
         return apiResponse($paymentUrl,ApiStatus::CODE_0);
     }
 

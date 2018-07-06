@@ -290,9 +290,24 @@ class PayController extends Controller
 	 * ]
 	 * 成功时，输出 {"status":"ok"}，其他输出都认为是失败，需要重复通知
 	 */
-	public function withholdUnsignNotify(Request $request)
+	public function withholdUnsignNotify()
 	{
-		$params     = $request->all();
+		$input = file_get_contents("php://input");
+		LogApi::info('代扣解约异步通知', $input);
+		
+		$params = json_decode($input,true);
+		if( is_null($params) ){
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
+		}
+		if( !is_array($params) ){
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data not array',
+			]);exit;
+		}
 
 		$rules = [
 			'reason'            => 'required',
@@ -304,20 +319,37 @@ class PayController extends Controller
 		// 参数过滤
 		$validateParams = $this->validateParams($rules,$params);
 		if ($validateParams['code'] != 0) {
-			return apiResponse([],$validateParams['code']);
+			
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'params error'.$validateParams['msg'],
+			]);exit;
 		}
 
 		// 解约成功 修改协议表
-		$params = $params['params'];
-
 		if($params['status'] == "success"){
 			try{
 				// 查询用户协议
 				$withhold = \App\Order\Modules\Repository\Pay\WithholdQuery::getByWithholdNo( $params['out_agreement_no'] );
-				$withhold->unsignSuccess();
+				$b = $withhold->unsignSuccess();
+				if( $b ){
+					echo json_encode([
+						'status' => 'ok',
+						'msg' => '成功',
+					]);exit;
+				}else{
+					echo json_encode([
+						'status' => 'error',
+						'msg' => '解约失败',
+					]);exit;
+				}
+				
 			} catch(\Exception $exc){
 
-				echo "FAIL";exit;
+				echo json_encode([
+					'status' => 'error',
+					'msg' => $exc->getMessage(),
+				]);exit;
 			}
 		}
 
