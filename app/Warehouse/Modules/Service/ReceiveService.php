@@ -344,8 +344,8 @@ class ReceiveService
      *      2.检测完成
      *      3.全部合格
      */
-    public function createDelivery($receive_no){
-        $model = Receive::find($receive_no);
+    public function createDelivery($params){
+        $model = Receive::find($params['receive_no']);
         $goods = $model->goods;
         if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
             $data = [
@@ -368,6 +368,7 @@ class ReceiveService
                 $item->update();
             }
             $model->status=Receive::STATUS_CONFIRM_RECEIVE;
+            $model->exchange_description=$params['exchange_description']?$params['exchange_description']:'无';
             $model->status_time=time();
             $model->update();
 
