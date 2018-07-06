@@ -344,7 +344,6 @@ class ReceiveService
         $model = Receive::find($receive_no);
         $goods = $model->goods;
         if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
-            $delivery = new DeliveryRepository();
             $data = [
                 'order_no'=>$model->order_no,
                 'app_id'=>$model->app_id,
@@ -362,7 +361,7 @@ class ReceiveService
                 ];
             }
             //创建发货单
-            if (!$delivery->create($data)) {
+            if (!DeliveryRepository::create($data)) {
                 throw new \Exception('创建发货单失败');
             }
         }else{

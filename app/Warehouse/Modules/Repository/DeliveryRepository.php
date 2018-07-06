@@ -47,7 +47,7 @@ class DeliveryRepository
 	 * @return boolean
 	 * @throws \Exception
 	 */
-    public function create($data)
+    public static function create($data)
     {
 		// 发货单号
         $delivery_no = create_delivery_no();
