@@ -71,8 +71,8 @@ class DeliveryRepository
             $model = new Delivery();
             $model->create($dRow);
 
-            $this->storeGoods($delivery_no, $data['delivery_detail']);
-            $this->storeLog($delivery_no);
+            self::storeGoods($delivery_no, $data['delivery_detail']);
+            self::storeLog($delivery_no);
 
             DB::commit();
         } catch (\Exception $e) {
