@@ -21,7 +21,8 @@ class BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params ){
-		
+
+
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------

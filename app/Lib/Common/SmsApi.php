@@ -25,7 +25,7 @@ class SmsApi {
 	 */
 	public static function sendCode($mobile) {
 
-		$url = env('GOODS_API');
+		$url = config('ordersystem.OLD_ORDER_API');
 		$data = [
 			'version'		=> '1.0',
 			'sign_type'		=> 'MD5',
@@ -55,7 +55,7 @@ class SmsApi {
 	 * @return boolean
 	 */
 	public static function verifyCode(string $mobile,string $code) {
-		$url = env('GOODS_API');
+		$url = config('ordersystem.OLD_ORDER_API');
 		$data = [
 			'version'		=> '1.0',
 			'sign_type'		=> 'MD5',
@@ -85,7 +85,7 @@ class SmsApi {
 	 * @return boolean
 	 */
 	public static function sendMessage(string $mobile, string $templateCode, array $templateParam=[] ) {
-		$url = env('GOODS_API');
+		$url = config('ordersystem.OLD_ORDER_API');
 		$data = [
 			'version'		=> '1.0',
 			'sign_type'		=> 'MD5',

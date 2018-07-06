@@ -698,7 +698,7 @@ class Pay extends \App\Lib\Configurable
 			'name'			=> $params['name'],				//【必选】string 交易名称
 			'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
 			//【必选】string 后台通知地址		
-			'back_url'		=> env('APP_URL').'/order/pay/paymentNotify',
+			'back_url'		=> config('ordersystem.ORDER_API').'/order/pay/paymentNotify',
 		]);
 		return $url_info;
 	}
@@ -742,7 +742,7 @@ class Pay extends \App\Lib\Configurable
 			'name'			=> $params['name'],					//【必选】string 交易名称
 			'front_url'		=> $params['front_url'],			//【必选】string 前端回跳地址
 			//【必选】string 后台通知地址	
-			'back_url'		=> env('APP_URL').'/order/pay/fundauthNotify',
+			'back_url'		=> config('ordersystem.ORDER_API').'/order/pay/fundauthNotify',
 		]);
 		return $url_info;
 	}
@@ -794,7 +794,7 @@ class Pay extends \App\Lib\Configurable
 			'name'			=> $params['name'],				//【必选】string 交易名称
 			'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
 			//【必选】string 后台通知地址		
-			'back_url'		=> env('APP_URL').'/order/pay/withholdSignNotify',
+			'back_url'		=> config('ordersystem.ORDER_API').'/order/pay/withholdSignNotify',
 		]);
 		return $url_info;
 	}
