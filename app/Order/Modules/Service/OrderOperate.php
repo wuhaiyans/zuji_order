@@ -136,8 +136,6 @@ class OrderOperate
                 $orderNoticeObj->notify();
                 $orderNoticeObj->alipay_notify();
 
-
-
                 return true;
 
             }else {
@@ -152,8 +150,7 @@ class OrderOperate
             }
         }catch (\Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
-            die;
+            return false;
         }
 
     }
@@ -712,7 +709,8 @@ class OrderOperate
             if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
                 $orderStatus = Inc\OrderStatus::OrderCompleted;
             }
-            if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT){
+            if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT && $v['goods_status'] != Inc\OrderGoodStatus::EXCHANGE_REFUND){
+            //var_dump("订单未完成");die;
                 return true;
             }
         }
