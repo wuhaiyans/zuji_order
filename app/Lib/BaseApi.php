@@ -42,7 +42,7 @@ class BaseApi {
 			return $response->getData();
 		}
 		//
-		Common\LogApi::type('api-error')::error('接口请求失败',$response);
+		Common\LogApi::type('api-error')::error('接口请求失败',$response->getOriginalValue());
 		//-+--------------------------------------------------------------------
 		// | 失败处理
 		//-+--------------------------------------------------------------------
