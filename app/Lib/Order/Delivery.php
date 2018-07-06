@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  * Class Delivery
  * 与收发货相关
  */
-class Delivery
+class Delivery extends \App\Lib\BaseApi
 {
     /**
      * 客户收货或系统自动签收会通知到此方法
@@ -105,17 +105,10 @@ class Delivery
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;
-        var_dump($params);
-        $response = Curl::post($base_api, [
-            'appid'=> 1,
-            'version' => 1.0,
-            'method'=> 'api.order.delivery',//模拟
-            'params' => $params
-        ]);
-        var_dump($response);
 
-        return $response;
-
+        if( self::request(\env('APPID'), \config('ordersystem.ORDER_API'),'api.order.delivery', '1.0', $params) ){
+            return true;
+        }
 
     }
 }

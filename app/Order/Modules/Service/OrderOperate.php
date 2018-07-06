@@ -1106,7 +1106,10 @@ class OrderOperate
 
                //显示花期还款总金额及每月支付金额
                $repaymentAmount =   normalizeNum($values['amount_after_discount']+$values['insurance']);
+
                $goodsList[$keys]['repayment_amount'] =  $repaymentAmount;
+               $zujinInsurance =   normalizeNum($values['zujin']+$values['insurance']);
+               $goodsList[$keys]['zujin_Insurance'] =  $zujinInsurance;
                if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
 
 

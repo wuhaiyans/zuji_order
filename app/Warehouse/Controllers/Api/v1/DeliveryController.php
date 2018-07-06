@@ -280,7 +280,6 @@ class DeliveryController extends Controller
 
         try {
             DB::beginTransaction();
-
             //修改发货信息
             $this->delivery->send($params);
 
@@ -302,10 +301,8 @@ class DeliveryController extends Controller
 
             //Log::error('aaaaaaaaccd');
             //Log::error($a);
-
             DB::commit();
         } catch (\Exception $e) {
-
             DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
