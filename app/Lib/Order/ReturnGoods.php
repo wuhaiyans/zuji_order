@@ -37,7 +37,7 @@ class ReturnGoods extends \App\Lib\BaseApi
 
         $params['business_key']=$business_key;
         $params['data']=$data;
-        if( self::request(\env('APPID'), \config('ordersystem.ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
+        if( self::request(\config('APPID'), \config('ordersystem.ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
             return true;
         }
 

@@ -27,7 +27,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function getSignUrl( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.withhold.agreement.url', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.url', '1.0', $params);
 	}
 
     /**
@@ -51,7 +51,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function queryAgreement( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.withhold.agreement.query', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.query', '1.0', $params);
 	}
 	
     /**
@@ -75,7 +75,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function deduct( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.withhold.deduct.applay', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.applay', '1.0', $params);
     }
 
     /**
@@ -99,7 +99,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function deductQuery( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.withhold.deduct.query', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.query', '1.0', $params);
     }
 
 
@@ -122,6 +122,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function unSign( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'), 'pay.withhold.agreement.unsign', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.agreement.unsign', '1.0', $params);
     }
 }

@@ -26,7 +26,7 @@ class CommonRefundApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function apply( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.refund.apply', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.refund.apply', '1.0', $params);
     }
 	
     /**
@@ -46,6 +46,6 @@ class CommonRefundApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
      */
     public static function query( array $params ){
-		return self::request(\env('PAY_APPID'), env('PAY_API'),'pay.refund.query', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), config('paysystem.PAY_API'),'pay.refund.query', '1.0', $params);
     }
 }

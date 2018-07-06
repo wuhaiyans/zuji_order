@@ -26,7 +26,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
-		$info = self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.url', '1.0', $params);
+		$info = self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.url', '1.0', $params);
 		if( !isset($info['url']) )
 		{
 			$info['url'] = $info['payment_url'];
@@ -51,7 +51,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @throws \Exception			请求失败时抛出异常
 	 */
 	public static function query( array $params ){
-		return self::request(\env('PAY_APPID'), \env('PAY_API'),'pay.payment.query', '1.0', $params);
+		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.query', '1.0', $params);
 	}
 
 }
