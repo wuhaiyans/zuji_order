@@ -35,34 +35,52 @@ class OrderClearingRepository
         $authDeductionNo    =   0;
         $authUnfreezeNo     =   0;
         $refundCleanNo      =   0;
-        if (isset($param['auth_deduction_amount'])  && $param['auth_deduction_amount']>0) {
+        //是否是押金转支付
+        $isAuthDeduction    =   0;
+        //是否是解预授权
+        $isAuthUnfreeze     =   0;
+        //是否是退款
+        $isRefund           =   0;
+        if (isset($param['auth_deduction_amount'])  && intval($param['auth_deduction_amount'])>0) {
+            $isAuthDeduction = 1;
+        }
+
+        if (isset($param['auth_unfreeze_amount'])  && intval($param['auth_unfreeze_amount'])>0) {
+            $isAuthUnfreeze = 1;
+        }
+
+        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) {
+            $isRefund   =   1;
+        }
+
+        if ($isAuthDeduction) {
             $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
             $authDeductionNo    = createNo('AD');
         }
-        if (isset($param['auth_unfreeze_amount'])  &&  $param['auth_unfreeze_amount']>0)    {
+        if ($isAuthUnfreeze)    {
             $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
             $authUnfreezeNo    = createNo('AU');
         }
-        if (isset($param['refund_amount'])  &&  $param['refund_amount']>0) {
+        if ($isRefund) {
             $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
             $refundCleanNo    = createNo('RC');
         }
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
-        if (empty(intval($param['auth_deduction_amount'])) && empty(intval($param['auth_unfreeze_amount'])) && empty(intval($param['refund_amount'])))
+        if (empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund))
         {
             $status    =   OrderCleaningStatus::orderCleaningComplete;
             //预授权转支付不为空，为待押金转支付状态
-        } else if (!empty(intval($param['auth_deduction_amount']))){
+        } else if ($isAuthDeduction){
 
             $status    =   OrderCleaningStatus::orderCleaningDeposit;
 
             //预授权转支付不为空，为待押金转支付状态
-        }   else if (empty(intval($param['auth_deduction_amount'])) && !empty(intval($param['auth_unfreeze_amount']))){
+        }   else if (empty($isAuthDeduction) && !empty($isAuthUnfreeze)){
 
             $status    =   OrderCleaningStatus::orderCleaningUnfreeze;
 
-        }   else if (empty(intval($param['auth_deduction_amount'])) && empty(intval($param['auth_unfreeze_amount'])) && !empty(intval($param['refund_amount']))){
+        }   else if (empty($isAuthDeduction) && empty($isAuthUnfreeze) && $isRefund){
 
             $status    =   OrderCleaningStatus::orderCleaningUnRefund;
         }

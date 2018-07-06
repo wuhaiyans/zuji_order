@@ -167,7 +167,7 @@ class OrderCleaning
     {
         try {
 
-            LogApi::info(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
+            LogApi::debug(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
             //查询清算表根据业务平台退款码out_refund_no
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
             if (empty($orderCleanData)) return false;
@@ -181,7 +181,7 @@ class OrderCleaning
                 'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
             ];
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
-            LogApi::info(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
+            LogApi::debug(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
             if ($success) return false;
 
@@ -235,9 +235,9 @@ class OrderCleaning
                 if (empty($orderCleanData['auth_no'])) return false;
                 $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
                 if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
-                    LogApi::info(__method__.'财务进入预授权转支付请求的逻辑');
+                    LogApi::debug(__method__.'财务进入预授权转支付请求的逻辑');
                     if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
-                        LogApi::info(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
+                        LogApi::error(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
                         return false;
                     }
                     $freezePayParams = [
@@ -250,9 +250,9 @@ class OrderCleaning
                         'user_id' => $orderCleanData['user_id'], //用户id
 
                     ];
-                    LogApi::info(__method__.'财务发起预授权转支付请求以前，请求的参数：',$freezePayParams);
+                    LogApi::debug(__method__.'财务发起预授权转支付请求以前，请求的参数：',$freezePayParams);
                     $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
-                    LogApi::info(__method__.'财务已经预授权转支付请求以后，返回的结果：',$succss);
+                    LogApi::debug(__method__.'财务已经预授权转支付请求以后，返回的结果：',$succss);
                 }
 
                 //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
@@ -269,7 +269,7 @@ class OrderCleaning
                     $miniOrderData = MiniOrderRepository::getMiniOrderInfo($orderCleanData['order_no']);
                     if (empty($miniOrderData))
                     {
-                        LogApi::info('没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
+                        LogApi::error('没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
                         return false;
                     }
 
@@ -285,7 +285,7 @@ class OrderCleaning
                             'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
                         ];
                         $succss =  miniApi::OrderClose($params);
-                        LogApi::info('支付小程序解冻押金', [$succss,  $params]);
+                        LogApi::debug('支付小程序解冻押金', [$succss,  $params]);
                     } else {
                         /*
                           * 订单取消
@@ -301,7 +301,7 @@ class OrderCleaning
                             'app_id'=>config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
                         ];
                         $success =  miniApi::OrderCancel($orderParams);
-                        LogApi::info('支付小程序解冻押金', [$success,  $orderParams]);
+                        LogApi::debug('支付小程序解冻押金', [$success,  $orderParams]);
                     }
 
                 }
@@ -310,7 +310,7 @@ class OrderCleaning
             return true;
 
         } catch (\Exception $e) {
-            LogApi::info(__method__.'操作请求异常',$e);
+            LogApi::error(__method__.'操作请求异常',$e);
             return false;
 
         }
@@ -331,7 +331,7 @@ class OrderCleaning
     public static function refundRequest($orderCleanData)
     {
 
-        LogApi::info(__method__.'财务进入退款请求的逻辑');
+        LogApi::debug(__method__.'财务进入退款请求的逻辑');
         //查询清算表根据业务平台退款码out_refund_no
         if (empty($orderCleanData)) return false;
 
@@ -361,7 +361,7 @@ class OrderCleaning
                 $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);
                 if (!isset($payInfo['out_payment_no']) || empty($payInfo['out_payment_no'])) {
 
-                    LogApi::info(__method__.'财务发起退款申请前，发现out_payment_no失败：', $payInfo);
+                    LogApi::error(__method__.'财务发起退款申请前，发现out_payment_no失败：', $payInfo);
                     return false;
                 }
                 $params = [
@@ -370,9 +370,9 @@ class OrderCleaning
                     'amount' => $orderCleanData['refund_amount'] * 100, //支付金额
                     'refund_back_url' => config('ordersystem.ORDER_API') . '/refundClean', //退款回调URL
                 ];
-                LogApi::info(__method__.'财务发起退款请求前，请求的参数：', $params);
+                LogApi::debug(__method__.'财务发起退款请求前，请求的参数：', $params);
                 $succss = CommonRefundApi::apply($params);
-                LogApi::info(__method__.'财务已经发起退款请求，请求后的参数及结果：',$succss);
+                LogApi::debug(__method__.'财务已经发起退款请求，请求后的参数及结果：',$succss);
 
             }
         }
@@ -390,7 +390,7 @@ class OrderCleaning
     public static function unfreezeRequest($orderCleanData)
     {
 
-        LogApi::info(__method__.'财务进入解除预授权请求的逻辑',$orderCleanData);
+        LogApi::debug(__method__.'财务进入解除预授权请求的逻辑',$orderCleanData);
         if (empty($orderCleanData)) return false;
 
         /**
@@ -440,7 +440,7 @@ class OrderCleaning
             if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
                 if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
 
-                    LogApi::info(__method__.'财务发起预授权解除前，发现out_fundauth_no失败：', $authInfo);
+                    LogApi::error(__method__.'财务发起预授权解除前，发现out_fundauth_no失败：', $authInfo);
                     return false;
                 }
                 $unFreezeParams = [
@@ -451,9 +451,9 @@ class OrderCleaning
                     'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
                     'user_id' => $orderCleanData['user_id'],//用户id
                 ];
-                LogApi::info(__method__.'财务发起预授权解冻请求前，请求的参数：', $unFreezeParams);
+                LogApi::debug(__method__.'财务发起预授权解冻请求前，请求的参数：', $unFreezeParams);
                 $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
-                LogApi::info(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：', $succss);
+                LogApi::debug(__method__.'财务已经发起预授权解冻请求，请求后的请求及结果：', $succss);
             }
 
 
@@ -503,7 +503,7 @@ class OrderCleaning
     public static function miniUnfreezeAndPayClean($param)
     {
         try{
-            LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:', $param);
+            LogApi::debug(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:', $param);
             /**
             支付宝小程序解压预授权成功后返回的值
             pay_amount（单位元）
@@ -518,7 +518,7 @@ class OrderCleaning
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
             if ($orderCleanInfo['code']) {
-                LogApi::info(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
+                LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 return false;
             }
             $orderCleanInfo = $orderCleanInfo['data'];
@@ -539,21 +539,21 @@ class OrderCleaning
                         'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
                     ];
                     $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-                    LogApi::info(__METHOD__.'() '.microtime(true).'小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
+                    LogApi::debug(__METHOD__.'() '.microtime(true).'小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
                     return $success ?? false;
                 } else {
 
-                        LogApi::info(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
+                        LogApi::error(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
                         return false;
                      }
             } else {
 
-                LogApi::info(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                LogApi::error(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
             }
             return true;
 
         } catch (\Exception $e) {
-            LogApi::info(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
+            LogApi::error(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage(),$param);
             return false;
 
         }
