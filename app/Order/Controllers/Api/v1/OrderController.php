@@ -50,6 +50,7 @@ class OrderController extends Controller
 	 * @return type
 	 */
     public function confirmation(Request $request){
+        echo OrderOperate::isOrderComplete("A706167119933455");die;
         $params = $request->all();
 
         //获取appid
