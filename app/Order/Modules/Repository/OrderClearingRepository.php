@@ -346,6 +346,12 @@ class OrderClearingRepository
             }
         }
 
+        if (isset($param['operator_uid'])) {
+            $orderData->operator_uid = $param['operator_uid'];
+            $orderData->operator_username   =   $param['operator_username'] ?? '';
+            $orderData->operator_type       =   $param['operator_type'] ??  0;
+        }
+
         $orderData->update_time = time();
 
         $success =$orderData->save();
