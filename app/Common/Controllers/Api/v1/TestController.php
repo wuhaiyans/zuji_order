@@ -17,6 +17,10 @@ class TestController extends Controller
     {
     }
 	
+	public function testLog(){
+		LogApi::error('test','test-Abc');
+	}
+	
     public function test()
     {
 		
