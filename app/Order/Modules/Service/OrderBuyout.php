@@ -8,6 +8,7 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Order\Modules\Repository\GoodsLogRepository;
 
 class OrderBuyout
 {
@@ -15,7 +16,7 @@ class OrderBuyout
 	 * 订单还机数据处理仓库
 	 * @var obj
 	 */
-	public function __construct(  ) {
+	public function __construct() {
 	}
 
 
@@ -245,6 +246,19 @@ class OrderBuyout
 		}
 		//插入日志
 		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断支付成功");
+		//插入订单设备日志
+		$log = [
+				'order_no'=>$buyout['order_no'],
+				'action'=>'用户买断支付',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
+				'business_no'=>$buyout['buyout_no'],
+				'goods_no'=>$buyout['goods_no'],
+				'operator_id'=>$userInfo['uid'],
+				'operator_name'=>$userInfo['username'],
+				'operator_type'=>$userInfo['type'],
+				'msg'=>'买断支付成功',
+		];
+		GoodsLogRepository::add($log);
 
 		return true;
 	}
@@ -309,6 +323,19 @@ class OrderBuyout
 		OrderOperate::isOrderComplete($buyout['order_no']);
 		//插入日志
 		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断完成");
+		//插入订单设备日志
+		$log = [
+				'order_no'=>$buyout['order_no'],
+				'action'=>'用户买断支付',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
+				'business_no'=>$buyout['buyout_no'],
+				'goods_no'=>$buyout['goods_no'],
+				'operator_id'=>$userInfo['uid'],
+				'operator_name'=>$userInfo['username'],
+				'operator_type'=>$userInfo['type'],
+				'msg'=>'买断完成',
+		];
+		GoodsLogRepository::add($log);
 		return true;
 	}
 
