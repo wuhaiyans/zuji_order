@@ -402,7 +402,12 @@ class ReturnController extends Controller
                 return  apiResponse([],ApiStatus::CODE_20001);
             }
         }
-        $res=$this->OrderReturnCreater->isQualified($params['params']['business_key'],$params['params']['data']);
+        $operateUserInfo = isset($params['params']['userinfo'])? $params['params']['userinfo'] :'';
+        LogApi::debug("检测获取用户信息",$operateUserInfo);
+        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+        }
+        $res=$this->OrderReturnCreater->isQualified($params['params']['business_key'],$params['params']['data'],$params['params']['userinfo']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33008,"修改失败");//修改检测结果失败
         }
@@ -537,7 +542,7 @@ class ReturnController extends Controller
     //test
     public function refundUpdate(Request $request){
         $orders = $request->all();
-        $aa=$this->OrderReturnCreater->refundUpdate($orders['params'],$orders['userinfo']);
+        $aa=$this->OrderReturnCreater->createchange($orders['params']['detail'],$orders['params']['goods_info'],$orders['params']['userinfo']);
         p($aa);
 
     }
