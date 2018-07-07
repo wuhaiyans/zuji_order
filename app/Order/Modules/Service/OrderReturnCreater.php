@@ -1701,7 +1701,7 @@ class OrderReturnCreater
         try{
             foreach ($goods_info as $k=>$v) {
                 //获取设备信息
-                $delivery=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDeliveryInfo($detail['order_no'],$v['goods_no']);
+                $delivery=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDeliveryInfo($detail['order_no'],$goods_info[$k]['goods_no']);
                 if(!$delivery){
                     LogApi::debug("获取设备信息失败");
                     return false;
@@ -1714,14 +1714,14 @@ class OrderReturnCreater
                     return false;
                 }
                 //换货物流信息
-                $return=GoodsReturn::getReturnByInfo($detail['order_no'],$v['goods_no']);
+                $return=GoodsReturn::getReturnByInfo($detail['order_no'],$goods_info[$k]['goods_no']);
                 LogApi::debug("换货物流信息参数",$detail['order_no']);
-                LogApi::debug("换货物流信息参数goods_no",$v['goods_no']);
+                LogApi::debug("换货物流信息参数goods_no",$goods_info[$k]['goods_no']);
                 if(!$return){
                     return false;
                 }
                 $updateReturn=$return->barterDelivery($detail);
-                LogApi::debug("更新换货物流信息参数goods_no",$v['goods_no']);
+                LogApi::debug("更新换货物流信息参数goods_no",$goods_info[$k]['goods_no']);
                 if(!$updateReturn){
                     LogApi::debug("更新换货物流信息失败");
                    return false;
