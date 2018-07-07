@@ -655,7 +655,6 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
 
         $rules = [
             'return_url'        => 'required',
@@ -680,10 +679,6 @@ class WithholdController extends Controller
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
-        // 用户验证
-        if($uid != $instalmentInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-        }
 
         // 生成交易码
         $trade_no = createNo();
@@ -753,7 +748,7 @@ class WithholdController extends Controller
             'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
             'businessNo'		=> $trade_no,	                // 业务编号
-            'order_no'		    => $instalmentInfo['order_no'],	// 订单号
+            'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
             'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
         ];
