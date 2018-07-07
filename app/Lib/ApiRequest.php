@@ -20,6 +20,7 @@ class ApiRequest {
 	private $appid = '';
 	private $method = '';
 	private $version = '1.0';
+	private $userInfo = '';
 	private $params = [];
 	private $url = '';
 
@@ -58,6 +59,14 @@ class ApiRequest {
 	public function getParams() {
 		return $this->params;
 	}
+	
+	/**
+	 * 获取用户参数
+	 * @return array
+	 */
+	public function getUserInfo() {
+		return $this->userInfo;
+	}
 
 	/**
 	 * 设置url
@@ -82,6 +91,21 @@ class ApiRequest {
 			$params = json_decode($params, true);
 		}
 		$this->params = $params;
+		return $this;
+	}
+	/**
+	 * 设置用户信息
+	 * @param array|string $userInfo
+	 * @throws \Exception
+	 */
+	public function setUserInfo( $userInfo ) {
+		if (!is_string($userInfo) && !is_array($userInfo)) {
+			throw new \Exception('method param error');
+		}
+		if (is_string($userInfo)) {
+			$userInfo = json_decode($userInfo, true);
+		}
+		$this->userInfo = $userInfo;
 		return $this;
 	}
 
@@ -185,6 +209,16 @@ class ApiRequest {
 				return $status;
 			}
 		}
+		// userinfo 参数
+		if (isset($data['userinfo'])) {
+			if (is_string($data['userinfo'])) {
+				$data['userinfo'] = json_decode($data['userinfo'], true);
+			}
+			if (!is_array($data['userinfo'])) {
+				$status->setCode(ApiStatus::CODE_10106)->setMsg('userinfo错误');
+				return $status;
+			}
+		}
 
 		//-+--------------------------------------------------------------------
 		// | 赋值，初始化响应对象
@@ -193,6 +227,7 @@ class ApiRequest {
 		$this->method = $data['method'];
 		$this->version = $data['version'];
 		$this->params = $data['params'];
+		$this->userInfo = $data['userinfo'];
 
 		// 创建成功
 		$this->status->setCode(ApiStatus::CODE_0);
@@ -218,6 +253,7 @@ class ApiRequest {
 			'method' => $this->method,
 			'version' => $this->version,
 			'params' => $this->params,
+			'userinfo' => $this->userInfo,
 			
 			'sign_type'=>'MD5',
 			'sign'=>'',

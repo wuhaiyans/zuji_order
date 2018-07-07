@@ -195,7 +195,7 @@ class Receive
      * ]
      *
      */
-    public static function checkItemsResult($params,$business_key=0)
+    public static function checkItemsResult($params,$business_key=0,$userInfo=[])
     {
         if (!$params || !is_array($params)) return ;
 
@@ -211,7 +211,7 @@ class Receive
         }
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-               Giveback::confirmEvaluation($result);
+               Giveback::confirmEvaluation($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
                ReturnGoods::checkResult($result,$business_key);
            }
