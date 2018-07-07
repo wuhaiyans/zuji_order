@@ -75,7 +75,6 @@ class OrderOperate
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
         DB::beginTransaction();
-        try{
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
@@ -118,6 +117,7 @@ class OrderOperate
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
                 DB::commit();
+                return true;
 
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
@@ -148,11 +148,6 @@ class OrderOperate
                 DB::commit();
                 return true;
             }
-        }catch (\Exception $exc){
-            DB::rollBack();
-            echo $exc->getMessage();
-            die;
-        }
 
     }
 
@@ -1107,7 +1102,10 @@ class OrderOperate
 
                //显示花期还款总金额及每月支付金额
                $repaymentAmount =   normalizeNum($values['amount_after_discount']+$values['insurance']);
+
                $goodsList[$keys]['repayment_amount'] =  $repaymentAmount;
+               $zujinInsurance =   normalizeNum($values['zujin']+$values['insurance']);
+               $goodsList[$keys]['zujin_Insurance'] =  $zujinInsurance;
                if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
 
 
