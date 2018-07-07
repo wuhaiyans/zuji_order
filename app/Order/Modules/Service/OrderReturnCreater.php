@@ -1695,8 +1695,6 @@ class OrderReturnCreater
      * @return boolean
      */
     public static function createchange($detail,$goods_info){
-        LogApi::debug("换货发货接收参数detail",$detail);
-        LogApi::debug("换货发货接收参数goods_info",$goods_info);
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
@@ -1714,20 +1712,16 @@ class OrderReturnCreater
                 }
                 //换货物流信息
                 $return=GoodsReturn::getReturnByInfo($detail['order_no'],$goods_info[$k]['goods_no']);
-                LogApi::debug("换货物流信息参数",$detail['order_no']);
-                LogApi::debug("换货物流信息参数goods_no",$goods_info[$k]['goods_no']);
                 if(!$return){
                     return false;
                 }
                 $updateReturn=$return->barterDelivery($detail);
-                LogApi::debug("更新换货物流信息参数goods_no",$goods_info[$k]['goods_no']);
                 if(!$updateReturn){
                     LogApi::debug("更新换货物流信息失败");
                    return false;
                 }
             }
             $goods_result= \App\Order\Modules\Repository\Order\DeliveryDetail::addGoodsDeliveryDetail($detail['order_no'],$goods_info);
-            LogApi::debug("创建换货记录",$goods_result);
             if(!$goods_result){
                 return false;//创建换货记录失败
             }
