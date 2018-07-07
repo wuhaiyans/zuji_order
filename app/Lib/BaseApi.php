@@ -20,7 +20,7 @@ class BaseApi {
      * @return	array				业务返回参数（具体业务查阅具体接口协议）
 	 * @throws \Exception			请求失败时抛出异常
      */
-    public static function request( int $appid, string $url, string $method, string $version, array $params ){
+    public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
 
 		//-+--------------------------------------------------------------------
@@ -32,6 +32,7 @@ class BaseApi {
 		$request->setMethod( $method );	// 接口名称
 		$request->setVersion( $version );
 		$request->setParams( $params );	// 业务参数
+		$request->setUserInfo( $userInfo );	// 业务参数
 		//-+--------------------------------------------------------------------
 		// | 发送请求
 		//-+--------------------------------------------------------------------
