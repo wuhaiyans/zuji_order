@@ -655,7 +655,6 @@ class WithholdController extends Controller
      */
     public function repayment(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
 
         $rules = [
             'return_url'        => 'required',
@@ -680,10 +679,6 @@ class WithholdController extends Controller
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
-        // 用户验证
-        if($uid != $instalmentInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-        }
 
         // 生成交易码
         $trade_no = createNo();
