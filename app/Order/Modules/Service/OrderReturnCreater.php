@@ -1706,7 +1706,6 @@ class OrderReturnCreater
                     LogApi::debug("获取设备信息失败");
                     return false;
                 }
-                LogApi::debug("获取设备信息",$delivery);
                 //更新原设备为无效
                 $updateDelivery=$delivery->barterDelivery();
                 if(!$updateDelivery){
