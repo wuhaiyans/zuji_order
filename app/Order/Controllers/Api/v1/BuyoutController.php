@@ -309,7 +309,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //插入订单日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断");
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断","");
         //插入订单设备日志
         $log = [
             'order_no'=>$data['order_no'],
@@ -383,7 +383,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_50001,"取消失败");
         }
         //插入日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服取消买断");
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服取消买断","");
         //插入订单设备日志
         $log = [
             'order_no'=>$buyout['order_no'],
@@ -456,7 +456,7 @@ class BuyoutController extends Controller
             'front_url' => $params['callback_url'],
         ]);
         //插入日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付");
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","");
         //插入订单设备日志
         $log = [
             'order_no'=>$buyout['order_no'],

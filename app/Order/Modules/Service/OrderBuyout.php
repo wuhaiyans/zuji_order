@@ -322,7 +322,7 @@ class OrderBuyout
 		}
 		OrderOperate::isOrderComplete($buyout['order_no']);
 		//插入日志
-		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断完成");
+		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断完成","");
 		//插入订单设备日志
 		$log = [
 				'order_no'=>$buyout['order_no'],
