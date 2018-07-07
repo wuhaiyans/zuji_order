@@ -143,7 +143,7 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = $orders['user_info'];
+        $userInfo = $orders['userinfo'];
         if (empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
         }
@@ -241,7 +241,7 @@ class BuyoutController extends Controller
     public function adminBuyout(Request $request)
     {
         //接收请求参数
-        $orders =$request->all();
+        $orders = $request->all();
         $params = $orders['params'];
         //过滤参数
         $rule= [
@@ -253,7 +253,7 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = $orders['user_info'];
+        $userInfo = $orders['userinfo'];
         //获取订单商品信息
         $goodsObj = Goods::getByGoodsNo($params['goods_no']);
         if(empty($goodsObj)){
@@ -349,7 +349,7 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = $orders['user_info'];
+        $userInfo = $orders['userinfo'];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no']);
         if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
@@ -426,7 +426,7 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = $orders['user_info'];
+        $userInfo = $orders['userinfo'];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
         if(!$buyout){
