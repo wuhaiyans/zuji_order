@@ -1637,6 +1637,18 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+                //插入操作日志
+                \App\Order\Modules\Repository\GoodsLogRepository::add([
+                    'order_no'     =>$params['order_no'],
+                    'action'       =>'换货确认收货',
+                    'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                    'business_no'  =>$return_info['refund_no'],
+                    'goods_no'     =>$goods_no,
+                    'operator_id'  =>$userinfo['uid'],
+                    'operator_name'=>$userinfo['username'],
+                    'operator_type'=>$userinfo['type'],
+                    'msg'           =>'用户已收货',
+                ],$isCorntab=FALSE);
             }
             //订单解冻
             $updateOrder=$order->returnClose();
@@ -1644,18 +1656,6 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;
             }
-            //插入操作日志
-            \App\Order\Modules\Repository\GoodsLogRepository::add([
-                'order_no'     =>$params['order_no'],
-                'action'       =>'换货确认收货',
-                'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
-                'business_no'  =>$return_info['refund_no'],
-                'goods_no'     =>$goods_no,
-                'operator_id'  =>$userinfo['uid'],
-                'operator_name'=>$userinfo['username'],
-                'operator_type'=>$userinfo['type'],
-                'msg'           =>'用户已收货',
-            ],$isCorntab=FALSE);
             DB::commit();
             return true;
 
