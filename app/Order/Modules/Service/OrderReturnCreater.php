@@ -1694,7 +1694,7 @@ class OrderReturnCreater
      * ]
      * @return boolean
      */
-    public static function createchange($detail,$goods_info,$userinfo){
+    public static function createchange($detail,$goods_info){
         LogApi::debug("换货发货接收参数detail",$detail);
         LogApi::debug("换货发货接收参数goods_info",$goods_info);
         //开启事物
