@@ -52,6 +52,10 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		if( empty($paramsArr['goods_no']) ) {
 			return apiResponse([],ApiStatus::CODE_91001);
@@ -149,6 +153,10 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
 		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$rules = [
 			'goods_no'     => 'required',//商品编号
@@ -232,6 +240,22 @@ class GivebackController extends Controller
 			if( !$orderFreezeResult ){
 				return apiResponse([],ApiStatus::CODE_92700,'订单冻结失败！');
 			}
+			
+			//记录日志
+			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+				'order_no'=>$paramsArr['order_no'],
+				'action'=>'还机单生成',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+				'business_no'=>$giveback_no,
+				'goods_no'=>$goodsNo,
+				'operator_id'=>$operateUserInfo['uid'],
+				'operator_name'=>$operateUserInfo['username'],
+				'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+				'msg'=>'用户申请还机',
+			]);
+			if( !$goodsLog ){
+				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
+			}
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
@@ -253,6 +277,10 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		$rules = [
 			'goods_no'     => 'required',//商品编号
@@ -267,15 +295,15 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		//获取还机单信息
 		$orderGivebackService = new OrderGiveback();//创建还机单服务层
-		$orderGoodsInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
 		//还机单状态必须为待收货
-		if( !$orderGoodsInfo ){
+		if( !$orderGivebackInfo ){
 			return apiResponse([], get_code(), get_msg());
 		}
-		if( $orderGoodsInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
+		if( $orderGivebackInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
 		}
-		if( $orderGoodsInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
+		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
 		//开启事务
@@ -307,6 +335,21 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92701);
 			}
+			//记录日志
+			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+				'order_no'=>$orderGivebackInfo['order_no'],
+				'action'=>'还机单收货',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+				'business_no'=>$orderGivebackInfo['giveback_no'],
+				'goods_no'=>$orderGivebackInfo['goods_no'],
+				'operator_id'=>$operateUserInfo['uid'],
+				'operator_name'=>$operateUserInfo['username'],
+				'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+				'msg'=>'还机单确认收货操作',
+			]);
+			if( !$goodsLog ){
+				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
+			}
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
@@ -329,6 +372,10 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		$rules = [
 			'goods_no'     => 'required',//商品编号
@@ -365,12 +412,12 @@ class GivebackController extends Controller
 			return apiResponse([], get_code(), get_msg());
 		}
 		//获取还机单信息
-		$orderGivevbackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
-		if( !$orderGivevbackInfo ) {
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
+		if( !$orderGivebackInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
 		
-		if( $orderGivevbackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
+		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
 			return apiResponse([], ApiStatus::CODE_92500, '当前还机单不处于待检测状态，不能进行检测处理!');
 		}
 
@@ -390,9 +437,9 @@ class GivebackController extends Controller
 		}
 
 		//拼接相关参数到paramsArr数组
-		$paramsArr['order_no'] = $orderGivevbackInfo['order_no'];//订单编号
-		$paramsArr['user_id'] = $orderGivevbackInfo['user_id'];//用户id
-		$paramsArr['giveback_no'] = $orderGivevbackInfo['giveback_no'];//还机单编号
+		$paramsArr['order_no'] = $orderGivebackInfo['order_no'];//订单编号
+		$paramsArr['user_id'] = $orderGivebackInfo['user_id'];//用户id
+		$paramsArr['giveback_no'] = $orderGivebackInfo['giveback_no'];//还机单编号
 
 		$paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
@@ -466,12 +513,21 @@ class GivebackController extends Controller
 					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
 				}
 			}
-//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$goodsNo], ['goods_status'=>$status]);
-//			if( !$orderGoodsResult ){
-//				//事务回滚
-//				DB::rollBack();
-//				return apiResponse([], get_code(), get_msg());
-//			}
+			//记录日志
+			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+				'order_no'=>$orderGivebackInfo['order_no'],
+				'action'=>'还机单检测',
+				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+				'business_no'=>$orderGivebackInfo['giveback_no'],
+				'goods_no'=>$orderGivebackInfo['goods_no'],
+				'operator_id'=>$operateUserInfo['uid'],
+				'operator_name'=>$operateUserInfo['username'],
+				'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+				'msg'=>'还机单提交检测结果',
+			]);
+			if( !$goodsLog ){
+				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
+			}
 		} catch (\Exception $ex) {
 			//回滚事务
 			DB::rollBack();
@@ -570,6 +626,10 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$userInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		if( empty($paramsArr['uid']) || empty($paramsArr['username']) || empty($paramsArr['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
 		$paramsArr = isset($params['params'])? $params['params'] :'';
 		if( !isset($paramsArr['payment_status']) || $paramsArr['payment_status'] != 'success' ){
 			return apiResponse([], ApiStatus::CODE_91000, '支付状态参数错误!');

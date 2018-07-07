@@ -68,7 +68,9 @@ class Receive extends Warehouse
         'receive_time',
         'check_time',
         'check_result',
-        'check_description'
+        'check_description',
+        'exchange_description',
+        'business_key'
     ];
 
     /**
@@ -82,7 +84,8 @@ class Receive extends Warehouse
             self::STATUS_CANCEL => '已取消',
             self::STATUS_INIT => '待收货',
             self::STATUS_RECEIVED => '已收货',
-            self::STATUS_FINISH => '检测完成'
+            self::STATUS_FINISH => '检测完成',
+            self::STATUS_CONFIRM_RECEIVE => '确认换货',
         ];
 
         if ($status === null) return $st;

@@ -245,7 +245,7 @@ class OrderCleaningController extends Controller
 
             $_params = [
                 'name'			=> '测试支付',					//【必选】string 交易名称
-                'front_url'		=> env('APP_URL').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
+                'front_url'		=> config('ordersystem.ORDER_API').'/order/pay/testPaymentFront',	//【必选】string 前端回跳地址
             ];
 
             $pay->setPaymentAmount(0.01);

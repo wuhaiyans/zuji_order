@@ -52,7 +52,6 @@ class MonthComputer extends Computer {
 	 * ]
 	 */
 	public function compute( ):array{
-	    var_dump(123);die;
 		$result = [];
 		
 		for( $i=0; $i< $this->params['zuqi']; ++$i ){

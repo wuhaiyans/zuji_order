@@ -27,8 +27,8 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function openBankCard( array $params ){
         $ApiRequest = new ApiRequest();
-        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+        $ApiRequest->setUrl(config('paysystem.PAY_API'));
+        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
         $ApiRequest->setMethod('pay.unionpay.open');
 		$ApiRequest->setParams($params);
         $Response = $ApiRequest->send();
@@ -63,8 +63,8 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function BankCardList( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+		$ApiRequest->setUrl(config('paysystem.PAY_API'));
+		$ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.bankcardlist');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -88,8 +88,8 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function backPolling( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+		$ApiRequest->setUrl(config('paysystem.PAY_API'));
+		$ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.polling');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -120,8 +120,8 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function sendSms( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+		$ApiRequest->setUrl(config('paysystem.PAY_API'));
+		$ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.smsconsume');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();
@@ -151,8 +151,8 @@ class UnionpayApi extends \App\Lib\BaseApi {
 	 */
 	public static function consume( array $params ){
 		$ApiRequest = new ApiRequest();
-		$ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-		$ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+		$ApiRequest->setUrl(config('paysystem.PAY_API'));
+		$ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 		$ApiRequest->setMethod('pay.unionpay.consume');
 		$ApiRequest->setParams($params);
 		$Response = $ApiRequest->send();

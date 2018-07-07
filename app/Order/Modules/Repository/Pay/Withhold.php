@@ -208,7 +208,12 @@ class Withhold extends \App\Lib\Configurable {
 	public function unsignApply(){
 		
 		// 协议状态判断
-		if( $this->withhold_status != WithholdStatus::SIGNED ){	// 已签约
+		if( $this->withhold_status == WithholdStatus::UNSIGNED ){	// 已解约，重复请求
+			LogApi::debug('代扣解约申请重复，忽略', $this->getData());
+			return true;
+		}
+		elseif( $this->withhold_status != WithholdStatus::SIGNED ){	// 已签约
+			LogApi::debug('代扣解约状态禁止', $this->getData());
 			Error::setError('代扣协议状态错误');
 			return false;
 		}
@@ -245,7 +250,7 @@ class Withhold extends \App\Lib\Configurable {
 			$this->update_time = $time;
 			return true;
 		} catch (\App\Lib\ApiException $exc) {
-				LogApi::type('data-save')::error('[代扣协议][解约申请]失败',$exc);
+				LogApi::type('api-error')::error('[代扣协议][解约申请]失败',$exc);
 				Error::exception( $exc );
 			return false;
 		}
@@ -256,8 +261,14 @@ class Withhold extends \App\Lib\Configurable {
 	 */
 	public function unsignSuccess(){
 		// 协议状态判断
-		if( $this->withhold_status != WithholdStatus::SIGNED	// 已签约
+		if( $this->withhold_status == WithholdStatus::UNSIGNED ){	// 已解约，重复请求
+			LogApi::debug('代扣解约重复通知，忽略', $this->getData());
+			return true;
+		}
+		// 协议状态判断
+		elseif( $this->withhold_status != WithholdStatus::SIGNED	// 已签约
 				&& $this->withhold_status != WithholdStatus::UNSIGNING ){	// 解约中
+			LogApi::debug('代扣解约状态错误', $this->getData());
 			Error::setError('代扣协议状态错误');
 			return false;
 		}
@@ -288,25 +299,11 @@ class Withhold extends \App\Lib\Configurable {
 		return true;
 	}
 
-	private function _unsignBefore(){
-		// 协议状态判断
-		if( !$this->isValid() ){
-			Error::setError('代扣协议已失效');
-			return false;
-		}
-		// 无在用业务
-		if( $this->counter > 0 ){
-			Error::setError('代扣协议正在使用');
-			return false;
-		}
-		return true;
-	}
-
-
 	public function getData(){
 		return [
 			'withhold_no'		=> $this->withhold_no,
 			'out_withhold_no'	=> $this->out_withhold_no,
+			'withhold_status'	=> $this->withhold_status,
 		];
 	}
 

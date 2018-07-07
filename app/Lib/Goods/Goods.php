@@ -24,7 +24,7 @@ class Goods  extends \App\Lib\BaseApi{
 		foreach( $skuids as $id){
 			$_params[] =['sku_id'=>$id];
 		}
-		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
+		return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
 
 	}
 
@@ -35,7 +35,7 @@ class Goods  extends \App\Lib\BaseApi{
      * @throws \Exception			请求失败时抛出异常
      */
     public static function getSpuInfo( int $spuId ){
-        return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spu.get', '1.0', ['id'=>$spuId]);
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spu.get', '1.0', ['id'=>$spuId]);
 
     }
 
@@ -52,7 +52,7 @@ class Goods  extends \App\Lib\BaseApi{
 		foreach($skuid as $id){
 			$params['list_sku_id'][]['sku_id'] = $id;
 		}
-		return self::request(\env('APPID'), \env('GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
+		return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
 		
 		
 //        $data['method'] ='zuji.goods.spusku.get';

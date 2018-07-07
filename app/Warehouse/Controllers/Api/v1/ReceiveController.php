@@ -251,6 +251,8 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
+        $param = request()->input();
+        $userinfo=$param['userinfo'];
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
@@ -269,7 +271,7 @@ class ReceiveController extends Controller
                 'compensate_amount'=>$params['compensate_amount'],
             ];
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
-            Receive::checkItemsResult($items,$receive_row['business_key']);
+            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -411,7 +413,8 @@ class ReceiveController extends Controller
      */
     public function createDelivery(){
         $rules = [
-            'receive_no' => 'required'
+            'receive_no' => 'required',
+            'exchange_description' => 'required'
         ];
         $params = $this->_dealParams($rules);
         if (!$params) {
@@ -420,7 +423,7 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
-            $this->receive->createDelivery($params['receive_no']);
+            $this->receive->createDelivery($params);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

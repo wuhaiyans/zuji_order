@@ -301,9 +301,9 @@ class Delivery
 
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
-          throw new \Exception(ApiStatus::$errCodes[$response['code']]);
+          return false;
       }
-      return $response;
+      return true;
     }
 
 

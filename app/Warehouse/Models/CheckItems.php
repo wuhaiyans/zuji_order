@@ -21,7 +21,8 @@ class CheckItems extends Warehouse
         'check_name',       //检查名
         'check_description',//检查描述
         'check_result',
-        'create_time'
+        'create_time',
+        'compensate_amount'
     ];
 
     //检测结果

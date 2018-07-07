@@ -202,7 +202,7 @@ class BusinessInfo
                 ],
                 [
                     'status' => 'D',
-                    'name' => '换货完成',
+                    'name' => '租用中',
                 ]
                 ],
                 'returnCancelStateFlow'  => [     //退货取消状态流
@@ -236,37 +236,37 @@ class BusinessInfo
                 'returnDeniedStateFlow'  => [   //退货拒绝状态流
                     [
                         'status' => 'A',
-                        'name' => '申请',
+                        'name' => '退货申请',
                     ],
                     [
                         'status' => 'B',
-                        'name' => '审核',
+                        'name' => '退货审核',
                     ],
                     [
                         'status' => 'C',
-                        'name' => '拒绝',
+                        'name' => '退货拒绝',
                     ],
                     [
                         'status' => 'D',
-                        'name' => '完成',
+                        'name' => '退货完成',
                     ],
                 ],
                 'barterDeniedStateFlow'  => [           //换货拒绝状态流
                     [
                         'status' => 'A',
-                        'name' => '申请',
+                        'name' => '换货申请',
                     ],
                     [
                         'status' => 'B',
-                        'name' => '审核',
+                        'name' => '换货审核',
                     ],
                     [
                         'status' => 'C',
-                        'name' => '拒绝',
+                        'name' => '换货拒绝',
                     ],
                     [
                         'status' => 'D',
-                        'name' => '完成',
+                        'name' => '租用中',
                     ],
                 ]
 
