@@ -88,7 +88,7 @@ class OrderNotice{
 	 * @return bool
 	 */
 	public function asyncNotify():bool{
-		return \App\Lib\Common\JobQueueApi::addRealTime($this->scene.'-'.$this->order_no, env('APP_URL').'/order/notice/notify', [
+		return \App\Lib\Common\JobQueueApi::addRealTime($this->scene.'-'.$this->order_no, config('app.url').'/order/notice/notify', [
 			'business_type' => $this->business_type,
 			'business_no' => $this->business_no,
 			'scene' => $this->scene,

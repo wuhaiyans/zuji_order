@@ -79,7 +79,7 @@ class ReceiveGoodsService
             $it['shouhuo']=($it['status']==ReceiveGoods::STATUS_INIT)?true:false;
             $receive_row = $item->receive;
             //确认同意换货操作(暂时不需要)换货类型并且检测完成
-            if($receive_row->status==Receive::STATUS_CONFIRM_RECEIVE && $receive_row->type==Receive::TYPE_EXCHANGE){
+            if($receive_row->status==Receive::STATUS_FINISH && $receive_row->type==Receive::TYPE_EXCHANGE){
                 $it['huanhuo']=true;
             }else{
                 $it['huanhuo']=false;//收货签收

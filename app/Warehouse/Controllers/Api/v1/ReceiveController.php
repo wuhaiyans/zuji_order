@@ -411,7 +411,8 @@ class ReceiveController extends Controller
      */
     public function createDelivery(){
         $rules = [
-            'receive_no' => 'required'
+            'receive_no' => 'required',
+            'exchange_description' => 'required'
         ];
         $params = $this->_dealParams($rules);
         if (!$params) {
@@ -420,7 +421,7 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
-            $this->receive->createDelivery($params['receive_no']);
+            $this->receive->createDelivery($params);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

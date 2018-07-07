@@ -83,7 +83,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 //		
 //        $ApiRequest = new ApiRequest();
 //        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 //        $ApiRequest->setMethod('pay.api.unfreezeandpaystatus');
 //        $ApiRequest->setParams($params);
 //        $Response = $ApiRequest->send();
@@ -117,7 +117,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 		
 //        $ApiRequest = new ApiRequest();
 //        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 //        $ApiRequest->setMethod('pay.api.unfreeze');
 //        $ApiRequest->setParams($params);
 //        $Response = $ApiRequest->send();
@@ -152,7 +152,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 		
 //        $ApiRequest = new ApiRequest();
 //        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( env('PAY_APP_ID') );	// 业务应用ID
+//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
 //        $ApiRequest->setMethod('pay.api.unfreezeandpay');
 //        $ApiRequest->setParams($params);
 //        $Response = $ApiRequest->send();

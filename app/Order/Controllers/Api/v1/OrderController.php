@@ -282,8 +282,9 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        $params = $request->input('params');
-
+        $params = $request->all();
+        $params['page'] = 1;
+        $params['size'] = 10000;
         $orderData = Service\OrderOperate::getOrderList($params);
 
         if ($orderData['code']===ApiStatus::CODE_0) {

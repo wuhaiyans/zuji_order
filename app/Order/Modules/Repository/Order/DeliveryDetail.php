@@ -70,9 +70,9 @@ class DeliveryDetail {
      */
     public function barterDelivery():bool{
         //必须是有效状态
-	    if($this->model->status==1){
+	    /*if($this->model->status == 1){
 	        return false;
-        }
+        }*/
         $this->model->status=1;
 	    return $this->model->save();
 

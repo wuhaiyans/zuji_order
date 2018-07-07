@@ -1667,16 +1667,34 @@ class OrderReturnCreater
     }
 
     /**
-     * 换货已发货通知
-     * @param $params
-     * $detail=》[
-     * 'order_no',
-     * 'logistics_id',
-     * 'logistics_no'
+     * 订单发货接口
+     * @param $detail array
+     * [
+     *  'order_no'=>'',//订单编号
+     *  'logistics_id'=>''//物流渠道ID
+     *  'logistics_no'=>''//物流单号
      * ]
-     * 备注：不要加事务 外面调用 已经嵌套事务
+     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * [
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     *   [
+     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *   ]
+     * ]
+     *@param $userinfo array 操作人员信息
+     *
+     *
+     *
+     * [
+     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,//用户ID
+     *      'user_name'=>1,//用户名
+     * ]
+     * @return boolean
      */
-    public static function createchange($detail,$goods_info){
+    public static function createchange($detail,$goods_info,$userinfo){
         LogApi::debug("换货发货接收参数detail",$detail);
         LogApi::debug("换货发货接收参数goods_info",$goods_info);
         //开启事物
@@ -1684,6 +1702,10 @@ class OrderReturnCreater
             foreach ($goods_info as $k=>$v) {
                 //获取设备信息
                 $delivery=\App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDeliveryInfo($detail['order_no'],$v['goods_no']);
+                if(!$delivery){
+                    LogApi::debug("获取设备信息失败");
+                    return false;
+                }
                 LogApi::debug("获取设备信息",$delivery);
                 //更新原设备为无效
                 $updateDelivery=$delivery->barterDelivery();
@@ -1696,12 +1718,12 @@ class OrderReturnCreater
                 LogApi::debug("换货物流信息参数",$detail['order_no']);
                 LogApi::debug("换货物流信息参数goods_no",$v['goods_no']);
                 if(!$return){
-                    LogApi::debug("更新换货物流信息失败",$return);
                     return false;
                 }
-                $updateReturn=$return->barterDelivery($v);
+                $updateReturn=$return->barterDelivery($detail);
                 LogApi::debug("更新换货物流信息参数goods_no",$v['goods_no']);
                 if(!$updateReturn){
+                    LogApi::debug("更新换货物流信息失败");
                    return false;
                 }
             }
