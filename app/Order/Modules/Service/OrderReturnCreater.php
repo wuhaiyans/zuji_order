@@ -49,7 +49,7 @@ class OrderReturnCreater
      *      'loss_type'     => '',   【必选】商品损耗
      *      'reason_id'     => '',   【必选】退货原因id
      *      'reason_text'   => '',   【可选】退货原因备注
-     *      'user_id'       => '',       【必选】用户id
+     *      'user_id'       => '',   【必选】用户id
      * ]
      *  * @param array $userinfo 业务参数
      * [
@@ -117,7 +117,7 @@ class OrderReturnCreater
                     }
                 }
 
-                // 创建退货单
+                // 创建清单
                 $data = [
                     'goods_no'      => $goods_info['goods_no'],
                     'order_no'      => $goods_info['order_no'],
@@ -166,7 +166,7 @@ class OrderReturnCreater
                 //短信
                 if( $params['business_key'] == OrderStatus::BUSINESS_RETURN ){
                     //插入操作日志
-                    \App\Order\Modules\Repository\GoodsLogRepository::add([
+                    $goods_info=\App\Order\Modules\Repository\GoodsLogRepository::add([
                         'order_no'     =>$params['order_no'],
                         'action'       =>'退货单生成',
                         'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
@@ -194,6 +194,9 @@ class OrderReturnCreater
                        'operator_type'=>$userinfo['type'],
                        'msg'           =>'用户申请换货',
                    ],$isCorntab=FALSE);
+               }
+               if(!$goods_info){
+                   return false;
                }
            }
             return $no_list;
@@ -582,6 +585,12 @@ class OrderReturnCreater
     /**
      * 订单退款审核
      * @param $param
+     * [
+     *    'refund_no'   =>''  //退款单号
+     *    'status'      =>''  //审核状态
+     *    'remark'      =>''  //审核备注
+     *
+     * ]
      *  @param array $userinfo 业务参数
      * [
      *       'uid'       =>'',【请求参数】 用户id
@@ -685,10 +694,12 @@ class OrderReturnCreater
     /**
      * 取消退货申请
      * @param $params
-     * @return string
+     * [
+     *    'refund_no'    => ['',''] //退货单号
+     *    'user_id'     => ''  //用户id
+     *    'business_key'=> '' //业务类型
+     * ]
      * @throws \Exception
-     *  退货单号refund_no=>['111','222']
-     *  业务类型 business_key
      *  @param array $userinfo 业务参数
      * [
      *       'uid'       =>'',【请求参数】 用户id
@@ -949,17 +960,17 @@ class OrderReturnCreater
     /** 查询条件过滤
      * @param array $where	【可选】查询条件
      * [
-     *      'user_id' => '',	//【可选】用户id
+     *      'user_id'      => '',	//【可选】用户id
      *      'business_key' => '',	//【必选】string；业务类型
-     *      'status'=>''      //【可选】int；阶段
-     *      'begin_time'=>''      //【可选】int；开始时间戳
-     *      'end_time'=>''      //【可选】int；  截止时间戳
-     *      'goods_name' => '',	//【可选】设备名称
-     *      'order_no' => '',	//【可选】string；订单编号
-     *      'reason_key'=>''      //【可选】int；退货问题
-     *      'user_mobile'=>''      //【可选】int；下单用户手机号
-     *      'order_status'=>''      //【可选】int；  订单状态
-     *      'appid'=>''      //【可选】int；应用来源
+     *      'status'       =>''     //【可选】int；阶段
+     *      'begin_time'   =>''    //【可选】int；开始时间戳
+     *      'end_time'     =>''    //【可选】int；  截止时间戳
+     *      'goods_name'   => '',	//【可选】设备名称
+     *      'order_no'     => '',	//【可选】string；订单编号
+     *      'reason_key'   =>''      //【可选】int；退货问题
+     *      'user_mobile'  =>''      //【可选】int；下单用户手机号
+     *      'order_status' =>''      //【可选】int；  订单状态
+     *      'appid'        =>''      //【可选】int；应用来源
      *
      * ]
      * @return array	查询条件
@@ -1172,15 +1183,7 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);
             }
-            //  foreach($params as $k=>$v){
             if(isset($return['refund_no'])){
-
-                //获取退换货单信息
-               // $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($return['refund_no']);
-              //  if(!$return){
-               //     return false;
-              //  }
-              //  $returnInfo=$return->getData();
                 $buss->setRefundNo($return['refund_no']);
                 if($return['status']==ReturnStatus::ReturnCreated){
                     $buss->setStatus("B");
@@ -1207,15 +1210,6 @@ class OrderReturnCreater
                             || !isset($info['data']) ){
                            return false;
                         }
-                       /*
-						$i=0;
-						$logistics = [];
-                        foreach($info['data']['list'] as $k=>$id){
-
-                            $logistics[$i]['id']=$k;
-                            $logistics[$i]['name']=$id;
-                            $i=$i+1;
-                        }*/
                         $buss->setLogisticsInfo($info['data']);
                     }
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
@@ -1228,20 +1222,13 @@ class OrderReturnCreater
                         //换货状态流
                         $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
                     }
-					//$buss->setStateFlow($stateFlow['deniedStateFlow']);
                     $buss->setStatus("D");
                     $buss->setStatusText("审核被拒绝");
                 }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测不合格");
                     $buss->setCheckResult("检测不合格");
-                }
-               /* elseif($returnInfo['status']==ReturnStatus::ReturnCanceled){
-                    $buss->setStateFlow($stateFlow['cancelStateFlow']);
-                    $buss->setStatus("C");
-                    $buss->setStatusText("已取消");
-                }*/
-                elseif($return['status']==ReturnStatus::ReturnReceive){
+                }elseif($return['status']==ReturnStatus::ReturnReceive){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
                     if($return['evaluation_status']==ReturnStatus::ReturnEvaluation){
@@ -1285,6 +1272,7 @@ class OrderReturnCreater
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
                 }
+                //退换货物流
                 if(!empty($return['logistics_no']) && !empty($return['logistics_name'])){
                      $channel_list['logistics_no']=$return['logistics_no'];
                      $channel_list['logistics_name']=$return['logistics_name'];
@@ -1356,7 +1344,6 @@ class OrderReturnCreater
             //检测不合格的状态
             $no_list=[];
             foreach($data as $k=>$v){
-                $order_no='';
                 //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($v['goods_no']);
                 if(!$return){
@@ -1380,7 +1367,6 @@ class OrderReturnCreater
                 $params['evaluation_time'] =$v['evaluation_time'];
                 if($data[$k]['evaluation_status']==1) {
                     $yes_list[]=$return_info['refund_no'];
-                    $order_no=$return_info['order_no'];//订单编号
                     $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
                     //更新退换货单信息
                     $updateReturn=$return->returnCheckOut($params);
@@ -1452,7 +1438,6 @@ class OrderReturnCreater
                         ],$isCorntab=FALSE);
                     }
                 }else{
-                    //$list[]=$return_info['status'];
                     $no_list[]=$return_info['refund_no'];
                     if($business_key ==OrderStatus::BUSINESS_RETURN){
                         //更新退货单检测信息
@@ -1538,26 +1523,6 @@ class OrderReturnCreater
                 }
             }
             DB::commit();
-           /* if($business_key ==OrderStatus::BUSINESS_BARTER){
-                if($order_no){
-                    //获取用户收货信息
-                    $userAddress=\App\Order\Modules\Repository\Order\Address::getByOrderNo($order_no);
-                    if(!$userAddress){
-                        return false;
-                    }
-                    $user_info=$userAddress->getData();
-                    $delivery_data['order_no']=$order_no;
-                    $delivery_data['mobile']=$user_info['consignee_mobile'];
-                    $delivery_data['realname']=$user_info['name'];
-                    $delivery_data['address_info']=$user_info['address_info'];
-                    //创建换货，发货单
-                    $delivery_result=Delivery::createDelivery($delivery_data);
-                    if(!$delivery_result){
-                        return false;//创建换货，发货单失败
-                    }
-                }
-            }*/
-
             //发短信
             if($business_key==OrderStatus::BUSINESS_RETURN){
                 if($yes_list){
