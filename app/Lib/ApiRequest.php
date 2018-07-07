@@ -214,10 +214,6 @@ class ApiRequest {
 			if (is_string($data['userinfo'])) {
 				$data['userinfo'] = json_decode($data['userinfo'], true);
 			}
-			if (!is_array($data['userinfo'])) {
-				$status->setCode(ApiStatus::CODE_10106)->setMsg('userinfo错误');
-				return $status;
-			}
 		}
 
 		//-+--------------------------------------------------------------------
