@@ -52,7 +52,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userInfo'])? $params['userInfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -153,7 +153,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userInfo'])? $params['userInfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -277,7 +277,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userInfo'])? $params['userInfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -372,7 +372,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userInfo'])? $params['userInfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -626,7 +626,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$userInfo = isset($params['userInfo'])? $params['userInfo'] :'';
+		$userInfo = isset($params['userinfo'])? $params['userinfo'] :'';
 		if( empty($paramsArr['uid']) || empty($paramsArr['username']) || empty($paramsArr['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
