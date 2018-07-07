@@ -1256,7 +1256,9 @@ class OrderReturnCreater
                     }
                     $checkResult['check_remark']=$return['evaluation_remark'];
                     $buss->setCheckResult( $checkResult);
-                }elseif($return['status']==ReturnStatus::ReturnTuiHuo || $return['status']==ReturnStatus::ReturnHuanHuo || $return['status']==ReturnStatus::ReturnTui){
+                }elseif( $return['status']==ReturnStatus::ReturnTuiHuo
+                    || $return['status']==ReturnStatus::ReturnHuanHuo
+                    || $return['status']==ReturnStatus::ReturnTui ){
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
                     if($return['evaluation_status']==ReturnStatus::ReturnEvaluation){
@@ -1272,6 +1274,11 @@ class OrderReturnCreater
                     $checkResult['check_remark']=$return['evaluation_remark'];
                     if(isset($checkResult)){
                         $buss->setCheckResult( $checkResult);
+                    }
+                    //已完成退货退款，返回退还押金信息
+                    if($return['status']==ReturnStatus::ReturnTuiHuo){
+                        $returnUnfreeze="押金已退还至支付账户，由于银行账务流水，请耐心等待1-3个工作日";
+                        $buss->returnUnfreeze( $returnUnfreeze);
                     }
 
                 }elseif($return['status']==ReturnStatus::ReturnTuiKuan){

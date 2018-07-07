@@ -142,7 +142,14 @@ class BusinessInfo
     public function setRefundNo(string $refund_no){
         $this->data['refund_no']=$refund_no;
     }
-
+    /**
+     * 退货退款完成退还押金信息
+     * @param string $checkInfo
+     */
+    public  function returnUnfreeze( string $returnUnfreeze )
+    {
+        $this->data['returnUnfreeze']=$returnUnfreeze;
+    }
     /**
      * 是否显示取消按钮
      * true   显示
