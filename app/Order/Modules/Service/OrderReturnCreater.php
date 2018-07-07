@@ -1623,6 +1623,7 @@ class OrderReturnCreater
                 $return_info=$return->getData();
                 //更新退货单状态为已换货
                 $updateBarter=$return->barterFinish();
+
                 if(!$updateBarter){
                     DB::rollBack();
                     return false;
