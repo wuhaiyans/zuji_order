@@ -68,7 +68,9 @@ class Receive extends Warehouse
         'receive_time',
         'check_time',
         'check_result',
-        'check_description'
+        'check_description',
+        'exchange_description',
+        'business_key'
     ];
 
     /**

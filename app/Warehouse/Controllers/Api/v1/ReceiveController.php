@@ -252,6 +252,7 @@ class ReceiveController extends Controller
 
         $params = $this->_dealParams($rules);
 
+        return \apiResponse([$params], ApiStatus::CODE_10104, 'aaaaaaa');
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
@@ -269,7 +270,7 @@ class ReceiveController extends Controller
                 'compensate_amount'=>$params['compensate_amount'],
             ];
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
-            Receive::checkItemsResult($items,$receive_row['business_key']);
+            Receive::checkItemsResult($items,$receive_row['business_key'],$params['userinfo']);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

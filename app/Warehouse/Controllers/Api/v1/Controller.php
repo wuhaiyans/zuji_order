@@ -25,6 +25,7 @@ class Controller extends BaseController
     protected function _dealParams($rules)
     {
         $params = request()->input();
+        $param['userinfo']=$params['userinfo'];
 
 //        $params = apiData();
 
@@ -46,6 +47,7 @@ class Controller extends BaseController
         }
 
         $param['app_id'] = $params['appid'];
+        $param['userinfo']=$params['userinfo'];
 
         return $param;
     }
