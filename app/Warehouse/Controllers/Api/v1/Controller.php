@@ -25,7 +25,6 @@ class Controller extends BaseController
     protected function _dealParams($rules)
     {
         $params = request()->input();
-
 //        $params = apiData();
 
         if (!isset($params['params'])) {

@@ -36,8 +36,8 @@ class Giveback extends \App\Lib\BaseApi
 	 * ]<br/>
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
-	public static function confirmEvaluation( $params ) {
-		if( self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.evaluation', '1.0', $params) ){
+	public static function confirmEvaluation( $params, $userInfo= [] ) {
+		if( self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.evaluation', '1.0', $params, $userInfo) ){
 			return true;
 		}
 	}
@@ -53,9 +53,9 @@ class Giveback extends \App\Lib\BaseApi
 	 * ]<br/>
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
-	public static function confirmEvaluationArr( $params ) {
+	public static function confirmEvaluationArr( $params, $userInfo = [] ) {
 		foreach ( $params as $param ){
-			self::confirmEvaluation($param);
+			self::confirmEvaluation($param, $userInfo);
 		}
 		return true;
 	}
