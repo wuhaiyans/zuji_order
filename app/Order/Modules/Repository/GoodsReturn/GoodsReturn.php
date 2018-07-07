@@ -215,10 +215,10 @@ class GoodsReturn {
      * @return bool
      */
     public function barterFinish( ):bool{
-        if($this->model->status==ReturnStatus::ReturnDelivery){
+        if($this->model->status==ReturnStatus::ReturnHuanHuo){
             return false;
         }
-        $this->model->status=ReturnStatus::ReturnDelivery;
+        $this->model->status=ReturnStatus::ReturnHuanHuo;
         $this->model->complete_time=time();
         return $this->model->save();
     }
