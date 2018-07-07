@@ -252,7 +252,6 @@ class ReceiveController extends Controller
 
         $params = $this->_dealParams($rules);
 
-        return \apiResponse([$params], ApiStatus::CODE_10104, 'aaaaaaa');
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
