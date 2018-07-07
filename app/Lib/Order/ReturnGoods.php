@@ -32,11 +32,12 @@ class ReturnGoods extends \App\Lib\BaseApi
      *
      */
 
-    public static function checkResult($data,$business_key)
+    public static function checkResult($data,$business_key,$userinfo)
     {
 
         $params['business_key']=$business_key;
         $params['data']=$data;
+        $params['userinfo']=$userinfo;
         if( self::request(\config('app.APPID'), \config('ordersystem.ORDER_API'),'api.Return.isQualified', '1.0', $params) ){
             return true;
         }

@@ -193,6 +193,13 @@ class Receive
      *      'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
      *  ],
      * ]
+     * @param string $business_key  业务类型
+     * @param array $userInfo       用户信息
+     * [
+     *       'uid'        =>'',【请求参数】 用户id
+     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
+     *      ‘username’  =>‘’，【请求参数】 用户名
+     * ]
      *
      */
     public static function checkItemsResult($params,$business_key=0,$userInfo=[])
@@ -213,7 +220,7 @@ class Receive
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
                Giveback::confirmEvaluation($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
-               ReturnGoods::checkResult($result,$business_key);
+               ReturnGoods::checkResult($result,$business_key,$userInfo);
            }
 
         } catch (\Exception $e) {

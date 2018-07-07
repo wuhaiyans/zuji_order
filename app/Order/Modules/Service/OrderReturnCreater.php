@@ -1337,7 +1337,7 @@ class OrderReturnCreater
      * @return string
      * @throws \Exception
      */
-    public function isQualified($business_key,$data)
+    public function isQualified($business_key,$data,$userinfo)
     {
         //开启事务
         DB::beginTransaction();
@@ -1416,10 +1416,34 @@ class OrderReturnCreater
                             DB::rollBack();
                             return false;//创建退款清单失败
                         }
+                        //插入操作日志
+                        $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                            'order_no'     =>$return_info['order_no'],
+                            'action'       =>'退货检测',
+                            'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
+                            'business_no'  =>$return_info['refund_no'],
+                            'goods_no'     =>$v['goods_no'],
+                            'operator_id'  =>$userinfo['uid'],
+                            'operator_name'=>$userinfo['username'],
+                            'operator_type'=>$userinfo['type'],
+                            'msg'           =>'退货检测合格',
+                        ],$isCorntab=FALSE);
                     }
                     $delivery_data['goods'][$k]['goods_no']=$return_info['goods_no'];
-
-
+                    if($business_key == OrderStatus::BUSINESS_BARTER){
+                        //插入操作日志
+                        $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                            'order_no'     =>$return_info['order_no'],
+                            'action'       =>'换货检测',
+                            'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                            'business_no'  =>$return_info['refund_no'],
+                            'goods_no'     =>$v['goods_no'],
+                            'operator_id'  =>$userinfo['uid'],
+                            'operator_name'=>$userinfo['username'],
+                            'operator_type'=>$userinfo['type'],
+                            'msg'           =>'换货检测合格',
+                        ],$isCorntab=FALSE);
+                    }
                 }else{
                     //$list[]=$return_info['status'];
                     $no_list[]=$return_info['refund_no'];
@@ -1431,6 +1455,18 @@ class OrderReturnCreater
                             DB::rollBack();
                             return false;
                         }
+                        //插入操作日志
+                        $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                            'order_no'     =>$return_info['order_no'],
+                            'action'       =>'退货检测',
+                            'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
+                            'business_no'  =>$return_info['refund_no'],
+                            'goods_no'     =>$v['goods_no'],
+                            'operator_id'  =>$userinfo['uid'],
+                            'operator_name'=>$userinfo['username'],
+                            'operator_type'=>$userinfo['type'],
+                            'msg'           =>'退货检测不合格',
+                        ],$isCorntab=FALSE);
                     }
                     if($business_key ==OrderStatus::BUSINESS_BARTER){
                         //更新退货单检测信息
@@ -1447,9 +1483,25 @@ class OrderReturnCreater
                             DB::rollBack();
                             return false;
                         }
+                        //插入操作日志
+                        $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                            'order_no'     =>$return_info['order_no'],
+                            'action'       =>'换货检测',
+                            'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                            'business_no'  =>$return_info['refund_no'],
+                            'goods_no'     =>$v['goods_no'],
+                            'operator_id'  =>$userinfo['uid'],
+                            'operator_name'=>$userinfo['username'],
+                            'operator_type'=>$userinfo['type'],
+                            'msg'           =>'换货检测不合格',
+                        ],$isCorntab=FALSE);
                     }
 
 
+                }
+                //操作日志错误
+                if(!$goodsLog){
+                    return false;
                 }
                 //获取商品信息
                 $goodsInfo =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no'] );
@@ -1639,7 +1691,7 @@ class OrderReturnCreater
                     return false;
                 }
                 //插入操作日志
-                \App\Order\Modules\Repository\GoodsLogRepository::add([
+                $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
                     'order_no'     =>$params['order_no'],
                     'action'       =>'换货确认收货',
                     'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
@@ -1650,6 +1702,9 @@ class OrderReturnCreater
                     'operator_type'=>$userinfo['type'],
                     'msg'           =>'用户已收货',
                 ],$isCorntab=FALSE);
+                if(!$goodsLog){
+                    return false;
+                }
             }
             //订单解冻
             $updateOrder=$order->returnClose();
@@ -1671,7 +1726,7 @@ class OrderReturnCreater
      * 订单发货接口
      * @param $detail array
      * [
-     *  'order_no'=>'',//订单编号
+     *  'order_no'    =>'',//订单编号
      *  'logistics_id'=>''//物流渠道ID
      *  'logistics_no'=>''//物流单号
      * ]
@@ -1686,16 +1741,14 @@ class OrderReturnCreater
      * ]
      *@param $userinfo array 操作人员信息
      *
-     *
-     *
      * [
-     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,//用户ID
-     *      'user_name'=>1,//用户名
+     *      'type'    =>'1'发货类型:1管理员，2用户,3系统，4线下,
+     *      'user_id' =>1,//用户ID
+     *      'user_name'=>'admin',//用户名
      * ]
      * @return boolean
      */
-    public static function createchange($detail,$goods_info){
+    public static function createchange($detail,$goods_info,$userinfo){
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
@@ -1721,6 +1774,19 @@ class OrderReturnCreater
                     LogApi::debug("更新换货物流信息失败");
                    return false;
                 }
+                $return_info=$return->getData();
+                //插入操作日志
+                \App\Order\Modules\Repository\GoodsLogRepository::add([
+                    'order_no'     =>$detail['order_no'],
+                    'action'       =>'换货发货',
+                    'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                    'business_no'  =>$return_info['refund_no'],
+                    'goods_no'     =>$goods_info[$k]['goods_no'],
+                    'operator_id'  =>$userinfo['uid'],
+                    'operator_name'=>$userinfo['username'],
+                    'operator_type'=>$userinfo['type'],
+                    'msg'           =>'换货已发货',
+                ],$isCorntab=FALSE);
             }
             $goods_result= \App\Order\Modules\Repository\Order\DeliveryDetail::addGoodsDeliveryDetail($detail['order_no'],$goods_info);
             if(!$goods_result){
