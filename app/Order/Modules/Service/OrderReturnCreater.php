@@ -723,10 +723,18 @@ class OrderReturnCreater
                 if($return_info[$refund_no]['user_id']!=$params['user_id']){
                     return false;
                 }
-                //审核通过之后不能取消
-               // if($return_info[$refund_no]['status']>3){
-               //     return false;
-             //   }
+                //收货之后不允许取消
+                if($return_info[$refund_no]['status']>ReturnStatus::ReturnAgreed){
+                    return false;
+                }
+                //如果审核通过通知收发货取消收货
+                if($return_info[$refund_no]['status'] == ReturnStatus::ReturnAgreed){
+                   $cancelReceive = \App\Lib\Order\Receive::cancelReceive($return_info[$refund_no]['receive_no']);
+                   if(!$cancelReceive){
+                       DB::rollBack();
+                       return false;//取消收货未执行成功
+                   }
+                }
                 //更新退换货状态为已取消
                 $cancelApply=$return->close();
                 if(!$cancelApply){
@@ -741,7 +749,8 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
-                $order_no=$return_info[$refund_no]['order_no'];
+                $order_no=$return_info[$refund_no]['order_no'];//订单编号
+
             }
             //获取订单信息
             $order =\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
@@ -1285,8 +1294,8 @@ class OrderReturnCreater
                 $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);
                 $quesion['reason_text']=$return['reason_text'];//退换货原因
                 $buss->setReturnReasonResult($quesion);
-                //设置是否显示取消退换货按钮
-                if($return['status']>1){
+                //设置是否显示取消退换货按钮,状态为创建申请，审核同意时显示
+                if($return['status'] == ReturnStatus::ReturnAgreed || $return['status'] == ReturnStatus::ReturnCreated ){
                     $buss->setCancel("1");
                 }else{
                     $buss->setCancel("0");
