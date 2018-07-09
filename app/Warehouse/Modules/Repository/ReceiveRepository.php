@@ -172,6 +172,9 @@ class ReceiveRepository
         if (!$model) {
             throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
         }
+        if (!$model->status !=Receive::STATUS_INIT) {
+            throw new NotFoundResourceException('收货单' . $receive_no . '非待收货状态，取消收货失败');
+        }
 
         $model->status = Receive::STATUS_CANCEL;
         $model->status_time = time();

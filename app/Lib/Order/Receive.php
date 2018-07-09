@@ -77,7 +77,7 @@ class Receive
             $response = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
-                'method'=> 'api.Return.isQualified',//取消申请
+                'method'=> 'warehouse.receive.cancel',//取消收货单
                 'data' => ['receive_no'=>$receive_no]
             ]);
             $res = json_decode($response);
