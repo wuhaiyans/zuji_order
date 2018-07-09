@@ -245,7 +245,7 @@ class OrderBuyout
 			}
 		}
 		//插入日志
-		OrderLogRepository::add(0,"支付回调",$userInfo['type'],$buyout['order_no'],"买断支付成功","支付完成");
+		OrderLogRepository::add(0,"支付回调",\App\Lib\PublicInc::Type_System,$buyout['order_no'],"买断支付成功","支付完成");
 		//插入订单设备日志
 		$log = [
 				'order_no'=>$buyout['order_no'],
