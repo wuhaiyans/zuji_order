@@ -170,7 +170,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public static function callbackPaid($params,$userInfo){
+	public static function callbackPaid($params){
 		//过滤参数
 		$rule = [
 				'business_type'     => 'required',//业务类型
