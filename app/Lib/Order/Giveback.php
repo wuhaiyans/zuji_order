@@ -18,9 +18,12 @@ class Giveback extends \App\Lib\BaseApi
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
 	public static function confirmDelivery( $params, $userInfo=[] ) {
-		if( self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.delivery', '1.0', $params, $userInfo) ){
-			return true;
+		foreach ($params as $value) {
+			if( !self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.delivery', '1.0', $params, $userInfo) ){
+				return false;
+			}
 		}
+		return true;
 	}
 	
 	/**
