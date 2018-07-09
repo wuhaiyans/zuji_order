@@ -53,10 +53,14 @@ class Giveback extends \App\Lib\BaseApi
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
 	public static function confirmEvaluationArr( $params, $userInfo = [] ) {
-		foreach ( $params as $param ){
-			self::confirmEvaluation($param, $userInfo);
-		}
-		return true;
+	    try{
+            foreach ( $params as $param ){
+                self::confirmEvaluation($param, $userInfo);
+            }
+            return true;
+        }catch (\Exception $e){
+            throw new \Exception( $e->getMessage());
+        }
 	}
 
 }
