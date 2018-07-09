@@ -84,6 +84,8 @@ $api->version('v1', [
         $api->get('cronCancelOrder', 'CronController@cronCancelOrder');
     // 定时任务 订单自动确认收货接口 不加token
         $api->get('cronDeliveryReceive', 'CronController@cronDeliveryReceive');
+    // 定时任务 每日执行定时任务-扣款
+    $api->get('crontabCreatepay', 'WithholdController@crontab_createpay');
 
 
     /*************************************************************************************************
