@@ -225,8 +225,8 @@ class Receive
            }
 
         } catch (\Exception $e) {
-			throw new \Exception( $e->getMessage());
             Log::error(__METHOD__ . '检测项反馈失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }
@@ -240,7 +240,7 @@ class Receive
      *      ['goods_no'=>123],
      * ]
      */
-    public static function receive($receive_no)
+    public static function receive($receive_no,$userinfo)
     {
         if (!$receive_no) return;
 
@@ -257,9 +257,10 @@ class Receive
         }
 
         try {
-            Giveback::confirmDelivery($result);
+            Giveback::confirmDelivery($result,$userinfo);
         } catch (\Exception $e) {
             Log::error(__METHOD__ . '收货反馈失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }

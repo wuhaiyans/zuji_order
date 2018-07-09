@@ -129,6 +129,8 @@ class ReceiveController extends Controller
             'receive_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
+        $param = request()->input();
+        $userinfo=$param['userinfo'];
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
@@ -137,7 +139,7 @@ class ReceiveController extends Controller
         try {
             DB::beginTransaction();
             $this->receive->received($params['receive_no']);
-            Receive::receive($params['receive_no']);
+            Receive::receive($params['receive_no'],$userinfo);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
