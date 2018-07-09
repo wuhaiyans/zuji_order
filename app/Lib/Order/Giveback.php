@@ -19,7 +19,7 @@ class Giveback extends \App\Lib\BaseApi
 	 */
 	public static function confirmDelivery( $params, $userInfo=[] ) {
 		foreach ($params as $value) {
-			if( !self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.delivery', '1.0', $params, $userInfo) ){
+			if( !self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.delivery', '1.0', $value, $userInfo) ){
 				return false;
 			}
 		}
