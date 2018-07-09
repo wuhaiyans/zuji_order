@@ -80,6 +80,7 @@ $api->version('v1', [
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/
 
+    $api->get('CancelOrder', 'InnerServiceController@cancelOrder');
     // 定时任务 订单取消接口 不加token
         $api->get('cronCancelOrder', 'CronController@cronCancelOrder');
     // 定时任务 订单自动确认收货接口 不加token

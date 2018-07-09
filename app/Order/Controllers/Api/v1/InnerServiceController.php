@@ -11,6 +11,8 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 class InnerServiceController extends Controller
 {
 
@@ -25,9 +27,18 @@ class InnerServiceController extends Controller
     {
 
         $input = file_get_contents("php://input");
+        $ab = $request->all();
+        $c = "--".$ab."Request";
+        Log::info($input.$c);
 
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+//        var_dump($input.$c);exit;
+//
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input.$c);
+//        $input = '{"appid":"1","method":"api.inner.cancelOrder","params":[{"order_no":"A709122536280234","user_id":"18"}],"version":"v1"}';
         $params = json_decode($input,true);
+        var_dump($params);die;
+        $params =json_encode($params['params'][0]);
+        var_dump($params);die;
         $rules = [
             'order_no'  => 'required',
             'user_id'  => 'required',

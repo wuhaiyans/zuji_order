@@ -1296,9 +1296,9 @@ class OrderReturnCreater
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮,状态为创建申请，审核同意时显示
                 if($return['status'] == ReturnStatus::ReturnAgreed || $return['status'] == ReturnStatus::ReturnCreated ){
-                    $buss->setCancel("1");
-                }else{
                     $buss->setCancel("0");
+                }else{
+                    $buss->setCancel("1");
                 }
 
             }
