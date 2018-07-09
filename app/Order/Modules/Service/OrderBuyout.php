@@ -139,7 +139,7 @@ class OrderBuyout
 				'goods_name'=>'required',
 				'buyout_price'=>'required',
 				'zujin_price'=>'required',
-				'zujin_number'=>'required',
+				'zuqi_number'=>'required',
 				'amount'=>'required',
 				'create_time'=>'required',
 		]);
