@@ -180,6 +180,14 @@ class BuyoutController extends Controller
         if($newTime>time()){
             return apiResponse([],ApiStatus::CODE_20001,"该订单未到买断时间");
         }
+        //获取剩余未支付租金
+        $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
+        $where[] = ['goods_no','=',$goodsInfo['goods_no']];
+        $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+        $fenqiPrice = $instaulment['amount']?$instaulment['amount']:0;
+        $fenqishu = $instaulment['fenqishu']?$instaulment['fenqishu']:0;
+        $buyoutPrice = $goodsInfo['buyout_price'];
+
         DB::beginTransaction();
         //创建买断单
         $data = [
@@ -188,9 +196,11 @@ class BuyoutController extends Controller
             'goods_no'=>$goodsInfo['goods_no'],
             'user_id'=>$goodsInfo['user_id'],
             'goods_name'=>$goodsInfo['goods_name'],
-            'buyout_price'=>$goodsInfo['buyout_price'],
-            'amount'=>$goodsInfo['buyout_price'],
-            'create_time'=>time(),
+            'buyout_price'=>$buyoutPrice,
+            'zujin_price'=>$fenqiPrice,
+            'zuqi_number'=>$fenqishu,
+            'amount'=>$buyoutPrice+$fenqiPrice,
+            'create_time'=>time()
         ];
         $ret = OrderBuyout::create($data);
         if(!$ret){
