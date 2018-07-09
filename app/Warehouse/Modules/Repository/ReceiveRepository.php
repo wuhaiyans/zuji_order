@@ -112,7 +112,9 @@ class ReceiveRepository
 
         try {
             DB::beginTransaction();
-            $receiveNo = WarehouseHelper::generateNo();
+            //$receiveNo = WarehouseHelper::generateNo();
+            $receiveNo = create_receive_no();
+
             $time = time();
             $da = [
                 'receive_no' => $receiveNo,
