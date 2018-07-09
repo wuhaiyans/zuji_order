@@ -257,7 +257,6 @@ class ReceiveController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
-        return \apiResponse($params, ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
 
         try {
             DB::beginTransaction();

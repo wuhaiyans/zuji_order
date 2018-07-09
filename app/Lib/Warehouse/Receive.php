@@ -216,6 +216,7 @@ class Receive
 //            ];
             $result[] = $v;
         }
+        throw new \Exception( $business_key);
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
                Giveback::confirmEvaluation($result,$userInfo);
