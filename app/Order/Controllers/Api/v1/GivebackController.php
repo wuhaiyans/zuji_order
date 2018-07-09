@@ -1080,6 +1080,8 @@ class GivebackController extends Controller
 	 *		'evaluation_time' => '',//检测时间 【必须】<br/>
 	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
 	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/>
+	 *		'instalment_amount' => '',//剩余分期金额 【可选】【存在未支付分期时必须】<br/>
+	 *		'instalment_num' => '',//剩余分期数 【可选】【存在未支付分期时必须】<br/>
 	 * ]
 	 * @return array $data
 	 * $data = [<br/>
@@ -1087,6 +1089,8 @@ class GivebackController extends Controller
 	 *		'evaluation_time' => '',//检测时间 <br/>
 	 *		'evaluation_remark' => '',//检测备注 <br/>
 	 *		'compensate_amount' => '',//赔偿金额 【<br/>
+	 *		'instalment_amount' => '',//赔偿金额 【<br/>
+	 *		'instalment_num' => '',//赔偿金额 【<br/>
 	 * ]
 	 */
 	private function __givebackUpdateDataInit( $paramsArr ) {
@@ -1095,6 +1099,8 @@ class GivebackController extends Controller
 			'evaluation_time' => $paramsArr['evaluation_time'],
 			'evaluation_remark' => isset($paramsArr['evaluation_remark']) ? $paramsArr['evaluation_remark'] : '',
 			'compensate_amount' => isset($paramsArr['compensate_amount']) ? $paramsArr['compensate_amount'] : 0,
+			'instalment_amount' => isset($paramsArr['instalment_amount']) ? $paramsArr['instalment_amount'] : 0,
+			'instalment_num' => isset($paramsArr['instalment_num']) ? $paramsArr['instalment_num'] : 0,
 		];
 	}
 }
