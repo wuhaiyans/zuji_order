@@ -142,6 +142,9 @@ class ReturnController extends Controller
         if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        if($param['status'] != 0){
+            return apiResponse([],ApiStatus::CODE_34009,"不支持退款审核拒绝");
+        }
         $res= $this->OrderReturnCreater->refundApply($param,$orders['userinfo']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");

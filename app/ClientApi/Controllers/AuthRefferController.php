@@ -59,9 +59,11 @@ class AuthRefferController extends Controller{
                 || !is_array($checkInfo)
                 || !isset($checkInfo['code'])
                 || !isset($checkInfo['msg'])
-                || !isset($checkInfo['data']) ){
+                || !isset($checkInfo['data'])
+                || $checkInfo['code']!=0){
                 return response()->json($checkInfo);
             }else{
+
                 $params['userinfo']=[
                     'uid'      =>$checkInfo['data'][0]['id'],
                     'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
