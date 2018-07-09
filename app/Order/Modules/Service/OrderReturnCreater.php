@@ -91,13 +91,13 @@ class OrderReturnCreater
                 }
 
                 //修改商品状态为退货
-                $returnOpen = $goods->returnOpen();
+               // $returnOpen = $goods->returnOpen();
                 // 商品退货
-                if( !$returnOpen ) {
+               /* if( !$returnOpen ) {
                     //事务回滚
                     DB::rollBack();
                     return false;
-                }
+                }*/
                 //获取商品数组
                 $goods_info = $goods->getData();
                 //代扣+预授权
