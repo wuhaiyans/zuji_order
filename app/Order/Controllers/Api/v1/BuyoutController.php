@@ -332,7 +332,7 @@ class BuyoutController extends Controller
      * @param array $params 【必选】
      * [
      *      "user_id"=>"", 用户id
-     *      "goods_no"=>"",商品编号
+     *      "buyout_no"=>"",买断业务号
      * ]
      * @return json
      */
@@ -408,6 +408,7 @@ class BuyoutController extends Controller
      * [
      *      "user_id"=>"", 用户id
      *      "goods_no"=>"",商品编号
+     *      "callback_url"=>"",前端回跳地址
      * ]
      * @return json
      */
