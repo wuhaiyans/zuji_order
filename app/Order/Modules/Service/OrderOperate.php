@@ -117,8 +117,6 @@ class OrderOperate
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
                 DB::commit();
-                return true;
-
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
                     $confirmTime = config('web.short_confirm_days');

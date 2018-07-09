@@ -216,16 +216,17 @@ class Receive
 //            ];
             $result[] = $v;
         }
+
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-               Giveback::confirmEvaluation($result,$userInfo);
+               Giveback::confirmEvaluationArr($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
                ReturnGoods::checkResult($result,$business_key,$userInfo);
            }
 
         } catch (\Exception $e) {
-			throw new \Exception( $e->getMessage());
             Log::error(__METHOD__ . '检测项反馈失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }
@@ -239,7 +240,7 @@ class Receive
      *      ['goods_no'=>123],
      * ]
      */
-    public static function receive($receive_no)
+    public static function receive($receive_no,$userinfo)
     {
         if (!$receive_no) return;
 
@@ -256,9 +257,10 @@ class Receive
         }
 
         try {
-            Giveback::confirmDelivery($result);
+            Giveback::confirmDelivery($result,$userinfo);
         } catch (\Exception $e) {
             Log::error(__METHOD__ . '收货反馈失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }

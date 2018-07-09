@@ -139,7 +139,7 @@ class OrderBuyout
 				'goods_name'=>'required',
 				'buyout_price'=>'required',
 				'zujin_price'=>'required',
-				'zujin_number'=>'required',
+				'zuqi_number'=>'required',
 				'amount'=>'required',
 				'create_time'=>'required',
 		]);
@@ -170,7 +170,7 @@ class OrderBuyout
      * ]
      * @return json
      */
-	public static function callbackPaid($params,$userInfo){
+	public static function callbackPaid($params){
 		//过滤参数
 		$rule = [
 				'business_type'     => 'required',//业务类型
@@ -245,7 +245,7 @@ class OrderBuyout
 			}
 		}
 		//插入日志
-		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断支付成功","支付完成");
+		OrderLogRepository::add(0,"支付回调",\App\Lib\PublicInc::Type_System,$buyout['order_no'],"买断支付成功","支付完成");
 		//插入订单设备日志
 		$log = [
 				'order_no'=>$buyout['order_no'],
@@ -253,12 +253,9 @@ class OrderBuyout
 				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
 				'business_no'=>$buyout['buyout_no'],
 				'goods_no'=>$buyout['goods_no'],
-				'operator_id'=>$userInfo['uid'],
-				'operator_name'=>$userInfo['username'],
-				'operator_type'=>$userInfo['type'],
 				'msg'=>'买断支付成功',
 		];
-		GoodsLogRepository::add($log);
+		GoodsLogRepository::add($log,true);
 
 		return true;
 	}
