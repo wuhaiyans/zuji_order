@@ -172,6 +172,7 @@ class OrderCleaning
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
             if (empty($orderCleanData)) return false;
 
+            DB::beginTransaction();
             //更新清算状态为清算中
             $orderParam = [
                 'clean_no' => $orderCleanData['clean_no'],
@@ -307,9 +308,11 @@ class OrderCleaning
                 }
 
             }
+            DB::commit();
             return true;
 
         } catch (\Exception $e) {
+            DB::rollback();
             LogApi::error(__method__.'操作请求异常',$e);
             return false;
 
