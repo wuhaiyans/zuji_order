@@ -61,6 +61,37 @@ class Receive
         return true;
     }
 
+    /**
+     * 退换货 ---取消退换货申请
+     * @param $receive_no
+     * [
+     *  'receive_no' =>''  //收货单编号
+     * ]
+     * @return bool
+     */
+    public static function cancelReceive($receive_no)
+    {
+        try{
+            $base_api = config('ordersystem.ORDER_API');
+
+            $response = Curl::post($base_api, [
+                'appid'=> 1,
+                'version' => 1.0,
+                'method'=> 'api.Return.isQualified',//取消申请
+                'data' => ['receive_no'=>$receive_no]
+            ]);
+            $res = json_decode($response);
+            if ($res->code != 0) {
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+        return true;
+    }
+
 
 
 
