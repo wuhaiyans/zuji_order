@@ -153,10 +153,12 @@ class OrderGoodsInstalment
             $model);
         $notice->notify();
 
+        $date = date('Ymd');
+
         $fail_num = intval($fail_num) + 1;
 
         //修改失败次数
-        $b = OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num]);
+        $b = OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num,'crontab_faile_date'=>$date]);
         Log::error('更新失败次数失败');
         return $b;
     }

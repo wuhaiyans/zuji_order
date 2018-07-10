@@ -123,12 +123,12 @@ class Receive
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("退换货转发收发货收到货通知接口",$info);
             $res = json_decode($info);
-            if ($res->code != 0) {
-                throw new \Exception( 'code '.$res->code.':'.$res->msg);
+            if ($res['code'] != 0) {
+                return false;
             }
 
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            LogApi::debug($e->getMessage());
             throw new \Exception( $e->getMessage());
         }
         return true;

@@ -469,8 +469,8 @@ class OrderGiveback
 				'business_no' => $orderGivebackInfo['giveback_no'],
 				'auth_deduction_amount' => 0,//扣除押金金额
 				'auth_unfreeze_amount' => $orderGoodsInfo['yajin'],//退还押金金额
-				'payment_no' => $paymentNo,//payment_no
-				'fundauth_no' => $fundauthNo,//和funath_no
+				'out_payment_no' => $paymentNo,//payment_no
+				'out_auth_no' => $fundauthNo,//和funath_no
 			];
 			//进入清算处理
 			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
