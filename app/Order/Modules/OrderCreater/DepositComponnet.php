@@ -59,10 +59,7 @@ class DepositComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
-        /*
-         * 2018-02-22 liuhongxing 暂时去掉 人脸识别 限制条件（为 芝麻活动 提高订单量）
-         * 2018-03-05 liuhongxing 恢复人脸识别 限制条件
-        */
+
         //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
         $this->deposit = !!$this->certifiedFlag;
         //未通过认证人脸识别

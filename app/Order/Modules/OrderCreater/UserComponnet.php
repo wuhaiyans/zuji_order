@@ -114,19 +114,20 @@ class UserComponnet implements OrderCreater
             $this->getOrderCreater()->setError('账号锁定');
             $this->flag = false;
         }
-        if( $this->block ){
-            $this->getOrderCreater()->setError('由于您的退款次数过多，账户暂时无法下单，请联系客服人员！');
-            $this->flag = false;
-        }
-        // 信用认证结果有效期
-        if(time()-$this->creditTime > 60*60 ){
-            $this->getOrderCreater()->setError('信用认证过期');
-            $this->flag = false;
-        }
-        if( $this->certified == 0 ){
-            $this->getOrderCreater()->setError('账户尚未信用认证');
-            $this->flag = false;
-        }
+//  以下三种判断 产品说要去掉
+//        if( $this->block ){
+//            $this->getOrderCreater()->setError('由于您的退款次数过多，账户暂时无法下单，请联系客服人员！');
+//            $this->flag = false;
+//        }
+//        // 信用认证结果有效期
+//        if(time()-$this->creditTime > 60*60 ){
+//            $this->getOrderCreater()->setError('信用认证过期');
+//            $this->flag = false;
+//        }
+//        if( $this->certified == 0 ){
+//            $this->getOrderCreater()->setError('账户尚未信用认证');
+//            $this->flag = false;
+//        }
 
         return $this->flag;
     }
