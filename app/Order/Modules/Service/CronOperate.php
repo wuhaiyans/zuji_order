@@ -154,7 +154,7 @@ class CronOperate
     {
         //设置未支付和超时条件
         $where[] = ['status', '=', Inc\OrderBuyoutStatus::OrderInitialize];
-        $where[] = ['create_time', '<', time() - 7200,];
+        $where[] = ['create_time', '<', time() - 600,];
         $orderList = OrderBuyout::query()->where($where)->limit(100)->get();
         if (!$orderList) {
             return false;
