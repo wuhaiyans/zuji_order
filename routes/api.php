@@ -76,11 +76,17 @@ $api->version('v1', [
         //换货列表导出
         $api->any('barterListExport', 'ReturnController@barterListExport');
 
+
+        //隊列取消订单
+        $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
+        //隊列确认收货订单
+        $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
+
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/
 
-    $api->get('CancelOrder', 'InnerServiceController@cancelOrder');
+
     // 定时任务 订单取消接口 不加token
         $api->get('cronCancelOrder', 'CronController@cronCancelOrder');
     // 定时任务 订单自动确认收货接口 不加token
