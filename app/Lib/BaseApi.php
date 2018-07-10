@@ -54,7 +54,7 @@ class BaseApi {
 		throw new ApiException($response);
 		
 		} catch (\Exception $ex) {
-			throw new ApiException($ex->getMessage());
+			throw new ApiException($response);
 		}
 	}
 }
