@@ -970,9 +970,9 @@ class OrderReturnCreater
             //退换货问题
             if(isset($data['data'][$k]->reason_key)){
                 if($data['data'][$k]->reason_key == ReturnStatus::ReturnGoodsQuestion){
-                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnGoodsQuestion);
+                    $data['data'][$k]->reason_name=ReturnStatus::getQuestionName(ReturnStatus::ReturnGoodsQuestion);
                 }elseif($data['data'][$k]->reason_key == ReturnStatus::ReturnUserQuestion){
-                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnUserQuestion);
+                    $data['data'][$k]->reason_name=ReturnStatus::getQuestionName(ReturnStatus::ReturnUserQuestion);
                 }
             }else{
                 $data['data'][$k]->reason_name='';
