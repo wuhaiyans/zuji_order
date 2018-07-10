@@ -261,19 +261,13 @@ class Receive
             ];
         }
 
-        try {
-            if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
-                Giveback::confirmDelivery($result,$userinfo);
-            }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
-                \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
-            }else{
-                Log::error(__METHOD__ . '收货签收失败');
-                throw new \Exception( 'business_key 业务类型错误');
-            }
-
-        } catch (\Exception $e) {
+        if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
+            Giveback::confirmDelivery($result,$userinfo);
+        }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+            \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
+        }else{
             Log::error(__METHOD__ . '收货签收失败');
-            throw new \Exception( $e->getMessage());
+            throw new \Exception( 'business_key 业务类型错误');
         }
 
     }
