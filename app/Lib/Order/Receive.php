@@ -72,6 +72,9 @@ class Receive
      */
     public static function cancelReceive($receive_no)
     {
+        if(empty($receive_no)){
+            return false;
+        }
         try{
 
             $data = config('tripartite.Interior_Order_Request_data');
@@ -79,16 +82,17 @@ class Receive
             $data['params'] = [
                 'receive_no'=>$receive_no,
             ];
+            LogApi::debug("转发参数",$data);
             $baseUrl = config("ordersystem.ORDER_API");
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("转发收发货取消接口",$info);
             $res = json_decode($info);
-            if ($res->code != 0) {
+            if ($res['code'] != 0) {
                 return false;
             }
 
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            LogApi::debug($e->getMessage());
             return false;
         }
         return true;
