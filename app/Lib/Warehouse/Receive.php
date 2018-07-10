@@ -254,13 +254,17 @@ class Receive
             $result[] = [
                 'goods_no' => $g->goods_no
             ];
+            //退换货使用(支持多商品)
+            $refund_no[] = [
+                'refund_no'=>$g->refund_no
+            ];
         }
 
         try {
             if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
                 Giveback::confirmDelivery($result,$userinfo);
             }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
-                \App\Lib\Order\Receive::receivedReturn($receive_no,$receive->business_key,$userinfo);
+                \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
             }else{
                 Log::error(__METHOD__ . '收货签收失败');
                 throw new \Exception( 'business_key 业务类型错误');
