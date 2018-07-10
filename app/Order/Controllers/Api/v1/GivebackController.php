@@ -372,6 +372,7 @@ class GivebackController extends Controller
 	 * @param Request $request
 	 */
 	public function confirmEvaluation( Request $request ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
