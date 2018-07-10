@@ -13,6 +13,7 @@ use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use App\Warehouse\Modules\Repository\ImeiRepository;
+use App\Warehouse\Modules\Repository\ReceiveGoodsRepository;
 use App\Warehouse\Modules\Repository\ReceiveRepository;
 use PHPUnit\Framework\MockObject\Stub\Exception;
 
@@ -171,6 +172,9 @@ class ReceiveService
     {
         if (!ReceiveRepository::cancel($receive_no)) {
             throw new \Exception('取消收货单失败');
+        }
+        if (!ReceiveGoodsRepository::cancel($receive_no)) {
+            throw new \Exception('取消收货清单失败');
         }
     }
 
