@@ -135,9 +135,12 @@ class GivebackController extends Controller
 		$specsStrArr = [];
 		foreach ($specs as $key => $value) {
 			$value = explode(':', $value);
-			$specsStrArr[]= $value[1];
+			$specsStrArr[$value[0]]= $value[1];
 		}
-		$specsStr = $specsStrArr[3] . '|' . $specsStrArr[1] . '|' . $specsStrArr[4] . '|'  . $specsStrArr[2];
+		if( isset($specsStrArr['租期']) ){
+			unset($specsStrArr['租期']);
+		}
+		$specsStr = implode('|', $specsStrArr);
 		$orderGoodsInfo['goods_specs'] = $specsStr;//商品规格信息
 		$orderGoodsInfo['goods_img'] = $orderGoodsInfo['goods_thumb'];//商品缩略图
 		return $orderGoodsInfo;
