@@ -142,7 +142,6 @@ class GoodsReturn {
         $this->model->evaluation_amount=$data['evaluation_amount'];
         $this->model->evaluation_time=$data['evaluation_time'];
         $this->model->evaluation_status=ReturnStatus::ReturnEvaluationSuccess;
-        $this->model->status=ReturnStatus::ReturnReceive;
         return $this->model->save();
 
     }
@@ -155,6 +154,14 @@ class GoodsReturn {
         $this->model->evaluation_amount=$data['evaluation_amount'];
         $this->model->evaluation_time=$data['evaluation_time'];
         $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
+        return $this->model->save();
+    }
+
+    /**
+     * 平台确认收货
+     * @return bool
+     */
+    public function returnReceive():bool{
         $this->model->status=ReturnStatus::ReturnReceive;
         return $this->model->save();
     }
