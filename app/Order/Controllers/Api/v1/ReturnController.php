@@ -418,6 +418,25 @@ class ReturnController extends Controller
     }
 
     /**
+     * 退换货确认收货
+     * @param Request $request
+     */
+    public function returnReceive(Request $request){
+        $orders = $request->all();
+        $params = $orders['params'];
+        if(empty($params['refund_no']) || empty($params['business_key'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->returnReceive($params);
+        if(!$res){
+            return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//修改检测结果失败
+        }
+        return apiResponse([],ApiStatus::CODE_0,'收货成功');
+
+
+    }
+
+    /**
      * 换货用户收货通知
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
