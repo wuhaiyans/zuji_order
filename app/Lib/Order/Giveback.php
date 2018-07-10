@@ -61,7 +61,7 @@ class Giveback extends \App\Lib\BaseApi
                 self::confirmEvaluation($param, $userInfo);
             }
             return true;
-        }catch (\Exception $e){
+        }catch (\App\Lib\ApiException $e){
             throw new \Exception( $e->getMessage());
         }
 	}
