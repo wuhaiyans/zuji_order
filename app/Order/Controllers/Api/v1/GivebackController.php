@@ -48,6 +48,10 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
+		$a = new OrderGiveback();
+		$b = $a->getUnfinishedListByOrderNo('A710116481722372');
+		var_dump($b);exit;
+		return apiResponse();return;
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
