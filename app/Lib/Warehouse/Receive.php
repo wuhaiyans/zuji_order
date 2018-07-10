@@ -233,7 +233,7 @@ class Receive
 
 
     /**
-     * 收到货通知
+     * 收到货通知(还机和退换类型)
      *
      * [
      *      ['goods_no'=>123],
@@ -257,9 +257,17 @@ class Receive
         }
 
         try {
-            Giveback::confirmDelivery($result,$userinfo);
+            if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
+                Giveback::confirmDelivery($result,$userinfo);
+            }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+                \App\Lib\Order\Receive::receivedReturn($receive_no,$receive->business_key,$userinfo);
+            }else{
+                Log::error(__METHOD__ . '收货签收失败');
+                throw new \Exception( 'business_key 业务类型错误');
+            }
+
         } catch (\Exception $e) {
-            Log::error(__METHOD__ . '收货反馈失败');
+            Log::error(__METHOD__ . '收货签收失败');
             throw new \Exception( $e->getMessage());
         }
 
