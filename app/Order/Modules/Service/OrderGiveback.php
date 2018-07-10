@@ -323,6 +323,12 @@ class OrderGiveback
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
+			//解冻订单
+			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
+				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			
 			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
@@ -343,11 +349,6 @@ class OrderGiveback
 			if( !$orderGoodsResult ){
 				set_msg('商品仓库更新状态失败');
 				\App\Lib\Common\LogApi::debug('[还机清算回调]商品仓库更新状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
-			}
-			//解冻订单
-			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
-				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			return false;
@@ -427,6 +428,11 @@ class OrderGiveback
 			// | 不生成=》更新订单状态（交易完成）
 			//-+--------------------------------------------------------------------
 			if( $orderGoodsInfo['yajin'] == 0 ){
+				//解冻订单
+				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
+					\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+					return false;
+				}
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
@@ -442,11 +448,6 @@ class OrderGiveback
 					return false;
 				}
 				
-				//解冻订单
-				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
-					\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-					return false;
-				}
 				//需要记录清算，清算数据为空即可
 				$paymentNo = $fundauthNo = '';
 			}

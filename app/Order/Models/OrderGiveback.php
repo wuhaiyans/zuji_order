@@ -46,8 +46,4 @@ class OrderGiveback extends Model
 	 */
 	public $timestamps = false;
 	
-	public function __construct( $attributes = [] ) {
-		parent::__construct($attributes);
-		var_dump($this);
-	}
 }
