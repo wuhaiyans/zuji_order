@@ -86,9 +86,7 @@ class Receive
             $baseUrl = config("ordersystem.ORDER_API");
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("转发收发货取消接口",$info);
-
             $res = json_decode($info);
-            LogApi::debug("转发收发货取消接口",$res->code);
             if ($res->code != 0) {
                 return false;
             }
