@@ -41,7 +41,9 @@ class Giveback extends \App\Lib\BaseApi
 	public static function confirmEvaluation( $params, $userInfo= [] ) {
 		if( self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.evaluation', '1.0', $params, $userInfo) ){
 			return true;
-		}
+		}else{
+            throw new \Exception( '确认检测结果错误');
+        }
 	}
 	/**
 	 * 确认检测结果【接收二维参数】
