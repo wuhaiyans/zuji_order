@@ -58,6 +58,7 @@ class Giveback extends \App\Lib\BaseApi
 	 * @return mixed boolen：true成功；obj:\exception
 	 */
 	public static function confirmEvaluationArr( $params, $userInfo = [] ) {
+				throw new \Exception( '测试还机接口' );
 	    try{
             foreach ( $params as $param ){
                 self::confirmEvaluation($param, $userInfo);

@@ -220,7 +220,6 @@ class Receive
 
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-				throw new \Exception( '测试还机接口' );
                Giveback::confirmEvaluationArr($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
                ReturnGoods::checkResult($result,$business_key,$userInfo);
