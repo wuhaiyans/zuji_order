@@ -102,18 +102,18 @@ class OrderReturnCreater
                 $goods_info = $goods->getData();
                 //代扣+预授权
                 if($order_info['pay_type']==PayInc::WithhodingPay){
-                    if($order_info['order_yajin']>0){
-                        $result['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                    if($goods_info['order_yajin']>0){
+                        $result['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                     }
                 }
                 //直接支付
                 if($order_info['pay_type']==PayInc::FlowerStagePay || $order_info['pay_type']==PayInc::UnionPay) {
-                    if (($order_info['order_amount'] + $order_info['order_insurance']) > 0) {
-                        $result['pay_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                        $result['refund_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//应退金额
+                    if ($goods_info['yajin'] > 0) {
+                        $result['refund_amount']=$goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
+                        $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                     }
-                    if ($order_info['order_yajin'] > 0) {
-                        $result['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                    if ($goods_info['yajin'] > 0) {
+                        $result['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                     }
                 }
 
