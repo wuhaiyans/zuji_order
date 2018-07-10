@@ -6,6 +6,7 @@
  */
 
 namespace App\Lib\Order;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 /**
  * Class Delivery
@@ -73,13 +74,14 @@ class Receive
     {
         try{
             $base_api = config('ordersystem.ORDER_API');
-
+            LogApi::debug("收发货系统接受参数",$receive_no);
             $response = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
                 'method'=> 'warehouse.receive.cancel',//取消收货单
                 'params' => ['receive_no'=>$receive_no]
             ]);
+            LogApi::debug("转发收发货取消接口",$response);
             $res = json_decode($response);
             if ($res->code != 0) {
                 return false;

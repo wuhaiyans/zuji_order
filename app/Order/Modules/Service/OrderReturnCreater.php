@@ -710,6 +710,7 @@ class OrderReturnCreater
      * ]
      */
     public function cancelApply($params,$userinfo){
+        LogApi::debug("获取取消申请的参数",$params);
         //开启事务
         DB::beginTransaction();
         try{
@@ -720,11 +721,13 @@ class OrderReturnCreater
                    return false;
                 }
                 $return_info[$refund_no]=$return->getData();
+                LogApi::debug("查询退货单信息",$return_info);
                 if($return_info[$refund_no]['user_id']!=$params['user_id']){
                     return false;
                 }
                 //收货之后不允许取消
                 if($return_info[$refund_no]['status']>ReturnStatus::ReturnAgreed){
+                    LogApi::debug("收货之后不允许取消",$return_info[$refund_no]);
                     return false;
                 }
                 //如果审核通过通知收发货取消收货
