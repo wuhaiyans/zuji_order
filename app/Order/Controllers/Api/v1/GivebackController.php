@@ -48,7 +48,6 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
-		return apiResponse();return;
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
