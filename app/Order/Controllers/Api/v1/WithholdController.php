@@ -494,10 +494,13 @@ class WithholdController extends Controller
      */
     public function crontab_createpay()
     {
+        $date = date('Ymd');
+
         $whereArray =
             [
                 ['term', '=', date('Ym')],
                 ['day', '<=', intval(date('d'))],
+                ['crontab_faile_date', '<', $date],
             ];
 
         // 查询数据
