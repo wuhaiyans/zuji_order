@@ -1797,7 +1797,7 @@ class OrderReturnCreater
                     return false;
                 }
                 //换货物流信息
-                $return=GoodsReturn::getReturnByInfo($detail['order_no'],$goods_info[$k]['goods_no']);
+                $return=GoodsReturn::getReturnInfo($detail['order_no'],$goods_info[$k]['goods_no']);
                 if(!$return){
                     return false;
                 }
