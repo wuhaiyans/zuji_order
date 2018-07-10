@@ -202,7 +202,6 @@ class Curl {
 				self::$error = '';
                 return $output;
             }
-            throw new \Exception( curl_error($ch));
 			self::$error = curl_error($ch);
 			self::$errno = curl_errno($ch);
             --$i;
