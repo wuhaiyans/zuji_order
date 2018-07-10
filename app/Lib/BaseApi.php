@@ -22,35 +22,32 @@ class BaseApi {
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
-        try{
-            //-+--------------------------------------------------------------------
-            // | 创建请求
-            //-+--------------------------------------------------------------------
-            $request = new \App\Lib\ApiRequest();
-            $request->setAppid( $appid );		// 系统Appid
-            $request->setUrl( $url );	// 接口地址
-            $request->setMethod( $method );	// 接口名称
-            $request->setVersion( $version );
-            $request->setParams( $params );	// 业务参数
-            $request->setUserInfo( $userInfo );	// 业务参数
-            //-+--------------------------------------------------------------------
-            // | 发送请求
-            //-+--------------------------------------------------------------------
-            $response = $request->sendPost();
-            //-+--------------------------------------------------------------------
-            // | 返回值处理
-            //-+--------------------------------------------------------------------
-            if( $response->isSuccessed() ){ // 判断执行是否成功，成功时返回业务返回值
-                return $response->getData();
-            }
-            //
-            Common\LogApi::type('api-error')::error('接口请求失败',$response->getOriginalValue());
-            //-+--------------------------------------------------------------------
-            // | 失败处理
-            //-+--------------------------------------------------------------------
-        }catch (\Exception $e){
-            throw new ApiException($e->getMessage());
-        }
 
+		//-+--------------------------------------------------------------------
+		// | 创建请求
+		//-+--------------------------------------------------------------------
+		$request = new \App\Lib\ApiRequest();
+		$request->setAppid( $appid );		// 系统Appid
+		$request->setUrl( $url );	// 接口地址
+		$request->setMethod( $method );	// 接口名称
+		$request->setVersion( $version );
+		$request->setParams( $params );	// 业务参数
+		$request->setUserInfo( $userInfo );	// 业务参数
+		//-+--------------------------------------------------------------------
+		// | 发送请求
+		//-+--------------------------------------------------------------------
+		$response = $request->sendPost();
+		//-+--------------------------------------------------------------------
+		// | 返回值处理
+		//-+--------------------------------------------------------------------
+		if( $response->isSuccessed() ){ // 判断执行是否成功，成功时返回业务返回值
+			return $response->getData();
+		}
+		//
+		Common\LogApi::type('api-error')::error('接口请求失败',$response->getOriginalValue());
+		//-+--------------------------------------------------------------------
+		// | 失败处理
+		//-+--------------------------------------------------------------------
+		throw new ApiException($response);
 	}
 }
