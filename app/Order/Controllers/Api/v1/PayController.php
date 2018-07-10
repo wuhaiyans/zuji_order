@@ -543,11 +543,11 @@ class PayController extends Controller
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
-                        $orderParam = [
+                        $orderCleanParam = [
                             'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
-                        $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                        $success = OrderCleaning::upOrderCleanStatus($orderCleanParam);
 
                         if (!$success) {	// 成功
                             //更新业务系统的状态
@@ -610,11 +610,10 @@ class PayController extends Controller
     public function unFreezeClean(Request $request)
     {
         try{
-
             $input = file_get_contents("php://input");
-            LogApi::debug(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
+            LogApi::key('unFreezeClean');
+            LogApi::info('订单清算退押金回调接口回调参数:',$input);
             $param = json_decode($input,true);
-
             $rule = [
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
                 "trade_no"=>'required',                //类型：String  必有字段  备注：支付平台交易码
@@ -661,11 +660,11 @@ class PayController extends Controller
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed){
-                        $orderParam = [
+                        $orderCleanParam = [
                             'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
-                        $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                        $success = OrderCleaning::upOrderCleanStatus($orderCleanParam);
                         if (!$success) {
                             //更新业务系统的状态
                             $businessParam = [
@@ -778,11 +777,11 @@ class PayController extends Controller
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
-                        $orderParam = [
+                        $orderCleanParam = [
                             'clean_no' => $orderCleanInfo['clean_no'],
                             'status' => OrderCleaningStatus::orderCleaningComplete
                         ];
-                        $success = OrderCleaning::upOrderCleanStatus($orderParam);
+                        $success = OrderCleaning::upOrderCleanStatus($orderCleanParam);
 
                         if (!$success) {
                             //更新业务系统的状态

@@ -171,7 +171,11 @@ class OrderCleaning
             LogApi::debug(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
             //查询清算表根据业务平台退款码out_refund_no
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
-            if (empty($orderCleanData)) return false;
+            if ($orderCleanData['status']==OrderCleaningStatus::orderCleaningComplete || $orderCleanData['status']==OrderCleaningStatus::orderCleaning) {
+                return apiResponseArray(31202,[],"扣款已经发起过，请不要重复发起请求，请稍等");
+            }
+            if (empty($orderCleanData)) return apiResponseArray(31202,[],"清算记录不存在");
+
 
             DB::beginTransaction();
             //更新清算状态为清算中
@@ -185,7 +189,7 @@ class OrderCleaning
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
             LogApi::debug(__method__.'财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
-            if ($success) return false;
+            if ($success) return apiResponseArray(31202,[],"清算记录不存在");
 
             /**
              * 退款申请接口
@@ -240,7 +244,7 @@ class OrderCleaning
                     LogApi::debug(__method__.'财务进入预授权转支付请求的逻辑');
                     if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
                         LogApi::error(__method__.'财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
-                        return false;
+                        return apiResponseArray(31202,[],"财务发起预授权转支付前，发现获取out_fundauth_no失败");
                     }
                     $freezePayParams = [
 
@@ -272,7 +276,7 @@ class OrderCleaning
                     if (empty($miniOrderData))
                     {
                         LogApi::error('没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
-                        return false;
+                        return apiResponseArray(31202,[],"没有找到芝麻订单号相关信息");
                     }
 
                     //查询分期有没有代扣并且扣款成功的记录
@@ -310,12 +314,12 @@ class OrderCleaning
 
             }
             DB::commit();
-            return true;
+            return apiResponseArray(0,[],"成功");
 
         } catch (\Exception $e) {
             DB::rollback();
             LogApi::error(__method__.'操作请求异常',$e);
-            return false;
+            return apiResponseArray(31202,[],"操作请求异常".$e->getMessage());
 
         }
 
