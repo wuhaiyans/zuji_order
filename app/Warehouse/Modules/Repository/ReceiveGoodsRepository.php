@@ -9,6 +9,7 @@ namespace App\Warehouse\Modules\Repository;
 
 use App\Warehouse\Models\ReceiveGoods;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class ReceiveGoodsRepository
 {
@@ -61,6 +62,26 @@ class ReceiveGoodsRepository
                 '*'
             ],
             'page', $page);
+    }
+
+    /**
+     * 取消收货清单
+     */
+    public static function cancel($receive_no){
+        $model = ReceiveGoods::find($receive_no);
+
+        if (!$model) {
+            throw new NotFoundResourceException('收货清单' . $receive_no . '未找到');
+        }
+
+        if ($model->status != ReceiveGoods::STATUS_INIT) {
+            throw new \Exception('收货清单' . $receive_no . '非待验收状态，取消收货失败');
+        }
+
+        $model->status = ReceiveGoods::STATUS_NONE;
+        $model->status_time = time();
+
+        return $model->update();
     }
 
 

@@ -216,30 +216,31 @@ class Receive
 //            ];
             $result[] = $v;
         }
+
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-               Giveback::confirmEvaluation($result,$userInfo);
+               Giveback::confirmEvaluationArr($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
                ReturnGoods::checkResult($result,$business_key,$userInfo);
            }
 
         } catch (\Exception $e) {
-			throw new \Exception( $e->getMessage());
             Log::error(__METHOD__ . '检测项反馈失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }
 
 
     /**
-     * 收到货通知
+     * 收到货通知(还机和退换类型)
      *
      * [
      *      ['goods_no'=>123],
      *      ['goods_no'=>123],
      * ]
      */
-    public static function receive($receive_no)
+    public static function receive($receive_no,$userinfo)
     {
         if (!$receive_no) return;
 
@@ -253,12 +254,25 @@ class Receive
             $result[] = [
                 'goods_no' => $g->goods_no
             ];
+            //退换货使用(支持多商品)
+            $refund_no[] = [
+                'refund_no'=>$g->refund_no
+            ];
         }
 
         try {
-            Giveback::confirmDelivery($result);
+            if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
+                Giveback::confirmDelivery($result,$userinfo);
+            }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+                \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
+            }else{
+                Log::error(__METHOD__ . '收货签收失败');
+                throw new \Exception( 'business_key 业务类型错误');
+            }
+
         } catch (\Exception $e) {
-            Log::error(__METHOD__ . '收货反馈失败');
+            Log::error(__METHOD__ . '收货签收失败');
+            throw new \Exception( $e->getMessage());
         }
 
     }

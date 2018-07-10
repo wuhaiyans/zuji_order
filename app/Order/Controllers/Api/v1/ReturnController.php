@@ -142,6 +142,9 @@ class ReturnController extends Controller
         if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        if($param['status'] != 0){
+            return apiResponse([],ApiStatus::CODE_34009,"不支持退款审核拒绝");
+        }
         $res= $this->OrderReturnCreater->refundApply($param,$orders['userinfo']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
@@ -412,6 +415,25 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_33008,"修改失败");//修改检测结果失败
         }
         return apiResponse([],ApiStatus::CODE_0,'检测合格');
+    }
+
+    /**
+     * 退换货确认收货
+     * @param Request $request
+     */
+    public function returnReceive(Request $request){
+        $orders = $request->all();
+        $params = $orders['params'];
+        if(empty($params['refund_no']) || empty($params['business_key'])){
+            return apiResponse( [], ApiStatus::CODE_20001);
+        }
+        $res=$this->OrderReturnCreater->returnReceive($params);
+        if(!$res){
+            return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//修改检测结果失败
+        }
+        return apiResponse([],ApiStatus::CODE_0,'收货成功');
+
+
     }
 
     /**

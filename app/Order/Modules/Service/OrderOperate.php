@@ -117,8 +117,6 @@ class OrderOperate
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
                 }
                 DB::commit();
-                return true;
-
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
                     $confirmTime = config('web.short_confirm_days');
@@ -126,7 +124,7 @@ class OrderOperate
                     $confirmTime = config('web.long_confirm_days');
                 }
                 //订单确认收货队列
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("ordersystem.ORDER_API"), [
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("ordersystem.ORDER_API")."/DeliveryReceive", [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");

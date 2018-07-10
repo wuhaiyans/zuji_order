@@ -106,14 +106,17 @@ class ReceiveController extends Controller
             'receive_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
-
+        LogApi::debug("取消收货单",$params['receive_no']);
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
         try {
+            DB::beginTransaction();
             $this->receive->cancel($params['receive_no']);
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -129,6 +132,8 @@ class ReceiveController extends Controller
             'receive_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
+        $param = request()->input();
+        $userinfo=$param['userinfo'];
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
@@ -137,7 +142,7 @@ class ReceiveController extends Controller
         try {
             DB::beginTransaction();
             $this->receive->received($params['receive_no']);
-            Receive::receive($params['receive_no']);
+            Receive::receive($params['receive_no'],$userinfo);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
