@@ -970,10 +970,12 @@ class OrderReturnCreater
             //退换货问题
             if(isset($data['data'][$k]->reason_key)){
                 if($data['data'][$k]->reason_key == ReturnStatus::ReturnGoodsQuestion){
-                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnGoodsQuestion);
+                    $data['data'][$k]->reason_name=ReturnStatus::getQuestionName(ReturnStatus::ReturnGoodsQuestion);
                 }elseif($data['data'][$k]->reason_key == ReturnStatus::ReturnUserQuestion){
-                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnUserQuestion);
+                    $data['data'][$k]->reason_name=ReturnStatus::getQuestionName(ReturnStatus::ReturnUserQuestion);
                 }
+            }else{
+                $data['data'][$k]->reason_name='';
             }
         }
         return $data;
@@ -1372,6 +1374,10 @@ class OrderReturnCreater
                     return false;
                 }
                 $return_info=$return->getData();
+                //必须是已收货状态
+                if($return_info['status']!=ReturnStatus::ReturnReceive){
+                    return false;
+                }
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
@@ -1573,6 +1579,35 @@ class OrderReturnCreater
 
     }
 
+    /***
+     * 退换货确认收货
+     * @param $params
+     */
+    public function returnReceive($params){
+        //开启事务
+        DB::beginTransaction();
+        try{
+            //获取退货单信息
+            $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($params['refund_no']);
+            if(!$return){
+                return false;
+            }
+            //修改退换货状态为已收货
+            if(!$return->returnReceive()){
+                DB::rollBack();
+                return false;
+            }
+            //提交事务
+            DB::commit();
+            return true;
+        }catch (\Exception $exc) {
+            DB::rollBack();
+            LogApi::debug($exc->getMessage());
+            return false;
+        }
+
+
+    }
 
     /**
      * 退换货物流单号上传
