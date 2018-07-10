@@ -22,7 +22,7 @@ class BaseApi {
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
-
+        throw new \Exception( '确认检测结果错误');
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------
