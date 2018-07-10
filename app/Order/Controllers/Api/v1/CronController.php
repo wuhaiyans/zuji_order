@@ -28,5 +28,13 @@ class CronController extends Controller
         Service\CronOperate::cronDeliveryReceive();
         echo "complete";die;
     }
+    /**
+     * 定时任务取消买断单
+     * @return bool
+     */
+    public function cronCancelOrderBuyout(){
 
+        Service\CronOperate::cronCancelOrderBuyout();
+        echo "complete";die;
+    }
 }

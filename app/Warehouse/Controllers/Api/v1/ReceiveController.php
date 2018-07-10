@@ -106,7 +106,7 @@ class ReceiveController extends Controller
             'receive_no' => 'required',
         ];
         $params = $this->_dealParams($rules);
-
+        LogApi::debug("取消收货单",$params['receive_no']);
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }

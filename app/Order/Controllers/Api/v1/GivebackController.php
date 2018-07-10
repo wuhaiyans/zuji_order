@@ -1025,7 +1025,7 @@ class GivebackController extends Controller
 			'business_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
 			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
-			'payment_no' => $paymentNo,//payment_no
+			'out_payment_no' => $paymentNo,//payment_no
 			'out_auth_no' => $fundauthNo,//和funath_no
 		];
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);

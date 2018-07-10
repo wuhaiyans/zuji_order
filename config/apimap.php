@@ -199,6 +199,8 @@ return [
     'api.Return.cancelRefund'       =>'ReturnController@cancelRefund',
     //退款--取消退款
     'api.Return.allowReturn'       =>'ReturnController@allowReturn',
+    //退换货--确认收货
+    'api.Return.returnReceive'       =>'ReturnController@returnReceive',
 
 
 

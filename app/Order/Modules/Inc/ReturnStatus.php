@@ -200,6 +200,13 @@ class ReturnStatus {
             self::ReturnUserQuestion => '用户问题 ',
         ];
     }
+    public static function getQuestionName($status){
+        $list = self::ReturnQuestion();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
     public static function getLostName($status){
         $list = self::getLostType();
         if( isset($list[$status]) ){
