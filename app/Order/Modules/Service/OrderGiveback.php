@@ -453,7 +453,7 @@ class OrderGiveback
 					'payment_time'=> time(),
 				]);
 				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
-				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderGoodsInfo['order_no'] );
 				$paymentNo = $payObj->getPaymentNo();
 				$fundauthNo = $payObj->getFundauthNo();
 			}
