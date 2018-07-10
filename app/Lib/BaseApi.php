@@ -22,7 +22,6 @@ class BaseApi {
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
-        throw new \Exception( '确认检测结果错误');
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------
@@ -40,6 +39,7 @@ class BaseApi {
 		//-+--------------------------------------------------------------------
 		// | 返回值处理
 		//-+--------------------------------------------------------------------
+        throw new \Exception( json_encode($response->getData()));
 		if( $response->isSuccessed() ){ // 判断执行是否成功，成功时返回业务返回值
 			return $response->getData();
 		}
