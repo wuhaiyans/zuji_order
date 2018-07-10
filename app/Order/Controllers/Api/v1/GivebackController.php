@@ -372,7 +372,7 @@ class GivebackController extends Controller
 	 * @param Request $request
 	 */
 	public function confirmEvaluation( Request $request ) {
-			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		try{
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
@@ -452,7 +452,6 @@ class GivebackController extends Controller
 
 		//开启事务
 		DB::beginTransaction();
-		try{
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
