@@ -124,7 +124,7 @@ class OrderOperate
                     $confirmTime = config('web.long_confirm_days');
                 }
                 //订单确认收货队列
-                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("ordersystem.ORDER_API"), [
+                $b =JobQueueApi::addScheduleOnce(config('app.env')."DeliveryReceive".$orderDetail['order_no'],config("ordersystem.ORDER_API")."/DeliveryReceive", [
                     'method' => 'api.inner.deliveryReceive',
                     'order_no'=>$orderDetail['order_no'],
                 ],time()+$confirmTime,"");
