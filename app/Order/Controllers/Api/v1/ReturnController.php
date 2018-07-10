@@ -427,6 +427,7 @@ class ReturnController extends Controller
         if(empty($params['refund_no']) || empty($params['business_key'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
+        LogApi::debug("退换货确认收货接受参数",$params);
         $res=$this->OrderReturnCreater->returnReceive($params);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//修改检测结果失败
