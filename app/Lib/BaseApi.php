@@ -35,6 +35,7 @@ class BaseApi {
 		$request->setVersion( $version );
 		$request->setParams( $params );	// 业务参数
 		$request->setUserInfo( $userInfo );	// 业务参数
+				throw new \Exception( '测试还机接口' );
 		//-+--------------------------------------------------------------------
 		// | 发送请求
 		//-+--------------------------------------------------------------------
