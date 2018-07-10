@@ -48,9 +48,11 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
-		$a = new OrderGiveback();
-		$b = $a->getUnfinishedListByOrderNo('A710116481722372');
-		var_dump($b);exit;
+//		$orderGivebackService = new OrderGiveback();
+//		//解冻订单
+//		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
+//		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo('A710116481722372');
+//		var_dump($givebackUnfinshedList);exit;
 		return apiResponse();return;
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证

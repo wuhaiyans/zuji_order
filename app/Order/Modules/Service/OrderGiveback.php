@@ -513,10 +513,10 @@ class OrderGiveback
 		return true;
 	}
 	public static function __unfreeze($orderNo) {
-		$orderGivebackService = new OrderGiveback();
+		$orderGivebackRespository = new OrderGivebackRepository();
 		//解冻订单
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderNo);
+		$givebackUnfinshedList = $orderGivebackRespository->getUnfinishedListByOrderNo($orderNo);
 			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo,'$givebackUnfinshedList'=>$givebackUnfinshedList]);
 		if( $givebackUnfinshedList === false ){
 			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo]);
