@@ -82,6 +82,7 @@ class Receive
             $data['params'] = [
                 'receive_no'=>$receive_no,
             ];
+            LogApi::debug("转发参数",$data);
             $baseUrl = config("ordersystem.ORDER_API");
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("转发收发货取消接口",$info);
