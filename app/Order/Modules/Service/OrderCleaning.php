@@ -23,6 +23,7 @@ use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Repository\Pay\PayQuery;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 
 class OrderCleaning
@@ -76,7 +77,7 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
-                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
+                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
@@ -172,6 +173,7 @@ class OrderCleaning
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
             if (empty($orderCleanData)) return false;
 
+            DB::beginTransaction();
             //更新清算状态为清算中
             $orderParam = [
                 'clean_no' => $orderCleanData['clean_no'],
@@ -307,9 +309,11 @@ class OrderCleaning
                 }
 
             }
+            DB::commit();
             return true;
 
         } catch (\Exception $e) {
+            DB::rollback();
             LogApi::error(__method__.'操作请求异常',$e);
             return false;
 

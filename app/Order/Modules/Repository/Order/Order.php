@@ -308,7 +308,6 @@ class Order {
 	 * @return bool
 	 */
 	public function refundFinish( ):bool{
-
 		$this->model->order_status = OrderStatus::OrderClosedRefunded;
         $this->model->freeze_type = OrderFreezeStatus::Non;
         return $this->model->save();
@@ -323,7 +322,7 @@ class Order {
      * @return bool
      */
     public function returnOpen( ):bool{
-        //订单必须是租用中
+        //订单必须是未冻结状态
         if( $this->model->freeze_type !=0 ){
             return false;
         }

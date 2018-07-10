@@ -132,7 +132,7 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API"), [
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
             'method' => 'api.inner.cancelOrder',
             'order_no'=>$orderNo,
             'user_id'=>$data['user_id'],

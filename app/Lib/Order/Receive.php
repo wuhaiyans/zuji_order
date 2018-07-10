@@ -6,6 +6,7 @@
  */
 
 namespace App\Lib\Order;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 /**
  * Class Delivery
@@ -71,22 +72,26 @@ class Receive
      */
     public static function cancelReceive($receive_no)
     {
+        if(empty($receive_no)){
+            return false;
+        }
         try{
-            $base_api = config('ordersystem.ORDER_API');
 
-            $response = Curl::post($base_api, [
-                'appid'=> 1,
-                'version' => 1.0,
-                'method'=> 'warehouse.receive.cancel',//取消收货单
-                'data' => ['receive_no'=>$receive_no]
-            ]);
-            $res = json_decode($response);
+            $data = config('tripartite.Interior_Order_Request_data');
+            $data['method'] ='warehouse.receive.cancel';
+            $data['params'] = [
+                'receive_no'=>$receive_no,
+            ];
+            $baseUrl = config("ordersystem.ORDER_API");
+            $info = Curl::post($baseUrl, $data);
+            LogApi::debug("转发收发货取消接口",$info);
+            $res = json_decode($info);
             if ($res->code != 0) {
                 return false;
             }
 
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            LogApi::debug($e->getMessage());
             return false;
         }
         return true;
