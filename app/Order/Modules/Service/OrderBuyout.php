@@ -335,5 +335,4 @@ class OrderBuyout
 		GoodsLogRepository::add($log);
 		return true;
 	}
-
 }

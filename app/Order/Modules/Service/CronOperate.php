@@ -10,6 +10,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
+use App\Order\Models\OrderBuyout;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
@@ -144,6 +145,28 @@ class CronOperate
             }
 
     }
-
+    /**
+     *  定时任务取消买断支付单
+     * @return bool
+     */
+    public static function cronCancelOrderBuyout()
+    {
+        //设置未支付和超时条件
+        $where[] = ['status', '=', Inc\OrderBuyoutStatus::OrderInitialize];
+        $where[] = ['create_time', '<', time() - 7200,];
+        $orderList = OrderBuyout::query()->where($where)->limit(100)->get();
+        if (!$orderList) {
+            return false;
+        }
+        $orderList = $orderList->toArray();
+        //批量取消买断单
+        $ids = array_column($orderList,"id");
+        $condition[] = ['status','=',Inc\OrderBuyoutStatus::OrderInitialize,];
+        $ret = OrderBuyout::where($condition)->wherein("id",$ids)->update(['status'=>OrderBuyoutStatus::OrderCancel,'update_time'=>time()]);
+        if(!$ret){
+            return false;
+        }
+        return true;
+    }
 
 }
