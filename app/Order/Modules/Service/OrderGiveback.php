@@ -289,36 +289,36 @@ class OrderGiveback
 	 * ]
 	 */
 	public static function callbackClearing( $params ) {
-		//参数过滤
-        $rules = [
-            'business_type'     => 'required',//业务类型
-            'business_no'     => 'required',//业务编码
-            'status'     => 'required',//支付状态
-        ];
-        $validator = app('validator')->make($params, $rules);
-        if ($validator->fails()) {
-			set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
-			return false;
-        }
-		//清算成功
-		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
-			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
-			return false;
-		}
-		
-		//创建服务层对象
-		$orderGivebackService = new OrderGiveback();
-		//获取还机单信息
-		$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivebackInfo ) {			
-			set_msg('还机单信息获取失败');
-			return false;
-		}
+		try{
+			//参数过滤
+			$rules = [
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
+			];
+			$validator = app('validator')->make($params, $rules);
+			if ($validator->fails()) {
+				set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
+				return false;
+			}
+			//清算成功
+			if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
+				set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
+				return false;
+			}
+
+			//创建服务层对象
+			$orderGivebackService = new OrderGiveback();
+			//获取还机单信息
+			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+			if( !$orderGivebackInfo ) {			
+				set_msg('还机单信息获取失败');
+				return false;
+			}
 		
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
-		try{
 			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
@@ -359,6 +359,7 @@ class OrderGiveback
 				return false;
 			}
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::debug('还机单清算回调错误', $ex);
 			set_msg($ex->getMessage());
 			return false;
 		}
@@ -370,39 +371,39 @@ class OrderGiveback
 	 * @param Request $request
 	 */
 	public static function callbackPayment( $params ) {
-		//参数过滤
-        $rules = [
-            'business_type'     => 'required',//业务类型
-            'business_no'     => 'required',//业务编码
-            'status'     => 'required',//支付状态
-        ];
-        $validator = app('validator')->make($params, $rules);
-        if ($validator->fails()) {
-			set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
-			return false;
-        }
-		//清算成功
-		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
-			set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
-			return false;
-		}
-		//创建服务层对象
-		$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
-		if( !$orderGoods ){
-			return false;
-		}
-		$orderGivebackService = new OrderGiveback();
-		//获取还机单信息
-		$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
-		if( !$orderGivebackInfo ) {
-			return false;
-		}
-		//获取商品信息
-		$orderGoodsInfo = $orderGoods->getData();
-		if( !$orderGoodsInfo ) {
-			return false;
-		}
 		try{
+			//参数过滤
+			$rules = [
+				'business_type'     => 'required',//业务类型
+				'business_no'     => 'required',//业务编码
+				'status'     => 'required',//支付状态
+			];
+			$validator = app('validator')->make($params, $rules);
+			if ($validator->fails()) {
+				set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
+				return false;
+			}
+			//清算成功
+			if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
+				set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
+				return false;
+			}
+			$orderGivebackService = new OrderGiveback();
+			//获取还机单信息
+			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
+			if( !$orderGivebackInfo ) {
+				return false;
+			}
+			//创建服务层对象
+			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
+			if( !$orderGoods ){
+				return false;
+			}
+			//获取商品信息
+			$orderGoodsInfo = $orderGoods->getData();
+			if( !$orderGoodsInfo ) {
+				return false;
+			}
 			//-+--------------------------------------------------------------------
 			// | 判断订单押金，是否生成清算单
 			//-+--------------------------------------------------------------------
@@ -487,6 +488,7 @@ class OrderGiveback
 				return false;
 			}
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::debug('还机单支付回调错误', $ex);
 			return false;
 		}
 		return true;

@@ -974,6 +974,8 @@ class OrderReturnCreater
                 }elseif($data['data'][$k]->reason_key == ReturnStatus::ReturnUserQuestion){
                     $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnUserQuestion);
                 }
+            }else{
+                $data['data'][$k]->reason_name='';
             }
         }
         return $data;
