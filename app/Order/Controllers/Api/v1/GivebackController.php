@@ -372,6 +372,7 @@ class GivebackController extends Controller
 	 * @param Request $request
 	 */
 	public function confirmEvaluation( Request $request ) {
+		try{
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
@@ -451,11 +452,10 @@ class GivebackController extends Controller
 
 		//开启事务
 		DB::beginTransaction();
-		try{
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = OrderGoodsInstalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {
@@ -530,6 +530,7 @@ class GivebackController extends Controller
 				'msg'=>'还机单提交检测结果',
 			]);
 			if( !$goodsLog ){
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 		} catch (\Exception $ex) {

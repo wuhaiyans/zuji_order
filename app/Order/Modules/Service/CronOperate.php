@@ -171,17 +171,20 @@ class CronOperate
             $ret = OrderBuyout::where($condition)->update(['status'=>Inc\OrderBuyoutStatus::OrderCancel,'update_time'=>time()]);
             if(!$ret){
                 DB::rollBack();
+                continue;
             }
             //更新订单商品状态
             $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->update(['goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,'update_time'=>time()]);
             if(!$ret){
                 DB::rollBack();
+                continue;
             }
             //解冻订单状态
             $OrderRepository= new OrderRepository;
             $ret = $OrderRepository->orderFreezeUpdate($value['order_no'],Inc\OrderFreezeStatus::Non);
             if(!$ret){
                 DB::rollBack();
+                continue;
             }
             DB::commit();
         }
