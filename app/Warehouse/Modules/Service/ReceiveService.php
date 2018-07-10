@@ -170,10 +170,10 @@ class ReceiveService
      */
     public function cancel($receive_no)
     {
-        if (!ReceiveRepository::cancel($receive_no)) {
+        if (ReceiveRepository::cancel($receive_no)!==true) {
             throw new \Exception('取消收货单失败');
         }
-        if (!ReceiveGoodsRepository::cancel($receive_no)) {
+        if (ReceiveGoodsRepository::cancel($receive_no)!==true) {
             throw new \Exception('取消收货清单失败');
         }
     }
