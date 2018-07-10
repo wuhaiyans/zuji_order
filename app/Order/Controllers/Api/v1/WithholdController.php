@@ -494,158 +494,190 @@ class WithholdController extends Controller
      */
     public function crontab_createpay()
     {
+        // 执行时间
+        ini_set('max_execution_time', '0');
+
+        // 查询当天没有扣款记录数据
         $date = date('Ymd');
 
         $whereArray =
             [
                 ['term', '=', date('Ym')],
-                ['day', '<=', intval(date('d'))],
+                ['day', '=', intval(date('d'))],
                 ['crontab_faile_date', '<', $date],
             ];
-
-        // 查询数据
-        $result =  \App\Order\Models\OrderGoodsInstalment::query()
+        $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
             ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
-            ->orderBy('id','DESC')
-            ->limit(100)
-            ->get()
-            ->toArray();
-
-        if(empty($result)){
+            ->count();
+        if($total == 0){
             return;
         }
+        /*
+         * 隔五分钟执行一次扣款
+         */
+        $limit  = 100;
+        $page   = 1;
+        $time   = 60 * 5;
+        $totalpage = ceil($total/$limit);
+        do {
 
-        foreach($result as $item) {
+            // 查询数据
+            $result =  \App\Order\Models\OrderGoodsInstalment::query()
+                ->where($whereArray)
+                ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
+                ->orderBy('id','DESC')
+                ->limit($limit)
+                ->get()
+                ->toArray();
 
-            // 生成交易码
-            $trade_no = createNo();
-            // 扣款交易码
-            if( $item['trade_no'] == '' ){
-                // 1)记录租机交易码
-                $b = OrderGoodsInstalment::save(['id'=>$item['id']],['trade_no'=>$trade_no]);
-                if( $b === false ){
-                    Log::error("数据异常");
-                    continue;
+            if(empty($result)){
+                return;
+            }
+
+            foreach($result as $item) {
+
+                // 生成交易码
+                $trade_no = createNo();
+                // 扣款交易码
+                if( $item['trade_no'] == '' ){
+                    // 1)记录租机交易码
+                    $b = OrderGoodsInstalment::save(['id'=>$item['id']],['trade_no'=>$trade_no]);
+                    if( $b === false ){
+                        Log::error("数据异常");
+                        continue;
+                    }
+                    $item['trade_no'] = $trade_no;
                 }
-                $item['trade_no'] = $trade_no;
-            }
-            $trade_no = $item['trade_no'];
+                $trade_no = $item['trade_no'];
 
-            //开启事务
-            DB::beginTransaction();
+                //开启事务
+                DB::beginTransaction();
 
-            // 订单
-            $orderInfo = OrderRepository::getInfoById($item['order_no']);
-            if (!$orderInfo) {
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error("数据异常");
-                continue;
-            }
-            if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error("[代扣]订单状态不在服务中");
-                continue;
-            }
-
-            // 商品
-            $subject = $item['order_no'].'-'.$item['times'].'-期扣款';
-
-            // 价格
-            $amount = $item['amount'] * 100;
-            if ($amount < 0) {
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
-                continue;
-            }
-
-            //判断支付方式
-            if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
-                //获取订单的芝麻订单编号
-                $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($item['order_no']);
-                if (empty($miniOrderInfo)) {
-                    \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
-                    Log::error("本地小程序确认订单回调记录查询失败");
-                    continue;
-                }
-                //芝麻小程序扣款请求
-                $miniParams['out_order_no'] = $miniOrderInfo['out_order_no'];
-                $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
-                //扣款交易号
-                $miniParams['out_trans_no'] = $item['id'];
-                $miniParams['pay_amount'] = $amount;
-                $miniParams['remark'] = $subject;
-                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
-                //判断请求发送是否成功
-                if ($pay_status == 'PAY_SUCCESS') {
-                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
-                } elseif ($pay_status == 'PAY_FAILED') {
-                    OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
-                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
-                } elseif ($pay_status == 'PAY_INPROGRESS') {
-                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
-                } else {
-                    return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
-                }
-            } else {
-                $data = [
-                    'remark'        => "定时任务扣款",
-                    'payment_time'  => time(),
-                    'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-                ];
-                $result = OrderGoodsInstalment::save(['id' => $item['id']], $data);
-                if (!$result) {
+                // 订单
+                $orderInfo = OrderRepository::getInfoById($item['order_no']);
+                if (!$orderInfo) {
                     DB::rollBack();
-                    Log::error("扣款备注保存失败");
+                    \App\Lib\Common\LogApi::error("数据异常");
+                    continue;
+                }
+                if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
+                    DB::rollBack();
+                    \App\Lib\Common\LogApi::error("[代扣]订单状态不在服务中");
                     continue;
                 }
 
-                // 代扣协议编号
-                $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
-                // 查询用户协议
-                $withhold = WithholdQuery::getByUserChannel($item['user_id'], $channel);
+                // 商品
+                $subject = $item['order_no'].'-'.$item['times'].'-期扣款';
 
-                $withholdInfo = $withhold->getData();
-
-                $agreementNo = $withholdInfo['out_withhold_no'];
-                if (!$agreementNo) {
+                // 价格
+                $amount = $item['amount'] * 100;
+                if ($amount < 0) {
                     DB::rollBack();
-                    \App\Lib\Common\LogApi::error("用户代扣协议编号错误");
+                    \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
                     continue;
                 }
-                // 代扣接口
-                $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
-                $withholding_data = [
-                    'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                    'out_trade_no'  => $trade_no,             //业务系统业务吗
-                    'amount'        => $amount,                 //交易金额；单位：分
-                    'back_url'      => $backUrl,                //后台通知地址
-                    'name'          => $subject,                //交易备注
-                    'user_id'       => $orderInfo['user_id'],   //业务平台用户id
-                ];
-
-                try {
-                    // 请求代扣接口
-                    $withholding->deduct($withholding_data);
-
-                } catch (\Exception $exc) {
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
-                    //捕获异常 买家余额不足
-                    if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                //判断支付方式
+                if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
+                    //获取订单的芝麻订单编号
+                    $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($item['order_no']);
+                    if (empty($miniOrderInfo)) {
+                        \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
+                        Log::error("本地小程序确认订单回调记录查询失败");
+                        continue;
+                    }
+                    //芝麻小程序扣款请求
+                    $miniParams['out_order_no'] = $miniOrderInfo['out_order_no'];
+                    $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+                    //扣款交易号
+                    $miniParams['out_trans_no'] = $item['id'];
+                    $miniParams['pay_amount'] = $amount;
+                    $miniParams['remark'] = $subject;
+                    $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+                    //判断请求发送是否成功
+                    if ($pay_status == 'PAY_SUCCESS') {
+                        return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+                    } elseif ($pay_status == 'PAY_FAILED') {
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
-                        \App\Lib\Common\LogApi::error("扣款失败");
+                        return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                    } elseif ($pay_status == 'PAY_INPROGRESS') {
+                        return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                    } else {
+                        return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
+                    }
+                } else {
+                    $data = [
+                        'remark'        => "定时任务扣款",
+                        'payment_time'  => time(),
+                        'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+                    ];
+
+                    $r = OrderGoodsInstalment::save(['id' => $item['id']], $data);
+                    if (!$r) {
+                        DB::rollBack();
+                        Log::error("扣款备注保存失败");
+                        continue;
+                    }
+                    try{
+
+                        // 代扣协议编号
+                        $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
+                        // 查询用户协议
+                        $withhold = WithholdQuery::getByUserChannel($item['user_id'], $channel);
+
+                        $withholdInfo = $withhold->getData();
+
+                        $agreementNo = $withholdInfo['out_withhold_no'];
+                        if (!$agreementNo) {
+                            DB::rollBack();
+                            \App\Lib\Common\LogApi::error("用户代扣协议编号错误");
+                            continue;
+                        }
+                        // 代扣接口
+                        $withholding = new \App\Lib\Payment\CommonWithholdingApi;
+                        $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
+                        $withholding_data = [
+                            'agreement_no'  => $agreementNo,            //支付平台代扣协议号
+                            'out_trade_no'  => $trade_no,             //业务系统业务吗
+                            'amount'        => $amount,                 //交易金额；单位：分
+                            'back_url'      => $backUrl,                //后台通知地址
+                            'name'          => $subject,                //交易备注
+                            'user_id'       => $orderInfo['user_id'],   //业务平台用户id
+                        ];
+
+                        try {
+                            // 请求代扣接口
+                            $withholding->deduct($withholding_data);
+
+                        } catch (\Exception $exc) {
+                            DB::rollBack();
+                            \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                            //捕获异常 买家余额不足
+                            if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                                OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
+                                \App\Lib\Common\LogApi::error("扣款失败");
+                                continue;
+                            }
+                        }
+
+                    }catch (\Exception $exc) {
+                        \App\Lib\Common\LogApi::error("扣款失败",$exc->getMessage());
                         continue;
                     }
                 }
 
+                // 提交事务
+                DB::commit();
             }
 
-            // 提交事务
-            DB::commit();
-        }
+
+            $page++;
+            sleep($time);
+        } while ($page <= $totalpage);
+
+
         return true;
     }
 
