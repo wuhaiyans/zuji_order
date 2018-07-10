@@ -86,8 +86,9 @@ class Receive
             $baseUrl = config("ordersystem.ORDER_API");
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("转发收发货取消接口",$info);
+            LogApi::debug("转发收发货取消接口",$info['code']);
             $res = json_decode($info);
-            if ($res['code'] != 0) {
+            if ($res->code != 0) {
                 return false;
             }
 
@@ -123,8 +124,8 @@ class Receive
             $info = Curl::post($baseUrl, $data);
             LogApi::debug("退换货转发收发货收到货通知接口",$info);
             $res = json_decode($info);
-            if ($res['code'] != 0) {
-                return false;
+            if ($res->code != 0) {
+                throw new \Exception( 'code '.$res->code.':'.$res->msg);
             }
 
         } catch (\Exception $e) {
