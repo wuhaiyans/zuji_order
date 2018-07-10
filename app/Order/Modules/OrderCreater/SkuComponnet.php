@@ -83,7 +83,7 @@ class SkuComponnet implements OrderCreater
 
             if ($this->zuqiType == 1) {
                 $this->zuqiTypeName = "day";
-                $goodsArr[$skuId]['sku_info']['zuqi'] = (strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400;
+                $goodsArr[$skuId]['sku_info']['zuqi'] = ((strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400)+1;
             } elseif ($this->zuqiType == 2) {
                 $this->zuqiTypeName = "month";
             }
@@ -91,11 +91,14 @@ class SkuComponnet implements OrderCreater
             // 格式化 规格
             $_specs = [];
             foreach($spec as $it){
-                $_specs[] = filter_array($it, [
-                    'id' => 'required',
-                    'name' => 'required',
-                    'value' => 'required',
-                ]);
+                //不存储租期
+                if($it['id'] !=4){
+                    $_specs[] = filter_array($it, [
+                        'id' => 'required',
+                        'name' => 'required',
+                        'value' => 'required',
+                    ]);
+                }
             }
             $this->specs = $_specs;
 
@@ -182,14 +185,14 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品押金错误');
                 $this->flag = false;
             }
-            // 格式化 规格
-            $mustSpec = [1,4];
-            $specId = array_column($this->specs, 'id');
-            $specDiff = array_diff($mustSpec, $specId);
-            if( count($specDiff)>0 ){
-                $this->getOrderCreater()->setError('商品规格错误');
-                $this->flag = false;
-            }
+//            // 格式化 规格
+//            $mustSpec = [1,4];
+//            $specId = array_column($this->specs, 'id');
+//            $specDiff = array_diff($mustSpec, $specId);
+//            if( count($specDiff)>0 ){
+//                $this->getOrderCreater()->setError('商品规格错误');
+//                $this->flag = false;
+//            }
         }
 
         return $this->flag;
@@ -404,10 +407,10 @@ class SkuComponnet implements OrderCreater
                 ];
                 //如果是短租 把租期时间写到goods 和goods_unit 中
                 if($this->zuqiType ==1){
-                    $goodsData['begin_time'] = strtotime($v['begin_time']);
+                    $goodsData['begin_time'] =strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
-                    $goodsData['zuqi'] = ($goodsData['end_time']-$goodsData['begin_time'])/86400;
-                    $unitData['unit_value'] =($goodsData['end_time']-$goodsData['begin_time'])/86400;
+                    $goodsData['zuqi'] = $v['zuqi'];
+                    $unitData['unit_value'] =$v['zuqi'];
                     $unitData['unit'] =1;
                     $unitData['goods_no'] =$goodsData['goods_no'];
                     $unitData['order_no'] =$orderNo;
