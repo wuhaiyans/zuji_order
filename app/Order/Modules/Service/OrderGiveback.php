@@ -289,7 +289,6 @@ class OrderGiveback
 	 * ]
 	 */
 	public static function callbackClearing( $params ) {
-		\App\Lib\Common\LogApi::debug('[还机清算回调]参数有误', ['$params'=>$params]);
 		try{
 			//参数过滤
 			$rules = [
@@ -351,7 +350,6 @@ class OrderGiveback
 				\App\Lib\Common\LogApi::debug('[还机清算回调]商品仓库更新状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
-			return false;
 			//记录日志
 			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
 				'order_no'=>$orderGivebackInfo['order_no'],
@@ -518,7 +516,6 @@ class OrderGiveback
 		//解冻订单
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
 		$givebackUnfinshedList = $orderGivebackRespository->getUnfinishedListByOrderNo($orderNo);
-			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo,'$givebackUnfinshedList'=>$givebackUnfinshedList]);
 		if( $givebackUnfinshedList === false ){
 			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo]);
 			return false;
@@ -539,7 +536,6 @@ class OrderGiveback
 			\App\Lib\Common\LogApi::debug('[还机支付回调]订单关闭失败',['$orderNo'=>$orderNo,'$orderComplete'=>$orderComplete]);
 			return false;
 		}
-			\App\Lib\Common\LogApi::debug('[还机支付回调]订单关闭结果',['$orderFreezeResult'=>$orderFreezeResult,'$orderComplete'=>$orderComplete]);
 		return true;
 	}
 	private function __parseWhere( &$where ) {
