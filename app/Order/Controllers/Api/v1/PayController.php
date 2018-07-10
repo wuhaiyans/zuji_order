@@ -487,10 +487,10 @@ class PayController extends Controller
      * @param Request $request
      */
     public function refundClean(Request $request){
-		LogApi::setSource('callback-refund');
+        LogApi::key('refundClean');
         try{
             $input = file_get_contents("php://input");
-            LogApi::debug('[清算退款]回调接收',$input);
+            LogApi::info('[清算退款]回调接收',$input);
             $param = json_decode($input,true);
             $rule = [
                 'out_refund_no'=>'required', //订单系统退款码
@@ -729,7 +729,8 @@ class PayController extends Controller
 
         try{
             $input = file_get_contents("php://input");
-            LogApi::debug(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
+            LogApi::key('unfreezeAndPayClean');
+            LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
             $rule = [
                 "status"=>'required',                //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
@@ -797,7 +798,7 @@ class PayController extends Controller
                                 LogApi::error('押金转支付回调业务业务失败参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$userinfo,$success]);
                                 $this->innerErrMsg('押金转支付回调业务业务失败');
                             }
-                            LogApi::debug('押金转支付回调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
+                            LogApi::info('押金转支付回调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
                         }  else {
                             DB::rollBack();
                             LogApi::error('押金转支付回调更新整体清算的状态失败', $orderParam);
