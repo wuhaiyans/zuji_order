@@ -228,8 +228,6 @@ class Receive
         } catch (\Exception $e) {
             Log::error(__METHOD__ . '检测项反馈失败');
             throw new \Exception( $e->getMessage());
-		} catch (\App\Lib\ApiException $e ){
-            throw new \Exception( $e->getMessage());
 		}
 
     }
