@@ -1587,8 +1587,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            foreach($params as $item){
-                LogApi::debug("接收退换货编号",$params);
+            foreach($params['refund_no'] as $item){
                 //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($item['refund_no']);
                 if(!$return){
