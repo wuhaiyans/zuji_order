@@ -25,5 +25,5 @@ class OrderGoodsInstalment extends Model
 
 
     // 可以被批量赋值的属性。
-    protected $fillable = ['id','trade_no','order_no','goods_no','user_id','term','day','times','original_amount','discount_amount','amount','payment_amount','payment_discount_amount','status','payment_time','update_time','remark','fail_num','unfreeze_status'];
+    protected $fillable = ['id','trade_no','order_no','goods_no','user_id','term','day','times','original_amount','discount_amount','amount','payment_amount','payment_discount_amount','status','payment_time','update_time','remark','fail_num','unfreeze_status','crontab_faile_date'];
 }
