@@ -266,7 +266,7 @@ class ReceiveController extends Controller
         try {
             DB::beginTransaction();
             $params['create_time'] = time();
-            $this->receive->checkItem($params);
+            //$this->receive->checkItem($params);
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $items[] = [
                 'goods_no'=>$params['goods_no'],
