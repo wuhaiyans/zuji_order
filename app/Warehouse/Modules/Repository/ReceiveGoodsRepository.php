@@ -68,7 +68,7 @@ class ReceiveGoodsRepository
      * 取消收货清单
      */
     public static function cancel($receive_no){
-        $model = ReceiveGoods::find($receive_no);
+        $model = ReceiveGoods::where(['receive_no'=>$receive_no])->first();
 
         if (!$model) {
             throw new NotFoundResourceException('收货清单' . $receive_no . '未找到');
