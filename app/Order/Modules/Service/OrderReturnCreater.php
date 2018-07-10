@@ -91,13 +91,13 @@ class OrderReturnCreater
                 }
 
                 //修改商品状态为退货
-                $returnOpen = $goods->returnOpen();
+               // $returnOpen = $goods->returnOpen();
                 // 商品退货
-                if( !$returnOpen ) {
+               /* if( !$returnOpen ) {
                     //事务回滚
                     DB::rollBack();
                     return false;
-                }
+                }*/
                 //获取商品数组
                 $goods_info = $goods->getData();
                 //代扣+预授权
@@ -710,6 +710,7 @@ class OrderReturnCreater
      * ]
      */
     public function cancelApply($params,$userinfo){
+        LogApi::debug("获取取消申请的参数",$params);
         //开启事务
         DB::beginTransaction();
         try{
@@ -720,11 +721,13 @@ class OrderReturnCreater
                    return false;
                 }
                 $return_info[$refund_no]=$return->getData();
+                LogApi::debug("查询退货单信息",$return_info);
                 if($return_info[$refund_no]['user_id']!=$params['user_id']){
                     return false;
                 }
                 //收货之后不允许取消
                 if($return_info[$refund_no]['status']>ReturnStatus::ReturnAgreed){
+                    LogApi::debug("收货之后不允许取消",$return_info[$refund_no]);
                     return false;
                 }
                 //如果审核通过通知收发货取消收货
@@ -1296,9 +1299,9 @@ class OrderReturnCreater
                 $buss->setReturnReasonResult($quesion);
                 //设置是否显示取消退换货按钮,状态为创建申请，审核同意时显示
                 if($return['status'] == ReturnStatus::ReturnAgreed || $return['status'] == ReturnStatus::ReturnCreated ){
-                    $buss->setCancel("1");
-                }else{
                     $buss->setCancel("0");
+                }else{
+                    $buss->setCancel("1");
                 }
 
             }
