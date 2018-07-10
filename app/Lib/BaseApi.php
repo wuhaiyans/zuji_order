@@ -22,9 +22,7 @@ class BaseApi {
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
-		try{
-			
-		
+
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------
@@ -51,9 +49,5 @@ class BaseApi {
 		// | 失败处理
 		//-+--------------------------------------------------------------------
 		throw new ApiException($response);
-		
-		} catch (\Exception $ex) {
-			throw new ApiException($ex->getMessage());
-		}
 	}
 }
