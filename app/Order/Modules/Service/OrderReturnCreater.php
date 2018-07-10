@@ -967,6 +967,14 @@ class OrderReturnCreater
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnTui){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTui);//退款中
             }
+            //退换货问题
+            if(isset($data['data'][$k]->reason_key)){
+                if($data['data'][$k]->reason_key == ReturnStatus::ReturnGoodsQuestion){
+                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnGoodsQuestion);
+                }elseif($data['data'][$k]->reason_key == ReturnStatus::ReturnUserQuestion){
+                    $data['data'][$k]->reason_name=ReturnStatus::ReturnQuestion(ReturnStatus::ReturnUserQuestion);
+                }
+            }
         }
         return $data;
     }
