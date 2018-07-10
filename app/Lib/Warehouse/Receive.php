@@ -46,6 +46,7 @@ class Receive
                 $receive_detail[] = [
                     'serial_no' => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
                     'goods_no'  => $d['goods_no'],
+                    'refund_no'  => isset($d['refund_no'])? $d['refund_no'] : '',
                     'goods_name'  => $d['goods_name'],
                     'quantity'  => isset($d['quantity']) ? $d['quantity'] : 1,
                     'imei'      => isset($d['imei']) ? $d['imei'] : ''
@@ -260,19 +261,13 @@ class Receive
             ];
         }
 
-        try {
-            if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
-                Giveback::confirmDelivery($result,$userinfo);
-            }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
-                \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
-            }else{
-                Log::error(__METHOD__ . '收货签收失败');
-                throw new \Exception( 'business_key 业务类型错误');
-            }
-
-        } catch (\Exception $e) {
+        if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
+            Giveback::confirmDelivery($result,$userinfo);
+        }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+            \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
+        }else{
             Log::error(__METHOD__ . '收货签收失败');
-            throw new \Exception( $e->getMessage());
+            throw new \Exception( 'business_key 业务类型错误');
         }
 
     }

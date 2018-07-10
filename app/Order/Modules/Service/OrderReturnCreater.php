@@ -1587,8 +1587,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            foreach($params as $item){
-                LogApi::debug("接收退换货编号",$item['refund_no']);
+            foreach($params['refund_no'] as $item){
                 //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($item['refund_no']);
                 if(!$return){
@@ -1782,6 +1781,9 @@ class OrderReturnCreater
      * @return boolean
      */
     public static function createchange($detail,$goods_info,$userinfo){
+        LogApi::debug("发货接受参数",$detail);
+        LogApi::debug("发货接受参数",$goods_info);
+        LogApi::debug("发货接受参数",$userinfo);
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
@@ -1798,7 +1800,7 @@ class OrderReturnCreater
                     return false;
                 }
                 //换货物流信息
-                $return=GoodsReturn::getReturnByInfo($detail['order_no'],$goods_info[$k]['goods_no']);
+                $return=GoodsReturn::getReturnInfo($detail['order_no'],$goods_info[$k]['goods_no']);
                 if(!$return){
                     return false;
                 }
@@ -1808,6 +1810,7 @@ class OrderReturnCreater
                    return false;
                 }
                 $return_info=$return->getData();
+                LogApi::debug("换货信息",$return_info);
                 //插入操作日志
                 \App\Order\Modules\Repository\GoodsLogRepository::add([
                     'order_no'     =>$detail['order_no'],
@@ -1815,8 +1818,8 @@ class OrderReturnCreater
                     'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
                     'business_no'  =>$return_info['refund_no'],
                     'goods_no'     =>$goods_info[$k]['goods_no'],
-                    'operator_id'  =>$userinfo['uid'],
-                    'operator_name'=>$userinfo['username'],
+                    'operator_id'  =>$userinfo['user_id'],
+                    'operator_name'=>$userinfo['user_name'],
                     'operator_type'=>$userinfo['type'],
                     'msg'           =>'换货已发货',
                 ],$isCorntab=FALSE);

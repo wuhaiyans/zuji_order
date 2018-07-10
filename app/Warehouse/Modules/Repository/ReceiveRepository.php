@@ -107,7 +107,7 @@ class ReceiveRepository
     /**
      * 创建
      */
-    public static function create($data)
+    public static function  create($data)
     {
 
         try {
