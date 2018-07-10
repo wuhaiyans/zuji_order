@@ -1587,15 +1587,17 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            //获取退货单信息
-            $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($params['refund_no']);
-            if(!$return){
-                return false;
-            }
-            //修改退换货状态为已收货
-            if(!$return->returnReceive()){
-                DB::rollBack();
-                return false;
+            foreach($params as $item){
+                //获取退货单信息
+                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($item['refund_no']);
+                if(!$return){
+                    return false;
+                }
+                //修改退换货状态为已收货
+                if(!$return->returnReceive()){
+                    DB::rollBack();
+                    return false;
+                }
             }
             //提交事务
             DB::commit();
