@@ -151,6 +151,7 @@ class CronOperate
      */
     public static function cronCancelOrderBuyout()
     {
+        return false;
         //设置未支付和超时条件
         $where[] = ['status', '=', Inc\OrderBuyoutStatus::OrderInitialize];
         $where[] = ['create_time', '<', time() - 7200,];
