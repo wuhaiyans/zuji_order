@@ -22,9 +22,7 @@ class BaseApi {
      */
     public static function request( int $appid, string $url, string $method, string $version, array $params, array $userInfo = [] ){
 
-		try{
-			
-		
+
 		//-+--------------------------------------------------------------------
 		// | 创建请求
 		//-+--------------------------------------------------------------------
@@ -35,11 +33,11 @@ class BaseApi {
 		$request->setVersion( $version );
 		$request->setParams( $params );	// 业务参数
 		$request->setUserInfo( $userInfo );	// 业务参数
-				throw new \Exception( '测试还机接口' );
 		//-+--------------------------------------------------------------------
 		// | 发送请求
 		//-+--------------------------------------------------------------------
 		$response = $request->sendPost();
+		throw new ApiException($response);
 		//-+--------------------------------------------------------------------
 		// | 返回值处理
 		//-+--------------------------------------------------------------------
@@ -52,9 +50,5 @@ class BaseApi {
 		// | 失败处理
 		//-+--------------------------------------------------------------------
 		throw new ApiException($response);
-		
-		} catch (\Exception $ex) {
-			throw new ApiException($response);
-		}
 	}
 }
