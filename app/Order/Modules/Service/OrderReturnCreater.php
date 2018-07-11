@@ -1240,13 +1240,15 @@ class OrderReturnCreater
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                         //退货状态流
                         $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                        $buss->setStatusText("您的退货审核被拒绝");
                     }
                     if($params['business_key']==OrderStatus::BUSINESS_BARTER){
                         //换货状态流
                         $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                        $buss->setStatusText("您的换货审核被拒绝");
                     }
-                    $buss->setStatus("D");
-                    $buss->setStatusText("审核被拒绝");
+                    $buss->setStatus("C");
+
                 }elseif($return['status']==ReturnStatus::ReturnReceive){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");

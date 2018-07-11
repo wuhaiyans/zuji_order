@@ -367,6 +367,7 @@ class BuyoutController extends Controller
     public function cancel(Request $request){
         //接收请求参数
         $orders =$request->all();
+        return $this->innerErrMsg(json_encode($orders));
         $params = $orders['params'];
         //过滤参数
         $rule= [

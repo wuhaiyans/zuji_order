@@ -251,10 +251,6 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'C',
-                        'name' => '退货拒绝',
-                    ],
-                    [
-                        'status' => 'D',
                         'name' => '租用中',
                     ],
                 ],
@@ -269,10 +265,6 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'C',
-                        'name' => '换货拒绝',
-                    ],
-                    [
-                        'status' => 'D',
                         'name' => '租用中',
                     ],
                 ],
