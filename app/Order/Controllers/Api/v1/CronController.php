@@ -37,4 +37,13 @@ class CronController extends Controller
         Service\CronOperate::cronCancelOrderBuyout();
         echo "complete";die;
     }
+    /**
+     * 定时任务还机单更新状态-逾期违约
+     * @return bool
+     */
+    public function cronGivebackAgedFail(){
+
+        Service\CronOperate::cronGivebackAgedFail();
+        echo "complete";die;
+    }
 }
