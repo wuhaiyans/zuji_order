@@ -242,6 +242,8 @@ return [
     'api.giveback.get.list'       => 'GivebackController@getList',
 	//还机获取还机信息
     'api.giveback.get.info'       => 'GivebackController@getInfo',
+	//还机逾期违约【定时任务】
+    'api.giveback.aged.fail'       => 'GivebackController@agedFail',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口
