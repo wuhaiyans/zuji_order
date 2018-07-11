@@ -153,14 +153,14 @@ class InnerServiceController extends Controller
         LogApi::info(__METHOD__.'() '.microtime(true).'买断单取消接口:'.json_encode($params));
 
         //过滤参数
-        /*$rule= [
+        $rule= [
             'buyout_no'=>'required',
             'user_id'=>'required',
         ];
         $validator = $this->validateParams($rule,$params);
         if ($validator['code']!=0) {
             return $this->innerErrMsg($validator['code']);
-        }*/
+        }
 
         $ret = OrderBuyout::cancel($params);
 
