@@ -135,6 +135,8 @@ class OrderGiveback
 	 *     'begin_time' => '',//还机单创建的开始时间<br\>
 	 *     'end_time' => '',//还机单创建的结束时间<br\>
 	 *     'status' => '',//还机单状态<br\>
+	 *     'payment_status' => '',//还机单支付状态<br\>
+	 *     'payment_end_time' => '',//还机单支付状态更新最后时间<br\>
 	 *     'kw_type' => '',//搜索关键字类型<br\>
 	 *     'keywords' => '',//搜索关键字<br\>
 	 * ]<br\>
@@ -198,6 +200,7 @@ class OrderGiveback
             ->leftJoin('order_goods', 'order_goods.goods_no', '=', 'order_giveback.goods_no')
             ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
+			->orderBy('order_giveback.create_time', 'desc')
             ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_info.mobile')
 //			paginate: 参数
 //			perPage:表示每页显示的条目数量
@@ -216,7 +219,7 @@ class OrderGiveback
 				$value['create_time'] = date('Y-m-d H:i:s',$value['create_time']);
 				$value['evaluation_time'] = date('Y-m-d H:i:s',$value['evaluation_time']);
 				$value['update_time'] = date('Y-m-d H:i:s',$value['update_time']);
-				$value['payment_time'] = date('Y-m-d H:i:s',$value['payment_time']);
+				$value['payment_time'] = $value['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ? date('Y-m-d H:i:s',$value['payment_time']) : '--';
 			}
 		}
         return $orderList;
@@ -517,7 +520,7 @@ class OrderGiveback
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
 		$givebackUnfinshedList = $orderGivebackRespository->getUnfinishedListByOrderNo($orderNo);
 		if( $givebackUnfinshedList === false ){
-			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo]);
+			\App\Lib\Common\LogApi::debug('[还机订单解冻]解冻异常',['$orderNo'=>$orderNo]);
 			return false;
 		}
 		if( count($givebackUnfinshedList) != 1 ){
@@ -526,14 +529,14 @@ class OrderGiveback
 		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if( !$orderFreezeResult ){
 			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
-			\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败',['$orderNo'=>$orderNo,'$orderFreezeResult'=>$orderFreezeResult]);
+			\App\Lib\Common\LogApi::debug('[还机订单解冻]订单解冻失败',['$orderNo'=>$orderNo,'$orderFreezeResult'=>$orderFreezeResult]);
 			return false;
 		}
 		//解冻成功，调用订单是否完成接口
 		$orderComplete = OrderOperate::isOrderComplete($orderNo);
 		if( !$orderComplete ){
 			set_apistatus(ApiStatus::CODE_92700, '订单关闭失败!');
-			\App\Lib\Common\LogApi::debug('[还机支付回调]订单关闭失败',['$orderNo'=>$orderNo,'$orderComplete'=>$orderComplete]);
+			\App\Lib\Common\LogApi::debug('[还机订单解冻]订单关闭失败',['$orderNo'=>$orderNo,'$orderComplete'=>$orderComplete]);
 			return false;
 		}
 		return true;
@@ -543,6 +546,10 @@ class OrderGiveback
         //根据还机单状态
         if (isset($where['status']) && $where['status']!= OrderGivebackStatus::STATUS_ALL) {
             $whereArray[] = ['order_giveback.status', '=', $where['status']];
+        }
+        //根据还机单状态
+        if (isset($where['payment_status']) && !empty($where['payment_status']) ) {
+            $whereArray[] = ['order_giveback.payment_status', '=', $where['payment_status']];
         }
 
         //应用来源ID
@@ -556,6 +563,11 @@ class OrderGiveback
         //还机单创建结束时间
         if ( isset($where['end_time']) && !empty($where['end_time'])) {
             $whereArray[] = ['order_giveback.create_time', '<=', strtotime($where['end_time'])];
+        }
+		
+        //还机单支付状态变更结束时间
+        if ( isset($where['payment_end_time']) && !empty($where['payment_end_time'])) {
+            $whereArray[] = ['order_giveback.payment_time', '<=', strtotime($where['payment_end_time'])];
         }
 
         //根据订单编号

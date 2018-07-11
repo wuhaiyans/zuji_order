@@ -323,6 +323,7 @@ class GivebackController extends Controller
 			//-+------------------------------------------------------------------------------
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+				return apiResponse($instalmentList,ApiStatus::CODE_92700,'设备日志生成失败！');
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					OrderWithhold::instalment_withhold($instalmentInfo['id']);
@@ -460,7 +461,7 @@ class GivebackController extends Controller
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {

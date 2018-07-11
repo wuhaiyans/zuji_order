@@ -168,6 +168,7 @@ class OrderCleaning
     {
         try {
 
+            LogApi::key('orderClean-orderCleanOperate');
             LogApi::info(__method__.'财务发起退款，解除预授权的请求，请求参数：', $param);
             //查询清算表根据业务平台退款码out_refund_no
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
@@ -339,6 +340,7 @@ class OrderCleaning
     public static function refundRequest($orderCleanData)
     {
 
+        LogApi::key('orderClean-refundRequest');
         LogApi::info(__method__.'财务进入退款请求的逻辑');
         //查询清算表根据业务平台退款码out_refund_no
         if (empty($orderCleanData)) return false;
@@ -398,6 +400,7 @@ class OrderCleaning
     public static function unfreezeRequest($orderCleanData)
     {
 
+        LogApi::key('orderClean-unfreezeRequest');
         LogApi::info(__method__.'财务进入解除预授权请求的逻辑',$orderCleanData);
         if (empty($orderCleanData)) return false;
 
