@@ -156,7 +156,7 @@ class InnerServiceController extends Controller
             'buyout_no'=>'required',
             'user_id'=>'required',
         ];
-        $validator = $this->validateParams($params, $rule);
+        $validator = $this->validateParams($rule,$params);
         if ($validator['code']!=0) {
             return $this->innerErrMsg($validator['code']);
         }

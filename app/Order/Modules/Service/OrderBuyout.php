@@ -332,7 +332,9 @@ class OrderBuyout
      * @return json
      */
 	public static function cancel($params){
-
+		if(!$params['buyout_no']||!$params['user_id']){
+			return false;
+		}
 		//获取买断单
 		$buyout = OrderBuyout::getInfo($params['buyout_no']);
 		if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
