@@ -149,7 +149,7 @@ class InnerServiceController extends Controller
      */
     public function cancelOrderBuyout(){
         $input = file_get_contents("php://input");
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        LogApi::info(__METHOD__.'() '.microtime(true).'买断单取消接口:'.$input);
         $params = json_decode($input,true);
         //过滤参数
         $rule= [
