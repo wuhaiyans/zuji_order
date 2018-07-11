@@ -21,5 +21,5 @@ return [
     //订单多长时间未支付取消订单
     'order_cancel_hours' =>2*3600,
     //买断单多长时间未支付取消买断支付单
-    'buyout_cancel_hours' =>60*60,
+    'buyout_cancel_hours' =>60*10,
 ];
