@@ -12,6 +12,7 @@ namespace App\Warehouse\Modules\Repository;
 
 use App\Warehouse\Config;
 use App\Warehouse\Models\CheckItems;
+use App\Warehouse\Models\DeliveryGoodsImei;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Models\ReceiveGoodsImei;
@@ -142,14 +143,26 @@ class ReceiveRepository
             foreach ($details as $detail) {//存receiveGoods
                 $detail['receive_no'] = $receiveNo;
                 $detail['refund_no'] = isset($detail['refund_no']) ? $detail['refund_no'] : '';
-                $detail['imei'] = isset($detail['imei']) ? $detail['imei'] : '';
+
+                if($detail['imei']){
+                    $detail['imei'] = $detail['imei'];
+                }else{
+                    $dgi_row = DeliveryGoodsImei::where(['goods_no'=>$detail['goods_no']])->first()->toArray();
+                    if($dgi_row){
+                        $detail['imei'] = $dgi_row['imei'];
+                    }else{
+                        throw new \Exception("DeliveryGoodsImei 未找到匹配的 goods_no");
+                    }
+
+                }
+
                 $detail['status'] = ReceiveGoodsImei::STATUS_WAIT_RECEIVE;
                 $detail['create_time'] = $time;
 
                 $gmodel = new ReceiveGoods();
                 $gmodel->create($detail);
 
-                if (!isset($detail['imei']) || !$detail['imei']) continue;
+                //if (!isset($detail['imei']) || !$detail['imei']) continue;
                 //unset($detail['goods_name']);
                 $mmodel = new ReceiveGoodsImei();
                 $mmodel->create($detail);

@@ -28,6 +28,7 @@ class DeliveryGoodsImei extends Warehouse
         'goods_no',
         'apple_serial', //苹果手机序列号
         'status',
+        'price',
         'create_time',
         'status_time'
     ];
