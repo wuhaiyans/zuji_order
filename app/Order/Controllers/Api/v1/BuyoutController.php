@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\PublicFunc;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
@@ -233,8 +234,16 @@ class BuyoutController extends Controller
             'msg'=>'用户到期买断',
         ];
         GoodsLogRepository::add($log);
-
         DB::commit();
+        //加入队列执行超时取消订单
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
+            'method' => 'api.buyout.cancel',
+            'params' => [
+                'buyout_no'=>$data['buyout_no'],
+                'user_id'=>$data['user_id'],
+            ],
+        ],time()+config('web.order_cancel_hours'),"");
+
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -357,60 +366,44 @@ class BuyoutController extends Controller
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
-            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+            return $this->innerErrMsg($validator->errors()->first());
         }
-        $userInfo = $orders['userinfo'];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no']);
         if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
-            return apiResponse([],ApiStatus::CODE_50001,"该订单不能取消买断");
+            return $this->innerErrMsg("该订单不能取消买断");
         }
         //获取订单商品信息
         $this->OrderGoodsRepository = new OrderGoodsRepository;
         $goodsInfo = $this->OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
         if(empty($goodsInfo)){
-            return apiResponse([],ApiStatus::CODE_50002,"没有找到该订单商品");
+            return $this->innerErrMsg("没有找到该订单商品");
         }
         //获取订单信息
         $this->OrderRepository= new OrderRepository;
         $orderInfo = $this->OrderRepository->get_order_info(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
         if(empty($orderInfo)){
-            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+            return $this->innerErrMsg("没有找到该订单");
         }
         if($orderInfo['freeze_type']!=OrderFreezeStatus::Buyout){
-            return apiResponse([],ApiStatus::CODE_50001,"该订单不在买断状态");
+            return $this->innerErrMsg("该订单不在买断状态");
         }
         DB::beginTransaction();
         //解冻订单-执行取消操作
         $ret = $this->OrderRepository->orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
         if(!$ret){
             DB::rollBack();
-            return apiResponse([],ApiStatus::CODE_50001,"订单解冻失败");
+            return $this->innerErrMsg("订单解冻失败");
         }
         $ret = OrderBuyout::cancel($buyout['id'],$params['user_id']);
         if(!$ret){
             DB::rollBack();
-            return apiResponse([],ApiStatus::CODE_50001,"取消失败");
+            return $this->innerErrMsg("取消失败");
         }
-        //插入日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服取消买断","取消成功");
-        //插入订单设备日志
-        $log = [
-            'order_no'=>$buyout['order_no'],
-            'action'=>'客服取消买断生成',
-            'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
-            'business_no'=>$buyout['buyout_no'],
-            'goods_no'=>$buyout['goods_no'],
-            'operator_id'=>$userInfo['uid'],
-            'operator_name'=>$userInfo['username'],
-            'operator_type'=>$userInfo['type'],
-            'msg'=>'取消买断成功',
-        ];
-        GoodsLogRepository::add($log);
-
+        
         DB::commit();
 
-        return apiResponse($goodsInfo,ApiStatus::CODE_0);
+        return $this->innerOkMsg();
     }
     /*
      * 买断支付请求
