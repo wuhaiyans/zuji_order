@@ -460,7 +460,7 @@ class GivebackController extends Controller
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {
