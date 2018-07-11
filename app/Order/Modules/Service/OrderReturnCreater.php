@@ -1248,10 +1248,6 @@ class OrderReturnCreater
                     }
                     $buss->setStatus("D");
                     $buss->setStatusText("审核被拒绝");
-                }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
-                    $buss->setStatus("C");
-                    $buss->setStatusText("检测不合格");
-                    $buss->setCheckResult("检测不合格");
                 }elseif($return['status']==ReturnStatus::ReturnReceive){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
@@ -1259,6 +1255,11 @@ class OrderReturnCreater
                         $checkResult['check_result']="待检测";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                        //退货检测不合格的状态流
+                        if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                        }
                         $checkResult['check_result']="检测不合格";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
@@ -1276,6 +1277,11 @@ class OrderReturnCreater
                         $checkResult['check_result']="待检测";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                        //退货检测不合格的状态流
+                        if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                        }
                         $checkResult['check_result']="检测不合格";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
