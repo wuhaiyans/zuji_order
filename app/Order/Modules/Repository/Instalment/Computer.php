@@ -57,8 +57,8 @@ abstract class Computer {
 	public function __construct( $params ) {
 		$begin_time = time();//默认时间戳
 		$this->params = $params;
-		if( isset($params['begin_time']) && $params['begin_time']>0 ){
-			$begin_time = $params['begin_time'];
+		if( isset($params['end_time']) && $params['end_time']>0 ){
+			$begin_time = $params['end_time'];
 		}
 		$this->setBeginTime( $begin_time );
 	}

@@ -224,11 +224,11 @@ class OrderGiveback
 	
     /**
      * 根据条件更新数据
-	 * @param array $where 更新条件【至少含有一项条件】
+	 * @param array $where 更新条件[至少含有一项条件]
 	 * $where = [<br/>
 	 *		'goods_no' => '',//商品编号<br/>
 	 * ]<br/>
-	 * @param array $data 需要更新的数据 【至少含有一项数据】
+	 * @param array $data 需要更新的数据 [至少含有一项数据]
 	 * $data = [<br/>
 	 *		'status'=>'',//还机状态<br/>
 	 *		'withhold_status'=>'',//代扣状态<br/>
@@ -283,8 +283,8 @@ class OrderGiveback
 	 * 还机单清算完成回调接口
 	 * @param array $params 还机单清算完成回调参数<br/>
 	 * $params = [
-	 *		'business_type' => '',//业务类型【必须是还机业务】
-	 *		'business_no' => '',//业务编码【必须是还机单编码】
+	 *		'business_type' => '',//业务类型[必须是还机业务]
+	 *		'business_no' => '',//业务编码[必须是还机单编码]
 	 *		'status' => '',//支付状态  processing：处理中；success：支付完成
 	 * ]
 	 */
@@ -299,13 +299,13 @@ class OrderGiveback
 			$validator = app('validator')->make($params, $rules);
 			if ($validator->fails()) {
 				set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
-				\App\Lib\Common\LogApi::debug('【还机清算回调】参数有误', ['$params'=>$params]);
+				\App\Lib\Common\LogApi::debug('[还机清算回调]参数有误', ['$params'=>$params]);
 				return false;
 			}
 			//清算成功
 			if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
 				set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】状态值或业务类型有误', ['$params'=>$params]);
+				\App\Lib\Common\LogApi::debug('[还机清算回调]状态值或业务类型有误', ['$params'=>$params]);
 				return false;
 			}
 
@@ -315,38 +315,39 @@ class OrderGiveback
 			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
 			if( !$orderGivebackInfo ) {			
 				set_msg('还机单信息获取失败');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】还机单信息获取失败', ['$params'=>$params,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机清算回调]还机单信息获取失败', ['$params'=>$params,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 		
 		//-+--------------------------------------------------------------------
 		// | 更新订单状态（交易完成）
 		//-+--------------------------------------------------------------------
+			//更新商品表状态
+			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
+			if( !$orderGoods ){
+				set_msg('商品仓库获取失败');
+				\App\Lib\Common\LogApi::debug('[还机清算回调]商品仓库更新状态失败', ['$orderGoods'=>$orderGoods,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			$orderGoodsResult = $orderGoods->givebackFinish();
+			if( !$orderGoodsResult ){
+				set_msg('商品仓库更新状态失败');
+				\App\Lib\Common\LogApi::debug('[还机清算回调]商品仓库更新状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			//解冻订单
+			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
+				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			
 			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
 				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
 			]);
 			if( !$orderGivebackResult ){
 				set_msg('还机单状态更新失败');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
-			}
-			//更新商品表状态
-			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
-			if( !$orderGoods ){
-				set_msg('商品仓库获取失败');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】商品仓库更新状态失败', ['$orderGoods'=>$orderGoods,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
-			}
-			$orderGoodsResult = $orderGoods->givebackFinish();
-			if( !$orderGoodsResult ){
-				set_msg('商品仓库更新状态失败');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】商品仓库更新状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
-			}
-			//解冻订单
-			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
-				\App\Lib\Common\LogApi::debug('【还机清算回调】订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机清算回调]还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//记录日志
@@ -363,7 +364,7 @@ class OrderGiveback
 			]);
 			if( !$goodsLog ){
 				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
-				\App\Lib\Common\LogApi::debug('【还机清算回调】设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机清算回调]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 		} catch (\Exception $ex) {
@@ -389,32 +390,32 @@ class OrderGiveback
 			$validator = app('validator')->make($params, $rules);
 			if ($validator->fails()) {
 				set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
-				\App\Lib\Common\LogApi::debug('【还机支付回调】参数错误', ['$params'=>$params]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]参数错误', ['$params'=>$params]);
 				return false;
 			}
 			//清算成功
 			if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK ){
 				set_apistatus(ApiStatus::CODE_91000, '状态值或业务类型有误!');
-				\App\Lib\Common\LogApi::debug('【还机支付回调】状态值或业务类型有误', ['$params'=>$params]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]状态值或业务类型有误', ['$params'=>$params]);
 				return false;
 			}
 			$orderGivebackService = new OrderGiveback();
 			//获取还机单信息
 			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($params['business_no']);
 			if( !$orderGivebackInfo ) {
-				\App\Lib\Common\LogApi::debug('【还机支付回调】还机单信息获取失败', ['$params'=>$params,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]还机单信息获取失败', ['$params'=>$params,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//创建服务层对象
 			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
 			if( !$orderGoods ){
-				\App\Lib\Common\LogApi::debug('【还机支付回调】商品服务层创建失败', ['$orderGoods'=>$orderGoods,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]商品服务层创建失败', ['$orderGoods'=>$orderGoods,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//获取商品信息
 			$orderGoodsInfo = $orderGoods->getData();
 			if( !$orderGoodsInfo ) {
-				\App\Lib\Common\LogApi::debug('【还机支付回调】商品信息获取失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]商品信息获取失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//-+--------------------------------------------------------------------
@@ -425,6 +426,17 @@ class OrderGiveback
 			// | 不生成=》更新订单状态（交易完成）
 			//-+--------------------------------------------------------------------
 			if( $orderGoodsInfo['yajin'] == 0 ){
+				//更新商品状态
+				$orderGoodsResult = $orderGoods->givebackFinish();
+				if(!$orderGoodsResult){
+					\App\Lib\Common\LogApi::debug('[还机支付回调]更新商品表状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+					return false;
+				}
+				//解冻订单
+				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
+					\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+					return false;
+				}
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 					'status'=> $status,
@@ -433,18 +445,7 @@ class OrderGiveback
 					'payment_time'=> time(),
 				]);
 				
-				//更新商品状态
-				$orderGoodsResult = $orderGoods->givebackFinish();
-				if(!$orderGoodsResult){
-					\App\Lib\Common\LogApi::debug('【还机支付回调】更新商品表状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-					return false;
-				}
 				
-				//解冻订单
-				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
-					\App\Lib\Common\LogApi::debug('【还机支付回调】订单解冻失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-					return false;
-				}
 				//需要记录清算，清算数据为空即可
 				$paymentNo = $fundauthNo = '';
 			}
@@ -459,13 +460,13 @@ class OrderGiveback
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 					'payment_time'=> time(),
 				]);
-				//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
+				//获取当时订单支付时的相关pay的对象信息[查询payment_no和funath_no]
 				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderGoodsInfo['order_no'] );
 				$paymentNo = $payObj->getPaymentNo();
 				$fundauthNo = $payObj->getFundauthNo();
 			}
 			if( !$orderGivebackResult ){
-				\App\Lib\Common\LogApi::debug('【还机支付回调】还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//清算处理数据拼接
@@ -483,7 +484,7 @@ class OrderGiveback
 			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 			if( !$orderCleanResult ){
 				set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
-				\App\Lib\Common\LogApi::debug('【还机支付回调】押金退还清算单创建失败', ['$orderCleanResult'=>$orderCleanResult,'$clearData'=>$clearData,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]押金退还清算单创建失败', ['$orderCleanResult'=>$orderCleanResult,'$clearData'=>$clearData,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			
@@ -501,22 +502,22 @@ class OrderGiveback
 			]);
 			if( !$goodsLog ){
 				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
-				\App\Lib\Common\LogApi::debug('【还机支付回调】设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				\App\Lib\Common\LogApi::debug('[还机支付回调]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 		} catch (\Exception $ex) {
-			\App\Lib\Common\LogApi::debug('【还机支付回调】异常', $ex);
+			\App\Lib\Common\LogApi::debug('[还机支付回调]异常', $ex);
 			return false;
 		}
 		return true;
 	}
 	public static function __unfreeze($orderNo) {
-		$orderGivebackService = new OrderGiveback();
+		$orderGivebackRespository = new OrderGivebackRepository();
 		//解冻订单
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
-		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo($orderNo);
+		$givebackUnfinshedList = $orderGivebackRespository->getUnfinishedListByOrderNo($orderNo);
 		if( $givebackUnfinshedList === false ){
-			\App\Lib\Common\LogApi::debug('【还机支付回调】解冻异常',['$orderNo'=>$orderNo]);
+			\App\Lib\Common\LogApi::debug('[还机支付回调]解冻异常',['$orderNo'=>$orderNo]);
 			return false;
 		}
 		if( count($givebackUnfinshedList) != 1 ){
@@ -525,14 +526,14 @@ class OrderGiveback
 		$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($orderNo, \App\Order\Modules\Inc\OrderFreezeStatus::Non);
 		if( !$orderFreezeResult ){
 			set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
-			\App\Lib\Common\LogApi::debug('【还机支付回调】订单解冻失败',['$orderNo'=>$orderNo,'$orderFreezeResult'=>$orderFreezeResult]);
+			\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败',['$orderNo'=>$orderNo,'$orderFreezeResult'=>$orderFreezeResult]);
 			return false;
 		}
 		//解冻成功，调用订单是否完成接口
 		$orderComplete = OrderOperate::isOrderComplete($orderNo);
 		if( !$orderComplete ){
 			set_apistatus(ApiStatus::CODE_92700, '订单关闭失败!');
-			\App\Lib\Common\LogApi::debug('【还机支付回调】订单关闭失败',['$orderNo'=>$orderNo,'$orderComplete'=>$orderComplete]);
+			\App\Lib\Common\LogApi::debug('[还机支付回调]订单关闭失败',['$orderNo'=>$orderNo,'$orderComplete'=>$orderComplete]);
 			return false;
 		}
 		return true;
