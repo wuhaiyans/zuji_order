@@ -88,7 +88,6 @@ class Contract{
      * @return array
      */
     public static function createContract($params){
-        LogApi::error("生成合同参数",$params);
         $rule= [
             'spu_id'=>'required',
             'order_no'=>'required',
@@ -120,7 +119,6 @@ class Contract{
             return false;
         }
         $info = json_decode($info,true);
-        LogApi::error("生成合同返回请求",$info);
         if(!is_array($info)){
             return false;
         }
