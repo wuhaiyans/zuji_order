@@ -97,6 +97,8 @@ $api->version('v1', [
     $api->get('crontabCreatepay', 'WithholdController@crontab_createpay');
     // 定时任务 每日执行定时任务-扣款
     $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
+    // 定时任务 还机逾期违约-修改状态
+    $api->get('cronGivebackAgedFail', 'CronController@cronGivebackAgedFail');
 
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
