@@ -1329,6 +1329,9 @@ class OrderReturnCreater
                     }
 
                 }
+                if($return['status']>ReturnStatus::ReturnCanceled){
+                    $buss->setReceive("已收货");
+                }
 
             }
 

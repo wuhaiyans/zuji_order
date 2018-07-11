@@ -217,6 +217,7 @@ class OrderWithhold
 
             $_data = [
                 'status'            => OrderInstalmentStatus::SUCCESS,
+                'payment_time'      => time(),
                 'update_time'       => time(),
                 'pay_type'          => 1,       //还款类型：0 代扣   1 主动还款
                 'remark'            => '提前还款',

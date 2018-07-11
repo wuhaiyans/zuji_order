@@ -100,6 +100,14 @@ class BusinessInfo
     {
         $this->data['logistics_info']=$logistics_info;
     }
+    /**
+     * 快递信息  已收货
+     * @param string $status_text
+     */
+    public  function setReceive( string $receive )
+    {
+        $this->data['receive'] = $receive;
+    }
 
     /**
      * 退换货问题
