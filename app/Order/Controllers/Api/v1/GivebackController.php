@@ -325,9 +325,7 @@ class GivebackController extends Controller
 			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-					var_dump($instalmentInfo['id']);exit;
-					$a = OrderWithhold::instalment_withhold($instalmentInfo['id']);
-					var_dump($a);exit;
+					OrderWithhold::instalment_withhold($instalmentInfo['id']);
 				}
 				//代扣已执行
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
