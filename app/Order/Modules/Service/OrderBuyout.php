@@ -9,6 +9,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
+use Illuminate\Support\Facades\DB;
 
 class OrderBuyout
 {
@@ -144,20 +145,6 @@ class OrderBuyout
 				'create_time'=>'required',
 		]);
 		return OrderBuyoutRepository::create($data);
-	}
-	/**
-	 * 取消买断单
-	 * @param int $id 买断单主键id
-	 * @param int $userId 操作人id
-	 * @return id
-	 */
-	public static function cancel($id,$userId){
-		$id = intval($id);
-		$userId = intval($userId);
-		if(!$id || !$userId){
-			return false;
-		}
-		return OrderBuyoutRepository::setOrderBuyoutCancel($id,$userId);
 	}
 
 	/*
@@ -333,6 +320,52 @@ class OrderBuyout
 				'msg'=>'买断完成',
 		];
 		GoodsLogRepository::add($log);
+		return true;
+	}
+	/*
+     * 取消买断
+     * @param array $params 【必选】
+     * [
+     *      "user_id"=>"", 用户id
+     *      "buyout_no"=>"",买断业务号
+     * ]
+     * @return json
+     */
+	public static function cancel($params){
+
+		//获取买断单
+		$buyout = OrderBuyout::getInfo($params['buyout_no']);
+		if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
+			return false;
+		}
+		//获取订单商品信息
+		$OrderGoodsRepository = new OrderGoodsRepository;
+		$goodsInfo =$OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
+		if(empty($goodsInfo)){
+			return false;
+		}
+		//获取订单信息
+		$OrderRepository = new OrderRepository;
+		$orderInfo = $OrderRepository->get_order_info(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
+		if(empty($orderInfo)){
+			return false;
+		}
+		if($orderInfo['freeze_type']!=OrderFreezeStatus::Buyout){
+			return false;
+		}
+		DB::beginTransaction();
+		//解冻订单-执行取消操作
+		$ret = $OrderRepository->orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
+		if(!$ret){
+			DB::rollBack();
+			return false;
+		}
+		$ret = OrderBuyoutRepository::setOrderBuyoutCancel($buyout['id'],$params['user_id']);
+		if(!$ret){
+			DB::rollBack();
+			return false;
+		}
+		DB::commit();
 		return true;
 	}
 }

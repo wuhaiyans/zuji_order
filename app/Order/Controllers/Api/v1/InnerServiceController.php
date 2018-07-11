@@ -9,6 +9,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
 class InnerServiceController extends Controller
@@ -137,7 +138,36 @@ class InnerServiceController extends Controller
         return $this->innerOkMsg();
 
     }
+    /*
+     * 取消买断
+     * @param array $params 【必选】
+     * [
+     *      "user_id"=>"", 用户id
+     *      "buyout_no"=>"",买断业务号
+     * ]
+     * @return json
+     */
+    public function cancelOrderBuyout(){
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        $params = json_decode($input,true);
+        //过滤参数
+        $rule= [
+            'buyout_no'=>'required',
+            'user_id'=>'required',
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return $this->innerErrMsg($validator->errors()->first());
+        }
 
+        $ret = OrderBuyout::cancel($params);
+
+        if(!$ret){
+            return $this->innerErrMsg("取消买断单失败");
+        }
+        return $this->innerOkMsg();
+    }
 
 
 
