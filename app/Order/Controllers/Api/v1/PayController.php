@@ -610,6 +610,7 @@ class PayController extends Controller
      */
     public function unFreezeClean(Request $request)
     {
+        DB::beginTransaction();
         try{
             $input = file_get_contents("php://input");
             LogApi::info(__method__.'[cleanAccount回调解除预授权]订单清算退押金回调接口回调参数:',$input);
@@ -626,7 +627,7 @@ class PayController extends Controller
             //更新查看清算表的状态
 
             // 开启事务
-            DB::beginTransaction();
+
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['auth_unfreeze_no'=>$param['out_trade_no']]);
 
 //            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['clean_no'=>'CA70407132618675']);
@@ -655,8 +656,7 @@ class PayController extends Controller
                 ];
                 $success = OrderCleaning::upOrderCleanStatus($orderParam);
                 if (!$success) {
-                    //发起退款的数据
-                    OrderCleaning::refundRequest($orderCleanInfo);
+
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['auth_deduction_status']!=OrderCleaningStatus::depositDeductionStatusUnpayed &&
                         $orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed){
@@ -703,6 +703,8 @@ class PayController extends Controller
                 $this->innerErrMsg('订单清算解押状态无效');
             }
             DB::commit();
+            //发起退款的数据
+            OrderCleaning::refundRequest($orderCleanInfo);
             $this->innerOkMsg();
 
 
@@ -726,6 +728,9 @@ class PayController extends Controller
      */
     public function unfreezeAndPayClean(Request $request)
     {
+
+        // 开启事务
+        DB::beginTransaction();
         try{
             $input = file_get_contents("php://input");
             LogApi::info(__method__.'[cleanAccount回调预授权转支付]订单清算退押金回调接口回调参数:'.$input);
@@ -742,8 +747,7 @@ class PayController extends Controller
             if ($param['status']!='success'){
                 LogApi::error(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'订单清算退款失败');
             }
-            // 开启事务
-            DB::beginTransaction();
+
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['auth_deduction_no'=>$param['out_trade_no']]);
             if ($orderCleanInfo['code']) {
@@ -769,10 +773,6 @@ class PayController extends Controller
                 ];
                 $success = OrderCleaning::upOrderCleanStatus($orderParam);
                 if (!$success) {
-                    //发起解押金的请求
-                    OrderCleaning::unfreezeRequest($orderCleanInfo);
-                    //发起退款的数据
-                    OrderCleaning::refundRequest($orderCleanInfo);
                     //查看其他状态是否完成，如果完成，更新整体清算的状态
                     if ($orderCleanInfo['refund_status']!=OrderCleaningStatus::refundUnpayed &&
                         $orderCleanInfo['auth_unfreeze_status']!=OrderCleaningStatus::depositUnfreezeStatusUnpayed){
@@ -815,6 +815,10 @@ class PayController extends Controller
                 $this->innerErrMsg('订单清算押金转支付状态无效');
             }
             DB::commit();
+            //发起解押金的请求
+            OrderCleaning::unfreezeRequest($orderCleanInfo);
+            //发起退款的数据
+            OrderCleaning::refundRequest($orderCleanInfo);
             $this->innerOkMsg();
 
 
