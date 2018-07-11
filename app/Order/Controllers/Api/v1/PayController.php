@@ -487,7 +487,7 @@ class PayController extends Controller
      * @param Request $request
      */
     public function refundClean(Request $request){
-        LogApi::key('refundClean');
+        LogApi::key('orderClean-refundClean');
         try{
             $input = file_get_contents("php://input");
             LogApi::info('[清算退款]回调接收',$input);
@@ -512,7 +512,7 @@ class PayController extends Controller
 			DB::beginTransaction();
 			
             //更新查看清算表的状态
-            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['out_refund_no'=>$param['out_refund_no']]);
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['refund_clean_no'=>$param['out_refund_no']]);
             if ($orderCleanInfo['code']) {
 				DB::rollback();
                 LogApi::error("[清算记录]不存在");
@@ -609,6 +609,7 @@ class PayController extends Controller
      */
     public function unFreezeClean(Request $request)
     {
+        LogApi::key('orderClean-unFreezeClean');
         try{
             $input = file_get_contents("php://input");
             LogApi::key('unFreezeClean');
@@ -726,10 +727,9 @@ class PayController extends Controller
      */
     public function unfreezeAndPayClean(Request $request)
     {
-
+        LogApi::key('orderClean-unfreezeAndPayClean');
         try{
             $input = file_get_contents("php://input");
-            LogApi::key('unfreezeAndPayClean');
             LogApi::info(__METHOD__.'() '.microtime(true).'订单清算退押金回调接口回调参数:'.$input);
             $param = json_decode($input,true);
             $rule = [
