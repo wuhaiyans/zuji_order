@@ -1214,7 +1214,7 @@ class OrderReturnCreater
                     //$buss->setStatusText("待审核");
                 }elseif($return['status']==ReturnStatus::ReturnAgreed){
                     $buss->setStatus("B");
-                    $params=[
+                    $param=[
                         "method"=>"warehouse.delivery.logisticList"
                     ];
                     //备注信息、客服电话
@@ -1224,7 +1224,7 @@ class OrderReturnCreater
                     if(empty($return['logistics_no']) && empty($return['logistics_name'])) {
                         //获取物流信息
                         $header = ['Content-Type: application/json'];
-                        $info = curl::post(config('tripartite.warehouse_api_uri'), json_encode($params), $header);
+                        $info = curl::post(config('tripartite.warehouse_api_uri'), json_encode($param), $header);
                         $info = json_decode($info, true);
                         if( is_null($info)
                             || !is_array($info)
@@ -1235,6 +1235,7 @@ class OrderReturnCreater
                         }
                         $buss->setLogisticsInfo($info['data']);
                     }
+
                 }elseif($return['status']==ReturnStatus::ReturnDenied){
 					//已经拒绝的状态流
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
@@ -1303,12 +1304,12 @@ class OrderReturnCreater
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
                 }
+
                 //退换货物流
                 if(!empty($return['logistics_no']) && !empty($return['logistics_name'])){
                      $channel_list['logistics_no']=$return['logistics_no'];
                      $channel_list['logistics_name']=$return['logistics_name'];
                      $buss->setLogisticsForm($channel_list);
-
                 }
 				//退换货原因
                 $quesion['reason_name']=ReturnStatus::getReturnQuestionName($return['reason_id']);
@@ -1320,7 +1321,8 @@ class OrderReturnCreater
                 }else{
                     $buss->setCancel("1");
                 }
-                if($return['status']>ReturnStatus::ReturnCreated && $return['status'] != ReturnStatus::ReturnDenied){
+
+                if($return['status'] != ReturnStatus::ReturnDenied){
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                         $buss->setStatusText("您的退货申请已通过审核");
                     }
@@ -1332,12 +1334,9 @@ class OrderReturnCreater
                 if($return['status']>ReturnStatus::ReturnCanceled){
                     $buss->setReceive("已收货");
                 }
-
             }
-
             //查询订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($order_no);
-
             if(!$order){
                 return false;
             }
