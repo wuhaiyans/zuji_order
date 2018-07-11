@@ -83,6 +83,7 @@ $api->version('v1', [
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
+        
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
