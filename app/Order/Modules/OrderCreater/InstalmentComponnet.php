@@ -65,7 +65,7 @@ class InstalmentComponnet implements OrderCreater
 			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
 			// 开始日期，只有日租有，月租没有
-            $skuInfo['begin_time'] = strtotime($sku['begin_time']);
+            $skuInfo['end_time'] = strtotime($sku['end_time']);
             $skuInfo['discount_info'] = [
                 [
                     'discount_amount' =>(float)$sku['first_coupon_amount'],
@@ -106,7 +106,7 @@ class InstalmentComponnet implements OrderCreater
             }
             // 日租，分期计算器
             elseif($sku['zuqi_type'] == 1){
-				$_data['begin_time'] = $sku['begin_time'];
+				$_data['end_time'] = $sku['end_time'];
                 $computer = new \App\Order\Modules\Repository\Instalment\DayComputer( $_data );
             }
             // 优惠策略

@@ -99,14 +99,14 @@ class OrderGivebackRepository
 	 */
 	public function getUnfinishedListByOrderNo( $orderNo ) {
 		$where['order_no'] = $orderNo;
-		$where['status'] = [
+		$whereIn['status'] = [
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_IN_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI,
 		];
-		$result = $this->order_giveback_model->where($where)->get();
+		$result = $this->order_giveback_model->where($where)->whereIn('status',$whereIn['status'])->get();
 		if( $result ) {
 			return $result->toArray();
 		}

@@ -11,6 +11,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
 use App\Order\Models\OrderBuyout;
+use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
@@ -151,21 +152,41 @@ class CronOperate
      */
     public static function cronCancelOrderBuyout()
     {
-        return false;
         //设置未支付和超时条件
         $where[] = ['status', '=', Inc\OrderBuyoutStatus::OrderInitialize];
-        $where[] = ['create_time', '<', time() - 7200,];
+        $where[] = ['create_time', '<', time() - 600,];
         $orderList = OrderBuyout::query()->where($where)->limit(100)->get();
         if (!$orderList) {
             return false;
         }
         $orderList = $orderList->toArray();
         //批量取消买断单
-        $ids = array_column($orderList,"id");
-        $condition[] = ['status','=',Inc\OrderBuyoutStatus::OrderInitialize,];
-        $ret = OrderBuyout::where($condition)->wherein("id",$ids)->update(['status'=>OrderBuyoutStatus::OrderCancel,'update_time'=>time()]);
-        if(!$ret){
-            return false;
+        foreach($orderList as $value){
+            DB::beginTransaction();
+            //取消买断单
+            $condition = [
+                'id'=>$value['id'],
+                'status'=>Inc\OrderBuyoutStatus::OrderInitialize,
+            ];
+            $ret = OrderBuyout::where($condition)->update(['status'=>Inc\OrderBuyoutStatus::OrderCancel,'update_time'=>time()]);
+            if(!$ret){
+                DB::rollBack();
+                continue;
+            }
+            //更新订单商品状态
+            $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->update(['goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,'update_time'=>time()]);
+            if(!$ret){
+                DB::rollBack();
+                continue;
+            }
+            //解冻订单状态
+            $OrderRepository= new OrderRepository;
+            $ret = $OrderRepository->orderFreezeUpdate($value['order_no'],Inc\OrderFreezeStatus::Non);
+            if(!$ret){
+                DB::rollBack();
+                continue;
+            }
+            DB::commit();
         }
         return true;
     }
