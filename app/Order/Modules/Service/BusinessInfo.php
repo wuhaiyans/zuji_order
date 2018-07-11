@@ -100,6 +100,14 @@ class BusinessInfo
     {
         $this->data['logistics_info']=$logistics_info;
     }
+    /**
+     * 快递信息  已收货
+     * @param string $status_text
+     */
+    public  function setReceive( string $receive )
+    {
+        $this->data['receive'] = $receive;
+    }
 
     /**
      * 退换货问题
@@ -174,7 +182,7 @@ class BusinessInfo
     public  static function getStateFlow(){
         // 业务状态
         return [
-                'returnStateFlow'  => [    //退货状态流
+                'returnStateFlow'  => [    //正常退货状态流
 
                  [
                         'status' => 'A',
@@ -190,10 +198,10 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'D',
-                        'name' => '退货完成',
+                        'name' => '退还押金',
                     ]
                  ],
-                'barterStateFlow'  => [        //换货状态流
+                'barterStateFlow'  => [        //正常换货状态流
 
                 [
                     'status' => 'A',
@@ -226,7 +234,7 @@ class BusinessInfo
                         'name' => '退货取消',
                     ],
                 ],
-                'barterCancelStateFlow'  => [     //h换货取消状态流
+                'barterCancelStateFlow'  => [     //换货取消状态流
                     [
                         'status' => 'A',
                         'name' => '换货申请',
@@ -251,11 +259,7 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'C',
-                        'name' => '退货拒绝',
-                    ],
-                    [
-                        'status' => 'D',
-                        'name' => '退货完成',
+                        'name' => '租用中',
                     ],
                 ],
                 'barterDeniedStateFlow'  => [           //换货拒绝状态流
@@ -269,7 +273,21 @@ class BusinessInfo
                     ],
                     [
                         'status' => 'C',
-                        'name' => '换货拒绝',
+                        'name' => '租用中',
+                    ],
+                ],
+                'returnCheckStateFlow'  => [           //退货检测不合格状态流
+                    [
+                        'status' => 'A',
+                        'name' => '退货申请',
+                    ],
+                    [
+                        'status' => 'B',
+                        'name' => '退货审核',
+                    ],
+                    [
+                        'status' => 'C',
+                        'name' => '退货检测',
                     ],
                     [
                         'status' => 'D',
