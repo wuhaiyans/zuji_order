@@ -252,6 +252,7 @@ class Instalment {
 		}
 
 		$where = [];
+		$whereIn = [];
 		if(isset($data['id'])){
 			$where[] = ['id', '=', $data['id']];
 		}
@@ -262,11 +263,17 @@ class Instalment {
 		if(isset($data['goods_no'])){
 			$where[] = ['goods_no', '=', $data['goods_no']];
 		}
+		if(isset($data['status']) && is_array($data['status'])){
+			$whereIn['status'] = $data['status'];
+		}
 
 		$status = ['status'=>OrderInstalmentStatus::CANCEL];
 
-
-		$result =  OrderGoodsInstalment::where($where)->update($status);
+		if( $whereIn ){
+			$result =  OrderGoodsInstalment::where($where)->whereIn('status',$whereIn['status'])->update($status);
+		}else{
+			$result =  OrderGoodsInstalment::where($where)->update($status);
+		}
 
 		if (!$result) return false;
 
