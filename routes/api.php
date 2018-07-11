@@ -79,7 +79,7 @@ $api->version('v1', [
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
-        //隊列取消订单
+        //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
