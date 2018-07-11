@@ -102,7 +102,7 @@ class OrderReturnCreater
                 $goods_info = $goods->getData();
                 //代扣+预授权
                 if($order_info['pay_type']==PayInc::WithhodingPay){
-                    if($goods_info['order_yajin']>0){
+                    if($goods_info['yajin']>0){
                         $result['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                     }
                 }

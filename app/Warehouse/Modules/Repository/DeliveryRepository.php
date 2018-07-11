@@ -440,18 +440,19 @@ class DeliveryRepository
 				\App\Lib\Common\LogApi::type('data-error')::error('商品配货imei取消失败', $imei_where);
 				return false;
 			}
+            // 还原 imei 状态
+            Imei::in( $goodsImeiModel->imei );
+
 			$goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
 			$goodsImeiModel->status_time = time();
             $goodsImeiModel->imei = '';
-            $goodsImeiModel->apple_serial = '';
+            $goodsImeiModel->apple_serial = '0';
             $goodsImeiModel->price = 0;
 			$b = $goodsImeiModel->update();
 			if( !$b ){
 				\App\Lib\Common\LogApi::type('data-save')::error('商品配货imei取消失败', $imei_where);
 				return false;
 			}
-			// 还原 imei 状态
-            Imei::in( $goodsImeiModel->imei );
 			
         } catch (\Exception $e) {
 			\App\Lib\Common\LogApi::error('商品取消配货失败', $e);
