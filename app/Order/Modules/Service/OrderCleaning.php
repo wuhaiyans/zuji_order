@@ -213,7 +213,7 @@ class OrderCleaning
                 //需退款金额大于0，并且属于待退款状态，
                 //发起清算，退租金
                 if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed
-                    && empty(intval($orderCleanData['auth_deduction_amount']) && empty(intval($orderCleanData['auth_unfreeze_amount'])))
+                    && empty(intval($orderCleanData['auth_deduction_amount'])) && empty(intval($orderCleanData['auth_unfreeze_amount']))
                 ) {
                     self::refundRequest($orderCleanData);
                 }
