@@ -48,6 +48,11 @@ class GivebackController extends Controller
 	 * @return type
 	 */
 	public function getApplyingViewdata( Request $request ) {
+//		$orderGivebackService = new OrderGiveback();
+//		//解冻订单
+//		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
+//		$givebackUnfinshedList = $orderGivebackService->getUnfinishedListByOrderNo('A710116481722372');
+//		var_dump($givebackUnfinshedList);exit;
 		return apiResponse();return;
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
@@ -455,7 +460,7 @@ class GivebackController extends Controller
 			//存在未完成分期单，关闭分期单
 			$instalmentResult = true;
 			if( $instalmentNum ){
-				$instalmentResult = OrderGoodsInstalment::close(['goods_no'=>$goodsNo]);
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo]);
 			}
 			//分期关闭失败，回滚
 			if( !$instalmentResult ) {
@@ -502,21 +507,6 @@ class GivebackController extends Controller
 				DB::rollBack();
 				return apiResponse([], get_code(), get_msg());
 			}
-			//更新商品表状态
-			if( $status == OrderGivebackStatus::STATUS_DEAL_DONE ){
-				$orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
-				if( !$orderGoods ){
-					//事务回滚
-					DB::rollBack();
-					return apiResponse([], ApiStatus::CODE_92401);
-				}
-				$orderGoodsResult = $orderGoods->givebackFinish();
-				if(!$orderGoodsResult){
-					//事务回滚
-					DB::rollBack();
-					return apiResponse([],  ApiStatus::CODE_92200, '同步更新商品状态出错');
-				}
-			}
 			//记录日志
 			$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
 				'order_no'=>$orderGivebackInfo['order_no'],
@@ -530,6 +520,7 @@ class GivebackController extends Controller
 				'msg'=>'还机单提交检测结果',
 			]);
 			if( !$goodsLog ){
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 		} catch (\Exception $ex) {
@@ -833,6 +824,15 @@ class GivebackController extends Controller
 		// | 无押金->直接修改订单
 		//-+--------------------------------------------------------------------
 		else{
+			//更新商品表状态
+			$orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
+			if( !$orderGoods ){
+				return false;
+			}
+			$orderGoodsResult = $orderGoods->givebackFinish();
+			if(!$orderGoodsResult){
+				return false;
+			}
 			//解冻订单
 			if(!OrderGiveback::__unfreeze($paramsArr['order_no'])){
 				set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');

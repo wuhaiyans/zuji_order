@@ -185,14 +185,7 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品押金错误');
                 $this->flag = false;
             }
-//            // 格式化 规格
-//            $mustSpec = [1,4];
-//            $specId = array_column($this->specs, 'id');
-//            $specDiff = array_diff($mustSpec, $specId);
-//            if( count($specDiff)>0 ){
-//                $this->getOrderCreater()->setError('商品规格错误');
-//                $this->flag = false;
-//            }
+
         }
 
         return $this->flag;
