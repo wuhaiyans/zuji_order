@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\PublicFunc;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
@@ -233,8 +234,16 @@ class BuyoutController extends Controller
             'msg'=>'用户到期买断',
         ];
         GoodsLogRepository::add($log);
-
         DB::commit();
+        //加入队列执行超时取消订单
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
+            'method' => 'api.buyout.cancel',
+            'params' => [
+                'buyout_no'=>$data['buyout_no'],
+                'user_id'=>$data['user_id'],
+            ],
+        ],time()+config('web.order_cancel_hours'),"");
+
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -333,8 +342,14 @@ class BuyoutController extends Controller
             'msg'=>'客服提前买断',
         ];
         GoodsLogRepository::add($log);
-
         DB::commit();
+
+        //加入队列执行超时取消订单
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API")."/CancelOrderBuyout", [
+            'buyout_no'=>$data['buyout_no'],
+            'user_id'=>$data['user_id'],
+        ],time()+config('web.order_cancel_hours'),"");
+
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
     /*

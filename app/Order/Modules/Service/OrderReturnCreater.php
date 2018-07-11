@@ -102,18 +102,18 @@ class OrderReturnCreater
                 $goods_info = $goods->getData();
                 //代扣+预授权
                 if($order_info['pay_type']==PayInc::WithhodingPay){
-                    if($order_info['order_yajin']>0){
-                        $result['auth_unfreeze_amount'] =$order_info['order_yajin'];//应退押金=实付押金
+                    if($goods_info['yajin']>0){
+                        $result['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                     }
                 }
                 //直接支付
                 if($order_info['pay_type']==PayInc::FlowerStagePay || $order_info['pay_type']==PayInc::UnionPay) {
-                    if (($order_info['order_amount'] + $order_info['order_insurance']) > 0) {
-                        $result['pay_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                        $result['refund_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//应退金额
+                    if ($goods_info['yajin'] > 0) {
+                        $result['refund_amount']=$goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
+                        $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                     }
-                    if ($order_info['order_yajin'] > 0) {
-                        $result['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                    if ($goods_info['yajin'] > 0) {
+                        $result['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                     }
                 }
 
@@ -1195,7 +1195,7 @@ class OrderReturnCreater
             $return=$this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
             if(!$return){
                 $buss->setStatus("A");
-                $buss->setStatusText("申请");
+                //$buss->setStatusText("申请");
                 //获取退换货原因
                 $reasons = ReturnStatus::getReturnQuestionList();
 				$_arr = [];
@@ -1211,10 +1211,9 @@ class OrderReturnCreater
                 $buss->setRefundNo($return['refund_no']);
                 if($return['status']==ReturnStatus::ReturnCreated){
                     $buss->setStatus("B");
-                    $buss->setStatusText("待审核");
+                    //$buss->setStatusText("待审核");
                 }elseif($return['status']==ReturnStatus::ReturnAgreed){
                     $buss->setStatus("B");
-                    $buss->setStatusText("审核同意");
                     $params=[
                         "method"=>"warehouse.delivery.logisticList"
                     ];
@@ -1241,17 +1240,15 @@ class OrderReturnCreater
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                         //退货状态流
                         $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                        $buss->setStatusText("您的退货审核被拒绝");
                     }
                     if($params['business_key']==OrderStatus::BUSINESS_BARTER){
                         //换货状态流
                         $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                        $buss->setStatusText("您的换货审核被拒绝");
                     }
-                    $buss->setStatus("D");
-                    $buss->setStatusText("审核被拒绝");
-                }elseif($return['status']==ReturnStatus::ReturnCanceled && $return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
                     $buss->setStatus("C");
-                    $buss->setStatusText("检测不合格");
-                    $buss->setCheckResult("检测不合格");
+
                 }elseif($return['status']==ReturnStatus::ReturnReceive){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
@@ -1259,6 +1256,11 @@ class OrderReturnCreater
                         $checkResult['check_result']="待检测";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                        //退货检测不合格的状态流
+                        if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                        }
                         $checkResult['check_result']="检测不合格";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
@@ -1276,6 +1278,11 @@ class OrderReturnCreater
                         $checkResult['check_result']="待检测";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                        //退货检测不合格的状态流
+                        if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                        }
                         $checkResult['check_result']="检测不合格";
 
                     }elseif($return['evaluation_status']==ReturnStatus::ReturnEvaluationSuccess){
@@ -1312,6 +1319,18 @@ class OrderReturnCreater
                     $buss->setCancel("0");
                 }else{
                     $buss->setCancel("1");
+                }
+                if($return['status']>ReturnStatus::ReturnCreated && $return['status'] != ReturnStatus::ReturnDenied){
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        $buss->setStatusText("您的退货申请已通过审核");
+                    }
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        $buss->setStatusText("您的换货申请已通过审核");
+                    }
+
+                }
+                if($return['status']>ReturnStatus::ReturnCanceled){
+                    $buss->setReceive("已收货");
                 }
 
             }
