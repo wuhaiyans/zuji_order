@@ -156,9 +156,9 @@ class InnerServiceController extends Controller
             'buyout_no'=>'required',
             'user_id'=>'required',
         ];
-        $validator = app('validator')->make($params, $rule);
-        if ($validator->fails()) {
-            return $this->innerErrMsg($validator->errors()->first());
+        $validator = $this->validateParams($params, $rule);
+        if ($validator['code']!=0) {
+            return $this->innerErrMsg($validator['code']);
         }
 
         $ret = OrderBuyout::cancel($params);
