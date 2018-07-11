@@ -232,7 +232,7 @@ class CronOperate
 						'payment_time' => time(),
 						'status' => OrderGivebackStatus::STATUS_AGED_FAIL,
 					]);
-					if(!$orderGivebackUpdate){ 
+					if(!$orderGivebackUpdate){
 						throw new \Exception('还机单状态更新失败：'.$orderGiveBackInfo['giveback_no']);
 					}
 				}
