@@ -342,8 +342,17 @@ class BuyoutController extends Controller
             'msg'=>'客服提前买断',
         ];
         GoodsLogRepository::add($log);
-
         DB::commit();
+
+        //加入队列执行超时取消订单
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
+            'method' => 'api.buyout.cancel',
+            'params' => [
+                'buyout_no'=>$data['buyout_no'],
+                'user_id'=>$data['user_id'],
+            ],
+        ],time()+config('web.order_cancel_hours'),"");
+
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
     /*
@@ -358,6 +367,7 @@ class BuyoutController extends Controller
     public function cancel(Request $request){
         //接收请求参数
         $orders =$request->all();
+        return $this->innerErrMsg(json_encode($orders));
         $params = $orders['params'];
         //过滤参数
         $rule= [
@@ -400,7 +410,7 @@ class BuyoutController extends Controller
             DB::rollBack();
             return $this->innerErrMsg("取消失败");
         }
-        
+
         DB::commit();
 
         return $this->innerOkMsg();
