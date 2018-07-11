@@ -1195,7 +1195,7 @@ class OrderReturnCreater
             $return=$this->orderReturnRepository->returnList($params['order_no'],$params['goods_no']);
             if(!$return){
                 $buss->setStatus("A");
-                $buss->setStatusText("申请");
+                //$buss->setStatusText("申请");
                 //获取退换货原因
                 $reasons = ReturnStatus::getReturnQuestionList();
 				$_arr = [];
@@ -1211,10 +1211,9 @@ class OrderReturnCreater
                 $buss->setRefundNo($return['refund_no']);
                 if($return['status']==ReturnStatus::ReturnCreated){
                     $buss->setStatus("B");
-                    $buss->setStatusText("待审核");
+                    //$buss->setStatusText("待审核");
                 }elseif($return['status']==ReturnStatus::ReturnAgreed){
                     $buss->setStatus("B");
-                    $buss->setStatusText("审核同意");
                     $params=[
                         "method"=>"warehouse.delivery.logisticList"
                     ];
@@ -1318,6 +1317,15 @@ class OrderReturnCreater
                     $buss->setCancel("0");
                 }else{
                     $buss->setCancel("1");
+                }
+                if($return['status']>ReturnStatus::ReturnCreated && $return['status'] != ReturnStatus::ReturnDenied){
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        $buss->setStatusText("您的退货申请已通过审核");
+                    }
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        $buss->setStatusText("您的换货申请已通过审核");
+                    }
+
                 }
 
             }
