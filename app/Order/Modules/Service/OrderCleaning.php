@@ -186,6 +186,16 @@ class OrderCleaning
                 'operator_username' => isset($param['userinfo']['username']) ? $param['userinfo']['username']: '',
                 'operator_type' => isset($param['userinfo']['type']) ? $param['userinfo']['type']: '',
             ];
+            if(!isset($param['userinfo']['uid'])) {
+                unset($orderParam['operator_uid']);
+            }
+            if(!isset($param['userinfo']['username'])) {
+                unset($orderParam['operator_username']);
+            }
+
+            if(!isset($param['userinfo']['type'])) {
+                unset($orderParam['operator_type']);
+            }
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
             LogApi::info(__method__.'[cleanAccount发起]财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
@@ -208,12 +218,15 @@ class OrderCleaning
              * ]
              */
 
+
+
             if ($orderCleanData['order_type']!=OrderStatus::orderMiniService) {
+
 
                 //需退款金额大于0，并且属于待退款状态，
                 //发起清算，退租金
                 if ($orderCleanData['refund_amount']>0 && $orderCleanData['refund_status']== OrderCleaningStatus::refundUnpayed
-                    && empty(intval($orderCleanData['auth_deduction_amount'])) && empty(intval($orderCleanData['auth_unfreeze_amount']))
+                    && (empty(intval($orderCleanData['auth_deduction_amount'])) || $orderCleanData['auth_deduction_status']==OrderCleaningStatus::depositDeductionStatusPayd) && (empty(intval($orderCleanData['auth_unfreeze_amount'])) ||  $orderCleanData['auth_unfreeze_status']==OrderCleaningStatus::depositUnfreezeStatusPayd)
                 ) {
                     self::refundRequest($orderCleanData);
                 }
@@ -263,7 +276,7 @@ class OrderCleaning
 
                 //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
                 if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
-                    && empty(intval($orderCleanData['auth_deduction_amount']))) {
+                    && (empty(intval($orderCleanData['auth_deduction_amount'])) || $orderCleanData['auth_deduction_status']==OrderCleaningStatus::depositDeductionStatusPayd)) {
                     self::unfreezeRequest($orderCleanData);
                 }
 
