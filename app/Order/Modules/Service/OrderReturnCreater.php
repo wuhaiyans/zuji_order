@@ -570,7 +570,7 @@ class OrderReturnCreater
                             //短信
                             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$no,SceneConfig::RETURN_APPLY_DISAGREE);
                             $b=$orderNoticeObj->notify();
-                            Log::debug($b?"Order :".$order." IS OK":"IS error");
+                            Log::debug($b?"Order :".$returnInfo[0]['order_no']." IS OK":"IS error");
                     }
                 }
             }
