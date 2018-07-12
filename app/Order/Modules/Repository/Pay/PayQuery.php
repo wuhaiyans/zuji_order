@@ -40,7 +40,7 @@ class PayQuery {
 				return new Pay( $info->toArray() );
 			}
 			$e = new \Exception;
-		throw new \App\Lib\NotFoundException($e->getTraceAsString());
+//		throw new \App\Lib\NotFoundException($e->getTraceAsString());
 			$array =debug_backtrace();
 			unset($array[0]);
 			$html = '';
@@ -48,6 +48,7 @@ class PayQuery {
 			{
 				$html .=$row['file'].':'.$row['line'].'行,调用方法:'.$row['function']."<p>";
 			}
+		throw new \App\Lib\NotFoundException($html);
 			return $html;
 
 
