@@ -249,7 +249,7 @@ class Receive
         $goods = $receive->goods;
 
         $result = [];
-        throw new \Exception( json_encode($goods));
+
         foreach ($goods as $g) {
             if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
@@ -260,7 +260,7 @@ class Receive
                 'refund_no'=>$g->refund_no
             ];
         }
-
+        throw new \Exception( json_encode($refund_no));
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
