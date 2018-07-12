@@ -450,7 +450,7 @@ class OrderCleaning
                 if (empty($orderCleanData['auth_no'])) return false;
 
                 $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
-                
+
                 //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
                 /**
                  * 预授权解冻接口
