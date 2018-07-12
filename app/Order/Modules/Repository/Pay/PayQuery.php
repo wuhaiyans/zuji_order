@@ -23,16 +23,20 @@ class PayQuery {
 	 * 根据业务 获取支付单
 	 * @param int		$business_type		业务类型
 	 * @param string	$business_no		业务编号
+     * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getPayByBusiness( int $business_type, string $business_no ){
-		$info = \App\Order\Models\OrderPayModel::where([
+	public static function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ){
+		$builder = \App\Order\Models\OrderPayModel::where([
 			'business_type'	=> $business_type,
 			'business_no'	=> $business_no,
-		])->first();
+		]);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+		$info =  $builder->first();
 		if( $info ){
-			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');
@@ -41,15 +45,19 @@ class PayQuery {
 	/**
 	 * 根据业务系统支付编号 获取支付单
 	 * @param string	$payment_no		支付编号
+     * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getPayByPaymentNo( string $payment_no ){
-		$info = \App\Order\Models\OrderPayModel::where([
+	public static function getPayByPaymentNo( string $payment_no, int $lock=0 ){
+		$builder = \App\Order\Models\OrderPayModel::where([
 			'payment_no'	=> $payment_no,
-		])->first();
+		]);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+		$info =  $builder->first();
 		if( $info ){
-			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
 		}
 		throw new \App\Lib\NotFoundException('支付单不存在');
@@ -58,13 +66,18 @@ class PayQuery {
 	/**
 	 * 根据业务系统 代扣协议编号 获取支付单
 	 * @param string	$withhold_no		代扣协议编号
+     * @param int		$lock			锁
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 * @throws \App\Lib\NotFoundException
 	 */
-	public static function getPayByWithholdNo( string $withhold_no ){
-		$info = \App\Order\Models\OrderPayModel::where([
+	public static function getPayByWithholdNo( string $withhold_no,int $lock=0 ){
+		$builder = \App\Order\Models\OrderPayModel::where([
 			'withhold_no'	=> $withhold_no,
-		])->first();
+		]);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+		$info =  $builder->first();
 		if( $info ){
 			\App\Lib\Common\LogApi::info( '支付单', $info );
 			return new Pay( $info->toArray() );
