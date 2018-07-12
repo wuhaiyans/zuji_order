@@ -250,11 +250,12 @@ class Receive
         $result = [];
 
         foreach ($goods as $g) {
-            throw new \Exception( $g->refund_no);
+
             if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
             ];
+            throw new \Exception( $g->refund_no);
             //退换货使用(支持多商品)
             $refund_no[] = [
                 'refund_no'=>$g->refund_no
