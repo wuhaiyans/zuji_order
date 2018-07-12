@@ -247,11 +247,10 @@ class Receive
 
         $receive = \App\Warehouse\Models\Receive::find($receive_no);
         $goods = $receive->goods;
-        throw new \Exception( json_encode($goods));
         $result = [];
 
         foreach ($goods as $g) {
-
+            throw new \Exception( $g['refund_no']);
             if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
