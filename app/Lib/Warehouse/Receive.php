@@ -249,9 +249,8 @@ class Receive
         $goods = $receive->goods;
         $result = [];
         $refund_no = [];
-        throw new \Exception( json_encode($goods));
         foreach ($goods as $g) {
-            if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
+            if ($g->status == ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
             ];
