@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -348,7 +349,7 @@ class OrderBuyout
 		}
 		//获取订单信息
 		$OrderRepository = new OrderRepository;
-		$orderInfo = $OrderRepository->get_order_info(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
+		$orderInfo = $OrderRepository->getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
 		if(empty($orderInfo)){
 			return false;
 		}

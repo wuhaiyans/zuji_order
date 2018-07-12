@@ -200,10 +200,10 @@ class OrderWithhold
 
             $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$params['business_no']]);
             if( !is_array($instalmentInfo)){
+                \App\Lib\Common\LogApi::error('代扣回调处理分期数据错误-分期错误');
                 return false;
             }
             $instalmentId = $instalmentInfo['id'];
-
 
             // 查询支付单数据
             $payWhere = [
@@ -261,7 +261,7 @@ class OrderWithhold
                 'order_no'      => $instalmentInfo['order_no'],
                 'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                 'business_no'   => $params['business_no'],
-                'appid'         => 1,
+                'appid'         => \App\Order\Modules\Inc\OrderPayIncomeStatus::REPAYMENT,
                 'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
                 'amount'        => $payInfo['payment_amount'],
                 'create_time'   => time(),

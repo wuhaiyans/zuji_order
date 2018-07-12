@@ -310,6 +310,9 @@ class ReturnController extends Controller
         if (empty($params['goods_info'])) {
             return apiResponse([],ApiStatus::CODE_20001);
         }
+        if(strlen($params['logistics_no'])>20){
+            return apiResponse([], ApiStatus::CODE_33003,'物流编号输入错误');
+        }
         $res= $this->OrderReturnCreater->uploadWuliu($params);
         if(!$res){
             return apiResponse([], ApiStatus::CODE_33003,'上传物流失败');
