@@ -42,7 +42,7 @@ class PayQuery {
 			}
 			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 		}catch(\Exception $e){
-			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness'."MESSAGE = " . $e->getMessage() . "\n" . "STACK TRACE = \n" . $e->getTraceAsString() );
+			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness'. $e->getTraceAsString() );
 		}
 
 	}
