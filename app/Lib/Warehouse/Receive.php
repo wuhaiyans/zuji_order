@@ -257,9 +257,9 @@ class Receive
             ];
             throw new \Exception( $g_arr['goods_no']);
             //退换货使用(支持多商品)
-            $refund_no[] = [
-                'refund_no'=>$g->refund_no
-            ];
+//            $refund_no[] = [
+//                'refund_no'=>$g->refund_no
+//            ];
         }
 
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
