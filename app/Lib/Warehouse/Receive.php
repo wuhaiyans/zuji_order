@@ -259,8 +259,7 @@ class Receive
                 'refund_no'=>$g->refund_no
             ];
         }
-
-        throw new \Exception( json_encode($refund_no));
+        return $refund_no;
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
