@@ -296,10 +296,17 @@ class Instalment {
 	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
-			LogApi::info("代扣定时任务", $param);
+//			LogApi::info("代扣定时任务", $param);
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
+				return false;
+			}
+
+			// 订单信息
+			$orderInfo  = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
+			if( !$orderInfo ){
+				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误-订单错误');
 				return false;
 			}
 
@@ -310,9 +317,11 @@ class Instalment {
 
 			$data = [
 				'status'        	=> OrderInstalmentStatus::SUCCESS,
+				'payment_time'      => time(),
+				'update_time'   	=> time(),
 				'payment_amount'   	=> $instalmentInfo['amount'],
 				'pay_type'   		=> 0,
-				'update_time'   	=> time(),
+
 			];
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
@@ -334,16 +343,17 @@ class Instalment {
 				return false;
 			}
 
+
 			// 创建收支明细
 			$incomeData = [
-				'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
-				'order_no'      => $instalmentInfo['order_no'],
-				'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-				'business_no'   => $param['out_trade_no'],
-				'appid'         => 1,
-				'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-				'amount'        => $instalmentInfo['amount'],
-				'create_time'   => time(),
+				'name'           => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
+				'order_no'       => $instalmentInfo['order_no'],
+				'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+				'business_no'    => $param['out_trade_no'],
+				'appid'          => $orderInfo['appid'],
+				'channel'        => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+				'amount'         => $instalmentInfo['amount'],
+				'create_time'    => time(),
 				'trade_no'       => $param['out_trade_no'],
 				'out_trade_no'   => $param['trade_no'],
 			];
