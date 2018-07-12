@@ -40,11 +40,9 @@ class PayQuery {
 			if( $info ){
 				return new Pay( $info->toArray() );
 			}
-			echo "<pre>";
-			debug_print_backtrace();die;
 			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 		}catch(\Exception $e){
-			echo "MESSAGE = " . $e->getMessage() . "\n" . "STACK TRACE = \n" . $e->getTraceAsString()  ;die;
+			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness'."MESSAGE = " . $e->getMessage() . "\n" . "STACK TRACE = \n" . $e->getTraceAsString() );
 		}
 
 	}
