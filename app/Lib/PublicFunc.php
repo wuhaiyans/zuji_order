@@ -470,3 +470,22 @@ function withholdDate($term, $day, $pre="-"){
     return $_date;
 }
 
+/**
+ * 将商品规格信息格式转换
+ * @param $specs string 商品规格信息【成色:全新;颜色:深空灰;租期:12期;存储:64G;网络:全网通】
+ * @return string 转换后的商品规格信息【全新|深空灰|64G|全网通】
+ */
+function filterSpecs( $specs ){
+	//商品信息解析
+	$specsArr = explode(';', $specs);
+	$specsStrArr = [];
+	foreach ($specsArr as $key => $value) {
+		$value = explode(':', $value);
+		$specsStrArr[$value[0]]= $value[1];
+	}
+	if( isset($specsStrArr['租期']) ){
+		unset($specsStrArr['租期']);
+	}
+	return implode('|', $specsStrArr);
+}
+
