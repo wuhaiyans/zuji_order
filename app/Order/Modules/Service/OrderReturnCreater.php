@@ -961,7 +961,7 @@ class OrderReturnCreater
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnDenied);//拒绝
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnCanceled){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
-            }elseif($data['data'][$k]->status==ReturnStatus::ReturnReceive){
+            }elseif($data['data'][$k]->status == ReturnStatus::ReturnReceive){
                 if($data['data'][$k]->business_key == OrderStatus::BUSINESS_RETURN){
                     if($data['data'][$k]->evaluation_status == ReturnStatus::ReturnEvaluationFalse){
                         $data['data'][$k]->check_button=true;
