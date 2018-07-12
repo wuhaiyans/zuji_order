@@ -1335,7 +1335,7 @@ class OrderReturnCreater
                     $buss->setCancel("1");
                 }
 
-                if($return['status'] != ReturnStatus::ReturnDenied){
+                if($return['status'] != ReturnStatus::ReturnDenied && $return['status'] >ReturnStatus::ReturnCreated){
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
                         $buss->setStatusText("您的退货申请已通过审核");
                     }
