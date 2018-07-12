@@ -256,11 +256,12 @@ class Receive
                 'goods_no' => $g->goods_no
             ];
             //退换货使用(支持多商品)
+            throw new \Exception( $g->refund_no);
             $refund_no[] = [
                 'refund_no'=>$g->refund_no
             ];
         }
-        throw new \Exception( json_encode($refund_no));
+
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
