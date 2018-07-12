@@ -247,7 +247,7 @@ class Receive
 
         $receive = \App\Warehouse\Models\Receive::find($receive_no);
         $goods = $receive->goods;
-        throw new \Exception( json_encode($goods));
+        throw new \Exception( json_encode($goods->refund_no));
         $result = [];
 
         foreach ($goods as $g) {
