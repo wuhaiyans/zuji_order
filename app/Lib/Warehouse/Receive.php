@@ -247,7 +247,7 @@ class Receive
 
         $receive = \App\Warehouse\Models\Receive::find($receive_no);
         $goods = $receive->goods;
-
+        throw new \Exception( json_encode($goods));
         $result = [];
 
         foreach ($goods as $g) {
@@ -256,7 +256,6 @@ class Receive
                 'goods_no' => $g->goods_no
             ];
             //退换货使用(支持多商品)
-            throw new \Exception( json_encode($g));
             $refund_no[] = [
                 'refund_no'=>$g->refund_no
             ];
