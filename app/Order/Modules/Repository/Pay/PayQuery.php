@@ -28,7 +28,6 @@ class PayQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ){
-		try{
 			$builder = \App\Order\Models\OrderPayModel::where([
 				'business_type'	=> $business_type,
 				'business_no'	=> $business_no,
@@ -40,10 +39,17 @@ class PayQuery {
 			if( $info ){
 				return new Pay( $info->toArray() );
 			}
-			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
-		}catch(\Exception $e){
-			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness'. $e->getTraceAsString() );
-		}
+			$e = new \Exception;
+		throw new \App\Lib\NotFoundException($e->getTraceAsString());
+			$array =debug_backtrace();
+			unset($array[0]);
+			$html = '';
+			foreach($array as $row)
+			{
+				$html .=$row['file'].':'.$row['line'].'行,调用方法:'.$row['function']."<p>";
+			}
+			return $html;
+
 
 	}
 	
