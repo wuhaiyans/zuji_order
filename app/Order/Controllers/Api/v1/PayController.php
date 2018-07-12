@@ -125,9 +125,10 @@ class PayController extends Controller
 			DB::beginTransaction();
 			
 			// 查询本地支付单
-			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'] );
+			$pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo( $params['out_payment_no'], true );
 			
 			if( $pay->isSuccess() ){// 已经支付成功
+				LogApi::debug('支付重复通知，忽略');
 				DB::rollBack();
 				echo json_encode([
 					'status' => 'ok',
@@ -137,6 +138,7 @@ class PayController extends Controller
 			
 			// 判断是否需要支付
 			if( ! $pay->needPayment() ){
+				LogApi::debug('支付环节状态禁止');
 				DB::rollBack();
 				echo json_encode([
 					'status' => 'error',
