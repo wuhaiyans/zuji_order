@@ -487,6 +487,7 @@ class Pay extends \App\Lib\Configurable
 			'channel'       => $params['payment_channel'],
 			'amount'        => $params['payment_amount'],
 			'create_time'   => $params['payment_time'],
+			'trade_no'   => $this->paymentNo,
 			'out_trade_no'  => $params['out_payment_no'],
 		];
 		$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
