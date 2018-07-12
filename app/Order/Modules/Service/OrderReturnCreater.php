@@ -962,11 +962,14 @@ class OrderReturnCreater
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnCanceled){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnReceive){
-                if($data['data'][$k]->evaluation_status == ReturnStatus::ReturnEvaluationFalse){
-                    $data['data'][$k]->check_button=true;
-                }else{
-                    $data['data'][$k]->check_button=false;
+                if($data['data'][$k]->business_key == OrderStatus::BUSINESS_RETURN){
+                    if($data['data'][$k]->evaluation_status == ReturnStatus::ReturnEvaluationFalse){
+                        $data['data'][$k]->check_button=true;
+                    }else{
+                        $data['data'][$k]->check_button=false;
+                    }
                 }
+
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnReceive);//已收货
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnTuiHuo){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiHuo);//已退货
