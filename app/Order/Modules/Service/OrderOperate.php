@@ -246,10 +246,12 @@ class OrderOperate
             $whereArray[] = ['goods_no', '=', $params['goods_no']];
         }
 
+
         $insuranceData =  OrderInsurance::where($whereArray)->first();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
+
             $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }
