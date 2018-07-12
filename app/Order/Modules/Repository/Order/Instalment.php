@@ -281,7 +281,7 @@ class Instalment {
 	}
 
 	/**
-	 * 支付成功
+	 * 代扣扣款成功
 	 * @param data  array
 	 * [
 	 *      'reason'       			=> '', //原因
@@ -300,13 +300,6 @@ class Instalment {
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
-				return false;
-			}
-
-			// 订单信息
-			$orderInfo  = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
-			if( !$orderInfo ){
-				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误-订单错误');
 				return false;
 			}
 
@@ -350,7 +343,7 @@ class Instalment {
 				'order_no'       => $instalmentInfo['order_no'],
 				'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
 				'business_no'    => $param['out_trade_no'],
-				'appid'          => $orderInfo['appid'],
+				'appid'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::WITHHOLD,
 				'channel'        => \App\Order\Modules\Repository\Pay\Channel::Alipay,
 				'amount'         => $instalmentInfo['amount'],
 				'create_time'    => time(),
