@@ -28,20 +28,25 @@ class PayQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ){
-		$builder = \App\Order\Models\OrderPayModel::where([
-			'business_type'	=> $business_type,
-			'business_no'	=> $business_no,
-		]);
-        if( $lock ){
-            $builder->lockForUpdate();
-        }
-		$info =  $builder->first();
-		if( $info ){
-			return new Pay( $info->toArray() );
+		try{
+			$builder = \App\Order\Models\OrderPayModel::where([
+				'business_type'	=> $business_type,
+				'business_no'	=> $business_no,
+			]);
+			if( $lock ){
+				$builder->lockForUpdate();
+			}
+			$info =  $builder->first();
+			if( $info ){
+				return new Pay( $info->toArray() );
+			}
+			echo "<pre>";
+			debug_print_backtrace();die;
+			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
+		}catch(\Exception $e){
+			echo "MESSAGE = " . $e->getMessage() . "\n" . "STACK TRACE = \n" . $e->getTraceAsString()  ;die;
 		}
-		echo "<pre>";
-		debug_print_backtrace();
-		throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
+
 	}
 	
 	/**
