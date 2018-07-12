@@ -250,6 +250,7 @@ class Receive
         $result = [];
 
         foreach ($goods as $g) {
+            throw new \Exception( $g->refund_no);
             if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
@@ -259,7 +260,7 @@ class Receive
                 'refund_no'=>$g->refund_no
             ];
         }
-        return $refund_no;
+
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
