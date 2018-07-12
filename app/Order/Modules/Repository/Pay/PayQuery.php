@@ -39,6 +39,8 @@ class PayQuery {
 		if( $info ){
 			return new Pay( $info->toArray() );
 		}
+		echo "<pre>";
+		debug_print_backtrace();
 		throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 	}
 	
