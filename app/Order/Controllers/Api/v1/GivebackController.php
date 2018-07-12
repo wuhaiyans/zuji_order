@@ -677,7 +677,11 @@ class GivebackController extends Controller
 	public function getList(Request $request) {
 		$params = $request->input();
 		$whereArr = $additionArr = isset($params['params'])? $params['params'] :'';
-
+		
+		if( isset($whereArr['end_time']) ){
+			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
+		}
+		
 		$orderGivebackService = new OrderGiveback( );
 		$orderGivebackList = $orderGivebackService->getList( $whereArr, $additionArr );
 		return apiResponse($orderGivebackList);
