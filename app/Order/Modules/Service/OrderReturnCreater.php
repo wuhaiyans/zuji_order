@@ -578,7 +578,7 @@ class OrderReturnCreater
             return true;
 
         }catch( \Exception $exc){
-            LogApi::debug("请问异常",$exc->getMessage());
+            LogApi::debug("请求异常",$exc->getMessage());
             DB::rollBack();
             echo $exc->getMessage();
             die;
