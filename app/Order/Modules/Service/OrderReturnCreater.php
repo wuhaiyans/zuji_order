@@ -447,7 +447,7 @@ class OrderReturnCreater
                     // 退货
                     if($params['business_key'] == OrderStatus::BUSINESS_RETURN ){
                         //插入操作日志
-                        \App\Order\Modules\Repository\GoodsLogRepository::add([
+                        $goods_log=\App\Order\Modules\Repository\GoodsLogRepository::add([
                             'order_no'     =>$returnInfo[$k]['order_no'],
                             'action'       =>'退货审核',
                             'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
@@ -458,11 +458,12 @@ class OrderReturnCreater
                             'operator_type'=>$userinfo['type'],
                             'msg'           =>'退货审核拒绝',
                         ],$isCorntab=FALSE);
+
                     }
                     //换货
                     if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ) {
                         //插入操作日志
-                        \App\Order\Modules\Repository\GoodsLogRepository::add([
+                        $goods_log=\App\Order\Modules\Repository\GoodsLogRepository::add([
                             'order_no'     =>$returnInfo[$k]['order_no'],
                             'action'       =>'换货审核',
                             'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RETURN,
@@ -473,6 +474,12 @@ class OrderReturnCreater
                             'operator_type'=>$userinfo['type'],
                             'msg'           =>'换货审核拒绝',
                         ],$isCorntab=FALSE);
+                    }
+
+                    if (!$goods_log){
+                        //事务回滚
+                        DB::rollBack();
+                        return false;
                     }
                 }
                 //获取商品信息
@@ -546,7 +553,6 @@ class OrderReturnCreater
 
 
             }
-
             //事务提交
             DB::commit();
             //审核发送短信
@@ -572,6 +578,7 @@ class OrderReturnCreater
             return true;
 
         }catch( \Exception $exc){
+            LogApi::debug("请问异常",$exc->getMessage());
             DB::rollBack();
             echo $exc->getMessage();
             die;
