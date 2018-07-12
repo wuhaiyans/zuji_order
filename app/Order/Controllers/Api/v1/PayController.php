@@ -159,19 +159,21 @@ class PayController extends Controller
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('支付通知处理失败',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'error',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		} catch (\Exception $exc) {
+			LogApi::error('支付通知处理失败',$exc);
 			DB::rollBack();
 			echo json_encode([
 				'status' => 'error',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		}
-		
+		LogApi::error('支付通知处理失败');
 		DB::rollBack();
 		exit;
 	}

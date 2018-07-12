@@ -206,11 +206,11 @@ class OrderWithhold
             $instalmentId = $instalmentInfo['id'];
 
             // 查询支付单数据
-            $payWhere = [
+            $where = [
                 'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                 'business_no'    => $params['business_no'],
             ];
-            $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($payWhere);
+            $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($where);
             if(empty($payInfo)){
                 return false;
             }
@@ -228,11 +228,8 @@ class OrderWithhold
 
             // 优惠券信息
             $recordData         = [];
-            $counponWhere = [
-                'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $params['business_no'],
-            ];
-            $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($counponWhere);
+
+            $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
             if(!empty($counponInfo)){
                 // 修改优惠券使用状态
                 $couponStatus = \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
@@ -255,20 +252,16 @@ class OrderWithhold
             }
 
 
-            // 创建收支明细表
+            /*
+             * 修改 收支明细表
+             * */
             $IncomeData = [
-                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
-                'order_no'      => $instalmentInfo['order_no'],
-                'business_type' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'   => $params['business_no'],
+                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "提前还款",
                 'appid'         => \App\Order\Modules\Inc\OrderPayIncomeStatus::REPAYMENT,
-                'channel'       => \App\Order\Modules\Repository\Pay\Channel::Alipay,
-                'amount'        => $payInfo['payment_amount'],
-                'create_time'   => time(),
             ];
-            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($IncomeData);
+            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::save($where,$IncomeData);
             if( !$IncomeId ){
-                \App\Lib\Common\LogApi::error('创建收支明细失败');
+                \App\Lib\Common\LogApi::error('修改收支明细失败');
                 return false;
             }
 

@@ -247,11 +247,10 @@ class Receive
 
         $receive = \App\Warehouse\Models\Receive::find($receive_no);
         $goods = $receive->goods;
-
         $result = [];
-
+        $refund_no = [];
         foreach ($goods as $g) {
-            if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
+            if ($g->status == ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
             ];
@@ -264,7 +263,6 @@ class Receive
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
-            throw new \Exception( json_encode($refund_no));
             \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
         }else{
             Log::error(__METHOD__ . '收货签收失败');
