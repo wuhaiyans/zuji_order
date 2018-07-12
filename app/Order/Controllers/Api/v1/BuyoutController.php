@@ -51,6 +51,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
         }
         $goodsInfo = $goodsInfo->getData();
+        $goodsInfo['specs'] = filterSpecs($goodsInfo['specs']);
         $goodsInfo['status'] = $buyoutInfo['status'];
         $goodsInfo['buyout_price'] = $buyoutInfo['buyout_price'];
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
