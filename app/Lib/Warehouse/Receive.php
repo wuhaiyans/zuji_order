@@ -264,6 +264,7 @@ class Receive
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+            throw new \Exception( json_encode($refund_no));
             \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
         }else{
             Log::error(__METHOD__ . '收货签收失败');
