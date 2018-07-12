@@ -1013,7 +1013,7 @@ class OrderReturnCreater
                 return false;
             }
             $where1[] = ['order_return.create_time', '>=', $where['begin_time']];
-            $where1[] = ['order_return.create_time', '<=', $where['end_time']];
+            $where1[] = ['order_return.create_time', '<', ($where['end_time']+3600*24)];
         }else{
             $where1[] = ['order_return.create_time', '<', $where['end_time']];
         }

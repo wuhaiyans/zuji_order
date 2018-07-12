@@ -28,18 +28,30 @@ class PayQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ){
-		$builder = \App\Order\Models\OrderPayModel::where([
-			'business_type'	=> $business_type,
-			'business_no'	=> $business_no,
-		]);
-        if( $lock ){
-            $builder->lockForUpdate();
-        }
-		$info =  $builder->first();
-		if( $info ){
-			return new Pay( $info->toArray() );
-		}
-		throw new \App\Lib\NotFoundException('支付单不存在');
+			$builder = \App\Order\Models\OrderPayModel::where([
+				'business_type'	=> $business_type,
+				'business_no'	=> $business_no,
+			]);
+			if( $lock ){
+				$builder->lockForUpdate();
+			}
+			$info =  $builder->first();
+			if( $info ){
+				return new Pay( $info->toArray() );
+			}
+			$e = new \Exception;
+//		throw new \App\Lib\NotFoundException($e->getTraceAsString());
+			$array =debug_backtrace();
+			unset($array[0]);
+			$html = '';
+			foreach($array as $row)
+			{
+				$html .=$row['file'].':'.$row['line'].'行,调用方法:'.$row['function']."<p>";
+			}
+		throw new \App\Lib\NotFoundException($html);
+			return $html;
+
+
 	}
 	
 	/**
@@ -60,7 +72,7 @@ class PayQuery {
 		if( $info ){
 			return new Pay( $info->toArray() );
 		}
-		throw new \App\Lib\NotFoundException('支付单不存在');
+		throw new \App\Lib\NotFoundException('支付单不存在getPayByPaymentNo');
 	}
 	
 	/**
