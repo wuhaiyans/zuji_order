@@ -39,7 +39,7 @@ class PayQuery {
 		if( $info ){
 			return new Pay( $info->toArray() );
 		}
-		throw new \App\Lib\NotFoundException('支付单不存在');
+		throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 	}
 	
 	/**
@@ -60,7 +60,7 @@ class PayQuery {
 		if( $info ){
 			return new Pay( $info->toArray() );
 		}
-		throw new \App\Lib\NotFoundException('支付单不存在');
+		throw new \App\Lib\NotFoundException('支付单不存在getPayByPaymentNo');
 	}
 	
 	/**
