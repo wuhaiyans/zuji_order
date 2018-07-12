@@ -476,6 +476,9 @@ function withholdDate($term, $day, $pre="-"){
  * @return string 转换后的商品规格信息【全新|深空灰|64G|全网通】
  */
 function filterSpecs( $specs ){
+	if( !is_string($specs) ){
+		return '';
+	}
 	//商品信息解析
 	$specsArr = explode(';', $specs);
 	$specsStrArr = [];
