@@ -392,7 +392,6 @@ class OrderController extends Controller
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
-            'goods_no' =>'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
