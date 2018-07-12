@@ -206,13 +206,13 @@ class OrderClearingRepository
 
         //创建时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
-            $whereArray[] = ['create_time', '>=', $param['begin_time']];
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
         }
 
         //创建时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
-            $whereArray[] = ['create_time', '>=', $param['begin_time']];
-            $whereArray[] = ['create_time', '<=', $param['end_time']];
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['create_time', '<=', strtotime($param['end_time'])];
         }
         $query = OrderClearing::where($whereArray)->orderBy('create_time','DESC');
 
