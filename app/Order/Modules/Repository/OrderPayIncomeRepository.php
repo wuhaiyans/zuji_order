@@ -64,6 +64,24 @@ class OrderPayIncomeRepository
             $whereArray[] = ['account', '=', $param['account']];
         }
 
+        // 结束时间（可选），默认为为当前时间
+        if( !isset($param['end_time']) || $param['end_time'] == ""){
+            $param['end_time'] = date("Y-m-d 23:59:59");
+        }else{
+            $param['end_time'] = $param['end_time'] . " 23:59:59";
+        }
+
+        // 开始时间（可选）
+        if( isset($param['begin_time']) && $param['begin_time'] != ""){
+            if( $param['begin_time'] > $param['end_time'] ){
+                return false;
+            }
+            $whereArray[] =  ['create_time', '>', strtotime($param['begin_time'])];
+            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+        }else{
+            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+        }
+
         $result = OrderPayIncome::query()->where($whereArray)
                 ->count();
         return $result;
@@ -104,9 +122,10 @@ class OrderPayIncomeRepository
 
         // 结束时间（可选），默认为为当前时间
         if( !isset($param['end_time']) || $param['end_time'] == ""){
-            $param['end_time'] = date("Y-m-d H:i:s");
+            $param['end_time'] = date("Y-m-d 23:59:59");
+        }else{
+            $param['end_time'] = $param['end_time'] . " 23:59:59";
         }
-
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
             if( $param['begin_time'] > $param['end_time'] ){
@@ -117,7 +136,6 @@ class OrderPayIncomeRepository
         }else{
             $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
         }
-
         $result =  OrderPayIncome::query()
             ->where($whereArray)
             ->offset($offset)
