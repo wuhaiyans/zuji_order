@@ -908,18 +908,23 @@ class OrderReturnCreater
         $where= $this->_parse_order_where($where);
         $data = $this->orderReturnRepository->get_list($where, $additional);
         foreach($data['data'] as $k=>$v){
+            //是否显示审核操作
             if($data['data'][$k]->status!=ReturnStatus::ReturnCreated){
                 $data['data'][$k]->operate_status=false;
             }else{
                 $data['data'][$k]->operate_status=true;
             }
+            //默认确认收货按钮不显示
             $data['data'][$k]->receive_button=false;
+            //默认检测不合格拒绝退款按钮不显示
+            $data['data'][$k]->check_button=false;
             //业务类型
             if($data['data'][$k]->business_key==OrderStatus::BUSINESS_REFUND){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_REFUND);//退款业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_RETURN){
                 $data['data'][$k]->business_name=OrderStatus::getBusinessName(OrderStatus::BUSINESS_RETURN);//退货业务
             }elseif($data['data'][$k]->business_key==OrderStatus::BUSINESS_BARTER){
+                //是否显示确认收货按钮
                 if($data['data'][$k]->status == ReturnStatus::ReturnDelivery){
                     $data['data'][$k]->receive_button=true;
                 }else{
@@ -957,6 +962,14 @@ class OrderReturnCreater
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnCanceled){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnCanceled);//取消退货申请
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnReceive){
+                if($data['data'][$k]->business_key == OrderStatus::BUSINESS_RETURN){
+                    if($data['data'][$k]->evaluation_status == ReturnStatus::ReturnEvaluationFalse){
+                        $data['data'][$k]->check_button=true;
+                    }else{
+                        $data['data'][$k]->check_button=false;
+                    }
+                }
+
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnReceive);//已收货
             }elseif($data['data'][$k]->status==ReturnStatus::ReturnTuiHuo){
                 $data['data'][$k]->status_name=ReturnStatus::getStatusName(ReturnStatus::ReturnTuiHuo);//已退货
@@ -1348,6 +1361,7 @@ class OrderReturnCreater
                 return false;
             }
             $goodsInfo=$goods->getData();
+            $goodsInfo['specs']=filterSpecs($goodsInfo['specs']);
             $buss->setGoodsInfo($goodsInfo);
             //获取换货信息
             if(!empty($return['barter_logistics_no']) && !empty($return['barter_logistics_id'])){

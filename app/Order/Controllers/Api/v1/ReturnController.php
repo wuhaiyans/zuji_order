@@ -510,16 +510,13 @@ class ReturnController extends Controller
         $params = $request->all();
         $rules = [
             'order_no'  => 'required',
-            'business_key'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
 
             return apiResponse([],$validateParams['code']);
         }
-        if($params['params']['business_key']!=OrderStatus::BUSINESS_RETURN){
-            return apiResponse([],ApiStatus::CODE_20001);
-        }
+        $params['params']['business_key']=OrderStatus::BUSINESS_RETURN;
         $params['params']['evaluation_status']=ReturnStatus::ReturnEvaluationFalse;
         $res=$this->OrderReturnCreater->returnCheckList($params['params']);
         return apiResponse($res,ApiStatus::CODE_0);
