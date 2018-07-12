@@ -81,11 +81,24 @@ class AuthRefferController extends Controller{
                         || !isset($info['code'])
                         || !isset($info['msg'])
                         || !isset($info['data']) ){
-                        return response()->json([
-                            'code'  =>ApiStatus::CODE_20002,
-                            'msg'   => "稍候重试",
-                            'data'  =>$info
-                        ]);
+
+                        if (isset($info['status_code']) && $info['status_code']==429) {
+                            return response()->json([
+                                'code'  =>ApiStatus::CODE_20002,
+                                'msg'   => "操作频率过快，请稍后再试",
+                                'data'  =>[]
+                            ]);
+                        } else {
+
+                            return response()->json([
+                                'code'  =>ApiStatus::CODE_20002,
+                                'msg'   => "稍候重试",
+                                'data'  =>$info
+                            ]);
+
+                        }
+
+
                     }
                     return response()->json($info);
 
