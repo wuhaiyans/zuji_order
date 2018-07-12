@@ -10,6 +10,7 @@ namespace App\Lib\Warehouse;
 use App\Lib\Curl;
 use App\Lib\Order\Giveback;
 use App\Lib\Order\ReturnGoods;
+use App\Order\Controllers\Api\v1\deliveryController;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Warehouse\Models\ReceiveGoods;
 use Illuminate\Support\Facades\Log;
@@ -247,11 +248,12 @@ class Receive
 
         $receive = \App\Warehouse\Models\Receive::find($receive_no);
         $goods = $receive->goods;
-
+        dd($goods);
+//        throw new \Exception( js);
         $result = [];
 
         foreach ($goods as $g) {
-            throw new \Exception( $g['refund_no']);
+
             if ($g->status != ReceiveGoods::STATUS_ALL_RECEIVE) continue;
             $result[] = [
                 'goods_no' => $g->goods_no
