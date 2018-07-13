@@ -57,7 +57,7 @@ class Config {
                 SceneConfig::ORDER_PAY 				 => 'SMS_113461043', //用户支付或授权 成功
                 SceneConfig::ORDER_CANCEL           => 'SMS_113461044', //用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY         => 'SMS_113461046', //订单发货短信
-                SceneConfig::ORDER_MONTH_RECEIVE    => 'SMS_113461047', //订单月租签收短信
+                SceneConfig::ORDER_MONTH_RECEIVE    => 'SMS_113461146', //订单月租签收短信
 
 				SceneConfig::INSTALMENT_WITHHOLD 	 => 'hsb_sms_b427f', //代扣扣款短信
 
