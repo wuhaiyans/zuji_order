@@ -243,7 +243,7 @@ class InstalmentController extends Controller
 
         $instalmentInfo['allow_pay'] = 0;
         if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
-            if($instalmentInfo['term'] <= date('Ym') && ($instalmentInfo['status'] == OrderInstalmentStatus::UNPAID || $instalmentInfo['status']==OrderInstalmentStatus::FAIL)){
+            if($instalmentInfo['status'] == OrderInstalmentStatus::UNPAID || $instalmentInfo['status']==OrderInstalmentStatus::FAIL){
                 $instalmentInfo['allow_pay']  = 1;
             }
         }
