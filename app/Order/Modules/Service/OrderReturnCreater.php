@@ -578,7 +578,7 @@ class OrderReturnCreater
             return true;
 
         }catch( \Exception $exc){
-            LogApi::debug("请问异常",$exc->getMessage());
+            LogApi::debug("请求异常",$exc->getMessage());
             DB::rollBack();
             echo $exc->getMessage();
             die;
@@ -2187,10 +2187,12 @@ class OrderReturnCreater
         }
         $return= orderReturnRepository::returnList($params['order_no'],$params['goods_no']);
         if($return){
-            return false;
+            return apiResponseArray(ApiStatus::CODE_0,$return,'成功');
         }
+
         return true;
     }
+
 
 
 }

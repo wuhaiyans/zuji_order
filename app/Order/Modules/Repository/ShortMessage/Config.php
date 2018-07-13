@@ -61,12 +61,12 @@ class Config {
 
 				SceneConfig::INSTALMENT_WITHHOLD 	 => 'hsb_sms_b427f', //代扣扣款短信
 
-                SceneConfig::RETURN_APPLY 			 => 'hsb_sms_771f7', //申请退货
-                SceneConfig::RETURN_APPLY_AGREE 	 => 'SMS_113455999', //退货审核通过
-                SceneConfig::RETURN_APPLY_DISAGREE => 'hsb_sms_d284d', //退货审核不通过
-                SceneConfig::RETURN_CHECK_OUT 		 => 'hsb_sms_1607a', //退货检测合格
-                SceneConfig::RETURN_UNQUALIFIED 	 => 'hsb_sms_1c8bf', //退货检测不合格
-                SceneConfig::RETURN_DELIVERY 		 => 'hsb_sms_e36c8', //退货收到客户手机
+                SceneConfig::RETURN_APPLY 			 => 'SMS_113461054', //申请退货
+                SceneConfig::RETURN_APPLY_AGREE 	 => 'SMS_113461055', //退货审核通过
+                SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461056', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461058', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 => 'SMS_113461059', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 => 'SMS_113461057', //退货收到客户手机
                 SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461060', //退款成功
 
 				SceneConfig::WITHHOLD_FAIL 		 => 'hsb_sms_99a6f', //扣款失败
