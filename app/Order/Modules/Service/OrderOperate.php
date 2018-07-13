@@ -1195,11 +1195,19 @@ class OrderOperate
 
                   $isAllowReturn = OrderReturnCreater::allowReturn(['order_no'=>$orderNo, 'goods_no'=>$values['goods_no']]);
 
+
+//                  LogApi::info("获取OrderReturnCreater::allowReturn的结果".$orderNo."商品号".$values['goods_no'],$isAllowReturn);
+
                    $goodsList[$keys]['is_allow_return'] = ($isAllowReturn && !is_array($isAllowReturn)) ?? 0;
 
                    $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
+//                   LogApi::info("获取OrderGoods的退货状态".$orderNo."商品号".$values['goods_no'],$isReturnBtn);
+//                   LogApi::info("获取是否是退货".(is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_RETURN));
                    $goodsList[$keys]['is_return_btn'] = ($isReturnBtn || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_RETURN)) ?? 0;
+//                   LogApi::info("获取OrderGoods的退货按钮状态".$orderNo."商品号".$values['goods_no'],$goodsList[$keys]['is_return_btn']);
                    $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
+//                   LogApi::info("获取是否是换货".(is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_BARTER));
+//                   LogApi::info("获取OrderGoods的换货状态".$orderNo."商品号".$values['goods_no'],$isExchange);
                    $goodsList[$keys]['is_exchange_btn'] = ($isExchange || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_BARTER))?? 0;
 
                }
