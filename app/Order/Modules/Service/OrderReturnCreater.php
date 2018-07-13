@@ -2187,7 +2187,7 @@ class OrderReturnCreater
         }
         $return= orderReturnRepository::returnList($params['order_no'],$params['goods_no']);
         if($return){
-            return apiResponse($return,ApiStatus::CODE_0);
+            return apiResponseArray(ApiStatus::CODE_0,$return,'成功');
         }
 
         return true;
