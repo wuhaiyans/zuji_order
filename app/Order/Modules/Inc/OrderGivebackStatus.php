@@ -101,7 +101,7 @@ class OrderGivebackStatus{
 	 */
 	const VIEW_STATUS_CHECK = 2;
 	/**
-	 * 前端申请还机
+	 * 前端退还押金
 	 */
 	const VIEW_STATUS_RETURN_DEPOSTI= 3;
 	/**
@@ -116,7 +116,7 @@ class OrderGivebackStatus{
             self::STATUS_DEAL_WAIT_CHECK => self::VIEW_STATUS_CHECK,
             self::STATUS_DEAL_WAIT_PAY => self::VIEW_STATUS_CHECK,
             self::STATUS_DEAL_IN_PAY => self::VIEW_STATUS_CHECK,
-            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => self::VIEW_STATUS_RETURN_DEPOSTI,
+            self::STATUS_DEAL_WAIT_RETURN_DEPOSTI => self::VIEW_STATUS_CHECK,
             self::STATUS_AGED_FAIL => self::VIEW_STATUS_CHECK,
             self::STATUS_DEAL_DONE => self::VIEW_STATUS_RETURN_DEPOSTI,
 		];
