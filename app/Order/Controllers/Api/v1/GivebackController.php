@@ -754,7 +754,7 @@ class GivebackController extends Controller
 		if( $orderGivebackInfo['evaluation_status'] != OrderGivebackStatus::EVALUATION_STATUS_INIT ){
 			$data['evaluation_info'] = [
 				'evaluation_status_name' => $orderGivebackInfo['evaluation_status_name'],
-				'evaluation_status_remark' => $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN? '押金已退还至支付账户，由于银行账务流水，请耐心等待1-3个工作日。':'',
+				'evaluation_status_remark' => $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION? '押金已退还至支付账户，由于银行账务流水，请耐心等待1-3个工作日。':'',
 			];
 		}
 		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED ){
