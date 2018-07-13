@@ -392,7 +392,6 @@ class OrderController extends Controller
         $params =$request->all();
         $rules = [
             'order_no'  => 'required',
-            'goods_no' =>'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
 
@@ -406,7 +405,7 @@ class OrderController extends Controller
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30036);
         }
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse($res,ApiStatus::CODE_0);
 
 
     }
