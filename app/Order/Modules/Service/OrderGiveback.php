@@ -269,6 +269,7 @@ class OrderGiveback
 			'evaluation_remark' => 'required',
 			'evaluation_time' => 'required',
 			'compensate_amount' => 'required',
+			'yajin_status' => 'required',
 			'remark' => 'required',
 		]);
 		if( count( $where ) < 1 ){
