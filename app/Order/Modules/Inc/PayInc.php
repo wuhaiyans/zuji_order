@@ -12,8 +12,6 @@ class PayInc{
     const  UnionPay = 4;
     /**
      * @var int 押金预授权/作废
-     *
-     *
      */
     const FlowerDepositPay = 3;
     /**
