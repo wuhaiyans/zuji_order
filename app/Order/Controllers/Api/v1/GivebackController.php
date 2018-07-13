@@ -754,6 +754,7 @@ class GivebackController extends Controller
 		if( $orderGivebackInfo['evaluation_status'] != OrderGivebackStatus::EVALUATION_STATUS_INIT ){
 			$data['evaluation_info'] = [
 				'evaluation_status_name' => $orderGivebackInfo['evaluation_status_name'],
+				'evaluation_status' => $orderGivebackInfo['evaluation_status'],
 			];
 		}
 		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED ){
