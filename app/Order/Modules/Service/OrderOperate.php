@@ -242,11 +242,16 @@ class OrderOperate
     public static function getInsuranceInfo($params){
 
         $whereArray[] = ['order_no', '=', $params['order_no']];
-        $whereArray[] = ['goods_no', '=', $params['goods_no']];
+        if (isset($params['goods_no'])) {
+            $whereArray[] = ['goods_no', '=', $params['goods_no']];
+        }
+
+
         $insuranceData =  OrderInsurance::where($whereArray)->first();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
+
             $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }

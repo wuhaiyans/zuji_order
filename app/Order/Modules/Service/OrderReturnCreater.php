@@ -2187,10 +2187,12 @@ class OrderReturnCreater
         }
         $return= orderReturnRepository::returnList($params['order_no'],$params['goods_no']);
         if($return){
-            return false;
+            return apiResponse($return,ApiStatus::CODE_0);
         }
+
         return true;
     }
+
 
 
 }
