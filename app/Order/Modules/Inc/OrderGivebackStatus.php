@@ -101,7 +101,7 @@ class OrderGivebackStatus{
 	 */
 	const VIEW_STATUS_CHECK = 2;
 	/**
-	 * 前端申请还机
+	 * 前端退还押金
 	 */
 	const VIEW_STATUS_RETURN_DEPOSTI= 3;
 	/**
