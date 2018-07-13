@@ -247,12 +247,14 @@ class OrderOperate
         }
 
 
-        $insuranceData =  OrderInsurance::where($whereArray)->first();
+        $insuranceData =  OrderInsurance::where($whereArray)->get();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
+            foreach($data as $keys=>$values) {
+                $data[$keys]['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($values['type']);
+            }
 
-            $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }
         return $data;
@@ -1192,13 +1194,11 @@ class OrderOperate
                    }
 
                   $isAllowReturn = OrderReturnCreater::allowReturn(['order_no'=>$orderNo, 'goods_no'=>$values['goods_no']]);
-                   if ($isAllowReturn) {
 
-                       $goodsList[$keys]['is_allow_return'] = $isAllowReturn ?? 0;
-                   }
+                   $goodsList[$keys]['is_allow_return'] = ($isAllowReturn && !is_array($isAllowReturn)) ?? 0;
 
                    $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
-                   $goodsList[$keys]['is_return_btn'] = $isReturnBtn ?? 0;
+                   $goodsList[$keys]['is_return_btn'] = ($isReturnBtn || (is_array($isAllowReturn) && !empty($isAllowReturn))) ?? 0;
                    $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
                    $goodsList[$keys]['is_exchange_btn'] = $isExchange ?? 0;
 
