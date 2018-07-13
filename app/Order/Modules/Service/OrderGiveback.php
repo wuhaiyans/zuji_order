@@ -343,11 +343,11 @@ class OrderGiveback
 				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
-			
-			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
-				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
-				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
-			]);
+			$statusArr['status'] = OrderGivebackStatus::STATUS_DEAL_DONE;
+			if( $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN ){
+				$statusArr['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION;
+			}
+			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], $statusArr);
 			if( !$orderGivebackResult ){
 				set_msg('还机单状态更新失败');
 				\App\Lib\Common\LogApi::debug('[还机清算回调]还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
