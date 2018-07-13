@@ -51,7 +51,7 @@ class Config {
 	 */
 	public static function getCode( $channelId, $scene ){
 		$arr = [
-			// 机市短息模板配置
+			// 拿趣用短息模板配置
 			self::CHANNELID_OFFICAL => [
 				SceneConfig::ORDER_CREATE 			 => 'SMS_113461042', //用户下单
                 SceneConfig::ORDER_PAY 				 => 'SMS_113461043', //用户支付或授权 成功
@@ -91,6 +91,11 @@ class Config {
                 SceneConfig::ORDER_DAY_RECEIVE      =>'SMS_113460982', //订单日租签收短信
                 SceneConfig::REFUND_SUCCESS 		 => 'SMS_113460991', //（取消订单、退货退款）退款成功
 
+                SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113460980', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113460989', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 => 'SMS_113460990', //退货检测不合格
+
+
 			],
 			// 极米
 			self::CHANNELID_MINI_JIMI => [
@@ -100,6 +105,12 @@ class Config {
                 SceneConfig::ORDER_DELIVERY          =>'SMS_113461006', //订单发货短信
                 SceneConfig::ORDER_DAY_RECEIVE       =>'SMS_113461007', //订单日租签收短信
                 SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461016', //（取消订单、退货退款）退款成功
+
+
+                SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461005', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461014', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 => 'SMS_113461015', //退货检测不合格
+
 
 			],
             // 努比亚
@@ -111,6 +122,9 @@ class Config {
                 SceneConfig::ORDER_MONTH_RECEIVE     =>'SMS_113461027', //订单月租签收短信
                 SceneConfig::REFUND_SUCCESS 		 => 'SMS_113461036', //（取消订单、退货退款）退款成功
 
+                SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461025', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461034', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 => 'SMS_113461035', //退货检测不合格
 
             ],
             // IOS
