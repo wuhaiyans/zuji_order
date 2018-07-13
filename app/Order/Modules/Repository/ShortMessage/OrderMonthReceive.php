@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
 use App\Lib\User\User;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderDeliveryRepository;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -80,6 +81,7 @@ class OrderMonthReceive implements ShortMessage {
             'endTime'=>date("Y-m-d H:i:s",$endTime),
             'zuJin'=>$zujin,
             'createTime'=>$createTime, //扣款日期
+            'zhifuTapy'=>PayInc::getPayName($orderInfo['pay_type']),
 		]);
 	}
 

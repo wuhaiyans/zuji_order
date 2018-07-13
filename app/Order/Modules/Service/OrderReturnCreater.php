@@ -1076,7 +1076,7 @@ class OrderReturnCreater
      * @return array
      *
      */
-    public function getReturnList($params)
+    public function getReturnList($params=array())
     {
         $where = [];
         if (isset($params['begin_time'])!= '') {
@@ -1716,10 +1716,9 @@ class OrderReturnCreater
      * @param $params
      * @return string
      * @throws \Exception
-     *[order_no =>'111'   //订单编号
-     *   [goods_no=>'222']   //商品编号
-     *   [goods_no=>'333']   //商品编号
-     * status   =>""      //物流状态
+     *[
+     *    'order_no' =>'111'      //订单编号
+     *    'goods_info'=>['','']   //商品编号
      * ]
      *  @param array $userinfo 业务参数
      * [
