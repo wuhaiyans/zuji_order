@@ -1198,9 +1198,9 @@ class OrderOperate
                    $goodsList[$keys]['is_allow_return'] = ($isAllowReturn && !is_array($isAllowReturn)) ?? 0;
 
                    $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
-                   $goodsList[$keys]['is_return_btn'] = ($isReturnBtn || (is_array($isAllowReturn) && !empty($isAllowReturn))) ?? 0;
+                   $goodsList[$keys]['is_return_btn'] = ($isReturnBtn || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_RETURN)) ?? 0;
                    $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
-                   $goodsList[$keys]['is_exchange_btn'] = $isExchange ?? 0;
+                   $goodsList[$keys]['is_exchange_btn'] = ($isExchange || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_BARTER))?? 0;
 
                }
 
