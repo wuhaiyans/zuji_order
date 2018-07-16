@@ -135,7 +135,7 @@ class ReceiveGoodsService
         $ks = [
             ReceiveGoodsRepository::SEARCH_TYPE_MOBILE    => '手机号',
             ReceiveGoodsRepository::SEARCH_TYPE_ORDER_NO  => '订单号',
-            ReceiveGoodsRepository::SEARCH_TYPE_GOODS_NAME=> '设备名',
+            ReceiveGoodsRepository::SEARCH_TYPE_GOODS_NAME=> '商品名',
         ];
 
         return $ks;
