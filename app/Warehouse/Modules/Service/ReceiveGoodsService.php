@@ -62,6 +62,8 @@ class ReceiveGoodsService
             array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'])]);
         }
 
+        return $logic_params;
+
         $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
         $items = $collect->items();
 
