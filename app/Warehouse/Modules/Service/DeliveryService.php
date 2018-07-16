@@ -29,14 +29,14 @@ class DeliveryService
     const SEARCH_MOBILE = 'customer_mobile';//手机
     const SEARCH_ORDER_NO = 'order_no';//订单号
     const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
-    const SEARCH_LOGISTIC_NO = 'logistic_no';
+    const SEARCH_LOGISTIC_NO = 'logistics_no';
 
 
     static $searchs = [
         self::SEARCH_MOBILE => 'customer_mobile',
         self::SEARCH_ORDER_NO => 'order_no',
         self::SEARCH_DELIVERY_NO => 'delivery_no',
-        self::SEARCH_LOGISTIC_NO => 'logistic_no'
+        self::SEARCH_LOGISTIC_NO => 'logistics_no'
     ];
 
 
