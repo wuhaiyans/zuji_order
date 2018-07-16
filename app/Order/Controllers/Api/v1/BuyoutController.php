@@ -60,6 +60,25 @@ class BuyoutController extends Controller
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
+     * 订单买断列表筛选条件
+     * @param array $params 【null】
+     * @return json
+     */
+    public function getCondition(){
+        $data['status'] = [
+            0=>"待支付",
+            1=>"已取消",
+            2=>"已支付",
+            3=>"已解押",
+        ];
+        $data['keywords'] = [
+            1=>"订单号",
+            2=>"商品名称",
+            3=>"手机号",
+        ];
+        return apiResponse($data,ApiStatus::CODE_0);
+    }
+    /*
      * 订单买断列表
      * @param array $params 【必选】
      * [
