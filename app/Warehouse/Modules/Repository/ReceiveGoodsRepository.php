@@ -40,7 +40,7 @@ class ReceiveGoodsRepository
         });
 
         if (isset($params['name']) && $params['name'] == self::SEARCH_TYPE_GOODS_NAME) {
-            $query->where('goods_name', 'like', '%'.$params['name'].'%');
+            $query->where('goods_name', 'like', '%'.$params['keywords'].'%');
         }
 
         if (isset($params['status'])) {
