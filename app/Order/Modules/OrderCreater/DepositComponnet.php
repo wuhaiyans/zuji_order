@@ -62,14 +62,15 @@ class DepositComponnet implements OrderCreater
 
         //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
         $this->deposit = !!$this->certifiedFlag;
+
         //未通过认证人脸识别
-        if($this->schema['user']['face']==0){
-            $this->deposit = false;
-        }
-        //未通过风控验证
-        if($this->schema['user']['risk']==0){
-            $this->deposit = false;
-        }
+//        if($this->schema['user']['face']==0){
+//            $this->deposit = false;
+//        }
+//        //未通过风控验证
+//        if($this->schema['user']['risk']==0){
+//            $this->deposit = false;
+//        }
         //风控整体策略
 //        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
 //            $this->deposit = false;
@@ -100,8 +101,7 @@ class DepositComponnet implements OrderCreater
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
             }
-        }
-        return $this->flag && $filter;
+        }return $this->flag && $filter;
     }
 
     /**
