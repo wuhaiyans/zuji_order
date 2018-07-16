@@ -46,6 +46,10 @@ class ReceiveGoodsRepository
             $query->where('goods_name', 'like', '%'.$params['name'].'%');
         }
 
+        if ($logic_params) {
+            $query->where($logic_params);
+        }
+
         if (isset($params['status'])) {
             $query->where('status', '=', $params['status']);
         } else {

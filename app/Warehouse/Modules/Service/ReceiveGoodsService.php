@@ -61,7 +61,6 @@ class ReceiveGoodsService
         if (isset($params['end_time']) && $params['end_time']) {
             array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
-        return $logic_params;
 
         $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
         $items = $collect->items();
