@@ -250,6 +250,8 @@ return [
     'api.buyout.userBuyout'       => 'BuyoutController@userBuyout',
     //提前买断
     'api.buyout.adminBuyout'       => 'BuyoutController@adminBuyout',
+    //买断列表条件筛选
+    'api.buyout.getCondition'       => 'BuyoutController@getCondition',
     //买断列表
     'api.buyout.getBuyoutList'       => 'BuyoutController@getBuyoutList',
     //买断详情
