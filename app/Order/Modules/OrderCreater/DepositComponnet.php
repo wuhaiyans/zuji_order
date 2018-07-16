@@ -71,9 +71,9 @@ class DepositComponnet implements OrderCreater
             $this->deposit = false;
         }
         //风控整体策略
-        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
-            $this->deposit = false;
-        }
+//        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
+//            $this->deposit = false;
+//        }
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
