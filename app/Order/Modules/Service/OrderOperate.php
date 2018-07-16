@@ -795,19 +795,19 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据
         $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
-        
+
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
         $goodsExtendArray = array();
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
-            foreach ($goodsExtendData as &$goodsValues) {
+            foreach ($goodsExtendData as $goodsKeys=>$goodsValues) {
                 if (is_array($goodsValues)) {
-                    foreach($goodsValues as $values) {
-                        $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
-                        $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
-                        $values['withhold_time']  = withholdDate($values['term'], $values['day']);
+                    foreach($goodsValues as $keys=>$values) {
+                        $goodsExtendData[$goodsKeys][$keys]['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['withhold_time']  = withholdDate($values['term'], $values['day']);
                         if ($values['times']==1)
                         {
                             $goodsExtendArray[$values['goods_no']]['firstAmount'] =$values['amount'];
@@ -825,7 +825,7 @@ class OrderOperate
                             $instalmentUnpayAmount+=$values['amount'];
                         }
 
-                        $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
+                        $goodsExtendData[$goodsKeys][$keys]['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
                     }
 
                 }
