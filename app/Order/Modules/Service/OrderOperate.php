@@ -247,12 +247,14 @@ class OrderOperate
         }
 
 
-        $insuranceData =  OrderInsurance::where($whereArray)->first();
+        $insuranceData =  OrderInsurance::where($whereArray)->get();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
+            foreach($data as $keys=>$values) {
+                $data[$keys]['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($values['type']);
+            }
 
-            $data['typeName'] = Inc\OrderGoodStatus::getInsuranceTypeName($data['type']);
 
         }
         return $data;
@@ -800,32 +802,37 @@ class OrderOperate
         if ($goodsExtendData) {
             $instalmentUnpayAmount  = 0.00;
             $instalmentPayedAmount  = 0.00;
-            foreach ($goodsExtendData as &$goodsValues) {
+            foreach ($goodsExtendData as $goodsKeys=>$goodsValues) {
                 if (is_array($goodsValues)) {
-                    foreach($goodsValues as &$values) {
-
-                        $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
-                        $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
-                        $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
-                        $values['withhold_time']  = withholdDate($values['term'], $values['day']);
+                    foreach($goodsValues as $keys=>$values) {
+                        $goodsExtendData[$goodsKeys][$keys]['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['withhold_time']  = withholdDate($values['term'], $values['day']);
                         if ($values['times']==1)
                         {
                             $goodsExtendArray[$values['goods_no']]['firstAmount'] =$values['amount'];
                             $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'] = withholdDate($values['term'], $values['day']);
                         }
 
+
                         if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
                         {
+
 
                             $instalmentPayedAmount+=$values['amount'];
                         } else {
 
                             $instalmentUnpayAmount+=$values['amount'];
                         }
+
+                        $goodsExtendData[$goodsKeys][$keys]['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
                     }
 
                 }
             }
+
+
+
             //未支付总金额
             $orderData['instalment_unpay_amount'] = normalizeNum($instalmentUnpayAmount);
             //已支付总金额
@@ -1192,15 +1199,21 @@ class OrderOperate
                    }
 
                   $isAllowReturn = OrderReturnCreater::allowReturn(['order_no'=>$orderNo, 'goods_no'=>$values['goods_no']]);
-                   if ($isAllowReturn) {
 
-                       $goodsList[$keys]['is_allow_return'] = $isAllowReturn ?? 0;
-                   }
+
+//                  LogApi::info("获取OrderReturnCreater::allowReturn的结果".$orderNo."商品号".$values['goods_no'],$isAllowReturn);
+
+                   $goodsList[$keys]['is_allow_return'] = ($isAllowReturn && !is_array($isAllowReturn)) ?? 0;
 
                    $isReturnBtn = $values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::REFUNDED;
-                   $goodsList[$keys]['is_return_btn'] = $isReturnBtn ?? 0;
+//                   LogApi::info("获取OrderGoods的退货状态".$orderNo."商品号".$values['goods_no'],$isReturnBtn);
+//                   LogApi::info("获取是否是退货".(is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_RETURN));
+                   $goodsList[$keys]['is_return_btn'] = ($isReturnBtn || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_RETURN)) ?? 0;
+//                   LogApi::info("获取OrderGoods的退货按钮状态".$orderNo."商品号".$values['goods_no'],$goodsList[$keys]['is_return_btn']);
                    $isExchange  = $values['goods_status']>=Inc\OrderGoodStatus::EXCHANGE_GOODS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_OF_GOODS;
-                   $goodsList[$keys]['is_exchange_btn'] = $isExchange ?? 0;
+//                   LogApi::info("获取是否是换货".(is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_BARTER));
+//                   LogApi::info("获取OrderGoods的换货状态".$orderNo."商品号".$values['goods_no'],$isExchange);
+                   $goodsList[$keys]['is_exchange_btn'] = ($isExchange || (is_array($isAllowReturn) && !empty($isAllowReturn) && $isAllowReturn['data']['business_key']==Inc\OrderStatus::BUSINESS_BARTER))?? 0;
 
                }
 

@@ -520,6 +520,7 @@ class WithholdController extends Controller
         $page   = 1;
         $time   = 60 * 5;
         $totalpage = ceil($total/$limit);
+        
         do {
 
             // 查询数据
@@ -672,13 +673,14 @@ class WithholdController extends Controller
                 DB::commit();
             }
 
-
+            if($page < $totalpage){
+                sleep($time);
+            }
             $page++;
-            sleep($time);
+
         } while ($page <= $totalpage);
 
 
-        return true;
     }
 
     /**
