@@ -66,15 +66,15 @@ class BuyoutController extends Controller
      */
     public function getCondition(){
         $data['status'] = [
-            0=>"待支付",
-            1=>"已取消",
-            2=>"已支付",
-            3=>"已解押",
+            '0'=>"待支付",
+            '1'=>"已取消",
+            '2'=>"已支付",
+            '3'=>"已解押",
         ];
         $data['keywords'] = [
-            1=>"订单号",
-            2=>"商品名称",
-            3=>"手机号",
+            '1'=>"订单号",
+            '2'=>"商品名称",
+            '3'=>"手机号",
         ];
         return apiResponse($data,ApiStatus::CODE_0);
     }
