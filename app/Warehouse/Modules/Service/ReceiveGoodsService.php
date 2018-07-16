@@ -43,6 +43,11 @@ class ReceiveGoodsService
             $whereParams['status'] = $params['status'];
         }
 
+        //归还属性
+        if (isset($params['return_type']) && $params['return_type']) {
+            $whereParams['return_type'] = $params['return_type'];
+        }
+
         $page = isset($params['page']) ? $params['page'] : 1;
 
         $type = isset($params['type']) ? $params['type'] : 1;

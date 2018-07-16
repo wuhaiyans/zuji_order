@@ -43,6 +43,10 @@ class ReceiveGoodsRepository
             $query->where('goods_name', 'like', '%'.$params['name'].'%');
         }
 
+        if (isset($params['return_type'])) {
+            $query->where('zuji_receive.type', '=', $params['return_type']);
+        }
+
         if (isset($params['status'])) {
             $query->where('status', '=', $params['status']);
         } else {
