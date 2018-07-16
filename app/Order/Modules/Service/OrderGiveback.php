@@ -569,7 +569,7 @@ class OrderGiveback
 		
         //还机单支付状态变更结束时间
         if ( isset($where['payment_end_time']) && !empty($where['payment_end_time'])) {
-            $whereArray[] = ['order_giveback.payment_time', '<=', strtotime($where['payment_end_time'])];
+            $whereArray[] = ['order_giveback.payment_time', '<=', $where['payment_end_time']];
         }
 
         //根据订单编号
