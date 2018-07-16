@@ -795,7 +795,7 @@ class OrderOperate
         if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
         //分期数据
         $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
-
+        
         $orderData['instalment_unpay_amount'] = 0.00;
         $orderData['instalment_payed_amount'] = 0.00;
         $goodsExtendArray = array();
@@ -804,9 +804,7 @@ class OrderOperate
             $instalmentPayedAmount  = 0.00;
             foreach ($goodsExtendData as &$goodsValues) {
                 if (is_array($goodsValues)) {
-                    foreach($goodsValues as &$values) {
-
-                        $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
+                    foreach($goodsValues as $values) {
                         $values['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
                         $values['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
                         $values['withhold_time']  = withholdDate($values['term'], $values['day']);
@@ -816,18 +814,25 @@ class OrderOperate
                             $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'] = withholdDate($values['term'], $values['day']);
                         }
 
+
                         if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
                         {
+
 
                             $instalmentPayedAmount+=$values['amount'];
                         } else {
 
                             $instalmentUnpayAmount+=$values['amount'];
                         }
+
+                        $values['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
                     }
 
                 }
             }
+
+
+
             //未支付总金额
             $orderData['instalment_unpay_amount'] = normalizeNum($instalmentUnpayAmount);
             //已支付总金额
