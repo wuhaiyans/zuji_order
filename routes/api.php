@@ -72,7 +72,7 @@ $api->version('v1', [
 		//还机列表导出
         $api->any('givebackListExport', 'GivebackController@listExport');
         //买断列表导出
-        $api->any('BuyoutListExport', 'BuyoutController@listExport');
+        $api->any('buyoutListExport', 'BuyoutController@listExport');
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
         //退换货列表导出
