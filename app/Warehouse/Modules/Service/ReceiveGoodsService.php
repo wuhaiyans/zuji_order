@@ -37,8 +37,6 @@ class ReceiveGoodsService
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
         }
-        return $whereParams;
-
 
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
         if (isset($params['status']) && $params['status']) {
