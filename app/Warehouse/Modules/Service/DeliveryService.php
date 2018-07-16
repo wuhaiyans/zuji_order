@@ -275,13 +275,13 @@ class DeliveryService
 
             switch ($time_type) {
                 case self::TIME_TYPE_CREATE:
-                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
                     array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
                     break;
 
                 case self::TIME_TYPE_DELIVERY:
                 default:
-                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
                     array_push($logic_params, ['delivery_time', '>=', strtotime($params['begin_time'])]);
             }
         }

@@ -36,11 +36,18 @@ class ReceiveGoodsRepository
                         $query->where('zuji_receive.' . $k,'like', '%'.$v.'%');
                     }
                 }
+                if (isset($params['return_type'])) {
+                    $query->where('zuji_receive.type', '=', $params['return_type']);
+                }
             }
         });
 
-        if (isset($params['name']) && $params['name'] == self::SEARCH_TYPE_GOODS_NAME) {
-            $query->where('goods_name', 'like', '%'.$params['keywords'].'%');
+        if ( isset($params[self::SEARCH_TYPE_GOODS_NAME]) && $params[self::SEARCH_TYPE_GOODS_NAME] ) {
+            $query->where('goods_name', 'like', '%'.$params['name'].'%');
+        }
+
+        if ($logic_params) {
+            $query->where($logic_params);
         }
 
         if (isset($params['status'])) {

@@ -99,7 +99,7 @@ $api->version('v1', [
     // 定时任务 订单自动确认收货接口 不加token
         $api->get('cronDeliveryReceive', 'CronController@cronDeliveryReceive');
     // 定时任务 每日执行定时任务-扣款
-    $api->get('crontabCreatepay', 'WithholdController@crontab_createpay');
+    $api->get('crontabCreatepay', 'WithholdController@crontabCreatepay');
     // 定时任务 每日执行定时任务-扣款
     $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
     // 定时任务 还机逾期违约-修改状态
