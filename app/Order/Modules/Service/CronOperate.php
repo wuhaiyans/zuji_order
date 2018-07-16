@@ -208,36 +208,38 @@ class CronOperate
 				//一页一页的查询处理，处理完成后，还机单状态会更新，所以永远查询第一页数据
 				$orderGivebackList = $orderGivebackService->getList($where,['page'=>1]);
 				$orderGivebackListArr = $orderGivebackList['data'];//逾期的还机单列表
-				//-+----------------------------------------------------------------
-				// | 逾期处理：更新支付状态=》未支付，还机单状态=>逾期违约
-				//-+----------------------------------------------------------------
-				foreach ($orderGivebackListArr as $orderGiveBackInfo) {
-					//更新商品表状态
-					$orderGoods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($orderGiveBackInfo['goods_no']);
-					if( !$orderGoods ){
-						throw new Exception('商品信息获取失败：'.$orderGiveBackInfo['goods_no']);
-					}
-					$orderGoodsResult = $orderGoods->givebackClose();
-					if(!$orderGoodsResult){
-						throw new \Exception('商品状态更新，还机关闭：'.$orderGiveBackInfo['goods_no']);
-					}
-					//解冻订单
-					if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
-						throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
-					}
-
-					//更新还机单
-					$orderGivebackUpdate = $orderGivebackService->update(['giveback_no'=>$orderGiveBackInfo['giveback_no']], [
-						'payment_status' => OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY,
-						'payment_time' => time(),
-						'status' => OrderGivebackStatus::STATUS_AGED_FAIL,
-					]);
-					if(!$orderGivebackUpdate){ 
-						throw new \Exception('还机单状态更新失败：'.$orderGiveBackInfo['giveback_no']);
-					}
-				}
 				$total = $orderGivebackList['total'];//逾期的还机单总数
 				$lastPage = $orderGivebackList['last_page'];//逾期的还机单最后一页列表
+				if($total){
+					//-+----------------------------------------------------------------
+					// | 逾期处理：更新支付状态=》未支付，还机单状态=>逾期违约
+					//-+----------------------------------------------------------------
+					foreach ($orderGivebackListArr as $orderGiveBackInfo) {
+						//更新商品表状态
+						$orderGoods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($orderGiveBackInfo['goods_no']);
+						if( !$orderGoods ){
+							throw new Exception('商品信息获取失败：'.$orderGiveBackInfo['goods_no']);
+						}
+						$orderGoodsResult = $orderGoods->givebackClose();
+						if(!$orderGoodsResult){
+							throw new \Exception('商品状态更新，还机关闭：'.$orderGiveBackInfo['goods_no']);
+						}
+						//解冻订单
+						if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
+							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
+						}
+
+						//更新还机单
+						$orderGivebackUpdate = $orderGivebackService->update(['giveback_no'=>$orderGiveBackInfo['giveback_no']], [
+							'payment_status' => OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY,
+							'payment_time' => time(),
+							'status' => OrderGivebackStatus::STATUS_AGED_FAIL,
+						]);
+						if(!$orderGivebackUpdate){ 
+							throw new \Exception('还机单状态更新失败：'.$orderGiveBackInfo['giveback_no']);
+						}
+					}
+				}
 			}
 			//只要逾期的还机单总数不为空;并且最后一页不是第一页继续查询
 			while ($total && $lastPage!=1);
