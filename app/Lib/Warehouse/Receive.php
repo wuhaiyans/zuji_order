@@ -220,7 +220,7 @@ class Receive
 
         try {
            if($business_key == OrderStatus::BUSINESS_GIVEBACK){
-               Giveback::confirmEvaluationArr($result,$userInfo);
+               //Giveback::confirmEvaluationArr($result,$userInfo);
            }elseif ($business_key == OrderStatus::BUSINESS_RETURN || $business_key == OrderStatus::BUSINESS_BARTER){
                ReturnGoods::checkResult($result,$business_key,$userInfo);
            }
