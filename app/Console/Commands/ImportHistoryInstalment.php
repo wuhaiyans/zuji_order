@@ -48,16 +48,6 @@ class ImportHistoryInstalment extends Command
       $totalpage = ceil($total/$limit);
       $arr =[];
 
-      $appid =[
-          1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
-          40,41,42,43,44,45,46,47,48,49,
-          50,51,52,53,54,55,56,57,58,59,
-          60,61,62,63,64,65,66,67,68,69,
-          70,71,72,73,74,75,76,77,78,79,
-          80,81,82,83,84,85,86,87,88,89,
-          93,94,95,96,97,98,122,123,131,132,
-      ];
-
       do {
           $result = \DB::connection('mysql_01')->table('zuji_order2_instalment')
               ->forPage($page,$limit)
@@ -75,9 +65,11 @@ class ImportHistoryInstalment extends Command
             }
 
             // 去除小程序分期
-            if(!in_array($orderInfo['appid'],$appid) || $orderInfo['business_key'] != 1){
+            $isAllow = \App\Console\Commands\ImportOrder::isAllowImport($orderInfo['order_no']);
+            if(!$isAllow){
               continue;
             }
+
 
             $data['id']               = $item['id'];
             $data['order_no']         = $orderInfo['order_no'];
