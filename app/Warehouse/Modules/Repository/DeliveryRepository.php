@@ -482,6 +482,7 @@ class DeliveryRepository
 
         $model->status = Delivery::STATUS_SEND;
         $model->delivery_time = $model->status_time = time();
+        $model->logistics_note = $params['logistics_note'];
 
         return $model->save();
     }
