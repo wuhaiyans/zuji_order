@@ -276,7 +276,8 @@ class ReceiveController extends Controller
                 'compensate_amount'=>$params['compensate_amount'],
             ];
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
-            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+            $a = Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+            return apiResponse($a);
             $this->receive->checkItem($params);
             DB::commit();
 
