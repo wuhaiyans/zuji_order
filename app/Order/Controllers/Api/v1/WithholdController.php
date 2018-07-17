@@ -316,7 +316,7 @@ class WithholdController extends Controller
      * ]
      * return String
      */
-    public function multi_createpay(Request $request)
+    public function multiCreatepay(Request $request)
     {
         ini_set('max_execution_time', '0');
 
@@ -492,7 +492,7 @@ class WithholdController extends Controller
     /**
      * 定时任务扣款
      */
-    public function crontab_createpay()
+    public function crontabCreatepay()
     {
         // 执行时间
         ini_set('max_execution_time', '0');
@@ -520,6 +520,7 @@ class WithholdController extends Controller
         $page   = 1;
         $time   = 60 * 5;
         $totalpage = ceil($total/$limit);
+        
         do {
 
             // 查询数据
@@ -672,13 +673,14 @@ class WithholdController extends Controller
                 DB::commit();
             }
 
-
+            if($page < $totalpage){
+                sleep($time);
+            }
             $page++;
-            sleep($time);
+
         } while ($page <= $totalpage);
 
 
-        return true;
     }
 
     /**

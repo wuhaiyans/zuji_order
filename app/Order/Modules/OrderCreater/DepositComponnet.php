@@ -62,6 +62,7 @@ class DepositComponnet implements OrderCreater
 
         //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
         $this->deposit = !!$this->certifiedFlag;
+
         //未通过认证人脸识别
         if($this->schema['user']['face']==0){
             $this->deposit = false;
@@ -100,8 +101,7 @@ class DepositComponnet implements OrderCreater
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
             }
-        }
-        return $this->flag && $filter;
+        }return $this->flag && $filter;
     }
 
     /**

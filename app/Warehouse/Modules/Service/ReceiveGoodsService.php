@@ -38,10 +38,14 @@ class ReceiveGoodsService
             $whereParams = array_merge($whereParams, $search);
         }
 
-
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
         if (isset($params['status']) && $params['status']) {
             $whereParams['status'] = $params['status'];
+        }
+
+        //归还属性
+        if (isset($params['return_type']) && $params['return_type']) {
+            $whereParams['return_type'] = $params['return_type'];
         }
 
         $page = isset($params['page']) ? $params['page'] : 1;
@@ -55,7 +59,7 @@ class ReceiveGoodsService
         }
 
         if (isset($params['end_time']) && $params['end_time']) {
-            array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'])]);
+            array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
 
         $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
@@ -135,7 +139,7 @@ class ReceiveGoodsService
         $ks = [
             ReceiveGoodsRepository::SEARCH_TYPE_MOBILE    => '手机号',
             ReceiveGoodsRepository::SEARCH_TYPE_ORDER_NO  => '订单号',
-            ReceiveGoodsRepository::SEARCH_TYPE_GOODS_NAME=> '设备名',
+            ReceiveGoodsRepository::SEARCH_TYPE_GOODS_NAME=> '商品名',
         ];
 
         return $ks;

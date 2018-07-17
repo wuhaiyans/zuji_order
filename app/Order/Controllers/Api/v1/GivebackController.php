@@ -58,7 +58,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -152,7 +152,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -276,7 +276,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -371,7 +371,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 		}
@@ -535,7 +535,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$paramsArr = isset($params['params'])? $params['params'] :'';
+		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$rules = [
 			'goods_no'     => 'required',//还机单编号
 			'callback_url'     => 'required',//回调地址
@@ -611,7 +611,7 @@ class GivebackController extends Controller
 //		// | 获取参数并验证
 //		//-+--------------------------------------------------------------------
 //		$params = $request->input();
-//		$userInfo = isset($params['userinfo'])? $params['userinfo'] :'';
+//		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 //		if( empty($paramsArr['uid']) || empty($paramsArr['username']) || empty($paramsArr['type']) ) {
 //			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
 //		}
@@ -666,7 +666,7 @@ class GivebackController extends Controller
 	 */
 	public function getList(Request $request) {
 		$params = $request->input();
-		$whereArr = $additionArr = isset($params['params'])? $params['params'] :'';
+		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
 		
 		if( isset($whereArr['end_time']) ){
 			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
@@ -677,6 +677,58 @@ class GivebackController extends Controller
 		return apiResponse($orderGivebackList);
 
 	}
+    /**
+     * 还机单列表导出接口
+     * Author: heaven
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function listExport(Request $request) {
+        $params = $request->all();
+		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
+        $additionArr['page'] = 1;
+        $additionArr['size'] = 10000;
+		if( isset($whereArr['end_time']) && $whereArr['end_time'] ){
+			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
+		}
+		$orderGivebackService = new OrderGiveback( );
+		$orderGivebackList = $orderGivebackService->getList( $whereArr, $additionArr );
+		$total = $orderGivebackList['total'];//还机单总数
+
+        if ($total) {
+
+            $headers = ['订单编号','还机单生成时间','还机单单号', '用户名','手机号','设备名称','订单金额','租期','归还设备','剩余分期金额',
+                '支付时间','应退押金','赔偿金','状态'];
+
+            foreach ($orderGivebackList['data'] as $item) {
+                $data[] = [
+                    $item['order_no'],
+                    $item['create_time'],
+                    $item['giveback_no'],
+                    $item['username'],
+                    $item['mobile'],
+                    $item['goods_name'],
+                    $item['amount_after_discount'],
+                    $item['zuqi'],
+                    $item['goods_name'],
+                    $item['instalment_amount'],
+                    $item['payment_time'],
+                    $item['yajin_should_return'],
+                    $item['compensate_amount'],
+                    $item['status_name'],
+                ];
+            }
+
+
+            return \App\Lib\Excel::write($data, $headers,'后台还机单列表数据导出-'.$additionArr['page']);
+//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+        } else {
+            return apiResponse([],ApiStatus::CODE_34007,'当前查询条件列表为空');
+        }
+
+    }
 	
 	/**
 	 * 获取还机信息
@@ -687,7 +739,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
-		$paramsArr = isset($params['params'])? $params['params'] :'';
+		$paramsArr = isset($params['params'])? $params['params'] :[];
 		if( empty($paramsArr['goods_no']) ) {
 			return apiResponse([],ApiStatus::CODE_91001);
 		}

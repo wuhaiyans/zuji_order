@@ -207,7 +207,7 @@ class ReturnController extends Controller
      *
      */
     public function returnListExport(Request $request){
-        $params = $request->input('params');
+        $params = $request->all();
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
         $data=[];
@@ -244,7 +244,7 @@ class ReturnController extends Controller
      *
      */
     public function barterListExport(Request $request){
-        $params = $request->input('params');
+        $params = $request->all();
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
         $data=[];

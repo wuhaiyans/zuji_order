@@ -29,14 +29,14 @@ class DeliveryService
     const SEARCH_MOBILE = 'customer_mobile';//手机
     const SEARCH_ORDER_NO = 'order_no';//订单号
     const SEARCH_DELIVERY_NO = 'delivery_no';//订单号
-    const SEARCH_LOGISTIC_NO = 'logistic_no';
+    const SEARCH_LOGISTIC_NO = 'logistics_no';
 
 
     static $searchs = [
         self::SEARCH_MOBILE => 'customer_mobile',
         self::SEARCH_ORDER_NO => 'order_no',
         self::SEARCH_DELIVERY_NO => 'delivery_no',
-        self::SEARCH_LOGISTIC_NO => 'logistic_no'
+        self::SEARCH_LOGISTIC_NO => 'logistics_no'
     ];
 
 
@@ -275,13 +275,13 @@ class DeliveryService
 
             switch ($time_type) {
                 case self::TIME_TYPE_CREATE:
-                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
                     array_push($logic_params, ['create_time', '>=', strtotime($params['begin_time'])]);
                     break;
 
                 case self::TIME_TYPE_DELIVERY:
                 default:
-                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'])]);
+                    array_push($logic_params, ['delivery_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
                     array_push($logic_params, ['delivery_time', '>=', strtotime($params['begin_time'])]);
             }
         }
