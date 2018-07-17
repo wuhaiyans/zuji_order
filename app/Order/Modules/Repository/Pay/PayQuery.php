@@ -39,19 +39,7 @@ class PayQuery {
 			if( $info ){
 				return new Pay( $info->toArray() );
 			}
-			$e = new \Exception;
-//		throw new \App\Lib\NotFoundException($e->getTraceAsString());
-			$array =debug_backtrace();
-			unset($array[0]);
-			$html = '';
-			foreach($array as $row)
-			{
-				$html .=$row['file'].':'.$row['line'].'行,调用方法:'.$row['function']."<p>";
-			}
-		throw new \App\Lib\NotFoundException($html);
-			return $html;
-
-
+			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 	}
 	
 	/**
