@@ -140,7 +140,102 @@ class BuyoutController extends Controller
 
         return apiResponse($orderList,ApiStatus::CODE_0);
     }
+    /**
+     * 买断单列表导出接口
+     * Author: heaven
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function listExport(Request $request) {
 
+        $params =$request->all();
+
+        $where = [];
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $where['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $where['goods_name'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 3){
+                $where['mobile'] = $params['keywords'];
+            }
+            else{
+                $where['order_no'] = $params['keywords'];
+            }
+        }
+        if(isset($params['begin_time'])||isset($params['end_time'])){
+            $where['begin_time'] = $params['begin_time'];
+            $where['end_time'] = $params['end_time'];
+        }
+        if(isset($params['status'])){
+            $where['status'] = $params['status'];
+        }
+        if(isset($params['appid'])){
+            $where['appid'] = $params['appid'];
+        }
+        //$sumCount = OrderBuyout::getCount($where);
+        $where['page'] = $params['page']>0?$params['page']-1:0;
+        $where['size'] = 10000;
+
+        $orderList = OrderBuyout::getList($where);
+
+        if(!$orderList){
+            return apiResponse([],ApiStatus::CODE_0);
+        }
+        //获取订单商品信息
+        $goodsNos = array_column($orderList['data'],"goods_no");
+        $goodsList= OrderGoodsRepository::getGoodsColumn($goodsNos);
+        //获取订单用户信息
+        $orderNos = array_column($orderList['data'],"order_no");
+        $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
+
+        //定义excel头部参数名称
+        $headers = [
+            '订单编号',
+            '下单时间',
+            '交易流水号',
+            '用户名',
+            '手机号',
+            '设备名称',
+            '订单金额',
+            '租期',
+            '买断设备',
+            '买断金额',
+            '应退押金',
+            '状态',
+        ];
+        foreach($orderList['data'] as &$item){
+            $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
+            $item['realname'] = $userList[$item['order_no']]['realname'];
+            $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
+            $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];
+            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
+
+            $data[] = [
+                $item['order_no'],
+                $item['create_time'],
+                $item['buyout_no'],
+                $item['realname'],
+                $item['mobile'],
+                $item['goods_name'],
+                $item['order_amount'],
+                $item['zuqi'],
+                $item['goods_name'],
+                $item['amount'],
+                $item['yajin'],
+                $item['status'],
+            ];
+        }
+
+        return \App\Lib\Excel::write($data, $headers,'后台买断单列表数据导出-');
+
+
+    }
     /*
      * 用户买断
      * @param array $params 【必选】
@@ -326,6 +421,7 @@ class BuyoutController extends Controller
             'goods_no'=>$goodsInfo['goods_no'],
             'user_id'=>$goodsInfo['user_id'],
             'plat_id'=>$params['user_id'],
+            'goods_name'=>$goodsInfo['goods_name'],
             'buyout_price'=>$buyoutPrice,
             'zujin_price'=>$fenqiPrice,
             'zuqi_number'=>$fenqishu,

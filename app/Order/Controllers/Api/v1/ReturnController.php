@@ -172,7 +172,7 @@ class ReturnController extends Controller
      *
      */
     public function refundListExport(Request $request){
-        $params = $request->input('params');
+        $params = $request->all();
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
         $data=[];
@@ -207,7 +207,7 @@ class ReturnController extends Controller
      *
      */
     public function returnListExport(Request $request){
-        $params = $request->input('params');
+        $params = $request->all();
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
         $data=[];
@@ -244,7 +244,7 @@ class ReturnController extends Controller
      *
      */
     public function barterListExport(Request $request){
-        $params = $request->input('params');
+        $params = $request->all();
         $refundData =$this->OrderReturnCreater->getReturnList($params);
         $returnListArray = objectToArray($refundData);
         $data=[];
@@ -565,7 +565,8 @@ class ReturnController extends Controller
     //test
     public function refundUpdate(Request $request){
         $orders = $request->all();
-        $aa=$this->OrderReturnCreater->createchange($orders['params']['detail'],$orders['params']['goods_info'],$orders['params']['userinfo']);
+        $params = $orders['params'];
+        $aa=$this->OrderReturnCreater->allowReturn($params);
         p($aa);
 
     }
