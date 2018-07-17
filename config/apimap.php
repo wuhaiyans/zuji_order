@@ -137,9 +137,9 @@ return [
     // 代扣扣款接口
     'api.Withhold.createpay'            => 'WithholdController@createpay',
     // 多项扣款接口
-    'api.Withhold.multi_createpay'      => 'WithholdController@multi_createpay',
+    'api.Withhold.multiCreatepay'      => 'WithholdController@multiCreatepay',
     // 定时任务扣款
-    'api.Withhold.crontab_createpay'      => 'WithholdController@crontab_createpay',
+    'api.Withhold.crontabCreatepay'      => 'WithholdController@crontabCreatepay',
 
     //  预授权相关
     // 资金预授权接口
@@ -250,6 +250,8 @@ return [
     'api.buyout.userBuyout'       => 'BuyoutController@userBuyout',
     //提前买断
     'api.buyout.adminBuyout'       => 'BuyoutController@adminBuyout',
+    //买断列表条件筛选
+    'api.buyout.getCondition'       => 'BuyoutController@getCondition',
     //买断列表
     'api.buyout.getBuyoutList'       => 'BuyoutController@getBuyoutList',
     //买断详情

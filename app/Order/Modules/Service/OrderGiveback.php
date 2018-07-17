@@ -201,7 +201,7 @@ class OrderGiveback
             ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
 			->orderBy('order_giveback.create_time', 'desc')
-            ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_info.mobile')
+            ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_goods.yajin','order_info.mobile')
 //			paginate: 参数
 //			perPage:表示每页显示的条目数量
 //			columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
@@ -220,6 +220,7 @@ class OrderGiveback
 				$value['evaluation_time'] = date('Y-m-d H:i:s',$value['evaluation_time']);
 				$value['update_time'] = date('Y-m-d H:i:s',$value['update_time']);
 				$value['payment_time'] = $value['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ? date('Y-m-d H:i:s',$value['payment_time']) : '--';
+				$value['yajin_should_return'] = ($value['compensate_amount']+$value['instalment_amount']) >= $value['yajin'] ? 0 : $value['yajin']-($value['compensate_amount']+$value['instalment_amount']) ;
 			}
 		}
         return $orderList;
@@ -269,6 +270,7 @@ class OrderGiveback
 			'evaluation_remark' => 'required',
 			'evaluation_time' => 'required',
 			'compensate_amount' => 'required',
+			'yajin_status' => 'required',
 			'remark' => 'required',
 		]);
 		if( count( $where ) < 1 ){
@@ -343,11 +345,11 @@ class OrderGiveback
 				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
-			
-			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
-				'status'=> OrderGivebackStatus::STATUS_DEAL_DONE,
-				'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
-			]);
+			$statusArr['status'] = OrderGivebackStatus::STATUS_DEAL_DONE;
+			if( $orderGivebackInfo['yajin_status'] == OrderGivebackStatus::YAJIN_STATUS_IN_RETURN ){
+				$statusArr['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION;
+			}
+			$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], $statusArr);
 			if( !$orderGivebackResult ){
 				set_msg('还机单状态更新失败');
 				\App\Lib\Common\LogApi::debug('[还机清算回调]还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
@@ -567,7 +569,7 @@ class OrderGiveback
 		
         //还机单支付状态变更结束时间
         if ( isset($where['payment_end_time']) && !empty($where['payment_end_time'])) {
-            $whereArray[] = ['order_giveback.payment_time', '<=', strtotime($where['payment_end_time'])];
+            $whereArray[] = ['order_giveback.payment_time', '<=', $where['payment_end_time']];
         }
 
         //根据订单编号

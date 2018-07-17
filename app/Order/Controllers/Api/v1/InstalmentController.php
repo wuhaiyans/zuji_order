@@ -275,6 +275,12 @@ class InstalmentController extends Controller
         $instalmentInfo['realname']         = "*" . mb_substr($memberInfo['realname'], 1, mb_strlen ( $memberInfo['realname'] )-1, 'utf-8');
         $instalmentInfo['mobile']           = substr($memberInfo['mobile'], -4);
 
+        //收货时间
+        $instalmentInfo['receive_date']     = $orderInfo['receive_time'] != "" ? date("Ymd",$orderInfo['receive_time']) : "";
+
+        //代扣日
+        $instalmentInfo['withhold_date']    = withholdDate($instalmentInfo['term'],$instalmentInfo['day']);
+
         return apiResponse($instalmentInfo, ApiStatus::CODE_0);
 
 

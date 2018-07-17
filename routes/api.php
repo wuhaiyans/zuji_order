@@ -69,6 +69,10 @@ $api->version('v1', [
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
         $api->any('orderListExport', 'OrderController@orderListExport');
+		//还机列表导出
+        $api->any('givebackListExport', 'GivebackController@listExport');
+        //买断列表导出
+        $api->any('buyoutListExport', 'BuyoutController@listExport');
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
         //退换货列表导出
@@ -95,7 +99,7 @@ $api->version('v1', [
     // 定时任务 订单自动确认收货接口 不加token
         $api->get('cronDeliveryReceive', 'CronController@cronDeliveryReceive');
     // 定时任务 每日执行定时任务-扣款
-    $api->get('crontabCreatepay', 'WithholdController@crontab_createpay');
+    $api->get('crontabCreatepay', 'WithholdController@crontabCreatepay');
     // 定时任务 每日执行定时任务-扣款
     $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
     // 定时任务 还机逾期违约-修改状态
