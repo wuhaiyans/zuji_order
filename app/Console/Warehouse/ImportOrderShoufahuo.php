@@ -179,8 +179,7 @@ function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
             $num++;
         }
     }
-    $address_insert_sql = substr($address_insert_sql,0,-1)
-    ;
+    $address_insert_sql = substr($address_insert_sql,0,-1);
 //    echo $address_insert_sql;
     if($db2->query($address_insert_sql)){
         echo '导入订单收货地址成功;<br>';
