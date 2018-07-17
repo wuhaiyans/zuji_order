@@ -41,11 +41,11 @@ class OrderClearingRepository
         $isAuthUnfreeze     =   0;
         //是否是退款
         $isRefund           =   0;
-        if (isset($param['auth_deduction_amount'])  && intval($param['auth_deduction_amount'])>0) {
+        if (isset($param['auth_deduction_amount'])  && ($param['auth_deduction_amount'])>0) {
             $isAuthDeduction = 1;
         }
 
-        if (isset($param['auth_unfreeze_amount'])  && intval($param['auth_unfreeze_amount'])>0) {
+        if (isset($param['auth_unfreeze_amount'])  && ($param['auth_unfreeze_amount'])>0) {
             $isAuthUnfreeze = 1;
         }
 
