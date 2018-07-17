@@ -185,6 +185,16 @@ class ImportOrder extends Command
         }
     }
     /**
+     * 判断订单是否可以导入
+     * @param $order_no
+     * @return bool
+     */
+    public static function isAllowImport($order_no){
+
+        return true;
+    }
+
+    /**
      * 获取follow
      * @param $order_id
      * @param $new_status
