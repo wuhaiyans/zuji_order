@@ -1811,6 +1811,17 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;
             }
+            //通知收发货确认收货
+            $confirm_data['order_no']=$params['order_no'];
+            $confirm_data['receive_type']=$userinfo['type'];
+            $confirm_data['user_id']=$userinfo['uid'];
+            $confirm_data['user_name']=$userinfo['username'];
+            $returnConfirm=Delivery::orderReceive($confirm_data);
+            if(!$returnConfirm){
+                DB::rollBack();
+                return false;
+            }
+
             DB::commit();
             return true;
 
