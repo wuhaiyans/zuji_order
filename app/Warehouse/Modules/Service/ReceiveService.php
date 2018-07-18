@@ -359,7 +359,7 @@ class ReceiveService
                 'customer_mobile'=>$model->customer_mobile,
                 'customer_address'=>$model->customer_address,
                 'business_key'=>$model->business_key,
-                'business_no'=>0,
+                'business_no'=>$model->business_no,
             ];
             foreach ($goods as $k=>$item){
                 $data['delivery_detail'][]=[
