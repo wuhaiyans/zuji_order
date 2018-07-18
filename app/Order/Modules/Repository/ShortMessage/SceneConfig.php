@@ -80,19 +80,15 @@ class SceneConfig {
      * 场景：<b>【退款成功】</b>
      */
     const REFUND_SUCCESS = 'RefundSuccess';
+
     /**
      * 场景：<b>【申请还机】</b>
      */
     const GIVEBACK_CREATE = 'GivebackCreate';
     /**
-     * 场景：<b>【买断确认】</b>
+     * 场景：<b>【还机确认收货】</b>
      */
-    const BUYOUT_CONFIRM = 'BuyoutConfirm';
-    /**
-     * 场景：<b>【买断支付】</b>
-     */
-    const BUYOUT_PAYMENT = 'BuyoutPayment';
-
+    const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
 
 
 }

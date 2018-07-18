@@ -8,7 +8,7 @@ use App\Order\Modules\Service\OrderBuyout;
 /**
  * OrderCancel
  *
- * @author wuhaiyan
+ * @author limin
  */
 class BuyoutConfirm implements ShortMessage {
 	

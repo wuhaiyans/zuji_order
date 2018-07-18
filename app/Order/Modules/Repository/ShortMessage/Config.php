@@ -75,6 +75,8 @@ class Config {
 
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
+				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货
+
 			],
 
 			// 小程序
