@@ -1398,12 +1398,19 @@ class OrderReturnCreater
 
     /**
      * 检测合格或不合格
-     * @param $business_key
-     * @param $data
-     * @return string
+     * @param int		$business_key	业务类型
+     * @param array		$data		
+	 * [
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 * ]	
+     * @param array		$userinfo		操作人信息
+     * @return bool	true：成功；false：失败
      * @throws \Exception
      */
-    public function isQualified($business_key,$data,$userinfo)
+    public function isQualified(int $business_key, array $data, array $userinfo)
     {
         //开启事务
         DB::beginTransaction();
