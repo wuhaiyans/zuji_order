@@ -36,7 +36,7 @@ class BuyoutPayment implements ShortMessage {
 			return false;
 		}
 		// 查询订单
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->business_no));
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyoutInfo['order_no']));
 		if( !$orderInfo ){
 			return false;
 		}

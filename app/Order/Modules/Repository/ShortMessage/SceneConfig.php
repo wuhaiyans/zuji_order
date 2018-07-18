@@ -89,6 +89,13 @@ class SceneConfig {
      * 场景：<b>【还机确认收货】</b>
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
-
+    /**
+    * 场景：<b>【买断确认】</b>
+    */
+    const BUYOUT_CONFIRM = 'BuyoutConfirm';
+    /**
+     * 场景：<b>【买断支付】</b>
+     */
+    const BUYOUT_PAYMENT = 'BuyoutPayment';
 
 }
