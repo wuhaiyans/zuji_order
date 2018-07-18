@@ -94,9 +94,13 @@ class SceneConfig {
      */
     const GIVEBACK_ORDERCLEAN = 'GivebackOrderClean';
     /**
-     * 场景：<b>【财务系统完成退还押金】</b>
+     * 场景：<b>【系统执行代扣成功后发送】</b>
      */
     const GIVEBACK_WITHHOLDSUCCESS = 'GivebackWithholdSuccess';
+    /**
+     * 场景：<b>【系统执行代扣失败后发送】</b>
+     */
+    const GIVEBACK_WITHHOLDFAIL = 'GivebackWithholdFail';
     /**
     * 场景：<b>【买断确认】</b>
     */

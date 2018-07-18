@@ -4,13 +4,14 @@ namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
-
+use App\Order\Modules\Service\OrderGoodsInstalment;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 /**
- * GivebackWithholdSuccess
+ * GivebackWithholdFail
  *
  * @author maxiaoyu
  */
-class GivebackWithholdSuccess implements ShortMessage {
+class GivebackWithholdFail implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -61,11 +62,21 @@ class GivebackWithholdSuccess implements ShortMessage {
             return false;
         }
 
+        $amount = 0;
+
+        //分期数据
+        $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$this->business_no,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
+        if( !empty($instalmentList[$this->business_no]) ){
+            foreach ($instalmentList[$this->business_no] as $instalmentInfo) {
+                $amount += $instalmentInfo['amount'];
+            }
+        }
         // 短信参数
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
+            'shengyuZujin'      => $amount,
         ];
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
