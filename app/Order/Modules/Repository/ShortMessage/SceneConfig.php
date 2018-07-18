@@ -90,6 +90,10 @@ class SceneConfig {
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
     /**
+     * 场景：<b>【财务系统完成退还押金】</b>
+     */
+    const GIVEBACK_ORDERCLEAN = 'GivebackOrderClean';
+    /**
     * 场景：<b>【买断确认】</b>
     */
     const BUYOUT_CONFIRM = 'BuyoutConfirm';

@@ -228,17 +228,17 @@ class SkuComponnet implements OrderCreater
 
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
-            $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['first_coupon_amount']:0.00;
-            $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?$this->sku[$skuInfo['sku_id']]['order_coupon_amount']:0.00;
+            $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['first_coupon_amount']):0.00;
+            $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['order_coupon_amount']):0.00;
             $specs =json_decode($spuInfo['specs'],true);
             $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
-            $this->orderYajin =$deposit_yajin;
-            $amount_after_discount =$skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount;
+            $this->orderYajin =normalizeNum($deposit_yajin);
+            $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount);
             if($amount_after_discount <0){
                 $amount_after_discount =0.00;
             }
 
-            $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
+            $this->orderZujin =normalizeNum($amount_after_discount+$spuInfo['yiwaixian']);
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
 
             $arr['sku'][] = [
@@ -260,26 +260,26 @@ class SkuComponnet implements OrderCreater
                     'insurance' =>$spuInfo['yiwaixian'],
                     'insurance_cost' => $spuInfo['yiwaixian_cost'],
                     'zujin' => $skuInfo['shop_price'],
-                    'yajin' => $skuInfo['yajin'],
+                    'yajin' => normalizeNum($skuInfo['yajin']),
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
                     'zuqi_type_name' => $this->zuqiTypeName,
-                    'buyout_price' => $skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'],
-                    'market_price' => $skuInfo['market_price'],
+                    'buyout_price' => normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']),
+                    'market_price' => normalizeNum($skuInfo['market_price']),
                     'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",
                     'chengse' => $skuInfo['chengse'],
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
-                    'discount_amount' => $skuInfo['buyout_price'],
-                    'amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
-                    'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
+                    'discount_amount' => normalizeNum($skuInfo['buyout_price']),
+                    'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
+                    'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,
-                    'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?$this->deposit[$skuInfo['sku_id']]['mianyajin']:0.00,
-                    'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?$this->deposit[$skuInfo['sku_id']]['jianmian']:0.00,
-                    'deposit_yajin' => $deposit_yajin,
-                    'amount_after_discount'=>$amount_after_discount,
+                    'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
+                    'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00,
+                    'deposit_yajin' => normalizeNum($deposit_yajin),
+                    'amount_after_discount'=>normalizeNum($amount_after_discount),
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
             ];
