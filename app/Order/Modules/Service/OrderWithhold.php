@@ -80,7 +80,7 @@ class OrderWithhold
         //判断支付方式
         if( $orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::MiniAlipay ){
             //获取订单的芝麻订单编号
-            $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
             if( empty($miniOrderInfo) ){
                 \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                 Log::error("本地小程序确认订单回调记录查询失败");

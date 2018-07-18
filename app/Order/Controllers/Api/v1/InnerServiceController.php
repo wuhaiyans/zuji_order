@@ -114,7 +114,7 @@ class InnerServiceController extends Controller
         }
         //调用小程序取消订单接口
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($params['order_no']);
+        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
         if( empty($result) ){
             \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$params['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');

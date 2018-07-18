@@ -1,15 +1,15 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
-use App\Order\Models\MiniOrderCreditPay;
+use App\Order\Models\OrderMiniCreditPay;
 
 /**
  * 小程序发送 扣款 取消 完成请求信息记录表
- * Class MiniOrderCreditPayRepository
+ * Class OrderMiniCreditPayRepository
  * Author zhangjinhui
  * @package App\Order\Modules\Repository
  */
-class MiniOrderCreditPayRepository
+class OrderMiniCreditPayRepository
 {
     public function __construct(){}
 
@@ -19,7 +19,7 @@ class MiniOrderCreditPayRepository
      * @return $last_id
      */
     public static function add($data){
-        $info =MiniOrderCreditPay::create($data);
+        $info =OrderMiniCreditPay::create($data);
         return $info->getQueueableId();
     }
 

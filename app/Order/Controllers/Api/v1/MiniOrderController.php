@@ -282,7 +282,7 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($params['order_no']);
+        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $params['out_order_no'] );
         if( empty($result) ){
             \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$params['order_no']);
@@ -321,7 +321,7 @@ class MiniOrderController extends Controller
         //循环取消操作
         foreach($order_info as $key=>$val){
             //查询芝麻订单
-            $result = \App\Order\Modules\Repository\MiniOrderRepository::getMiniOrderInfo($val['order_no']);
+            $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($val['order_no']);
             if( empty($result) ){
                 \App\Lib\Common\LogApi::debug('小程序定时取消芝麻订单查询失败',$val['order_no']);
                 continue;
@@ -345,83 +345,5 @@ class MiniOrderController extends Controller
                 continue;
             }
         }
-    }
-
-    /**
-     * 数据导入操作
-     */
-    public function dataOperate(){
-        //小程序回调数据表
-//        DB::beginTransaction();
-//        $datas01 = \DB::connection('mysql_01')->table('zuji_zhima_order_confirmed')->select('*')->get();
-//        $orders=objectToArray($datas01);
-//        unset($orders[0]);
-//        unset($orders[1]);
-//        $error_data = [];
-//        foreach($orders as $key=>$val){
-//            unset($val['api_name']);
-//            unset($val['id']);
-//            $val['out_order_no'] = $val['order_no'];
-//            unset($val['order_no']);
-//            if(strlen($val['order_create_time']) < 5){
-//                $error_data[] = $val;
-//                unset($val);
-//            }else{
-//                $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::add($val);
-//                if( !$result ){
-//                    $error_data[] = $val;
-//                    \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$result);
-//                }
-//            }
-//        }
-//        print_r($error_data);die;
-        //小程序查询数据表
-        set_time_limit(0);//0表示不限时
-        DB::beginTransaction();
-        $datas01 = \DB::connection('mysql_01')->table('zuji_zhima_certification')->select('*')->get();
-        $orders = objectToArray($datas01);
-        $error_data = [];
-        foreach($orders as $key=>$val){
-            $datas02 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->where(['order_no'=>$val['out_order_no']])->limit(5)->get();
-            $orders2 = objectToArray($datas02);
-            if(empty($orders2)){
-                $error_data[] = $val;
-                continue;
-            }
-            if(config('miniappid.'.$orders2[0]['appid'])){
-                $val['appid'] = config('miniappid.'.$orders2[0]['appid']);
-            }else{
-                $error_data[] = $val;
-                continue;
-            }
-            unset($val['open_id']);
-            unset($val['zm_score']);
-            if( $orders2[0]['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
-                $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($orders2[0]['zuqi'])+1).' month'));
-            }else{
-                $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($orders2[0]['zuqi'])+30).' day'));
-            }
-            $val['overdue_time'] = $overdue_time;
-            $val['create_time'] = strtotime($val['create_time']);
-            $val['transaction_id'] = $val['trade_no'];
-            $val['zm_order_no'] = $val['order_no'];
-            $val['order_no'] = $val['out_order_no'];
-            if(strlen($val['trade_no']) < 1){
-                $error_data[] = $val;
-                unset($val);
-                continue;
-            }else{
-                print_r($orders2);
-                print_r($val);die;
-                $result = \App\Order\Modules\Repository\MiniOrderRepository::add($val);
-                if( !$result ){
-                    DB::rollBack();
-                    $error_data[] = $val;
-//                    \App\Lib\Common\LogApi::debug('小程序查询记录导入失败',$val);
-                }
-            }
-        }
-        DB::commit();
-        print_r($error_data);die;
     }
 }
