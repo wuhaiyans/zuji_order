@@ -171,25 +171,25 @@ class LogApi {
 //		dispatch( $job );
 		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
 		
-//		// 日志系统接口
-//		try {
-//			// 请求
-//			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
-//			
-//			if( !$res ){
-//				return false;
-//			}
-//			$res = json_decode($res,true);
-//			if( !$res ){
-//				return false;
-//			}
-//			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
-//				dispatch(new \App\Jobs\LogJob( $str ));
-//			}
-//
-//		} catch (\Exception $exc) {
-//			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
-//		}
+		// 日志系统接口
+		try {
+			// 请求
+			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+			
+			if( !$res ){
+				return false;
+			}
+			$res = json_decode($res,true);
+			if( !$res ){
+				return false;
+			}
+			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
+				dispatch(new \App\Jobs\LogJob( $str ));
+			}
+
+		} catch (\Exception $exc) {
+			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
+		}
 
 		
 		return self::getInstace();
