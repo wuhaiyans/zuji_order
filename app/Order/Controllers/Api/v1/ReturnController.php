@@ -405,7 +405,7 @@ class ReturnController extends Controller
                 || empty($param['evaluation_status'])
                 || empty($param['evaluation_time'])
                 ||empty($params['params']['business_key'])
-                ||empty($params['params']['business_no'])){
+                ||empty($param['business_no'])){
                 return  apiResponse([],ApiStatus::CODE_20001);
             }
         }
