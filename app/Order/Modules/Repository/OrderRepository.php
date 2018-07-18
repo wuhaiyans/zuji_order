@@ -466,6 +466,7 @@ class OrderRepository
     public static function getOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
+		$orWhereArray = array();
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -481,10 +482,11 @@ class OrderRepository
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
+            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
+            $orWhereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords'],'or'];
         }
         //根据订单号
-        if (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
             $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
         }
@@ -548,9 +550,10 @@ class OrderRepository
                 $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
             }, null,null,'left')
             ->where($whereArray)
+            ->where($orWhereArray)
             ->orderBy('order_info.create_time', 'DESC')
             ->orderBy('order_info_visit.id','desc')
-            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $param['page']);
+            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
 
 //        $orderList = DB::table('order_info')
 //            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')

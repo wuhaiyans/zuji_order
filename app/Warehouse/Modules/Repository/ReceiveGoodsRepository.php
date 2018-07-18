@@ -63,6 +63,7 @@ class ReceiveGoodsRepository
             }
 
         }
+        $query->orderByDesc('id');
 
         return $query->with(['receive'])->paginate($limit,
             [
