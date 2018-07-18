@@ -51,7 +51,6 @@ class ReceiveGoodsService
         $page = isset($params['page']) ? $params['page'] : 1;
 
         $type = isset($params['type']) ? $params['type'] : 1;
-        return [$type,$params['type']];
 
         //组合时间查询
         $logic_params = [];
