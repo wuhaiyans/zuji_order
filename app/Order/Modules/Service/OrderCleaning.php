@@ -14,7 +14,7 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
-use App\Order\Modules\Repository\MiniOrderRepository;
+use App\Order\Modules\Repository\OrderMiniRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
@@ -286,7 +286,7 @@ class OrderCleaning
                 //小程序待退还押金大于0，并且处于待退押金状态
                 if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
 
-                    $miniOrderData = MiniOrderRepository::getMiniOrderInfo($orderCleanData['order_no']);
+                    $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderCleanData['order_no']);
                     if (empty($miniOrderData))
                     {
                         LogApi::error(__method__.'[cleanAccount发起]没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
