@@ -77,6 +77,7 @@ class Config {
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货
 				SceneConfig::GIVEBACK_ORDERCLEAN 		=> 'SMS_113461138', //财务系统完成退还押金
+				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
 
 			],
 
