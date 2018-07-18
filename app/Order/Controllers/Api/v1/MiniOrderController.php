@@ -44,7 +44,6 @@ class MiniOrderController extends Controller
      *      sku_id      子商品ID
      */
     public function getTemporaryOrderNo(Request $request){
-        echo 11;die;
         $params     = $request->all();
         // 验证参数
         $rules = [
