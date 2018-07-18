@@ -112,14 +112,14 @@ class ImportHistoryRefund extends Command
                 foreach($newData as $keys=>$values) {
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
-                        $continueReturnArr = $values[$values['refund_id']];
+                        $continueReturnArr[] = $values['refund_id'];
                         continue;
                     }
 
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
                         echo '导入退款error ' . date("Y-m-d H:i:s", time()) . "\n";
-                        $errorReturnArr = $values[$values['refund_id']];
+                        $errorReturnArr[] = $values['refund_id'];
                     } else {
 
                         $bar->advance(); //中间

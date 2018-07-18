@@ -112,13 +112,13 @@ class ImportHistoryReturn extends Command
 
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
-                        $continueReturnArr = $values[$values['return_id']];
+                        $continueReturnArr[] = $values['return_id'];
                         continue;
                     }
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
                         echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
-                        $errorReturnArr = $values[$values['return_id']];
+                        $errorReturnArr[] = $values['return_id'];
                     } else {
 
                         $bar->advance();  //中间
