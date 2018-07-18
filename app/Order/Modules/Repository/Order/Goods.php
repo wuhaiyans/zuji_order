@@ -175,6 +175,8 @@ class Goods {
 	 * @return bool
 	 */
     public function givebackClose():bool {
+        $this->model->business_no = 0;
+        $this->model->business_key = 0;
         $this->model->goods_status = OrderGoodStatus::CLOSED_THE_MACHINE;
         $this->model->update_time = time();
         return $this->model->save();
