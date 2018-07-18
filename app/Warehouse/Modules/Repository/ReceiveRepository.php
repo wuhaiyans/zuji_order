@@ -129,7 +129,8 @@ class ReceiveRepository
                 'status'    => Receive::STATUS_INIT,
                 'create_time' => $time,
                 'type' => isset($data['type']) ? $data['type'] : 0,
-                'business_key' => $data['business_key']
+                'business_key' => $data['business_key'],
+                'business_no' => $data['business_no']
             ];
 
             $model = new Receive();
