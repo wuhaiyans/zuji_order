@@ -54,16 +54,14 @@ class ReceiveGoodsRepository
             $query->where('status', '=', $params['status']);
         } else {
 
+            return $type;
             if ($type == 1) {
-                return [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK];
                 $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
             }
 
-            if ($type = 2) {
-                return [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_INIT];
+            if ($type == 2) {
                 $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_INIT]);
             }
-            return [3];
 
         }
         $query->orderByDesc('id');
