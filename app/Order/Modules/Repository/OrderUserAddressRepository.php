@@ -47,6 +47,7 @@ class OrderUserAddressRepository
             $data['address_info']    =   $params['address_info'];
         }
 
+        $data['update_time'] = time();
 
         if(OrderUserAddress::where('order_no','=', $params['order_no'])->update($data)){
             return true;
