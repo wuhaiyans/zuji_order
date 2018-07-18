@@ -56,8 +56,11 @@ class ImportOrderYidun extends Command
                                 LogApi::notify("订单不存在riskid:".$v['id'],[]);
                                 continue;
                             }
+                            if(!ImportOrder::isAllowImport($v['order_no'])){
+                                continue;
+                            }
                             $riskData = [
-                                'order_no' => empty($v['order_no']) ? "" : $v['order_no'],
+                                'order_no' => $v['order_no'],
                                 'decision' => $v['decision'],
                                 'score' => $v['score'],
                                 'strategies' => $v['strategies'],
