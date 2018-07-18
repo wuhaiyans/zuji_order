@@ -620,7 +620,56 @@ class GivebackController extends Controller
 
 	}
 
-
+//	/**
+//	 * 还机单支付成功的同步回调
+//	 * @param Request $request
+//	 */
+//	public function syncPaymentStatus( Request $request ) {
+//		//-+--------------------------------------------------------------------
+//		// | 获取参数并验证
+//		//-+--------------------------------------------------------------------
+//		$params = $request->input();
+//		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+//		if( empty($paramsArr['uid']) || empty($paramsArr['username']) || empty($paramsArr['type']) ) {
+//			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+//		}
+//		$paramsArr = isset($params['params'])? $params['params'] :'';
+//		if( !isset($paramsArr['payment_status']) || $paramsArr['payment_status'] != 'success' ){
+//			return apiResponse([], ApiStatus::CODE_91000, '支付状态参数错误!');
+//		}
+//		if( empty($paramsArr['goods_no']) ){
+//			return apiResponse([], ApiStatus::CODE_91000, '商品编号不能为空!');
+//		}
+//		//创建商品服务层对象
+//		$orderGoodsService = new OrderGoods();
+//		$orderGivebackService = new OrderGiveback();
+//		//开始事务
+//		DB::beginTransaction();
+//		try{
+//			//更新还机单状态为还机处理中
+//			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_IN_PAY]);
+//			if( !$orderGivebackResult ){
+//				//事务回滚
+//				DB::rollBack();
+//				return apiResponse([], ApiStatus::CODE_92700, '还机单状态更新失败!');
+//			}
+//			//同步到商品表
+//			$orderGoodsResult = $orderGoodsService->update(['goods_no'=>$paramsArr['goods_no']], ['status'=> OrderGivebackStatus::STATUS_DEAL_IN_PAY]);
+//			if( !$orderGoodsResult ){
+//				//事务回滚
+//				DB::rollBack();
+//				return apiResponse([], ApiStatus::CODE_92700, '商品同步状态更新失败!');
+//			}
+//		} catch (\Exception $ex) {
+//			//事务回滚
+//			DB::rollBack();
+//			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
+//		}
+//		DB::commit();
+//
+//
+//		return apiResponse();
+//	}
 
 	/**
 	 * 获取还机搜索条件
@@ -1024,14 +1073,6 @@ class GivebackController extends Controller
 		$data['payment_time'] = time();
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
-
-		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			$paramsArr['goods_no'],
-			"GivebackEvaNoWitNo");
-		$notice->notify();
-
 		return $orderGivebackResult ? true : false;
 	}
 
