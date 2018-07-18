@@ -54,6 +54,7 @@ class ReceiveGoodsRepository
             $query->where('status', '=', $params['status']);
         } else {
 
+            return $type;
             if ($type == 1) {
                 $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
             }
