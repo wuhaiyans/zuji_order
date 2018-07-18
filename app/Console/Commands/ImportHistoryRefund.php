@@ -112,6 +112,7 @@ class ImportHistoryRefund extends Command
                 foreach($newData as $keys=>$values) {
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
+                        $continueReturnArr = $values[$values['return_id']];
                         continue;
                     }
 
@@ -142,6 +143,7 @@ class ImportHistoryRefund extends Command
 
             $bar->finish(); //结束
             LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()) );
+            echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
             LogApi::info('导入退款错误的记录列表：'.json_encode($errorReturnArr));
             echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";
             echo '导入退款错误的记录列表：'.json_encode($errorReturnArr);
