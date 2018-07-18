@@ -54,6 +54,9 @@ class ImportOrderLog extends Command
                     $logs=objectToArray($datas01);
 
                     foreach ($logs as $k=>$v) {
+                        if(!ImportOrder::isAllowImport($v['order_no'])){
+                            continue;
+                        }
                         $logData = [
                             'order_no' => $v['order_no'],
                             'action' => $v['action'],

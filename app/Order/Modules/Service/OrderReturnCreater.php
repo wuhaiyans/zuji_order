@@ -1398,12 +1398,19 @@ class OrderReturnCreater
 
     /**
      * 检测合格或不合格
-     * @param $business_key
-     * @param $data
-     * @return string
+     * @param int		$business_key	业务类型
+     * @param array		$data		
+	 * [
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 * ]	
+     * @param array		$userinfo		操作人信息
+     * @return bool	true：成功；false：失败
      * @throws \Exception
      */
-    public function isQualified($business_key,$data,$userinfo)
+    public function isQualified(int $business_key, array $data, array $userinfo)
     {
         //开启事务
         DB::beginTransaction();
@@ -1492,6 +1499,13 @@ class OrderReturnCreater
                             //事务回滚
                             DB::rollBack();
                             return false;//创建退款清单失败
+                        }
+                        //退货检测合格更新状态为退款中
+                        $ReturnTui=$return->returnCheck();
+                        if(!$ReturnTui){
+                            //事务回滚
+                            DB::rollBack();
+                            return false;//更新失败
                         }
                         //插入操作日志
                         $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
