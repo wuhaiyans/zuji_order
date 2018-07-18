@@ -40,15 +40,7 @@ class ImportUserCertified extends Command
      */
     public function handle()
     {
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->whereIn("appid",[
-            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
-            40,41,42,43,44,45,46,47,48,49,
-            50,51,52,53,54,55,56,57,58,59,
-            60,61,62,63,64,65,66,67,68,69,
-            70,71,72,73,74,75,76,77,78,79,
-            80,81,82,83,84,85,86,87,88,89,
-            93,94,95,96,97,98,122,123,131,132,
-        ])->count();
+        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -56,35 +48,33 @@ class ImportUserCertified extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->whereIn("appid",[
-                    1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
-                    40,41,42,43,44,45,46,47,48,49,
-                    50,51,52,53,54,55,56,57,58,59,
-                    60,61,62,63,64,65,66,67,68,69,
-                    70,71,72,73,74,75,76,77,78,79,
-                    80,81,82,83,84,85,86,87,88,89,
-                    93,94,95,96,97,98,122,123,131,132,
-                ])->forPage($page,$limit)->get();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
-                    $data = [
-                        'order_no'=>$v['order_no'],
-                        'certified'=>$v['credit']>0?1:0,
-                        'certified_platform'=>$v['certified_platform'],
-                        'credit'=>$v['credit'],
-                        'score'=>0,
-                        'risk'=>0,
-                        'face'=>0,
-                        'realname'=>$v['realname'],
-                        'cret_no'=>$v['cert_no'],
-                        'create_time'=>$v['create_time'],
-                    ];
-                    $ret = OrderUserCertified::updateOrCreate($data);
-                    if(!$ret->getQueueableId()){
-                        $arr[$v['order_no']] = $data;
+                    if(ImportOrder::isAllowImport($v['order_no'])){
+                        $data = [
+                            'order_no'=>$v['order_no'],
+                            'certified'=>$v['credit']>0?1:0,
+                            'certified_platform'=>$v['certified_platform'],
+                            'credit'=>$v['credit'],
+                            'score'=>0,
+                            'risk'=>0,
+                            'face'=>0,
+                            'realname'=>$v['realname'],
+                            'cret_no'=>$v['cert_no'],
+                            'create_time'=>$v['create_time'],
+                        ];
+                        $ret = OrderUserCertified::updateOrCreate($data);
+                        if(!$ret->getQueueableId()){
+                            $arr[$v['order_no']] = $data;
+                        }
+                        $bar->advance();
                     }
-                    $bar->advance();
+                    else{
+                        $arr[$v['order_no']] = $v;
+                    }
+
                 }
                 $page++;
                 sleep(1);

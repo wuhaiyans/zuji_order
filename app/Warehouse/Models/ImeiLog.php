@@ -1,8 +1,8 @@
 <?php
 /**
- * User: wansq
- * Date: 2018/5/14
- * Time: 10:27
+ * User: jinlin
+ * Date: 2018/7/18
+ * Time: 16:20
  */
 
 namespace App\Warehouse\Models;
@@ -11,7 +11,7 @@ namespace App\Warehouse\Models;
  * Class Imei
  * @package App\Warehouse\Models
  */
-class Imei extends Warehouse
+class ImeiLog extends Warehouse
 {
     /**
      * @var bool
@@ -22,14 +22,14 @@ class Imei extends Warehouse
 
     public $timestamps = false;
 
-    protected $table = 'zuji_imei';
+    protected $table = 'zuji_imei_log';
 
     protected $primaryKey='imei';
     /**
      * imei状态
      */
     const STATUS_CNACEN = 0;//取消
-    const STATUS_IN     = 1;//仓库中
+    const STATUS_IN     = 1;//入库
     const STATUS_OUT    = 2;//出库
 
     /**
@@ -37,8 +37,7 @@ class Imei extends Warehouse
      * 可填充字段
      */
     protected $fillable = [
-        'imei', 'price', 'status', 'brand', 'name', 'price', 'apple_serial',
-        'quality', 'color', 'business', 'storage', 'create_time', 'update_time'
+        'imei', 'type', 'create_time'
     ];
 
 
@@ -51,8 +50,9 @@ class Imei extends Warehouse
     public static function sta($status=null)
     {
         $st = [
-            self::STATUS_IN   => '仓库中',
-            self::STATUS_OUT  => '出库',
+            self::STATUS_CNACEN => '取消无效',
+            self::STATUS_IN     => '入库',
+            self::STATUS_OUT    => '出库',
         ];
 
         if ($status === null) return $st;
@@ -64,22 +64,24 @@ class Imei extends Warehouse
      * @param $imei
      * @return bool
      *
-     * 库存中
+     * 入库
      */
     public static function in($imei)
     {
-        $model = self::where(['imei'=>$imei])->first();
+        $data = [
+            'imei'=>$imei,
+            'type'=>self::STATUS_IN,
+            'create_time'=>time(),
+        ];
+        $model = self::create($data);
         if (!$model) {
             return false;
         }
-        //设备出入库记录
-        if(!ImeiLog::in($imei)){
+        if (!$model) {
             return false;
         }
-        $model->status = self::STATUS_IN;
-        $model->update_time = time();
 
-        return $model->update();
+        return true;
     }
 
     /**
@@ -89,17 +91,16 @@ class Imei extends Warehouse
      */
     public static function out($imei)
     {
-        $model = self::where(['imei'=>$imei])->first();
+        $data = [
+            'imei'=>$imei,
+            'type'=>self::STATUS_OUT,
+            'create_time'=>time(),
+        ];
+        $model = self::create($data);
         if (!$model) {
             return false;
         }
-        //设备出入库记录
-        if(!ImeiLog::out($imei)){
-            return false;
-        }
-        $model->status = self::STATUS_OUT;
-        $model->update_time = time();
 
-        return $model->update();
+        return true;
     }
 }
