@@ -148,6 +148,73 @@ class CronOperate
 
     }
     /**
+     * 定时任务  长租订单到期前一个月发送信息
+     */
+    public static function cronOneMonthEndByLong()
+    {
+
+        $whereLong =[];
+        $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
+        $whereLong[] = ['zuqi_type', '=', 2];
+        $start =strtotime(date('Y-m-d',strtotime('+30 days')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+30 days')));
+        $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
+        if (!$goodsData) {
+            return false;
+        }
+        foreach ($goodsData as $k => $v) {
+            //发送短信
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING);
+            $orderNoticeObj->notify();
+        }
+        return true;
+
+
+    }
+    /**
+     * 定时任务  长租订单到期前一周发送信息
+     */
+    public static function cronOneWeekEndByLong()
+    {
+
+        $whereLong =[];
+        $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
+        $whereLong[] = ['zuqi_type', '=', 2];
+        $start =strtotime(date('Y-m-d',strtotime('+7 days')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+7 days')));
+        $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
+        if (!$goodsData) {
+            return false;
+        }
+        foreach ($goodsData as $k => $v) {
+            //发送短信
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING);
+            $orderNoticeObj->notify();
+        }
+        return true;
+    }
+    /**
+     * 定时任务  长租订单逾期一个月发送信息
+     */
+    public static function cronOverOneMonthEndByLong()
+    {
+        $whereLong =[];
+        $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
+        $whereLong[] = ['zuqi_type', '=', 2];
+        $start =strtotime(date('Y-m-d',strtotime('-30 days')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('-30 days')));
+        $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
+        if (!$goodsData) {
+            return false;
+        }
+        foreach ($goodsData as $k => $v) {
+            //发送短信
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING);
+            $orderNoticeObj->notify();
+        }
+        return true;
+    }
+    /**
      *  定时任务取消买断支付单
      * @return bool
      */
