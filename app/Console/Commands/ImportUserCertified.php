@@ -68,23 +68,29 @@ class ImportUserCertified extends Command
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
-                    $data = [
-                        'order_no'=>$v['order_no'],
-                        'certified'=>$v['credit']>0?1:0,
-                        'certified_platform'=>$v['certified_platform'],
-                        'credit'=>$v['credit'],
-                        'score'=>0,
-                        'risk'=>0,
-                        'face'=>0,
-                        'realname'=>$v['realname'],
-                        'cret_no'=>$v['cert_no'],
-                        'create_time'=>$v['create_time'],
-                    ];
-                    $ret = OrderUserCertified::updateOrCreate($data);
-                    if(!$ret->getQueueableId()){
-                        $arr[$v['order_no']] = $data;
+                    if(ImportOrder::isAllowImport($v['order_no'])){
+                        $data = [
+                            'order_no'=>$v['order_no'],
+                            'certified'=>$v['credit']>0?1:0,
+                            'certified_platform'=>$v['certified_platform'],
+                            'credit'=>$v['credit'],
+                            'score'=>0,
+                            'risk'=>0,
+                            'face'=>0,
+                            'realname'=>$v['realname'],
+                            'cret_no'=>$v['cert_no'],
+                            'create_time'=>$v['create_time'],
+                        ];
+                        $ret = OrderUserCertified::updateOrCreate($data);
+                        if(!$ret->getQueueableId()){
+                            $arr[$v['order_no']] = $data;
+                        }
+                        $bar->advance();
                     }
-                    $bar->advance();
+                    else{
+                        $arr[$v['order_no']] = $v;
+                    }
+
                 }
                 $page++;
                 sleep(1);
