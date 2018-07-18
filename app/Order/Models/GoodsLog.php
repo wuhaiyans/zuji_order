@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GoodsLog extends Model
 {
-    protected $table = 'goods_log';
+    protected $table = 'order_goods_log';
 
     protected $primaryKey='id';
     /**
