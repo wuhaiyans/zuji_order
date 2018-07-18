@@ -73,6 +73,7 @@ class Config {
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461053', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461067', //提前还款短信
 
+				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 			],
 
 			// 小程序

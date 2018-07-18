@@ -81,5 +81,10 @@ class SceneConfig {
      */
     const REFUND_SUCCESS = 'RefundSuccess';
 
+    /**
+     * 场景：<b>【申请还机】</b>
+     */
+    const GIVEBACK_CREATE = 'GivebackCreate';
+
 
 }
