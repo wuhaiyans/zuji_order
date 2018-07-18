@@ -132,6 +132,7 @@ class ImportHistoryRefund extends Command
                 echo "导入退款offset".$offset."\n";
                 if ($offset>$returnCount) {
                     LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()));
+                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
