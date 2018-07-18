@@ -146,6 +146,29 @@ class CronOperate
 
             }
 
+            return true;
+
+    }
+    /**
+     * 定时任务  长租订单到期前一个月发送信息
+     */
+    public static function cronOneMonthEndByLong()
+    {
+
+    }
+    /**
+     * 定时任务  长租订单到期前一周发送信息
+     */
+    public static function cronOneWeekEndByLong()
+    {
+
+    }
+    /**
+     * 定时任务  长租订单逾期一个月发送信息
+     */
+    public static function cronOverOneMonthEndByLong()
+    {
+
     }
     /**
      *  定时任务取消买断支付单
