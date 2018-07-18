@@ -60,7 +60,7 @@ class ImportUserAddress extends Command
 
                 foreach ($orderList as $k=>$v) {
                     $bar->advance();
-                    if(!empty($addressList[$v['order_id']])){
+                    if(!empty($addressList[$v['order_id']]) && ImportOrder::isAllowImport($v['order_no'])){
                         $data = [
                             'order_no'=>$v['order_no'],
                             'consignee_mobile'=>$addressList[$v['order_id']]['mobile'],

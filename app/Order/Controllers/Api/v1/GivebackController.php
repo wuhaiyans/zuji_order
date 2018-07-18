@@ -232,6 +232,14 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([], ApiStatus::CODE_93200, '收货单创建失败!');
 				}
+
+				//发送短信
+				$notice = new \App\Order\Modules\Service\OrderNotice(
+					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					$goodsNo,
+					"GivebackCreate");
+				$notice->notify();
+
 			}
 			//冻结订单
 
@@ -255,6 +263,7 @@ class GivebackController extends Controller
 			if( !$goodsLog ){
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
+
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
@@ -349,6 +358,15 @@ class GivebackController extends Controller
 			if( !$goodsLog ){
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$goodsNo,
+				"GivebackConfirmDelivery");
+			$notice->notify();
+
+
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
@@ -896,6 +914,15 @@ class GivebackController extends Controller
 
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			"GivebackWithholdSuccess");
+		$notice->notify();
+
+
 		return $orderGivebackResult ? true : false;
 	}
 
@@ -938,6 +965,14 @@ class GivebackController extends Controller
 		$data['payment_time'] = time();
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			"GivebackWithholdFail");
+		$notice->notify();
+
 		return $orderGivebackResult ? true : false;
 	}
 
@@ -1085,6 +1120,14 @@ class GivebackController extends Controller
 			set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
 			return false;
 		}
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$goodsNo,
+			"GivebackConfirmDelivery");
+		$notice->notify();
+
+
 		return true;
 	}
 

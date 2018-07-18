@@ -57,18 +57,22 @@ class ImportUserVisit extends Command
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
-                    $data = [
-                        'order_no' => $v['order_no'],
-                        'visit_id' => $v['remark_id'],
-                        'visit_text' => $v['remark'],
-                        'create_time' => $v['create_time'],
-                    ];
-                    $ret = OrderVisit::updateOrCreate($data);
-                    OrderExtend::updateOrCreate(['order_no'=>$v['order_no'],'field_name'=>'visit','field_value'=>1]);
-                    if(!$ret->getQueueableId()){
-                        $arr[$v['order_no']] = $data;
+                    if(ImportOrder::isAllowImport($v['order_no'])) {
+                        $data = [
+                            'order_no' => $v['order_no'],
+                            'visit_id' => $v['remark_id'],
+                            'visit_text' => $v['remark'],
+                            'create_time' => $v['create_time'],
+                        ];
+                        $ret = OrderVisit::updateOrCreate($data);
+                        OrderExtend::updateOrCreate(['order_no' => $v['order_no'], 'field_name' => 'visit', 'field_value' => 1]);
+                        if (!$ret->getQueueableId()) {
+                            $arr[$v['order_no']] = $data;
+                        }
+                        $bar->advance();
+                    }else{
+                        $arr[$v['order_no']] = $v;
                     }
-                    $bar->advance();
                 }
                 $page++;
                 sleep(1);

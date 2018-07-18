@@ -371,10 +371,10 @@ class DeliveryService
      */
     public function export($params)
     {
-        $limit = 200;
-        if (isset($params['size']) && $params['size']) {
-            $limit = $params['size'];
-        }
+        $limit = 20000;
+//        if (isset($params['size']) && $params['size']) {
+//            $limit = $params['size'];
+//        }
         $whereParams = [];
 
         $logic_params = [];

@@ -26,13 +26,13 @@ $order_ID_N = 1000000;//订单增量结束ID 必填
 // ...
 echo '开始时间:'.date('Y-m-d H:i:s',$t).';<br>';
 //数据库配置
-$user = 'root';
-$password = '123456';
-$dbname1 = 'zuji';
-$dbname2 = 'zuji_order';
-$dbname3 = 'zuji_warehouse';
-$host = '127.0.0.1';
-$port = 3306;
+$user = 'root';//用户名
+$password = '123456';//密码
+$dbname1 = 'zuji';//老数据库库名
+$dbname2 = 'zuji_order';//新订单系统库名
+$dbname3 = 'zuji_warehouse';//新收发货库名
+$host = '127.0.0.1';//host
+$port = 3306;//端口
 
 //$user = 'root';
 //$password = 'd^GHL,Oc@De3jW';

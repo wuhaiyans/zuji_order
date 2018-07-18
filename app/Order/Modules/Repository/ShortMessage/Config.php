@@ -58,6 +58,10 @@ class Config {
                 SceneConfig::ORDER_CANCEL           	=> 'SMS_113461044', //用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY         	=> 'SMS_113461046', //订单发货短信
                 SceneConfig::ORDER_MONTH_RECEIVE    	=> 'SMS_113461146', //订单月租签收短信
+                SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING =>'SMS_113461128',//订单到期前一个月发送信息-月租
+                SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING  =>'SMS_113461129',//订单到期前一周发送信息-月租
+                SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_113461130',//订单逾期一个月发送信息-月租
+
 
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_113461054', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	 	=> 'SMS_113461055', //退货审核通过
@@ -72,6 +76,15 @@ class Config {
 				SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_113461052', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461053', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461067', //提前还款短信
+
+				//还机
+				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
+				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货
+				SceneConfig::GIVEBACK_ORDERCLEAN 		=> 'SMS_113461138', //财务系统完成退还押金
+				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
+				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461134', //系统执行代扣成功后发送
+				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送
+
 
 			],
 
@@ -117,6 +130,8 @@ class Config {
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461013', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461019', //提前还款短信
 
+				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
 
                 SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461005', //退货审核不通过
                 SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461014', //退货检测合格

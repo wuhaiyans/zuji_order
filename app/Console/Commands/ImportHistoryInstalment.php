@@ -47,6 +47,7 @@ class ImportHistoryInstalment extends Command
       $page   = 1;
       $totalpage = ceil($total/$limit);
       $arr =[];
+
       do {
           $result = \DB::connection('mysql_01')->table('zuji_order2_instalment')
               ->forPage($page,$limit)
@@ -57,11 +58,18 @@ class ImportHistoryInstalment extends Command
           foreach($result as &$item) {
             // 查询订单信息
 
-            $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'user_id', 'zujin')->where(['order_id' => $item['order_id']])->first();
+            $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'user_id', 'zujin', "appid", "business_key")->where(['order_id' => $item['order_id']])->first();
             $orderInfo = objectToArray($orderInfo);
             if(!$orderInfo){
               continue;
             }
+
+            // 去除小程序分期
+            $isAllow = \App\Console\Commands\ImportOrder::isAllowImport($orderInfo['order_no']);
+            if(!$isAllow){
+              continue;
+            }
+
 
             $data['id']               = $item['id'];
             $data['order_no']         = $orderInfo['order_no'];

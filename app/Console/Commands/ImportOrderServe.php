@@ -62,7 +62,7 @@ class ImportOrderServe extends Command
                 $serviceList = array_keys_arrange($serviceList,"service_id");
 
                 foreach ($orderList as $k=>$v) {
-                    if($serviceList[$v['service_id']]){
+                    if($serviceList[$v['service_id']]   && ImportOrder::isAllowImport($v['order_no'])){
                         $data = [
                             'order_no'=>$v['order_no'],
                             'goods_no'=>$v['goods_id'],
@@ -78,7 +78,7 @@ class ImportOrderServe extends Command
                         }
                     }
                     else{
-                        $arr[$v['order_no']] = $v['order_no'];
+                        $arr[$v['order_no']] = $v;
                     }
                     $bar->advance();
                 }

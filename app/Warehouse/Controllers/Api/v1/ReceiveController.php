@@ -5,6 +5,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
+use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Service\ReceiveService;
 use Illuminate\Support\Facades\DB;
 
@@ -81,7 +82,8 @@ class ReceiveController extends Controller
             'customer' => 'required',
             'customer_mobile' => 'required',
             'customer_address' => 'required',
-            'receive_detail' => 'required'
+            'receive_detail' => 'required',
+            'business_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -268,14 +270,18 @@ class ReceiveController extends Controller
             $params['create_time'] = time();
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
+            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
                 'evaluation_status'=>$params['check_result'],
                 'evaluation_time'=>$params['create_time'],
                 'evaluation_remark'=>$params['check_description'],
                 'compensate_amount'=>$params['compensate_amount'],
+                'business_no'=>$receive_row['business_no'],
+                //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
-            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
             $this->receive->checkItem($params);
             DB::commit();

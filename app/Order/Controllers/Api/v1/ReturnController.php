@@ -404,7 +404,8 @@ class ReturnController extends Controller
             if(empty($param['goods_no'])
                 || empty($param['evaluation_status'])
                 || empty($param['evaluation_time'])
-                ||empty($params['params']['business_key'])){
+                ||empty($params['params']['business_key'])
+                ||empty($params['params']['business_no'])){
                 return  apiResponse([],ApiStatus::CODE_20001);
             }
         }
@@ -415,6 +416,10 @@ class ReturnController extends Controller
         }
         $res=$this->OrderReturnCreater->isQualified($params['params']['business_key'],$params['params']['data'],$params['params']['userinfo']);
         if(!$res){
+			LogApi::error("检测结果保存失败",[
+				'error' => \App\Lib\Common\Error::getError(),
+				'request' => $params,
+			]);
             return  apiResponse([],ApiStatus::CODE_33008,"修改失败");//修改检测结果失败
         }
         return apiResponse([],ApiStatus::CODE_0,'检测合格');

@@ -50,19 +50,21 @@ class ReceiveGoodsRepository
             $query->where($logic_params);
         }
 
-        if (isset($params['status'])) {
+        if (isset($params['status']) && $params['status']!='') {
             $query->where('status', '=', $params['status']);
-        } else {
-
-            if ($type == 1) {
-                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
-            }
-
-            if ($type = 2) {
-                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_INIT]);
-            }
-
         }
+//        else {
+//
+//            if ($type == 1) {
+//                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_ALL_CHECK]);
+//            }
+//
+//            if ($type == 2) {
+//                $query->whereIn('status', [ReceiveGoods::STATUS_ALL_RECEIVE, ReceiveGoods::STATUS_INIT]);
+//            }
+//
+//        }
+        $query->orderByDesc('id');
 
         return $query->with(['receive'])->paginate($limit,
             [

@@ -84,7 +84,7 @@ class ImeiService
 
 
         if (isset($params['end_time']) && $params['end_time']) {
-            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
 
         $page = isset($params['page']) ? $params['page'] : 1;
@@ -125,11 +125,11 @@ class ImeiService
      */
     public function export($params)
     {
-        $limit = 20;
+        $limit = 20000;
 
-        if (isset($params['size']) && $params['size']) {
-            $limit = $params['size'];
-        }
+//        if (isset($params['size']) && $params['size']) {
+//            $limit = $params['size'];
+//        }
         $whereParams = [];
 
         $search = $this->paramsSearch($params);

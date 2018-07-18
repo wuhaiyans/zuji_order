@@ -98,6 +98,16 @@ $api->version('v1', [
         $api->get('cronCancelOrder', 'CronController@cronCancelOrder');
     // 定时任务 订单自动确认收货接口 不加token
         $api->get('cronDeliveryReceive', 'CronController@cronDeliveryReceive');
+
+
+    // 定时任务 长租订单到期前一个月发送信息
+    $api->get('cronOneMonthEndByLong', 'CronController@cronOneMonthEndByLong');
+    // 定时任务 长租订单到期前一周发送信息
+    $api->get('cronOneWeekEndByLong', 'CronController@cronOneWeekEndByLong');
+    // 定时任务 长租订单逾期一个月发送信息
+    $api->get('cronOverOneMonthEndByLong', 'CronController@cronOverOneMonthEndByLong');
+
+
     // 定时任务 每日执行定时任务-扣款
     $api->get('crontabCreatepay', 'WithholdController@crontabCreatepay');
     // 定时任务 每日执行定时任务-扣款
