@@ -156,8 +156,8 @@ class CronOperate
         $whereLong =[];
         $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
         $whereLong[] = ['zuqi_type', '=', 2];
-        $start =strtotime(date('Y-m-d',strtotime('+30 days')));
-        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+30 days')));
+        $start =strtotime(date('Y-m-d',strtotime('+1 month')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 month')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
             echo "无";die;
@@ -180,8 +180,8 @@ class CronOperate
         $whereLong =[];
         $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
         $whereLong[] = ['zuqi_type', '=', 2];
-        $start =strtotime(date('Y-m-d',strtotime('+7 days')));
-        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+7 days')));
+        $start =strtotime(date('Y-m-d',strtotime('+1 week')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 week')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
             echo "无";die;
@@ -201,8 +201,8 @@ class CronOperate
         $whereLong =[];
         $whereLong[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
         $whereLong[] = ['zuqi_type', '=', 2];
-        $start =strtotime(date('Y-m-d',strtotime('-30 days')));
-        $end =strtotime(date('Y-m-d 23:59:59',strtotime('-30 days')));
+        $start =strtotime(date('Y-m-d',strtotime('-1 month')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('-1 month')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
             echo "无";die;
