@@ -159,7 +159,7 @@ class ImportHistoryReturn extends Command
      */
     private function getReceiveInfo($orderNo){
 
-        $receiveSql = "SELECT *  FROM zuji_order2_receive WHERE order_no={$orderNo}";
+        $receiveSql = "SELECT *  FROM zuji_order2_receive WHERE order_no='{$orderNo}'";
         $returnData  =  $this->conn->select($receiveSql);
         return objectToArray($returnData) ? objectToArray($returnData)[0]: '';
     }
@@ -173,7 +173,7 @@ class ImportHistoryReturn extends Command
      */
     private function getEvaluationInfo($orderNo){
 
-        $receiveSql = "SELECT *  FROM zuji_order2_evaluation WHERE order_no={$orderNo}";
+        $receiveSql = "SELECT *  FROM zuji_order2_evaluation WHERE order_no='{$orderNo}'";
         $evaluationData   =  $this->conn->select($receiveSql);
         return objectToArray($evaluationData)? objectToArray($evaluationData)[0]: '' ;
     }
