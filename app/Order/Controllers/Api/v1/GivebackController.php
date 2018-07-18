@@ -237,7 +237,7 @@ class GivebackController extends Controller
 				$notice = new \App\Order\Modules\Service\OrderNotice(
 					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 					$goodsNo,
-					"GIVEBACK_CREATE");
+					"GivebackCreate");
 				$notice->notify();
 
 			}
