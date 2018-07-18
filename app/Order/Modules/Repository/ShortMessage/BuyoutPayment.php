@@ -10,7 +10,7 @@ use App\Order\Modules\Service\OrderBuyout;
  *
  * @author wuhaiyan
  */
-class BuyoutConfirm implements ShortMessage {
+class BuyoutPayment implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
