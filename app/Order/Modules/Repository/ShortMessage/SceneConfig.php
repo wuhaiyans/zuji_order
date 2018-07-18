@@ -30,6 +30,18 @@ class SceneConfig {
      * 场景:<b>【订单签收-月租】</b>
      */
     const ORDER_MONTH_RECEIVE = 'OrderMonthReceive';
+    /**
+     * 场景:<b>【订单到期前一个月发送信息-月租】</b>
+     */
+    const ORDER_MONTH_BEFORE_MONTH_ENDING = 'OrderMonthBeforeMonthEnding';
+    /**
+     * 场景:<b>【订单到期前一周发送信息-月租】</b>
+     */
+    const ORDER_MONTH_BEFORE_WEEK_ENDING = 'OrderMonthBeforeWeekEnding';
+    /**
+     * 场景:<b>【订单逾期一个月发送信息-月租】</b>
+     */
+    const ORDER_MONTH_OVER_MONTH_ENDING = 'OrderMonthOverMonthEnding';
 
 	/**
 	 * 场景:<b>【分期扣款】</b>
@@ -93,6 +105,14 @@ class SceneConfig {
      * 场景：<b>【财务系统完成退还押金】</b>
      */
     const GIVEBACK_ORDERCLEAN = 'GivebackOrderClean';
+    /**
+     * 场景：<b>【系统执行代扣成功后发送】</b>
+     */
+    const GIVEBACK_WITHHOLDSUCCESS = 'GivebackWithholdSuccess';
+    /**
+     * 场景：<b>【系统执行代扣失败后发送】</b>
+     */
+    const GIVEBACK_WITHHOLDFAIL = 'GivebackWithholdFail';
     /**
     * 场景：<b>【买断确认】</b>
     */

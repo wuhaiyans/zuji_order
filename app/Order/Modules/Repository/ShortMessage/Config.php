@@ -58,6 +58,10 @@ class Config {
                 SceneConfig::ORDER_CANCEL           	=> 'SMS_113461044', //用户/后台/自动任务取消订单
                 SceneConfig::ORDER_DELIVERY         	=> 'SMS_113461046', //订单发货短信
                 SceneConfig::ORDER_MONTH_RECEIVE    	=> 'SMS_113461146', //订单月租签收短信
+                SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING =>'SMS_113461128',//订单到期前一个月发送信息-月租
+                SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING  =>'SMS_113461129',//订单到期前一周发送信息-月租
+                SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_113461130',//订单逾期一个月发送信息-月租
+
 
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_113461054', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	 	=> 'SMS_113461055', //退货审核通过
@@ -77,6 +81,9 @@ class Config {
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货
 				SceneConfig::GIVEBACK_ORDERCLEAN 		=> 'SMS_113461138', //财务系统完成退还押金
+				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
+				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461134', //系统执行代扣成功后发送
+
 
 			],
 

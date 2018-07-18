@@ -914,6 +914,15 @@ class GivebackController extends Controller
 
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			"GivebackWithholdSuccess");
+		$notice->notify();
+
+
 		return $orderGivebackResult ? true : false;
 	}
 
@@ -956,6 +965,14 @@ class GivebackController extends Controller
 		$data['payment_time'] = time();
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			"GivebackWithholdFail");
+		$notice->notify();
+
 		return $orderGivebackResult ? true : false;
 	}
 

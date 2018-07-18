@@ -1410,40 +1410,49 @@ class OrderReturnCreater
                 //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($v['goods_no']);
                 if(!$return){
+					\App\Lib\Common\Error::setError('退货单查询失败');
                     return false;
                 }
                 $return_info=$return->getData();
                 //必须是已收货状态
                 if($return_info['status']!=ReturnStatus::ReturnReceive){
+					\App\Lib\Common\Error::setError('退货单状态禁止');
                     return false;
                 }
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
+					\App\Lib\Common\Error::setError('订单查询失败');
                     return false;
                 }
                 $order_info=$order->getData();
                 //获取商品信息
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($v['goods_no']);
                 if(!$goods){
+					\App\Lib\Common\Error::setError('商品查询失败');
                     return false;
                 }
                 $goods_info=$goods->getData();
                 $params['evaluation_remark'] = $v['evaluation_remark'];
-                $params['evaluation_amount'] =$v['compensate_amount'];
-                $params['evaluation_time'] =$v['evaluation_time'];
+                $params['evaluation_amount'] = $v['compensate_amount'];
+                $params['evaluation_time'] = $v['evaluation_time'];
+				
+				// 合格状态
                 if($data[$k]['evaluation_status']==1) {
-                    $yes_list[]=$return_info['refund_no'];
+                    $yes_list[] = $return_info['refund_no'];
                     $params['evaluation_status'] = ReturnStatus::ReturnEvaluationSuccess;
-                    //更新退换货单信息
+                    // 更新退换货单信息
                     $updateReturn=$return->returnCheckOut($params);
                     if(!$updateReturn){
                         DB::rollBack();
+						\App\Lib\Common\Error::setError('退换货单检测结果保存失败');
                         return false;
                     }
+					
+					// 退货业务，创建清算单
                     if($business_key == OrderStatus::BUSINESS_RETURN){
                         //获取订单的支付信息
-                        $pay_result=$this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
+                        $pay_result=$this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$return_info['order_no']);
                         if(!$pay_result){
                             return false;
                         }

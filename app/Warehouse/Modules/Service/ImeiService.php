@@ -125,11 +125,11 @@ class ImeiService
      */
     public function export($params)
     {
-        $limit = 20;
+        $limit = 20000;
 
-        if (isset($params['size']) && $params['size']) {
-            $limit = $params['size'];
-        }
+//        if (isset($params['size']) && $params['size']) {
+//            $limit = $params['size'];
+//        }
         $whereParams = [];
 
         $search = $this->paramsSearch($params);
