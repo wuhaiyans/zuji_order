@@ -51,6 +51,7 @@ class OrderOperate
      *  'order_no'=>'',//订单编号
      *  'logistics_id'=>''//物流渠道ID
      *  'logistics_no'=>''//物流单号
+     * ‘logistics_note’ //发货备注
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
@@ -113,7 +114,7 @@ class OrderOperate
                 //增加操作日志
                 if(!empty($operatorInfo)){
 
-                    OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货","");
+                    OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货",$orderDetail['logistics_note']);
                 }
                 DB::commit();
                 //增加确认收货队列

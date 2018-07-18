@@ -110,6 +110,10 @@ class ImportHistoryRefund extends Command
                 }
 
                 foreach($newData as $keys=>$values) {
+                    if (!ImportOrder::isAllowImport($values['order_no'])){
+
+                        continue;
+                    }
 
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {

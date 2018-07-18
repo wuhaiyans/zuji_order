@@ -289,6 +289,7 @@ class DeliveryController extends Controller
                 'order_no' => $result['order_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
+                'logistics_note'=>$params['logistics_note']
             ];
 
             //操作员信息,用户或管理员操作有
@@ -299,8 +300,6 @@ class DeliveryController extends Controller
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
 
-            //Log::error('aaaaaaaaccd');
-            //Log::error($a);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

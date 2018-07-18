@@ -84,7 +84,7 @@ class ImeiService
 
 
         if (isset($params['end_time']) && $params['end_time']) {
-            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'])]);
+            array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
 
         $page = isset($params['page']) ? $params['page'] : 1;

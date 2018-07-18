@@ -110,6 +110,10 @@ class ImportHistoryReturn extends Command
                 foreach($newData as $keys=>$values) {
 
 
+                    if (!ImportOrder::isAllowImport($values['order_no'])){
+
+                        continue;
+                    }
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
                         echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
