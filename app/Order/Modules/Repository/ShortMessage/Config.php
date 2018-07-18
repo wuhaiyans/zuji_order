@@ -83,6 +83,7 @@ class Config {
 				SceneConfig::GIVEBACK_ORDERCLEAN 		=> 'SMS_113461138', //财务系统完成退还押金
 				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461134', //系统执行代扣成功后发送
+				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送
 
 
 			],

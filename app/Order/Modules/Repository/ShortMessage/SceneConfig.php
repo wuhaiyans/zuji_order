@@ -114,6 +114,10 @@ class SceneConfig {
      */
     const GIVEBACK_WITHHOLDFAIL = 'GivebackWithholdFail';
     /**
+     * 场景：<b>【财务收到用户剩余租金成功时发送】</b>
+     */
+    const GIVEBACK_PAYMENT = 'GivebackPayment';
+    /**
     * 场景：<b>【买断确认】</b>
     */
     const BUYOUT_CONFIRM = 'BuyoutConfirm';
