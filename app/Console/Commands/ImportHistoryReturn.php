@@ -112,6 +112,7 @@ class ImportHistoryReturn extends Command
 
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
+                        $continueReturnArr = $values[$values['return_id']];
                         continue;
                     }
                     $success = $this->insertSelectReturn($values);
@@ -127,6 +128,7 @@ class ImportHistoryReturn extends Command
                 LogApi::info("导入退货offset".$offset);
                 echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
+                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
                     echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
