@@ -119,6 +119,22 @@ class Goods {
         return $this->model->save();
 
     }
+
+    /**
+     * 取消退换货
+     * @return bool
+     */
+    public function returnCancel():bool{
+        if( $this->model->goods_status== OrderGoodStatus::RENTING_MACHINE){
+            return false;
+        }
+        // 状态改为租用中并且清除business_key 和business_no
+        $this->model->business_key = 0;
+        $this->model->business_no ='';
+        $this->model->goods_status = OrderGoodStatus::RENTING_MACHINE;
+        return $this->model->save();
+    }
+
     /**
      * 完成退货
      * @return bool
