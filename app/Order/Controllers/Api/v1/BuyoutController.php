@@ -334,6 +334,9 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
+        //发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
+        $notice->notify();
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
         //插入订单设备日志
@@ -443,6 +446,9 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
+        //发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
+        $notice->notify();
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断","创建买断成功");
         //插入订单设备日志

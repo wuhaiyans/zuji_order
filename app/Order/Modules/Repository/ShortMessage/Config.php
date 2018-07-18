@@ -121,7 +121,7 @@ class Config {
 				SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_113461012', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461013', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461019', //提前还款短信
-				
+
 				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
 				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
 
