@@ -50,7 +50,7 @@ class ReceiveGoodsRepository
             $query->where($logic_params);
         }
 
-        if (isset($params['status'])) {
+        if (isset($params['status']) && $params['status']!='') {
             $query->where('status', '=', $params['status']);
         } else {
 
