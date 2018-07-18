@@ -2,20 +2,14 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
-use App\Lib\Common\LogApi;
-use App\Lib\User\User;
-use App\Order\Modules\Inc\PayInc;
-use App\Order\Modules\Repository\OrderDeliveryRepository;
-use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\Pay\Channel;
 
 /**
- * OrderMonthBeforeMonthEnding 订单到期前一个月发送信息-月租
+ * OrderCancel
  *
  * @author wuhaiyan
  */
-class OrderMonthBeforeMonthEnding implements ShortMessage {
+class BuyoutConfirm implements ShortMessage {
 	
 	private $business_type;
 	private $business_no;
@@ -53,23 +47,19 @@ class OrderMonthBeforeMonthEnding implements ShortMessage {
         }
         $goodsName ="";
         foreach ($goods as $k=>$v){
-            $goodsName=$v['goods_name'];
-            $endTime =$v['end_time'];
+            $goodsName.=$v['goods_name']." ";
         }
-
-
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName'=>$orderInfo['realname'],
-            'goodsName'=>$goodsName,
-            'endTime'=>date("Y-m-d H:i:s",$endTime),
+            'buyoutPrice'=>$orderInfo['order_no'],
 		]);
 	}
 
 	// 支付宝 短信通知
 	public function alipay_notify(){
-        return true;
+		return true;
 	}
 
 	

@@ -60,7 +60,7 @@ class GoodsLogRepository
     {
         if (empty($businessNo)) return false;
         $result = GoodsLog::query()->where([
-            ['businessNo', '=', $businessNo],
+            ['business_no', '=', $businessNo],
         ])->get()->toArray();
         return $result ?? false;
     }

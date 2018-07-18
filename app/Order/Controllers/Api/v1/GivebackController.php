@@ -232,6 +232,14 @@ class GivebackController extends Controller
 					DB::rollBack();
 					return apiResponse([], ApiStatus::CODE_93200, '收货单创建失败!');
 				}
+
+				//发送短信
+				$notice = new \App\Order\Modules\Service\OrderNotice(
+					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					$goodsNo,
+					"GivebackCreate");
+				$notice->notify();
+
 			}
 			//冻结订单
 
@@ -255,6 +263,7 @@ class GivebackController extends Controller
 			if( !$goodsLog ){
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
+
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
