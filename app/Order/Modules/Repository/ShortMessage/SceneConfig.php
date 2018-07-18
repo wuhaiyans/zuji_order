@@ -85,6 +85,10 @@ class SceneConfig {
      * 场景：<b>【申请还机】</b>
      */
     const GIVEBACK_CREATE = 'GivebackCreate';
+    /**
+     * 场景：<b>【还机确认收货】</b>
+     */
+    const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
 
 
 }

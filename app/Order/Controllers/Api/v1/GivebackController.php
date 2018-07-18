@@ -358,6 +358,11 @@ class GivebackController extends Controller
 			if( !$goodsLog ){
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
+
+
+
+
+
 		} catch (\Exception $ex) {
 			//事务回滚
 			DB::rollBack();
