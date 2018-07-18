@@ -22,4 +22,8 @@ return [
     'order_cancel_hours' =>2*3600,
     //买断单多长时间未支付取消买断支付单
     'buyout_cancel_hours' =>60*10,
+    //检查androd审核情况
+    'check_verify_app_android' => env('CHECK_VERIFY_APP_ANDROID',false),
+    //检查ios审核情况
+    'check_verify_app_ios' => env('CHECK_VERIFY_APP_IOS',false),
 ];

@@ -1638,7 +1638,9 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+
             }
+
             //提交事务
             DB::commit();
             return true;

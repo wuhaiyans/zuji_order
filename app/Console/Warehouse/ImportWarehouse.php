@@ -19,13 +19,13 @@ $order_ID_N = 100;//订单增量结束ID 必填
 // ...
 echo '开始时间:'.date('Y-m-d H:i:s',$t).';<br>';
 //数据库配置
-$user = 'root';
-$password = '123456';
-$dbname1 = 'zuji';
-$dbname2 = 'zuji_order';
-$dbname3 = 'zuji_warehouse';
-$host = '127.0.0.1';
-$port = 3306;
+$user = 'root';//用户名
+$password = '123456';//密码
+$dbname1 = 'zuji';//老数据库库名
+$dbname2 = 'zuji_order';//新订单系统库名
+$dbname3 = 'zuji_warehouse';//新收发货库名
+$host = '127.0.0.1';//host
+$port = 3306;//端口
 
 //$user = 'root';
 //$password = 'd^GHL,Oc@De3jW';
@@ -68,7 +68,8 @@ $db3->autocommit(false);
 
 //DB1 数据查询
 // 查询订单
-$result_order2_all1=$db1->query("SELECT order_id,business_key,order_no,appid FROM zuji_order2 WHERE order_id>".$order_ID_S." AND order_id<".$order_ID_N);
+$appid = "appid in (1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,93,94,95,96,97,98,122,123,131,132)";
+$result_order2_all1=$db1->query("SELECT order_id,business_key,order_no,appid FROM zuji_order2 WHERE order_id>".$order_ID_S." AND order_id<".$order_ID_N." AND business_key=1 AND ".$appid);
 //$result_order2_all1=$db1->query("SELECT order_id,order_no FROM zuji_order2 WHERE order_no='20180227000712'");
 while($arr = $result_order2_all1->fetch_assoc()){
     //订单二维数组 order_id,order_no
