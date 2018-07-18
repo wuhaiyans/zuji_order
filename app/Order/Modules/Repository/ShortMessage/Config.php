@@ -84,6 +84,11 @@ class Config {
 				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461134', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送
+				SceneConfig::GIVEBACK_EVANOWITNOENONO	=> 'SMS_113461141', //库管点击检测不合格、输入赔偿金额时发送
+				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
+				SceneConfig::GIVEBACK_EVANOWITYESENONO	=> 'SMS_113461139', //库管点击检测不合格、输入赔偿金额时发送
+				SceneConfig::GIVEBACK_EVANOWITYESENO	=> 'SMS_113461140', //库管点击检测不合格、输入赔偿金额时发送
+
 
 
 			],

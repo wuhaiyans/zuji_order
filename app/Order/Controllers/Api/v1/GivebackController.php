@@ -1013,6 +1013,13 @@ class GivebackController extends Controller
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
 			$data['payment_time'] = time();
 			$data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$paramsArr['goods_no'],
+				'GivebackEvaNoWitYesEno');
+			$notice->notify();
 		}
 		//押金<赔偿金：还机支付
 		else{
@@ -1022,6 +1029,13 @@ class GivebackController extends Controller
 			$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 			$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 			$data['payment_time'] = time();
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$paramsArr['goods_no'],
+				'GivebackEvaNoWitYesEnoNo');
+			$notice->notify();
 		}
 		//清算或者支付结果失败，返回错误
 		if( !$tradeResult ){
@@ -1071,6 +1085,20 @@ class GivebackController extends Controller
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 		$data['payment_time'] = time();
+
+		if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
+			$smsModel = "GivebackEvaNoWitNoEnoNo";
+		}else{
+			$smsModel = "GivebackEvaNoWitNoEno";
+		}
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			$smsModel);
+		$notice->notify();
+
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;

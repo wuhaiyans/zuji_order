@@ -145,6 +145,15 @@ class GoodsReturn {
         return $this->model->save();
 
     }
+
+    /***
+     * 退货检测合格更新状态为退款中
+     *
+     */
+    public function returnCheck():bool{
+        $this->model->status=ReturnStatus::ReturnTui;
+        return $this->model->save();
+    }
     /**
      * 退货检测不合格
      * @return bool

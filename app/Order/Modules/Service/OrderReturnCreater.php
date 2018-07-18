@@ -140,17 +140,18 @@ class OrderReturnCreater
                 }
                 $no_list[$k]['refund_no'] = $data['refund_no'];
                 $no_list[$k]['goods_no'] = $goods_no;
+                //修改冻结状态为退货中
+                if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
+                    $orderStatus=$order->returnOpen();
+                    $goodsStatus=$goods->returnOpen($data['refund_no']);
+                }
+                //修改冻结状态为换货中
+                if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ){
+                    $orderStatus = $order->barterOpen();
+                    $goodsStatus = $goods->barterOpen($data['refund_no']);
+                }
             }
-            //修改冻结状态为退货中
-            if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
-                $orderStatus=$order->returnOpen();
-                $goodsStatus=$goods->returnOpen();
-            }
-            //修改冻结状态为换货中
-            if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ){
-                $orderStatus = $order->barterOpen();
-                $goodsStatus = $goods->barterOpen();
-            }
+
             if( !$orderStatus ){
                 //事务回滚
                 DB::rollBack();
@@ -754,7 +755,7 @@ class OrderReturnCreater
                 }
                 //修改商品状态为租用中
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info[$refund_no]['goods_no'] );
-                if(!$goods->returnClose()){
+                if(!$goods->returnCancel()){
                     //事务回滚
                     DB::rollBack();
                     return false;
@@ -1499,6 +1500,13 @@ class OrderReturnCreater
                             //事务回滚
                             DB::rollBack();
                             return false;//创建退款清单失败
+                        }
+                        //退货检测合格更新状态为退款中
+                        $ReturnTui=$return->returnCheck();
+                        if(!$ReturnTui){
+                            //事务回滚
+                            DB::rollBack();
+                            return false;//更新失败
                         }
                         //插入操作日志
                         $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
