@@ -160,14 +160,14 @@ class CronOperate
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('+30 days')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
-            return false;
+            echo "无";die;
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING);
             $orderNoticeObj->notify();
         }
-        return true;
+        echo "完成";die;
 
 
     }
@@ -184,14 +184,14 @@ class CronOperate
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('+7 days')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
-            return false;
+            echo "无";die;
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING);
             $orderNoticeObj->notify();
         }
-        return true;
+        echo "完成";die;
     }
     /**
      * 定时任务  长租订单逾期一个月发送信息
@@ -205,14 +205,14 @@ class CronOperate
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('-30 days')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
-            return false;
+            echo "无";die;
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING);
             $orderNoticeObj->notify();
         }
-        return true;
+        echo "成功";die;
     }
     /**
      *  定时任务取消买断支付单
