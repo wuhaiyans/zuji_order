@@ -1638,17 +1638,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
-
-                if($params['business_key'] == OrderStatus::BUSINESS_RETURN){
-                    $return_info=$return->getData();
-                    //短信
-                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$item['refund_no'],SceneConfig::RETURN_DELIVERY);
-                    $b=$orderNoticeObj->notify();
-                    Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
-                }
-
             }
-
             //提交事务
             DB::commit();
             return true;

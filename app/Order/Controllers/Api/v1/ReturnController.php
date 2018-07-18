@@ -433,7 +433,7 @@ class ReturnController extends Controller
         LogApi::debug("退换货确认收货接受参数",$params);
         $res=$this->OrderReturnCreater->returnReceive($params);
         if(!$res){
-            return  apiResponse([],ApiStatus::CODE_35009,"收货失败");
+            return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//修改检测结果失败
         }
         return apiResponse([],ApiStatus::CODE_0,'收货成功');
 
