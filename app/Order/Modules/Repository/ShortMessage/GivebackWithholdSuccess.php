@@ -6,11 +6,11 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * GivebackOrderClean
+ * GivebackConfirmDelivery
  *
  * @author maxiaoyu
  */
-class GivebackOrderClean implements ShortMessage {
+class GivebackConfirmDelivery implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -66,9 +66,7 @@ class GivebackOrderClean implements ShortMessage {
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'tuihuanYajin'      => $goodsInfo['yajin'],
         ];
-
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
