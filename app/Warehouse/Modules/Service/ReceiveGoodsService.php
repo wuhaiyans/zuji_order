@@ -63,7 +63,6 @@ class ReceiveGoodsService
         }
 
         $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
-        return $collect;
         $items = $collect->items();
 
         if (!$items) {
