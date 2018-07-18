@@ -112,14 +112,14 @@ class ImportHistoryRefund extends Command
                 foreach($newData as $keys=>$values) {
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
-                        $continueReturnArr = $values[$values['return_id']];
+                        $continueReturnArr[] = $values['refund_id'];
                         continue;
                     }
 
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
                         echo '导入退款error ' . date("Y-m-d H:i:s", time()) . "\n";
-                        $errorReturnArr = $values[$values['return_id']];
+                        $errorReturnArr[] = $values['refund_id'];
                     } else {
 
                         $bar->advance(); //中间
@@ -132,6 +132,7 @@ class ImportHistoryRefund extends Command
                 echo "导入退款offset".$offset."\n";
                 if ($offset>$returnCount) {
                     LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()));
+                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
