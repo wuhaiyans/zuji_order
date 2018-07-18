@@ -1390,12 +1390,19 @@ class OrderReturnCreater
 
     /**
      * 检测合格或不合格
-     * @param $business_key
-     * @param $data
-     * @return string
+     * @param int		$business_key	业务类型
+     * @param array		$data		
+	 * [
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 *		'' => '',
+	 * ]	
+     * @param array		$userinfo		操作人信息
+     * @return bool	true：成功；false：失败
      * @throws \Exception
      */
-    public function isQualified($business_key,$data,$userinfo)
+    public function isQualified(int $business_key, array $data, array $userinfo)
     {
         //开启事务
         DB::beginTransaction();
@@ -1408,7 +1415,7 @@ class OrderReturnCreater
             $no_list=[];
             foreach($data as $k=>$v){
                 //获取退货单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($v['goods_no']);
+                $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnGoodsInfo($v['goods_no']);
                 if(!$return){
 					\App\Lib\Common\Error::setError('退货单查询失败');
                     return false;
