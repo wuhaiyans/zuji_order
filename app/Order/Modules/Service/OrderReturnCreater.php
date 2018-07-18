@@ -755,7 +755,7 @@ class OrderReturnCreater
                 }
                 //修改商品状态为租用中
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info[$refund_no]['goods_no'] );
-                if(!$goods->returnClose()){
+                if(!$goods->returnCancel()){
                     //事务回滚
                     DB::rollBack();
                     return false;
