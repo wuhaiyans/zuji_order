@@ -140,17 +140,18 @@ class OrderReturnCreater
                 }
                 $no_list[$k]['refund_no'] = $data['refund_no'];
                 $no_list[$k]['goods_no'] = $goods_no;
+                //修改冻结状态为退货中
+                if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
+                    $orderStatus=$order->returnOpen();
+                    $goodsStatus=$goods->returnOpen($data['refund_no']);
+                }
+                //修改冻结状态为换货中
+                if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ){
+                    $orderStatus = $order->barterOpen();
+                    $goodsStatus = $goods->barterOpen($data['refund_no']);
+                }
             }
-            //修改冻结状态为退货中
-            if( $params['business_key'] == OrderStatus::BUSINESS_RETURN  ){
-                $orderStatus=$order->returnOpen();
-                $goodsStatus=$goods->returnOpen();
-            }
-            //修改冻结状态为换货中
-            if( $params['business_key'] == OrderStatus::BUSINESS_BARTER ){
-                $orderStatus = $order->barterOpen();
-                $goodsStatus = $goods->barterOpen();
-            }
+
             if( !$orderStatus ){
                 //事务回滚
                 DB::rollBack();

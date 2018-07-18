@@ -91,13 +91,17 @@ class Goods {
     //-+------------------------------------------------------------------------
     /**
      * 申请退货
+     *
      * @return bool
      */
-    public function returnOpen( ){
+    public function returnOpen(string $business_no){
         //商品必须为租用中
         if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
            return false;
         }
+        $this->model->business_key = OrderStatus::BUSINESS_RETURN;
+        $this->model->business_no = $business_no;
+        $this->model->goods_status = OrderGoodStatus::REFUNDS;
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
@@ -131,7 +135,9 @@ class Goods {
      * 申请换货
      * @return bool
      */
-    public function barterOpen( ):bool{
+    public function barterOpen(string $business_no):bool{
+        $this->model->business_key = OrderStatus::BUSINESS_BARTER;
+        $this->model->business_no = $business_no;
         // 状态改为换货中
         $this->model->goods_status = OrderGoodStatus::EXCHANGE_GOODS;
         return $this->model->save();
