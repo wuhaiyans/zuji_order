@@ -232,6 +232,9 @@ class OrderBuyout
 				return false;
 			}
 		}
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$buyout['buyout_no'],"BuyoutPayment");
+		$notice->notify();
 		//插入日志
 		OrderLogRepository::add(0,"支付回调",\App\Lib\PublicInc::Type_System,$buyout['order_no'],"买断支付成功","支付完成");
 		//插入订单设备日志
