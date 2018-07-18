@@ -242,7 +242,13 @@ class CronOperate
                 continue;
             }
             //更新订单商品状态
-            $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->update(['goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,'update_time'=>time()]);
+            $data = [
+                'business_key' => '',
+                'business_no' => '',
+                'goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,
+                'update_time'=>time()
+            ];
+            $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->update($data);
             if(!$ret){
                 DB::rollBack();
                 continue;

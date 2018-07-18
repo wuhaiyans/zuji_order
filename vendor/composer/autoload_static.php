@@ -516,7 +516,7 @@ class ComposerStaticInitb486767c87a8c131b090ec9d225464d2
         'App\\Order\\Modules\\OrderCreater\\WithholdingComponnet' => __DIR__ . '/../..' . '/app/Order/Modules/OrderCreater/WithholdingComponnet.php',
         'App\\Order\\Modules\\OrderCreater\\YidunComponnet' => __DIR__ . '/../..' . '/app/Order/Modules/OrderCreater/YidunComponnet.php',
         'App\\Order\\Modules\\PublicInc' => __DIR__ . '/../..' . '/app/Lib/PublicInc_bak.php',
-        'App\\Order\\Modules\\Repository\\MiniOrderRepository' => __DIR__ . '/../..' . '/app/Order/Modules/Repository/MiniOrderRepository.php',
+        'App\\Order\\Modules\\Repository\\OrderMiniRepository' => __DIR__ . '/../..' . '/app/Order/Modules/Repository/OrderMiniRepository.php',
         'App\\Order\\Modules\\Repository\\OrderClearingRepository' => __DIR__ . '/../..' . '/app/Order/Modules/Repository/OrderClearingRepository.php',
         'App\\Order\\Modules\\Repository\\OrderCouponRepository' => __DIR__ . '/../..' . '/app/Order/Modules/Repository/OrderCouponRepository.php',
         'App\\Order\\Modules\\Repository\\OrderGivebackRepository' => __DIR__ . '/../..' . '/app/Order/Modules/Repository/OrderGivebackRepository.php',

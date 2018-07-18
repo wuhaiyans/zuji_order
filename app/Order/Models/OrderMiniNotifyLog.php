@@ -2,16 +2,16 @@
 
 /**
  *
- *  小程序发送 扣款 取消 完成请求信息记录表
+ *  小程序 请求回调 记录表
  */
 namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MiniOrderCreditPay extends Model
+class OrderMiniNotifyLog extends Model
 {
 
-    protected $table = 'mini_order_credit_pay';
+    protected $table = 'order_mini_notify_log';
 
     protected $primaryKey='id';
 
@@ -29,12 +29,18 @@ class MiniOrderCreditPay extends Model
      * @var array
      */
     protected $fillable = [
-        'order_operate_type',
+        'notify_type',
+        'redis_key',
         'out_order_no',
         'zm_order_no',
         'out_trans_no',
-        'remark',
+        'alipay_fund_order_no',
+        'pay_time',
+        'pay_status',
         'pay_amount',
+        'channel',
+        'notify_app_id',
+        'data_text',
     ];
 
 

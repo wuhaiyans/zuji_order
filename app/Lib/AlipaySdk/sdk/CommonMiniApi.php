@@ -58,7 +58,7 @@ class CommonMiniApi extends BaseApi {
 		$request = new \ZhimaMerchantOrderCreditPayRequest();
 		$request->setBizContent (json_encode($biz_content) );
 		//入库请求信息
-		$result = \App\Order\Modules\Repository\MiniOrderCreditPayRepository::add($biz_content);
+		$result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add($biz_content);
 		if( !$result ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
 		}
@@ -131,7 +131,7 @@ class CommonMiniApi extends BaseApi {
 			'zm_face'=>'Y',
 		];
 		//查询成功记录表
-		$res = \App\Order\Modules\Repository\MiniOrderRepository::add(array_merge($params,$this->result));
+		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
 		if( !$res ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
 		}
