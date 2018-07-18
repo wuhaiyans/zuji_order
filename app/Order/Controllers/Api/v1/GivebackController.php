@@ -1071,6 +1071,20 @@ class GivebackController extends Controller
 		$data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 		$data['payment_time'] = time();
+
+		if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
+			$smsModel = "GivebackEvaNoWitNoEnoNo";
+		}else{
+			$smsModel = "GivebackEvaNoWitNoEno";
+		}
+
+		//发送短信
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+			$paramsArr['goods_no'],
+			$smsModel);
+		$notice->notify();
+
 		//更新还机单
 		$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
 		return $orderGivebackResult ? true : false;
