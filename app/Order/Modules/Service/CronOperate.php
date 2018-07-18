@@ -154,21 +154,27 @@ class CronOperate
      */
     public static function cronOneMonthEndByLong()
     {
-
+        //发送短信。;
+        $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,'A711191295592594',SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING);
+        $orderNoticeObj->notify();
     }
     /**
      * 定时任务  长租订单到期前一周发送信息
      */
     public static function cronOneWeekEndByLong()
     {
-
+//发送短信。;
+        $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,'A711191295592594',SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING);
+        $orderNoticeObj->notify();
     }
     /**
      * 定时任务  长租订单逾期一个月发送信息
      */
     public static function cronOverOneMonthEndByLong()
     {
-
+//发送短信。;
+        $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,'A711191295592594',SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING);
+        $orderNoticeObj->notify();
     }
     /**
      *  定时任务取消买断支付单
