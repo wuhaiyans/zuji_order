@@ -76,6 +76,11 @@ class AuthRefferController extends Controller{
                     $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
                     Log::debug("验证token".$info);
                     $info =json_decode($info,true);
+                    LogApi::debug("转发接口信息及结果",[
+                        'url' => $list,
+                        'request' => $params,
+                        'response' => $info,
+                    ]);
                     if( is_null($info)
                         || !is_array($info)
                         || !isset($info['code'])

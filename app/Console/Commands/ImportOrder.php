@@ -158,7 +158,7 @@ class ImportOrder extends Command
                         'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 <0?0:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 ,
                         'specs'=>$goods_info['specs'],
                         'insurance'=>$goods_info['yiwaixian']/100,
-                        'buyout_price'=>($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100)),
+                        'buyout_price'=>($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100))<0?0:($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100)),
                         'begin_time'=>$service['begin_time'],
                         'end_time'=>$service['end_time'],
                         'weight'=>$sku_info['weight'],
