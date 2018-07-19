@@ -112,7 +112,7 @@ class MiniOrderController extends Controller
         $data = json_decode($data,true);
         $data['pay_type'] = $param['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = $param['coupon_no'];
+        $data['coupon'] = $param['coupon'];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
             return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');
