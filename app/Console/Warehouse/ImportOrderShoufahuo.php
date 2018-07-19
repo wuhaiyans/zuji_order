@@ -213,6 +213,7 @@ function orderDelivery($order2_all1,$db1,$db2,$t){
         return true;
     }else{
         echo '导入订单发货信息表失败;<br>';
+        echo $order_delivery_insert_sql;
         return false;
     }
 
