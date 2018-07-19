@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Common\LogApi;
+//use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
@@ -222,7 +222,7 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("订单风控信息导入失败",$arr);
+               // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;
