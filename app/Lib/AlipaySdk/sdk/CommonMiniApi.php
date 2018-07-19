@@ -132,14 +132,13 @@ class CommonMiniApi extends BaseApi {
 //			'zm_face'=>'Y',
 //		];
 //		return true;
-		print_r($result);die;
-		if( !isset($result['zhima_merchant_order_confirm_response']) ){
+		if( !isset($result['code']) ){
 			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
 			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
 			return false;
 		}
-		if( $result['zhima_merchant_order_confirm_response']['code']!=10000 ){
-			$this->error = $result['zhima_merchant_order_confirm_response']['sub_code'].$result['zhima_merchant_order_confirm_response']['sub_msg'];
+		if( $result['code']!=10000 ){
+			$this->error = $result['sub_code'].$result['sub_msg'];
 			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
 			return false;
 		}
