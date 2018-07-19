@@ -141,5 +141,9 @@ class SceneConfig {
      * 场景：<b>【买断支付】</b>
      */
     const BUYOUT_PAYMENT = 'BuyoutPayment';
+    /**
+     * 场景：<b>【押金退还】</b>
+     */
+    const RETURN_DEPOSIT = 'ReturnDeposit';
 
 }
