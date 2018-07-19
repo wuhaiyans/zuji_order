@@ -19,7 +19,7 @@ class ImportHistoryMiniCertification extends Command
      *
      * @var string
      */
-    protected $signature = 'command:MiniCertification';
+    protected $signature = 'command:ImportHistoryMiniCertification';
 
     /**
      * The console command description.

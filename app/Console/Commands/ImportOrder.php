@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Common\LogApi;
+//use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
@@ -56,7 +56,7 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
+        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1,'status'=>2])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -64,7 +64,7 @@ class ImportOrder extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->forPage($page,$limit)->get();
+                $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1,'status'=>2])->whereIn("appid",$appid)->forPage($page,$limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -82,10 +82,12 @@ class ImportOrder extends Command
                     $follow_info =$this->getOrderFollow($v['order_id'],7);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                        $status['order_status'] = 8;
                     }
                     $follow_info =$this->getOrderFollow($v['order_id'],22);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                        $status['order_status'] =8;
                     }
 
 
@@ -158,7 +160,7 @@ class ImportOrder extends Command
                         'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 <0?0:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 ,
                         'specs'=>$goods_info['specs'],
                         'insurance'=>$goods_info['yiwaixian']/100,
-                        'buyout_price'=>($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100)),
+                        'buyout_price'=>($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100))<0?0:($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100)),
                         'begin_time'=>$service['begin_time'],
                         'end_time'=>$service['end_time'],
                         'weight'=>$sku_info['weight'],
@@ -205,6 +207,7 @@ class ImportOrder extends Command
                      		'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
                      		'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
                      		'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
+                            'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
                      		'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
                      		'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
                      		'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
@@ -221,7 +224,7 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("订单风控信息导入失败",$arr);
+               // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;

@@ -18,7 +18,7 @@ class ImportHistoryMiniConfirmed extends Command
      *
      * @var string
      */
-    protected $signature = 'command:MiniConfirmed';
+    protected $signature = 'command:ImportHistoryMiniConfirmed';
 
     /**
      * The console command description.

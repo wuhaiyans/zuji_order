@@ -8,6 +8,8 @@
  * Time: 下午5:05
  */
 //$stime=microtime(true);
+
+//header("Content-type:text/html;charset=utf-8");
 $num = 0;//统计插入条数
 $sel = 0;//统计查询条数
 
@@ -41,6 +43,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 1.';
     exit;
 }
+mysqli_query($db1,'set names utf8');
 
 //数据库2 (新订单)
 //$db2=new mysqli($host,$user,$password,$dbname2,$port);
@@ -55,6 +58,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 3.';
     exit;
 }
+mysqli_query($db3,'set names utf8');
 
 //$db2->autocommit(false);//关闭自动提交
 //$db2->rollback();//回滚
@@ -80,7 +84,6 @@ $sel++;
 //省,市,区县
 $result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
 while($arr = $result_zuji_district_all1->fetch_assoc()){
-    print_r($arr);die;
     //二维数组 id,name
     $district_all1[$arr['id']]=$arr;
 }
