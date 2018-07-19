@@ -86,11 +86,11 @@ return [
 
         'mysql_01' => [
             'driver' => 'mysql',
-            'host' => env('DB_HOST_01', '119.29.141.207'),
-            'port' => env('DB_PORT_01', '3306'),
-            'database' => env('DB_DATABASE_01', 'zuji'),
-            'username' => env('DB_USERNAME_01', 'root'),
-            'password' => env('DB_PASSWORD_01', 'd^GHL,Oc@De3jW'),
+            'host' => env('DB_HOST_01'),
+            'port' => env('DB_PORT_01'),
+            'database' => env('DB_DATABASE_01'),
+            'username' => env('DB_USERNAME_01'),
+            'password' => env('DB_PASSWORD_01'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

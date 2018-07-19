@@ -2090,7 +2090,7 @@ class OrderReturnCreater
                     'operator_type'=>$userinfo['type'],
                     'msg'           =>'退款成功',
                 ],$isCorntab=FALSE);
-                if($goodsLog){
+                if(!$goodsLog){
                     return false;
                 }
             }else{
