@@ -8,9 +8,9 @@ class TestController extends Controller
 {
 	public function sendSms() {
 
-//		$id = 1;
-//		$a  = \App\Order\Modules\Service\OrderWithhold::instalment_withhold($id);
-//		v($a);
+
+		$a  = \App\Order\Modules\Service\OrderWithhold::instalment_withhold(14634);
+		v($a);
 
 //		//发送短信通知 支付宝内部通知
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
