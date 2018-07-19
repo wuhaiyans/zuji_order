@@ -8,6 +8,7 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
 use \App\Order\Modules\Inc\OrderCleaningStatus;
@@ -626,7 +627,6 @@ class OrderReturnCreater
             if($param['status'] == 0){
                 //更新退款单状态为同意
                 $returnApply = $return->refundAgree($param['remark']);
-
                 if(!$returnApply){
                     //事务回滚
                     DB::rollBack();
@@ -2014,6 +2014,12 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }else{
+                //获取商品信息
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['order_no']);
+                if(!$goods){
+                    LogApi::debug("获取商品信息失败");
+                    return false;
+                }
                 //修改退货单状态为已退款
                 $updateReturn=$return->refundFinish($params);
                 if(!$updateReturn){
@@ -2029,6 +2035,7 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }
+            $goodsInfo=$goods->getData();
             //释放库存
             //查询商品的信息
             $orderGoods = OrderRepository::getGoodsListByGoodsId($returnData);
@@ -2110,7 +2117,22 @@ class OrderReturnCreater
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
             }
-            //发送短信
+            //获取订单用户认证信息
+            $userInfo=OrderRepository::getUserCertified($order_info['order_no']);
+            if(!$userInfo){
+                return false;
+            }
+            //发送短信，押金解冻短信发送
+           $returnSend = ReturnDeposit::notify($order_info['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+                'mobile'=>$order_info['mobile'],
+                'realName'=>$userInfo['realname'],
+                'orderNo'=>$order_info['order_no'],
+                'goodsName'=>$goodsInfo['goods_name'],
+                'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
+                ]
+            );
+            Log::debug($returnSend?"Order :".$order_info['order_no']." IS OK":"IS error");
+            //发送短信，通知用户押金已退还
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
             $b=$orderNoticeObj->notify();
             Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
