@@ -135,7 +135,7 @@ class ImportOrder extends Command
                         'zuji_goods_id'=>$goods_info['sku_id'],
                         'zuji_goods_sn'=>$sku_info['sn'],
                         'goods_no'=>$goods_info['goods_id'],
-                        'goods_thumb'=>$goods_info['thumb'],
+                        'goods_thumb'=>$spu_info['thumb'],
                         'prod_id'=>$goods_info['spu_id'],
                         'prod_no'=>$spu_info['sn'],
                         'brand_id'=>$goods_info['brand_id'],
