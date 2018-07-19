@@ -37,19 +37,18 @@ class CouponComponnet implements OrderCreater
                     'coupon_no'=>$v,
                 ];
             }
-            print_r($couponData);
             $coupon = Coupon::getCoupon($couponData);
-            print_r($coupon);
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");
             }
             if(empty($coupon)){
                 throw new Exception("该优惠券已使用");
             }
-            print_r($coupon);
+            if($coupon['code'] != 0){
+                throw new Exception("该优惠券查询错误：".$coupon['msg']);
+            }
             $couponInfo =[];
             foreach ($coupon as $key=>$value){
-                print_r($value);die;
                 foreach ($value as $k=>$v){
                     $couponInfo[]=[
                         'coupon_id'=>$v['coupon_id'],
