@@ -368,7 +368,7 @@ class OrderCreater
 
             //代扣
             //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
-            print_r($data);die;
+
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
 
@@ -377,7 +377,7 @@ class OrderCreater
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
+            print_r($data);die;
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
 
