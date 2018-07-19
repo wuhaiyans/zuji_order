@@ -188,7 +188,7 @@ class ImportHistoryFundauth extends Command
                         'out_fundauth_no'  => $fundauth_no,                 // '支付系统代扣协议码',
                         'fundauth_status'  => 1,                            // '状态：1：已授权；2：已关闭；3：完成',
                         'user_id'          => $user_id,                     // '用户ID',
-                        'freeze_time'      => strtotime($item['gmt_trans']),// '冻结时间',
+                        'freeze_time'      => $item['create_time'],			// '冻结时间',
                         'total_amount'     => $item['amount'],              // '累计冻结金额；单位：元',
                         'unfreeze_amount'  => $item['unfreeze_amount'],     // '累计解冻金额；单位：元',
                         'pay_amount'       => $item['pay_amount'],          // '累计转支付金额；单位：元',
@@ -204,12 +204,12 @@ class ImportHistoryFundauth extends Command
                         $arr[$item['auth_id'].'order_pay_fundauth'] = $order_pay_fundauth_data;
                         continue;
                     }
+					
+					$bar->advance();
 
                 }
 
-                $bar->advance();
                 $page++;
-                sleep(2);
             } while ($page <= $totalpage);
 
             if(count($arr)>0){
