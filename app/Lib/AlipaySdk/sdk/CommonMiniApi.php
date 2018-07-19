@@ -63,7 +63,9 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
 		}
 		$response = $this->execute($request);
+		echo $response;
 		$result = json_decode(json_encode($response),true);
+		print_r($result);
 		$debug_data = [
 			'request' => $biz_content,
 			'response' => $response,
@@ -116,7 +118,6 @@ class CommonMiniApi extends BaseApi {
 			'request' => $biz_content,
 			'response' => json_decode(json_encode($result),true),
 		];
-
 		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
 //		$this->result = [
 //			'name'=>'张三',
@@ -130,24 +131,23 @@ class CommonMiniApi extends BaseApi {
 //			'zm_risk'=>'Y',
 //			'zm_face'=>'Y',
 //		];
+//		return true;
+		if( !isset($result['code']) ){
+			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
+			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
+			return false;
+		}
+		if( $result['code']!=10000 ){
+			$this->error = $result['sub_code'].$result['sub_msg'];
+			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
+			return false;
+		}
+		$this->result = $result;
 		//查询成功记录表
 		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
 		if( !$res ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
 		}
-//		return true;
-		if( !isset($result['zhima_merchant_order_confirm_response']) ){
-			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
-			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);
-			return false;
-		}
-		if( $result['zhima_merchant_order_confirm_response']['code']!=10000 ){
-			$this->error = $result['zhima_merchant_order_confirm_response']['sub_code'].$result['zhima_merchant_order_confirm_response']['sub_msg'];
-			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
-			return false;
-		}
-
-		$this->result = $result;
 		return true;
 	}
 

@@ -92,11 +92,11 @@ class MiniOrderController extends Controller
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
-            'coupon_no' => 'required', //【必须】string；优惠券
+            'coupon' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
+            return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         $param = $params['params'];
         //判断支付状态
@@ -106,16 +106,16 @@ class MiniOrderController extends Controller
         //判断当前是否有临时订单
         $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$param['out_order_no']);
         if(!$data){
-            \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
-            return apiResponse([],$validateParams['code'],'业务临时订单不存在');
+            \App\Lib\Common\LogApi::notify('小程序临时订单不存在',$data);
+            return apiResponse([], ApiStatus::CODE_35010,'业务临时订单不存在');
         }
         $data = json_decode($data,true);
         $data['pay_type'] = $param['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = $param['coupon_no'];
+        $data['coupon'] = $param['coupon'];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
-            return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');
+            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
         }
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
@@ -240,20 +240,18 @@ class MiniOrderController extends Controller
         $params     = $request->all();
         // 验证参数
         $rules = [
-            'appid' => 'required', //【必须】string；appid
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
-            'coupon_no' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
-        $params = $params['params'];
+        $param = $params['params'];
         // 验签 验证 通过 修改数据
-        if($params['order_status'] == 'SUCCESS'){
-            \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$params);
+        if($param['order_status'] == 'SUCCESS'){
+            \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
             return apiResponse( [], ApiStatus::CODE_0);
         }else{
             return apiResponse( [], ApiStatus::CODE_35004,'小程序处理中');
@@ -273,23 +271,23 @@ class MiniOrderController extends Controller
             'order_no'  => 'required',
             'remark'  => 'required',
         ];
-        $validateParams = $this->validateParams($rules,$params);
-
+        $validateParams = $this->validateParams($rules,$params['params']);
+        $param = $params['params'];
         if (empty($validateParams) || $validateParams['code']!=0) {
             return apiResponse([],$validateParams['code']);
         }
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $params['out_order_no'] );
+        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $param['out_order_no'] );
         if( empty($result) ){
-            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$params['order_no']);
+            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$param['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
         }
         //发送取消请求
         $data = [
             'out_order_no'=>$result['order_no'],//商户端订单号
             'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
-            'remark'=>$params['remark'],//订单操作说明
+            'remark'=>$param['remark'],//订单操作说明
             'app_id'=>$result['app_id'],//小程序appid
         ];
         $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
