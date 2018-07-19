@@ -64,7 +64,10 @@ class ImportUserAddress extends Command
                         $province = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['province_id'])->first();
                         $city = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['city_id'])->first();
                         $area = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['country_id'])->first();
-                        $address = $province->name." ".$city->name." ".$area->name." ".$addressList[$v['order_id']]['address'];
+                        $province = objectToArray($province);
+                        $city = objectToArray($city);
+                        $area = objectToArray($area);
+                        $address = $province['name']." ".$city['name']." ".$area['name']." ".$addressList[$v['order_id']]['address'];
                         $data = [
                             'order_no'=>$v['order_no'],
                             'consignee_mobile'=>$addressList[$v['order_id']]['mobile'],
