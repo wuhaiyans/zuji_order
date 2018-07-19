@@ -52,10 +52,12 @@ class OrderWithhold
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
             DB::rollBack();
+            \App\Lib\Common\LogApi::error("订单不存在");
             return false;
         }
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
             DB::rollBack();
+            \App\Lib\Common\LogApi::error("订单不在服务中");
             return false;
         }
 
@@ -66,7 +68,7 @@ class OrderWithhold
         $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
             DB::rollBack();
-            Log::error("扣款金额不能小于1分");
+            \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
             return false;
         }
 
@@ -111,7 +113,7 @@ class OrderWithhold
             $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
             if(!$result){
                 DB::rollBack();
-                Log::error("扣款备注保存失败");
+                \App\Lib\Common\LogApi::error("扣款备注保存失败");
                 return false;
             }
 
@@ -125,7 +127,7 @@ class OrderWithhold
             $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
-                Log::error("用户代扣协议编号错误");
+                \App\Lib\Common\LogApi::error("用户代扣协议编号错误");
                 return false;
             }
             // 代扣接口
@@ -152,10 +154,10 @@ class OrderWithhold
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
-                    Log::error("买家余额不足");
+                    \App\Lib\Common\LogApi::error('买家余额不足');
                     return false;
                 } else {
-                    Log::error("扣款失败");
+                    \App\Lib\Common\LogApi::error("扣款失败");
                     return false;
                 }
             }
