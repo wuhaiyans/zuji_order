@@ -325,8 +325,8 @@ class ReturnController extends Controller
     /*
      * [
      *    "business_key"  =>'' 必选  业务类型
-     *   'goods_no'       =>''必选   商品编号
-     *   'order_no'       =>''必选   订单编号
+     *    "business_no"    =>''可选   业务编号
+     *    "goods_no"     =>''   必选  商品编号
      * ]
      *
      */
@@ -334,6 +334,13 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
+        $param = filter_array($params,[
+            'business_key'		=> 'required',
+            'goods_no'		=> 'required',
+        ]);
+        if(count($param)<1){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
         $ret = $this->OrderReturnCreater->returnResult($params);
 		//\App\Lib\Common\LogApi::debug('退货结果',$ret);
         if(!$ret){
