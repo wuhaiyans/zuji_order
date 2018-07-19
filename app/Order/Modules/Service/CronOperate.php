@@ -185,7 +185,7 @@ class CronOperate
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 week')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
-            echo "无->";
+            echo "无长租->";
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
@@ -200,7 +200,7 @@ class CronOperate
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 days')));
         $goodsData = OrderGoods::query()->where($whereSort)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
-            echo "无->";
+            echo "无短租->";
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
