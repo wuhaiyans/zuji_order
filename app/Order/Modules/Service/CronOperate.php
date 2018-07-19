@@ -12,6 +12,7 @@ use App\Lib\Goods\Goods;
 use App\Order\Models\Order;
 use App\Order\Models\OrderBuyout;
 use App\Order\Models\OrderGoods;
+use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Repository\Order\Instalment;
@@ -172,7 +173,7 @@ class CronOperate
 
     }
     /**
-     * 定时任务  长租订单到期前一周发送信息
+     * 定时任务  长租订单到期前一周发送信息 + 短租 提前一天发送短信
      */
     public static function cronOneWeekEndByLong()
     {
@@ -183,6 +184,20 @@ class CronOperate
         $start =strtotime(date('Y-m-d',strtotime('+1 week')));
         $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 week')));
         $goodsData = OrderGoods::query()->where($whereLong)->whereBetween('end_time',[$start,$end])->get()->toArray();
+        if (!$goodsData) {
+            echo "无";die;
+        }
+        foreach ($goodsData as $k => $v) {
+            //发送短信
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING);
+            $orderNoticeObj->notify();
+        }
+        $whereSort =[];
+        $whereSort[] = ['goods_status', '=', Inc\OrderGoodStatus::RENTING_MACHINE];
+        $whereSort[] = ['zuqi_type', '=', 1];
+        $start =strtotime(date('Y-m-d',strtotime('+1 days')));
+        $end =strtotime(date('Y-m-d 23:59:59',strtotime('+1 days')));
+        $goodsData = OrderGoods::query()->where($whereSort)->whereBetween('end_time',[$start,$end])->get()->toArray();
         if (!$goodsData) {
             echo "无";die;
         }
@@ -323,5 +338,33 @@ class CronOperate
 		}
 		DB::commit();
 	}
+
+    /**
+     *  定时任务 换货确认收货
+     * @return bool
+     */
+    public static function cronBarterDelivey()
+    {
+        $whereLong =[];
+        $whereLong[] = ['status', '=', Inc\ReturnStatus::ReturnDelivery];
+        $whereLong[] = ['delivery_time', '<=', time()-config('web.long_confirm_days')];
+
+        $returnData = OrderReturn::query()->where($whereLong)->get()->toArray();
+        if (!$returnData) {
+            return false;
+        }
+        //var_dump($orderData);die;
+        foreach ($returnData as $k => $v) {
+            $userinfo['uid']=1;
+            $userinfo['username']="系统";
+            $userinfo['type']=\App\Lib\PublicInc::Type_System;
+            $b =OrderReturnCreater::updateorder($v['refund_no'],$userinfo);
+            if(!$b){
+                LogApi::debug("换货确认收货失败:" . $v['order_no']);
+            }
+
+        }
+
+    }
 
 }

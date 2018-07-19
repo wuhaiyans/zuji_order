@@ -58,7 +58,7 @@ class ImportHistoryInstalment extends Command
           foreach($result as &$item) {
             // 查询订单信息
 
-            $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'user_id', 'zujin', "appid", "business_key")->where(['order_id' => $item['order_id']])->first();
+            $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'goods_id', 'user_id', 'zujin', "appid", "business_key")->where(['order_id' => $item['order_id']])->first();
             $orderInfo = objectToArray($orderInfo);
             if(!$orderInfo){
               continue;
@@ -70,10 +70,9 @@ class ImportHistoryInstalment extends Command
               continue;
             }
 
-
             $data['id']               = $item['id'];
             $data['order_no']         = $orderInfo['order_no'];
-            $data['goods_no']         = createNo();
+            $data['goods_no']         = $orderInfo['goods_id'];
             $data['user_id']          = $orderInfo['user_id'];
 
             $data['term']             = $item['term'];

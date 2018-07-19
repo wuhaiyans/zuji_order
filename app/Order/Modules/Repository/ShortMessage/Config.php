@@ -61,6 +61,7 @@ class Config {
                 SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING =>'SMS_113461128',//订单到期前一个月发送信息-月租
                 SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING  =>'SMS_113461129',//订单到期前一周发送信息-月租
                 SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_113461130',//订单逾期一个月发送信息-月租
+                SceneConfig::ORDER_DAY_BEFORE_ONE_ENDING     =>'SMS_113461158',//订单到期前一天发送信息-短租
 
 
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_113461054', //申请退货

@@ -61,6 +61,13 @@ class ImportUserAddress extends Command
                 foreach ($orderList as $k=>$v) {
                     $bar->advance();
                     if(!empty($addressList[$v['order_id']]) && ImportOrder::isAllowImport($v['order_no'])){
+                        $province = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['province_id'])->first();
+                        $city = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['city_id'])->first();
+                        $area = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['country_id'])->first();
+                        $province = objectToArray($province);
+                        $city = objectToArray($city);
+                        $area = objectToArray($area);
+                        $address = $province['name']." ".$city['name']." ".$area['name']." ".$addressList[$v['order_id']]['address'];
                         $data = [
                             'order_no'=>$v['order_no'],
                             'consignee_mobile'=>$addressList[$v['order_id']]['mobile'],
@@ -68,7 +75,7 @@ class ImportUserAddress extends Command
                             'province_id'=>$addressList[$v['order_id']]['province_id'],
                             'city_id'=>$addressList[$v['order_id']]['city_id'],
                             'area_id'=>$addressList[$v['order_id']]['country_id'],
-                            'address_info'=>$addressList[$v['order_id']]['address'],
+                            'address_info'=>$address,
                             'create_time'=>$v['create_time'],
                         ];
                         $ret = OrderUserAddress::updateOrCreate($data);

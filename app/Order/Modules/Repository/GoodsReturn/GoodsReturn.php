@@ -248,6 +248,7 @@ class GoodsReturn {
         $this->model->barter_logistics_id=$data['logistics_id'];
         $this->model->barter_logistics_no=$data['logistics_no'];
         $this->model->status = ReturnStatus::ReturnDelivery;
+        $this->model->delivery_time =time();
         return $this->model->save();
     }
     /**

@@ -1760,8 +1760,7 @@ class OrderReturnCreater
      * @return string
      * @throws \Exception
      *[
-     *    'order_no' =>'111'      //订单编号
-     *    'goods_info'=>['','']   //商品编号
+     *    'refund_no' =>'111'      //业务编号
      * ]
      *  @param array $userinfo 业务参数
      * [
@@ -1770,56 +1769,54 @@ class OrderReturnCreater
      *      ‘username’  =>‘’，【请求参数】 用户名
      * ]
      */
-    public function updateorder($params,$userinfo){
+    public static function updateorder(string $refund_no,array $userinfo){
         //开启事物
        DB::beginTransaction();
         try{
+            //获取退换单信息
+            $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($refund_no);
+            if(!$return){
+                return false;
+            }
+            $return_info=$return->getData();
             //获取订单信息
-            $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['order_no']);
+            $order=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
             if(!$order){
                 return false;
             }
-            foreach($params['goods_info'] as $goods_no){
-                //获取换货 单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnInfo($params['order_no'],$goods_no);
-                if(!$return){
-                    return false;
-                }
-                $return_info=$return->getData();
-                //更新退货单状态为已换货
-                $updateBarter=$return->barterFinish();
-
-                if(!$updateBarter){
-                    DB::rollBack();
-                    return false;
-                }
-                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
-                if(!$goods){
-                    return false;
-                }
-                //更新商品状态为租用中
-                $updateGoods=$goods->barterFinish();
-                if(!$updateGoods){
-                    DB::rollBack();
-                    return false;
-                }
-                //插入操作日志
-                $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
-                    'order_no'     =>$params['order_no'],
-                    'action'       =>'换货确认收货',
-                    'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
-                    'business_no'  =>$return_info['refund_no'],
-                    'goods_no'     =>$goods_no,
-                    'operator_id'  =>$userinfo['uid'],
-                    'operator_name'=>$userinfo['username'],
-                    'operator_type'=>$userinfo['type'],
-                    'msg'           =>'用户已收货',
-                ],$isCorntab=FALSE);
-                if(!$goodsLog){
-                    DB::rollBack();
-                    return false;
-                }
+            //更新退货单状态为已换货
+            $updateBarter=$return->barterFinish();
+            if(!$updateBarter){
+                DB::rollBack();
+                return false;
             }
+            $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
+            if(!$goods){
+                return false;
+            }
+            //更新商品状态为租用中
+            $updateGoods=$goods->barterFinish();
+            if(!$updateGoods){
+                DB::rollBack();
+                return false;
+            }
+            //插入操作日志
+            $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                'order_no'     =>$return_info['order_no'],
+                'action'       =>'换货确认收货',
+                'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
+                'business_no'  =>$refund_no,
+                'goods_no'     =>$return_info['goods_no'],
+                'operator_id'  =>$userinfo['uid'],
+                'operator_name'=>$userinfo['username'],
+                'operator_type'=>$userinfo['type'],
+                'msg'           =>'用户已收货',
+            ],$isCorntab=FALSE);
+            if(!$goodsLog){
+                DB::rollBack();
+                return false;
+            }
+
             //订单解冻
             $updateOrder=$order->returnClose();
             if(!$updateOrder){
@@ -1827,7 +1824,7 @@ class OrderReturnCreater
                 return false;
             }
             //通知收发货确认收货
-            $confirm_data['order_no']=$params['order_no'];
+            $confirm_data['order_no']=$return_info['order_no'];
             $confirm_data['receive_type']=$userinfo['type'];
             $confirm_data['user_id']=$userinfo['uid'];
             $confirm_data['user_name']=$userinfo['username'];

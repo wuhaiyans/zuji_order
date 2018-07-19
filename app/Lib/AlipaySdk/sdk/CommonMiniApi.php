@@ -118,24 +118,24 @@ class CommonMiniApi extends BaseApi {
 		];
 
 		\App\Lib\Common\LogApi::notify('芝麻接口请求默认返回值',$debug_data);
-		$this->result = [
-			'name'=>'张三',
-			'cert_no'=>'110101200010012568',
-			'mobile'=>'18820881688',
-			'house'=>'北京 北京 顺义 西湖区文三路168号',
-			'zm_grade'=>'Z3',
-			'credit_amount'=>'1500',
-			'user_id'=>'2018032002411058',
-			'channel_id'=>'app',
-			'zm_risk'=>'Y',
-			'zm_face'=>'Y',
-		];
+//		$this->result = [
+//			'name'=>'张三',
+//			'cert_no'=>'110101200010012568',
+//			'mobile'=>'18820881688',
+//			'house'=>'北京 北京 顺义 西湖区文三路168号',
+//			'zm_grade'=>'Z3',
+//			'credit_amount'=>'1500',
+//			'user_id'=>'2018032002411058',
+//			'channel_id'=>'app',
+//			'zm_risk'=>'Y',
+//			'zm_face'=>'Y',
+//		];
 		//查询成功记录表
 		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
 		if( !$res ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
 		}
-		return true;
+//		return true;
 		if( !isset($result['zhima_merchant_order_confirm_response']) ){
 			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
 			\App\Lib\Common\LogApi::notify('芝麻接口，返回值错误',$debug_data);

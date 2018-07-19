@@ -89,33 +89,30 @@ class MiniOrderController extends Controller
         $params     = $request->all();
         // 验证参数
         $rules = [
-            'appid' => 'required', //【必须】string；appid
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'payment_type_id' => 'required', //【必须】string；支付方式id
+            'pay_type' => 'required', //【必须】string；支付方式id
             'coupon_no' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
-        $params = $params['params'];
+        $param = $params['params'];
         //判断支付状态
-        if($params['payment_type_id'] != \App\Order\Modules\Inc\PayInc::MiniAlipay){
+        if($param['pay_type'] != \App\Order\Modules\Inc\PayInc::MiniAlipay){
             return apiResponse([],ApiStatus::CODE_50005,'小程序支付状态错误');
         }
         //判断当前是否有临时订单
-        $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$params['out_order_no']);
+        $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$param['out_order_no']);
         if(!$data){
             \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
         $data = json_decode($data,true);
-        $data['pay_type'] = $params['payment_type_id'];
+        $data['pay_type'] = $param['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = [
-            $params['coupon_no']
-        ];
+        $data['coupon'] = $param['coupon_no'];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
             return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');
@@ -127,8 +124,8 @@ class MiniOrderController extends Controller
         //添加逾期时间
         $miniParams = [
             'transaction_id'=>$transactionNo,
-            'order_no'=>$params['zm_order_no'],
-            'out_order_no'=>$params['out_order_no'],
+            'order_no'=>$param['zm_order_no'],
+            'out_order_no'=>$param['out_order_no'],
             'overdue_time'=>$data['overdue_time'],
         ];
         $b = $miniApi->orderConfirm($miniParams);
@@ -246,7 +243,7 @@ class MiniOrderController extends Controller
             'appid' => 'required', //【必须】string；appid
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'payment_type_id' => 'required', //【必须】string；支付方式id
+            'pay_type' => 'required', //【必须】string；支付方式id
             'coupon_no' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
