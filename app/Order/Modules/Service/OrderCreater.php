@@ -297,7 +297,7 @@ class OrderCreater
             $orderCreater = new DepositComponnet($orderCreater);
 
             //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+            //$orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);

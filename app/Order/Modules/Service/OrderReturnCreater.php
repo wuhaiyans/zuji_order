@@ -2015,7 +2015,7 @@ class OrderReturnCreater
 
             }else{
                 //获取商品信息
-                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['order_no']);
+                $goods=\App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
                 if(!$goods){
                     LogApi::debug("获取商品信息失败");
                     return false;
