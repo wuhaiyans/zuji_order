@@ -707,6 +707,7 @@ class PayController extends Controller
                 $this->innerErrMsg('订单清算解押状态无效');
             }
             DB::commit();
+
             //发起退款的数据
             OrderCleaning::refundRequest($orderCleanInfo);
             $this->innerOkMsg();

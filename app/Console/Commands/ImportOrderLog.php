@@ -54,6 +54,10 @@ class ImportOrderLog extends Command
                     $logs=objectToArray($datas01);
 
                     foreach ($logs as $k=>$v) {
+                        if(empty($v['order_no'])){
+                            LogApi::notify("订单不存在riskid:".$v['id'],[]);
+                            continue;
+                        }
                         $logData = [
                             'order_no' => $v['order_no'],
                             'action' => $v['action'],
