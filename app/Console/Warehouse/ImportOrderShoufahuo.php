@@ -203,7 +203,8 @@ function orderDelivery($order2_all1,$db1,$db2,$t){
     foreach ($order2_all1 as $key=>$item) {
         $row = $db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=" . $item['order_id'])->fetch_assoc();
         $sel++;
-        $order_delivery_insert_sql .= "('".$item['order_no']."','".$row['wuliu_no']."','".$row['wuliu_channel_id']."','".$t."'),";
+        $wuliu_channel_id = $row['wuliu_channel_id']?$row['wuliu_channel_id']:0;
+        $order_delivery_insert_sql .= "('".$item['order_no']."','".$row['wuliu_no']."','".$wuliu_channel_id."','".$t."'),";
         $num++;
     }
     $order_delivery_insert_sql = substr($order_delivery_insert_sql,0,-1);
