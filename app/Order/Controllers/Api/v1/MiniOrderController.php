@@ -106,7 +106,7 @@ class MiniOrderController extends Controller
         //判断当前是否有临时订单
         $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$param['out_order_no']);
         if(!$data){
-            \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
+            \App\Lib\Common\LogApi::notify('小程序临时订单不存在',$data);
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
         $data = json_decode($data,true);
