@@ -148,7 +148,11 @@ class ReceiveRepository
                 if($detail['imei']){
                     $detail['imei'] = $detail['imei'];
                 }else{
-                    $dgi_row = DeliveryGoodsImei::where(['goods_no'=>$detail['goods_no']])->first()->toArray();
+                    $dgi_row = DeliveryGoodsImei::where(['goods_no'=>$detail['goods_no']])->first();
+                    if(!$dgi_row){
+                        throw new \Exception("DeliveryGoodsImei 未找到匹配的 goods_no");
+                    }
+                    $dgi_row = $dgi_row->toArray();
                     if($dgi_row){
                         $detail['imei'] = $dgi_row['imei'];
                     }else{

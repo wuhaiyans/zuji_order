@@ -120,7 +120,7 @@ class PayincomeController extends Controller
         }else{
 
             // 查询分期
-            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$info['business_no']]);
+            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$info['business_no']]);
             $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
         }
 

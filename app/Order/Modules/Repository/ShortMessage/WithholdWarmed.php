@@ -31,7 +31,7 @@ class WithholdWarmed implements ShortMessage {
         // 根据业务，获取短息需要的数据
 
         // 查询分期信息
-        $instalmentInfo = \APp\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$this->business_no]);
+        $instalmentInfo = \APp\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
             // 提交事务
             return false;

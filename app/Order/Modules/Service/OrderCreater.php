@@ -333,7 +333,7 @@ class OrderCreater
             ];
             return $result;
         } catch (\Exception $exc) {
-            set_msg($exc->getMessage());
+             set_msg($exc->getMessage());
             return false;
         }
     }
@@ -620,20 +620,20 @@ class OrderCreater
 	 * @param Array $param
 	 */
 	public static function __praseParam( &$param ) {
-		$paramArr = filter_array($param, [
-	 		'payType' => 'required',//支付方式 【必须】<br/>
-	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
-			'userId' => 'required',//业务用户ID<br/>
-			'businessType' => 'required',//业务类型<br/>
-			'businessNo' => 'required',//业务编号<br/>
-			'paymentAmount' => 'required',//Price 支付金额，单位：元<br/>
-			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
-			'paymentFenqi' => 'required',//int 分期数，取值范围[0,3,6,12]，0：不分期<br/>
-		]);
-		if( count($paramArr) != 8 ){
-			return FALSE;
-		}
-		$param = $paramArr;
+//		$paramArr = filter_array($param, [
+//	 		'payType' => 'required',//支付方式 【必须】<br/>
+//	 		'payChannelId' => 'required',//支付渠道 【必须】<br/>
+//			'userId' => 'required',//业务用户ID<br/>
+//			'businessType' => 'required',//业务类型<br/>
+//			'businessNo' => 'required',//业务编号<br/>
+//			'paymentAmount' => 'required',//Price 支付金额，单位：元<br/>
+//			'fundauthAmount' => 'required',//Price 预授权金额，单位：元<br/>
+//			'paymentFenqi' => 'required',//int 分期数，取值范围[0,3,6,12]，0：不分期<br/>
+//		]);
+//		if( count($paramArr) != 8 ){
+//			return FALSE;
+//		}
+//		$param = $paramArr;
 		return true;
 	}
 	
