@@ -1283,7 +1283,9 @@ class OrderReturnCreater
                     }
                     $buss->setStatus("C");
 
-                }elseif($return_info['status']==ReturnStatus::ReturnReceive || $return_info['status']==ReturnStatus::ReturnTui){
+                }elseif($return_info['status']==ReturnStatus::ReturnReceive
+                    || $return_info['status']==ReturnStatus::ReturnTui
+                    || $return_info['status']==ReturnStatus::ReturnDelivery ){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
                     if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluation){
