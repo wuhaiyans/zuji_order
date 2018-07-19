@@ -64,7 +64,7 @@ class Receive
             'customer' => $data['customer'],
             'customer_mobile' => $data['customer_mobile'],
             'customer_address' => $data['customer_address'],
-            'business_no'      =>$goods_info[0]['refund_no'],
+            'business_no'      =>isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
         ];
 
         $base_api = config('tripartite.warehouse_api_uri');
