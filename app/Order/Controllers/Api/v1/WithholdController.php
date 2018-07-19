@@ -223,7 +223,7 @@ class WithholdController extends Controller
         //判断支付方式
         if( $orderInfo['pay_type'] == PayInc::MiniAlipay ){
             //获取订单的芝麻订单编号
-            $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
             if( empty($miniOrderInfo) ){
                 \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                 return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
@@ -403,7 +403,7 @@ class WithholdController extends Controller
             //判断支付方式 小程序
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
                 //获取订单的芝麻订单编号
-                $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
+                $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::getMiniOrderRentNotify( $instalmentInfo['order_no'] );
                 if( empty($miniOrderInfo) ){
                     \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                     continue;
@@ -582,7 +582,7 @@ class WithholdController extends Controller
                 //判断支付方式
                 if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
                     //获取订单的芝麻订单编号
-                    $miniOrderInfo = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::getMiniOrderRentNotify($item['order_no']);
+                    $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::getMiniOrderRentNotify($item['order_no']);
                     if (empty($miniOrderInfo)) {
                         \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
                         Log::error("本地小程序确认订单回调记录查询失败");

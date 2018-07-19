@@ -112,12 +112,13 @@ class ImportHistoryReturn extends Command
 
                     if (!ImportOrder::isAllowImport($values['order_no'])){
 
+                        $continueReturnArr[] = $values['return_id'];
                         continue;
                     }
                     $success = $this->insertSelectReturn($values);
                     if (!$success) {
                         echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
-                        $errorReturnArr = $values[$values['return_id']];
+                        $errorReturnArr[] = $values['return_id'];
                     } else {
 
                         $bar->advance();  //中间
@@ -127,6 +128,7 @@ class ImportHistoryReturn extends Command
                 LogApi::info("导入退货offset".$offset);
                 echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
+                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
                     echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
@@ -159,7 +161,7 @@ class ImportHistoryReturn extends Command
      */
     private function getReceiveInfo($orderNo){
 
-        $receiveSql = "SELECT *  FROM zuji_order2_receive WHERE order_no={$orderNo}";
+        $receiveSql = "SELECT *  FROM zuji_order2_receive WHERE order_no='{$orderNo}'";
         $returnData  =  $this->conn->select($receiveSql);
         return objectToArray($returnData) ? objectToArray($returnData)[0]: '';
     }
@@ -173,7 +175,7 @@ class ImportHistoryReturn extends Command
      */
     private function getEvaluationInfo($orderNo){
 
-        $receiveSql = "SELECT *  FROM zuji_order2_evaluation WHERE order_no={$orderNo}";
+        $receiveSql = "SELECT *  FROM zuji_order2_evaluation WHERE order_no='{$orderNo}'";
         $evaluationData   =  $this->conn->select($receiveSql);
         return objectToArray($evaluationData)? objectToArray($evaluationData)[0]: '' ;
     }

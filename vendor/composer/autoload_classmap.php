@@ -137,7 +137,7 @@ return array(
     'App\\Order\\Modules\\OrderCreater\\WithholdingComponnet' => $baseDir . '/app/Order/Modules/OrderCreater/WithholdingComponnet.php',
     'App\\Order\\Modules\\OrderCreater\\YidunComponnet' => $baseDir . '/app/Order/Modules/OrderCreater/YidunComponnet.php',
     'App\\Order\\Modules\\PublicInc' => $baseDir . '/app/Lib/PublicInc_bak.php',
-    'App\\Order\\Modules\\Repository\\MiniOrderRepository' => $baseDir . '/app/Order/Modules/Repository/MiniOrderRepository.php',
+    'App\\Order\\Modules\\Repository\\OrderMiniRepository' => $baseDir . '/app/Order/Modules/Repository/OrderMiniRepository.php',
     'App\\Order\\Modules\\Repository\\OrderClearingRepository' => $baseDir . '/app/Order/Modules/Repository/OrderClearingRepository.php',
     'App\\Order\\Modules\\Repository\\OrderCouponRepository' => $baseDir . '/app/Order/Modules/Repository/OrderCouponRepository.php',
     'App\\Order\\Modules\\Repository\\OrderGivebackRepository' => $baseDir . '/app/Order/Modules/Repository/OrderGivebackRepository.php',

@@ -1,32 +1,50 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
-use App\Order\Models\MiniOrderRentNotify;
+use App\Order\Models\OrderMini;
 
 /**
- * 小程序确认订单回调 记录表
- * Class MiniOrderRentNotifyRepository
+ * 小程序订单表
+ * Class OrderMiniRepository
  * Author zhangjinhui
  * @package App\Order\Modules\Repository
  */
-class MiniOrderRentNotifyRepository
+class OrderMiniRepository
 {
     public function __construct(){}
 
     /**
-     * 添加记录信息
+     * 添加芝麻订单信息
      * @param $data
      * @return $last_id
      */
     public static function add($data){
-        $info =MiniOrderRentNotify::create($data);
+        $arr = [
+            'order_no'=>$data['out_order_no'],
+            'name'=>$data['name'],
+            'zm_order_no'=>$data['order_no'],
+            'transaction_id'=>$data['transaction_id'],
+            'cert_no'=>$data['cert_no'],
+            'mobile'=>$data['mobile'],
+            'house'=>$data['house'],
+            'zm_grade'=>$data['zm_grade'],
+            'credit_amount'=>$data['credit_amount'],
+            'zm_risk'=>$data['zm_risk'],
+            'zm_face'=>$data['zm_face'],
+            'app_id'=>$data['appid'],
+            'channel_id'=>$data['channel_id'],
+            'user_id'=>$data['user_id'],
+            'overdue_time'=>$data['overdue_time'],
+            'create_time'=>time(),
+        ];
+        $info =OrderMini::create($arr);
         return $info->getQueueableId();
     }
 
     /**
      * 根据订单编号获取单条订单信息
      * @param string $orderNo 订单编号
-     * @return array $orderInfo 订单基础信息|空<br/>
+     * @return array $miniOrderInfo 小程序订单基础信息|空<br/>
      * $orderInfo = [<br/>
      *		'id' => '',//订单自增id<br/>
      *		'order_no' => '',//业务平台订单号<br/>
@@ -45,8 +63,8 @@ class MiniOrderRentNotifyRepository
      *		'create_time' => '',//创建时间<br/>
      * ]
      */
-    public static function getMiniOrderRentNotify( $orderNo ) {
-        $MiniOrder = new MiniOrderRentNotify();
+    public static function getMiniOrderInfo( $orderNo ) {
+        $MiniOrder = new OrderMini();
         $result =  $MiniOrder->where(['order_no'=> $orderNo])->first();
         if (!$result) {
             get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');

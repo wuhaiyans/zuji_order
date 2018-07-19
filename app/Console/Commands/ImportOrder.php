@@ -97,7 +97,7 @@ class ImportOrder extends Command
                         'pay_type'=>$v['payment_type_id'],//
                         'zuqi_type'=>$v['zuqi_type'],//
                         'remark'=>$delivery['delivery_remark'],//
-                        'order_amount'=>($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 <1?1:($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 ,//订单实际总租金
+                        'order_amount'=>($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 <0?0:($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 ,//订单实际总租金
                         'goods_yajin'=>($v['yajin']+$v['mianyajin'])/100,//商品总押金金额
                         'discount_amount'=>0,//商品优惠总金额
                         'order_yajin'=>$v['yajin']/100,//实付商品总押金金额
@@ -148,12 +148,12 @@ class ImportOrder extends Command
                         'chengse'=>$goods_info['chengse'],
                         'discount_amount'=>0,
                         'coupon_amount'=>$v['discount_amount']/100,
-                        'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100<1 ?1:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
+                        'amount_after_discount'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100<0 ?0:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount'])/100,
                         'edition'=>$sku_info['edition'],
                         'business_key'=>0,
                         'business_no'=>'',
                         'market_price'=>$sku_info['market_price'],
-                        'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 <1?1:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 ,
+                        'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 <0?0:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 ,
                         'specs'=>$goods_info['specs'],
                         'insurance'=>$goods_info['yiwaixian']/100,
                         'buyout_price'=>($sku_info['market_price']*120 -($goods_info['zuqi']*$goods_info['zujin']/100)),

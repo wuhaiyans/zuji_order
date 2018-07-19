@@ -37,14 +37,14 @@ class MiniNotifyController extends Controller
         $this->data = $_POST;
         if($this->data['notify_type'] == $this->CANCEL){
             //入库取消订单回调信息
-            $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
+            $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
             }
             $this->orderCloseCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
             //入库 完成 或 扣款 回调信息
-            $result = \App\Order\Modules\Repository\MiniOrderNotifyLogRepository::add($_POST);
+            $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
             }
@@ -58,7 +58,7 @@ class MiniNotifyController extends Controller
             }
             \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
         }else if($this->data['notify_type'] == $this->CREATE){
-            $result = \App\Order\Modules\Repository\MiniOrderRentNotifyRepository::add($_POST);
+            $result = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::add($_POST);
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序订单确认支付回调记录失败',$_POST);
             }

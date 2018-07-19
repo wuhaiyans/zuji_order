@@ -2,16 +2,16 @@
 
 /**
  *
- *  小程序 请求回调 记录表
+ *  小程序确认订单回调 记录表
  */
 namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MiniOrderNotifyLog extends Model
+class OrderMiniRentNotify extends Model
 {
 
-    protected $table = 'mini_order_notify_log';
+    protected $table = 'order_mini_rent_notify';
 
     protected $primaryKey='id';
 
@@ -30,14 +30,11 @@ class MiniOrderNotifyLog extends Model
      */
     protected $fillable = [
         'notify_type',
-        'redis_key',
         'out_order_no',
         'zm_order_no',
-        'out_trans_no',
-        'alipay_fund_order_no',
-        'pay_time',
-        'pay_status',
-        'pay_amount',
+        'order_create_time',
+        'fund_type',
+        'credit_privilege_amount',
         'channel',
         'notify_app_id',
         'data_text',

@@ -58,7 +58,6 @@ class ImportUserCertified extends Command
                             'certified'=>$v['credit']>0?1:0,
                             'certified_platform'=>$v['certified_platform'],
                             'credit'=>$v['credit'],
-                            'score'=>0,
                             'risk'=>0,
                             'face'=>0,
                             'realname'=>$v['realname'],

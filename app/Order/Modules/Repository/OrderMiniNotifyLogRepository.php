@@ -1,15 +1,15 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Order\Models\Order;
-use App\Order\Models\MiniOrderNotifyLog;
+use App\Order\Models\OrderMiniNotifyLog;
 
 /**
  * 小程序 请求回调 记录表
- * Class MiniOrderRepository
+ * Class OrderMiniRepository
  * Author zhangjinhui
  * @package App\Order\Modules\Repository
  */
-class MiniOrderNotifyLogRepository
+class OrderMiniNotifyLogRepository
 {
     public function __construct(){}
 
@@ -19,7 +19,7 @@ class MiniOrderNotifyLogRepository
      * @return $last_id
      */
     public static function add($data){
-        $info =MiniOrderNotifyLog::create($data);
+        $info =OrderMiniNotifyLog::create($data);
         return $info->getQueueableId();
     }
 

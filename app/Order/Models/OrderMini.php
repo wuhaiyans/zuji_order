@@ -8,10 +8,10 @@ namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MiniOrder extends Model
+class OrderMini extends Model
 {
 
-    protected $table = 'mini_order_info';
+    protected $table = 'order_mini_info';
 
     protected $primaryKey='id';
 
