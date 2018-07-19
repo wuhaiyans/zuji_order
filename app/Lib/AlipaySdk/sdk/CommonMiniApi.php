@@ -130,11 +130,6 @@ class CommonMiniApi extends BaseApi {
 //			'zm_risk'=>'Y',
 //			'zm_face'=>'Y',
 //		];
-		//查询成功记录表
-		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
-		if( !$res ){
-			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
-		}
 //		return true;
 		if( !isset($result['zhima_merchant_order_confirm_response']) ){
 			$this->error = '芝麻扣款 取消订单 关闭订单 接口，返回值错误';
@@ -146,7 +141,11 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
 			return false;
 		}
-
+		//查询成功记录表
+		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
+		if( !$res ){
+			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);
+		}
 		$this->result = $result;
 		return true;
 	}
