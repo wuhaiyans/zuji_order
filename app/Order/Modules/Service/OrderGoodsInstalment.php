@@ -104,26 +104,26 @@ class OrderGoodsInstalment
     /**
      * 更新分期扣款的租机交易码
      * @param int $id	主键ID
-     * @param string $trade_no	交易码
+     * @param string $business_no	交易码
      * @return mixed  false：更新失败；int：受影响记录数
      */
-    public static function set_trade_no($id, $trade_no){
+    public static function set_trade_no($id, $business_no){
         if(!$id){
             return ApiStatus::CODE_20001;
         }
 
-        if(!$trade_no){
+        if(!$business_no){
             return ApiStatus::CODE_20001;
         }
 
-        return OrderGoodsInstalmentRepository::setTradeNo($id, $trade_no);
+        return OrderGoodsInstalmentRepository::setTradeNo($id, $business_no);
 
     }
 
     /**
      * 更新分期扣款的租机交易码
      * @param int $id	主键ID
-     * @param string $trade_no	交易码
+     * @param string $business_no	交易码
      * @return mixed  false：更新失败；int：受影响记录数
      */
     public static function instalment_failed($fail_num,$instalment_id,$term){
@@ -149,7 +149,7 @@ class OrderGoodsInstalment
         // 发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
             OrderStatus::BUSINESS_FENQI,
-            $instalmentInfo['trade_no'],
+            $instalmentInfo['business_no'],
             $model);
         $notice->notify();
 

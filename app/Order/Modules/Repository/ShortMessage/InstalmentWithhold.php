@@ -31,7 +31,7 @@ class InstalmentWithhold implements ShortMessage {
     public function notify(){
 
         // 查询分期信息
-        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$this->business_no]);
+        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
             LogApi::debug("扣款成功短信-分期详情错误",[$this->business_no]);
             return false;
@@ -83,7 +83,7 @@ class InstalmentWithhold implements ShortMessage {
     public function alipay_notify(){
 
         // 查询分期信息
-        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$this->business_no]);
+        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
             // 提交事务
             return false;
