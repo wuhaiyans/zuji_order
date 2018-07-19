@@ -34,7 +34,6 @@ class ImportHistoryMiniConfirmed extends Command
      */
     public function __construct()
     {
-        echo 11;die;
         parent::__construct();
     }
 
@@ -45,7 +44,6 @@ class ImportHistoryMiniConfirmed extends Command
      */
     public function handle()
     {
-        echo 11;die;
         //小程序回调数据表
         DB::beginTransaction();
         $total = \DB::connection('mysql_01')->table('zuji_zhima_order_confirmed')
