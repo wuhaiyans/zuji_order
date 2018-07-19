@@ -218,11 +218,13 @@ class GivebackController extends Controller
 					[
 						'goods_no'=>$goodsNo,
 						'goods_name'=>$orderGoodsInfo['goods_name'],
+						'business_no' => $giveback_no,
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
 					'logistics_no' => $paramsArr['logistics_no'],
 					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'business_no' => $giveback_no,
 					'customer' => $userInfo['name'],
 					'customer_mobile' => $userInfo['consignee_mobile'],
 					'customer_address' => $userInfo['address_info'],
