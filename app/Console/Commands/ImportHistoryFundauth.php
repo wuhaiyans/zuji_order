@@ -22,7 +22,7 @@ class ImportHistoryFundauth extends Command
      */
     protected $description = 'Command description';
 
-    private $update = true;
+    private $update = false;
     /**
      * Create a new command instance.
      *
@@ -121,6 +121,7 @@ class ImportHistoryFundauth extends Command
                         // 更新
                         if( $this->update ){
                             unset($pay_ali_fund_data['alipay_fundauth_no']);
+                            unset($pay_ali_fund_data['fundauth_no']);
                             \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                                 ->where([
                                     ['alipay_fundauth_no', '=', $alipay_fundauth_no]
