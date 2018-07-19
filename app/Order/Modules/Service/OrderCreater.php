@@ -349,6 +349,7 @@ class OrderCreater
             $data['user_id'] = intval($data['user_id']);
             $data['pay_type'] = intval($data['pay_type']);
             $data['appid'] = intval($data['appid']);
+            print_r($data);die;
             //订单创建构造器
             $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['appid']),($orderType));
 
