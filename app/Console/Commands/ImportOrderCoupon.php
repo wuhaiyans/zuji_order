@@ -53,8 +53,7 @@ class ImportOrderCoupon extends Command
                     $coupons=objectToArray($datas01);
 
                     foreach ($coupons as $k=>$v) {
-                        if(empty($v['order_no'])){
-                            LogApi::notify("订单不存在riskid:".$v['id'],[]);
+                        if(!ImportOrder::isAllowImport($v['order_no'])){
                             continue;
                         }
                         $couponData = [
