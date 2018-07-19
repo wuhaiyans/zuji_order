@@ -48,6 +48,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 1.';
     exit;
 }
+mysqli_query($db1,'set names utf8');
 
 //数据库2 (新订单)
 $db2=new mysqli($host,$user,$password,$dbname2,$port);
@@ -55,6 +56,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 2.';
     exit;
 }
+mysqli_query($db2,'set names utf8');
 
 //数据库2 (新收发货)
 //$db3=new mysqli($host,$user,$password,$dbname3,$port);
@@ -86,22 +88,22 @@ while($arr = $result_order2_all1->fetch_assoc()){
 $sel++;
 
 //省,市,区县
-$result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
-while($arr = $result_zuji_district_all1->fetch_assoc()){
-    //二维数组 id,name
-    $district_all1[$arr['id']]=$arr;
-}
-$sel++;
+//$result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
+//while($arr = $result_zuji_district_all1->fetch_assoc()){
+//    //二维数组 id,name
+//    $district_all1[$arr['id']]=$arr;
+//}
+//$sel++;
 
 //------------------导入订单收货地址------------------
-if( !orderAddress($order2_all1,$district_all1,$db1,$db2,$t) ){
-    $db2->rollback();//回滚
-    //关闭链接
-    $db1->close();
-    $db2->close();
-    die;
-
-}
+//if( !orderAddress($order2_all1,$district_all1,$db1,$db2,$t) ){
+//    $db2->rollback();//回滚
+//    //关闭链接
+//    $db1->close();
+//    $db2->close();
+//    die;
+//
+//}
 
 //------------------导入订单发货信息------------------
 if( !orderDelivery($order2_all1,$db1,$db2,$t) ){
@@ -152,45 +154,45 @@ die;
  * $db2         链接2(新)
  * $t           执行时间
  */
-function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
-    global $num,$sel;
-    echo '导入订单用户收货信息开始 '.date('Y-m-d H:i:s',time()).'<br>';
-    //拼接订单收货地址信息
-    $district = [];//省市区 二维
-    $address_insert_sql = "INSERT INTO order_user_address (order_no,consignee_mobile,name,province_id,city_id,area_id,address_info,create_time,update_time) VALUES ";
-    foreach ($order2_all1 as $key=>$item){
-        $order2_address_all1 = [];//初始化
-        $result1=$db1->query("SELECT * FROM zuji_order2_address WHERE order_id=".$item['order_id']);
-        while($arr = $result1->fetch_assoc()){
-            $order2_address_all1[]=$arr;//订单收货二维数组
-        }
-        $sel++;
-        foreach ($order2_address_all1 as $k=>$v){
-            $address_info = '';//地址详情
-            //省
-            $address_info .= $district_all1[$v['province_id']]['name'].' ';
-            //市
-            $address_info .= $district_all1[$v['city_id']]['name'].' ';
-            //区县
-            $address_info .= $district_all1[$v['country_id']]['name'].' ';
-            $address_info .= replaceSpecialChar($v['address']);
-
-            //order_no,consignee_mobile,name,province_id,city_id,area_id,address_info,create_time,update_time
-            $address_insert_sql .= "('".$item['order_no']."','".$v['mobile']."','".replaceSpecialChar($v['name'])."','".$v['province_id']."','".$v['city_id']."','".$v['country_id']."','".$address_info."','".$t."','".$t."'),";
-            $num++;
-        }
-    }
-    $address_insert_sql = substr($address_insert_sql,0,-1);
-//    echo $address_insert_sql;
-    if($db2->query($address_insert_sql)){
-        echo '导入订单收货地址成功;<br>';
-        return true;
-    }else{
-        echo '导入订单收货地址失败;<br>';
-        echo $address_insert_sql;
-        return false;
-    }
-}
+//function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
+//    global $num,$sel;
+//    echo '导入订单用户收货信息开始 '.date('Y-m-d H:i:s',time()).'<br>';
+//    //拼接订单收货地址信息
+//    $district = [];//省市区 二维
+//    $address_insert_sql = "INSERT INTO order_user_address (order_no,consignee_mobile,name,province_id,city_id,area_id,address_info,create_time,update_time) VALUES ";
+//    foreach ($order2_all1 as $key=>$item){
+//        $order2_address_all1 = [];//初始化
+//        $result1=$db1->query("SELECT * FROM zuji_order2_address WHERE order_id=".$item['order_id']);
+//        while($arr = $result1->fetch_assoc()){
+//            $order2_address_all1[]=$arr;//订单收货二维数组
+//        }
+//        $sel++;
+//        foreach ($order2_address_all1 as $k=>$v){
+//            $address_info = '';//地址详情
+//            //省
+//            $address_info .= $v['province_id']?$district_all1[$v['province_id']]['name'].' ':'';
+//            //市
+//            $address_info .= $v['city_id']?$district_all1[$v['city_id']]['name'].' ':'';
+//            //区县
+//            $address_info .= $v['country_id']?$district_all1[$v['country_id']]['name'].' ':'';
+//            $address_info .= $v['address']?replaceSpecialChar($v['address']):'';
+//
+//            //order_no,consignee_mobile,name,province_id,city_id,area_id,address_info,create_time,update_time
+//            $address_insert_sql .= "('".$item['order_no']."','".$v['mobile']."','".replaceSpecialChar($v['name'])."','".($v['province_id']?$v['province_id']:'0')."','".($v['city_id']?$v['city_id']:'0')."','".($v['country_id']?$v['country_id']:'0')."','".$address_info."','".$t."','".$t."'),";
+//            $num++;
+//        }
+//    }
+//    $address_insert_sql = substr($address_insert_sql,0,-1);
+////    echo $address_insert_sql;
+//    if($db2->query($address_insert_sql)){
+//        echo '导入订单收货地址成功;<br>';
+//        return true;
+//    }else{
+//        echo '导入订单收货地址失败;<br>';
+//        echo $address_insert_sql;
+//        return false;
+//    }
+//}
 
 /**
  * 导入订单发货信息
@@ -233,9 +235,9 @@ function goodsDelivery($order2_all1,$db1,$db2){
     foreach ($order2_all1 as $key=>$item) {
         $row = $db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=" . $item['order_id'])->fetch_assoc();
         $sel++;
-        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
+        $sku_row=$db1->query("SELECT `sku_id` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
         $sel++;
-        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
+        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sku_id']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
         $num++;
     }
     $goods_delivery_insert_sql = substr($goods_delivery_insert_sql,0,-1);
