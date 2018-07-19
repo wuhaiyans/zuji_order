@@ -203,18 +203,21 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
     if ($delivery_insert_sql) {
         if( !$db3->query($delivery_insert_sql) ){
             echo '导入发货单失败;';
+            echo $delivery_insert_sql;
             return false;
         }
     }
     if ($delivery_goods_insert_sql) {
         if( !$db3->query($delivery_goods_insert_sql) ){
             echo '导入发货商品清单失败;';
+            echo $delivery_goods_insert_sql;
             return false;
         }
     }
     if ($delivery_goods_imei_insert_sql) {
         if( !$db3->query($delivery_goods_imei_insert_sql) ){
             echo '导入发货设备IMEI号表失败;';
+            echo $delivery_goods_imei_insert_sql;
             return false;
         }
     }
@@ -328,18 +331,21 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
     if ($receive_insert_sql) {
         if( !$db3->query($receive_insert_sql) ){
             echo '导入收货检测单失败;';
+            echo $receive_insert_sql;
             return false;
         }
     }
     if ($receive_goods_insert_sql) {
         if( !$db3->query($receive_goods_insert_sql) ){
             echo '导入收货检测商品清单失败;';
+            echo $receive_goods_insert_sql;
             return false;
         }
     }
     if ($receive_goods_imei_insert_sql) {
         if( !$db3->query($receive_goods_imei_insert_sql) ){
             echo '导入收货检测设备IMEI号表失败;';
+            echo $receive_goods_imei_insert_sql;
             return false;
         }
     }
