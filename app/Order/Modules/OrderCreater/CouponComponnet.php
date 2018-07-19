@@ -31,14 +31,13 @@ class CouponComponnet implements OrderCreater
         $this->componnet = $componnet;
         if(!empty($coupon)){
             //获取优惠券类型接口
-            print_r($coupon);die;
             foreach ($coupon as $k=>$v){
                 $couponData[]=[
                     'user_id'=>$userId,
                     'coupon_no'=>$v,
                 ];
             }
-           // var_dump($couponData);die;
+            var_dump($couponData);
             $coupon = Coupon::getCoupon($couponData);
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");
@@ -48,6 +47,7 @@ class CouponComponnet implements OrderCreater
             }
             $couponInfo =[];
             foreach ($coupon as $key=>$value){
+                var_dump($value);
                 foreach ($value as $k=>$v){
                     $couponInfo[]=[
                         'coupon_id'=>$v['coupon_id'],
