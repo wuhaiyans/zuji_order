@@ -161,8 +161,8 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
         $sel++;
         $goods_row=$db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=".$item['order_id']." ORDER BY goods_id DESC LIMIT 1")->fetch_assoc();
         $sel++;
-        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
-        $sel++;
+        //$sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
+        //$sel++;
 
         foreach ($delivery_all1 as $k=>$delivery_row){
             $delivery_no = $delivery_row['delivery_id'];
@@ -180,23 +180,23 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
 
             $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
             $num++;
-            $delivery_goods_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
+            $delivery_goods_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
             $num++;
             //imei
             if ($goods_row['serial_number']){
                 //苹果
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".replaceSpecialChar($goods_row['imei1'])."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                 $num++;
             }else{
                 //安卓
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".replaceSpecialChar($goods_row['imei1'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                 $num++;
                 if($goods_row['imei2']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','2','".replaceSpecialChar($goods_row['imei2'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','2','".replaceSpecialChar($goods_row['imei2'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                     $num++;
                 }
                 if($goods_row['imei3']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','3','".replaceSpecialChar($goods_row['imei3'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','3','".replaceSpecialChar($goods_row['imei3'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                     $num++;
                 }
             }
@@ -256,8 +256,8 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
         $sel++;
         $goods_row=$db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=".$item['order_id']." ORDER BY goods_id DESC LIMIT 1")->fetch_assoc();
         $sel++;
-        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
-        $sel++;
+        //$sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$goods_row['sku_id'])->fetch_assoc();
+        //$sel++;
         foreach ($receive_all1 as $k=>$receive_row){
             $receive_no = $receive_row['receive_id'];
             $address_info = '';//地址详情
@@ -278,23 +278,23 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $checkResult = getCheckResult($evaluation_row['evaluation_status']);
                 $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".$receive_row['business_key']."'),";
                 $num++;
-                $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
+                $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
                 $num++;
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
                     $num++;
                 }else{
                     //安卓
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                     $num++;
                     if($goods_row['imei2']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei2'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei2'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                     if($goods_row['imei3']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei3'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei3'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                 }
@@ -304,23 +304,23 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $goodsStatus = getGoodsReceiveStatus($receive_row['receive_status']);
                 $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".$receive_row['business_key']."'),";
                 $num++;
-                $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
+                $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
                 $num++;
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
                     $num++;
                 }else{
                     //安卓
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                     $num++;
                     if($goods_row['imei2']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei2'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei2'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                     if($goods_row['imei3']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei3'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$goods_row['goods_id']."','".replaceSpecialChar($goods_row['imei3'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                 }
