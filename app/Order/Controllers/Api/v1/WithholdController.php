@@ -177,17 +177,17 @@ class WithholdController extends Controller
         }
 
         // 生成交易码
-        $trade_no = createNo();
+        $business_no = createNo();
         // 扣款交易码
-        if( $instalmentInfo['trade_no'] == '' ){
+        if( $instalmentInfo['business_no'] == '' ){
             // 1)记录租机交易码
-            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['trade_no'=>$trade_no]);
+            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
             if( $b === false ){
                 return apiResponse([], ApiStatus::CODE_32002, "数据异常");
             }
-            $instalmentInfo['trade_no'] = $trade_no;
+            $instalmentInfo['business_no'] = $business_no;
         }
-        $trade_no = $instalmentInfo['trade_no'];
+        $business_no = $instalmentInfo['business_no'];
 
         //开启事务
         DB::beginTransaction();
@@ -279,7 +279,7 @@ class WithholdController extends Controller
 
             $withholding_data = [
                 'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                'out_trade_no'  => $trade_no,               //业务系统业务码
+                'out_trade_no'  => $business_no,               //业务系统业务码
                 'amount'        => $amount,                 //交易金额；单位：分
                 'back_url'      => $backUrl,                //后台通知地址
                 'name'          => $subject,                //交易备注
@@ -352,18 +352,18 @@ class WithholdController extends Controller
             }
 
             // 生成交易码
-            $trade_no = createNo();
+            $business_no = createNo();
             // 扣款交易码
-            if( $instalmentInfo['trade_no'] == '' ){
+            if( $instalmentInfo['business_no'] == '' ){
                 // 1)记录租机交易码
-                $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['trade_no'=>$trade_no]);
+                $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
                 if( $b === false ){
                     Log::error("数据异常");
                     continue;
                 }
-                $instalmentInfo['trade_no'] = $trade_no;
+                $instalmentInfo['business_no'] = $business_no;
             }
-            $trade_no = $instalmentInfo['trade_no'];
+            $business_no = $instalmentInfo['business_no'];
 
             // 判断是否允许扣款
             $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
@@ -457,7 +457,7 @@ class WithholdController extends Controller
 
                 $withholding_data = [
                     'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                    'out_trade_no'  => $trade_no,               //业务系统业务吗
+                    'out_trade_no'  => $business_no,               //业务系统业务吗
                     'amount'        => $amount,                 //交易金额；单位：分
                     'back_url'      => $backUrl,                //后台通知地址
                     'name'          => $subject,                //交易备注
@@ -539,18 +539,18 @@ class WithholdController extends Controller
             foreach($result as $item) {
 
                 // 生成交易码
-                $trade_no = createNo();
+                $business_no = createNo();
                 // 扣款交易码
-                if( $item['trade_no'] == '' ){
+                if( $item['business_no'] == '' ){
                     // 1)记录租机交易码
-                    $b = OrderGoodsInstalment::save(['id'=>$item['id']],['trade_no'=>$trade_no]);
+                    $b = OrderGoodsInstalment::save(['id'=>$item['id']],['business_no'=>$business_no]);
                     if( $b === false ){
                         Log::error("数据异常");
                         continue;
                     }
-                    $item['trade_no'] = $trade_no;
+                    $item['business_no'] = $business_no;
                 }
-                $trade_no = $item['trade_no'];
+                $business_no = $item['business_no'];
 
                 //开启事务
                 DB::beginTransaction();
@@ -641,7 +641,7 @@ class WithholdController extends Controller
 
                         $withholding_data = [
                             'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                            'out_trade_no'  => $trade_no,             //业务系统业务吗
+                            'out_trade_no'  => $business_no,             //业务系统业务吗
                             'amount'        => $amount,                 //交易金额；单位：分
                             'back_url'      => $backUrl,                //后台通知地址
                             'name'          => $subject,                //交易备注
@@ -720,19 +720,19 @@ class WithholdController extends Controller
 
 
         // 生成交易码
-        $trade_no = createNo();
+        $business_no = createNo();
         // 扣款交易码
-        if( $instalmentInfo['trade_no'] == '' ){
+        if( $instalmentInfo['business_no'] == '' ){
             // 1)记录租机交易码
-            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['trade_no'=>$trade_no]);
+            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
             if( $b === false ){
                 Log::error("数据异常");
                 return apiResponse([], ApiStatus::CODE_71000, "更新交易码错误");
             }
-            $instalmentInfo['trade_no'] = $trade_no;
+            $instalmentInfo['business_no'] = $business_no;
         }
 
-        $trade_no = $instalmentInfo['trade_no'];
+        $business_no = $instalmentInfo['business_no'];
 
 
         //开启事务
@@ -777,7 +777,7 @@ class WithholdController extends Controller
                 'coupon_id'         => $couponInfo['coupon_id'],
                 'discount_amount'   => $couponInfo['youhui'],
                 'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'       => $trade_no,
+                'business_no'       => $business_no,
             ];
             \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
         }
@@ -786,7 +786,7 @@ class WithholdController extends Controller
         $payData = [
             'userId'            => $instalmentInfo['user_id'],//用户ID
             'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $trade_no,	                // 业务编号
+            'businessNo'		=> $business_no,	                // 业务编号
             'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
             'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
             'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期

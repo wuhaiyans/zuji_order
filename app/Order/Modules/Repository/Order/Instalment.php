@@ -297,7 +297,7 @@ class Instalment {
 
 		if($param['status'] == "success"){
 //			LogApi::info("代扣定时任务", $param);
-			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['trade_no'=>$param['out_trade_no']]);
+			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['business_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
 				return false;
@@ -317,7 +317,7 @@ class Instalment {
 
 			];
 			// 修改分期状态
-			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['trade_no'=>$param['out_trade_no']], $data);
+			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['business_no'=>$param['out_trade_no']], $data);
 			if(!$b){
 				\App\Lib\Common\LogApi::error('修改分期状态失败');
 				return false;

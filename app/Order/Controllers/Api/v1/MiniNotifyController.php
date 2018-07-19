@@ -89,10 +89,10 @@ class MiniNotifyController extends Controller
         }
         // 扣款成功 修改分期状态
         if($data['pay_status'] == "PAY_SUCCESS"){
-            $trade_no = $data['out_trans_no'];
+            $business_no = $data['out_trans_no'];
             $params = [
                 'status'=>'success',
-                'out_trade_no'=>$trade_no,
+                'out_trade_no'=>$business_no,
             ];
             //修改分期状态
             $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
