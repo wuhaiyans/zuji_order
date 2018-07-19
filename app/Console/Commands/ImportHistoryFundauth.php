@@ -112,6 +112,7 @@ class ImportHistoryFundauth extends Command
                     //有记录则跳出
                     $pay_ali_fund_info = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                         ->where([
+                            ['alipay_fundauth_no', '=', $alipay_fundauth_no],
                             ['alipay_fundauth_no', '=', $alipay_fundauth_no]
                         ])
                         ->first();
