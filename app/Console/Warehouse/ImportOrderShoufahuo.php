@@ -48,6 +48,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 1.';
     exit;
 }
+mysqli_query($db1,'set names utf8');
 
 //数据库2 (新订单)
 $db2=new mysqli($host,$user,$password,$dbname2,$port);
@@ -55,6 +56,7 @@ if(mysqli_connect_error()){
     echo 'Could not connect to database 2.';
     exit;
 }
+mysqli_query($db2,'set names utf8');
 
 //数据库2 (新收发货)
 //$db3=new mysqli($host,$user,$password,$dbname3,$port);

@@ -84,7 +84,6 @@ $sel++;
 //省,市,区县
 $result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
 while($arr = $result_zuji_district_all1->fetch_assoc()){
-    print_r($arr);die;
     //二维数组 id,name
     $district_all1[$arr['id']]=$arr;
 }
