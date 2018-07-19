@@ -1270,6 +1270,12 @@ class OrderOperate
                 if ($insuranceData){
                     $goodsList[$keys]['act_goods_state']['Insurance'] = false;
                     $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+                    $popInsurance = array_pop($insuranceData);
+                    if ($popInsurance == 2) {
+                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
+                        $goodsList[$keys]['act_goods_state']['Insurance'] = true;
+                    }
+
                     $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
                 }
 
