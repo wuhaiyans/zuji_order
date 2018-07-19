@@ -187,6 +187,7 @@ function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
         return true;
     }else{
         echo '导入订单收货地址失败;<br>';
+        echo $address_insert_sql;
         return false;
     }
 }
@@ -203,7 +204,8 @@ function orderDelivery($order2_all1,$db1,$db2,$t){
     foreach ($order2_all1 as $key=>$item) {
         $row = $db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=" . $item['order_id'])->fetch_assoc();
         $sel++;
-        $order_delivery_insert_sql .= "('".$item['order_no']."','".$row['wuliu_no']."','".$row['wuliu_channel_id']."','".$t."'),";
+        $wuliu_channel_id = $row['wuliu_channel_id']?$row['wuliu_channel_id']:1;
+        $order_delivery_insert_sql .= "('".$item['order_no']."','".$row['wuliu_no']."','".$wuliu_channel_id."','".$t."'),";
         $num++;
     }
     $order_delivery_insert_sql = substr($order_delivery_insert_sql,0,-1);
@@ -213,6 +215,7 @@ function orderDelivery($order2_all1,$db1,$db2,$t){
         return true;
     }else{
         echo '导入订单发货信息表失败;<br>';
+        echo $order_delivery_insert_sql;
         return false;
     }
 
@@ -232,7 +235,7 @@ function goodsDelivery($order2_all1,$db1,$db2){
         $sel++;
         $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
         $sel++;
-        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".$row['imei1']."','".$row['imei2']."','".$row['imei3']."','".$row['serial_number']."','1'),";
+        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
         $num++;
     }
     $goods_delivery_insert_sql = substr($goods_delivery_insert_sql,0,-1);
@@ -242,6 +245,7 @@ function goodsDelivery($order2_all1,$db1,$db2){
         return true;
     }else{
         echo '导入订单商品发货信息表失败;<br>';
+        echo $goods_delivery_insert_sql;
         return false;
     }
 

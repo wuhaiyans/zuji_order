@@ -180,18 +180,18 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
             //imei
             if ($goods_row['serial_number']){
                 //苹果
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['imei1']."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".replaceSpecialChar($goods_row['imei1'])."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                 $num++;
             }else{
                 //安卓
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['imei1']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".replaceSpecialChar($goods_row['imei1'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                 $num++;
                 if($goods_row['imei2']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','2','".$goods_row['imei2']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','2','".replaceSpecialChar($goods_row['imei2'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                     $num++;
                 }
                 if($goods_row['imei3']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','3','".$goods_row['imei3']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','3','".replaceSpecialChar($goods_row['imei3'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
                     $num++;
                 }
             }
@@ -203,18 +203,21 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
     if ($delivery_insert_sql) {
         if( !$db3->query($delivery_insert_sql) ){
             echo '导入发货单失败;';
+            echo $delivery_insert_sql;
             return false;
         }
     }
     if ($delivery_goods_insert_sql) {
         if( !$db3->query($delivery_goods_insert_sql) ){
             echo '导入发货商品清单失败;';
+            echo $delivery_goods_insert_sql;
             return false;
         }
     }
     if ($delivery_goods_imei_insert_sql) {
         if( !$db3->query($delivery_goods_imei_insert_sql) ){
             echo '导入发货设备IMEI号表失败;';
+            echo $delivery_goods_imei_insert_sql;
             return false;
         }
     }
@@ -275,18 +278,18 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
                     $num++;
                 }else{
                     //安卓
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                     $num++;
                     if($goods_row['imei2']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".$goods_row['imei2']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei2'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                     if($goods_row['imei3']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".$goods_row['imei3']."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei3'])."','".$status_arr[2]."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                 }
@@ -301,18 +304,18 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 //imei
                 if ($goods_row['serial_number']){
                     //苹果
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','1','".$goods_row['serial_number']."'),";
                     $num++;
                 }else{
                     //安卓
-                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".$goods_row['imei1']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                    $receive_goods_imei_insert_sql .= "('".$receive_no."','1','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei1'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                     $num++;
                     if($goods_row['imei2']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".$goods_row['imei2']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','2','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei2'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                     if($goods_row['imei3']){
-                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".$goods_row['imei3']."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
+                        $receive_goods_imei_insert_sql .= "('".$receive_no."','3','".$sku_row['sn']."','".replaceSpecialChar($goods_row['imei3'])."','".$status."','".$goods_row['create_time']."','0','0','2','".$goods_row['serial_number']."'),";
                         $num++;
                     }
                 }
@@ -328,18 +331,21 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
     if ($receive_insert_sql) {
         if( !$db3->query($receive_insert_sql) ){
             echo '导入收货检测单失败;';
+            echo $receive_insert_sql;
             return false;
         }
     }
     if ($receive_goods_insert_sql) {
         if( !$db3->query($receive_goods_insert_sql) ){
             echo '导入收货检测商品清单失败;';
+            echo $receive_goods_insert_sql;
             return false;
         }
     }
     if ($receive_goods_imei_insert_sql) {
         if( !$db3->query($receive_goods_imei_insert_sql) ){
             echo '导入收货检测设备IMEI号表失败;';
+            echo $receive_goods_imei_insert_sql;
             return false;
         }
     }
