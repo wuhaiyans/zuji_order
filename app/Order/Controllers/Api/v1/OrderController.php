@@ -50,7 +50,6 @@ class OrderController extends Controller
 	 * @return type
 	 */
     public function confirmation(Request $request){
-        return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         $params = $request->all();
 
         //获取appid
