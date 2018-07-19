@@ -39,7 +39,7 @@ class ReceiveGoodsService
         }
 
         //1：待配货；2：待发货；3：已发货，待用户签收；4：已签收完成；5：已拒签完成；6：已取消；
-        if (isset($params['status']) && $params['status']) {
+        if (isset($params['status']) && $params['status']!='') {
             $whereParams['status'] = $params['status'];
         }
 

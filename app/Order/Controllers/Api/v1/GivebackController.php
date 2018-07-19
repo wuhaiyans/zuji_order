@@ -218,11 +218,13 @@ class GivebackController extends Controller
 					[
 						'goods_no'=>$goodsNo,
 						'goods_name'=>$orderGoodsInfo['goods_name'],
+						'business_no' => $giveback_no,
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
 					'logistics_no' => $paramsArr['logistics_no'],
 					'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					'business_no' => $giveback_no,
 					'customer' => $userInfo['name'],
 					'customer_mobile' => $userInfo['consignee_mobile'],
 					'customer_address' => $userInfo['address_info'],
@@ -781,7 +783,9 @@ class GivebackController extends Controller
 		if( !$orderGivebackInfo ){
 			//组合最终返回商品基础数据
 			$data['goods_info'] = $orderGoodsInfo;//商品信息
-			$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+			$data['giveback_address'] = config('tripartite.Customer_Service_Address');
+			$data['giveback_username'] = config('tripartite.Customer_Service_Name');;
+			$data['giveback_tel'] = config('tripartite.Customer_Service_Phone');;
 			$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 			$data['status_text'] = '还机申请中';//后台状态
 

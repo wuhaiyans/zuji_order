@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Common\LogApi;
+//use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
 
 class ImportOrder extends Command
@@ -80,10 +82,12 @@ class ImportOrder extends Command
                     $follow_info =$this->getOrderFollow($v['order_id'],7);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                        $status['order_status'] = 8;
                     }
                     $follow_info =$this->getOrderFollow($v['order_id'],22);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                        $status['order_status'] =8;
                     }
 
 
@@ -156,7 +160,7 @@ class ImportOrder extends Command
                         'price'=>($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 <0?0:($goods_info['zuqi']*$goods_info['zujin']-$v['discount_amount']+$goods_info['yiwaixian']+$goods_info['yajin'])/100 ,
                         'specs'=>$goods_info['specs'],
                         'insurance'=>$goods_info['yiwaixian']/100,
-                        'buyout_price'=>($sku_info['market_price']*120 -($goods_info['zuqi']*$goods_info['zujin']/100)),
+                        'buyout_price'=>($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100))<0?0:($sku_info['market_price']*1.2 -($goods_info['zuqi']*$goods_info['zujin']/100)),
                         'begin_time'=>$service['begin_time'],
                         'end_time'=>$service['end_time'],
                         'weight'=>$sku_info['weight'],
@@ -166,7 +170,52 @@ class ImportOrder extends Command
                     ];
                     $res =OrderGoods::updateOrCreate($goodsData);
                     if(!$res->getQueueableId()){
-                        $arr['goods'][$k] =$orderData;
+                        $arr['goods'][$k] =$goodsData;
+                    }
+                    /**
+                     * 判断订单状态 如果是已下单 的 创建支付单
+                     */
+                    /**
+                     * 创建支付单
+                     * @param array $param 创建支付单数组
+                     * $param = [<br/>
+                     *		'payType' => '',//支付方式 【必须】<br/>
+                     *		'payChannelId' => '',//支付渠道 【必须】<br/>
+                     *		'userId' => '',//业务用户ID 【必须】<br/>
+                     *		'businessType' => '',//业务类型（租机业务 ）【必须】<br/>
+                     *		'businessNo' => '',//业务编号（订单编号）【必须】<br/>
+                     *		'paymentAmount' => '',//Price 支付金额（总租金），单位：元【必须】<br/>
+                     *		'fundauthAmount' => '',//Price 预授权金额（押金），单位：元【必须】<br/>
+                     *		'paymentFenqi' => '',//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                     * ]<br/>
+                     * @return mixed boolen：flase创建失败|array $result 结果数组
+                     * $result = [<br/>
+                     *		'isPay' => '',订单是否需要支付（true：需要支付；false：无需支付）【订单是否创建支付单】//<br/>
+                     *		'withholdStatus' => '',是否需要签代扣（true：需要签约代扣；false：无需签约代扣）//<br/>
+                     *		'paymentStatus' => '',是否需要支付（true：需要支付；false:无需支付）//<br/>
+                     *		'fundauthStatus' => '',是否需要预授权（true：需要预授权；false：无需预授权）//<br/>
+                     * ]
+                     */
+                    if($v['status'] ==1){
+                        $fenqi =$goodsData['zuqi'];
+                        if($goodsData['zuqi_type'] ==1){
+                            $fenqi=0;
+                        }
+                        $payData =[
+                            'payType' =>$v['payment_type_id'],//支付方式 【必须】<br/>
+                     		'payChannelId' => 2,//支付渠道 【必须】<br/>
+                     		'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
+                     		'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+                     		'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
+                            'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
+                     		'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
+                     		'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+                     		'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                           ];
+                        $res =OrderCreater::createPay($payData);
+                        if(!$res){
+                            $arr['order_pay'][$k] =$payData;
+                        }
                     }
                     $bar->advance();
                 }
@@ -175,7 +224,7 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("订单风控信息导入失败",$arr);
+               // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;

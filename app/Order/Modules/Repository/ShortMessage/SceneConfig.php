@@ -42,6 +42,10 @@ class SceneConfig {
      * 场景:<b>【订单逾期一个月发送信息-月租】</b>
      */
     const ORDER_MONTH_OVER_MONTH_ENDING = 'OrderMonthOverMonthEnding';
+    /**
+     * 场景:<b>【订单提前一天发送信息-短租】</b>
+     */
+    const ORDER_DAY_BEFORE_ONE_ENDING = 'OrderDayBeforeOneEnding';
 
 	/**
 	 * 场景:<b>【分期扣款】</b>
