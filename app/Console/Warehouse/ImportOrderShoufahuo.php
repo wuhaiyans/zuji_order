@@ -235,7 +235,7 @@ function goodsDelivery($order2_all1,$db1,$db2){
         $sel++;
         $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
         $sel++;
-        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".$row['imei1']."','".$row['imei2']."','".$row['imei3']."','".$row['serial_number']."','1'),";
+        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
         $num++;
     }
     $goods_delivery_insert_sql = substr($goods_delivery_insert_sql,0,-1);
