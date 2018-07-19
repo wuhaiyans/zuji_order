@@ -1990,13 +1990,7 @@ class OrderReturnCreater
             }
             $goodsInfo=$goodInfo->toArray();
             LogApi::debug("查询此订单的商品",$goodsInfo);*/
-            //获取商品信息
-            $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
-            if(!$goods){
-                LogApi::debug("获取商品信息失败");
-                return false;
-            }
-            $goodsInfo=$goods->toArray();
+
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 //修改退货单状态为已退货
                 $updateReturn=$return->returnFinish($params);
@@ -2004,7 +1998,12 @@ class OrderReturnCreater
                     LogApi::debug("修改退款、退货状态失败");
                     return false;
                 }
-
+                //获取商品信息
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
+                if(!$goods){
+                    LogApi::debug("获取商品信息失败");
+                    return false;
+                }
                 //修改商品状态
                $updateGoods= $goods->returnFinish();
                 if(!$updateGoods){
@@ -2015,6 +2014,12 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }else{
+                //获取商品信息
+                $goods=\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['order_no']);
+                if(!$goods){
+                    LogApi::debug("获取商品信息失败");
+                    return false;
+                }
                 //修改退货单状态为已退款
                 $updateReturn=$return->refundFinish($params);
                 if(!$updateReturn){
@@ -2030,6 +2035,7 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }
+            $goodsInfo=$goods->getData();
             //释放库存
             //查询商品的信息
             $orderGoods = OrderRepository::getGoodsListByGoodsId($returnData);
