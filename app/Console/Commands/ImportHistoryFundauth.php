@@ -69,7 +69,6 @@ class ImportHistoryFundauth extends Command
                 $result = objectToArray($result);
 
 
-
                 foreach($result as &$item){
 
                     // 查询订单信息
@@ -159,7 +158,6 @@ class ImportHistoryFundauth extends Command
                         'user_id'           => $user_id,                    // '用户ID',
                         'business_type'     => 1,                           // '业务类型', 订单业务
                         'business_no'       => $item['order_no'],         // '业务编号',
-                        'order_no'			=> $item['order_no'],         // '业务编号',
                         'status'            => 4,                           // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
                         'order_no'          => $item['order_no'],           // '订单号'
                         'create_time'       => $item['create_time'],        // '创建时间戳',
@@ -173,9 +171,9 @@ class ImportHistoryFundauth extends Command
                     // 有记录则跳出
                     $order_pay_info = \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])->first();
                     if($order_pay_info){
-                        continue;
+						continue;
                     }
-                    $order_pay_id = \App\Order\Models\OrderPayModel::updateOrCreate($order_pay_data);
+                    $order_pay_id = \App\Order\Models\OrderPayModel::insert($order_pay_data);
                     if(!$order_pay_id){
                         $arr[$item['auth_id'].'order_pay'] = $order_pay_data;
                         continue;
