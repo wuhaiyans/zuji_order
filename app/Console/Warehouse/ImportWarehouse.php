@@ -80,6 +80,7 @@ $sel++;
 //省,市,区县
 $result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
 while($arr = $result_zuji_district_all1->fetch_assoc()){
+    print_r($arr);die;
     //二维数组 id,name
     $district_all1[$arr['id']]=$arr;
 }
@@ -141,7 +142,7 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
     $delivery_goods_insert_sql = "INSERT INTO zuji_delivery_goods (delivery_no,goods_no,serial_no,goods_name,quantity,quantity_delivered,status,status_time) VALUES ";
     //拼接设备IMEI号表sql
     $delivery_goods_imei_insert_sql = "INSERT INTO zuji_delivery_goods_imei (delivery_no,goods_no,serial_no,imei,apple_serial,status,price,create_time,status_time) VALUES ";
-    print_r($district_all1);
+
     foreach ($order2_all1 as $key=>$item){
         $delivery_all1 = [];
         $delivery_result=$db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=".$item['order_id']." ORDER BY delivery_id DESC");
@@ -166,8 +167,6 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
 
             //省
             $address_info .= $address_row['province_id']?$district_all1[$address_row['province_id']]['name'].' ':'';
-            echo $address_info.'----'.$address_row['province_id'].'----'.$district_all1[$address_row['province_id']]['name'];
-            die;
             //市
             $address_info .= $address_row['city_id']?$district_all1[$address_row['city_id']]['name'].' ':'';
             //区县

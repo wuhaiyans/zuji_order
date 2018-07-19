@@ -86,12 +86,12 @@ while($arr = $result_order2_all1->fetch_assoc()){
 $sel++;
 
 //省,市,区县
-$result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
-while($arr = $result_zuji_district_all1->fetch_assoc()){
-    //二维数组 id,name
-    $district_all1[$arr['id']]=$arr;
-}
-$sel++;
+//$result_zuji_district_all1 = $db1->query("SELECT `id`,`name` FROM zuji_district");
+//while($arr = $result_zuji_district_all1->fetch_assoc()){
+//    //二维数组 id,name
+//    $district_all1[$arr['id']]=$arr;
+//}
+//$sel++;
 
 //------------------导入订单收货地址------------------
 //if( !orderAddress($order2_all1,$district_all1,$db1,$db2,$t) ){
