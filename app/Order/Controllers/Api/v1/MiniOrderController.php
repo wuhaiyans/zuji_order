@@ -95,6 +95,8 @@ class MiniOrderController extends Controller
             'coupon_no' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
+        print_r($params);
+        print_r($validateParams);die;
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code']);
         }
