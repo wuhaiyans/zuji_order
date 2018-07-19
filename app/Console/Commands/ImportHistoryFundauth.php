@@ -113,7 +113,6 @@ class ImportHistoryFundauth extends Command
                     $pay_ali_fund_info = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                         ->where([
                             ['alipay_fundauth_no', '=', $alipay_fundauth_no],
-                            ['alipay_fundauth_no', '=', $alipay_fundauth_no]
                         ])
                         ->first();
 
@@ -121,6 +120,7 @@ class ImportHistoryFundauth extends Command
                     if($pay_ali_fund_info){
                         // 更新
                         if( $this->update ){
+                            unset($pay_ali_fund_data['alipay_fundauth_no']);
                             \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                                 ->where([
                                     ['alipay_fundauth_no', '=', $alipay_fundauth_no]
@@ -165,6 +165,7 @@ class ImportHistoryFundauth extends Command
                     if($pay_fundauth_info){
                         // 更新
                         if( $this->update ){
+                            unset($pay_fundauth_data['fundauth_no']);
                             \DB::connection('pay')->table('zuji_pay_fundauth')
                                 ->where([
                                     ['fundauth_no', '=', $fundauth_no]
@@ -204,6 +205,7 @@ class ImportHistoryFundauth extends Command
                     if($order_pay_info){
                         // 更新
                         if( $this->update ){
+                            unset($order_pay_data['fundauth_no']);
                             \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])
                                 ->update( $order_pay_data );
                         }
@@ -236,6 +238,7 @@ class ImportHistoryFundauth extends Command
                     if($order_pay_fundauth_info){
                         // 更新
                         if( $this->update ){
+                            unset($order_pay_fundauth_data['fundauth_no']);
                             \App\Order\Models\OrderPayFundauthModel::query()->where(['fundauth_no'=>$out_fundauth_no])
                                 ->update( $order_pay_fundauth_data );
                         }
