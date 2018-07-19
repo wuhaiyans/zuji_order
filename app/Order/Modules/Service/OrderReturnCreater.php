@@ -530,6 +530,7 @@ class OrderReturnCreater
                         'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
                         'imei'     =>$goodsDeliveryInfo[$k]['imei1'],
+                        'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                       //  'imei2'     =>$goodsDeliveryInfo[$k]['imei2'],
                        // 'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
                     ];
