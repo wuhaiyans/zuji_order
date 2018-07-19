@@ -46,7 +46,7 @@ class ImportHistoryFundauth extends Command
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 10;
+            $limit  = 100;
             $page   = 1;
             $totalpage = ceil($total/$limit);
 
@@ -162,6 +162,7 @@ class ImportHistoryFundauth extends Command
                         'business_type'     => 1,                           // '业务类型', 订单业务
                         'business_no'       => $item['request_no'],         // '业务编号',
                         'status'            => 4,                           // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
+                        'order_no'          => $item['order_no'],           // '订单号'
                         'create_time'       => $item['create_time'],        // '创建时间戳',
                         'update_time'       => $item['update_time'],        // '更新时间戳',
                         'fundauth_status'   => 2,                           // '预授权-状态：0：无需资金授权；1：待授权；2：授权成功；3：授权失败',
