@@ -204,7 +204,7 @@ class CronOperate
         }
         foreach ($goodsData as $k => $v) {
             //发送短信
-            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING);
+            $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$v['order_no'],SceneConfig::ORDER_DAY_BEFORE_ONE_ENDING);
             $orderNoticeObj->notify();
         }
         echo "短租完成";die;
