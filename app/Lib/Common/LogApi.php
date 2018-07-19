@@ -128,6 +128,11 @@ class LogApi {
 	 */
 	private static function log( string $level, string $msg, $data=[] )
 	{
+		$type = self::$type;
+		self::$type = '';
+		$key = self::$key;
+		self::$key = '';
+		
 		// 异常
 		if( $data instanceof \Exception ){
 			$data = json_encode([
@@ -157,8 +162,8 @@ class LogApi {
 				$line,
 				$function,
 				$level,
+				self::$source,
 				self::$id,
-				$key,
 				$type,
 				$key,
 				$msg,
