@@ -43,7 +43,6 @@ class ImportHistoryFundauth extends Command
             ->where([
                 ['zuji_payment_fund_auth.auth_status', '>=', 3],
             ])->count();
-
         $bar = $this->output->createProgressBar($total);
         try{
             $limit  = 10;
@@ -93,9 +92,9 @@ class ImportHistoryFundauth extends Command
                     $alipay_fundauth_no = $item['auth_no'];
 
                     // 支付系统授权编码
-                    $fundauth_no = createNo(4);
+                    $fundauth_no = create_fundauth_no($item['create_time']);
 
-            // 创建（支付）系统 支付宝预授权表 zuji_pay_alipay_fundauth
+					// 创建（支付）系统 支付宝预授权表 zuji_pay_alipay_fundauth
                     $pay_ali_fund_data = [
                         'fundauth_no'           => $fundauth_no,                // '支付系统授权编码',
                         'alipay_fundauth_no'    => $alipay_fundauth_no,         // '支付宝预授权码',
@@ -107,15 +106,14 @@ class ImportHistoryFundauth extends Command
                         'payee_logon_id'        => $item['payee_logon_id'],     // '收款方支付宝用户号',
                         'create_time'           => $item['create_time'],        // '创建时间',
                         'update_time'           => $item['update_time'],        // '修改时间',
-                        'gmt_trans'             => $item['gmt_trans'],          // '授权成功时间',
+                        'gmt_trans'             => date('Y-m-d H:i:s',$item['create_time']),          // '授权成功时间',
                     ];
 
                     //有记录则跳出
                     $pay_ali_fund_info = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                         ->where([
-                            ['zuji_pay_fundauth.out_fundauth_no', '=', $out_fundauth_no]
+                            ['alipay_fundauth_no', '=', $alipay_fundauth_no]
                         ])
-                        ->leftJoin('zuji_pay_fundauth', 'zuji_pay_alipay_fundauth.fundauth_no', '=', 'zuji_pay_fundauth.fundauth_no')
                         ->first();
                     if($pay_ali_fund_info){
                         continue;
@@ -142,7 +140,7 @@ class ImportHistoryFundauth extends Command
                         'rest_amount'           => ($item['amount'] - $item['unfreeze_amount'] - $item['pay_amount']) * 100,        // '订单总共剩余的冻结金额，单位为：分',
                         'status'                => 1,                               // '状态；0：未授权；1：授权成功；2：支付失败；3：超时；4：关闭（无支付）；5：完成（有支付）；6：异常',
                         'create_time'           => $item['create_time'],            // '创建时间',
-                        'auth_time'             => strtotime($item['gmt_trans']),   // '授权成功时间',
+                        'auth_time'             => $item['create_time'],   // '授权成功时间',
                         'update_time'           => $item['update_time'],            // '状态更新时间',
 
                     ];
@@ -160,7 +158,8 @@ class ImportHistoryFundauth extends Command
                     $order_pay_data = [
                         'user_id'           => $user_id,                    // '用户ID',
                         'business_type'     => 1,                           // '业务类型', 订单业务
-                        'business_no'       => $item['request_no'],         // '业务编号',
+                        'business_no'       => $item['order_no'],         // '业务编号',
+                        'order_no'			=> $item['order_no'],         // '业务编号',
                         'status'            => 4,                           // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
                         'create_time'       => $item['create_time'],        // '创建时间戳',
                         'update_time'       => $item['update_time'],        // '更新时间戳',
