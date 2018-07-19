@@ -87,9 +87,9 @@ class MiniOrderController extends Controller
      */
     public function confirmationQuery(Request $request){
         $params     = $request->all();
+        print_r($params);die;
         // 验证参数
         $rules = [
-            'appid' => 'required', //【必须】string；appid
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
