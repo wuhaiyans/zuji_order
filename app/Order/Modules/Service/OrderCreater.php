@@ -377,7 +377,6 @@ class OrderCreater
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-            print_r($data);die;
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
 
