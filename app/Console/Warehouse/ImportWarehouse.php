@@ -174,20 +174,25 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
             $delivereyGoods = getDeliveryGoodsStatus($delivery_row['delivery_status']);
 
             $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
+            $num++;
             $delivery_goods_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
-
+            $num++;
             //imei
             if ($goods_row['serial_number']){
                 //苹果
                 $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['imei1']."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $num++;
             }else{
                 //安卓
                 $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['imei1']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $num++;
                 if($goods_row['imei2']){
                     $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','2','".$goods_row['imei2']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $num++;
                 }
                 if($goods_row['imei3']){
                     $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','3','".$goods_row['imei3']."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $num++;
                 }
             }
         }
