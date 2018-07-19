@@ -1282,7 +1282,7 @@ class OrderReturnCreater
                     }
                     $buss->setStatus("C");
 
-                }elseif($return_info['status']==ReturnStatus::ReturnReceive){
+                }elseif($return_info['status']==ReturnStatus::ReturnReceive || $return_info['status']==ReturnStatus::ReturnTui){
                     $buss->setStatus("C");
                     $buss->setStatusText("检测");
                     if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluation){
@@ -1303,8 +1303,7 @@ class OrderReturnCreater
                     $checkResult['check_remark']=$return_info['evaluation_remark'];
                     $buss->setCheckResult( $checkResult);
                 }elseif( $return_info['status']==ReturnStatus::ReturnTuiHuo
-                    || $return_info['status']==ReturnStatus::ReturnHuanHuo
-                    || $return_info['status']==ReturnStatus::ReturnTui ){
+                    || $return_info['status']==ReturnStatus::ReturnHuanHuo ){
                     $buss->setStatus("D");
                     $buss->setStatusText("完成");
                     if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluation){
