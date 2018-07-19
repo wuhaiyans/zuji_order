@@ -15,12 +15,12 @@ $sel = 0;//统计查询条数
 $t = time();//初始化时间 或 增量时间
 $_t = 0;//上次执行时间
 $order_ID_S = 0;//订单增量开始ID 初始化为0
-$order_ID_N = 100;//订单增量结束ID 必填
+$order_ID_N = 1000000;//订单增量结束ID 必填
 // ...
 echo '开始时间:'.date('Y-m-d H:i:s',$t).';<br>';
 //数据库配置
-$user = 'root';//用户名
-$password = '123456';//密码
+$user = 'nqyong';//用户名
+$password = 'nqy3854MysqldB';//密码
 $dbname1 = 'zuji';//老数据库库名
 $dbname2 = 'zuji_order';//新订单系统库名
 $dbname3 = 'zuji_warehouse';//新收发货库名
