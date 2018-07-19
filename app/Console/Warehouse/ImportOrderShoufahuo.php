@@ -187,6 +187,7 @@ function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
         return true;
     }else{
         echo '导入订单收货地址失败;<br>';
+        echo $address_insert_sql;
         return false;
     }
 }
@@ -244,6 +245,7 @@ function goodsDelivery($order2_all1,$db1,$db2){
         return true;
     }else{
         echo '导入订单商品发货信息表失败;<br>';
+        echo $goods_delivery_insert_sql;
         return false;
     }
 
