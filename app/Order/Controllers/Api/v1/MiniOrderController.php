@@ -92,7 +92,7 @@ class MiniOrderController extends Controller
             'appid' => 'required', //【必须】string；appid
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'payment_type_id' => 'required', //【必须】string；支付方式id
+            'pay_type' => 'required', //【必须】string；支付方式id
             'coupon_no' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
@@ -111,11 +111,9 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],'业务临时订单不存在');
         }
         $data = json_decode($data,true);
-        $data['pay_type'] = $params['payment_type_id'];
+        $data['pay_type'] = $params['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = [
-            $params['coupon_no']
-        ];
+        $data['coupon'] = $params['coupon_no'];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
             return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');

@@ -405,7 +405,7 @@ class ReturnController extends Controller
                 || empty($param['evaluation_status'])
                 || empty($param['evaluation_time'])
                 ||empty($params['params']['business_key'])
-                ||empty($params['params']['business_no'])){
+                ||empty($param['business_no'])){
                 return  apiResponse([],ApiStatus::CODE_20001);
             }
         }
@@ -448,33 +448,19 @@ class ReturnController extends Controller
     /**
      * 换货用户收货通知
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * [
-     * ‘order_no ’    =>'', //订单编号
-     * ‘goods_info’   =>[   //商品编号数组
-     *      ‘goods_no’=>''  //商品编号
-     *      ‘goods_no’=>''  //商品编号
-     *     ] ，
-     * ‘status’       =>''  //物流状态
-     *
-     *
-     *
-     *
+     * ‘refund_no ’    =>'', //业务编号
      *
      */
     public function updateOrder(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'order_no'    => 'required',
+            'refund_no'    => 'required',
         ]);
         if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(empty($params['goods_info'])){
-            return  apiResponse([],ApiStatus::CODE_20001);
-        }
-        $res=$this->OrderReturnCreater->updateorder($params,$orders['userinfo']);
+        $res=OrderReturnCreater::updateorder($params['refund_no'],$orders['userinfo']);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }

@@ -128,9 +128,8 @@ class ReturnStatus {
                 self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
                 self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
                 self::ReturnTuiKuan => self::getStatusName( self::ReturnTuiKuan ),
-                self::ReturnTui		=> self::getStatusName( self::ReturnTui ),
             ],
-			//退或
+			//退换货
             'return'=>[
                 self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
                 self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
@@ -140,6 +139,7 @@ class ReturnStatus {
                 self::ReturnReceive	=> self::getStatusName( self::ReturnReceive ),
                 self::ReturnTui	=> self::getStatusName( self::ReturnTui ),
                 self::ReturnTuiHuo	=> self::getStatusName( self::ReturnTuiHuo ),
+                self::ReturnDelivery	=> self::getStatusName( self::ReturnDelivery ),
             ],
 			//换货
             'barter'=>[
@@ -150,6 +150,7 @@ class ReturnStatus {
                 self::ReturnCanceled	=> self::getStatusName( self::ReturnCanceled ),
                 self::ReturnReceive	=> self::getStatusName( self::ReturnReceive ),
                 self::ReturnHuanHuo => self::getStatusName( self::ReturnHuanHuo ),
+                self::ReturnDelivery	=> self::getStatusName( self::ReturnDelivery ),
             ],
 
         ];

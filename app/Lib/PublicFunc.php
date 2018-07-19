@@ -492,3 +492,77 @@ function filterSpecs( $specs ){
 	return implode('|', $specsStrArr);
 }
 
+//-+----------------------------------------------------------------------------
+// | 数据导入，临时使用的 支付系统编码函数
+//-+----------------------------------------------------------------------------
+/**
+ * 创建编码
+ * <p>规则：前缀（2位）+年（1位）+月（1位）+日（2位）+时间戳（5位）+毫秒（5位）+随机数（1位）</p>
+ * @param string $prefix	编码前缀
+ * @return string 17位编码
+ */
+function create_no(string $prefix,$time=NULL){
+	// 年差值标记符，大写字母集[A-Z]
+    for($i=65;$i<91;$i++){
+        $year[]= strtoupper(chr($i));
+    }
+    $orderSn = $prefix.$year[(intval(date('Y',$time)))-2018] . strtoupper(dechex(date('m',$time))) . date('d',$time) . substr(time(), -5) . substr(microtime(), 2, 5) . rand(0, 9);
+    return $orderSn;
+}
+
+/**
+ * 创建 支付单号
+ * @return string
+ */
+function create_payment_no($time=null){
+	return create_no('10',$time);
+}
+
+/**
+ * 创建 退款单号
+ * @return string
+ */
+function create_refund_no($time=null){
+	return create_no('11',$time);
+}
+
+/**
+ * 创建 资金预授权单号
+ * @return string
+ */
+function create_fundauth_no($time=null){
+	return create_no('20',$time);
+}
+
+/**
+ * 创建 资金预授权 解冻 单号
+ * @return string
+ */
+function create_fundauth_unfreeze_no($time=null){
+	return create_no('21',$time);
+}
+
+/**
+ * 创建 资金预授权 转支付 单号
+ * @return string
+ */
+function create_fundauth_create_pay_no($time=null){
+	return create_no('22',$time);
+}
+
+/**
+ * 创建 代扣协议 单号
+ * @return string
+ */
+function create_withhold_no($time=null){
+	return create_no('30',$time);
+}
+
+/**
+ * 创建 代扣协议 单号
+ * @return string
+ */
+function create_withhold_create_pay_no($time=null){
+	return create_no('31',$time);
+}
+//-+----------------------------------------------------------------------------

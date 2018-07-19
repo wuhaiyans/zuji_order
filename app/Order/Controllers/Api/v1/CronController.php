@@ -66,4 +66,12 @@ class CronController extends Controller
         Service\CronOperate::cronGivebackAgedFail();
         echo "complete";die;
     }
+
+    /**
+     * 定时任务  换货确认收货
+     */
+    public function cronBarterDelivey(){
+        Service\CronOperate::cronBarterDelivey();
+        echo "complete";die;
+    }
 }
