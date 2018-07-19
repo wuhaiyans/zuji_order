@@ -106,16 +106,16 @@ class MiniOrderController extends Controller
         //判断当前是否有临时订单
         $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$param['out_order_no']);
         if(!$data){
-            \App\Lib\Common\LogApi::notify('小程序临时订单不存在');
-            return apiResponse([],$validateParams['code'],'业务临时订单不存在');
+            \App\Lib\Common\LogApi::notify('小程序临时订单不存在',$data);
+            return apiResponse([], ApiStatus::CODE_35010,'业务临时订单不存在');
         }
         $data = json_decode($data,true);
         $data['pay_type'] = $param['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = $param['coupon_no'];
+        $data['coupon'] = $param['coupon'];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
-            return apiResponse([],ApiStatus::CODE_20001,'业务临时订单不存在');
+            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
         }
         //查询芝麻订单确认结果
         $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
