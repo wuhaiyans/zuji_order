@@ -22,6 +22,7 @@ class ImportHistoryFundauth extends Command
      */
     protected $description = 'Command description';
 
+    private $update = true;
     /**
      * Create a new command instance.
      *
@@ -114,18 +115,26 @@ class ImportHistoryFundauth extends Command
                             ['alipay_fundauth_no', '=', $alipay_fundauth_no]
                         ])
                         ->first();
+
+                    // 存在
                     if($pay_ali_fund_info){
-                        continue;
+                        // 更新
+                        if( $this->update ){
+                            \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
+                                ->where([
+                                    ['alipay_fundauth_no', '=', $alipay_fundauth_no]
+                                ])->update( $pay_ali_fund_data );
+                        }
+                    }else{ // 不存在
+                        // 新增记录
+                        $pay_ali_fund_id = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')->insert($pay_ali_fund_data);
+                        if(!$pay_ali_fund_id){
+                            $arr[$item['auth_id'].'zuji_pay_alipay_fundauth'] = $pay_ali_fund_data;
+                            continue;
+                        }
                     }
 
-                    // 添加记录
-                    $pay_ali_fund_id = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')->insert($pay_ali_fund_data);
-                    if(!$pay_ali_fund_id){
-                        $arr[$item['auth_id'].'zuji_pay_alipay_fundauth'] = $pay_ali_fund_data;
-                        continue;
-                    }
-
-            // 创建（支付）系统 授权表 zuji_pay_fundauth
+                    // 创建（支付）系统 授权表 zuji_pay_fundauth
                     $pay_fundauth_data = [
                         'fundauth_no'           => $fundauth_no,                    // '业务平台支付名称',
                         'app_id'                => 1,                               // '业务应用平台ID',
@@ -144,11 +153,32 @@ class ImportHistoryFundauth extends Command
 
                     ];
 
-                    $pay_fundauth_id = \DB::connection('pay')->table('zuji_pay_fundauth')->insert($pay_fundauth_data);
-                    if(!$pay_fundauth_id){
-                        $arr[$item['auth_id'].'zuji_pay_fundauth'] = $pay_fundauth_data;
-                        continue;
+                    //有记录则跳出
+                    $pay_fundauth_info = \DB::connection('pay')->table('zuji_pay_fundauth')
+                        ->where([
+                            ['fundauth_no', '=', $fundauth_no]
+                        ])
+                        ->first();
+
+                    // 存在
+                    if($pay_fundauth_info){
+                        // 更新
+                        if( $this->update ){
+                            \DB::connection('pay')->table('zuji_pay_fundauth')
+                                ->where([
+                                    ['fundauth_no', '=', $fundauth_no]
+                                ])->update( $pay_fundauth_data );
+                        }
+                    }else{ // 不存在
+                        // 新增记录
+                        $pay_fundauth_id = \DB::connection('pay')->table('zuji_pay_fundauth')->insert($pay_fundauth_data);
+                        if(!$pay_fundauth_id){
+                            $arr[$item['auth_id'].'zuji_pay_fundauth'] = $pay_fundauth_data;
+                            continue;
+                        }
                     }
+
+
 
                     //--------------------------------------------------------------------------------------------------
 
@@ -171,12 +201,19 @@ class ImportHistoryFundauth extends Command
                     // 有记录则跳出
                     $order_pay_info = \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])->first();
                     if($order_pay_info){
-						continue;
-                    }
-                    $order_pay_id = \App\Order\Models\OrderPayModel::insert($order_pay_data);
-                    if(!$order_pay_id){
-                        $arr[$item['auth_id'].'order_pay'] = $order_pay_data;
-                        continue;
+                        // 更新
+                        if( $this->update ){
+                            \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])
+                                ->update( $order_pay_data );
+                        }
+                    }else{
+
+                        $order_pay_id = \App\Order\Models\OrderPayModel::insert($order_pay_data);
+                        if(!$order_pay_id){
+                            $arr[$item['auth_id'].'order_pay'] = $order_pay_data;
+                            continue;
+                        }
+
                     }
 
 
@@ -192,16 +229,27 @@ class ImportHistoryFundauth extends Command
                         'pay_amount'       => $item['pay_amount'],          // '累计转支付金额；单位：元',
                     ];
 
+
                     // 有记录则跳出
                     $order_pay_fundauth_info = \App\Order\Models\OrderPayFundauthModel::query()->where(['fundauth_no'=>$out_fundauth_no])->first();
                     if($order_pay_fundauth_info){
-                        continue;
+                        // 更新
+                        if( $this->update ){
+                            \App\Order\Models\OrderPayFundauthModel::query()->where(['fundauth_no'=>$out_fundauth_no])
+                                ->update( $order_pay_fundauth_data );
+                        }
+                    }else{
+
+                        $order_pay_fundauth_id = \App\Order\Models\OrderPayFundauthModel::updateOrCreate($order_pay_fundauth_data);
+                        if(!$order_pay_fundauth_id){
+                            $arr[$item['auth_id'].'order_pay_fundauth'] = $order_pay_fundauth_data;
+                            continue;
+                        }
+
                     }
-                    $order_pay_fundauth_id = \App\Order\Models\OrderPayFundauthModel::updateOrCreate($order_pay_fundauth_data);
-                    if(!$order_pay_fundauth_id){
-                        $arr[$item['auth_id'].'order_pay_fundauth'] = $order_pay_fundauth_data;
-                        continue;
-                    }
+
+
+
 					
 					$bar->advance();
 
