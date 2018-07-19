@@ -92,13 +92,11 @@ class MiniOrderController extends Controller
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
-            'coupon_no' => 'required', //【必须】string；优惠券
+            'coupon' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
-        print_r($params);
-        print_r($validateParams);die;
         if ($validateParams['code'] != 0) {
-            return apiResponse([],$validateParams['code']);
+            return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         $param = $params['params'];
         //判断支付状态
