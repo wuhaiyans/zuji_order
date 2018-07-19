@@ -70,10 +70,9 @@ class ImportHistoryInstalment extends Command
               continue;
             }
 
-
             $data['id']               = $item['id'];
             $data['order_no']         = $orderInfo['order_no'];
-            $data['goods_no']         = createNo();
+            $data['goods_no']         = $orderInfo['goods_id'];
             $data['user_id']          = $orderInfo['user_id'];
 
             $data['term']             = $item['term'];
