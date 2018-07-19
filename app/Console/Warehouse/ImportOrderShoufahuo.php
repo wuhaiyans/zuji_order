@@ -235,9 +235,9 @@ function goodsDelivery($order2_all1,$db1,$db2){
     foreach ($order2_all1 as $key=>$item) {
         $row = $db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=" . $item['order_id'])->fetch_assoc();
         $sel++;
-        $sku_row=$db1->query("SELECT `sku_id` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
+        $goods_row=$db1->query("SELECT `goods_id` FROM zuji_order2_goods WHERE order_id=".$row['order_id'])->fetch_assoc();
         $sel++;
-        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sku_id']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
+        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$goods_row['goods_id']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
         $num++;
     }
     $goods_delivery_insert_sql = substr($goods_delivery_insert_sql,0,-1);
