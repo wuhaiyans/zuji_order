@@ -164,16 +164,16 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
             $address_info = '';//地址详情
 
             //省
-            $address_info .= $district_all1[$address_row['province_id']]['name'].' ';
+            $address_info .= $address_row['province_id']?$district_all1[$address_row['province_id']]['name'].' ':'';
             //市
-            $address_info .= $district_all1[$address_row['city_id']]['name'].' ';
+            $address_info .= $address_row['city_id']?$district_all1[$address_row['city_id']]['name'].' ':'';
             //区县
-            $address_info .= $district_all1[$address_row['country_id']]['name'].' ';
-            $address_info .= replaceSpecialChar($address_row['address']);
+            $address_info .= $address_row['country_id']?$district_all1[$address_row['country_id']]['name'].' ':'';
+            $address_info .= $address_row['address']?replaceSpecialChar($address_row['address']):'';
 
             $delivereyGoods = getDeliveryGoodsStatus($delivery_row['delivery_status']);
 
-            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
+            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
             $num++;
             $delivery_goods_insert_sql .= "('".$delivery_no."','".$sku_row['sn']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
             $num++;
@@ -259,19 +259,19 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
             $evaluation_row=$db1->query("SELECT * FROM zuji_order2_evaluation WHERE order_id=".$item['order_id']." AND business_key='".$item['business_key']."' ORDER BY evaluation_id DESC LIMIT 1")->fetch_assoc();
             $sel++;
             //省
-            $address_info .= $district_all1[$address_row['province_id']]['name'].' ';
+            $address_info .= $address_row['province_id']?$district_all1[$address_row['province_id']]['name'].' ':'';
             //市
-            $address_info .= $district_all1[$address_row['city_id']]['name'].' ';
+            $address_info .= $address_row['city_id']?$district_all1[$address_row['city_id']]['name'].' ':'';
             //区县
-            $address_info .= $district_all1[$address_row['country_id']]['name'].' ';
-            $address_info .= replaceSpecialChar($address_row['address']);
+            $address_info .= $address_row['country_id']?$district_all1[$address_row['country_id']]['name'].' ':'';
+            $address_info .= $address_row['address']?replaceSpecialChar($address_row['address']):'';
 
             if ($evaluation_row){
                 //存在检测单
                 $status_arr = getReceiveStatusE($evaluation_row['evaluation_status']);
                 $goodsStatus = getGoodsReceiveStatusE($evaluation_row['evaluation_status']);
                 $checkResult = getCheckResult($evaluation_row['evaluation_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".$receive_row['business_key']."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".$receive_row['business_key']."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
                 $num++;
@@ -297,7 +297,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 //不存在检测单
                 $status = getReceiveStatus($receive_row['receive_status']);
                 $goodsStatus = getGoodsReceiveStatus($receive_row['receive_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".replaceSpecialChar($address_row['name'])."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".$receive_row['business_key']."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".$receive_row['business_key']."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$sku_row['sn']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
                 $num++;

@@ -168,15 +168,15 @@ function orderAddress($order2_all1,$district_all1,$db1,$db2,$t){
         foreach ($order2_address_all1 as $k=>$v){
             $address_info = '';//地址详情
             //省
-            $address_info .= $district_all1[$v['province_id']]['name'].' ';
+            $address_info .= $v['province_id']?$district_all1[$v['province_id']]['name'].' ':'';
             //市
-            $address_info .= $district_all1[$v['city_id']]['name'].' ';
+            $address_info .= $v['city_id']?$district_all1[$v['city_id']]['name'].' ':'';
             //区县
-            $address_info .= $district_all1[$v['country_id']]['name'].' ';
-            $address_info .= replaceSpecialChar($v['address']);
+            $address_info .= $v['country_id']?$district_all1[$v['country_id']]['name'].' ':'';
+            $address_info .= $v['address']?replaceSpecialChar($v['address']):'';
 
             //order_no,consignee_mobile,name,province_id,city_id,area_id,address_info,create_time,update_time
-            $address_insert_sql .= "('".$item['order_no']."','".$v['mobile']."','".replaceSpecialChar($v['name'])."','".$v['province_id']."','".$v['city_id']."','".$v['country_id']."','".$address_info."','".$t."','".$t."'),";
+            $address_insert_sql .= "('".$item['order_no']."','".$v['mobile']."','".replaceSpecialChar($v['name'])."','".($v['province_id']?$v['province_id']:'0')."','".($v['city_id']?$v['city_id']:'0')."','".($v['country_id']?$v['country_id']:'0')."','".$address_info."','".$t."','".$t."'),";
             $num++;
         }
     }
@@ -233,9 +233,9 @@ function goodsDelivery($order2_all1,$db1,$db2){
     foreach ($order2_all1 as $key=>$item) {
         $row = $db1->query("SELECT * FROM zuji_order2_goods WHERE order_id=" . $item['order_id'])->fetch_assoc();
         $sel++;
-        $sku_row=$db1->query("SELECT `sn` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
+        $sku_row=$db1->query("SELECT `sku_id` FROM zuji_goods_sku WHERE sku_id=".$row['sku_id'])->fetch_assoc();
         $sel++;
-        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sn']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
+        $goods_delivery_insert_sql .= "('".$item['order_no']."','".$sku_row['sku_id']."','".replaceSpecialChar($row['imei1'])."','".replaceSpecialChar($row['imei2'])."','".replaceSpecialChar($row['imei3'])."','".$row['serial_number']."','1'),";
         $num++;
     }
     $goods_delivery_insert_sql = substr($goods_delivery_insert_sql,0,-1);
