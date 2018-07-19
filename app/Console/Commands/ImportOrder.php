@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Lib\Common\LogApi;
+//use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
@@ -205,6 +205,7 @@ class ImportOrder extends Command
                      		'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
                      		'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
                      		'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
+                            'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
                      		'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
                      		'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
                      		'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
@@ -221,7 +222,7 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("订单风控信息导入失败",$arr);
+               // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;
