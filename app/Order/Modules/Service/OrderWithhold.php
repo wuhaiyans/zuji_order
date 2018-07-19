@@ -59,13 +59,6 @@ class OrderWithhold
             return false;
         }
 
-        //判断是否允许扣款
-        $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
-        if(!$allow){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71000, "不允许扣款" );
-        }
-
         // 商品
         $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
