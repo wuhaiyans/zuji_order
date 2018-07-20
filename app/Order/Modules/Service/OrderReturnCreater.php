@@ -1478,7 +1478,7 @@ class OrderReturnCreater
                         if(!$pay_result){
                             return false;
                         }
-                        $create_data['order_no']=$return_info['order_no'];//订单类型
+                        $create_data['order_no']=$return_info['order_no']; //订单类型
                         $create_data['order_type']=$order_info['order_type'];//订单类型
                         $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
@@ -2122,6 +2122,14 @@ class OrderReturnCreater
             if(!$userInfo){
                 return false;
             }
+            LogApi::debug("押金解冻短信发送",[
+                'mobile'=>$order_info['mobile'],
+                'realName'=>$userInfo['realname'],
+                'orderNo'=>$order_info['order_no'],
+                'goodsName'=>$goodsInfo['goods_name'],
+                'channel_id'=>$order_info['channel_id'],
+                'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
+            ]);
             //发送短信，押金解冻短信发送
            $returnSend = ReturnDeposit::notify($order_info['channel_id'],SceneConfig::RETURN_DEPOSIT,[
                 'mobile'=>$order_info['mobile'],
@@ -2131,7 +2139,7 @@ class OrderReturnCreater
                 'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
                 ]
             );
-            Log::debug($returnSend?"Order :".$order_info['order_no']." IS OK":"IS error");
+            Log::debug($returnSend?"Order :".  ['order_no']." IS OK":"IS error");
             //发送短信，通知用户押金已退还
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
             $b=$orderNoticeObj->notify();
