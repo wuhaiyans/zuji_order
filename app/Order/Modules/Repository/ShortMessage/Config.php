@@ -91,7 +91,7 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITYESENO	=> 'SMS_113461140', //库管点击检测不合格、输入赔偿金额时发送
 
 				//退押金
-				SceneConfig::RETURN_DEPOSIT	=> 'MS_113461138', //财务系统完成押金退还时发送
+				SceneConfig::RETURN_DEPOSIT	=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 			],
 
