@@ -6,6 +6,7 @@ use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+
 class ImportHistoryFundauth extends Command
 {
     /**
@@ -46,7 +47,7 @@ class ImportHistoryFundauth extends Command
             ])->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 100;
+            $limit  = 10;
             $page   = 1;
             $totalpage = ceil($total/$limit);
 
@@ -54,6 +55,8 @@ class ImportHistoryFundauth extends Command
 
             do {
 
+                //开启事务
+                DB::beginTransaction();
                 // 查询数据
                 $result = \DB::connection('mysql_01')->table('zuji_payment_fund_auth')
                     ->select('zuji_payment_fund_auth.*','zuji_payment_fund_auth_notify.gmt_trans')
@@ -64,11 +67,9 @@ class ImportHistoryFundauth extends Command
                     ])
                     ->leftJoin('zuji_payment_fund_auth_notify', 'zuji_payment_fund_auth.fundauth_no', '=', 'zuji_payment_fund_auth_notify.request_no')
                     ->orderBy('auth_id', 'DESC')
-                    ->groupBy('zuji_payment_fund_auth.auth_id')
                     ->forPage($page,$limit)
                     ->get()->toArray();
                 $result = objectToArray($result);
-
 
                 foreach($result as &$item){
 
@@ -77,8 +78,9 @@ class ImportHistoryFundauth extends Command
                     $orderInfo = objectToArray($orderInfo);
                     if(!$orderInfo){
                         $arr[$item['auth_id'].'order_info'] = "";
-                        continue;
+                        DB::rollBack();
                     }
+
                     // 用户id
                     $user_id   = $orderInfo['user_id'];
                     if(!$user_id){
@@ -96,7 +98,6 @@ class ImportHistoryFundauth extends Command
 
 					// 创建（支付）系统 支付宝预授权表 zuji_pay_alipay_fundauth
                     $pay_ali_fund_data = [
-                        'fundauth_no'           => $fundauth_no,                // '支付系统授权编码',
                         'alipay_fundauth_no'    => $alipay_fundauth_no,         // '支付宝预授权码',
                         'status'                => "AUTHORIZED",                // '状态：INIT：初始 AUTHORIZED：已授权 FINISH：完成 CLOSED：关闭',
                         'amount'                => $item['amount'],             // '授权金额',
@@ -113,15 +114,15 @@ class ImportHistoryFundauth extends Command
                     $pay_ali_fund_info = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                         ->where([
                             ['alipay_fundauth_no', '=', $alipay_fundauth_no],
-                        ])
-                        ->first();
+                        ])->first();
 
                     // 存在
                     if($pay_ali_fund_info){
+                        // 使用数据库中的 授权码
+                        $fundauth_no = $pay_ali_fund_info->fundauth_no;
+
                         // 更新
                         if( $this->update ){
-                            unset($pay_ali_fund_data['alipay_fundauth_no']);
-                            unset($pay_ali_fund_data['fundauth_no']);
                             \DB::connection('pay')->table('zuji_pay_alipay_fundauth')
                                 ->where([
                                     ['alipay_fundauth_no', '=', $alipay_fundauth_no]
@@ -129,16 +130,17 @@ class ImportHistoryFundauth extends Command
                         }
                     }else{ // 不存在
                         // 新增记录
+                        $pay_ali_fund_data['fundauth_no'] = $fundauth_no;                // '支付系统授权编码',
                         $pay_ali_fund_id = \DB::connection('pay')->table('zuji_pay_alipay_fundauth')->insert($pay_ali_fund_data);
                         if(!$pay_ali_fund_id){
                             $arr[$item['auth_id'].'zuji_pay_alipay_fundauth'] = $pay_ali_fund_data;
+                            DB::rollBack();
                             continue;
                         }
                     }
 
                     // 创建（支付）系统 授权表 zuji_pay_fundauth
                     $pay_fundauth_data = [
-                        'fundauth_no'           => $fundauth_no,                    // '业务平台支付名称',
                         'app_id'                => 1,                               // '业务应用平台ID',
                         'out_fundauth_no'       => $out_fundauth_no,                // '业务平台授权编码',
                         'user_id'               => $user_id,                        // '用户id',
@@ -166,7 +168,6 @@ class ImportHistoryFundauth extends Command
                     if($pay_fundauth_info){
                         // 更新
                         if( $this->update ){
-                            unset($pay_fundauth_data['fundauth_no']);
                             \DB::connection('pay')->table('zuji_pay_fundauth')
                                 ->where([
                                     ['fundauth_no', '=', $fundauth_no]
@@ -174,56 +175,63 @@ class ImportHistoryFundauth extends Command
                         }
                     }else{ // 不存在
                         // 新增记录
+                        $pay_fundauth_data['fundauth_no'] = $fundauth_no;                // '支付系统授权编码',
                         $pay_fundauth_id = \DB::connection('pay')->table('zuji_pay_fundauth')->insert($pay_fundauth_data);
                         if(!$pay_fundauth_id){
                             $arr[$item['auth_id'].'zuji_pay_fundauth'] = $pay_fundauth_data;
+                            DB::rollBack();
                             continue;
                         }
                     }
 
 
-
                     //--------------------------------------------------------------------------------------------------
-
 
             // 创建（订单）系统 授权表 order_pay
                     $order_pay_data = [
                         'user_id'           => $user_id,                    // '用户ID',
                         'business_type'     => 1,                           // '业务类型', 订单业务
-                        'business_no'       => $item['order_no'],         // '业务编号',
+                        'business_no'       => $item['order_no'],           // '业务编号',
                         'status'            => 4,                           // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
                         'order_no'          => $item['order_no'],           // '订单号'
+
+                        'payment_status'    => 2,                           // '支付-状态：0：无需支付；1：待支付；2：支付成功；3：支付失败',
+                        'payment_channel'   => 2,                           // '支付-渠道'
+                        'payment_amount'    => $item['amount'],             // '支付-金额；单位：元'
+                        'payment_fenqi'     => 0,                           // '支付-分期数；0：不分期；取值范围[0,3,6,12]'
+
                         'create_time'       => $item['create_time'],        // '创建时间戳',
                         'update_time'       => $item['update_time'],        // '更新时间戳',
                         'fundauth_status'   => 2,                           // '预授权-状态：0：无需资金授权；1：待授权；2：授权成功；3：授权失败',
                         'fundauth_channel'  => 2,                           // '预授权-渠道',
                         'fundauth_amount'   => $item['amount'],             // '预授权-金额；单位：元',
-                        'fundauth_no'       => $out_fundauth_no,            // '预授权-编号',
                     ];
 
                     // 有记录则跳出
-                    $order_pay_info = \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])->first();
+                    $order_pay_info = \App\Order\Models\OrderPayModel::query()->where(
+                        ['business_type'=>1,
+                        'order_no'=>$item['order_no']]
+                    )->first();
                     if($order_pay_info){
                         // 更新
                         if( $this->update ){
-                            unset($order_pay_data['fundauth_no']);
                             \App\Order\Models\OrderPayModel::query()->where(['fundauth_no'=>$out_fundauth_no])
                                 ->update( $order_pay_data );
                         }
                     }else{
+                        $order_pay_data['fundauth_no'] = $out_fundauth_no;                // '支付系统授权编码',
 
                         $order_pay_id = \App\Order\Models\OrderPayModel::insert($order_pay_data);
                         if(!$order_pay_id){
                             $arr[$item['auth_id'].'order_pay'] = $order_pay_data;
+                            DB::rollBack();
                             continue;
                         }
 
                     }
 
-
             // 创建（订单）系统 预授权环节明细表 order_pay_fundauth
                     $order_pay_fundauth_data = [
-                        'fundauth_no'      => $out_fundauth_no,             // '业务系统协议码',
                         'out_fundauth_no'  => $fundauth_no,                 // '支付系统代扣协议码',
                         'fundauth_status'  => 1,                            // '状态：1：已授权；2：已关闭；3：完成',
                         'user_id'          => $user_id,                     // '用户ID',
@@ -239,26 +247,26 @@ class ImportHistoryFundauth extends Command
                     if($order_pay_fundauth_info){
                         // 更新
                         if( $this->update ){
-                            unset($order_pay_fundauth_data['fundauth_no']);
                             \App\Order\Models\OrderPayFundauthModel::query()->where(['fundauth_no'=>$out_fundauth_no])
                                 ->update( $order_pay_fundauth_data );
                         }
                     }else{
+                        $order_pay_fundauth_data['fundauth_no'] = $out_fundauth_no;                // '支付系统授权编码',
 
                         $order_pay_fundauth_id = \App\Order\Models\OrderPayFundauthModel::updateOrCreate($order_pay_fundauth_data);
                         if(!$order_pay_fundauth_id){
                             $arr[$item['auth_id'].'order_pay_fundauth'] = $order_pay_fundauth_data;
+                            DB::rollBack();
                             continue;
                         }
 
                     }
-
-
-
 					
 					$bar->advance();
 
                 }
+                // 提交事务
+                DB::commit();
 
                 $page++;
             } while ($page <= $totalpage);

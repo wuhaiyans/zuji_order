@@ -92,7 +92,6 @@ class MiniOrderController extends Controller
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
-            'coupon' => 'required', //【必须】string；优惠券
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
@@ -112,7 +111,7 @@ class MiniOrderController extends Controller
         $data = json_decode($data,true);
         $data['pay_type'] = $param['pay_type'];
         $data['appid'] = $params['appid'];
-        $data['coupon'] = $param['coupon'];
+        $data['coupon'] = isset($param['coupon'])?$param['coupon']:[];
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$data['appid']))){
             return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');

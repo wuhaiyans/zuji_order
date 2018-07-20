@@ -114,6 +114,9 @@ $api->version('v1', [
     $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
     // 定时任务 还机逾期违约-修改状态
     $api->get('cronGivebackAgedFail', 'CronController@cronGivebackAgedFail');
+    // 定时任务 换货确认收货
+    $api->get('cronBarterDelivey', 'CronController@cronBarterDelivey');
+
 
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
