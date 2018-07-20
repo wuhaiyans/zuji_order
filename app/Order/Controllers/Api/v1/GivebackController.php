@@ -323,22 +323,30 @@ class GivebackController extends Controller
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
 
-			//发送短信
-			$notice = new \App\Order\Modules\Service\OrderNotice(
-				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				$goodsNo,
-				"GivebackConfirmDelivery");
-			$notice->notify();
+
 
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
+				//发送短信
+				$notice = new \App\Order\Modules\Service\OrderNotice(
+					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					$goodsNo,
+					"GivebackConfirmDelivery");
+				$notice->notify();
+
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					OrderWithhold::instalment_withhold($instalmentInfo['id']);
 				}
 				//代扣已执行
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
 			} else {
+				//发送短信
+				$notice = new \App\Order\Modules\Service\OrderNotice(
+					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+					$goodsNo,
+					"GIVEBACK_WITHHOLDSUCCESS");
+				$notice->notify();
 				//无需代扣
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
