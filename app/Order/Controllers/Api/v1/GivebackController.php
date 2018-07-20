@@ -467,16 +467,6 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
-			//存在未完成分期单，关闭分期单
-			$instalmentResult = true;
-			if( $instalmentNum ){
-				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
-			}
-			//分期关闭失败，回滚
-			if( !$instalmentResult ) {
-				DB::rollBack();
-				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
-			}
 			//-+----------------------------------------------------------------
 			// | 检测合格-代扣成功(无剩余分期)
 			//-+----------------------------------------------------------------
@@ -509,6 +499,17 @@ class GivebackController extends Controller
 			//-+----------------------------------------------------------------
 			else {
 				throw new \Exception('这简直就是一个惊天大bug，天上有漏洞----->你需要一个女娲—.—');
+			}
+			
+			//存在未完成分期单，关闭分期单
+			$instalmentResult = true;
+			if( $instalmentNum ){
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
+			}
+			//分期关闭失败，回滚
+			if( !$instalmentResult ) {
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
 			}
 
 
