@@ -90,7 +90,7 @@ class ImportHistoryWithhold extends Command
                     $agreement_no           = create_withhold_no($order_info->create_time);
 					
                     // 订单系统代扣协议号
-                    $out_agreement_no           = create_no('W',$order_info->create_time);
+                    $out_agreement_no       = create_no('W',$order_info->create_time);
 
                     // 支付宝授权编号
                     $alipay_agreement_no    = $item['agreement_no'];
@@ -182,6 +182,11 @@ class ImportHistoryWithhold extends Command
                         'business_no'       => $order_info->order_no,     // '业务编号',
                         'order_no'			=> $order_info->order_no,		// 订单号
                         'status'            => 4,                           // '状态：0：无效；1：待支付；2：待签代扣协议；3：预授权；4：完成；5：关闭',
+
+                        'payment_status'    => 2,                           // '支付-状态：0：无需支付；1：待支付；2：支付成功；3：支付失败',
+                        'payment_channel'   => 2,                           // '支付-渠道'
+                        'payment_amount'    => $item['amount'],             // '支付-金额；单位：元'
+                        'payment_fenqi'     => 0,                           // '支付-分期数；0：不分期；取值范围[0,3,6,12]'
 
                         'withhold_status'   => 2,                           // '代扣协议-状态：0：无需签约；1：待签约；2：签约成功；3：签约失败',
                         'withhold_channel'  => 2,                           // '代扣协议-渠道',
