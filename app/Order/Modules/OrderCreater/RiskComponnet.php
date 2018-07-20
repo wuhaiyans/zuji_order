@@ -83,6 +83,7 @@ class RiskComponnet implements OrderCreater
         if(empty($this->knight)){
             return true;
         }
+        print_r($this->knight);die;
         foreach ($this->knight as $k=>$v){
             $score =0;
             $strategies= '';
