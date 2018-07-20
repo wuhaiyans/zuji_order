@@ -366,7 +366,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
-            print_r($data);die;
+
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
@@ -389,6 +389,7 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
+            print_r($data);die;
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
