@@ -11,7 +11,6 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
-use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 
 class OrderBuyout
@@ -290,6 +289,11 @@ class OrderBuyout
 		if(empty($goodsInfo)){
 			return false;
 		}
+		//获取订单信息
+		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyout['order_no']));
+		if(empty($orderInfo)){
+			return false;
+		}
 		//解冻订单
 		$OrderRepository= new OrderRepository;
 		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
@@ -326,6 +330,16 @@ class OrderBuyout
 				'msg'=>'买断完成',
 		];
 		GoodsLogRepository::add($log);
+
+		//押金解冻短信发送
+		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+				'mobile'=>$orderInfo['mobile'],
+				'realName'=>$orderInfo['realname'],
+				'orderNo'=>$orderInfo['order_no'],
+				'goodsName'=>$goodsInfo['goods_name'],
+				'tuihuanYajin'=>$buyout['yajin']
+		]);
+
 		return true;
 	}
 	/*
@@ -353,7 +367,8 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单信息
-		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
+		$OrderRepository = new OrderRepository;
+		$orderInfo = $OrderRepository->getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
 		if(empty($orderInfo)){
 			return false;
 		}
@@ -362,7 +377,7 @@ class OrderBuyout
 		}
 		DB::beginTransaction();
 		//解冻订单-执行取消操作
-		$ret = OrderRepository::orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = $OrderRepository->orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			DB::rollBack();
 			return false;
@@ -373,14 +388,6 @@ class OrderBuyout
 			return false;
 		}
 		DB::commit();
-		//押金解冻短信发送
-		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
-				'mobile'=>$orderInfo['mobile'],
-				'realName'=>$orderInfo['realname'],
-				'orderNo'=>$orderInfo['order_no'],
-				'goodsName'=>$goodsInfo['goods_name'],
-				'tuihuanYajin'=>$buyout['yajin']
-		]);
 		return true;
 	}
 }
