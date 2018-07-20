@@ -529,7 +529,7 @@ class OrderOperate
      * @param string $userId 用户id
      * @return bool|string
      */
-    public static function cancelOrder($orderNo,$userId='')
+    public static function cancelOrder($orderNo,$userId='',$reasonId = '')
     {
         if (empty($orderNo)) {
             return  ApiStatus::CODE_31001;
@@ -1270,6 +1270,12 @@ class OrderOperate
                 if ($insuranceData){
                     $goodsList[$keys]['act_goods_state']['Insurance'] = false;
                     $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+                    $popInsurance = array_pop($insuranceData);
+                    if ($popInsurance['type'] == 2) {
+                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
+                        $goodsList[$keys]['act_goods_state']['Insurance'] = true;
+                    }
+
                     $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
                 }
 
