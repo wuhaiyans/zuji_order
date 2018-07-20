@@ -332,13 +332,15 @@ class OrderBuyout
 		GoodsLogRepository::add($log);
 
 		//押金解冻短信发送
-		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+		if($buyout['yajin']>0){
+			ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
 				'tuihuanYajin'=>$buyout['yajin']
-		]);
+			]);
+		}
 
 		return true;
 	}
