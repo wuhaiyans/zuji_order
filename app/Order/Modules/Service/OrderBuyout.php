@@ -11,6 +11,7 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 
 class OrderBuyout
