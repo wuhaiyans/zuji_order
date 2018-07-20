@@ -333,7 +333,8 @@ class OrderCreater
             ];
             return $result;
         } catch (\Exception $exc) {
-            set_msg($exc->getMessage());
+            LogApi::info("确认订单异常：".$exc->getMessage());
+             set_msg($exc->getMessage());
             return false;
         }
     }

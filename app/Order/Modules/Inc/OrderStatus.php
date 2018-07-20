@@ -240,6 +240,7 @@ class OrderStatus{
     }
 
     /**
+     * 
      * 回访值 转换成 回访名称
      * @param int $status   回访值
      * @return string 回访名称
@@ -251,6 +252,42 @@ class OrderStatus{
         }
         return '';
     }
+
+
+    /**
+     *
+     * 获取订单取消原因列表
+     * Author: heaven
+     * @return array
+     *
+     */
+    public static function getOrderCancelResasonList(){
+            return [
+                '1'  => '额度不够',
+                '2'  => '价格不划算',
+                '3'  => '选错机型,重新下单',
+                '4'  => '随便试试',
+                '5'  => '不想租了',
+                '6'  => '已经买了',
+            ];
+
+    }
+
+    /**
+     *
+     * 获取订单取消原因名称
+     * Author: heaven
+     * @param $id
+     * @return mixed|string
+     */
+    public static function getOrderCancelResasonName($id){
+        $list = self::getOrderCancelResasonList();
+        if( isset($list[$id]) ){
+            return $list[$id];
+        }
+        return '';
+    }
+
 
 
 }

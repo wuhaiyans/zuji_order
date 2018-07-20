@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Channel\Channel;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
@@ -110,7 +111,6 @@ class ChannelComponnet implements OrderCreater
         }
 
         if( $this->channelAloneGoods ==1 ){
-            print_r($schema);
             foreach ($schema['sku'] as $k=>$v){
                 if($v['channel_id'] != $this->channelId){
                     $this->getOrderCreater()->setError('商品渠道错误');

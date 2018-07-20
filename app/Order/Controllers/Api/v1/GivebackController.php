@@ -1155,7 +1155,7 @@ class GivebackController extends Controller
 		//发送短信
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			$goodsNo,
+			$paramsArr['goods_no'],
 			"GivebackConfirmDelivery");
 		$notice->notify();
 

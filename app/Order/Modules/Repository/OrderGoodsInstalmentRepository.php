@@ -120,18 +120,18 @@ class OrderGoodsInstalmentRepository
     /**
      * 设置TradeNo
      */
-    public static function setTradeNo($id, $trade_no){
+    public static function setTradeNo($id, $business_no){
 
         if (!$id ) {
             return false;
         }
 
-        if (!$trade_no ) {
+        if (!$business_no ) {
             return false;
         }
 
         $data = [
-            'trade_no'=>$trade_no
+            'business_no'=>$business_no
         ];
         $result =  OrderGoodsInstalment::where(
             ['id'=>$id]

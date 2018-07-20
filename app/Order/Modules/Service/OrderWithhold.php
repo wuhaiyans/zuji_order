@@ -33,17 +33,17 @@ class OrderWithhold
         }
 
         // 生成交易码
-        $trade_no = createNo();
+        $business_no = createNo();
         // 扣款交易码
-        if( $instalmentInfo['trade_no'] == '' ){
+        if( $instalmentInfo['business_no'] == '' ){
             // 1)记录租机交易码
-            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['trade_no'=>$trade_no]);
+            $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
             if( $b === false ){
                 return false;
             }
-            $instalmentInfo['trade_no'] = $trade_no;
+            $instalmentInfo['business_no'] = $business_no;
         }
-        $trade_no = $instalmentInfo['trade_no'];
+        $business_no = $instalmentInfo['business_no'];
 
         //开启事务
         DB::beginTransaction();
@@ -137,7 +137,7 @@ class OrderWithhold
 
             $withholding_data = [
                 'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                'out_trade_no'  => $trade_no,               //业务系统业务码
+                'out_trade_no'  => $business_no,            //业务系统业务码
                 'amount'        => $amount,                 //交易金额；单位：分
                 'back_url'      => $backUrl,                //后台通知地址
                 'name'          => $subject,                //交易备注
@@ -193,7 +193,7 @@ class OrderWithhold
         // 支付成功
         if($params['status'] == "success"){
 
-            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['trade_no'=>$params['business_no']]);
+            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$params['business_no']]);
             if( !is_array($instalmentInfo)){
                 \App\Lib\Common\LogApi::error('代扣回调处理分期数据错误-分期错误');
                 return false;
@@ -241,7 +241,7 @@ class OrderWithhold
             }
 
             // 修改分期状态
-            $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['trade_no'=>$params['business_no']],$_data);
+            $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['business_no'=>$params['business_no']],$_data);
             if(!$result){
                 return false;
             }
