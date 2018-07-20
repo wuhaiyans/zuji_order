@@ -99,9 +99,9 @@ class SmsApi {
 				'data'		=> $templateParam,
 			],
 		];
-		\App\Lib\Common\LogApi::debug("短信调试",$data);
 		$info = Curl::post($url, json_encode($data));
 		$info = json_decode($info,true);
+		v($info);
 		\App\Lib\Common\LogApi::debug("短信调试",$info);
 		if ($info['code'] != 0) {
 			// 发短信失败
