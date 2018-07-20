@@ -9,6 +9,7 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
@@ -57,6 +58,16 @@ class BuyoutController extends Controller
         $goodsInfo['zujin_price'] = $buyoutInfo['zujin_price'];
         $goodsInfo['zuqi_number'] = $buyoutInfo['zuqi_number'];
         $goodsInfo['amount'] = $buyoutInfo['amount'];
+
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyoutInfo['order_no']));
+        //押金解冻短信发送
+        ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+            'mobile'=>18716347783,
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
+            'goodsName'=>$goodsInfo['goods_name'],
+            'tuihuanYajin'=>$buyoutInfo['yajin']
+        ]);
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
     /*
