@@ -362,10 +362,11 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            print_r($data);die;
+            print_r($data);
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
+            print_r($data);die;
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
