@@ -529,7 +529,7 @@ class OrderOperate
      * @param string $userId 用户id
      * @return bool|string
      */
-    public static function cancelOrder($orderNo,$userId='')
+    public static function cancelOrder($orderNo,$userId='',$reasonId = '')
     {
         if (empty($orderNo)) {
             return  ApiStatus::CODE_31001;
