@@ -67,7 +67,7 @@ class BuyoutController extends Controller
             'realName'=>$orderInfo['realname'],
             'orderNo'=>$orderInfo['order_no'],
             'goodsName'=>$goodsInfo['goods_name'],
-            'tuihuanYajin'=>$buyoutInfo['yajin']
+            'tuihuanYajin'=>100
         ]);
         return apiResponse($goodsInfo,ApiStatus::CODE_0);
     }
