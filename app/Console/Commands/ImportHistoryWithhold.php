@@ -185,7 +185,6 @@ class ImportHistoryWithhold extends Command
 
                         'payment_status'    => 2,                           // '支付-状态：0：无需支付；1：待支付；2：支付成功；3：支付失败',
                         'payment_channel'   => 2,                           // '支付-渠道'
-                        'payment_amount'    => $item['amount'],             // '支付-金额；单位：元'
                         'payment_fenqi'     => 0,                           // '支付-分期数；0：不分期；取值范围[0,3,6,12]'
 
                         'withhold_status'   => 2,                           // '代扣协议-状态：0：无需签约；1：待签约；2：签约成功；3：签约失败',
