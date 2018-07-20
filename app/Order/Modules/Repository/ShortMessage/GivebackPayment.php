@@ -29,7 +29,7 @@ class GivebackPayment implements ShortMessage {
     }
 
     public function notify(){
-
+        p(1,1);
         $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
         $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
 
@@ -67,6 +67,7 @@ class GivebackPayment implements ShortMessage {
             'goodsName'      => $goodsInfo['goods_name'],
             'orderNo'        => $orderInfo['order_no'],
         ];
+        p($dataSms);
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
