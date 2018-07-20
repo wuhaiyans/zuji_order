@@ -362,7 +362,6 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            print_r($data);
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
@@ -389,6 +388,7 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = $orderCreater->getDataSchema();
+            print_r($schemaData);
             print_r($data);die;
             $result = [
                 'coupon'         => $data['coupon'],
