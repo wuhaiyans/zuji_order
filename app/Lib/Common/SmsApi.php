@@ -99,6 +99,7 @@ class SmsApi {
 				'data'		=> $templateParam,
 			],
 		];
+		\App\Lib\Common\LogApi::debug("短信调试",$data);
 		$info = Curl::post($url, json_encode($data));
 		$info = json_decode($info,true);
 		\App\Lib\Common\LogApi::debug("短信调试",$info);
