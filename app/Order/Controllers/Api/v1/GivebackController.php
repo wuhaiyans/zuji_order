@@ -322,6 +322,14 @@ class GivebackController extends Controller
 			//-+------------------------------------------------------------------------------
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$goodsNo,
+				"GivebackConfirmDelivery");
+			$notice->notify();
+
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
@@ -361,12 +369,7 @@ class GivebackController extends Controller
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 
-			//发送短信
-			$notice = new \App\Order\Modules\Service\OrderNotice(
-				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				$goodsNo,
-				"GivebackConfirmDelivery");
-			$notice->notify();
+
 
 
 		} catch (\Exception $ex) {
@@ -467,16 +470,6 @@ class GivebackController extends Controller
 		//开启事务
 		DB::beginTransaction();
 		try{
-			//存在未完成分期单，关闭分期单
-			$instalmentResult = true;
-			if( $instalmentNum ){
-				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
-			}
-			//分期关闭失败，回滚
-			if( !$instalmentResult ) {
-				DB::rollBack();
-				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
-			}
 			//-+----------------------------------------------------------------
 			// | 检测合格-代扣成功(无剩余分期)
 			//-+----------------------------------------------------------------
@@ -509,6 +502,17 @@ class GivebackController extends Controller
 			//-+----------------------------------------------------------------
 			else {
 				throw new \Exception('这简直就是一个惊天大bug，天上有漏洞----->你需要一个女娲—.—');
+			}
+			
+			//存在未完成分期单，关闭分期单
+			$instalmentResult = true;
+			if( $instalmentNum ){
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
+			}
+			//分期关闭失败，回滚
+			if( !$instalmentResult ) {
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
 			}
 
 

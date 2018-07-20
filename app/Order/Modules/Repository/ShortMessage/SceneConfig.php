@@ -138,6 +138,10 @@ class SceneConfig {
      */
     const GIVEBACK_EVANOWITYESENONO = 'GivebackEvaNoWitYesEnoNo';
     /**
+     * 场景：<b>【库管点击检测不合格、输入赔偿金额时发送】</b>
+     */
+    const GIVEBACK_CLEARING = 'GivebackClearing';
+    /**
     * 场景：<b>【买断确认】</b>
     */
     const BUYOUT_CONFIRM = 'BuyoutConfirm';
