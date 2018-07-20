@@ -322,6 +322,14 @@ class GivebackController extends Controller
 			//-+------------------------------------------------------------------------------
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$goodsNo,
+				"GivebackConfirmDelivery");
+			$notice->notify();
+
 			//获取当前商品未完成分期列表数据
 			$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
 			if( !empty($instalmentList[$goodsNo]) ){
@@ -361,12 +369,7 @@ class GivebackController extends Controller
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 
-			//发送短信
-			$notice = new \App\Order\Modules\Service\OrderNotice(
-				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				$goodsNo,
-				"GivebackConfirmDelivery");
-			$notice->notify();
+
 
 
 		} catch (\Exception $ex) {

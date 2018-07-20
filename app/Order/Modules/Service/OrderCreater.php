@@ -216,7 +216,7 @@ class OrderCreater
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['score'],
+                'credit'			=> ''.$schemaData['user']['credit'],
                 '_order_info' => $schemaData,
                 'order_no'=>$data['order_no'],
                 'pay_type'=>$data['pay_type'],
@@ -365,6 +365,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
 
             //押金
+
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
 
             //代扣
@@ -391,7 +392,7 @@ class OrderCreater
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['score'],
+                'credit'			=> ''.$schemaData['user']['credit'],
                 '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),

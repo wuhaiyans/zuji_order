@@ -209,6 +209,8 @@ class MiniOrderController extends Controller
         $addressId = \App\Lib\User\User::getAddressId([
             'house'=>$address,
         ]);
+        print_r($params);
+        print_r($addressId);die;
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
