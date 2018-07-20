@@ -71,7 +71,7 @@ class ImportHistoryWithhold extends Command
                     ->get()->toArray();
                 $result = objectToArray($result);
 
-
+				
                 foreach($result as &$item){
 					
 					// 查询用户最后一个订单
@@ -94,7 +94,7 @@ class ImportHistoryWithhold extends Command
 
                     // 支付宝授权编号
                     $alipay_agreement_no    = $item['agreement_no'];
-
+					
                     // 用户ID
                     $user_id                = $item['user_id'];
 
@@ -192,7 +192,8 @@ class ImportHistoryWithhold extends Command
                     //没有记录则添加
                     $order_pay_info = \App\Order\Models\OrderPayModel::query()
                         ->where([
-                            ['withhold_no', '=', $out_agreement_no],
+                            ['business_type', '=', 1],
+                            ['business_no', '=', $order_info->order_no],
                         ])->first();
                     if(!$order_pay_info){
                         $order_pay_id = \App\Order\Models\OrderPayModel::updateOrCreate($order_pay_data);
@@ -201,8 +202,8 @@ class ImportHistoryWithhold extends Command
                         }
 					}else{
 						\App\Order\Models\OrderPayModel::where([
-                            ['withhold_no', '=', $out_agreement_no],
-						])
+									['withhold_no', '=', $out_agreement_no],
+								])
 								->limit(1)
 								->update( $order_pay_data );
 					}
@@ -232,7 +233,7 @@ class ImportHistoryWithhold extends Command
                             $arr[$item['withhold_id'] . 'order_pay_withhold'] = $order_pay_withhold_data;
                         }
                     }
-
+					
             // 代扣 与 业务 关系表 order_pay_withhold_business
                     $order_pay_withhold_business_data = [
                         'withhold_no'       => $out_agreement_no,               // '业务系统代扣编码',
