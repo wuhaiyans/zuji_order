@@ -22,7 +22,7 @@ class ImportHistoryFundauth extends Command
      */
     protected $description = 'Command description';
 
-    private $update = false;
+    private $update = true;
     /**
      * Create a new command instance.
      *
