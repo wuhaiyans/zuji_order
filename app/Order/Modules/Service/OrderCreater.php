@@ -163,38 +163,41 @@ class OrderCreater
      *];
      */
     public function miniCreate($data){
+        print_r($data);
         try{
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
             $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['appid'],$orderType);
-
+            print_r(1);
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
-
+            print_r(2);
             // 商品
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
-
+            print_r(3);
             //风控
             $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
-
+            print_r(4);
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
-
+            print_r(5);
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
-
+            print_r(6);
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-
+            print_r(7);
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
+            print_r(8);
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
+            print_r(9);
             $b = $orderCreater->filter();
+            var_dump($b);
             if(!$b){
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
@@ -202,6 +205,7 @@ class OrderCreater
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
+            print_r(10);
             $schemaData = $orderCreater->getDataSchema();
             print_r($schemaData);die;
             $b = $orderCreater->create();
