@@ -205,6 +205,9 @@ class MiniOrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
+        //确认订单查询（芝麻小程序数据）
+        $res = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderNo);
+        print_r($res);die;
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,

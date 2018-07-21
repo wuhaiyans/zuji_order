@@ -141,7 +141,7 @@ class CommonMiniApi extends BaseApi {
 			return false;
 		}
 		$this->result = $result;
-		//查询成功记录表
+		//查询成功记录表（插入）
 		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
 		if( !$res ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$res);

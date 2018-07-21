@@ -33,7 +33,6 @@ class DepositComponnet implements OrderCreater
 
     public function __construct(OrderCreater $componnet,$certifiedFlag=true,$miniCreditAmount = 0)
     {
-        echo 11;die;
         $this->componnet = $componnet;
         $this->certifiedFlag =$certifiedFlag;
         $this->miniCreditAmount =$miniCreditAmount;
