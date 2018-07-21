@@ -60,21 +60,18 @@ class WithholdController extends Controller
             $payWithhold  = $withhold->getData();
             $allowUnsign  = $withhold->getCounter() == 0 ? "Y" : "N";
 
-            $data = [
+			// 支付系统查询代扣签约状态
+            $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement([
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
                 'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
                 'user_id'			=> $userId, //【必选】string 业务系统用户ID
-            ];
-
-            $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement($data);
-            if($withholdInfo['status'] == "signed"){
-
-                $withholdStatus = [
-                    "withholding" => "Y",
-                    "allowUnsign" => $allowUnsign
-                ];
-                return apiResponse($withholdStatus, ApiStatus::CODE_0);
-            }
+            ]);
+			
+			$withholdStatus = [
+				"withholding" => $withholdInfo['status'] == "signed" ? 'Y':'N',
+				"allowUnsign" => $allowUnsign
+			];
+			return apiResponse($withholdStatus, ApiStatus::CODE_0);
         }catch(\Exception $exc){
 
             $withholdStatus = [

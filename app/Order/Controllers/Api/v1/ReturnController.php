@@ -3,7 +3,6 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\PublicFunc;
-use App\Lib\Warehouse\Receive;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Http\Request;
@@ -24,26 +23,41 @@ class ReturnController extends Controller
         $this->OrderReturnCreater = $OrderReturnCreater;
     }
     /*
-     * 用户收到货退货时调用
+     * 用户收到货退货或换货时调用
      * 申请退货
      * @param array $params 业务参数
      * [
-     *      user_id用户id     必选
-     *      business_key业务类型  必选
-     *      reason_id退货原因id   必选
-     *      reason_text退货原因   可选
-     *      'goods_no'=>[]商品编号 必选
+     *      'user_id'      =>''     用户id     int    【必选】
+     *      'business_key' =>''   业务类型     int    【必选】
+     *      'reason_id'    =>''   退货原因id   int    【必选】
+     *      'reason_text'  =>''   退货原因     string 【必选】
+     *      'loss_type'     => '',商品损耗     string 【必选】
+     *      'order_no’    =>''   订单编号     string 【必选】
+     *      'goods_no'     =>['','']商品编号   string【必选】
+     * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'    =>''     用户id      int      【必传】
+     *      'username' =>''   用户名      string   【必传】
+     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     *
+     * @return array
+     * [
+     *   'refund_no'   =>''  业务编号
+     *   'goods_no’   =>''  商品编号
+     *
      * ]
      */
     public function returnApply(Request $request)
     {
         $orders =$request->all();
         $params = $orders['params'];
-        $data= filter_array($params,[
-            'user_id'=>'required',
-            'business_key'=>'required',
-            'reason_id'=>'required',
-            'reason_text'=>'required',
+        $data = filter_array($params,[
+            'user_id'     =>'required|int',//用户id
+            'business_key'=>'required|int',//业务类型
+            'reason_id'   =>'required|int',//退换货原因id
+            'reason_text' =>'required',    //退换或换货说明
 
         ]);
         if(count($data)<4){
@@ -52,14 +66,9 @@ class ReturnController extends Controller
         if(empty($params['goods_no'])){
             return ApiStatus::CODE_20001;
         }
-        //验证是全新未拆封还是已拆封已使用
-       // if ($params['loss_type']!=ReturnStatus::OrderGoodsNew && $params['loss_type']!=ReturnStatus::OrderGoodsIncomplete) {
-         //   return apiResponse([],ApiStatus::CODE_20001,"商品损耗类型不能为空");
-      //  }
-
         $return = $this->OrderReturnCreater->add($params,$orders['userinfo']);
         if(!$return){
-            return apiResponse([],ApiStatus::CODE_34006,"创建退换货单失败");
+            return apiResponse([],ApiStatus::CODE_34006,"申请失败");
         }
         return apiResponse($return,ApiStatus::CODE_0);
     }
@@ -67,50 +76,64 @@ class ReturnController extends Controller
      *
      *申请退款
      * 用户支付中，已支付使用
-     * order_no订单编号  必选
-     * user_id用户id      必选
-     *
+     * @params  array $params  业务参数
+     * [
+     *  order_no 订单编号  string 【必选】
+     *  user_id  用户id     int  【必选】
+     * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'    =>''     用户id      int      【必传】
+     *      'username' =>''   用户名      string   【必传】
+     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return array ['refund_no'=>'']  //业务编号
      */
     public function returnMoney(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
-        $data= filter_array($params,[
-            'order_no'=>'required',
-            'user_id'=>'required',
+        $data = filter_array($params,[
+            'order_no'=>'required',     //订单编号
+            'user_id' =>'required|int', //用户
         ]);
         if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);//修改信息
+        $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);
         if(!$return){
-            return apiResponse([],ApiStatus::CODE_34005,"创建退款单失败");
+            return apiResponse([],ApiStatus::CODE_34005,"取消订单失败");
         }
         return apiResponse($return,ApiStatus::CODE_0);
 
     }
     /**
      *   退换货审核
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param array  $params 业务参数
      * 选中即同意
      * [
      *   'detail'=>[
-     * [
-     *      'refund_no'=>'',
-     *      'remark'=>'',
-     *      'reason_key'=>''
-     *      'audit_state'=>''true 审核通过，false 审核不通过
+     *     [
+     *         'refund_no'  =>'',  业务编号  string 【必传】
+     *         'remark'     =>'',  审核备注  string 【必传】
+     *          'reason_key' =>''   审核原因id  int    【必传】
+     *          'audit_state'=>''true 审核通过，false 审核不通过  【必传】
      *    ],
-     *   [
-     *      'refund_no'=>'',
-     *      'remark'=>'',
-     *      'reason_key'=>''
-     *      'audit_state'=>''
-     *    ]
+     *    [
+     *         'refund_no'  =>'',  业务编号  string 【必传】
+     *         'remark'     =>'',  审核备注  string 【必传】
+     *          'reason_key' =>''  审核原因id  int    【必传】
+     *          'audit_state'=>''  true 审核通过，false 审核不通过  【必传】
+     *    ],
+     *   ]
+     *  'business_key'  =>''    业务类型   int   【必传】
      * ]
-     *   'business_key'=>''
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'    =>''     用户id      int      【必传】
+     *      'username' =>''   用户名      string   【必传】
+     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
-     *
+     * @return string
      */
 
     public function returnReply(Request $request){
