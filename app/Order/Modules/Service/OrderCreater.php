@@ -182,6 +182,7 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
             print_r(4);
             //押金
+            echo 123;
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
             print_r(5);
             //收货地址
