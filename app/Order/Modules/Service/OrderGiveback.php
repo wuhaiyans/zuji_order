@@ -372,6 +372,14 @@ class OrderGiveback
 				\App\Lib\Common\LogApi::debug('[还机清算回调]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
+
+			//发送短信
+			$notice = new \App\Order\Modules\Service\OrderNotice(
+				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+				$params['business_no'],
+				"GivebackClearing");
+			$notice->notify();
+
 		} catch (\Exception $ex) {
 			\App\Lib\Common\LogApi::debug('还机单清算回调错误', $ex);
 			set_msg($ex->getMessage());

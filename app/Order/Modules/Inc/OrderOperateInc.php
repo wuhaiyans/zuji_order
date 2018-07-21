@@ -48,6 +48,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => false
 
 
                 ],
@@ -76,6 +78,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => false
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
@@ -101,6 +105,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => false
                 ],
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
@@ -126,6 +132,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => false
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -151,6 +159,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => true
 
                 ],
                 //租用中
@@ -177,6 +187,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => true
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -203,6 +215,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => false
 
                 ],
                 //已关闭（已退款）
@@ -229,6 +243,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => true
 
                 ],
                  //已完成
@@ -256,6 +272,8 @@ class OrderOperateInc
                     'giveback_topay' => false,
                     //'买断去支付'
                     'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => true
                 ],
             ),
             //后台用户出现的按钮
