@@ -266,7 +266,7 @@ class MiniOrderController extends Controller
      *   'remark'=>'',
      * ]
      */
-    public function miniOrderCancel(Request $request){
+    public function orderCancel(Request $request){
         $params = $request->all();
         $rules = [
             'order_no'  => 'required',
@@ -307,7 +307,7 @@ class MiniOrderController extends Controller
     /**
      * 小程序系统任务取消订单接口（30分钟自动执行）
      */
-    public function miniOrderCancelTimedTask(){
+    public function orderCancelTimedTask(){
         //查询商户订单
         $order_info = \App\Order\Models\Order::where(['order_status'=>OrderStatus::OrderWaitPaying,'pay_type'=>\App\Order\Modules\Inc\PayInc::MiniAlipay ,'create_time'=>['LT',time()-1800]])->select();
         if( empty($order_info) ){

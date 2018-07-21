@@ -288,9 +288,9 @@ return [
     //小程序订单同步接口
     'mini.order.fronttransition' => 'MiniOrderController@frontTransition',
     //取消订单接口
-    'mini.order.ordercancel' => 'MiniOrderController@miniOrderCancel',
-//    //小程序订单完成接口
-//    'mini.order.close' => 'MiniOrderController@cancelOrder',
+    'mini.order.ordercancel' => 'MiniOrderController@orderCancel',
+    //小程序订单完成接口
+    'mini.order.orderclose' => 'MiniOrderController@orderClose',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************
