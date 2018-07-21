@@ -170,7 +170,7 @@ class OrderCreater
             $orderCreater = new OrderComponnet($data['order_no'],$data['user_id'],$data['appid'],$orderType);
 
             // 用户
-            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
@@ -354,7 +354,7 @@ class OrderCreater
             $orderCreater = new OrderComponnet($data['order_no'],($data['user_id']),($data['appid']),($orderType));
 
             // 用户
-            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],0,$data['address_info']);
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品

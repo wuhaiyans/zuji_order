@@ -19,26 +19,27 @@ class AuthRefferController extends Controller{
      * Author: heaven
      * @param Request $request
      *[
-     * "appid"    => "1"
-     * "version"  => "v1"
-     * "auth_token" => ""
-     * "method"  =>""
-     * "params"=>[]
-     * "type"   =>
+     * "appid"       => "1"   渠道id
+     * "version"     => "v1"  版本
+     * "auth_token"  => ""    token值
+     * "method"      =>""     接口方法
+     * "params"      =>[]     参数
      * ]
-     * @return bool
      */
     public function header(Request $request)
     {
         try{
-
             //默认订单都需要验证，除了主动扣款
             $params = $request->all();
             $header = ['Content-Type: application/json'];
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
-                Log::debug("验证token".$info);
+                LogApi::debug("无需登录直接转发接口信息及结果",[
+                    'url' => config('ordersystem.ORDER_API'),
+                    'request' => $params,
+                    'response' => $info,
+                ]);
                 $info =json_decode($info,true);
                 if( is_null($info)
                     || !is_array($info)
@@ -53,9 +54,9 @@ class AuthRefferController extends Controller{
                 }
                 return response()->json($info);
             }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
-                $token  =   $params['auth_token'];
+                $token     = $params['auth_token'];
                 $checkInfo = User::checkToken($token);
-                Log::debug("验证token调用第三方User::checkToken返回的结果".print_r($checkInfo,true));
+                LogApi::debug("验证token调用第三方User::checkToken返回的结果",$checkInfo);
                 //验证不通过
                 if (is_null($checkInfo)
                     || !is_array($checkInfo)
@@ -72,16 +73,14 @@ class AuthRefferController extends Controller{
                         'username' =>$checkInfo['data'][0]['mobile']
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
-                    LogApi::debug("验证token",$list);
-                   // LogApi::debug("请求参数json",json_encode($params));
-                    $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
-                    LogApi::debug("验证token".$info);
-                    $info =json_decode($info,true);
-                    LogApi::debug("转发接口信息及结果",[
-                        'url' => $list,
+                    LogApi::debug("通过登录转发接口的url及参数",[
+                        'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
-                        'response' => $info,
                     ]);
+                    LogApi::debug("通过登录转发接口的参数",$params);
+                    $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
+                    $info =json_decode($info,true);
+                    LogApi::debug("登录转发接口结果",$info);
                     if( is_null($info)
                         || !is_array($info)
                         || !isset($info['code'])
