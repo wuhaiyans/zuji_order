@@ -186,10 +186,8 @@ class OrderCreater
             print_r(5);
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
-            print_r(6);
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-            print_r(7);
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
             print_r(8);
@@ -198,7 +196,7 @@ class OrderCreater
             print_r(9);
             $b = $orderCreater->filter();
             var_dump($b);
-            var_dump($orderCreater->getOrderCreater()->getError());die;
+//            var_dump($orderCreater->getOrderCreater()->getError());die;
             if(!$b){
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
@@ -208,7 +206,7 @@ class OrderCreater
             }
             print_r(10);
             $schemaData = $orderCreater->getDataSchema();
-            print_r($schemaData);die;
+//            print_r($schemaData);die;
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){

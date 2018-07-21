@@ -112,8 +112,6 @@ class ChannelComponnet implements OrderCreater
 
         if( $this->channelAloneGoods ==1 ){
             foreach ($schema['sku'] as $k=>$v){
-                print_r($v);
-                print_r($this->channelId);die;
                 if($v['channel_id'] != $this->channelId){
                     $this->getOrderCreater()->setError('商品渠道错误');
                     $this->flag = false;
