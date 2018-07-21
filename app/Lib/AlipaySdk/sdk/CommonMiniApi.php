@@ -63,9 +63,7 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
 		}
 		$response = $this->execute($request);
-		echo $response;
 		$result = json_decode(json_encode($response),true);
-		print_r($result);
 		$debug_data = [
 			'request' => $biz_content,
 			'response' => $response,
