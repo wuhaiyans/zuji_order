@@ -143,6 +143,8 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::notify('风控系统接口请求错误',$miniData);
             return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
         }
+        print_r($miniData);
+        print_r($_user);
         //处理用户收货地址
         $address = \App\Lib\User\User::getAddressId([
             'house'=>$miniData['house'],
@@ -150,6 +152,7 @@ class MiniOrderController extends Controller
             'name'=>$miniData['name'],
             'mobile'=>$miniData['mobile'],
         ]);
+        var_dump($address);die;
         $data['mobile']=$miniData['mobile'];
         $data['name']=$miniData['name'];
         $data['address']=$miniData['house'];
