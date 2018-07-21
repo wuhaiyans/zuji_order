@@ -291,10 +291,6 @@ class SkuComponnet implements OrderCreater
      * @param int $amount
      */
     public function discrease_yajin(int $jianmian,$yajin,$mianyajin,$sku_id): array{
-        print_r($jianmian);
-        print_r($yajin);
-        print_r($mianyajin);
-        print_r($sku_id);die;
         if( $jianmian<0 ){
             return [];
         }
