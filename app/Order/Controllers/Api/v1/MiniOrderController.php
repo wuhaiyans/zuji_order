@@ -216,6 +216,10 @@ class MiniOrderController extends Controller
             'coupon'=>$coupon,
             'user_id'=>$userId,
             'address_id'=>$address_id,
+            'name'=>$res['name'],
+            'mobile'=>$res['mobile'],
+            'credit_amount'=>$res['credit_amount'],
+            'cert_no'=>$res['cert_no'],
         ];
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
