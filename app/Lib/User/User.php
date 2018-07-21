@@ -123,6 +123,9 @@ class User{
         $data['method'] ='zuji.district.query.id';
         $data['params'] = [
             'house'=>$params['house'],
+            'house'=>$params['house'],
+            'house'=>$params['house'],
+            'house'=>$params['house'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);

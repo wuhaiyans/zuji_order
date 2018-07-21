@@ -144,19 +144,16 @@ class MiniOrderController extends Controller
             return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
         }
         //处理用户收货地址
-        $addressId = \App\Lib\User\User::getAddressId($miniData);
-        $data['address_info'] = [
-            'province_id'=>$addressId['provin_id'],
-            'city_id'=>$addressId['city_id'],
-            'district_id'=>$addressId['country_id'],
-            'mobile'=>$miniData['mobile'],
+        $address = \App\Lib\User\User::getAddressId([
+            'house'=>$miniData['house'],
+            'user_id'=>$_user['user_id'],
             'name'=>$miniData['name'],
-            'address'=>$miniData['house'],
-            'credit_amount'=>$miniData['credit_amount'],
-        ];
+            'mobile'=>$miniData['mobile'],
+        ]);
         $data['mobile']=$miniData['mobile'];
         $data['name']=$miniData['name'];
         $data['address']=$miniData['house'];
+        $data['address_id']=$address['address_id'];
         $data['credit_amount']=$miniData['credit_amount'];
         //小程序订单确认
         $res = $this->OrderCreate->miniConfirmation($data);
@@ -182,16 +179,19 @@ class MiniOrderController extends Controller
 
         //获取appid
         $appid		= $params['appid'];
-        $orderNo	= $params['params']['order_no'];//支付方式ID
+        $orderNo	= $params['params']['order_no'];
         $payType	= $params['params']['pay_type'];//支付方式ID
         $sku		= $params['params']['sku_info'];
         $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
         $userId		= $params['params']['user_id'];
-        $address		= $params['params']['address'];
+        $address_id		= $params['params']['address_id'];
 
         //判断参数是否设置
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
+        }
+        if(empty($orderNo)){
+            return apiResponse([],ApiStatus::CODE_20001,"orderNo不能为空");
         }
         if(empty($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
@@ -199,18 +199,16 @@ class MiniOrderController extends Controller
         if(empty($userId)){
             return apiResponse([],ApiStatus::CODE_20001,"userId不能为空");
         }
-        if(empty($address)){
-            return apiResponse([],ApiStatus::CODE_20001,"address不能为空");
+        if(empty($address_id)){
+            return apiResponse([],ApiStatus::CODE_20001,"address_id不能为空");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
         //处理用户收货地址
-        $addressId = \App\Lib\User\User::getAddressId([
-            'house'=>$address,
-        ]);
+
         print_r($params);
-        print_r($addressId);die;
+        print_r($address_id);die;
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
@@ -218,12 +216,7 @@ class MiniOrderController extends Controller
             'sku'=>$sku,
             'coupon'=>$coupon,
             'user_id'=>$userId,  //增加用户ID
-        ];
-        $data['address_info'] = [
-            'province_id'=>$addressId['provin_id'],
-            'city_id'=>$addressId['city_id'],
-            'district_id'=>$addressId['country_id'],
-            'address'=>$address,
+            'address_id'=>$address_id,  //增加用户ID
         ];
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
