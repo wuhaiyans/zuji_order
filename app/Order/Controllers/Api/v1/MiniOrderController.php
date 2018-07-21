@@ -202,7 +202,7 @@ class MiniOrderController extends Controller
         if(empty($address_id)){
             return apiResponse([],ApiStatus::CODE_20001,"address_id不能为空");
         }
-        if(count($sku)<1){
+        if(empty($sku)){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
         //确认订单查询（芝麻小程序数据）
