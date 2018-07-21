@@ -33,6 +33,9 @@ class DepositComponnet implements OrderCreater
 
     public function __construct(OrderCreater $componnet,$certifiedFlag=true,$miniCreditAmount = 0)
     {
+        print_r($componnet);
+        print_r($certifiedFlag);
+        print_r($miniCreditAmount);
         $this->componnet = $componnet;
         $this->certifiedFlag =$certifiedFlag;
         $this->miniCreditAmount =$miniCreditAmount;
@@ -59,7 +62,6 @@ class DepositComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
-        print_r($schema);die;
         //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
         $this->deposit = !!$this->certifiedFlag;
 
