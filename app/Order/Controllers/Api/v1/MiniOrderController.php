@@ -205,18 +205,14 @@ class MiniOrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-        //处理用户收货地址
-
-        print_r($params);
-        print_r($address_id);die;
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
             'order_no'=>$orderNo,
             'sku'=>$sku,
             'coupon'=>$coupon,
-            'user_id'=>$userId,  //增加用户ID
-            'address_id'=>$address_id,  //增加用户ID
+            'user_id'=>$userId,
+            'address_id'=>$address_id,
         ];
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
