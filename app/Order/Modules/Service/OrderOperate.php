@@ -392,6 +392,43 @@ class OrderOperate
                     return false;
                 }
             }
+            // 兼容老订单系统（短租服务时间为确认收货时间） 后期可以删除
+            if($orderInfo['zuqi_type'] == 1){
+                //查询商品信息
+                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
+                foreach ($goodsInfo as $k=>$v){
+                    if($goodsInfo[$k]['begin_time'] ==0 && $goodsInfo[$k]['end_time'] ==0){
+                        //更新商品表
+                        $goodsData['begin_time'] = time();
+                        $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[$k]['zuqi']);
+                        $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[$k]['goods_no']);
+                        $b =$goods->updateGoodsServiceTime($goodsData);
+                        if(!$b){
+                            DB::rollBack();
+                            return false;
+                        }
+
+                        //增加商品租期表
+                        $unitData =[
+                            'order_no'=>$orderNo,
+                            'goods_no'=>$goodsInfo[$k]['goods_no'],
+                            'user_id'=>$orderInfo['user_id'],
+                            'unit'=>1,
+                            'unit_value'=>$goodsInfo[$k]['zuqi'],
+                            'begin_time'=>$goodsData['begin_time'],
+                            'end_time'=>$goodsData['end_time'],
+                        ];
+                        $b =ServicePeriod::createService($unitData);
+                        if(!$b){
+                            DB::rollBack();
+                            return false;
+                        }
+
+                    }
+                }
+
+            }
+
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
             if(!$b){
