@@ -119,6 +119,7 @@ class User{
      * @return string or array
      */
     public static function getAddressId($params){
+        print_r($params);
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.district.query.id';
         $data['params'] = [
