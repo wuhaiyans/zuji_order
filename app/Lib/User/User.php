@@ -130,12 +130,11 @@ class User{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        print_r($info);die;
         if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+            return false;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return false;
         }
         return $info['data'];
     }
