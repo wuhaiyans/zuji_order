@@ -81,7 +81,6 @@ class Config {
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货
-				SceneConfig::GIVEBACK_ORDERCLEAN 		=> 'SMS_113461138', //财务系统完成退还押金
 				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461133', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461134', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送
@@ -89,7 +88,6 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_EVANOWITYESENONO	=> 'SMS_113461139', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_EVANOWITYESENO	=> 'SMS_113461140', //库管点击检测不合格、输入赔偿金额时发送
-				SceneConfig::GIVEBACK_CLEARING			=> 'SMS_113461138', //退还押金成功
 
 				//退押金
 				SceneConfig::RETURN_DEPOSIT	=> 'SMS_113461138', //财务系统完成押金退还时发送
