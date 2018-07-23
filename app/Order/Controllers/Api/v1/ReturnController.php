@@ -54,9 +54,9 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $data = filter_array($params,[
-            'user_id'     =>'required|int',//用户id
-            'business_key'=>'required|int',//业务类型
-            'reason_id'   =>'required|int',//退换货原因id
+            'user_id'     =>'required',//用户id
+            'business_key'=>'required',//业务类型
+            'reason_id'   =>'required',//退换货原因id
             'reason_text' =>'required',    //退换或换货说明
 
         ]);
@@ -78,14 +78,14 @@ class ReturnController extends Controller
      * 用户支付中，已支付使用
      * @params  array $params  业务参数
      * [
-     *  order_no 订单编号  string 【必选】
-     *  user_id  用户id     int  【必选】
+     *  ‘order_no’=>'' 订单编号  string 【必选】
+     *   'user_id '  =>'' 用户id     int  【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
-     *      'uid'    =>''     用户id      int      【必传】
+     *      'uid'      =>''   用户id      int      【必传】
      *      'username' =>''   用户名      string   【必传】
-     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      * @return array ['refund_no'=>'']  //业务编号
      */
@@ -94,7 +94,7 @@ class ReturnController extends Controller
         $params = $orders['params'];
         $data = filter_array($params,[
             'order_no'=>'required',     //订单编号
-            'user_id' =>'required|int', //用户
+            'user_id' =>'required', //用户
         ]);
         if(count($data)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
@@ -115,23 +115,23 @@ class ReturnController extends Controller
      *     [
      *         'refund_no'  =>'',  业务编号  string 【必传】
      *         'remark'     =>'',  审核备注  string 【必传】
-     *          'reason_key' =>''   审核原因id  int    【必传】
-     *          'audit_state'=>''true 审核通过，false 审核不通过  【必传】
+     *         'reason_key' =>''  审核原因id  int    【必传】
+     *         'audit_state'=>''  true 审核通过，false 审核不通过  【必传】
      *    ],
      *    [
-     *         'refund_no'  =>'',  业务编号  string 【必传】
-     *         'remark'     =>'',  审核备注  string 【必传】
-     *          'reason_key' =>''  审核原因id  int    【必传】
-     *          'audit_state'=>''  true 审核通过，false 审核不通过  【必传】
+     *         'refund_no'   =>'',  业务编号  string 【必传】
+     *         'remark'      =>'',  审核备注  string 【必传】
+     *         'reason_key' =>''  审核原因id  int    【必传】
+     *         'audit_state'=>''  true 审核通过，false 审核不通过  【必传】
      *    ],
      *   ]
      *  'business_key'  =>''    业务类型   int   【必传】
      * ]
      * @param array $userinfo 用户信息参数
      * [
-     *      'uid'    =>''     用户id      int      【必传】
-     *      'username' =>''   用户名      string   【必传】
-     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      * @return string
      */
@@ -152,15 +152,25 @@ class ReturnController extends Controller
     /**
      * 退款---审核
      * @param Request $request
-     *
+     *  [   'refund_no'  =>'',  业务编号  string  【必传】
+     *      'remark'     =>'',  审核备注  string 【必传】
+     *      'status'     =>''   审核状态 int    【必传】
+     * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return string
      */
     public function refundReply(Request $request){
         $orders =$request->all();
         $params = $orders['params'];
         $param = filter_array($params,[
-            'refund_no'=> 'required',
-            'remark'=> 'required',
-            'status'=> 'required',
+            'refund_no'=> 'required',    //业务编号
+            'remark'   => 'required',    //审核备注
+            'status'   => 'required',    //审核状态   0 同意，1拒绝
         ]);
         if(count($param)<3){
             return  apiResponse([],ApiStatus::CODE_20001);

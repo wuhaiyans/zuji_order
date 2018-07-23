@@ -82,13 +82,21 @@ class ImportOrder extends Command
                     $follow_info =$this->getOrderFollow($v['order_id'],7);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
-                        $status['order_status'] = 8;
                     }
                     $follow_info =$this->getOrderFollow($v['order_id'],22);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                    }
+                    //关闭已退款
+                    $follow_info =$this->getOrderFollow($v['order_id'],10);
+                    if(!empty($follow_info)){
                         $status['order_status'] =8;
                     }
+                    $follow_info =$this->getOrderFollow($v['order_id'],23);
+                    if(!empty($follow_info)){
+                        $status['order_status'] =8;
+                    }
+
 
 
                     $orderData =[
@@ -396,7 +404,7 @@ class ImportOrder extends Command
                 break;
             //订单关闭
             case 3:
-                $array = ['order_status'=>8,'freeze_type'=>0,'goods_status'=>0,'complete_time'=>$order_info['update_time']];
+                $array = ['order_status'=>8,'freeze_type'=>0,'goods_status'=>71,'complete_time'=>$order_info['update_time']];
                 break;
             //租用中
             case 4:
@@ -416,7 +424,7 @@ class ImportOrder extends Command
                 break;
             //已退款
             case 10:
-                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>71,'complete_time'=>$update_time];
                 break;
             //已发货
             case 11:
@@ -468,7 +476,7 @@ class ImportOrder extends Command
                 break;
             //资金已解冻
             case 23:
-                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>21,'complete_time'=>$update_time];
+                $array = [ 'order_status'=>8,'freeze_type'=>0,'goods_status'=>71,'complete_time'=>$update_time];
                 break;
             //用户归还
             case 25:
