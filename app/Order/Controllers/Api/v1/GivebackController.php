@@ -855,6 +855,20 @@ class GivebackController extends Controller
 				'yajin_status_name' => $orderGivebackInfo['yajin_status_name'],
 			];
 		}
+		//赔偿金额计算(检测不合格，没有未支付分期金额，押金》赔偿金，才能押金抵扣)
+		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && !$orderGivebackInfo['instalment_amount'] && $orderGoodsInfo['yajin']>=$orderGivebackInfo['compensate_amount'] ){
+			$data['compensate_info'] = [
+				'compensate_all_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
+				'compensate_deduction_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
+				'compensate_release_amount' => $orderGoodsInfo['yajin'] - ($orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount']),
+			];
+		}else{
+			$data['compensate_info'] = [
+				'compensate_all_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
+				'compensate_deduction_amount' => 0,
+				'compensate_release_amount' => $orderGoodsInfo['yajin'],
+			];
+		}
 		
 		$data['status'] = ''.OrderGivebackStatus::adminMapView($orderGivebackInfo['status']);//状态
 		

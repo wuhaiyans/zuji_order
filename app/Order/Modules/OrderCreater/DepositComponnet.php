@@ -59,7 +59,6 @@ class DepositComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
-
         //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
         $this->deposit = !!$this->certifiedFlag;
 
@@ -78,7 +77,6 @@ class DepositComponnet implements OrderCreater
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
-            //print_r($this->schema['sku']);die;
             //支付押金规则
             foreach ($this->schema['sku'] as $k=>$v)
             {
