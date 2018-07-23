@@ -150,8 +150,9 @@ class MiniOrderController extends Controller
             'name'=>$miniData['name'],
             'mobile'=>$miniData['mobile'],
         ]);
-        print_r($address);
-        var_dump($address);die;
+        if(!$address){
+            return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
+        }
         $data['mobile']=$miniData['mobile'];
         $data['name']=$miniData['name'];
         $data['address']=$miniData['house'];
@@ -160,7 +161,7 @@ class MiniOrderController extends Controller
         //小程序订单确认
         $res = $this->OrderCreate->miniConfirmation($data);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+            return apiResponse([],ApiStatus::CODE_35012,get_msg());
         }
         return apiResponse($res,ApiStatus::CODE_0);
     }
