@@ -3,6 +3,8 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderGoodsInstalment;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
@@ -14,6 +16,7 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
 
     private $business_type;
     private $business_no;
+    private $data;
 
     public function setBusinessType( int $business_type ){
         $this->business_type = $business_type;
@@ -21,6 +24,10 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
 
     public function setBusinessNo( string $business_no ){
         $this->business_no = $business_no;
+    }
+
+    public function setData( array $data ){
+        $this->data = $data;
     }
 
     public function getCode($channel_id){

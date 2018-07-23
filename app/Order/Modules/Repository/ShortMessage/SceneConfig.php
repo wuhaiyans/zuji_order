@@ -102,9 +102,13 @@ class SceneConfig {
      */
     const GIVEBACK_CREATE = 'GivebackCreate';
     /**
-     * 场景：<b>【还机确认收货】</b>
+     * 场景：<b>【还机确认收货 有剩余租金】</b>
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
+    /**
+     * 场景：<b>【还机确认收货 】</b>
+     */
+    const GIVEBACK_CONFIRMNOWITH = 'GivebackConfirmNoWith';
     /**
      * 场景：<b>【系统执行代扣成功后发送】</b>
      */
