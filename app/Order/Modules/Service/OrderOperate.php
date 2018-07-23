@@ -1000,7 +1000,7 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
-
+                $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? $orderOperateData['zm_order_no'];
                 if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
                     $params = [
                     'payType' => $values['pay_type'],//支付方式 【必须】<br/>
