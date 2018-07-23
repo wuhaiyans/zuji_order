@@ -193,7 +193,6 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
-
         $return_list = $this->OrderReturnCreater->get_list($params);
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
@@ -313,18 +312,15 @@ class ReturnController extends Controller
     /**
      * 物流单号上传
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|string
      *[
      *
-     * logistics_id
-     * logistics_name
-     * logistics_no
-     * user_id
-     * refund_no=>[
-     *            ''
-     *            ''
-     *           ]
+     * 'logistics_id'   =>'',  物流id   int    【必传】
+     * 'logistics_name' =>'',  物流名称 string 【必传】
+     * 'logistics_no'   =>'',  物流编号 string 【必传】
+     * 'user_id'        =>'',  用户id   int    【必传】
+     * 'refund_no'      =>['','']  业务编号 string 【必传】
      * ]
+     * @return string
      */
     public function updateDeliveryNo(Request $request)
     {
@@ -354,14 +350,15 @@ class ReturnController extends Controller
 
     }
 
-    // 退货结果查看接口
     /*
+     * 退货结果查看接口
+     * @params   业务参数
      * [
-     *    "business_key"  =>'' 必选  业务类型
-     *    "business_no"    =>''可选   业务编号
-     *    "goods_no"     =>''   必选  商品编号
+     *    "business_key"   =>''   业务类型   int   【必选】
+     *    "business_no"    =>''   业务编号   string【可选 】
+     *    "goods_no"       =>''   商品编号   string【必选】
      * ]
-     *
+     *@return array|string
      */
     public function returnResult(Request $request)
     {
@@ -386,10 +383,19 @@ class ReturnController extends Controller
 
     /**
      * 取消退货申请
-     * @param Request $request
+     * @param Request $request   业务参数
+     * [
+     *    'refund_no'=>['111','222'] 业务编号  string 【必传】
+     *    'user_id'  =>''            用户id   int     【必传】
+     * ]
+     *
+     * @param array $orders['userinfo'] 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
      * @return \Illuminate\Http\JsonResponse|string
-     * 'refund_no'=>['111','222'] 退货单编号
-     * user_id
      */
     public function cancelApply(Request $request)
     {
@@ -411,6 +417,18 @@ class ReturnController extends Controller
     /**
      * 取消退款
      * @param Request $request
+     *  @param array params 业务参数
+     * [
+     *       'user_id'         =>'', 用户id   int    【必传】
+     *       'refund_no'       =>'',业务编码  string 【必传】
+     * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return  string
      */
     public function cancelRefund(Request $request){
         $orders = $request->all();
@@ -430,8 +448,24 @@ class ReturnController extends Controller
 
     /**
      * 退换货结果检测
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param int	$params['params']['business_key']	$business_key	业务类型
+     * @param array	 $params['params']['data']
+     * [
+     *		'business_no'       => '',    业务编码   string   【必传】
+     *		'evaluation_remark' => '',    检测备注   string   【必传】
+     *		'compensate_amount' => '',    检测金额   float    【必传】
+     *      'evaluation_status' => '',    检测状态   int      【必传】 1检测合格  ，2检测不合格
+     *		'evaluation_time'   => '',    检测时间   int     【必传】
+     *      'goods_no'          =>''      商品编号   string  【必传】
+     * ]
+     * @param array $params['params']['userinfo'] 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     *
+     * @return \Illuminate\Http\JsonResponse|string
      *
      */
     public function isQualified(Request $request){
@@ -466,8 +500,13 @@ class ReturnController extends Controller
     }
 
     /**
-     * 退换货确认收货
+     * 换货确认收货
      * @param Request $request
+     * [
+     *   'refund_no'   =>'',  //业务编号   string  【必传】
+     *   'business_key'=>'',  //业务类型   int     【必传】
+     * ]
+     * @return string
      */
     public function returnReceive(Request $request){
         $orders = $request->all();
@@ -475,7 +514,7 @@ class ReturnController extends Controller
         if(empty($params['refund_no']) || empty($params['business_key'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
-        LogApi::debug("退换货确认收货接受参数",$params);
+        LogApi::debug("换货确认收货接受参数",$params);
         $res=$this->OrderReturnCreater->returnReceive($params);
         if(!$res){
             return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//修改检测结果失败
@@ -487,8 +526,15 @@ class ReturnController extends Controller
 
     /**
      * 换货用户收货通知
-     * @param Request $request
+     * @param Request $request  $params['refund_no']  业务参数
      * ‘refund_no ’    =>'', //业务编号
+     * @param array $orders['userinfo'] 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return  string
      *
      */
     public function updateOrder(Request $request){
@@ -509,16 +555,18 @@ class ReturnController extends Controller
 
 
     /**
-     *params[
-     * 'order_no'
-     * 'business_key'
-     * ]
      * 后台点击退换货审核弹出内容
+     * @param Request $request  $params['params'] 业务参数
+     *[
+     *    'order_no'    =>''  订单编号    string   【必传】
+     *    'business_key'=>''  业务编号    int      【必传】
+     * ]
+     * @return  array
      */
     public function returnApplyList(Request $request){
         $params = $request->all();
         $rules = [
-            'order_no'  => 'required',
+            'order_no'      => 'required',
             'business_key'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
@@ -531,11 +579,12 @@ class ReturnController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
     }
     /**
-     *params[
-     * 'order_no'
-     * 'business_key'
-     * ]
      * 获取订单检测不合格的数据
+     * @param $params
+     * [
+     *     'order_no'          =>'', 订单编号   string   【必传】
+     * ]
+     *  @return  array
      */
     public function returnCheckList(Request $request){
         $params = $request->all();
@@ -555,7 +604,13 @@ class ReturnController extends Controller
 
     /**
      * 检测不合格拒绝退款
-     * @param Request $request
+     * @param Request $request  $params   业务参数
+     * [
+     *   'refund_no'            =>'',  业务编号       string  【必传】
+     *   'refuse_refund_remark' =>''   拒绝退款备注   string  【必传】
+     *
+     * ]
+     * @return string
      */
     public function refuseRefund(Request $request){
         $orders = $request->all();
@@ -569,11 +624,12 @@ class ReturnController extends Controller
 
     /**
      * 是否允许进入退换货
-     * @param Request $request
+     * @param Request $request   $orders['params']  业务参数
      * [
-     *   "order_no"  =>"", 【必选】订单编号
-     *    ""
+     *    'order_no'   =>  ''   订单编号  string  【必传】
+     *    'goods_no'   =>  ''   商品编号  string  【必传】
      * ]
+     * @return  string
      */
     public function allowReturn(Request $request){
         $orders = $request->all();
