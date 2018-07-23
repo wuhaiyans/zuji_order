@@ -1113,9 +1113,10 @@ class OrderOperate
         if ($orderData['order_info']['freeze_type'] >0) {
             $actArray['cancel_pay_btn'] = false;
         }
+        $list['zm_order_no'] = $orderData['order_info']['zm_order_no'];
         $list['button_operate'] = $actArray;
         $list['logistics_info'] = $orderData['goods_extend_info'];
-        $list['zm_order_no'] = $orderData['zm_order_no'];
+
         return $list;
 
     }
