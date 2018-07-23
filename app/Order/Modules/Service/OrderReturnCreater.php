@@ -1076,6 +1076,7 @@ class OrderReturnCreater
         if( isset($where['order_no']) ){
             $where1[] = ['order_return.order_no', '=', $where['order_no']];
         }
+        //退换货原因
         if( isset($where['reason_key']) ){
             $where1[] = ['order_return.reason_key', '=',$where['reason_key']];
         }
@@ -1086,15 +1087,19 @@ class OrderReturnCreater
         if(isset($where['mobile'])){
             $where1[] = ['order_info.mobile','=',$where['mobile']];
         }
+        //退换货单状态
         if( isset($where['status']) ){
             $where1[] = ['order_return.status', '=', $where['status']];
         }
+        //订单状态
         if( isset($where['order_status']) ){
             $where1[] = ['order_info.status', '=', $where['order_status']];
         }
+        //渠道入口id
         if(isset($where['appid']) ){
             $where1[] = ['order_info.appid', '=', $where['appid']];
         }
+        //业务类型
         if( isset($where['business_key'])>0 ){
             $where1[] = ['order_return.business_key', '=', $where['business_key']];
         }else{
@@ -1436,13 +1441,21 @@ class OrderReturnCreater
      * @param int		$business_key	业务类型
      * @param array		$data		
 	 * [
-	 *		'' => '',
-	 *		'' => '',
-	 *		'' => '',
-	 *		'' => '',
-	 * ]	
-     * @param array		$userinfo		操作人信息
-     * @return bool	true：成功；false：失败
+	 *		'business_no'       => '',    业务编码   string   【必传】
+	 *		'evaluation_remark' => '',    检测备注   string   【必传】
+	 *		'compensate_amount' => '',    检测金额   float    【必传】
+     *      'evaluation_status' => '',    检测状态   int      【必传】 1检测合格  ，2检测不合格
+	 *		'evaluation_time'   => '',    检测时间   int     【必传】
+     *      'goods_no'          =>''      商品编号   string  【必传】
+     *
+	 * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return bool	  true：成功；false：失败
      * @throws \Exception
      */
     public function isQualified(int $business_key, array $data, array $userinfo)
@@ -1460,32 +1473,32 @@ class OrderReturnCreater
                 //获取退货单信息
                 $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['business_no']);
                 if(!$return){
-					\App\Lib\Common\Error::setError('退货单查询失败');
+                    LogApi::debug("退货单查询失败");
                     return false;
                 }
                 $return_info=$return->getData();
                 //必须是已收货状态
                 if($return_info['status']!=ReturnStatus::ReturnReceive){
-					\App\Lib\Common\Error::setError('退货单状态禁止');
+                    LogApi::debug("必须是已收货状态才可以检测");
                     return false;
                 }
                 //获取订单信息
                 $order =\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
-					\App\Lib\Common\Error::setError('订单查询失败');
+                    LogApi::debug('获取订单查询失败');
                     return false;
                 }
                 $order_info=$order->getData();
                 //获取商品信息
                 $goods =\App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
                 if(!$goods){
-					\App\Lib\Common\Error::setError('商品查询失败');
+                    LogApi::debug('商品信息查询失败');
                     return false;
                 }
                 $goods_info=$goods->getData();
-                $params['evaluation_remark'] = $v['evaluation_remark'];
-                $params['evaluation_amount'] = $v['compensate_amount'];
-                $params['evaluation_time'] = $v['evaluation_time'];
+                $params['evaluation_remark'] = $v['evaluation_remark']; //检测备注
+                $params['evaluation_amount'] = $v['compensate_amount']; //检测金额
+                $params['evaluation_time'] = $v['evaluation_time'];     //检测时间
 				
 				// 合格状态
                 if($data[$k]['evaluation_status']==1) {
@@ -1495,7 +1508,7 @@ class OrderReturnCreater
                     $updateReturn=$return->returnCheckOut($params);
                     if(!$updateReturn){
                         DB::rollBack();
-						\App\Lib\Common\Error::setError('退换货单检测结果保存失败');
+                        LogApi::debug('退换货单检测结果更新失败');
                         return false;
                     }
 					
@@ -1688,6 +1701,11 @@ class OrderReturnCreater
     /***
      * 退换货确认收货
      * @param $params
+     * [
+     *   'refund_no'   =>'',  //业务编号   string  【必传】
+     *   'business_key'=>'',  //业务类型   int     【必传】
+     * ]
+     * @return  bool
      */
     public function returnReceive($params){
         //开启事务
@@ -1731,6 +1749,9 @@ class OrderReturnCreater
     /**
      * 退换货物流单号上传
      * @param $params
+     * [
+     *    'goods_info'=>['',''],   业务编号   string  【必传】
+     * ]
      * @return bool|string
      * @throws \Exception
      *
@@ -1768,13 +1789,15 @@ class OrderReturnCreater
                 }
                 $receive_no = $return_info['receive_no'];
             }
-            $data['logistics_id']=$params['logistics_id'];
-            $data['logistics_no']=$params['logistics_no'];
-           // $data['logistics_name']=$params['logistics_name'];
-            $data['receive_no']= $receive_no;
+            $data['logistics_id']=$params['logistics_id'];  //物流id
+            $data['logistics_no']=$params['logistics_no'];   //物流编号
+            $data['receive_no']= $receive_no;  //收货单编号
+            LogApi::debug("通知收发货系统的参数信息",$data);
             //上传物流单号到收货系统
             $create_receive = Receive::updateLogistics($data);
             if(!$create_receive){
+                //事务回滚
+                DB::rollBack();
                 return false;
             }
             //提交事务
@@ -1790,18 +1813,18 @@ class OrderReturnCreater
 
     /**
      * 换货用户收到货
-     * @param $params
-     * @return string
      * @throws \Exception
+     * @param $params
      *[
-     *    'refund_no' =>'111'      //业务编号
+     *    'refund_no' =>'111'      //业务编号  string  【必传】
      * ]
-     *  @param array $userinfo 业务参数
+     * @param array $userinfo 用户信息参数
      * [
-     *       'uid'        =>'',【请求参数】 用户id
-     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
-     *      ‘username’  =>‘’，【请求参数】 用户名
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
+     * @return bool
      */
     public static function updateorder(string $refund_no,array $userinfo){
         //开启事物
@@ -1858,10 +1881,11 @@ class OrderReturnCreater
                 return false;
             }
             //通知收发货确认收货
-            $confirm_data['order_no']=$return_info['order_no'];
-            $confirm_data['receive_type']=$userinfo['type'];
-            $confirm_data['user_id']=$userinfo['uid'];
-            $confirm_data['user_name']=$userinfo['username'];
+            $confirm_data['order_no']=$return_info['order_no'];  //订单编号
+            $confirm_data['receive_type']=$userinfo['type'];     //渠道类型  1  管理员，2 用户，3 系统自动化
+            $confirm_data['user_id']=$userinfo['uid'];           //操作者id
+            $confirm_data['user_name']=$userinfo['username'];    //用户名
+            LogApi::debug("换货通知收发货确认收货的参数",$confirm_data);
             $returnConfirm=Delivery::orderReceive($confirm_data);
             if(!$returnConfirm){
                 DB::rollBack();
@@ -1882,9 +1906,9 @@ class OrderReturnCreater
      * 订单发货接口
      * @param $detail array
      * [
-     *  'order_no'    =>'',//订单编号
-     *  'logistics_id'=>''//物流渠道ID
-     *  'logistics_no'=>''//物流单号
+     *  'order_no'    =>'',//订单编号   string   【必传】
+     *  'logistics_id'=>''//物流渠道ID  int      【必传】
+     *  'logistics_no'=>''//物流单号    string   【必传】
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
@@ -1895,19 +1919,18 @@ class OrderReturnCreater
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
-     *@param $userinfo array 操作人员信息
-     *
+     * @param array $userinfo 用户信息参数
      * [
-     *      'type'    =>'1'发货类型:1管理员，2用户,3系统，4线下,
-     *      'user_id' =>1,//用户ID
-     *      'user_name'=>'admin',//用户名
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      * @return boolean
      */
     public static function createchange($detail,$goods_info,$userinfo){
-        LogApi::debug("发货接受参数",$detail);
-        LogApi::debug("发货接受参数",$goods_info);
-        LogApi::debug("发货接受参数",$userinfo);
+        LogApi::debug("发货接受参数物流信息参数",$detail);
+        LogApi::debug("发货接收商品信息参数",$goods_info);
+        LogApi::debug("发货接收用户信息参数",$userinfo);
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
@@ -1967,9 +1990,9 @@ class OrderReturnCreater
      * 退款成功更新退款状态
      * @param array $params 
 	 * [
-     *		'business_type'=> '',//业务类型【
-     *		'business_no' => '',//业务编码
-     *		'status'      => '',//支付状态  processing：处理中；success：支付完成
+     *		'business_type'=> '',//业务类型   int     【必传】
+     *		'business_no' => '',//业务编码    string  【必传】
+     *		'status'      => '',//支付状态    string  processing：处理中；success：支付完成
      * ]
      * @param array $userinfo 
 	 * [
@@ -2184,6 +2207,11 @@ class OrderReturnCreater
     /**
      * 退换货点击审核弹出退换货单
      * @param $params
+     *[
+     *   'order_no'    =>'' ,订单编号   string   【必传】
+     *   'business_key'=>'',业务类型    int      【必传】
+     * ]
+     * @return array
      */
     public function returnApplyList($params){
         $where[]=['order_return.order_no','=',$params['order_no']];
@@ -2198,6 +2226,10 @@ class OrderReturnCreater
     /**
      *获取退款单数据
      * @param $params
+     * [
+     *    'order_no'   =>'',订单编号   string  【必传】
+     * ]
+     * @return  array
      */
     public function getOrderStatus($params){
         $where[]=['order_no','=',$params['order_no']];
@@ -2207,6 +2239,12 @@ class OrderReturnCreater
     /**
      * 退换货除已完成单的检测不合格的数据
      * @param $params
+     * [
+     *     'order_no'          =>'', 订单编号   string   【必传】
+     *     'business_key'      =>'', 业务类型   int     【必传】
+     *     'evaluation_status' =>'', 检测状态   int    【必传】
+     * ]
+     * @return array
      */
     public function returnCheckList($params){
         $where[]=['order_return.order_no','=',$params['order_no']];
@@ -2225,7 +2263,12 @@ class OrderReturnCreater
     /**
      * 检测不合格拒绝退款
      * @param $params
+     * [
+     *   'refund_no'            =>'',  业务编号       string  【必传】
+     *   'refuse_refund_remark' =>''   拒绝退款备注   string  【必传】
      *
+     * ]
+     * @return bool
      */
     public function refuseRefund($params){
         //开启事物
@@ -2297,9 +2340,10 @@ class OrderReturnCreater
      * 是否允许退换货审核
      * @param $params
      * [
-     *    'order_no'   =>  ''  必选 订单编号
-     *    'goods_no'   =>  ''  必选  商品编号
+     *    'order_no'   =>  ''   订单编号  string  【必传】
+     *    'goods_no'   =>  ''   商品编号  string  【必传】
      * ]
+     * @return   bool|array
      */
     public static function allowReturn($params){
         if(empty($params['goods_no']) || empty($params['order_no'])){
