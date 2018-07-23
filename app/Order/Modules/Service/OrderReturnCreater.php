@@ -44,13 +44,13 @@ class OrderReturnCreater
      * 申请退货
      * @param array $params 业务参数
      * [
-     *      'order_no'      => '',   【必选】 商品编号
-     *      'goods_no'      => [],   【必选】array 商品编号数组
-     *      'business_key'  => '',   【必选】业务类型
-     *      'loss_type'     => '',   【必选】商品损耗
-     *      'reason_id'     => '',   【必选】退货原因id
-     *      'reason_text'   => '',   【可选】退货原因备注
-     *      'user_id'       => '',   【必选】用户id
+     *      'order_no'      => '',    商品编号   string   【必选】
+     *      'goods_no'      => [],    商品编号   string   【必选】
+     *      'business_key'  => '',    业务类型   int      【必选】
+     *      'loss_type'     => '',    商品损耗   int      【必选】
+     *      'reason_id'     => '',    退货原因id int     【必选】
+     *      'reason_text'   => '',   退货原因备注string  【可选】
+     *      'user_id'       => '',   用户id      int     【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
@@ -214,14 +214,14 @@ class OrderReturnCreater
      *申请退款
      * @param array $params 业务参数
      * [
-     *       'order_no'      => '',   string   【必选】 商品编号
-     *       'user_id'      => '',     int     【必选】用户id
+     *       'order_no'      => '',   商品编号 string  【必选】
+     *       'user_id'      => '',    用户id  int     【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
-     *      'uid'    =>''     用户id      int      【必传】
-     *      'username' =>''   用户名      string   【必传】
-     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      * @return array ['refund_no'=>'']  //业务编号
      */
@@ -322,10 +322,10 @@ class OrderReturnCreater
 
     /**
      * 退换货审核同意
-     * @param array $params
+     * @param array $params  业务参数
      * [
-     * 'business_key'    =>'',  【必选】业务类型
-     *  'detail'=> [            业务参数
+     * 'business_key'    =>'',  业务类型  int【必选】
+     *  'detail'=> [
      *     [
      *         'refund_no'  =>'',   业务编号     string   【必传】
      *         'remark'     =>'',   审核备注     string   【必传】
@@ -360,7 +360,7 @@ class OrderReturnCreater
                 $param= filter_array($params['detail'][$k],[
                     'refund_no'  => 'required',    //业务编号
                     'remark'     => 'required',    //审核备注
-                    'reason_key' => 'required|int',//审核原因id
+                    'reason_key' => 'required',//审核原因id
                     'audit_state'=> 'required',    //审核状态
                 ]);
                 if(count($param)<4){
@@ -600,19 +600,20 @@ class OrderReturnCreater
      * 订单退款审核
      * @param $param
      * [
-     *    'refund_no'   =>''  //退款单号
-     *    'status'      =>''  //审核状态
-     *    'remark'      =>''  //审核备注
+     *    'refund_no'   =>''  //退款单号  string 【必传】
+     *    'status'      =>''  //审核状态  int   【必传】
+     *    'remark'      =>''  //审核备注  string【必传】
      *
      * ]
      *  @param array $userinfo 业务参数
      * [
-     *       'uid'       =>'',【请求参数】 用户id
-     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
-     *      ‘username’  =>‘’，【请求参数】 用户名
+     *       'uid'        =>'',    用户id  int【必传】
+     *       'type'       =>'',   请求类型（2前端，1后端） int 【必传】
+     *      ‘username’  =>‘’，用户名 string【必传】
      * ]
+     * @return  bool
      */
-    public function refundApply($param,$userinfo){
+    public function refundApply(array $param,array $userinfo){
         //开启事务
         DB::beginTransaction();
         try{
@@ -675,7 +676,6 @@ class OrderReturnCreater
 
             }else{
 
-
                 //更新退款单状态为审核拒绝
                 $returnApply=$return->refundAccept($param['remark']);
                 if(!$returnApply){
@@ -708,19 +708,20 @@ class OrderReturnCreater
 
     /**
      * 取消退货申请
-     * @param $params
+     * @param $params   业务参数
      * [
-     *    'refund_no'    => ['',''] //退货单号
-     *    'user_id'     => ''  //用户id
-     *    'business_key'=> '' //业务类型
+     *    'refund_no'    => ['','']  //退货单号   string 【必传】
+     *    'user_id'     => ''       //用户id      int    【必传】
+     *    'business_key'=> ''      //业务类型     int    【必传】
      * ]
      * @throws \Exception
-     *  @param array $userinfo 业务参数
+     * @param array $userinfo 用户信息参数
      * [
-     *       'uid'       =>'',【请求参数】 用户id
-     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
-     *      ‘username’  =>‘’，【请求参数】 用户名
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
+     * @return bool
      */
     public function cancelApply($params,$userinfo){
         LogApi::debug("获取取消申请的参数",$params);
@@ -740,7 +741,7 @@ class OrderReturnCreater
                 }
                 //收货之后不允许取消
                 if($return_info[$refund_no]['status']>ReturnStatus::ReturnAgreed){
-                    LogApi::debug("收货之后不允许取消",$return_info[$refund_no]);
+                    LogApi::debug("收货之后不允许取消,获取退换单数据",$return_info[$refund_no]);
                     return false;
                 }
                 //如果审核通过通知收发货取消收货
@@ -821,13 +822,18 @@ class OrderReturnCreater
 
     /**
      * 取消退款
-     * @param $params
-     *  @param array $userinfo 业务参数
+     *  @param array params 业务参数
      * [
-     *       'uid'       =>'',【请求参数】 用户id
-     *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
-     *      ‘username’  =>‘’，【请求参数】 用户名
+     *       'user_id'         =>'', 用户id   int    【必传】
+     *       'refund_no'       =>'',业务编码  string 【必传】
      * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     * @return bool
      */
     public function cancelRefund($params,$userinfo){
         //开启事务
@@ -878,6 +884,21 @@ class OrderReturnCreater
     /**
      * 获取退换货订单列表方法
      * @param $params
+     * [
+     *   'page'          =>''     页数     int   【必传】
+     *   'size'          =>''     条数     int   【必传】
+     *   'begin_time'    =>''     开始时间 int   【可选】
+     *   'end_time'      =>''     结束时间 int   【可选】
+     *   'business_key'  =>''     业务类型 int   【可选】
+     *   'keywords'      =>''     搜索关键词 string 【可选】
+     *   'kw_type'       =>''     搜索类型   string 【可选】
+     *   'return_status' =>''     退换货状态  int   【可选】
+     *   'user_id'       =>''     用户id      int   【可选】
+     *   'reason_key'    =>''     审核原因id  int   【可选】
+     *   'order_status'  =>''     订单状态    int   【可选】
+     *   'appid'         =>''      渠道入口id int   【可选】
+     *
+     * ]
      * @return array
      *
      */
@@ -1020,7 +1041,7 @@ class OrderReturnCreater
      *      'business_key' => '',	//【必选】string；业务类型
      *      'status'       =>''     //【可选】int；阶段
      *      'begin_time'   =>''    //【可选】int；开始时间戳
-     *      'end_time'     =>''    //【可选】int；  截止时间戳
+     *      'end_time'     =>''    //【可选】int；截止时间戳
      *      'goods_name'   => '',	//【可选】设备名称
      *      'order_no'     => '',	//【可选】string；订单编号
      *      'reason_key'   =>''      //【可选】int；退货问题
@@ -1085,6 +1106,20 @@ class OrderReturnCreater
     /**
      * 导出，获取退换货订单列表方法
      * @param $params
+     *   [
+     *      'user_id'      => '',	       //【可选】用户id
+     *      'business_key' => '',	       //【必选】string； 业务类型
+     *      'return_status' =>''           //【可选】int；   退换货状态
+     *      'begin_time'   =>''           //【可选】int；    开始时间戳
+     *      'end_time'     =>''          //【可选】int；    截止时间戳
+     *      'goods_name'   => '',	    //【可选】string    设备名称
+     *      'order_no'     => '',	    //【可选】string；  订单编号
+     *      'reason_key'   =>''        //【可选】int；     退货问题
+     *      'user_mobile'  =>''       //【可选】int；     下单用户手机号
+     *      'order_status' =>''       //【可选】int；     订单状态
+     *      'appid'        =>''      //【可选】int；      应用来源
+     *
+     * ]
      * @return array
      *
      */
@@ -1191,24 +1226,13 @@ class OrderReturnCreater
         }
         return apiResponse($data,ApiStatus::CODE_0);
     }
-    //获取商品信息
-    /*public function get_goods_info($params){
-        if(empty($params['goods_no'])){
-            return ApiStatus::CODE_20001;//商品编号不能为空
-        }
-        if(empty($params['order_no'])){
-            return ApiStatus::CODE_20001;//订单编号不能为空
-        }
-        return $this->orderReturnRepository->getGoodsList($params);
-
-    }*/
     /**
      * 退货结果查看
      * @param $params
      * [
-     *    "business_key"  =>'' 必选   业务类型
-     *    "business_no"   =>''  可选  业务编号
-     *    "goods_no"     =>''   必选  商品编号
+     *    "business_key"  =>''  业务类型 int    【必选】
+     *    "business_no"   =>''  业务编号 string 【可选】
+     *    "goods_no"     =>''   商品编号 string 【必选】
      * ]
      * @return array|bool|string
      */
@@ -1243,7 +1267,7 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);
             }elseif(isset($params['business_no'])){
-                //根据refund_no获取退货单信息
+                //根据业务编号获取退货单信息
                 $return=GoodsReturn::getReturnByRefundNo($params['business_no']);
                 $return_info=$return->getData();
                 $buss->setRefundNo($return_info['refund_no']);
@@ -1379,7 +1403,7 @@ class OrderReturnCreater
                 return false;
             }
             $goodsInfo=$goods->getData();
-            $goodsInfo['specs']=filterSpecs($goodsInfo['specs']);
+            $goodsInfo['specs']=filterSpecs($goodsInfo['specs']); //商品规格信息格式转换
             $buss->setGoodsInfo($goodsInfo);
             //查询订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($goodsInfo['order_no']);
@@ -1391,8 +1415,8 @@ class OrderReturnCreater
 
             //获取换货信息
             if(!empty($return_info['barter_logistics_no']) && !empty($return_info['barter_logistics_id'])){
-                $barter['barter_logistics_no']=$return_info['barter_logistics_no'];
-                $barter['barter_logistics_name']=\App\Lib\Warehouse\Logistics::info($return_info['barter_logistics_id']);
+                $barter['barter_logistics_no']=$return_info['barter_logistics_no'];   //换货物流编号
+                $barter['barter_logistics_name']=\App\Lib\Warehouse\Logistics::info($return_info['barter_logistics_id']); //换货物流名称
                 $barter['order_no']=$return_info['order_no'];
                 $barter['old_goods_name']=$goodsInfo['goods_name'];
                 $barter['goods_name']=$goodsInfo['goods_name'];

@@ -202,9 +202,11 @@ class MiniOrderController extends Controller
         if(empty($address_id)){
             return apiResponse([],ApiStatus::CODE_20001,"address_id不能为空");
         }
-        if(count($sku)<1){
+        if(empty($sku)){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
+        //确认订单查询（芝麻小程序数据）
+        $res = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderNo);
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
@@ -213,6 +215,10 @@ class MiniOrderController extends Controller
             'coupon'=>$coupon,
             'user_id'=>$userId,
             'address_id'=>$address_id,
+            'name'=>$res['name'],
+            'mobile'=>$res['mobile'],
+            'credit_amount'=>$res['credit_amount'],
+            'cert_no'=>$res['cert_no'],
         ];
         $res = $this->OrderCreate->miniCreate($data);
         if(!$res){
