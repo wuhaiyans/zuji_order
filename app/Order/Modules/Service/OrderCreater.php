@@ -187,6 +187,8 @@ class OrderCreater
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
             $b = $orderCreater->filter();
+            var_dump($b);
+            var_dump($orderCreater->getOrderCreater()->getError());
             if(!$b){
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
@@ -195,7 +197,9 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
+            var_dump($schemaData);
             $b = $orderCreater->create();
+            var_dump($b);
             //创建成功组装数据返回结果
             if(!$b){
                 DB::rollBack();
