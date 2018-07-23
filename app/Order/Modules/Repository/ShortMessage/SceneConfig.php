@@ -106,10 +106,6 @@ class SceneConfig {
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
     /**
-     * 场景：<b>【财务系统完成退还押金】</b>
-     */
-    const GIVEBACK_ORDERCLEAN = 'GivebackOrderClean';
-    /**
      * 场景：<b>【系统执行代扣成功后发送】</b>
      */
     const GIVEBACK_WITHHOLDSUCCESS = 'GivebackWithholdSuccess';
@@ -137,10 +133,6 @@ class SceneConfig {
      * 场景：<b>【库管点击检测不合格、输入赔偿金额时发送】</b>
      */
     const GIVEBACK_EVANOWITYESENONO = 'GivebackEvaNoWitYesEnoNo';
-    /**
-     * 场景：<b>【库管点击检测不合格、输入赔偿金额时发送】</b>
-     */
-    const GIVEBACK_CLEARING = 'GivebackClearing';
     /**
     * 场景：<b>【买断确认】</b>
     */
