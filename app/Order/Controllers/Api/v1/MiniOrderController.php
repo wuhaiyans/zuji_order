@@ -150,6 +150,8 @@ class MiniOrderController extends Controller
             'name'=>$miniData['name'],
             'mobile'=>$miniData['mobile'],
         ]);
+        print_r($address);
+        var_dump($address);die;
         $data['mobile']=$miniData['mobile'];
         $data['name']=$miniData['name'];
         $data['address']=$miniData['house'];
