@@ -1065,7 +1065,7 @@ class GivebackController extends Controller
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				$paramsArr['goods_no'],
 				'GivebackEvaNoWitYesEnoNo',
-				['amount' =>$paramsArr['compensate_amount']]);
+				['amount' => $paramsArr['compensate_amount'] . '元' ]);
 			$notice->notify();
 		}
 		//清算或者支付结果失败，返回错误
