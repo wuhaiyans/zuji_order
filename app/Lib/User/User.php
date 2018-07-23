@@ -119,6 +119,7 @@ class User{
      * @return string or array
      */
     public static function getAddressId($params){
+        print_r($params);
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.district.query.id';
         $data['params'] = [
@@ -129,6 +130,7 @@ class User{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
+        print_r($info);die;
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

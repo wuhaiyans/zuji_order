@@ -82,13 +82,21 @@ class ImportOrder extends Command
                     $follow_info =$this->getOrderFollow($v['order_id'],7);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
-                        $status['order_status'] = 8;
                     }
                     $follow_info =$this->getOrderFollow($v['order_id'],22);
                     if(!empty($follow_info)){
                         $payment_time =$follow_info['create_time'];
+                    }
+                    //关闭已退款
+                    $follow_info =$this->getOrderFollow($v['order_id'],10);
+                    if(!empty($follow_info)){
                         $status['order_status'] =8;
                     }
+                    $follow_info =$this->getOrderFollow($v['order_id'],23);
+                    if(!empty($follow_info)){
+                        $status['order_status'] =8;
+                    }
+
 
 
                     $orderData =[
