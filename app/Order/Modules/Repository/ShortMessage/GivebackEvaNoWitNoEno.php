@@ -3,6 +3,7 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
