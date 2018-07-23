@@ -134,6 +134,11 @@ class SceneConfig {
      */
     const GIVEBACK_EVANOWITYESENONO = 'GivebackEvaNoWitYesEnoNo';
     /**
+     * 场景：<b>【财务系统完成押金退还时发送】</b>
+     */
+    const GIVEBACK_RETURNDEPOSIT = 'GivebackReturnDeposit';
+
+    /**
     * 场景：<b>【买断确认】</b>
     */
     const BUYOUT_CONFIRM = 'BuyoutConfirm';
