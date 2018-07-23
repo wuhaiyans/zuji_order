@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Order\Modules\Repository\OrderMiniRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
@@ -887,6 +888,16 @@ class OrderOperate
 
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+        $orderData['zm_order_no']    =  '';
+        //获取小程序芝麻单号
+        if ($orderData['order_type']==Inc\OrderStatus::orderMiniService) {
+
+            $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
+
+            $orderData['zm_order_no']    =    $miniOrderData['zm_order_no'];
+
+        }
+
 
         //订单金额
         $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
@@ -968,6 +979,8 @@ class OrderOperate
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+
+
 
                 //设备名称
 
@@ -1102,6 +1115,7 @@ class OrderOperate
         }
         $list['button_operate'] = $actArray;
         $list['logistics_info'] = $orderData['goods_extend_info'];
+        $list['zm_order_no'] = $orderData['zm_order_no'];
         return $list;
 
     }
