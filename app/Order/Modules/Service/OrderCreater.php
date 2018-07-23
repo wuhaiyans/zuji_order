@@ -187,8 +187,6 @@ class OrderCreater
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
             $b = $orderCreater->filter();
-            var_dump($b);
-//            var_dump($orderCreater->getOrderCreater()->getError());die;
             if(!$b){
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
