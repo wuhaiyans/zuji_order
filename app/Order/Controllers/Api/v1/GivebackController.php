@@ -1156,7 +1156,7 @@ class GivebackController extends Controller
 	 * ]
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
-	public function __orderClean( $paramsArr ) {
+	private function __orderClean( $paramsArr ) {
 		if( $paramsArr['yajin'] ){
 			//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
@@ -1181,13 +1181,6 @@ class GivebackController extends Controller
 			set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
 			return false;
 		}
-		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			$paramsArr['goods_no'],
-			"GivebackReturnDeposit");
-		$notice->notify();
-
 
 		return true;
 	}
