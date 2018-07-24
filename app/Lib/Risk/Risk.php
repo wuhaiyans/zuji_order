@@ -144,6 +144,43 @@ class Risk{
     }
 
     /**
+     * 通过风控系统 获取减免押金和押金
+     * @param $arr[
+     *  'user_id'=>'',// int,用户ID
+     *  'yajin'=>'',//int,原始押金金额  单位(分)
+     *  'market_price'=>'',//int,市场价格 单位(分)
+     * ]
+     * @return string 错误信息
+     * @return array[
+     *  'yajin'=>'',//免押押金金额 int 单位（分）
+     *  'jianmian'=>'',//减免金额 int 单位（分）
+     *  'jianmian_detail'=>[//免押详情
+     *      'type'=>'',//减免分类 string realname：实名认证，mco:移动运营商认证,eb:电商认证
+     *      'jianmian'=>'',//减免金额 int 单位（分）
+     *   ],
+     *
+     * ]
+     */
+    public static function getRiskYajin($arr){
+        $data=config('tripartite.Interior_Fengkong_Request_data');
+        $data['method'] ='fengkong.yajin.calculate';
+        $data['params'] = [
+            'user_id'=>$arr['user_id'],
+            'yajin'=>$arr['yajin'],
+            'market_price'=>$arr['market_price'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
+        $info =json_decode($info,true);
+        if(!is_array($info)){
+            return "获取风控系统押金接口失败";
+        }
+        if($info['code']!=0){
+            return $info['msg'];
+        }
+        return $info['data'];
+    }
+
+    /**
      * 获取风控系统的分数
      * @return int
      */
