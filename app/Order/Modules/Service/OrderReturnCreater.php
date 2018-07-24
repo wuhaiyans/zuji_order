@@ -291,6 +291,20 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;//订单冻结失败
             }
+            //获取商品信息
+           $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no'],true);
+            if( !$goods ){
+                return false;
+            }
+            //更新商品状态为退款中
+            $goodsRefund = $goods->orderRefund();
+            if( !$goodsRefund ){
+                //事务回滚
+                DB::rollBack();
+                return false;//商品状态修改为退款中失败
+            }
+
+
             //创建退款单
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
@@ -690,6 +704,20 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+                //获取商品信息
+                $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no'],true);
+                if( !$goods ){
+                    return false;
+                }
+                //更新商品状态为退款中
+                $goodsRefund =$goods->refundRefuse();
+                if( !$goodsRefund ){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;//商品状态修改为退款中失败
+                }
+
+
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核拒绝");
 
