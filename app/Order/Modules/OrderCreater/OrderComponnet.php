@@ -217,6 +217,7 @@ class OrderComponnet implements OrderCreater
             'zuqi_type_name'=>$zuqiTypeName,
             'pay_type'=>$this->payType,
             'order_type'=>$this->orderType,
+            'app_id'=>$this->appid,
         ]],$userSchema,$skuSchema);
 
     }
