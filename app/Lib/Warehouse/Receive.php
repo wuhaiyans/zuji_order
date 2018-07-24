@@ -257,13 +257,16 @@ class Receive
             ];
             //退换货使用(支持多商品)
             $refund_no[] = [
-                'refund_no'=>$g->refund_no
+                'refund_no'=>($g->refund_no?$g->refund_no:''),
+                'order_no'=>$receive->order_no,
+                'goods_no'=>$g->goods_no
             ];
         }
 
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
+            return [$refund_no,$receive->business_key,$userinfo];
             \App\Lib\Order\Receive::receivedReturn($refund_no,$receive->business_key,$userinfo);
         }else{
             Log::error(__METHOD__ . '收货签收失败');
