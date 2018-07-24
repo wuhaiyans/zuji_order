@@ -24,7 +24,7 @@ class RiskComponnet implements OrderCreater
     //白骑士
     private $knight;
 
-    public function __construct(OrderCreater $componnet,int $userId)
+    public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
         $data =$this->componnet->getDataSchema();
@@ -39,13 +39,11 @@ class RiskComponnet implements OrderCreater
         $yidun = Risk::getRisk($params);
         //var_dump($yidun);die;
         //获取白骑士信息
-        $knight =Risk::getKnight(['user_id'=>$userId]);
+        $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
         $this->knight =[];
         if(is_array($knight)){
             $this->knight =$knight;
         }
-        var_dump($this->knight);die;
-
     }
     /**
      * 获取订单创建器
