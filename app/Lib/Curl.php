@@ -71,6 +71,16 @@ class Curl {
 		return self::$errno;
 	}
 	/**
+	 * 请求具体内容
+	 * curl_info() 的结果 
+     * @access public
+     * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+	 * @return array
+	 */
+	public static function getInfo():string{
+		return self::$errno;
+	}
+	/**
 	 * 
      * @access public
      * @author liuhongxing <liuhongxing@huishoubao.com.cn>
