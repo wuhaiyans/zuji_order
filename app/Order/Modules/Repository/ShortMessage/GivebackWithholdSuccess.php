@@ -14,6 +14,7 @@ class GivebackWithholdSuccess implements ShortMessage {
 
     private $business_type;
     private $business_no;
+    private $data;
 
     public function setBusinessType( int $business_type ){
         $this->business_type = $business_type;
@@ -21,6 +22,10 @@ class GivebackWithholdSuccess implements ShortMessage {
 
     public function setBusinessNo( string $business_no ){
         $this->business_no = $business_no;
+    }
+
+    public function setData( array $data ){
+        $this->data = $data;
     }
 
     public function getCode($channel_id){

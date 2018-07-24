@@ -72,7 +72,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater);
 
             //押金
            $orderCreater = new DepositComponnet($orderCreater);
@@ -175,7 +175,7 @@ class OrderCreater
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater);
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
             //收货地址
@@ -195,12 +195,9 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
-            print_r($schemaData);
             $b = $orderCreater->create();
-            var_dump($b);
             //创建成功组装数据返回结果
             if(!$b){
-                echo 11;die;
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
                 User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
@@ -219,7 +216,7 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
-//            //发送取消订单队列（小程序取消订单队列）
+            //发送取消订单队列（小程序取消订单队列）
 //            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API"), [
 //                'method' => 'api.inner.miniCancelOrder',
 ////                'order_no'=>$data['order_no'],
@@ -287,7 +284,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['user_id']);
+            $orderCreater = new RiskComponnet($orderCreater);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
@@ -358,7 +355,7 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater,$data['appid']);
+            $orderCreater = new RiskComponnet($orderCreater);
 
             //押金
 

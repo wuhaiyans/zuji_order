@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Order\Modules\Repository\OrderMiniRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
@@ -456,6 +457,7 @@ class OrderOperate
                 'user_id'=>$userId,//
                 'user_name'=>$userName,//
             ];
+            //LogApi::info("确认收货参数传递",$params);
 
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
@@ -540,7 +542,8 @@ class OrderOperate
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
-            $orderInfo['business_no'] =$orderInfo['order_no'];
+            $orderInfo['business_no'] =$data['order_no'];
+            $orderInfo['order_no']=$data['order_no'];
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
@@ -887,6 +890,16 @@ class OrderOperate
 
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+        $orderData['zm_order_no']    =  '';
+        //获取小程序芝麻单号
+        if ($orderData['order_type']==Inc\OrderStatus::orderMiniService) {
+
+            $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
+
+            $orderData['zm_order_no']    =    $miniOrderData['zm_order_no'];
+
+        }
+
 
         //订单金额
         $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
@@ -969,6 +982,8 @@ class OrderOperate
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
 
+
+
                 //设备名称
 
                 //订单商品列表相关的数据
@@ -987,7 +1002,7 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
-
+                $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? $orderOperateData['zm_order_no'];
                 if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
                     $params = [
                     'payType' => $values['pay_type'],//支付方式 【必须】<br/>
@@ -1100,8 +1115,10 @@ class OrderOperate
         if ($orderData['order_info']['freeze_type'] >0) {
             $actArray['cancel_pay_btn'] = false;
         }
+        $list['zm_order_no'] = $orderData['order_info']['zm_order_no'];
         $list['button_operate'] = $actArray;
         $list['logistics_info'] = $orderData['goods_extend_info'];
+
         return $list;
 
     }
@@ -1341,6 +1358,8 @@ class OrderOperate
 	 * 获取订单支付单状态列表
 	 * @param array $param 创建支付单数组
 	 * $param = [<br/>
+	 		'bussiness_key' => '',//业务类型 【必须】<br/>
+	 		'bussiness_no' => '',//业务编号 【必须】<br/>
 	 		'payType' => '',//支付方式 【必须】<br/>
 	 		'payChannelId' => '',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
@@ -1354,6 +1373,34 @@ class OrderOperate
 	 * ]
 	 */
 	public static function getPayStatus( $param ) {
+		//-+--------------------------------------------------------------------
+		// | 从新修改次方法 【开始】
+		//-+--------------------------------------------------------------------
+		if( empty( $param['business_key'] ) || empty( $param['business_no'] ) ){
+			throw new \Exception('支付状态获取失败参数出错');
+		}
+		
+		//获取支付单信息
+		$payInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($param['business_key'], $param['business_no']);
+		if( $payInfo->isSuccess() ){
+			return [
+				'withholdStatus' => false,
+				'paymentStatus' => false,
+				'fundauthStatus' => false,
+			];
+		}
+		return [
+			'withholdStatus' => $payInfo->needWithhold(),
+			'paymentStatus' => $payInfo->needPayment(),
+			'fundauthStatus' => $payInfo->needFundauth(),
+		];
+		//-+--------------------------------------------------------------------
+		// | 从新修改次方法 【结束，下面内容没有用】
+		//-+--------------------------------------------------------------------
+		throw new \Exception('支付状态获取失败');
+		
+		
+		
 		//-+--------------------------------------------------------------------
 		// | 校验参数
 		//-+--------------------------------------------------------------------

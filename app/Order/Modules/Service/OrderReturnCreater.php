@@ -506,7 +506,7 @@ class OrderReturnCreater
                 }
             }
             if( $status == true ){
-                //解冻订单并关闭订单
+                //解冻订单
                 $orderInfo   = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no']);
                 $updateOrder = $orderInfo->returnClose();
                 if(!$updateOrder){
@@ -1702,7 +1702,10 @@ class OrderReturnCreater
      * 退换货确认收货
      * @param $params
      * [
-     *   'refund_no'   =>'',  //业务编号   string  【必传】
+     *   'refund_no'    =>[
+     *                    'refund_no'=>'', //业务编号   string  【必传】
+     *                    'goods_no'  =>''  //商品编号   String  【必传】
+     *                    ],  //业务编号   string  【必传】
      *   'business_key'=>'',  //业务类型   int     【必传】
      * ]
      * @return  bool
@@ -1711,20 +1714,29 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            foreach($params['refund_no'] as $item){
-                //获取退货单信息
-                $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($item['refund_no']);
-                if(!$return){
-                    return false;
-                }
-                //修改退换货状态为已收货
-                if(!$return->returnReceive()){
 
-                    DB::rollBack();
-                    return false;
+                foreach($params['refund_no'] as $item){
+                    if(!empty($item['refund_no'])){
+                       //获取退货单信息
+                       $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($item['refund_no']);
+                    }else{
+                        //获取退货单信息
+                        $return=\App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnInfoByGoodsNo($item['goods_no'],ReturnStatus::ReturnAgreed);
+                    }
+                    if(!$return){
+                        return false;
+                    }
+
+                    //修改退换货状态为已收货
+                    if(!$return->returnReceive()){
+
+                        DB::rollBack();
+                        return false;
+                    }
+                    $return_info=$return->getData();
                 }
-                $return_info=$return->getData();
-            }
+
+
             //提交事务
             DB::commit();
             if($params['business_key'] == OrderStatus::BUSINESS_RETURN){

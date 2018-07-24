@@ -51,6 +51,11 @@ class OrderNotice{
 	 * @var string
 	 */
 	private $scene;
+	/**
+	 *
+	 * @var array
+	 */
+	private $data;
 	
 	
 	/**
@@ -60,10 +65,11 @@ class OrderNotice{
 	 * @param string	$order_no	订单编号
 	 * @param string	$scene		场景
 	 */
-	public function __construct( string $business_type, string $business_no, string $scene ) {
+	public function __construct( string $business_type, string $business_no, string $scene, array $data = [] ) {
 		$this->business_type = $business_type;
 		$this->business_no = $business_no;
 		$this->scene = $scene;
+		$this->data = $data;
 	}
 	
 	
@@ -111,6 +117,7 @@ class OrderNotice{
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,
+					'data' => $this->data,
 				]);
 			}
 			
@@ -120,6 +127,7 @@ class OrderNotice{
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,
+					'data' => $this->data,
 					'status' => $b?'success':'failed',
 			]);
 		}
@@ -143,6 +151,7 @@ class OrderNotice{
 					'business_type' => $this->business_type,
 					'business_no' => $this->business_no,
 					'scene' => $this->scene,
+					'data' => $this->data,
 				]);
 			}
 			// 通知
@@ -174,6 +183,7 @@ class OrderNotice{
 		$short_message = new $className;
 		$short_message->setBusinessType( $this->business_type );
 		$short_message->setBusinessNo( $this->business_no );
+		$short_message->setData( $this->data );
 		return $short_message;
 	}
 
@@ -190,6 +200,7 @@ class OrderNotice{
 		$short_message = new $className;
 		$short_message->setBusinessType( $this->business_type );
 		$short_message->setBusinessNo( $this->business_no );
+		$short_message->setData( $this->data );
 		return $short_message;
 	}
 	

@@ -194,7 +194,7 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        $receive_type = isset($params['receive_type']) ? $params['receive_type'] : false;
+        $receive_type = isset($params['receive_type']) ? $params['receive_type'] : Delivery::RECEIVE_TYPE_USER;
 
         try {
             $deliveryInfo = $this->delivery->receive($params['order_no'], $receive_type);
