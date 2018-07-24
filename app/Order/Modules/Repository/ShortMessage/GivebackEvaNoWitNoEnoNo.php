@@ -3,6 +3,8 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderGoodsInstalment;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
@@ -14,6 +16,7 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
 
     private $business_type;
     private $business_no;
+    private $data;
 
     public function setBusinessType( int $business_type ){
         $this->business_type = $business_type;
@@ -21,6 +24,10 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
 
     public function setBusinessNo( string $business_no ){
         $this->business_no = $business_no;
+    }
+
+    public function setData( array $data ){
+        $this->data = $data;
     }
 
     public function getCode($channel_id){
@@ -61,26 +68,28 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
             return false;
         }
 
-        $amount = 0;
+        $zujinamount = 0;
         //分期数据
         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$this->business_no,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
         if( !empty($instalmentList[$this->business_no]) ){
             foreach ($instalmentList[$this->business_no] as $instalmentInfo) {
-                $amount += $instalmentInfo['amount'];
+                $zujinamount += $instalmentInfo['amount'];
             }
         }
+        $amount = $this->data;
 
-        $zhifuzonge = $amount + $orderGivebackInfo['compensate_amount'];
+        $zhifuzonge = $zujinamount + $amount['compensate_amount'];
 
         // 短信参数
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'zhifuZonge'        => $zhifuzonge,
-            'compensateAmount'  => $orderGivebackInfo['compensate_amount'],
-            'shengyuZujin'      => $amount,
+            'zhifuZonge'        => $zhifuzonge . "元",
+            'compensateAmount'  => $amount['compensate_amount'] . "元",
+            'shengyuZujin'      => $zujinamount . "元",
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

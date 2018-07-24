@@ -20,6 +20,13 @@ interface ShortMessage {
 	 * @return  \App\Order\Modules\Repository\ShortMessage\ShortMessage
 	 */
 	public function setBusinessNo( string $business_no );
+
+	/**
+	 * 设置业务编号
+	 * @param string $business_no 业务编号
+	 * @return  \App\Order\Modules\Repository\ShortMessage\ShortMessage
+	 */
+	public function setData( array $data );
 	
 	/**
 	 * 发送短息通知

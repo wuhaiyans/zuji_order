@@ -23,8 +23,10 @@ class AuthRefferController extends Controller{
      * "version"     => "v1"  版本
      * "auth_token"  => ""    token值
      * "method"      =>""     接口方法
-     * "params"      =>[]     参数
+     * "params"      =>[]     业务参数
      * ]
+     *
+     * @return  array
      */
     public function header(Request $request)
     {

@@ -8,6 +8,7 @@
 
 namespace App\Lib\Warehouse;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -226,6 +227,7 @@ class Delivery
         ]));
 
         $res = json_decode($res, true);
+        LogApi::info("收发货系统返回",$res);
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);

@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Order\Modules\Repository\OrderMiniRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
@@ -392,6 +393,43 @@ class OrderOperate
                     return false;
                 }
             }
+            // 兼容老订单系统（短租服务时间为确认收货时间） 后期可以删除
+            if($orderInfo['zuqi_type'] == 1){
+                //查询商品信息
+                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
+                foreach ($goodsInfo as $k=>$v){
+                    if($goodsInfo[$k]['begin_time'] ==0 && $goodsInfo[$k]['end_time'] ==0){
+                        //更新商品表
+                        $goodsData['begin_time'] = time();
+                        $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[$k]['zuqi']);
+                        $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[$k]['goods_no']);
+                        $b =$goods->updateGoodsServiceTime($goodsData);
+                        if(!$b){
+                            DB::rollBack();
+                            return false;
+                        }
+
+                        //增加商品租期表
+                        $unitData =[
+                            'order_no'=>$orderNo,
+                            'goods_no'=>$goodsInfo[$k]['goods_no'],
+                            'user_id'=>$orderInfo['user_id'],
+                            'unit'=>1,
+                            'unit_value'=>$goodsInfo[$k]['zuqi'],
+                            'begin_time'=>$goodsData['begin_time'],
+                            'end_time'=>$goodsData['end_time'],
+                        ];
+                        $b =ServicePeriod::createService($unitData);
+                        if(!$b){
+                            DB::rollBack();
+                            return false;
+                        }
+
+                    }
+                }
+
+            }
+
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
             if(!$b){
@@ -419,6 +457,7 @@ class OrderOperate
                 'user_id'=>$userId,//
                 'user_name'=>$userName,//
             ];
+            LogApi::info("确认收货参数传递",$params);
 
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
@@ -850,6 +889,16 @@ class OrderOperate
 
         //应用来源
         $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+        $orderData['zm_order_no']    =  '';
+        //获取小程序芝麻单号
+        if ($orderData['order_type']==Inc\OrderStatus::orderMiniService) {
+
+            $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
+
+            $orderData['zm_order_no']    =    $miniOrderData['zm_order_no'];
+
+        }
+
 
         //订单金额
         $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
@@ -932,6 +981,8 @@ class OrderOperate
                 //应用来源
                 $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
 
+
+
                 //设备名称
 
                 //订单商品列表相关的数据
@@ -950,7 +1001,7 @@ class OrderOperate
 
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
-
+                $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? $orderOperateData['zm_order_no'];
                 if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
                     $params = [
                     'payType' => $values['pay_type'],//支付方式 【必须】<br/>
@@ -1063,8 +1114,10 @@ class OrderOperate
         if ($orderData['order_info']['freeze_type'] >0) {
             $actArray['cancel_pay_btn'] = false;
         }
+        $list['zm_order_no'] = $orderData['order_info']['zm_order_no'];
         $list['button_operate'] = $actArray;
         $list['logistics_info'] = $orderData['goods_extend_info'];
+
         return $list;
 
     }
