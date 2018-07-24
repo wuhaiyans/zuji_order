@@ -59,6 +59,7 @@ class MiniOrderController extends Controller
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
         $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
+        print_r($goods_info);die;
         if( $goods_info[$params['sku_id']]['sku_info']['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
             $new_data = date('Y-m-d H:i:s');
             $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+1).' month'));
@@ -69,7 +70,20 @@ class MiniOrderController extends Controller
         $data = [
             'order_no' => $orderNo,
             'sku' => [$params],
-            'overdue_time' => $overdue_time
+            'zhima_params'=>[
+                'category'=>'',
+                'amount'=>'',
+                'deposit'=>'',
+                'out_order_no'=>'',
+                'overdue_time'=>'',
+                'products'=>[
+                    'count'=>'',
+                    'amount'=>'',
+                    'deposit'=>'',
+                    'installmentCount'=>'',
+                    'name'=>'',
+                ],
+            ],
         ];
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));

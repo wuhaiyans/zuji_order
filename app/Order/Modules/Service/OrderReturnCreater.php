@@ -1742,7 +1742,7 @@ class OrderReturnCreater
             if($params['business_key'] == OrderStatus::BUSINESS_RETURN){
                 foreach($params['refund_no'] as $value){
                     //发送短信
-                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $value['refund_no'] ,SceneConfig::RETURN_DELIVERY);
+                    $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::RETURN_DELIVERY);
                     $b=$orderNoticeObj->notify();
                     Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
