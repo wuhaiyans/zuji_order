@@ -109,7 +109,10 @@ class MiniOrderController extends Controller
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
         //存储数据日志
-        $result = \App\Order\Modules\Repository\OrderMiniCreditRentRepository::add($data);
+        $result = \App\Order\Modules\Repository\OrderMiniCreditRentRepository::add([
+            'order_no'=>$orderNo,
+            'data'=>json_encode($data),
+        ]);
         if( !$result ){
             \App\Lib\Common\LogApi::debug('小程序临时订单号请求记录失败',$result);
         }
