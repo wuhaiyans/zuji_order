@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -129,7 +130,7 @@ class OrderBuyout
 	/**
 	 * 创建买断单
 	 * @param $data
-	 * @return id
+	 * @return bool
 	 */
 	public static function create($array)
 	{
@@ -171,7 +172,7 @@ class OrderBuyout
 		if ($validator->fails()) {
 			return false;
 		}
-		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+		if( $params['status'] != 'success' || $params['business_type'] != OrderStatus::BUSINESS_BUYOUT ){
 			return false;
 		}
 		//获取买断单
@@ -191,7 +192,7 @@ class OrderBuyout
 			//return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id'],$buyout['user_id']);
+		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
 		if(!$ret){
 			return false;
 		}
@@ -206,13 +207,13 @@ class OrderBuyout
 		$clearData = [
 				'order_type'=> $orderInfo['order_type'],
 				'order_no' => $buyout['order_no'],
-				'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,
+				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
 
 		if($goodsInfo['yajin']>0){
 			//获取支付单信息
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
 			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
@@ -235,7 +236,7 @@ class OrderBuyout
 			}
 		}
 		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$buyout['buyout_no'],"BuyoutPayment");
+		$notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$buyout['buyout_no'],"BuyoutPayment");
 		$notice->notify();
 		//插入日志
 		OrderLogRepository::add(0,"支付回调",\App\Lib\PublicInc::Type_System,$buyout['order_no'],"买断支付成功","支付完成");
@@ -273,7 +274,7 @@ class OrderBuyout
 		if ($validator->fails()) {
 			return false;
 		}
-		if( $params['status'] != 'success' || $params['business_type'] != \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT ){
+		if( $params['status'] != 'success' || $params['business_type'] != OrderStatus::BUSINESS_BUYOUT ){
 			return false;
 		}
 		//获取买断单
@@ -297,7 +298,7 @@ class OrderBuyout
 		}
 		//解冻订单
 		$OrderRepository= new OrderRepository;
-		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],\App\Order\Modules\Inc\OrderFreezeStatus::Non);
+		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
@@ -311,7 +312,7 @@ class OrderBuyout
 			return false;
 		}
 		//更新买断单
-		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id'],$buyout['user_id']);
+		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id']);
 		if(!$ret){
 			return false;
 		}
@@ -322,7 +323,7 @@ class OrderBuyout
 		$log = [
 				'order_no'=>$buyout['order_no'],
 				'action'=>'用户买断支付',
-				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
+				'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
 				'business_no'=>$buyout['buyout_no'],
 				'goods_no'=>$buyout['goods_no'],
 				'operator_id'=>$userInfo['uid'],
@@ -333,7 +334,7 @@ class OrderBuyout
 		GoodsLogRepository::add($log);
 
 		//押金解冻短信发送
-		if($buyout['yajin']>0){
+		if($goodsInfo['yajin']>0){
 			ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
