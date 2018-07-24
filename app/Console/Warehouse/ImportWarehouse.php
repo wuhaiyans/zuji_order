@@ -276,7 +276,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $status_arr = getReceiveStatusE($evaluation_row['evaluation_status']);
                 $goodsStatus = getGoodsReceiveStatusE($evaluation_row['evaluation_status']);
                 $checkResult = getCheckResult($evaluation_row['evaluation_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".replaceBusinessKey($receive_row['business_key'])."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','".replaceBusinessKeyType($receive_row['business_key'])."','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".replaceBusinessKey($receive_row['business_key'])."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
                 $num++;
@@ -450,11 +450,21 @@ function replaceSpecialChar($strParam){
     return preg_replace($regex,"",$strParam);
 }
 
-//过滤老库中的 business_key
+//过滤老库中的 business_key 转换为新订单key
 function replaceBusinessKey($n){
     $arr = [
         1=>2,
         5=>4,
+        6=>3,
+        9=>3,
+    ];
+    return ($arr[$n]?$arr[$n]:1);
+}
+//过滤老库中的 business_key 转换为收发货类型
+function replaceBusinessKeyType($n){
+    $arr = [
+        1=>2,
+        5=>1,
         6=>3,
         9=>3,
     ];
