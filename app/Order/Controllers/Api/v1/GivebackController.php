@@ -1181,13 +1181,6 @@ class GivebackController extends Controller
 			set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
 			return false;
 		}
-		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			$paramsArr['goods_no'],
-			"GivebackReturnDeposit");
-		$notice->notify();
-
 
 		return true;
 	}
