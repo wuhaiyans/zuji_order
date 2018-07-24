@@ -117,14 +117,14 @@ class Delivery
             'customer_address' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
-        LogApi::info("发货申请参数",$result);
+        //LogApi::info("发货申请参数",$result);
 
 		$params = [
             'method'=> 'warehouse.delivery.deliveryCreate',//模拟
             'params' => json_encode($result)
         ];
         $res= Curl::post( $base_api, array_merge(self::getParams(), $params) );
-        LogApi::info("发货申请回执",$res);
+        //LogApi::info("发货申请回执",$res);
 		
         $res = json_decode($res, true);;
 //
