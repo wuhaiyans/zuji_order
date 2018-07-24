@@ -8,12 +8,16 @@ class TestController extends Controller
 {
 	public function sendSms() {
 
-		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'GA71199188045622',
-			"GivebackPayment");
-		$notice->notify();
+
+//		//发送短信
+//		$notice = new \App\Order\Modules\Service\OrderNotice(
+//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+//			'GA71199188045622',
+//			'GivebackEvaNoWitYesEnoNo',
+//			['amount'=>1]);
+//		$notice->notify();
+
+
 
 //		$id = 1;
 //		$a  = \App\Order\Modules\Service\OrderWithhold::instalment_withhold($id);

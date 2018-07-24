@@ -377,7 +377,7 @@ class OrderGiveback
 			$notice = new \App\Order\Modules\Service\OrderNotice(
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				$params['business_no'],
-				"GivebackClearing");
+				"GivebackReturnDeposit");
 			$notice->notify();
 
 		} catch (\Exception $ex) {
