@@ -457,6 +457,7 @@ class OrderOperate
                 'user_id'=>$userId,//
                 'user_name'=>$userName,//
             ];
+            //LogApi::info("确认收货参数传递",$params);
 
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
@@ -541,7 +542,8 @@ class OrderOperate
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
-            $orderInfo['business_no'] =$orderInfo['order_no'];
+            $orderInfo['business_no'] =$data['order_no'];
+            $orderInfo['order_no']=$data['order_no'];
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
