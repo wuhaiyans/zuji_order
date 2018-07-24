@@ -197,7 +197,18 @@ class LogApi {
 		try {
 			// 请求
 			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
-			
+			if( Curl::getErrno() !=0 ){
+				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl错误 '.Curl::getError().' '.json_encode($_data) ));
+				$__data = $_data;
+				$__data['message'] = '日志Api请求Curl错误';
+				$__data['data']['id'] = 'LogApi';
+				$__data['data']['type'] = 'api-error';
+				$__data['data']['level'] = 'Error';
+				$__data['data']['serial_no'] = self::_autoincrement();
+				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
+			}
 			if( !$res ){
 				return false;
 			}
