@@ -28,7 +28,7 @@ class RiskComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         //提交用户信息
-        $yidun = Risk::getRisk();
+        //$yidun = Risk::getRisk();
         //获取白骑士信息
         $knight =Risk::getKnight(['user_id'=>$userId]);
         $this->knight =[];
