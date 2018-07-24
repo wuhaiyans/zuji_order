@@ -329,14 +329,14 @@ class OrderReturnCreater
      *     [
      *         'refund_no'  =>'',   业务编号     string   【必传】
      *         'remark'     =>'',   审核备注     string   【必传】
-     *          'reason_key' =>''    审核原因id  int      【必传】
-     *          'audit_state'=>''true 审核通过，false 审核不通过  【必传】
+     *         'reason_key' =>''    审核原因id  int      【必传】
+     *         'audit_state'=>''true 审核通过，false 审核不通过  【必传】
      *    ],
      *     [
      *         'refund_no'  =>'',     业务编号    string 【必传】
      *         'remark'     =>'',     审核备注    string 【必传】
-     *          'reason_key' =>''     审核原因id  int    【必传】
-     *          'audit_state'=>''true 审核通过，false 审核不通过  【必传】
+     *         'reason_key' =>''     审核原因id  int    【必传】
+     *         'audit_state'=>''true 审核通过，false 审核不通过  【必传】
      *    ],
      *     ]
      * ]
@@ -360,7 +360,7 @@ class OrderReturnCreater
                 $param= filter_array($params['detail'][$k],[
                     'refund_no'  => 'required',    //业务编号
                     'remark'     => 'required',    //审核备注
-                    'reason_key' => 'required',//审核原因id
+                    'reason_key' => 'required',    //审核原因id
                     'audit_state'=> 'required',    //审核状态
                 ]);
                 if(count($param)<4){
@@ -396,7 +396,7 @@ class OrderReturnCreater
                         return false;
                     }
                     $goodsDeliveryInfo[$k] = $goodsDelivery[$k]->getData();
-                    $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];   //
+                    $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];
                     $goodsDeliveryInfo[$k]['refund_no'] = $params['detail'][$k]['refund_no'];
                     $goodsDeliveryInfo[$k]['goods_name'] = $goods_info['goods_name'];
 
@@ -2192,9 +2192,9 @@ class OrderReturnCreater
             );
             Log::debug($returnSend?"Order :".  ['order_no']." IS OK":"IS error");
             //发送短信，通知用户押金已退还
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
+           /* $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
             $b=$orderNoticeObj->notify();
-            Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");
+            Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");*/
             LogApi::debug("退款执行成功");
             return true;
         }catch (\Exception $exc) {
