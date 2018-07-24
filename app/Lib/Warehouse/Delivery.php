@@ -117,6 +117,7 @@ class Delivery
             'customer_address' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
+        LogApi::info("发货申请参数",$result);
 
 		$params = [
             'method'=> 'warehouse.delivery.deliveryCreate',//模拟
