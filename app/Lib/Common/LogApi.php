@@ -196,30 +196,49 @@ class LogApi {
 		// 日志系统接口
 		try {
 			// 请求
+			$err_flag = false;
+			$__data = $_data;
 			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+			
+			// 请求失败
 			if( Curl::getErrno() !=0 ){
-				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl错误 '.Curl::getError().' '.json_encode($_data) ));
-				$__data = $_data;
+				$err_flag = true;
+				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
 				$__data['message'] = '日志Api请求Curl错误';
+				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+				$__data['data']['content'] = Curl::getInfo();
+			}
+			
+			// 请求结果装换
+			$res_arr = json_decode($res,true);
+			
+			// 请求返回格式错误
+			if( !is_array($res_arr) || !isset($res_arr['code']) ){
+				$err_flag = true;
+				$__data['message'] = '日志Api请求结果格式错误';
+				$__data['data']['content'] = $res;
+				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+			}
+			
+			// 请求处理状态
+			if( $res_arr['code']!='0' ){// 非0为不正常
+				$err_flag = true;
+				$__data['message'] = '日志Api请求处理失败';
+				$__data['data']['content'] = $res;
+				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+			}
+			// 请求错误
+			if( $err_flag ){
+				dispatch(new \App\Jobs\LogJob( $str ));
 				$__data['data']['id'] = 'LogApi';
 				$__data['data']['type'] = 'api-error';
 				$__data['data']['level'] = 'Error';
 				$__data['data']['serial_no'] = self::_autoincrement();
-				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
-				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
 				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
 			}
-			if( !$res ){
-				return false;
-			}
-			$res = json_decode($res,true);
-			if( !$res ){
-				return false;
-			}
-			if( $res['code']!='0'){ // 非0为不正常，记录本地日志
-				dispatch(new \App\Jobs\LogJob( $str ));
-			}
-
 		} catch (\Exception $exc) {
 			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
 		}
