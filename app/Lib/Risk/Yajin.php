@@ -28,18 +28,6 @@ class Yajin extends \App\Lib\BaseApi {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public static function calculate( array $params ):array{
-		// 差价 = 押金-市场价
-		$d = abs($params['yajin']-$params['market_price']);
-		
-		return [
-			'yajin'				=> $params['yajin']-$d,
-			'jianmian'			=> $d,
-			'jianmian_detail'	=> [
-				[
-					'type'		=> 'realname',
-					'jianmian'	=> $d,
-				],
-			],
-		];
+		return self::request('1', \config('risksystem.RISK_API'), 'fengkong.yajin.calculate', '1.0', $params);
 	}
 }
