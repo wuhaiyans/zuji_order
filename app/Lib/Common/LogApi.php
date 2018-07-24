@@ -232,7 +232,7 @@ class LogApi {
 			}
 			// 请求错误
 			if( $err_flag ){
-				dispatch(new \App\Jobs\LogJob( $str ));
+				dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
 				$__data['data']['id'] = 'LogApi';
 				$__data['data']['type'] = 'api-error';
 				$__data['data']['level'] = 'Error';
