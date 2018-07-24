@@ -13,6 +13,7 @@ use App\Lib\Common\LogApi;
 use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
+use App\Order\Models\OrderGoods;
 
 class ImportHistoryRefund extends Command
 {
