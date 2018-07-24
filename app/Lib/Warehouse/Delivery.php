@@ -185,8 +185,7 @@ class Delivery
     public static function cancel($order_no)
     {
 		// liuhongxing 2018-06-29 修改
-        //$base_api = config('api.warehouse_api_uri');
-		$base_api = env('WAREHOUSE_API');
+        $base_api = config('tripartite.warehouse_api_uri');
 
         $res = Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.cancel',//模拟
