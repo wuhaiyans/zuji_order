@@ -189,9 +189,9 @@ class ImportHistoryRefund extends Command
             //存在是退货，更新记录
             $bussness_key = 2;
         }
-
+        $refundNo   =   createNo(2);
         $refundData = [
-            'refund_no'  =>  createNo(2),
+            'refund_no'  =>  $refundNo,
             'old_refund_id' => $datas['refund_id'],
             'out_refund_no'  =>  $datas['out_refund_no'],
             'user_id'  =>  $datas['user_id'],
@@ -208,6 +208,7 @@ class ImportHistoryRefund extends Command
          if ($orderRefundData){
 
              unset($refundData['refund_no']);
+             $this->setOrderGoodsStatus($datas['order_no'],$bussness_key,$datas['refund_status'],$refundNo);
             return  $orderRefundData->update($refundData);
          }
 
@@ -215,7 +216,50 @@ class ImportHistoryRefund extends Command
         if (!$ret->getQueueableId()) {
                 return false;
         }
+        $this->setOrderGoodsStatus($datas['order_no'],$bussness_key,$datas['refund_status'],$refundNo);
         return true;
+
+    }
+
+    private function setOrderGoodsStatus($orderNo,$bussness_key,$returnStatus,$refundNo)
+    {
+        $orderGoodStatusList = $this->refundOrderGoodsStatusMap($bussness_key);
+        $orderGoodsStatu = $orderGoodStatusList[$returnStatus];
+        return OrderGoods::where([
+            ['order_no', '=', $orderNo],
+        ])->update(['goods_status'=>$orderGoodsStatu,'business_key'=>$bussness_key, 'business_no'=>$refundNo]);
+
+    }
+
+    /**
+     * 导入orderGoods表的记录
+     * Author: heaven
+     */
+    private function refundOrderGoodsStatusMap($businessKey)
+    {
+//        0：非启用；10： 租机中； 20：退货中 ，21 ：已退货； 30：  换货中， 31：已换货 ；40 ：还机中， 41：还机完成；50：买断中，
+//        51：买断完成； 60： 续租中， 61：续租完成；，71：已退款
+//
+//    0初始化 1提交申请 2同意 3审核拒绝 4已取消 5已收货 7退货完成 8换货完成 9已退款 10退款中 11换货已发货
+        //换货 $businessKey 3               2是退货
+        if ($businessKey==2) {
+            return [
+                1=>20,
+                2=>20,
+                3=>20,
+                4=>21,
+                5=>20,
+            ];
+        } else {
+
+            return [
+                1=>20,
+                2=>20,
+                3=>20,
+                4=>71,
+                5=>20,
+            ];
+        }
 
     }
 
