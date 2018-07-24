@@ -2,14 +2,15 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * WithholdFail
+ * GivebackReturnDeposit
  *
  * @author maxiaoyu
  */
-class WithholdFail implements ShortMessage {
+class GivebackReturnDeposit implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -28,38 +29,34 @@ class WithholdFail implements ShortMessage {
     }
 
     public function getCode($channel_id){
-        $class = basename(str_replace('\\', '/', __CLASS__));
+        $class =basename(str_replace('\\', '/', __CLASS__));
         return Config::getCode($channel_id, $class);
     }
 
     public function notify(){
-        // 根据业务，获取短息需要的数据
 
-        // 查询分期信息
-        $instalmentInfo = \APp\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$this->business_no]);
-        if( !is_array($instalmentInfo)){
-            // 提交事务
-            return false;
-        }
+        $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
+        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
+
 
         // 查询订单
-        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+        $orderInfo = OrderRepository::getInfoById($orderGivebackInfo['order_no']);
         if( !$orderInfo ){
+            LogApi::debug("创建还机单-订单详情错误",$orderGivebackInfo);
             return false;
         }
-        // 电话号
-        $mobile = $orderInfo['mobile'];
 
         // 用户信息
-        $userInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
+        $userInfo = \App\Lib\User\User::getUser($orderGivebackInfo['user_id']);
         if( !is_array($userInfo )){
             return false;
         }
 
         // 查询商品
         $orderGoods = New \App\Order\Modules\Service\OrderGoods();
-        $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
+        $goodsInfo  = $orderGoods->getGoodsInfo($orderGivebackInfo['goods_no']);
         if(!$goodsInfo){
+            LogApi::debug("扣款成功短信-商品详情错误",$orderGivebackInfo);
             return false;
         }
 
@@ -70,19 +67,18 @@ class WithholdFail implements ShortMessage {
         }
 
         // 短信参数
-        $dataSms = [
-            'realName'      => $userInfo['realname'],
-            'orderNo'       => $orderInfo['order_no'],
-            'goodsName'     => $goodsInfo['goods_name'],
-            'zuJin'         => $instalmentInfo['amount'],
-            'serviceTel'    => env("CUSTOMER_SERVICE_PHONE"),
+        $dataSms =[
+            'realName'          => $userInfo['realname'],
+            'goodsName'         => $goodsInfo['goods_name'],
+            'orderNo'           => $orderInfo['order_no'],
+            'tuihuanYajin'      => $goodsInfo['yajin'],
         ];
-
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
+
     }
 
-    // 支付宝 短信通知
+    // 支付宝内部消息通知
     public function alipay_notify(){
         return true;
     }

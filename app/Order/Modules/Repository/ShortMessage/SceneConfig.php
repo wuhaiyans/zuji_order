@@ -102,9 +102,13 @@ class SceneConfig {
      */
     const GIVEBACK_CREATE = 'GivebackCreate';
     /**
-     * 场景：<b>【还机确认收货】</b>
+     * 场景：<b>【还机确认收货 有剩余租金】</b>
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
+    /**
+     * 场景：<b>【还机确认收货 】</b>
+     */
+    const GIVEBACK_CONFIRMNOWITH = 'GivebackConfirmNoWith';
     /**
      * 场景：<b>【系统执行代扣成功后发送】</b>
      */
@@ -133,6 +137,11 @@ class SceneConfig {
      * 场景：<b>【库管点击检测不合格、输入赔偿金额时发送】</b>
      */
     const GIVEBACK_EVANOWITYESENONO = 'GivebackEvaNoWitYesEnoNo';
+    /**
+     * 场景：<b>【财务系统完成押金退还时发送】</b>
+     */
+    const GIVEBACK_RETURNDEPOSIT = 'GivebackReturnDeposit';
+
     /**
     * 场景：<b>【买断确认】</b>
     */

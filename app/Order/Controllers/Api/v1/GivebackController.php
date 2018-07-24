@@ -1048,7 +1048,8 @@ class GivebackController extends Controller
 			$notice = new \App\Order\Modules\Service\OrderNotice(
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				$paramsArr['goods_no'],
-				'GivebackEvaNoWitYesEno');
+				'GivebackEvaNoWitYesEno',
+				['amount' => $paramsArr['compensate_amount'] ]);
 			$notice->notify();
 		}
 		//押金<赔偿金：还机支付
@@ -1064,7 +1065,8 @@ class GivebackController extends Controller
 			$notice = new \App\Order\Modules\Service\OrderNotice(
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 				$paramsArr['goods_no'],
-				'GivebackEvaNoWitYesEnoNo');
+				'GivebackEvaNoWitYesEnoNo',
+				['amount' => $paramsArr['compensate_amount'] ]);
 			$notice->notify();
 		}
 		//清算或者支付结果失败，返回错误
@@ -1126,7 +1128,8 @@ class GivebackController extends Controller
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			$paramsArr['goods_no'],
-			$smsModel);
+			$smsModel,
+			['amount' => $paramsArr['compensate_amount'] ]);
 		$notice->notify();
 
 		//更新还机单
@@ -1182,7 +1185,7 @@ class GivebackController extends Controller
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			$paramsArr['goods_no'],
-			"ReturnDeposit");
+			"GivebackReturnDeposit");
 		$notice->notify();
 
 
