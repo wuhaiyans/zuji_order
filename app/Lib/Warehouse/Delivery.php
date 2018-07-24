@@ -123,6 +123,7 @@ class Delivery
             'params' => json_encode($result)
         ];
         $res= Curl::post( $base_api, array_merge(self::getParams(), $params) );
+        LogApi::info("发货申请回执",$res);
 		
         $res = json_decode($res, true);;
 //
@@ -227,7 +228,7 @@ class Delivery
         ]));
 
         $res = json_decode($res, true);
-        LogApi::info("收发货系统返回",$res);
+        //LogApi::info("收发货系统返回",$res);
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);

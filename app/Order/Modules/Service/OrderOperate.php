@@ -457,7 +457,7 @@ class OrderOperate
                 'user_id'=>$userId,//
                 'user_name'=>$userName,//
             ];
-            LogApi::info("确认收货参数传递",$params);
+            //LogApi::info("确认收货参数传递",$params);
 
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
