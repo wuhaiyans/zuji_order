@@ -1009,6 +1009,9 @@ class OrderOperate
                     'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
+
+                    'business_key' => Inc\OrderStatus::BUSINESS_ZUJI,//Price 预授权金额，单位：元<br/>
+                    'business_no' => $values['order_no'],//Price 预授权金额，单位：元<br/>
 	        ];
 //                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
