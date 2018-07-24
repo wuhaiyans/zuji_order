@@ -319,10 +319,7 @@ class DeliveryRepository
     public static function receive($order_no, $receive_type=Delivery::RECEIVE_TYPE_USER)
     {
         //$model = Delivery::find($order_no);
-        $model = Delivery::where([
-            ['order_no','=',$order_no],
-            ['status','=',Delivery::STATUS_SEND]
-        ])->first();
+        $model = Delivery::where(['order_no'=>$order_no,'status'=>Delivery::STATUS_SEND])->first();
 
         if (!$model) {
             throw new NotFoundResourceException('发货单订单编号:' . $order_no . ',status:'.Delivery::STATUS_SEND.' 未找到');

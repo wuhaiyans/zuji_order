@@ -68,26 +68,28 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
             return false;
         }
 
-        $amount = 0;
+        $zujinamount = 0;
         //分期数据
         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$this->business_no,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
         if( !empty($instalmentList[$this->business_no]) ){
             foreach ($instalmentList[$this->business_no] as $instalmentInfo) {
-                $amount += $instalmentInfo['amount'];
+                $zujinamount += $instalmentInfo['amount'];
             }
         }
+        $amount = $this->data;
 
-        $zhifuzonge = $amount + $orderGivebackInfo['compensate_amount'];
+        $zhifuzonge = $zujinamount + $amount['compensate_amount'];
 
         // 短信参数
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'zhifuZonge'        => $zhifuzonge,
-            'compensateAmount'  => $orderGivebackInfo['compensate_amount'],
-            'shengyuZujin'      => $amount,
+            'zhifuZonge'        => $zhifuzonge . "元",
+            'compensateAmount'  => $amount['compensate_amount'] . "元",
+            'shengyuZujin'      => $zujinamount . "元",
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

@@ -841,6 +841,8 @@ class OrderController extends Controller
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
                             'userId' => $params['userinfo']['uid'],//业务用户ID<br/>
                             'fundauthAmount' => $orderData['order_yajin'],//Price 预授权金额，单位：元<br/>
+                            'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,//Price 预授权金额，单位：元<br/>
+                            'business_no' => $validateParams['data']['order_no'],//Price 预授权金额，单位：元<br/>
                         ];
                         $payInfo = OrderOperate::getPayStatus($orderParams);
 

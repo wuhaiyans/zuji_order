@@ -457,6 +457,7 @@ class OrderOperate
                 'user_id'=>$userId,//
                 'user_name'=>$userName,//
             ];
+            //LogApi::info("确认收货参数传递",$params);
 
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
@@ -541,7 +542,8 @@ class OrderOperate
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
-            $orderInfo['business_no'] =$orderInfo['order_no'];
+            $orderInfo['business_no'] =$data['order_no'];
+            $orderInfo['order_no']=$data['order_no'];
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
@@ -1007,6 +1009,9 @@ class OrderOperate
                     'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
                     'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
                     'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
+
+                    'business_key' => Inc\OrderStatus::BUSINESS_ZUJI,//Price 预授权金额，单位：元<br/>
+                    'business_no' => $values['order_no'],//Price 预授权金额，单位：元<br/>
 	        ];
 //                    LogApi::debug('客户端订单列表支付信息参数', $params);
                     $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
@@ -1356,6 +1361,8 @@ class OrderOperate
 	 * 获取订单支付单状态列表
 	 * @param array $param 创建支付单数组
 	 * $param = [<br/>
+	 		'bussiness_key' => '',//业务类型 【必须】<br/>
+	 		'bussiness_no' => '',//业务编号 【必须】<br/>
 	 		'payType' => '',//支付方式 【必须】<br/>
 	 		'payChannelId' => '',//支付渠道 【必须】<br/>
 			'userId' => 'required',//业务用户ID<br/>
@@ -1369,6 +1376,34 @@ class OrderOperate
 	 * ]
 	 */
 	public static function getPayStatus( $param ) {
+		//-+--------------------------------------------------------------------
+		// | 从新修改次方法 【开始】
+		//-+--------------------------------------------------------------------
+		if( empty( $param['business_key'] ) || empty( $param['business_no'] ) ){
+			throw new \Exception('支付状态获取失败参数出错');
+		}
+		
+		//获取支付单信息
+		$payInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($param['business_key'], $param['business_no']);
+		if( $payInfo->isSuccess() ){
+			return [
+				'withholdStatus' => false,
+				'paymentStatus' => false,
+				'fundauthStatus' => false,
+			];
+		}
+		return [
+			'withholdStatus' => $payInfo->needWithhold(),
+			'paymentStatus' => $payInfo->needPayment(),
+			'fundauthStatus' => $payInfo->needFundauth(),
+		];
+		//-+--------------------------------------------------------------------
+		// | 从新修改次方法 【结束，下面内容没有用】
+		//-+--------------------------------------------------------------------
+		throw new \Exception('支付状态获取失败');
+		
+		
+		
 		//-+--------------------------------------------------------------------
 		// | 校验参数
 		//-+--------------------------------------------------------------------

@@ -76,14 +76,15 @@ class GivebackEvaNoWitYesEno implements ShortMessage {
                 $amount += $instalmentInfo['amount'];
             }
         }
-
+        $amount = $this->data;
         // 短信参数
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'compensateAmount'  => $goodsInfo['compensate_amount'],
+            'compensateAmount'  => $amount['compensate_amount'] . "元",
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

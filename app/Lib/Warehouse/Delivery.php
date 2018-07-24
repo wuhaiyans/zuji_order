@@ -8,6 +8,7 @@
 
 namespace App\Lib\Warehouse;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use App\Lib\Order\OrderInfo;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -116,12 +117,14 @@ class Delivery
             'customer_address' => $orderInfo['address_info'],
             'delivery_detail' => $goodsInfo
         ];
+        //LogApi::info("发货申请参数",$result);
 
 		$params = [
             'method'=> 'warehouse.delivery.deliveryCreate',//模拟
             'params' => json_encode($result)
         ];
         $res= Curl::post( $base_api, array_merge(self::getParams(), $params) );
+        //LogApi::info("发货申请回执",$res);
 		
         $res = json_decode($res, true);;
 //
@@ -185,8 +188,7 @@ class Delivery
     public static function cancel($order_no)
     {
 		// liuhongxing 2018-06-29 修改
-        //$base_api = config('api.warehouse_api_uri');
-		$base_api = env('WAREHOUSE_API');
+        $base_api = config('tripartite.warehouse_api_uri');
 
         $res = Curl::post($base_api, array_merge(self::getParams(), [
             'method'=> 'warehouse.delivery.cancel',//模拟
@@ -226,6 +228,7 @@ class Delivery
         ]));
 
         $res = json_decode($res, true);
+        //LogApi::info("收发货系统返回",$res);
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);

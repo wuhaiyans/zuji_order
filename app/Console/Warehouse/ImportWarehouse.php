@@ -148,7 +148,7 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
 
     foreach ($order2_all1 as $key=>$item){
         $delivery_all1 = [];
-        $delivery_result=$db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=".$item['order_id']." ORDER BY delivery_id DESC");
+        $delivery_result=$db1->query("SELECT * FROM zuji_order2_delivery WHERE order_id=".$item['order_id']." AND business_key IN(1,5,6,9) ORDER BY delivery_id DESC");
         while($arr = $delivery_result->fetch_assoc()){
             //订单二维数组 order_id,order_no
             $delivery_all1[]=$arr;
@@ -178,7 +178,7 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
 
             $delivereyGoods = getDeliveryGoodsStatus($delivery_row['delivery_status']);
 
-            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".$delivery_row['business_key']."'),";
+            $delivery_insert_sql .= "('".$delivery_no."','".$item['appid']."','".$item['order_no']."','".$delivery_row['wuliu_channel_id']."','".$delivery_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".getStatus($delivery_row['delivery_status'])."','".$delivery_row['create_time']."','".$delivery_row['delivery_time']."','".$delivery_row['update_time']."','系统导入','3','".replaceBusinessKey($delivery_row['business_key'])."'),";
             $num++;
             $delivery_goods_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".$goods_row['sku_name']."','1','".$delivereyGoods[0]."','".$delivereyGoods[1]."','".$goods_row['update_time']."'),";
             $num++;
@@ -243,7 +243,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
     //查询db1订单商品表
     foreach ($order2_all1 as $key=>$item) {
         $receive_all1=[];
-        $receive_result=$db1->query("SELECT * FROM zuji_order2_receive WHERE order_id=".$item['order_id']." ORDER BY receive_id DESC");
+        $receive_result=$db1->query("SELECT * FROM zuji_order2_receive WHERE order_id=".$item['order_id']." AND business_key IN(1,5,6,9) ORDER BY receive_id DESC");
         while($arr = $receive_result->fetch_assoc()){
             //订单二维数组 order_id,order_no
             $receive_all1[]=$arr;
@@ -261,7 +261,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
         foreach ($receive_all1 as $k=>$receive_row){
             $receive_no = $receive_row['receive_id'];
             $address_info = '';//地址详情
-            $evaluation_row=$db1->query("SELECT * FROM zuji_order2_evaluation WHERE order_id=".$item['order_id']." AND business_key='".$item['business_key']."' ORDER BY evaluation_id DESC LIMIT 1")->fetch_assoc();
+            $evaluation_row=$db1->query("SELECT * FROM zuji_order2_evaluation WHERE order_id=".$item['order_id']." AND business_key IN(1,5,6,9) ORDER BY evaluation_id DESC LIMIT 1")->fetch_assoc();
             $sel++;
             //省
             $address_info .= $address_row['province_id']?$district_all1[$address_row['province_id']]['name'].' ':'';
@@ -276,7 +276,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 $status_arr = getReceiveStatusE($evaluation_row['evaluation_status']);
                 $goodsStatus = getGoodsReceiveStatusE($evaluation_row['evaluation_status']);
                 $checkResult = getCheckResult($evaluation_row['evaluation_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".$receive_row['business_key']."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status_arr[0]."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','".$evaluation_row['evaluation_time']."','".$status_arr[1]."','".$evaluation_row['evaluation_remark']."','".replaceBusinessKey($receive_row['business_key'])."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','".$evaluation_row['evaluation_time']."','".$checkResult."','".$evaluation_row['evaluation_remark']."','0'),";
                 $num++;
@@ -302,7 +302,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 //不存在检测单
                 $status = getReceiveStatus($receive_row['receive_status']);
                 $goodsStatus = getGoodsReceiveStatus($receive_row['receive_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".$receive_row['business_key']."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".replaceBusinessKey($receive_row['business_key'])."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
                 $num++;
@@ -448,4 +448,15 @@ function getCheckResult($n){
 function replaceSpecialChar($strParam){
     $regex = "/\/|\~|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\_|\+|\{|\}|\:|\<|\>|\?|\[|\]|\,|\.|\/|\;|\'|\`|\-|\=|\\\|\|/";
     return preg_replace($regex,"",$strParam);
+}
+
+//过滤老库中的 business_key
+function replaceBusinessKey($n){
+    $arr = [
+        1=>2,
+        5=>4,
+        6=>3,
+        9=>3,
+    ];
+    return ($arr[$n]?$arr[$n]:1);
 }

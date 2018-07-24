@@ -82,8 +82,9 @@ class GivebackEvaNoWitNoEno implements ShortMessage {
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'shengyuZujin'      => $amount,
+            'shengyuZujin'      => $amount . "元",
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
