@@ -503,7 +503,10 @@ class ReturnController extends Controller
      * 换货确认收货
      * @param Request $request
      * [
-     *   'refund_no'   =>'',  //业务编号   string  【必传】
+     *   'refund_no'   =>[
+     *                   'refund_no'=>'', //业务编号   string  【必传】
+     *                  'goods_no'  =>''  //商品编号   String  【必传】
+     *                  ],
      *   'business_key'=>'',  //业务类型   int     【必传】
      * ]
      * @return string

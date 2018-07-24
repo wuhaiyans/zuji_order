@@ -257,7 +257,9 @@ class Receive
             ];
             //退换货使用(支持多商品)
             $refund_no[] = [
-                'refund_no'=>$g->refund_no
+                'refund_no'=>($g->refund_no?$g->refund_no:''),
+                'order_no'=>$receive->order_no,
+                'goods_no'=>$g->goods_no
             ];
         }
 
