@@ -143,8 +143,7 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
-            $a = Receive::receive($params['receive_no'],$userinfo);
-            return apiResponse($a, ApiStatus::CODE_60002, 'error');
+            Receive::receive($params['receive_no'],$userinfo);
             $this->receive->received($params['receive_no']);
             DB::commit();
         } catch (\Exception $e) {
