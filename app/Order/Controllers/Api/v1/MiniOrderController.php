@@ -300,64 +300,54 @@ class MiniOrderController extends Controller
         }
     }
 
-//    /**
-//     * 小程序买断还机支付接口
-//     * @param [
-//     *      ''=>'',  //
-//     * ]
-//     */
-//    public function orderClose(Request $request){
-//        $params = $request->all();
-//        $rules = [
-//            'order_no'  => 'required',
-//            'remark'  => 'required',
-//        ];
-//
-//
-////        $params = [
-////            'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
-////            'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
-////            'out_trans_no'=>$orderCleanData['clean_no'],//资金交易号
-////            'pay_amount'=>$orderCleanData['auth_deduction_amount'],//支付金额
-////            'remark'=>'小程序退押金',//订单操作说明
-////            'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
-////        ];
-////        $succss =  miniApi::OrderClose($params);
-//
-//
-//
-//
-//        $validateParams = $this->validateParams($rules,$params['params']);
-//        $param = $params['params'];
-//        if (empty($validateParams) || $validateParams['code']!=0) {
-//            return apiResponse([],$validateParams['code'],$validateParams['msg']);
-//        }
-//        //查询芝麻订单
-//        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
-//        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $param['out_order_no'] );
-//        if( empty($result) ){
-//            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$param['order_no']);
-//            return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
-//        }
-//        //发送取消请求
-//        $data = [
-//            'out_order_no'=>$result['order_no'],//商户端订单号
-//            'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
-//            'remark'=>$param['remark'],//订单操作说明
-//            'app_id'=>$result['app_id'],//小程序appid
-//        ];
-//        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
-//        if($b === false){
-//            return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
-//        }
-//        //取消订单修改订单状态
-//        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($result['order_no'],$orderInfo['user_id']);
-//        if( $code != ApiStatus::CODE_0){
-//            \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败',$orderInfo);
-//            return apiResponse([],ApiStatus::CODE_35003,'小程序取消商户端订单失败');
-//        }
-//        return apiResponse([],ApiStatus::CODE_0);
-//    }
+    /**
+     * 小程序获取用户最新下单订单号接口
+     * @return array
+     */
+    public function getOrderNo(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no'  => 'required',
+            'remark'  => 'required',
+        ];
+
+        $validateParams = $this->validateParams($rules,$params['params']);
+        $param = $params['params'];
+        if (empty($validateParams) || $validateParams['code']!=0) {
+            return apiResponse([],$validateParams['code'],$validateParams['msg']);
+        }
+
+        $userinfo = $params['userinfo'];
+
+
+
+
+        //查询芝麻订单
+        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $param['out_order_no'] );
+        if( empty($result) ){
+            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$param['order_no']);
+            return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
+        }
+        //发送取消请求
+        $data = [
+            'out_order_no'=>$result['order_no'],//商户端订单号
+            'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
+            'remark'=>$param['remark'],//订单操作说明
+            'app_id'=>$result['app_id'],//小程序appid
+        ];
+        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+        if($b === false){
+            return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
+        }
+        //取消订单修改订单状态
+        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($result['order_no'],$orderInfo['user_id']);
+        if( $code != ApiStatus::CODE_0){
+            \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败',$orderInfo);
+            return apiResponse([],ApiStatus::CODE_35003,'小程序取消商户端订单失败');
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+    }
 
     /**
      * 小程序取消订单（解冻预授权 解约代扣）
@@ -411,7 +401,7 @@ class MiniOrderController extends Controller
             "取消订单",
             $remark
         );
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse([],ApiStatus::CODE_0,'取消小程序订单成功');
     }
 
     /**
