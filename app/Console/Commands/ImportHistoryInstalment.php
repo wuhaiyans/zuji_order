@@ -52,7 +52,7 @@ class ImportHistoryInstalment extends Command
 	
     $bar = $this->output->createProgressBar($total);
     try{
-      $limit  = 100;
+      $limit  = 1000;
       $page   = 1;
       $totalpage = ceil($total/$limit);
       $arr =[];
