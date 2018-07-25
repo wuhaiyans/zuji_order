@@ -377,29 +377,39 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $param['out_order_no'] );
-        if( empty($result) ){
+        $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $param['order_no'] );
+        if( empty($miniOrderInfo) ){
             \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$param['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
         }
+        $remark = \App\Order\Modules\Inc\OrderStatus::getOrderCancelResasonName($param['remark_id']);
         //发送取消请求
         $data = [
-            'out_order_no'=>$result['order_no'],//商户端订单号
-            'zm_order_no'=>$result['zm_order_no'],//芝麻订单号
-            'remark'=>$param['remark'],//订单操作说明
-            'app_id'=>$result['app_id'],//小程序appid
+            'out_order_no'=>$miniOrderInfo['order_no'],//商户端订单号
+            'zm_order_no'=>$miniOrderInfo['zm_order_no'],//芝麻订单号
+            'remark'=>$remark,//订单操作说明
+            'app_id'=>$miniOrderInfo['app_id'],//小程序appid
         ];
         $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
         if($b === false){
             return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
         }
         //取消订单修改订单状态
-        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($result['order_no'],$orderInfo['user_id']);
+        $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($miniOrderInfo['order_no'],$orderInfo['user_id']);
         if( $code != ApiStatus::CODE_0){
             \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败',$orderInfo);
             return apiResponse([],ApiStatus::CODE_35003,'小程序取消商户端订单失败');
         }
+        //用户取消订单写入日志系统
+        \App\Order\Modules\Repository\OrderLogRepository::add(
+            $orderInfo['user_id'],
+            $orderInfo['mobile'],
+            \App\Lib\PublicInc::Type_User,
+            $miniOrderInfo['order_no'],
+            "取消订单",
+            $remark
+        );
         return apiResponse([],ApiStatus::CODE_0);
     }
 
