@@ -401,7 +401,7 @@ class MiniOrderController extends Controller
             "取消订单",
             $remark
         );
-        return apiResponse([],ApiStatus::CODE_0);
+        return apiResponse([],ApiStatus::CODE_0,'取消小程序订单成功');
     }
 
     /**
