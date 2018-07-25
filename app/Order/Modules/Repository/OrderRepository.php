@@ -592,4 +592,21 @@ class OrderRepository
 
     }
 
+    /**
+     * 根据用户id查询用户最新下单订单
+     * @params $user_id //用户id
+     */
+    public static function getUserNewOrder($user_id){
+        if(empty($user_id)){
+            return false;
+        }
+        $where[]=['user_id','=',$user_id];
+        $where[]=['create_time','desc'];
+        $getUserCertified=OrderUserCertified::where($where)->first();
+        if(!$getUserCertified){
+            return false;
+        }
+        return $getUserCertified->toArray();
+
+    }
 }
