@@ -345,7 +345,7 @@ class GivebackController extends Controller
 				$notice = new \App\Order\Modules\Service\OrderNotice(
 					\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 					$goodsNo,
-					"GivebackWithholdSuccess");
+					"GivebackConfirmNoWith");
 				$notice->notify();
 				//无需代扣
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;

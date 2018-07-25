@@ -81,7 +81,7 @@ class Config {
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货 有剩余的租金
-				SceneConfig::GIVEBACK_CONFIRMNOWITH 	=> 'SMS_113461132', //还机确认收货 无剩余的租金
+				SceneConfig::GIVEBACK_CONFIRMNOWITH 	=> 'SMS_113461159', //还机确认收货 无剩余的租金
 				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461135', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461136', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送

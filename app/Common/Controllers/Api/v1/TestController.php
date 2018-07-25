@@ -21,6 +21,26 @@ class TestController extends Controller
 		LogApi::error('test','test-Abc');
 	}
 	
+    public function test_yajin()
+    {
+		$params = [
+			'user_id'		=> '5',
+			'yajin'			=> '900000',
+			'market_price'	=> '800000',
+		];
+		
+		try{
+			$result = \App\Lib\Risk\Yajin::calculate($params);
+			
+		} catch (\App\Lib\ApiException $ex) {
+			echo $ex->getOriginalValue();exit;
+			var_dump( $ex->getOriginalValue() );exit;
+		}
+		
+		var_dump( $result );exit;
+	}
+		
+	
     public function test()
     {
 		

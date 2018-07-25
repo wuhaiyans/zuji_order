@@ -85,7 +85,31 @@ class Goods {
         $this->model->update_time =time();
         return $this->model->save();
     }
-
+    //-+------------------------------------------------------------------------
+    // |订单退款
+    //-+------------------------------------------------------------------------
+    /**
+     * 申请退款
+     */
+    public function orderRefund( ):bool{
+        if( $this->model->goods_status != OrderGoodStatus::INIT){
+            return false;
+        }
+        // 状态改为退款中
+        $this->model->goods_status = OrderGoodStatus::REFUND;
+        return $this->model->save();
+    }
+    /**
+     * 退款审核拒绝
+     */
+    public function refundRefuse( ):bool{
+        if( $this->model->goods_status == OrderGoodStatus::INIT){
+            return false;
+        }
+        // 状态改为退款中
+        $this->model->goods_status = OrderGoodStatus::INIT;
+        return $this->model->save();
+    }
     //-+------------------------------------------------------------------------
     // | 退货
     //-+------------------------------------------------------------------------
@@ -296,7 +320,8 @@ class Goods {
      * 获取商品列表
      * @param string	$order_no		订单编号
      * @param int		$lock			锁
-     * @return array
+     * @return \App\Order\Modules\Repository\Order\Goods
+     *
      */
     public static function getOrderNo( string $order_no, int $lock=0 ) {
 

@@ -11,6 +11,8 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Lib\Certification;
 use App\Lib\Goods;
+use App\Lib\Risk\Yajin;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Mockery\Exception;
 
 class DepositComponnet implements OrderCreater
@@ -30,6 +32,10 @@ class DepositComponnet implements OrderCreater
     private $certifiedFlag =true;
 
     private $flag = true;
+
+    private $deposit_detail='';
+
+    private $orderNo='';
 
     public function __construct(OrderCreater $componnet,$certifiedFlag=true,$miniCreditAmount = 0)
     {
@@ -59,21 +65,7 @@ class DepositComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
-        //根据用户实名认证信息是否一致初始化订单是否满足押金键名条件
-        $this->deposit = !!$this->certifiedFlag;
-
-        //未通过认证人脸识别
-        if($this->schema['user']['face']==0){
-            $this->deposit = false;
-        }
-        //未通过风控验证
-        if($this->schema['user']['risk']==0){
-            $this->deposit = false;
-        }
-        //风控整体策略
-        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
-            $this->deposit = false;
-        }
+        $this->orderNo =$schema['order']['order_no'];
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
@@ -83,23 +75,26 @@ class DepositComponnet implements OrderCreater
                 if( $this->payType == \App\Order\Modules\Inc\PayInc::MiniAlipay) {//小程序入口
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }else{//其他入口
-                    $deposit = Goods\Deposit::getDeposit([
-                        'spu_id' => $v['spu_id'],
-                        'pay_type' => $this->payType,
-                        'credit' => $this->schema['user']['credit'] ? $this->schema['user']['credit'] : 0,
-                        'age' => $this->schema['user']['age'] ? $this->schema['user']['age'] : 0,
-                        'yajin' => $v['yajin'] * 100,
-
-                    ]);
-                    if (!is_array($deposit)) {
+                    $arr =[
+                        'user_id'=>$this->schema['user']['user_id'],
+                        'yajin'=>$v['yajin'] * 100,
+                        'market_price'=>$v['market_price']*100,
+                    ];
+                    try{
+                        $deposit = Yajin::calculate($arr);
+                    }catch (\Exception $e){
                         $this->getOrderCreater()->setError('商品押金接口错误');
                         $this->flag = false;
                     }
+
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
+                    $this->deposit_detail = $deposit['_msg'];
+
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
             }
-        }return $this->flag && $filter;
+        }
+        return $this->flag && $filter;
     }
 
     /**
@@ -119,6 +114,12 @@ class DepositComponnet implements OrderCreater
     {
         $b = $this->componnet->create();
         if( !$b ){
+            return false;
+        }
+        //保存减免押金详情信息
+        $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail);
+        if(!$b){
+            $this->getOrderCreater()->setError('保存用户减免押金详情信息失败');
             return false;
         }
         return true;

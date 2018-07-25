@@ -23,7 +23,7 @@ class OrderGoodStatus{
      */
     const RENTING_MACHINE= 10;
     /**
-	 * 退货退款中
+	 * 退货中
      * @var int 2
      */
     const REFUNDS = 20;
@@ -77,6 +77,11 @@ class OrderGoodStatus{
      * @var int 6
      */
     const RENEWAL_OF_RENT = 61;
+    /**
+     * 退款中
+     */
+    const REFUND = 70;
+
     /**
      * 已退款
      */
