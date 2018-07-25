@@ -60,6 +60,7 @@ class ImportHistoryInstalment extends Command
 
             $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'goods_id', 'user_id', 'zujin', "appid", "business_key")->where(['order_id' => $item['order_id']])->first();
             $orderInfo = objectToArray($orderInfo);
+
             if(!$orderInfo){
               continue;
             }
@@ -100,8 +101,8 @@ class ImportHistoryInstalment extends Command
             }
 
             // 插入数据
-            $ret = \App\Order\Models\OrderGoodsInstalment::updateOrCreate($data);
-            if(!$ret->getQueueableId()){
+            $ret = \App\Order\Models\OrderGoodsInstalment::insert($data);
+            if(!$ret){
               $arr[$item['id']] = $item;
             }
           }
@@ -112,7 +113,7 @@ class ImportHistoryInstalment extends Command
           sleep(2);
         } while ($page <= $totalpage);
           if(count($arr)>0){
-            LogApi::notify("订单用户回访数据导入失败",$arr);
+            LogApi::notify("订单分期数据导入失败",$arr);
           }
         $bar->finish();
         echo "导入成功";die;

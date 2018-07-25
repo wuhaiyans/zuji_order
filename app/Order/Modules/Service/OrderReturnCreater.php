@@ -1333,16 +1333,39 @@ class OrderReturnCreater
                 }elseif($return_info['status']==ReturnStatus::ReturnDenied){
                     //已经拒绝的状态流
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
-                        //退货状态流
-                        $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                        if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                            //退货检测不合格状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                            $buss->setStatus("D");
+                            $checkResult['check_result']="检测不合格";
+                            $checkResult['check_remark']=$return_info['evaluation_remark'];
+                        }else{
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                            $buss->setStatus("C");
+                        }
+
                         $buss->setStatusText("您的退货审核被拒绝");
                     }
+
                     if($params['business_key']==OrderStatus::BUSINESS_BARTER){
-                        //换货状态流
-                        $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                        if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                            //换货检测不合格状态流
+                            $buss->setStateFlow($stateFlow['barterStateFlow']);
+                            $buss->setStatus("D");
+                            $checkResult['check_result']="检测不合格";
+                            $checkResult['check_remark']=$return_info['evaluation_remark'];
+                        }else{
+                            //换货状态流
+                            $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                            $buss->setStatus("C");
+                        }
+
                         $buss->setStatusText("您的换货审核被拒绝");
                     }
-                    $buss->setStatus("C");
+                    if(isset($checkResult)){
+                        $buss->setCheckResult( $checkResult);
+                    }
 
                 }elseif($return_info['status']==ReturnStatus::ReturnReceive
                     || $return_info['status']==ReturnStatus::ReturnTui

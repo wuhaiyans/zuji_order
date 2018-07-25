@@ -130,7 +130,7 @@ class GoodsReturn {
             return false;
         }
         $this->model->refuse_refund_remark = $remark;
-        $this->model->status = ReturnStatus::ReturnCanceled;
+        $this->model->status = ReturnStatus::ReturnDenied;   //拒绝
         return $this->model->save();
     }
     /**
@@ -183,7 +183,7 @@ class GoodsReturn {
         $this->model->evaluation_amount=$data['evaluation_amount'];
         $this->model->evaluation_time=$data['evaluation_time'];
         $this->model->evaluation_status=ReturnStatus::ReturnEvaluationFalse;
-        $this->model->status=ReturnStatus::ReturnCanceled;//已取消
+        $this->model->status=ReturnStatus::ReturnDenied;//拒绝
         return $this->model->save();
     }
     /**

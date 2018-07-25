@@ -214,7 +214,7 @@ class ImportHistoryReturn extends Command
     private function insertSelectReturn($data)
     {
 
-        if ($data['return_status']==6) {
+        if ($data['return_status']==6 || $data['reason_id']==6) {
             $bussness_key = 3;
         } else {
             $bussness_key = $this->businessKeyMap()[$data['business_key']];
