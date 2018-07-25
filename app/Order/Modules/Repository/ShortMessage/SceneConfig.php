@@ -106,7 +106,7 @@ class SceneConfig {
      */
     const GIVEBACK_CONFIRMDELIVERY = 'GivebackConfirmDelivery';
     /**
-     * 场景：<b>【还机确认收货 】</b>
+     * 场景：<b>【还机确认收货 无剩余租金 】</b>
      */
     const GIVEBACK_CONFIRMNOWITH = 'GivebackConfirmNoWith';
     /**
