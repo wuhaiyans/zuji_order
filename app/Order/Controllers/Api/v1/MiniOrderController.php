@@ -92,11 +92,12 @@ class MiniOrderController extends Controller
         $data = [
             'order_no' => $orderNo,
             'sku' => [$params],
+            'overdue_time' => $overdue_time,
             'zhima_params'=>[
                 'amount'=>$total_amount,
                 'deposit'=>$deposit,
                 'out_order_no'=>$orderNo,
-                'overdue_time'=>$overdue_time,
+                'overdue_time' => $overdue_time,
                 'products'=>[
                     'count'=>$count,
                     'amount'=>$single_amount,
