@@ -87,7 +87,7 @@ class OrderController extends Controller
         ];
         $res = $this->OrderCreate->confirmation( $data );
         if(!is_array($res)){
-            return apiResponse(["msg"=>get_msg()],ApiStatus::CODE_60000,get_msg());
+            return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
         return apiResponse($res,ApiStatus::CODE_0);
 

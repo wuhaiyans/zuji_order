@@ -291,6 +291,20 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;//订单冻结失败
             }
+            //获取商品信息
+           $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no'],true);
+            if( !$goods ){
+                return false;
+            }
+            //更新商品状态为退款中
+            $goodsRefund = $goods->orderRefund();
+            if( !$goodsRefund ){
+                //事务回滚
+                DB::rollBack();
+                return false;//商品状态修改为退款中失败
+            }
+
+
             //创建退款单
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
@@ -690,6 +704,20 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+                //获取商品信息
+                $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no'],true);
+                if( !$goods ){
+                    return false;
+                }
+                //更新商品状态为退款中
+                $goodsRefund =$goods->refundRefuse();
+                if( !$goodsRefund ){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;//商品状态修改为退款中失败
+                }
+
+
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核拒绝");
 
@@ -1305,16 +1333,39 @@ class OrderReturnCreater
                 }elseif($return_info['status']==ReturnStatus::ReturnDenied){
                     //已经拒绝的状态流
                     if($params['business_key']==OrderStatus::BUSINESS_RETURN){
-                        //退货状态流
-                        $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                        if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                            //退货检测不合格状态流
+                            $buss->setStateFlow($stateFlow['returnCheckStateFlow']);
+                            $buss->setStatus("D");
+                            $checkResult['check_result']="检测不合格";
+                            $checkResult['check_remark']=$return_info['evaluation_remark'];
+                        }else{
+                            //退货状态流
+                            $buss->setStateFlow($stateFlow['returnDeniedStateFlow']);
+                            $buss->setStatus("C");
+                        }
+
                         $buss->setStatusText("您的退货审核被拒绝");
                     }
+
                     if($params['business_key']==OrderStatus::BUSINESS_BARTER){
-                        //换货状态流
-                        $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                        if($return_info['evaluation_status']==ReturnStatus::ReturnEvaluationFalse){
+                            //换货检测不合格状态流
+                            $buss->setStateFlow($stateFlow['barterStateFlow']);
+                            $buss->setStatus("D");
+                            $checkResult['check_result']="检测不合格";
+                            $checkResult['check_remark']=$return_info['evaluation_remark'];
+                        }else{
+                            //换货状态流
+                            $buss->setStateFlow($stateFlow['barterDeniedStateFlow']);
+                            $buss->setStatus("C");
+                        }
+
                         $buss->setStatusText("您的换货审核被拒绝");
                     }
-                    $buss->setStatus("C");
+                    if(isset($checkResult)){
+                        $buss->setCheckResult( $checkResult);
+                    }
 
                 }elseif($return_info['status']==ReturnStatus::ReturnReceive
                     || $return_info['status']==ReturnStatus::ReturnTui

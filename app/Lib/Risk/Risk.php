@@ -9,6 +9,7 @@
 
 namespace App\Lib\Risk;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 
 class Risk{
@@ -132,6 +133,7 @@ class Risk{
             'mobile'=>$arr['mobile'],
             'channel_appid'=>$arr['channel_appid'],
         ];
+        LogApi::info("请求风控系统信息URL:".config('tripartite.Interior_Fengkong_Url'),$data);
         $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);
         if(!is_array($info)){
