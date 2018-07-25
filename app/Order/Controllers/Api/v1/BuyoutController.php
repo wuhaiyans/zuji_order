@@ -9,6 +9,8 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\ShortMessage\BuyoutConfirm;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
@@ -335,8 +337,11 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
-        $notice->notify();
+        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+            'mobile'=>$orderInfo['mobile'],
+            'realName'=>$orderInfo['realname'],
+            'buyoutPrice'=>$data['amount'],
+        ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
         //插入订单设备日志
@@ -447,8 +452,11 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
-        $notice->notify();
+        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+            'mobile'=>$orderInfo['mobile'],
+            'realName'=>$orderInfo['realname'],
+            'buyoutPrice'=>$data['amount'],
+        ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断","创建买断成功");
         //插入订单设备日志
