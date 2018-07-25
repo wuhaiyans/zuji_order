@@ -2,66 +2,52 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
-use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Service\OrderBuyout;
 
 /**
- * OrderCancel
- *
- * @author wuhaiyan
+ * 买断支付成功短信通知
+ * @author limin
  */
-class BuyoutPayment implements ShortMessage {
-	
-	private $business_type;
-	private $business_no;
-	private $data;
-	
-	public function setBusinessType( int $business_type ){
-		$this->business_type = $business_type;
-	}
-	
-	public function setBusinessNo( string $business_no ){
-		$this->business_no = $business_no;
-	}
+class BuyoutPayment{
 
-	public function setData( array $data ){
-		$this->data = $data;
-	}
+	    /*
+        * 买断支付成功短信通知
+         * @$channel_id 渠道id 【必选】
+         * @$class 场景名称 【必选】
+        * @$data array $data 【必选】
+        * [
+        *      "mobile"=>"",手机号码
+        *      "realName"=>"", 用户名称
+        *      "buyoutPrice"=>"", 买断金
+        * ]
+        * @return json
+        */
+	public static function notify($channel_id,$class,$data){
 
-	public function getCode($channel_id){
-	    $class =basename(str_replace('\\', '/', __CLASS__));
-		return Config::getCode($channel_id, $class);
-	}
-
-	
-	public function notify(){
-		// 根据业务，获取短息需要的数据
-		$buyoutInfo = OrderBuyout::getInfo($this->business_no);
-		if( !$buyoutInfo ){
+		if(!$channel_id){
 			return false;
 		}
-		// 查询订单
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyoutInfo['order_no']));
-		if( !$orderInfo ){
+		if(!$class){
+			return false;
+		}
+		$rule= [
+				'mobile'=>'required',
+				'realName'=>'required',
+				'buyoutPrice'=>'required',
+		];
+		$validator = app('validator')->make($data, $rule);
+		if ($validator->fails()) {
 			return false;
 		}
 		// 短息模板
-		$code = $this->getCode($orderInfo['channel_id']);
+		$code = Config::getCode($channel_id, $class);
 		if( !$code ){
 			return false;
 		}
 
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
-            'realName'=>$orderInfo['realname'],
-            'buyoutPrice'=>$buyoutInfo['amount'],
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
+            'realName'=>$data['realname'],
+            'buyoutPrice'=>$data['amount'],
 		]);
 	}
-
-	// 支付宝 短信通知
-	public function alipay_notify(){
-		return true;
-	}
-
-	
 }
