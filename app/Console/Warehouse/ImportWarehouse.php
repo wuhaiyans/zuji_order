@@ -302,7 +302,7 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
                 //不存在检测单
                 $status = getReceiveStatus($receive_row['receive_status']);
                 $goodsStatus = getGoodsReceiveStatus($receive_row['receive_status']);
-                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','1','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".replaceBusinessKey($receive_row['business_key'])."'),";
+                $receive_insert_sql .= "('".$receive_no."','".$item['appid']."','".$item['order_no']."','".$receive_row['wuliu_channel_id']."','".$receive_row['wuliu_no']."','".($address_row['name']?replaceSpecialChar($address_row['name']):'')."','".$address_row['mobile']."','".$address_info."','".$status."','".replaceBusinessKeyType($receive_row['business_key'])."','".$receive_row['update_time']."','".$receive_row['create_time']."','".$receive_row['receive_time']."','0','0','0','".replaceBusinessKey($receive_row['business_key'])."'),";
                 $num++;
                 $receive_goods_insert_sql .= "('".$receive_no."','".$receive_row['wuliu_no']."','1','".$goods_row['goods_id']."','".$goods_row['sku_name']."','1','1','".$goodsStatus."','".$receive_row['update_time']."','0','0','0','0'),";
                 $num++;

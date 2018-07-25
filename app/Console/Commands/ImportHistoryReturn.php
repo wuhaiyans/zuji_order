@@ -10,6 +10,7 @@
 namespace App\Console\Commands;
 
 use App\Lib\Common\LogApi;
+use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
@@ -116,6 +117,8 @@ class ImportHistoryReturn extends Command
                         continue;
                     }
                     $success = $this->insertSelectReturn($values);
+                    //更新order_goods表记录
+
                     if (!$success) {
                         echo '导入退货error ' . date("Y-m-d H:i:s", time()) . "\n";
                         $errorReturnArr[] = $values['return_id'];
@@ -164,6 +167,17 @@ class ImportHistoryReturn extends Command
         $receiveSql = "SELECT *  FROM zuji_order2_receive WHERE order_no='{$orderNo}'";
         $returnData  =  $this->conn->select($receiveSql);
         return objectToArray($returnData) ? objectToArray($returnData)[0]: '';
+    }
+
+
+    private function setOrderGoodsStatus($orderNo,$bussness_key,$returnStatus,$refundNo)
+    {
+        $orderGoodStatusList = $this->returnOrderGoodsStatusMap($bussness_key);
+        $orderGoodsStatu = $orderGoodStatusList[$returnStatus];
+        return OrderGoods::where([
+            ['order_no', '=', $orderNo],
+        ])->update(['goods_status'=>$orderGoodsStatu,'business_key'=>$bussness_key, 'business_no'=>$refundNo]);
+
     }
 
 
@@ -230,6 +244,7 @@ class ImportHistoryReturn extends Command
             ];
         }
 
+        $refundNo   =   createNo(2);
         $datas += [
             'goods_no'      => $data['goods_id'],
             'order_no'      => $data['order_no'],
@@ -239,16 +254,17 @@ class ImportHistoryReturn extends Command
             'reason_text'   => $data['reason_text'],
             'user_id'       => $data['user_id'],
             'status'        => $this->returnStatusMap()[$data['return_status']],
-            'refund_no'  =>  createNo(2),
+            'refund_no'  =>  $refundNo,
             'old_refund_id' => $data['return_id'],
             'remark'        => $data['return_check_remark'],
             'create_time'  => $data['create_time'],
             'check_time'  => $data['return_check_time'],
             'update_time'  => $data['update_time'],
-
         ];
         if ($orderRefundData) unset($datas['refund_no']);
         $succsss = OrderReturn::updateOrCreate($datas);
+        //更新退货退款表记录
+        $this->setOrderGoodsStatus($data['order_no'],$bussness_key,$data['return_status'],$refundNo);
         return $succsss;
 
     }
@@ -269,6 +285,41 @@ class ImportHistoryReturn extends Command
             5=>4,
             6=>2,
         ];
+    }
+
+
+    /**
+     * 导入orderGoods表的记录
+     * Author: heaven
+     */
+    private function returnOrderGoodsStatusMap($businessKey)
+    {
+//        0：非启用；10： 租机中； 20：退货中 ，21 ：已退货； 30：  换货中， 31：已换货 ；40 ：还机中， 41：还机完成；50：买断中，
+//        51：买断完成； 60： 续租中， 61：续租完成；，71：已退款
+//
+//    0初始化 1提交申请 2同意 3审核拒绝 4已取消 5已收货 7退货完成 8换货完成 9已退款 10退款中 11换货已发货
+        //换货 $businessKey 3               2是退货
+        if ($businessKey==3) {
+            return [
+                1=>30,
+                2=>30,
+                3=>30,
+                4=>10,
+                5=>10,
+                6=>30,
+            ];
+        } else {
+
+            return [
+                1=>20,
+                2=>20,
+                3=>20,
+                4=>10,
+                5=>10,
+                6=>20,
+            ];
+        }
+
     }
 
     /**
