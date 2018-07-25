@@ -436,7 +436,7 @@ class MiniOrderController extends Controller
             $data = [
                 'out_order_no'=>$val['order_no'],//商户端订单号
                 'zm_order_no'=>$val['zm_order_no'],//芝麻订单号
-                'remark'=>'小程序系统取消订单操作',//订单操作说明
+                'remark'=>'小程序系统取消订单操作（定时取消）',//订单操作说明
                 'app_id'=>$val['app_id'],//小程序appid
             ];
             $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
@@ -450,6 +450,15 @@ class MiniOrderController extends Controller
                 \App\Lib\Common\LogApi::debug('小程序定时取消商户端订单失败',$val['order_no']);
                 continue;
             }
+            //用户取消订单写入日志系统
+            \App\Order\Modules\Repository\OrderLogRepository::add(
+                $val['user_id'],
+                $val['mobile'],
+                \App\Lib\PublicInc::Type_System,
+                $val['order_no'],
+                "取消订单",
+                '小程序定时取消商户端订单操作'
+            );
         }
     }
 }
