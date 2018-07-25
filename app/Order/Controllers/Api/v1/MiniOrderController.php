@@ -59,35 +59,63 @@ class MiniOrderController extends Controller
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
         $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
-        print_r($goods_info);die;
-        if( $goods_info[$params['sku_id']]['sku_info']['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+        $sku_info = $goods_info[$params['sku_id']]['sku_info'];
+        $spu_info = $goods_info[$params['sku_id']]['spu_info'];
+        //商品件数固定为1
+        $count = 1;
+        $name = $sku_info['sku_name'];
+        if( $sku_info['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+            //长租
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+1).' month'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($sku_info['zuqi'])+1).' month'));
+            //总租金
+            $total_amount = normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])+$spu_info['yiwaixian']);
+            //单月租金
+            $single_amount = $sku_info['shop_price'];
+            //总押金
+            $deposit = $sku_info['yajin'];
+            //分期数 短租为1期
+            $installmentCount = intval($sku_info['zuqi']);
         }else{
+            //短租
             $new_data = date('Y-m-d H:i:s');
-            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($goods_info[$params['sku_id']]['sku_info']['zuqi'])+30).' day'));
+            $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($sku_info['zuqi'])+30).' day'));
+            //总租金
+            $total_amount = normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])+$spu_info['yiwaixian']);
+            //单月租金
+            $single_amount = $sku_info['shop_price'];
+            //总押金
+            $deposit = $sku_info['yajin'];
+            //分期数 短租为1期
+            $installmentCount = 1;
         }
         $data = [
             'order_no' => $orderNo,
             'sku' => [$params],
             'zhima_params'=>[
-                'category'=>'',
-                'amount'=>'',
-                'deposit'=>'',
-                'out_order_no'=>'',
-                'overdue_time'=>'',
+                'amount'=>$total_amount,
+                'deposit'=>$deposit,
+                'out_order_no'=>$orderNo,
+                'overdue_time'=>$overdue_time,
                 'products'=>[
-                    'count'=>'',
-                    'amount'=>'',
-                    'deposit'=>'',
-                    'installmentCount'=>'',
-                    'name'=>'',
+                    'count'=>$count,
+                    'amount'=>$single_amount,
+                    'deposit'=>$deposit,
+                    'installmentCount'=>$installmentCount,
+                    'name'=>$name,
                 ],
             ],
         ];
         //redis 存储数据
         $values = Redis::set('dev:zuji:order:miniorder:temporaryorderno:'.$orderNo, json_encode($data));
-
+        //存储数据日志
+        $result = \App\Order\Modules\Repository\OrderMiniCreditRentRepository::add([
+            'order_no'=>$orderNo,
+            'data'=>json_encode($data),
+        ]);
+        if( !$result ){
+            \App\Lib\Common\LogApi::debug('小程序临时订单号请求记录失败',$result);
+        }
         if(!$values){
             return apiResponse([],ApiStatus::CODE_35001,'保存临时订单号失败');
         }

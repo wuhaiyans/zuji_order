@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\ApiStatus;
 use App\Lib\Risk\Risk;
 use App\Order\Modules\Repository\OrderRiskRepository;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\OrderYidunRepository;
 use Mockery\Exception;
 
@@ -93,7 +94,19 @@ class RiskComponnet implements OrderCreater
         if(empty($this->knight)){
             return true;
         }
+        //保存用户身份证信息
+        if(isset($this->knight['user_info']['card_img']) && !empty($this->knight['user_info']['card_img'])){
+            $b= OrderUserCertifiedRepository::updateCardImg($orderNo,$this->knight['user_info']['card_img']);
+            if(!$b){
+                $this->getOrderCreater()->setError('保存身份证信息失败');
+                return false;
+            }
+        }
+
         foreach ($this->knight as $k=>$v){
+            if($k=='user_info'){
+                continue;
+            }
             $score =0;
             $strategies= '';
             if($k=="zhima_score"){

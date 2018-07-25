@@ -340,7 +340,7 @@ class OrderBuyout
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
-				'tuihuanYajin'=>$buyout['yajin']
+				'tuihuanYajin'=>$goodsInfo['yajin']
 			]);
 		}
 
