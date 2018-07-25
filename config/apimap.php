@@ -291,6 +291,14 @@ return [
     'mini.order.ordercancel' => 'MiniOrderController@orderCancel',
     //小程序订单完成接口
     'mini.order.orderclose' => 'MiniOrderController@orderClose',
+    //小程序获取用户最新下单订单号接口
+    'mini.order.getorderno' => 'MiniOrderController@getOrderNo',
+    //小程序还机信息详情接口
+    'mini.order.givebackinfo' => 'MiniGivebackController@GivebackInfo',
+    //小程序订单还机提交申请接口
+    'mini.order.givebackcreate' => 'MiniGivebackController@GivebackCreate',
+    //小程序订单还机支付接口
+    'mini.order.givebackpay' => 'MiniGivebackController@GivebackPay',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************
