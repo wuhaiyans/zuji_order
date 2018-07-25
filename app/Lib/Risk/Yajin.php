@@ -28,6 +28,6 @@ class Yajin extends \App\Lib\BaseApi {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public static function calculate( array $params ):array{
-		return self::request('1', \config('risksystem.RISK_API'), 'fengkong.yajin.calculate', '1.0', $params);
+		return self::request('1', \config('risksystem.FENGKONG_API'), 'fengkong.yajin.calculate', '1.0', $params);
 	}
 }
