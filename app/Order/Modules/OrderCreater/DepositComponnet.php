@@ -61,18 +61,6 @@ class DepositComponnet implements OrderCreater
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
 
-        //未通过认证人脸识别
-        if($this->schema['user']['face']==0){
-            $this->deposit = false;
-        }
-        //未通过风控验证
-        if($this->schema['user']['risk']==0){
-            $this->deposit = false;
-        }
-        //风控整体策略
-        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
-            $this->deposit = false;
-        }
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
