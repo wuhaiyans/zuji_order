@@ -57,8 +57,6 @@ class ImportOrder extends Command
             93,94,95,96,97,98,122,123,131,132,
         ];
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
-        echo sql_profiler();echo "**";
-
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -67,7 +65,6 @@ class ImportOrder extends Command
             $arr =[];
             do {
                 $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->forPage($page,$limit)->get();
-                echo sql_profiler();die;
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
