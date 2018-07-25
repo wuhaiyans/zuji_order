@@ -38,7 +38,9 @@ class ImportHistoryInstalment extends Command
    * @return mixed
    */
   public function handle(){
-	  
+	 
+	$_count1 = 0;
+	$_count2 = 0;
 
 	$min_id = intval($this->option('min_id'));
 	$max_id = ($this->option('max_id'));
@@ -76,6 +78,7 @@ class ImportHistoryInstalment extends Command
 		  }
 		  
           foreach($result as &$item) {
+			++$_count1;
 			$bar->advance();
 			$last_id = $item['id'];
 			
@@ -91,7 +94,8 @@ class ImportHistoryInstalment extends Command
             // 去除小程序分期
             $isAllow = \App\Console\Commands\ImportOrder::isAllowImport($orderInfo['order_no']);
             if(!$isAllow){
-              continue;
+				++$_count2;
+				continue;
             }
 
             $data['id']               = $item['id'];
@@ -135,8 +139,8 @@ class ImportHistoryInstalment extends Command
           if(count($arr)>0){
             LogApi::notify("订单分期数据导入失败",$arr);
           }
-//        $bar->finish();
-        echo "导入成功";die;
+        $bar->finish();
+		echo "导入成功（{$_count1},{$_count2}）";die;
       }catch (\Exception $e){
         echo $e->getMessage();
         die;
