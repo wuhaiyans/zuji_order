@@ -43,4 +43,18 @@ class OrderUserCertifiedRepository
         $orderCertified =$order->toArray();
         return $orderCertified;
     }
+    /**
+     * 保存用户身份证信息
+     * @param $orderNo
+     * @return boolean
+     */
+    public static function updateCardImg($orderNo,$cardImg)
+    {
+        if (empty($orderNo)) {
+            return false;
+        }
+        $data['card_img'] =$cardImg;
+        return OrderUserCertified::where('order_no','=',$orderNo)->update($data);
+
+    }
 }
