@@ -43,7 +43,7 @@ class OrderMiniRepository
 
     /**
      * 根据订单编号获取单条订单信息
-     * @param string $orderNo 订单编号
+     * @param string $orderNo 内部订单编号
      * @return array $miniOrderInfo 小程序订单基础信息|空<br/>
      * $orderInfo = [<br/>
      *		'id' => '',//订单自增id<br/>

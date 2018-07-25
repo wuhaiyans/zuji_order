@@ -542,12 +542,15 @@ class OrderRepository
         
 
         $orderList = DB::table('order_info')
-            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text')
+            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
             ->join('order_info_visit',function($join){
                 $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
