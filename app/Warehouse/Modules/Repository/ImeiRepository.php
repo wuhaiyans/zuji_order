@@ -63,7 +63,7 @@ class ImeiRepository
                 "create_time"=>$time,
                 "status"=>1,
             ];
-            DB::table('zuji_imei')->insert($row);
+            Imei::insert($row);
 
             //DB::table('zuji_imei')->insert($data);
             //Imei::insert($data);
