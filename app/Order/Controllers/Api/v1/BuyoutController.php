@@ -330,7 +330,7 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");
         }
-        $ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
+        $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
@@ -444,7 +444,7 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");
         }
-        $ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
+        $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
