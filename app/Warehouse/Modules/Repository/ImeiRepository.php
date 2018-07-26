@@ -33,9 +33,9 @@ class ImeiRepository
     {
 
         try {
-            DB::beginTransaction();
+            //DB::beginTransaction();
 
-            DB::setDefaultConnection('warehouse');
+            //DB::setDefaultConnection('warehouse');
 
             $time = time();
 
@@ -50,7 +50,7 @@ class ImeiRepository
 //                DB::table('zuji_imei')->insert($data[$k]);
 //            }
             $row = [
-                "imei"=>"0K1UF4C00E00VR",
+                "imei"=>"86803003489506801",
                 "price"=>5311,
                 "apple_serial"=>"dxxxxxxx",
                 "brand"=>"苹果",
@@ -68,9 +68,9 @@ class ImeiRepository
             //DB::table('zuji_imei')->insert($data);
             //Imei::insert($data);
 
-            DB::commit();
+            //DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
+            //DB::rollBack();
 
             throw new \Exception($e->getMessage());
         }
