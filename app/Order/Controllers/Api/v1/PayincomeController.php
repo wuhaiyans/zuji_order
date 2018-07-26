@@ -18,10 +18,14 @@ class PayincomeController extends Controller
      *
      */
     public function payIncomeWhere(){
+        $business_type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
+        unset($business_type[1]);
+        unset($business_type[8]);
+
         $list = [
             'create_time'       => "",  //日期范围
             'order_no'          => "",  //日期范围
-            'business_type'     => \App\Order\Modules\Inc\OrderStatus::getBusinessType(),
+            'business_type'     => $business_type,
             'appid'             => \App\Order\Modules\Inc\OrderPayIncomeStatus::getBusinessType(),
             'channel'           => \App\Order\Modules\Repository\Pay\Channel::getBusinessType(),
             'amount'            => "",  //金额范围
