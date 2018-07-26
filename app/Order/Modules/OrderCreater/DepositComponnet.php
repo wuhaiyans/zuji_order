@@ -34,6 +34,7 @@ class DepositComponnet implements OrderCreater
     private $flag = true;
 
     private $deposit_detail='';
+    private $deposit_msg ='';
 
     private $orderNo='';
 
@@ -88,7 +89,8 @@ class DepositComponnet implements OrderCreater
                     }
 
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
-                    $this->deposit_detail = isset($deposit['_msg'])?$deposit['_msg']:"";
+                    $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
+                    $this->deposit_detail = $deposit['jianmian_detail'];
 
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
@@ -117,7 +119,7 @@ class DepositComponnet implements OrderCreater
             return false;
         }
         //保存减免押金详情信息
-        $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail);
+        $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);
         if(!$b){
             $this->getOrderCreater()->setError('保存用户减免押金详情信息失败');
             return false;
