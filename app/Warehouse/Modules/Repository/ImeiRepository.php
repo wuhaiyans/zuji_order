@@ -50,7 +50,7 @@ class ImeiRepository
 //                DB::table('zuji_imei')->insert($data[$k]);
 //            }
             $row = [
-                "imei"=>"86803003489506801",
+                "imei"=>"O86803X003489506801",
                 "price"=>5311,
                 "apple_serial"=>"dxxxxxxx",
                 "brand"=>"苹果",
