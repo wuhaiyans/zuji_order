@@ -319,6 +319,7 @@ class MiniOrderController extends Controller
         }
         //查询用户最新订单
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] );
+        var_dump($orderInfo);die;
         if( empty($orderInfo) ){
             \App\Lib\Common\LogApi::info('本地小程序查询用户订单不存在',$userinfo['uid']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询用户订单不存在');
