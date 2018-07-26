@@ -279,8 +279,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"该订单商品正买断进行中");
         }
         //获取订单信息
-        $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->getInfoById($goodsInfo['order_no'],$params['user_id']);
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
         //验证商品是否冻结
         if($orderInfo['freeze_type']>0){
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
@@ -403,8 +402,7 @@ class BuyoutController extends Controller
         }
         $goodsInfo = $goodsObj->getData();
         //获取订单信息
-        $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->getInfoById(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
         if(empty($orderInfo)){
             return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
         }
