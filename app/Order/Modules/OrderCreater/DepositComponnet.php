@@ -91,8 +91,9 @@ class DepositComponnet implements OrderCreater
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
                     }
-                    LogApi::info("确认订单调用押金接口",$deposit);
+                    LogApi::debug("确认订单调用押金接口:".$this->orderNo,$deposit);
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
+
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
                     if (!empty($deposit['jianmian_detail'])){
                         foreach ($deposit['jianmian_detail'] as $key=>$value){
@@ -100,6 +101,7 @@ class DepositComponnet implements OrderCreater
 
                         }
                     }
+                    LogApi::debug("减免金额:".$this->orderNo,$jianmian);
 
                     $this->deposit_detail = json_encode($deposit['jianmian_detail']);
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);

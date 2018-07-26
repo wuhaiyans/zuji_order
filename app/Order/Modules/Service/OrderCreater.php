@@ -324,6 +324,7 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
+            LogApi::debug("确认订单返回",$result);
             return $result;
         } catch (\Exception $exc) {
             LogApi::info("确认订单异常：".$exc->getMessage());
