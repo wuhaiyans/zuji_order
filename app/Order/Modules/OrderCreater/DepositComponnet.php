@@ -95,6 +95,7 @@ class DepositComponnet implements OrderCreater
                     if (!empty($deposit['jianmian_detail'])){
                         foreach ($deposit['jianmian_detail'] as $key=>$value){
                             $deposit['jianmian_detail'][$key]['jianmian'] = $deposit['jianmian_detail'][$key]['jianmian']/100;
+
                         }
                     }
 

@@ -119,7 +119,7 @@ class DeliveryDetail {
                 'machine_no'=>$v['machine_value'],
                 'imei'=>$imei,
                 'zuqi'=>$v['zuqi'],
-                'zujin'=>$v['amount_after_discount']+$v['yajin'],
+                'zujin'=>$v['amount_after_discount'],
                 'mianyajin'=>$v['yajin'],
                 'yiwaixian'=>$v['insurance'],
                 'market_price'=>$v['market_price'],
