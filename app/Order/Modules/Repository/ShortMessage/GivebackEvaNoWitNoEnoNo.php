@@ -78,7 +78,7 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
         }
         $amount = $this->data;
 
-        $zhifuzonge = $zujinamount + $amount['compensate_amount'];
+        $zhifuzonge = $zujinamount + $amount['amount'];
 
         // 短信参数
         $dataSms =[
@@ -86,7 +86,7 @@ class GivebackEvaNoWitNoEnoNo implements ShortMessage {
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
             'zhifuZonge'        => $zhifuzonge . "元",
-            'compensateAmount'  => $amount['compensate_amount'] . "元",
+            'compensateAmount'  => $amount['amount'] . "元",
             'shengyuZujin'      => $zujinamount . "元",
         ];
 
