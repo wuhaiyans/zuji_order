@@ -605,7 +605,17 @@ class OrderRepository
         if(!$order){
             return false;
         }
-        return $order->toArray();
+        $orderArr = $order->toArray();
+        $goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsByOrderNo($orderArr['order_no']);
+        if(!$goods){
+            return false;
+        }
+        $goodsArr = $goods->toArray();
+        $data = [
+            'orderArr'=>$orderArr,
+            'goodsArr'=>$goodsArr,
+        ];
+        return $data;
 
     }
 }
