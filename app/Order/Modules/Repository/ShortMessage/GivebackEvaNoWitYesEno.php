@@ -40,7 +40,6 @@ class GivebackEvaNoWitYesEno implements ShortMessage {
         $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
         $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
 
-
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($orderGivebackInfo['order_no']);
         if( !$orderInfo ){
@@ -61,30 +60,20 @@ class GivebackEvaNoWitYesEno implements ShortMessage {
             LogApi::debug("扣款成功短信-商品详情错误",$orderGivebackInfo);
             return false;
         }
-
         // 短息模板
         $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
             return false;
         }
 
-        $amount = 0;
-        //分期数据
-        $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$this->business_no,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
-        if( !empty($instalmentList[$this->business_no]) ){
-            foreach ($instalmentList[$this->business_no] as $instalmentInfo) {
-                $amount += $instalmentInfo['amount'];
-            }
-        }
         $amount = $this->data;
         // 短信参数
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'compensateAmount'  => $amount['compensate_amount'] . "元",
+            'compensateAmount'  => $amount['amount'] . "元",
         ];
-
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

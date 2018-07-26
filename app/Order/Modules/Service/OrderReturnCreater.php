@@ -1286,8 +1286,9 @@ class OrderReturnCreater
                 //换货状态流
                 $buss->setStateFlow($stateFlow['barterStateFlow']);
             }
-            //business_no值为空时，说明还没创建申请
-            if(!isset($params['business_no'])){
+            $return=GoodsReturn::getReturnGoodsInfo($params['goods_no']);
+            //$return值为空时，说明还没创建申请
+            if(!$return){
                 $buss->setStatus("A");
                 //获取退换货原因
                 $reasons = ReturnStatus::getReturnQuestionList();
@@ -1299,9 +1300,12 @@ class OrderReturnCreater
 					];
 				}
                 $buss->setReturnReason($_arr);
-            }elseif(isset($params['business_no'])){
+            }else{
                 //根据业务编号获取退货单信息
-                $return=GoodsReturn::getReturnByRefundNo($params['business_no']);
+              //  $return=GoodsReturn::getReturnByRefundNo($params['business_no']);
+              //  if(!$return){
+              //     return false;
+             //   }
                 $return_info=$return->getData();
                 $buss->setRefundNo($return_info['refund_no']);
                 if($return_info['status']==ReturnStatus::ReturnCreated){

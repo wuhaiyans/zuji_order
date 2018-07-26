@@ -56,6 +56,7 @@ class OrderGoods
 	 * ]
 	 */
 	public function getGoodsInfo( $goodsNo ) {
+		//var_dump($goodsNo);
 		//判断参数
 		if( empty( $goodsNo ) ) {
 			set_apistatus(\App\Lib\ApiStatus::CODE_92300, '获取商品信息时商品编号参数缺失！');

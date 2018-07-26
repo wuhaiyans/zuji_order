@@ -3,7 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
-use App\Lib\PublicFunc;
+use App\Lib\Excel;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
@@ -23,7 +23,7 @@ use App\Order\Modules\Repository\GoodsLogRepository;
 
 /**
  * 订单买断接口控制器
- * @var obj BuyoutController
+ * @var  BuyoutController
  * @author limin<limin@huishoubao.com.cn>
  */
 
@@ -210,6 +210,7 @@ class BuyoutController extends Controller
             '应退押金',
             '状态',
         ];
+        $data = [];
         foreach($orderList['data'] as &$item){
             $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
             $item['realname'] = $userList[$item['order_no']]['realname'];
@@ -234,8 +235,7 @@ class BuyoutController extends Controller
             ];
         }
 
-        return \App\Lib\Excel::write($data, $headers,'后台买断单列表数据导出-');
-
+        return Excel::write($data, $headers,'后台买断单列表数据导出-');
 
     }
     /*
@@ -286,6 +286,7 @@ class BuyoutController extends Controller
         }
 
         //按天处理
+        $triggerTime = 0;
         if($goodsInfo['zuqi_type'] == 1){
             $triggerTime = config("web.day_expiry_process_days");
         }
@@ -339,7 +340,7 @@ class BuyoutController extends Controller
         BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
             'mobile'=>$orderInfo['mobile'],
             'realName'=>$orderInfo['realname'],
-            'buyoutPrice'=>$data['amount'],
+            'buyoutPrice'=>normalizeNum($data['amount'])."元",
         ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
@@ -358,14 +359,11 @@ class BuyoutController extends Controller
         GoodsLogRepository::add($log);
         DB::commit();
         //加入队列执行超时取消订单
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
-            'method' => 'api.buyout.cancel',
-            'params' => [
-                'buyout_no'=>$data['buyout_no'],
-                'user_id'=>$data['user_id'],
-            ],
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API")."/CancelOrderBuyout", [
+            'buyout_no'=>$data['buyout_no'],
+            'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -453,7 +451,7 @@ class BuyoutController extends Controller
         BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
             'mobile'=>$orderInfo['mobile'],
             'realName'=>$orderInfo['realname'],
-            'buyoutPrice'=>$data['amount'],
+            'buyoutPrice'=>normalizeNum($data['amount'])."元",
         ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断","创建买断成功");
@@ -477,7 +475,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
