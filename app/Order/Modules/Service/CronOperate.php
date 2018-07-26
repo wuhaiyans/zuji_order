@@ -264,7 +264,7 @@ class CronOperate
                 'goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,
                 'update_time'=>time()
             ];
-            $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->update($data);
+            $ret = OrderGoods::where(['goods_no'=>$value['goods_no'],'goods_status'=>Inc\OrderGoodStatus::BUY_OFF])->save($data);
             if(!$ret){
                 DB::rollBack();
                 continue;
