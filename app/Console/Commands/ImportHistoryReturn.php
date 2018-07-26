@@ -111,11 +111,11 @@ class ImportHistoryReturn extends Command
                 foreach($newData as $keys=>$values) {
 
 
-                    if (!ImportOrder::isAllowImport($values['order_no'])){
-
-                        $continueReturnArr[] = $values['return_id'];
-                        continue;
-                    }
+//                    if (!ImportOrder::isAllowImport($values['order_no'])){
+//
+//                        $continueReturnArr[] = $values['return_id'];
+//                        continue;
+//                    }
                     $success = $this->insertSelectReturn($values);
                     //更新order_goods表记录
 
