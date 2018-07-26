@@ -13,7 +13,7 @@ class ImportHistoryWithhold extends Command
      *
      * @var string
      */
-    protected $signature = 'command:Withhold';
+	protected $signature = 'command:Withhold  {--begin_time=}  {--end_time=}';
 
     /**
      * The console command description.
@@ -39,6 +39,12 @@ class ImportHistoryWithhold extends Command
      */
     public function handle()
     {
+		$begin_time = strtotime($this->option('begin_time'));
+		$end_time = strtotime($this->option('end_time'));
+		if( $begin_time >= $end_time ){
+			echo "时间错误\n";exit;
+		}
+		
 
         $total = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
             ->join('zuji_member',function ($join) {
@@ -47,12 +53,14 @@ class ImportHistoryWithhold extends Command
             })
             ->where([
                 ['zuji_withholding_alipay.status', '=', 1],
+				['zuji_withholding_alipay.sign_time', '>=', date('Y-m-d H:i:s',$begin_time)],
+				['zuji_withholding_alipay.sign_time', '<', date('Y-m-d H:i:s',$end_time)],
             ])
             ->count('zuji_withholding_alipay.id');
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 300;
+            $limit  = 500;
             $page   = 1;
             $totalpage = ceil($total/$limit);
 			$arr = [];
@@ -67,7 +75,9 @@ class ImportHistoryWithhold extends Command
                     ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
                     ->where([
                         ['zuji_withholding_alipay.status', '=', 1],
-                        ['zuji_withholding_notify_alipay.status', '=', 'NORMAL']
+                        ['zuji_withholding_notify_alipay.status', '=', 'NORMAL'],
+						['zuji_withholding_alipay.sign_time', '>=', date('Y-m-d H:i:s',$begin_time)],
+						['zuji_withholding_alipay.sign_time', '<', date('Y-m-d H:i:s',$end_time)],
                     ])
 
                     ->groupBy('zuji_withholding_alipay.agreement_no')
