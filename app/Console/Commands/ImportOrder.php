@@ -72,9 +72,7 @@ class ImportOrder extends Command
             do {
                 $begin = $orderId+1;
                 $whereArra[] = ['order_id','>=',$begin];
-                $end =$orderId+$limit+1;
-                $whereArra[] = ['order_id','<',$end];
-                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
+                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->take($limit)->orderBy('order_id','asc')->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
 
