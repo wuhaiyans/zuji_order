@@ -280,8 +280,6 @@ class DeliveryController extends Controller
 
         try {
             DB::beginTransaction();
-            //修改发货信息
-            $this->delivery->send($params);
 
             $result = $this->_info($params['delivery_no']);
 
@@ -299,6 +297,9 @@ class DeliveryController extends Controller
 
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+
+            //修改发货信息
+            $this->delivery->send($params);
 
             DB::commit();
         } catch (\Exception $e) {
