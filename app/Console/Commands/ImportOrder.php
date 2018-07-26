@@ -63,16 +63,15 @@ class ImportOrder extends Command
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
+            $orderId =0;
 
             do {
                 sql_profiler();
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
-                $order =  $this->conn->table('zuji_order2')->orderBy('order_id','asc')->forPage($page)->take(1)->first();
-                $order=objectToArray($order);
-                $whereArra[] = ['order_id','>=',$order['order_id']];
+                $whereArra[] = ['order_id','>=',$orderId+1];
                 $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
-                exit;
+
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -234,6 +233,7 @@ class ImportOrder extends Command
                         }
                     }
                     $bar->advance();
+                    $orderId =$v['order_id'];
                 }
                 ++$page;
 
