@@ -140,6 +140,7 @@ class Config {
 
 				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
 				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END		=> 'SMS_113461161', //买断支付完成短信
 
                 SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461005', //退货审核不通过
                 SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461014', //退货检测合格

@@ -46,7 +46,7 @@ class OrderUserCertified extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','certified','certified_platform','credit','realname','cret_no','card_img','deposit_detail','create_time'];
+    protected $fillable = ['order_no','certified','certified_platform','credit','realname','cret_no','card_img','deposit_msg','deposit_detail','create_time'];
 
 
 }

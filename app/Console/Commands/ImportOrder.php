@@ -56,15 +56,22 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
+        $whereArra = [];
+        $whereArra[] = ['create_time','<=','1532588400'];
+        $status =[2,3,10,21,23,26];
+        $total = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit = 5000;
+            $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
+            $orderId =0;
+
             do {
-                $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->forPage($page,$limit)->get();
+                $whereArra[] = ['order_id','>=',$orderId+1];
+                $whereArra[] = ['order_id','<',$orderId+$limit+1];
+                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -125,8 +132,8 @@ class ImportOrder extends Command
                         'receive_time'=>intval($delivery['receive_time']),//
                         'complete_time'=>intval($status['complete_time']),//
                     ];
-                    $res =Order::updateOrCreate($orderData);
-                    if(!$res->getQueueableId()){
+                    $res =Order::insert($orderData);
+                    if(!$res){
                         $arr['order'][$k] =$v['order_no'];
                     }
                     //获取服务周期
@@ -176,8 +183,8 @@ class ImportOrder extends Command
                         'create_time'=>intval($goods_info['create_time']),
                         'update_time'=>intval($goods_info['update_time']),
                     ];
-                    $res =OrderGoods::updateOrCreate($goodsData);
-                    if(!$res->getQueueableId()){
+                    $res =OrderGoods::insert($goodsData);
+                    if(!$res){
                         $arr['goods'][$k] =$goodsData;
                     }
                     /**
@@ -226,9 +233,10 @@ class ImportOrder extends Command
                         }
                     }
                     $bar->advance();
+                    $orderId =$v['order_id'];
                 }
-                $page++;
-                sleep(2);
+                ++$page;
+
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
@@ -256,7 +264,11 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(['business_key'=>1,'order_no'=>$order_no])->whereIn("appid",$appid)->count();
+        $whereArra = [];
+        $whereArra[] = ['order_no','=',$order_no];
+        $whereArra[] = ['create_time','<=','1532588400'];
+        $status =[2,3,10,21,23,26];
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
         if($total >0){
             return true;
         }
@@ -420,7 +432,7 @@ class ImportOrder extends Command
                 break;
             //退款中
             case 9:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //已退款
             case 10:
@@ -432,39 +444,39 @@ class ImportOrder extends Command
                 break;
             //用户拒签
             case 12:
-                $array = [ 'order_status'=>5,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>5,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货审核中
             case 13:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //退货中
             case 14:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //平台已收货
             case 15:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测合格
             case 16:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //检测不合格
             case 17:
-                $array = [ 'order_status'=>6,'freeze_type'=>1,'goods_status'=>20,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>20,'complete_time'=>0];
                 break;
             //换货中
             case 18:
-                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>30,'complete_time'=>0];
                 break;
             //回寄中
             case 19:
-                $array = [ 'order_status'=>6,'freeze_type'=>4,'goods_status'=>30,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>30,'complete_time'=>0];
                 break;
             //买断中
             case 20:
-                $array = [ 'order_status'=>6,'freeze_type'=>3,'goods_status'=>50,'complete_time'=>0];
+                $array = [ 'order_status'=>6,'freeze_type'=>0,'goods_status'=>50,'complete_time'=>0];
                 break;
             //已买断
             case 21:

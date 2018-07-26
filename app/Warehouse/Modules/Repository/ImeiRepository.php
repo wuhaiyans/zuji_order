@@ -32,25 +32,27 @@ class ImeiRepository
     public static function import($data)
     {
 
-
         try {
-            DB::beginTransaction();
-
-            DB::setDefaultConnection('warehouse');
+            //DB::beginTransaction();
+            //DB::setDefaultConnection('warehouse');
 
             $time = time();
 
-            foreach ($data as &$d) {
-                $d['create_time'] = $d['update_time'] = $time;
-                $d['status'] = 1;
-            }unset($d);
+//            foreach ($data as &$d) {
+//                $d['create_time'] = $d['update_time'] = $time;
+//                $d['status'] = 1;
+//            }unset($d);
+            foreach ($data as $k=>$item) {
+                $data[$k]['create_time'] = $time;
+                $data[$k]['update_time'] = $time;
+                $data[$k]['status'] = 1;
+                Imei::insert($data[$k]);
+            }
 
-
-            DB::table('zuji_imei')->insert($data);
-
-            DB::commit();
+            //DB::table('zuji_imei')->insert($data);
+            //DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
+            //DB::rollBack();
 
             throw new \Exception($e->getMessage());
         }
