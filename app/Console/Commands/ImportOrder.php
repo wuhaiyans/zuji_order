@@ -66,12 +66,11 @@ class ImportOrder extends Command
             $orderId =0;
 
             do {
-                sql_profiler();
+
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
                 $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
-exit;
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
