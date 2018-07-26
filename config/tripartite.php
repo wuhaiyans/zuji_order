@@ -12,7 +12,7 @@ return [
     'Customer_Service_Address' =>"深圳市南山区高新南九道威新软件园8号楼7层",
     'Customer_Service_Name' =>"拿趣用",
     'Fengkong_Score'=>env("ORDER_SCORE",50),
-    'Interior_Goods_Url' =>env("GOODS_API"),
+    'Interior_Goods_Url' =>env("GOODS_API",'http://biz.nqyong.com:1081/api.php'),
     'Interior_Goods_Request_data'=>[
         'appid'=>1,
         'sign_type'=>'MD5',
@@ -20,7 +20,7 @@ return [
         'timestamp'=>date("Y-m-d H:i:s"),
         'version'=>'1.0',
     ],
-    'Interior_Fengkong_Url' =>env("FENGKONG_API"),
+    'Interior_Fengkong_Url' =>env("FENGKONG_API",'http://risk.nqyong.com:1081/api'),
     'Interior_Fengkong_Request_data'=>[
         'appid'=>1,
         'version'=>'1.0',
@@ -35,7 +35,7 @@ return [
         'version'=>'1.0',
     ],
     //收发货
-    'warehouse_api_uri' => env('WAREHOUSE_API'),
+    'warehouse_api_uri' => env('WAREHOUSE_API','http://order.nqyong.com:1081/api'),
 
     /*********电子合同接口***********/
     //电子合同创建
