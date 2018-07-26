@@ -336,13 +336,13 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        $result = BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
             'mobile'=>$orderInfo['mobile'],
             'realName'=>$orderInfo['realname'],
             'buyoutPrice'=>$data['amount'],
         ]);
         //插入订单日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断",json_encode($result));
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
         //插入订单设备日志
         $log = [
             'order_no'=>$data['order_no'],
