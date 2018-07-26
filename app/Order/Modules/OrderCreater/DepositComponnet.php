@@ -88,7 +88,7 @@ class DepositComponnet implements OrderCreater
                     }
 
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
-                    $this->deposit_detail = $deposit['_msg'];
+                    $this->deposit_detail = isset($deposit['_msg'])?$deposit['_msg']:"";
 
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }

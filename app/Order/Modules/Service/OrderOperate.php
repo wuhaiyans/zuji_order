@@ -1003,20 +1003,20 @@ class OrderOperate
                 $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
                 $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
                 $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? $orderOperateData['zm_order_no'];
-                if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
-                    $params = [
-                    'payType' => $values['pay_type'],//支付方式 【必须】<br/>
-                    'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
-                    'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
-                    'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
-
-                    'business_key' => Inc\OrderStatus::BUSINESS_ZUJI,//Price 预授权金额，单位：元<br/>
-                    'business_no' => $values['order_no'],//Price 预授权金额，单位：元<br/>
-	        ];
-//                    LogApi::debug('客户端订单列表支付信息参数', $params);
-                    $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
-//                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
-                }
+//                if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
+//                    $params = [
+//                    'payType' => $values['pay_type'],//支付方式 【必须】<br/>
+//                    'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
+//                    'userId' => $param['userinfo']['uid'],//业务用户ID<br/>
+//                    'fundauthAmount' => $values['order_yajin'],//Price 预授权金额，单位：元<br/>
+//
+//                    'business_key' => Inc\OrderStatus::BUSINESS_ZUJI,//Price 预授权金额，单位：元<br/>
+//                    'business_no' => $values['order_no'],//Price 预授权金额，单位：元<br/>
+//	        ];
+////                    LogApi::debug('客户端订单列表支付信息参数', $params);
+//                    $orderListArray['data'][$keys]['payInfo'] = self::getPayStatus($params);
+////                    LogApi::debug('客户端订单列表支付信息返回的值', $orderListArray['data'][$keys]['payInfo']);
+//                }
 
             }
 

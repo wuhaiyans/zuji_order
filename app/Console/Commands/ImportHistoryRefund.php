@@ -254,11 +254,11 @@ class ImportHistoryRefund extends Command
         } else {
 
             return [
-                1=>20,
-                2=>20,
-                3=>20,
+                1=>70,
+                2=>70,
+                3=>70,
                 4=>71,
-                5=>20,
+                5=>70,
             ];
         }
 
