@@ -238,7 +238,7 @@ class SkuComponnet implements OrderCreater
                 $amount_after_discount =0.00;
             }
 
-            $this->orderZujin =normalizeNum($amount_after_discount+$spuInfo['yiwaixian']);
+            $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
 
             $arr['sku'][] = [
@@ -278,7 +278,7 @@ class SkuComponnet implements OrderCreater
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00,
-                    'deposit_yajin' => normalizeNum($deposit_yajin),
+                    'deposit_yajin' => $this->orderYajin,
                     'amount_after_discount'=>normalizeNum($amount_after_discount),
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
