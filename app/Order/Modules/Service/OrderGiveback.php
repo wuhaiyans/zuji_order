@@ -376,7 +376,7 @@ class OrderGiveback
 			//发送短信
 			$notice = new \App\Order\Modules\Service\OrderNotice(
 				\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-				$params['business_no'],
+				$orderGivebackInfo['goods_no'],
 				"GivebackReturnDeposit");
 			$notice->notify();
 
