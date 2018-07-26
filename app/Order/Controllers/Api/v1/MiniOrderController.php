@@ -55,6 +55,8 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
+        //开启事务
+        DB::beginTransaction();
         //获取订单号
         $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
         //获取商品信息
