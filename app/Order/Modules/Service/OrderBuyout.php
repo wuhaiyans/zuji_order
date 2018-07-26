@@ -359,7 +359,7 @@ class OrderBuyout
 		$orderLog = [
 				'uid'=>$userInfo['uid'],
 				'username'=>$userInfo['username'],
-				'type'=>$userInfo['username'],
+				'type'=>$userInfo['type'],
 				'order_no'=>$userInfo['username'],
 				'title'=>"买断完成",
 				'msg'=>"买断结束",
