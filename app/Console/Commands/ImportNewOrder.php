@@ -8,15 +8,16 @@ use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
-class ImportOrder extends Command
+class ImportNewOrder extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportOrder';
+    protected $signature = 'command:ImportNewOrder';
 
     /**
      * The console command description.
@@ -56,8 +57,19 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
+
         $status =[2,3,10,21,23,26];
-        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
+        $countWhereArra = [];
+        $countWhereArra[] = ['create_time','<=','1532588400'];
+
+        $orWhere[] = ['create_time','>','1532588400'];
+        $status =[2,3,10,21,23,26];
+        //3点之前非关闭的订单，3点之后所有订单
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
+            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                $query->where(array(['create_time','>','1532588400']));
+            })->count();
+//        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 500;
@@ -65,12 +77,12 @@ class ImportOrder extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             $orderId =0;
-
             do {
 
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
+
                 $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
@@ -271,7 +283,12 @@ class ImportOrder extends Command
         $whereArra[] = ['order_no','=',$order_no];
         $whereArra[] = ['create_time','<=','1532588400'];
         $status =[2,3,10,21,23,26];
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
+        //3点之前非关闭的订单，3点之后所有订单
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($whereArra)->whereNotIn('status', $status)
+            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                $query->where(array(['create_time','>','1532588400']));
+
+            })->count();
         if($total >0){
             return true;
         }
