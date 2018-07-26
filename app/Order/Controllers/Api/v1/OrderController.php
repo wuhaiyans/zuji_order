@@ -68,9 +68,9 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
         }
 
-        if($userType!=2 && empty($userInfo)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-        }
+//        if($userType!=2 && empty($userInfo)){
+//            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+//        }
         if(empty($payChannelId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
         }
@@ -84,7 +84,7 @@ class OrderController extends Controller
             'appid'		=> $appid,
             'sku'		=> $sku,
             'coupon'	=> $coupon,
-            'user_id'	=> $params['userinfo']['uid'],  //增加用户ID
+            'user_id'	=> 18,//$params['userinfo']['uid'],  //增加用户ID
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->confirmation( $data );
