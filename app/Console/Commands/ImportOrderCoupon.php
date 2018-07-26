@@ -56,6 +56,9 @@ class ImportOrderCoupon extends Command
                         if(!ImportOrder::isAllowImport($v['order_no'])){
                             continue;
                         }
+                        if(empty($v['order_no'])){
+                            continue;
+                        }
                         $couponData = [
                             'coupon_no' => $v['coupon_no'],
                             'coupon_id' => $v['coupon_id'],
