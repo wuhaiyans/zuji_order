@@ -120,7 +120,7 @@ class DeliveryDetail {
                 'imei'=>$imei,
                 'zuqi'=>$v['zuqi'],
                 'zujin'=>$v['amount_after_discount']+$v['yajin'],
-                'mianyajin'=>$v['goods_yajin']-$v['yajin'],
+                'mianyajin'=>$v['yajin'],
                 'yiwaixian'=>$v['insurance'],
                 'market_price'=>$v['market_price'],
             ];
