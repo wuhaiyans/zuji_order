@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
@@ -431,6 +432,19 @@ class OrderBuyout
 			DB::rollBack();
 			return false;
 		}
+		//更新订单商品状态
+		$data = [
+				'business_key' => 0,
+				'business_no' => '',
+				'goods_status'=>OrderGoodStatus::RENTING_MACHINE,
+				'update_time'=>time()
+		];
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$data);
+		if(!$ret){
+			DB::rollBack();
+			return false;
+		}
+		//取消买断单
 		$ret = OrderBuyoutRepository::setOrderBuyoutCancel($buyout['id'],$params['user_id']);
 		if(!$ret){
 			DB::rollBack();
