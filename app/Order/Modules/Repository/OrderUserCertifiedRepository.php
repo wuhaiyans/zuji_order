@@ -62,12 +62,13 @@ class OrderUserCertifiedRepository
      * @param $orderNo
      * @return boolean
      */
-    public static function updateDepoistDetail($orderNo,$depositDetail)
+    public static function updateDepoistDetail($orderNo,$depositDetail,$depositMsg)
     {
         if (empty($orderNo)) {
             return false;
         }
         $data['deposit_detail'] =$depositDetail;
+        $data['deposit_msg'] =$depositMsg;
         return OrderUserCertified::where('order_no','=',$orderNo)->update($data);
 
     }

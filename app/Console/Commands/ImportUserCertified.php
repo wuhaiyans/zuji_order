@@ -60,6 +60,7 @@ class ImportUserCertified extends Command
                             'credit'=>$v['credit'],
                             'card_img'=>'',
                             'deposit_detail'=>'',
+                            'deposit_msg'=>'',
                             'realname'=>$v['realname'],
                             'cret_no'=>$v['cert_no'],
                             'create_time'=>$v['create_time'],

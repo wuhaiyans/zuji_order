@@ -33,9 +33,8 @@ class ImeiRepository
     {
 
         try {
-            DB::beginTransaction();
-
-            DB::setDefaultConnection('warehouse');
+            //DB::beginTransaction();
+            //DB::setDefaultConnection('warehouse');
 
             $time = time();
 
@@ -47,15 +46,13 @@ class ImeiRepository
                 $data[$k]['create_time'] = $time;
                 $data[$k]['update_time'] = $time;
                 $data[$k]['status'] = 1;
-                DB::table('zuji_imei')->insert($data[$k]);
+                Imei::insert($data[$k]);
             }
 
             //DB::table('zuji_imei')->insert($data);
-            //Imei::insert($data);
-
-            DB::commit();
+            //DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
+            //DB::rollBack();
 
             throw new \Exception($e->getMessage());
         }
