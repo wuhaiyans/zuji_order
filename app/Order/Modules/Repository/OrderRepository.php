@@ -601,12 +601,12 @@ class OrderRepository
             return false;
         }
         $where[]=['user_id','=',$user_id];
+        $where[]=['order_status', '<=', OrderStatus::OrderInService];
         $order =  Order::query()->where($where)->orderBy('create_time','desc')->first();
         if(!$order){
             return false;
         }
         $orderArr = $order->toArray();
-        print_r($orderArr);die;
         $goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsByOrderNo($orderArr['order_no']);
         if(!$goods){
             return false;
