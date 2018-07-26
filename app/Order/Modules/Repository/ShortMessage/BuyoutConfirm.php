@@ -20,7 +20,7 @@ class BuyoutConfirm{
            * ]
            * @return json
            */
-	public static function notify($channel_id,$class,$data){
+	public static function deposit($channel_id,$class,$data){
 
 		if(!$channel_id){
 			return false;
@@ -49,5 +49,5 @@ class BuyoutConfirm{
             'buyoutPrice'=>$data['amount'],
 		]);
 	}
-	
+
 }
