@@ -59,18 +59,19 @@ class ImportOrder extends Command
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit = 2000;
+            $limit = 5000;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             $orderId =0;
 
             do {
+                sql_profiler();
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
                 $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
-
+exit;
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
