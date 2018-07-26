@@ -612,6 +612,7 @@ class OrderRepository
             return false;
         }
         $goodsArr = $goods->toArray();
+        print_r($goodsArr);die;
         //计算免押金
         $goodsArr['mianyajin'] = normalizeNum($goodsArr['goods_yajin'] - $goodsArr['yajin']);
         $specsArr=explode(';', $goodsArr['']);
