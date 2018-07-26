@@ -52,7 +52,7 @@ class ReturnDeposit{
             'realName'=>$data['realName'],
             'orderNo'=>$data['orderNo'],
             'goodsName'=>$data['goodsName'],
-            'tuihuanYajin'=>$data['tuihuanYajin'],
+            'tuihuanYajin'=>$data['tuihuanYajin']."元",
 		]);
 	}
 	
