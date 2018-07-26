@@ -198,8 +198,7 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单信息
-		$OrderRepository= new OrderRepository;
-		$orderInfo = $OrderRepository->getInfoById($buyout['order_no']);
+		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyout['order_no']));
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
@@ -332,8 +331,7 @@ class OrderBuyout
 			return false;
 		}
 		//解冻订单
-		$OrderRepository= new OrderRepository;
-		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
@@ -419,8 +417,7 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单信息
-		$OrderRepository = new OrderRepository;
-		$orderInfo = $OrderRepository->getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
+		$orderInfo = OrderRepository::getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
 		if(empty($orderInfo)){
 			return false;
 		}
@@ -429,7 +426,7 @@ class OrderBuyout
 		}
 		DB::beginTransaction();
 		//解冻订单-执行取消操作
-		$ret = $OrderRepository->orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = OrderRepository::orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			DB::rollBack();
 			return false;
