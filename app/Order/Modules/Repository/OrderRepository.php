@@ -615,7 +615,12 @@ class OrderRepository
         //计算免押金
         $goodsArr[0]['mianyajin'] = normalizeNum($goodsArr[0]['goods_yajin'] - $goodsArr[0]['yajin']);
         $specsArr=explode(';', $goodsArr[0]['specs']);
-        print_r($specsArr);die;
+        $specs = '';
+        foreach($specsArr as $val){
+            $specs .= substr($val,strpos(':',$val)).'/';
+        }
+        $specs = substr($specs,0,-1);
+        $goodsArr[0]['specs'] = $specs;
         //修改数据格式
         $data = [
             'orderArr'=>$orderArr,
