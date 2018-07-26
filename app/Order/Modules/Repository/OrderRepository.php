@@ -606,6 +606,7 @@ class OrderRepository
             return false;
         }
         $orderArr = $order->toArray();
+        print_r($orderArr);die;
         $goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsByOrderNo($orderArr['order_no']);
         if(!$goods){
             return false;
