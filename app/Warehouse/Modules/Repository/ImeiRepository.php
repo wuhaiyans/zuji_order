@@ -46,6 +46,7 @@ class ImeiRepository
             }unset($d);
 
 
+            throw new \Exception(json_encode($data));
             DB::table('zuji_imei')->insert($data);
 
             DB::commit();
