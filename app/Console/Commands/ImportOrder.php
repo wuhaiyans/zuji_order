@@ -56,7 +56,10 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
+        $whereArra = [];
+        $whereArra[] = ['create_time','<=','1532588400'];
+        $status =[2,3,10,21,23,26];
+        $total = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 500;
@@ -66,12 +69,9 @@ class ImportOrder extends Command
             $orderId =0;
 
             do {
-
-                $whereArra = [];
-                $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
                 $whereArra[] = ['order_id','<',$orderId+$limit+1];
-                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
+                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -264,7 +264,11 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(['business_key'=>1,'order_no'=>$order_no])->whereIn("appid",$appid)->count();
+        $whereArra = [];
+        $whereArra[] = ['order_no','=',$order_no];
+        $whereArra[] = ['create_time','<=','1532588400'];
+        $status =[2,3,10,21,23,26];
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
         if($total >0){
             return true;
         }
