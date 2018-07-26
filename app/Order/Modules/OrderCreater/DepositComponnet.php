@@ -86,13 +86,18 @@ class DepositComponnet implements OrderCreater
                     }catch (\Exception $e){
                         $this->getOrderCreater()->setError('商品押金接口错误');
                         $this->flag = false;
+                        $deposit['jianmian'] =0;
+                        $deposit['_msg'] ='商品押金接口错误';
+                        $deposit['jianmian_detail'] =[];
                     }
-
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
-                    foreach ($deposit['jianmian_detail'] as $key=>$value){
-                        $deposit['jianmian_detail'][$key]['jianmian'] = $deposit['jianmian_detail'][$key]['jianmian']/100;
+                    if (!empty($deposit['jianmian_detail'])){
+                        foreach ($deposit['jianmian_detail'] as $key=>$value){
+                            $deposit['jianmian_detail'][$key]['jianmian'] = $deposit['jianmian_detail'][$key]['jianmian']/100;
+                        }
                     }
+
                     $this->deposit_detail = json_encode($deposit['jianmian_detail']);
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
