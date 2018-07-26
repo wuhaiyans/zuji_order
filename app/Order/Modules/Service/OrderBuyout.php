@@ -383,7 +383,7 @@ class OrderBuyout
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
-				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin'])."元",
+				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
 		]);
 		return true;
 	}
