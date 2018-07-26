@@ -87,6 +87,8 @@ class ImportHistoryWithhold extends Command
                 $result = objectToArray($result);
 
                 foreach($result as &$item){
+					// 更新进度条
+					$bar->advance();
 					
 					// 查询用户最后一个订单
 					$order_info = \DB::connection('mysql_01')->table('zuji_order2')
@@ -278,8 +280,6 @@ class ImportHistoryWithhold extends Command
                             $arr[$item['withhold_id'].'order_pay_withhold_business'] = $order_pay_withhold_business_data;
                         }
                     }
-					// 更新进度条
-					$bar->advance();
                 }
 
                 $page++;
