@@ -66,7 +66,6 @@ class ImportOrder extends Command
             $orderId =0;
 
             do {
-                sql_profiler();
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
