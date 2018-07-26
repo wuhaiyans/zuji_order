@@ -183,9 +183,8 @@ class ImeiController extends Controller
 
             if (!$result)
                 return \apiResponse([], ApiStatus::CODE_20001, '没有需要导入的数据,可能是数据已经导入过');
-            return \apiResponse([$result], ApiStatus::CODE_60002, '');
-            $this->imei->import($result);
 
+            $this->imei->import($result);
             DB::commit();
         } catch (\Exception $e) {
             Log::error('imei数据导入出错');
