@@ -79,16 +79,18 @@ class ImportNewOrder extends Command
             $orderId =0;
             do {
 
-                $whereArra = [];
-                $whereArra[] = ['business_key','=',1];
-                $whereArra[] = ['order_id','>=',$orderId+1];
+//                $whereArra = [];
+//                $whereArra[] = ['order_id','>=',$orderId+1];
 
-                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
+                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
+                    ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                        $query->where(array(['create_time','>','1532588400']));
+                    })->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
-                if (!self::isAllowImport($v['order_no'])) {
-                   continue;
-                }
+//                if (!self::isAllowImport($v['order_no'])) {
+//                   continue;
+//                }
                     //获取渠道
                     $channel_id =$this->getChannel($v['appid']);
                     //获取订单类型
