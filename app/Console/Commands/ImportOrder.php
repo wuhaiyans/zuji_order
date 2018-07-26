@@ -10,14 +10,14 @@ use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 
-class ImportNewOrder extends Command
+class ImportOrder extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportNewOrder';
+    protected $signature = 'command:ImportOrder';
 
     /**
      * The console command description.
