@@ -23,10 +23,10 @@ class BuyoutConfirm{
 	public static function notify($channel_id,$class,$data){
 
 		if(!$channel_id){
-			return 1;
+			return false;
 		}
 		if(!$class){
-			return 2;
+			return false;
 		}
 		$rule= [
 				'mobile'=>'required',
@@ -35,12 +35,12 @@ class BuyoutConfirm{
 		];
 		$validator = app('validator')->make($data, $rule);
 		if ($validator->fails()) {
-			return 3;
+			return false;
 		}
 		// 短息模板
 		$code = Config::getCode($channel_id, $class);
 		if( !$code ){
-			return 4;
+			return false;
 		}
 
 		// 发送短息
