@@ -362,7 +362,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -474,7 +474,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 

@@ -259,7 +259,7 @@ class CronOperate
             }
             //更新订单商品状态
             $data = [
-                'business_key' => '',
+                'business_key' => 0,
                 'business_no' => '',
                 'goods_status'=>Inc\OrderGoodStatus::RENTING_MACHINE,
                 'update_time'=>time()
