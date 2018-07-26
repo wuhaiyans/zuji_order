@@ -477,6 +477,8 @@ class OrderOperate
                 $orderNoticeObj->notify();
                 $orderNoticeObj->alipay_notify();
             }
+            //取消任务队列
+            $cancel = JobQueueApi::cancel(config('app.env')."DeliveryReceive".$orderNo);
             DB::commit();
             return true;
 
@@ -659,6 +661,8 @@ class OrderOperate
 
 
             DB::commit();
+            //取消定时任务
+            $cancel = JobQueueApi::cancel(config('app.env')."OrderCancel_".$orderNo);
             // 订单取消后发送取消短息。;
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CANCEL);
             $orderNoticeObj->notify();
