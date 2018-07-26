@@ -617,7 +617,10 @@ class OrderRepository
         $specsArr=explode(';', $goodsArr[0]['specs']);
         $specs = '';
         foreach($specsArr as $val){
-            $specs .= substr($val,2).'/';
+            echo $val;
+            echo strpos(':',$val);
+            echo substr($val,strpos(':',$val)).'/';die;
+            $specs .= substr($val,strpos(':',$val)).'/';
         }
         $specs = substr($specs,0,-1);
         $goodsArr[0]['specs'] = $specs;
