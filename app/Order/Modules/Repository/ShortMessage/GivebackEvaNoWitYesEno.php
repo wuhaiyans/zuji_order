@@ -60,7 +60,6 @@ class GivebackEvaNoWitYesEno implements ShortMessage {
             LogApi::debug("扣款成功短信-商品详情错误",$orderGivebackInfo);
             return false;
         }
-p(22);
         // 短息模板
         $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
