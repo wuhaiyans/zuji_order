@@ -59,18 +59,19 @@ class ImportOrder extends Command
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit = 2000;
+            $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             $orderId =0;
 
             do {
+
                 $whereArra = [];
                 $whereArra[] = ['business_key','=',1];
                 $whereArra[] = ['order_id','>=',$orderId+1];
-                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
-
+                $whereArra[] = ['order_id','<',$orderId+$limit+1];
+                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -131,8 +132,8 @@ class ImportOrder extends Command
                         'receive_time'=>intval($delivery['receive_time']),//
                         'complete_time'=>intval($status['complete_time']),//
                     ];
-                    $res =Order::updateOrCreate($orderData);
-                    if(!$res->getQueueableId()){
+                    $res =Order::insert($orderData);
+                    if(!$res){
                         $arr['order'][$k] =$v['order_no'];
                     }
                     //获取服务周期
@@ -182,8 +183,8 @@ class ImportOrder extends Command
                         'create_time'=>intval($goods_info['create_time']),
                         'update_time'=>intval($goods_info['update_time']),
                     ];
-                    $res =OrderGoods::updateOrCreate($goodsData);
-                    if(!$res->getQueueableId()){
+                    $res =OrderGoods::insert($goodsData);
+                    if(!$res){
                         $arr['goods'][$k] =$goodsData;
                     }
                     /**
