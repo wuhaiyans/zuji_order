@@ -601,8 +601,7 @@ class OrderRepository
             return false;
         }
         $where[]=['user_id','=',$user_id];
-        $where[]=['create_time','desc'];
-        $getUserCertified=OrderUserCertified::where($where)->first();
+        $getUserCertified=OrderUserCertified::where($where)->first()->orderByDesc('create_time');
         if(!$getUserCertified){
             return false;
         }
