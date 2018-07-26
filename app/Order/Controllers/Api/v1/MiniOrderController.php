@@ -301,7 +301,7 @@ class MiniOrderController extends Controller
     }
 
     /**
-     * 小程序获取用户最新下单订单号接口
+     * 小程序获取用户最新下单订单信息+商品信息接口
      * @return array
      */
     public function getOrderNo(Request $request){
@@ -318,15 +318,12 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         //查询用户最新订单
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] );
-        var_dump($orderInfo);die;
-        if( empty($orderInfo) ){
-            \App\Lib\Common\LogApi::info('本地小程序查询用户订单不存在',$userinfo['uid']);
-            return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询用户订单不存在');
+        $Info = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] );
+        if( empty($Info) ){
+            \App\Lib\Common\LogApi::info('本地小程序查询用户订单不存在（或无激活订单）',$userinfo['uid']);
+            return apiResponse([],ApiStatus::CODE_0,'本地小程序查询用户订单不存在（或无激活订单）');
         }
-        return apiResponse([
-            'order_no'=>$orderInfo['order_no'],
-        ],ApiStatus::CODE_0);
+        return apiResponse($Info,ApiStatus::CODE_0);
     }
 
     /**

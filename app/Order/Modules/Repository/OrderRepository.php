@@ -593,7 +593,7 @@ class OrderRepository
     }
 
     /**
-     * 根据用户id查询用户最新下单订单
+     * 根据用户id查询用户最新下单订单信息+商品信息
      * @params $user_id //用户id
      */
     public static function getUserNewOrder($user_id){
@@ -607,18 +607,15 @@ class OrderRepository
             return false;
         }
         $orderArr = $order->toArray();
-        var_dump($orderArr);
         $goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsByOrderNo($orderArr['order_no']);
         if(!$goods){
             return false;
         }
         $goodsArr = $goods->toArray();
-        var_dump($goodsArr);
         $data = [
             'orderArr'=>$orderArr,
             'goodsArr'=>$goodsArr,
         ];
-        var_dump($data);
         return $data;
 
     }
