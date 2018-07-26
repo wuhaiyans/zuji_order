@@ -43,12 +43,27 @@ class ImeiRepository
 //                $d['create_time'] = $d['update_time'] = $time;
 //                $d['status'] = 1;
 //            }unset($d);
-            foreach ($data as $k=>$item) {
-                $data[$k]['create_time'] = $time;
-                $data[$k]['update_time'] = $time;
-                $data[$k]['status'] = 1;
-                DB::table('zuji_imei')->insert($data[$k]);
-            }
+//            foreach ($data as $k=>$item) {
+//                $data[$k]['create_time'] = $time;
+//                $data[$k]['update_time'] = $time;
+//                $data[$k]['status'] = 1;
+//                DB::table('zuji_imei')->insert($data[$k]);
+//            }
+            $row = [
+                "imei"=>"0K1UF4C00E00VR",
+                "price"=>5311,
+                "apple_serial"=>"dxxxxxxx",
+                "brand"=>"苹果",
+                "name"=>"苹果",
+                "quality"=>85,
+                "color"=>"黑色",
+                "business"=>"全网通",
+                "storage"=>32,
+                "create_time"=>$time,
+                "create_time"=>$time,
+                "status"=>1,
+            ];
+            Imei::insert($row);
 
             //DB::table('zuji_imei')->insert($data);
             //Imei::insert($data);
