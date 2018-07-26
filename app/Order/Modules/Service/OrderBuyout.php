@@ -240,7 +240,7 @@ class OrderBuyout
 			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
 					'mobile'=>$orderInfo['mobile'],
 					'realName'=>$orderInfo['realname'],
-					'buyoutPrice'=>$buyout['order_no'],
+					'buyoutPrice'=>$buyout['amount'],
 			]);
 			//日志记录
 			$orderLog = [
@@ -266,7 +266,7 @@ class OrderBuyout
 		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
-				'buyoutPrice'=>$buyout['order_no'],
+				'buyoutPrice'=>$buyout['amount'],
 		]);
 		//日志记录
 		$orderLog = [
