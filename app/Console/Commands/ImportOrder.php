@@ -231,7 +231,7 @@ class ImportOrder extends Command
                     }
                     $bar->advance();
                 }
-                $page++;
+                ++$page;
 
             } while ($page <= $totalpage);
             $bar->finish();
