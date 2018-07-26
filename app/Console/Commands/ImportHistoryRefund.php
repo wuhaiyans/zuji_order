@@ -41,6 +41,7 @@ class ImportHistoryRefund extends Command
      */
     public function __construct()
     {
+        ini_set('memory_limit','1024M');
         parent::__construct();
         $this->conn = \DB::connection('mysql_01');
     }
@@ -133,7 +134,7 @@ class ImportHistoryRefund extends Command
                 echo "导入退款offset".$offset."\n";
                 if ($offset>$returnCount) {
                     LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()));
-                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
+//                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
                 if ($returnCount%$size==0) {
@@ -145,8 +146,8 @@ class ImportHistoryRefund extends Command
 
             $bar->finish(); //结束
             LogApi::info('导入退款end ' . date("Y-m-d H:i:s", time()) );
-            echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
-            LogApi::info('导入退款错误的记录列表：'.json_encode($errorReturnArr));
+//            echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
+//            LogApi::info('导入退款错误的记录列表：'.json_encode($errorReturnArr));
             echo '导入退款end ' . date("Y-m-d H:i:s", time()) . "\n";
             echo '导入退款错误的记录列表：'.json_encode($errorReturnArr);
 

@@ -41,6 +41,7 @@ class ImportHistoryReturn extends Command
      */
     public function __construct()
     {
+        ini_set('memory_limit','1024M');
         parent::__construct();
         $this->conn = \DB::connection('mysql_01');
     }
@@ -110,7 +111,6 @@ class ImportHistoryReturn extends Command
 
                 foreach($newData as $keys=>$values) {
 
-
 //                    if (!ImportOrder::isAllowImport($values['order_no'])){
 //
 //                        $continueReturnArr[] = $values['return_id'];
@@ -131,7 +131,6 @@ class ImportHistoryReturn extends Command
                 LogApi::info("导入退货offset".$offset);
                 echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
-                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
                     echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
