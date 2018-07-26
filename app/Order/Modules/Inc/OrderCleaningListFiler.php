@@ -24,10 +24,10 @@ class OrderCleaningListFiler
                     //出账类型
                     'out_status'=>Inc\OrderCleaningStatus::getOrderCleaningList(),
                     //出账类型
-                    'out_type'=>array(
-                            'zujin' => '租金',
-                            'other' => '其它',
-                        ),
+//                    'out_type'=>array(
+//                            'zujin' => '租金',
+//                            'other' => '其它',
+//                        ),
                     //入账来源
                     'appid_list' => $channlistName,
                     //出账方式

@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
@@ -239,7 +240,7 @@ class OrderBuyout
 			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
 					'mobile'=>$orderInfo['mobile'],
 					'realName'=>$orderInfo['realname'],
-					'buyoutPrice'=>$buyout['order_no'],
+					'buyoutPrice'=>$buyout['amount'],
 			]);
 			//日志记录
 			$orderLog = [
@@ -265,7 +266,7 @@ class OrderBuyout
 		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
-				'buyoutPrice'=>$buyout['order_no'],
+				'buyoutPrice'=>$buyout['amount'],
 		]);
 		//日志记录
 		$orderLog = [
@@ -359,7 +360,7 @@ class OrderBuyout
 		$orderLog = [
 				'uid'=>$userInfo['uid'],
 				'username'=>$userInfo['username'],
-				'type'=>$userInfo['username'],
+				'type'=>$userInfo['type'],
 				'order_no'=>$userInfo['username'],
 				'title'=>"买断完成",
 				'msg'=>"买断结束",
@@ -431,6 +432,19 @@ class OrderBuyout
 			DB::rollBack();
 			return false;
 		}
+		//更新订单商品状态
+		$data = [
+				'business_key' => 0,
+				'business_no' => '',
+				'goods_status'=>OrderGoodStatus::RENTING_MACHINE,
+				'update_time'=>time()
+		];
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$data);
+		if(!$ret){
+			DB::rollBack();
+			return false;
+		}
+		//取消买断单
 		$ret = OrderBuyoutRepository::setOrderBuyoutCancel($buyout['id'],$params['user_id']);
 		if(!$ret){
 			DB::rollBack();

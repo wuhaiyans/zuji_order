@@ -53,7 +53,8 @@ class ImportOrderCoupon extends Command
                     $coupons=objectToArray($datas01);
 
                     foreach ($coupons as $k=>$v) {
-                        if(!ImportOrder::isAllowImport($v['order_no'])){
+
+                        if(empty($v['order_no'])){
                             continue;
                         }
                         $couponData = [

@@ -542,12 +542,15 @@ class OrderRepository
         
 
         $orderList = DB::table('order_info')
-            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text')
+            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
             ->join('order_info_visit',function($join){
                 $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
@@ -593,7 +596,7 @@ class OrderRepository
     }
 
     /**
-     * 根据用户id查询用户最新下单订单
+     * 根据用户id查询用户最新下单订单信息+商品信息
      * @params $user_id //用户id
      */
     public static function getUserNewOrder($user_id){
@@ -607,18 +610,25 @@ class OrderRepository
             return false;
         }
         $orderArr = $order->toArray();
-        var_dump($orderArr);
         $goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsByOrderNo($orderArr['order_no']);
         if(!$goods){
             return false;
         }
         $goodsArr = $goods->toArray();
-        var_dump($goodsArr);
+        //计算免押金
+        $goodsArr[0]['mianyajin'] = normalizeNum($goodsArr[0]['goods_yajin'] - $goodsArr[0]['yajin']);
+        $specsArr=explode(';', $goodsArr[0]['specs']);
+        $specs = '';
+        foreach($specsArr as $val){
+            $specs .= substr($val,strpos($val,':')+1).'/';
+        }
+        $specs = substr($specs,0,-1);
+        $goodsArr[0]['specs'] = $specs;
+        //修改数据格式
         $data = [
             'orderArr'=>$orderArr,
             'goodsArr'=>$goodsArr,
         ];
-        var_dump($data);
         return $data;
 
     }

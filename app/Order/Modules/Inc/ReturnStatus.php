@@ -123,7 +123,6 @@ class ReturnStatus {
         return [
 			//退款
             'refund'=>[
-                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
                 self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
                 self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
                 self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
@@ -131,7 +130,6 @@ class ReturnStatus {
             ],
 			//退换货
             'return'=>[
-                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
                 self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
                 self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
                 self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),
@@ -143,7 +141,6 @@ class ReturnStatus {
             ],
 			//换货
             'barter'=>[
-                self::ReturnInvalid => self::getStatusName( self::ReturnInvalid ),
                 self::ReturnCreated => self::getStatusName( self::ReturnCreated ),
                 self::ReturnAgreed	=> self::getStatusName( self::ReturnAgreed ),
                 self::ReturnDenied	=> self::getStatusName( self::ReturnDenied ),

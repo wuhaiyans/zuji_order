@@ -358,14 +358,11 @@ class BuyoutController extends Controller
         GoodsLogRepository::add($log);
         DB::commit();
         //加入队列执行超时取消订单
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
-            'method' => 'api.buyout.cancel',
-            'params' => [
-                'buyout_no'=>$data['buyout_no'],
-                'user_id'=>$data['user_id'],
-            ],
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API")."/CancelOrderBuyout", [
+            'buyout_no'=>$data['buyout_no'],
+            'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -477,7 +474,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 

@@ -46,8 +46,8 @@ class BuyoutPayment{
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realname'],
-            'buyoutPrice'=>$data['amount'],
+            'realName'=>$data['realName'],
+            'buyoutPrice'=>$data['buyoutPrice'],
 		]);
 	}
 }
