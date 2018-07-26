@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Certification;
+use App\Lib\Common\LogApi;
 use App\Lib\Goods;
 use App\Lib\Risk\Yajin;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
@@ -90,6 +91,7 @@ class DepositComponnet implements OrderCreater
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
                     }
+                    LogApi::info("确认订单调用押金接口",$deposit);
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
                     if (!empty($deposit['jianmian_detail'])){
