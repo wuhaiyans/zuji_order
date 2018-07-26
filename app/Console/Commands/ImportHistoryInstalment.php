@@ -13,7 +13,7 @@ class ImportHistoryInstalment extends Command
    *
    * @var string
    */
-  protected $signature = 'command:Instalment';
+  protected $signature = 'command:Instalment {--min_id=} {--max_id=}';
 
   /**
    * The console command description.
@@ -38,28 +38,55 @@ class ImportHistoryInstalment extends Command
    * @return mixed
    */
   public function handle(){
+	 
+	$_count1 = 0;
+	$_count2 = 0;
 
-    $total = \DB::connection('mysql_01')->table('zuji_order2_instalment')->count();
-
+	$min_id = intval($this->option('min_id'));
+	$max_id = ($this->option('max_id'));
+    $total = \DB::connection('mysql_01')->table('zuji_order2_instalment')
+			->where([
+				['id','>=',$min_id],
+				['id','<=',$max_id]
+			])->count('id');
+	
     $bar = $this->output->createProgressBar($total);
     try{
-      $limit  = 300;
+      $limit  = 1000;
       $page   = 1;
       $totalpage = ceil($total/$limit);
       $arr =[];
-
-      do {
+	  
+	  // 开始位置
+	  $last_id = $min_id-1;
+	  
+      while($last_id<$max_id) {
+		  // 重新调整位置
+		  $last_id +=1;
           $result = \DB::connection('mysql_01')->table('zuji_order2_instalment')
-              ->forPage($page,$limit)
-              ->orderBy('id', 'DESC')
+              ->where([
+				['id','>=',$last_id],
+				['id','<=',$max_id],
+			  ])
+              ->limit($limit)
+              ->orderBy('id', 'ASC')
               ->get()->toArray();
           $result = objectToArray($result);
-
+		  
+		  if( count($result) == 0 ){
+			  break;
+		  }
+		  
           foreach($result as &$item) {
+			++$_count1;
+			$bar->advance();
+			$last_id = $item['id'];
+			
             // 查询订单信息
 
             $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'goods_id', 'user_id', 'zujin', "appid", "business_key")->where(['order_id' => $item['order_id']])->first();
             $orderInfo = objectToArray($orderInfo);
+
             if(!$orderInfo){
               continue;
             }
@@ -67,7 +94,8 @@ class ImportHistoryInstalment extends Command
             // 去除小程序分期
             $isAllow = \App\Console\Commands\ImportOrder::isAllowImport($orderInfo['order_no']);
             if(!$isAllow){
-              continue;
+				++$_count2;
+				continue;
             }
 
             $data['id']               = $item['id'];
@@ -100,22 +128,19 @@ class ImportHistoryInstalment extends Command
             }
 
             // 插入数据
-            $ret = \App\Order\Models\OrderGoodsInstalment::updateOrCreate($data);
-            if(!$ret->getQueueableId()){
+            $ret = \App\Order\Models\OrderGoodsInstalment::insert($data);
+            if(!$ret){
               $arr[$item['id']] = $item;
             }
           }
 
-          $bar->advance();
 
-          $page++;
-          sleep(2);
-        } while ($page <= $totalpage);
+        } 
           if(count($arr)>0){
-            LogApi::notify("订单用户回访数据导入失败",$arr);
+            LogApi::notify("订单分期数据导入失败",$arr);
           }
         $bar->finish();
-        echo "导入成功";die;
+		echo "导入成功（{$_count1},{$_count2}）";die;
       }catch (\Exception $e){
         echo $e->getMessage();
         die;

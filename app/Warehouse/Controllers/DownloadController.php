@@ -101,7 +101,8 @@ class DownloadController extends Controller
      */
     public function imeitpl()
     {
-        $filePath = storage_path('app/download/imei_data_tpl.xls');
+//        $filePath = storage_path('app/download/imei_data_tpl.xls');
+        $filePath = storage_path('app/download/imei_data_tpl.xlsx');
         if (ob_get_length()){
             ob_end_clean();
         }
@@ -109,7 +110,7 @@ class DownloadController extends Controller
 //            'Content-Type:application/vnd.ms-excel',
 //        ];
 //        return response()->download($filePath, 'imei导入模板文件.xls', $headers);
-        return response()->download($filePath, 'imei导入模板文件.xls');
+        return response()->download($filePath, 'imei导入模板文件.xlsx');
 
 
 //        $file_filesize = filesize($filePath);

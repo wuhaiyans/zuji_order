@@ -13,7 +13,7 @@ class ImportHistoryWithhold extends Command
      *
      * @var string
      */
-    protected $signature = 'command:Withhold';
+	protected $signature = 'command:Withhold  {--begin_time=}  {--end_time=}';
 
     /**
      * The console command description.
@@ -39,40 +39,56 @@ class ImportHistoryWithhold extends Command
      */
     public function handle()
     {
+		$begin_time = strtotime($this->option('begin_time'));
+		$end_time = strtotime($this->option('end_time'));
+		if( $begin_time >= $end_time ){
+			echo "时间错误\n";exit;
+		}
 		
+
         $total = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
+            ->join('zuji_member',function ($join) {
+                $join->on('zuji_member.id', '=', 'zuji_withholding_alipay.user_id')
+                    ->on('zuji_withholding_alipay.agreement_no', '=', 'zuji_member.withholding_no');
+            })
             ->where([
                 ['zuji_withholding_alipay.status', '=', 1],
-                ['zuji_withholding_notify_alipay.status', '=', 'NORMAL']
+				['zuji_withholding_alipay.sign_time', '>=', date('Y-m-d H:i:s',$begin_time)],
+				['zuji_withholding_alipay.sign_time', '<', date('Y-m-d H:i:s',$end_time)],
             ])
-            ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
             ->count('zuji_withholding_alipay.id');
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 300;
+            $limit  = 500;
             $page   = 1;
             $totalpage = ceil($total/$limit);
 			$arr = [];
             do {
-				
                 // 查询代扣数据（已签约的，不考虑未签约数据）
                 $result = \DB::connection('mysql_01')->table('zuji_withholding_alipay')
                     ->select('zuji_withholding_alipay.*','zuji_withholding_notify_alipay.scene')
-                    // 查询 已签约的数据
+                    ->join('zuji_member',function ($join) {
+                        $join->on('zuji_member.id', '=', 'zuji_withholding_alipay.user_id')
+                            ->on('zuji_withholding_alipay.agreement_no', '=', 'zuji_member.withholding_no');
+                    })
+                    ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
                     ->where([
                         ['zuji_withholding_alipay.status', '=', 1],
-                        ['zuji_withholding_notify_alipay.status', '=', 'NORMAL']
+                        ['zuji_withholding_notify_alipay.status', '=', 'NORMAL'],
+						['zuji_withholding_alipay.sign_time', '>=', date('Y-m-d H:i:s',$begin_time)],
+						['zuji_withholding_alipay.sign_time', '<', date('Y-m-d H:i:s',$end_time)],
                     ])
-                    ->leftJoin('zuji_withholding_notify_alipay', 'zuji_withholding_alipay.agreement_no', '=', 'zuji_withholding_notify_alipay.agreement_no')
+
                     ->groupBy('zuji_withholding_alipay.agreement_no')
                     ->orderBy('zuji_withholding_alipay.id', 'DESC')
                     ->forPage($page,$limit)
                     ->get()->toArray();
                 $result = objectToArray($result);
 
-				
                 foreach($result as &$item){
+					// 更新进度条
+					$bar->advance();
 					
 					// 查询用户最后一个订单
 					$order_info = \DB::connection('mysql_01')->table('zuji_order2')
@@ -264,8 +280,6 @@ class ImportHistoryWithhold extends Command
                             $arr[$item['withhold_id'].'order_pay_withhold_business'] = $order_pay_withhold_business_data;
                         }
                     }
-					// 更新进度条
-					$bar->advance();
                 }
 
                 $page++;

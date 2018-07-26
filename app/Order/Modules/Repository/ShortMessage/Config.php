@@ -81,7 +81,7 @@ class Config {
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
 				SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_113461132', //还机确认收货 有剩余的租金
-				SceneConfig::GIVEBACK_CONFIRMNOWITH 	=> 'SMS_113461132', //还机确认收货 无剩余的租金
+				SceneConfig::GIVEBACK_CONFIRMNOWITH 	=> 'SMS_113461159', //还机确认收货 无剩余的租金
 				SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_113461135', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_113461136', //系统执行代扣成功后发送
 				SceneConfig::GIVEBACK_PAYMENT	 		=> 'SMS_113461137', //财务收到用户剩余租金成功时发送
@@ -90,7 +90,10 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITNOENONO	=> 'SMS_113461141', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_113461138', //财务系统完成押金退还时发送
-
+				//买断
+				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END		=> 'SMS_113461161', //买断支付完成短信
 				//退押金
 				SceneConfig::RETURN_DEPOSIT	=> 'SMS_113461138', //财务系统完成押金退还时发送
 
@@ -137,9 +140,6 @@ class Config {
 				SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_113461012', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461013', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461019', //提前还款短信
-
-				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
-				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
 
                 SceneConfig::RETURN_APPLY_DISAGREE => 'SMS_113461005', //退货审核不通过
                 SceneConfig::RETURN_CHECK_OUT 		 => 'SMS_113461014', //退货检测合格

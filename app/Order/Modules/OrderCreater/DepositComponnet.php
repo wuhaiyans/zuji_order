@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\Certification;
 use App\Lib\Goods;
 use App\Lib\Risk\Yajin;
+use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Mockery\Exception;
 
 class DepositComponnet implements OrderCreater
@@ -31,6 +32,11 @@ class DepositComponnet implements OrderCreater
     private $certifiedFlag =true;
 
     private $flag = true;
+
+    private $deposit_detail='';
+    private $deposit_msg ='';
+
+    private $orderNo='';
 
     public function __construct(OrderCreater $componnet,$certifiedFlag=true,$miniCreditAmount = 0)
     {
@@ -60,19 +66,7 @@ class DepositComponnet implements OrderCreater
         $filter =  $this->componnet->filter();
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
-
-        //未通过认证人脸识别
-        if($this->schema['user']['face']==0){
-            $this->deposit = false;
-        }
-        //未通过风控验证
-        if($this->schema['user']['risk']==0){
-            $this->deposit = false;
-        }
-        //风控整体策略
-        if(empty($this->schema['risk']['risk_grade']) || $this->schema['risk']['risk_grade'] =='REJECT'){
-            $this->deposit = false;
-        }
+        $this->orderNo =$schema['order']['order_no'];
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
 
         if($this->deposit && $this->payType >0){
@@ -95,6 +89,11 @@ class DepositComponnet implements OrderCreater
                     }
 
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
+                    $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
+                    foreach ($deposit['jianmian_detail'] as $key=>$value){
+                        $deposit['jianmian_detail'][$key]['jianmian'] = $deposit['jianmian_detail'][$key]['jianmian']/100;
+                    }
+                    $this->deposit_detail = json_encode($deposit['jianmian_detail']);
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
             }
@@ -119,6 +118,12 @@ class DepositComponnet implements OrderCreater
     {
         $b = $this->componnet->create();
         if( !$b ){
+            return false;
+        }
+        //保存减免押金详情信息
+        $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);
+        if(!$b){
+            $this->getOrderCreater()->setError('保存用户减免押金详情信息失败');
             return false;
         }
         return true;

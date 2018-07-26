@@ -3,6 +3,7 @@ namespace App\Order\Modules\Service;
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
@@ -11,6 +12,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
+use App\Order\Modules\Repository\ShortMessage\BuyoutPayment;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
@@ -197,8 +199,7 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单信息
-		$OrderRepository= new OrderRepository;
-		$orderInfo = $OrderRepository->getInfoById($buyout['order_no']);
+		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyout['order_no']));
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
@@ -230,27 +231,61 @@ class OrderBuyout
 					'business_no'     => $clearData['business_no'],
 					'status'     => 'success',//支付状态
 			];
-			$result = self::callbackOver($params);
+
+			$result = self::callbackOver($params,[]);
 			if(!$result){
 				return false;
 			}
+			//发送短信
+			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
+					'mobile'=>$orderInfo['mobile'],
+					'realName'=>$orderInfo['realname'],
+					'buyoutPrice'=>$buyout['order_no'],
+			]);
+			//日志记录
+			$orderLog = [
+					'uid'=>0,
+					'username'=>$orderInfo['realname'],
+					'type'=>\App\Lib\PublicInc::Type_System,
+					'order_no'=>$orderInfo['order_no'],
+					'title'=>"买断完成",
+					'msg'=>"无押金直接买断完成",
+			];
+			$goodsLog = [
+					'order_no'=>$buyout['order_no'],
+					'action'=>'用户买断完成',
+					'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
+					'business_no'=>$buyout['buyout_no'],
+					'goods_no'=>$buyout['goods_no'],
+					'msg'=>'买断完成',
+			];
+			self::log($orderLog,$goodsLog);
+			return true;
 		}
 		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$buyout['buyout_no'],"BuyoutPayment");
-		$notice->notify();
-		//插入日志
-		OrderLogRepository::add(0,"支付回调",\App\Lib\PublicInc::Type_System,$buyout['order_no'],"买断支付成功","支付完成");
-		//插入订单设备日志
-		$log = [
+		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
+				'mobile'=>$orderInfo['mobile'],
+				'realName'=>$orderInfo['realname'],
+				'buyoutPrice'=>$buyout['order_no'],
+		]);
+		//日志记录
+		$orderLog = [
+				'uid'=>0,
+				'username'=>$orderInfo['realname'],
+				'type'=>\App\Lib\PublicInc::Type_System,
+				'order_no'=>$orderInfo['order_no'],
+				'title'=>"买断支付成功",
+				'msg'=>"支付完成",
+		];
+		$goodsLog = [
 				'order_no'=>$buyout['order_no'],
 				'action'=>'用户买断支付',
-				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
+				'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
 				'business_no'=>$buyout['buyout_no'],
 				'goods_no'=>$buyout['goods_no'],
 				'msg'=>'买断支付成功',
 		];
-		GoodsLogRepository::add($log,true);
-
+		self::log($orderLog,$goodsLog);
 		return true;
 	}
 	/*
@@ -297,8 +332,7 @@ class OrderBuyout
 			return false;
 		}
 		//解冻订单
-		$OrderRepository= new OrderRepository;
-		$ret = $OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			return false;
 		}
@@ -317,12 +351,23 @@ class OrderBuyout
 			return false;
 		}
 		OrderOperate::isOrderComplete($buyout['order_no']);
-		//插入日志
-		OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"买断完成","买断结束");
-		//插入订单设备日志
-		$log = [
+
+		//无押金直接返回成功
+		if($goodsInfo['yajin']==0){
+			return true;
+		}
+		//日志记录
+		$orderLog = [
+				'uid'=>$userInfo['uid'],
+				'username'=>$userInfo['username'],
+				'type'=>$userInfo['type'],
+				'order_no'=>$userInfo['username'],
+				'title'=>"买断完成",
+				'msg'=>"买断结束",
+		];
+		$goodsLog = [
 				'order_no'=>$buyout['order_no'],
-				'action'=>'用户买断支付',
+				'action'=>'用户买断完成',
 				'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
 				'business_no'=>$buyout['buyout_no'],
 				'goods_no'=>$buyout['goods_no'],
@@ -331,20 +376,22 @@ class OrderBuyout
 				'operator_type'=>$userInfo['type'],
 				'msg'=>'买断完成',
 		];
-		GoodsLogRepository::add($log);
-
+		self::log($orderLog,$goodsLog);
 		//押金解冻短信发送
-		if($goodsInfo['yajin']>0){
-			ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
 				'tuihuanYajin'=>$goodsInfo['yajin']
-			]);
-		}
-
+		]);
 		return true;
+	}
+	static function log($orderLog,$goodsLog){
+		//插入日志
+		OrderLogRepository::add($orderLog['uid'],$orderLog['username'],$orderLog['type'],$orderLog['order_no'],$orderLog['title'],$orderLog['msg']);
+		//插入订单设备日志
+		GoodsLogRepository::add($goodsLog);
 	}
 	/*
      * 取消买断
@@ -371,8 +418,7 @@ class OrderBuyout
 			return false;
 		}
 		//获取订单信息
-		$OrderRepository = new OrderRepository;
-		$orderInfo = $OrderRepository->getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
+		$orderInfo = OrderRepository::getInfoById($goodsInfo['order_no'],$goodsInfo['user_id']);
 		if(empty($orderInfo)){
 			return false;
 		}
@@ -381,11 +427,24 @@ class OrderBuyout
 		}
 		DB::beginTransaction();
 		//解冻订单-执行取消操作
-		$ret = $OrderRepository->orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
+		$ret = OrderRepository::orderFreezeUpdate($orderInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
 			DB::rollBack();
 			return false;
 		}
+		//更新订单商品状态
+		$data = [
+				'business_key' => 0,
+				'business_no' => '',
+				'goods_status'=>OrderGoodStatus::RENTING_MACHINE,
+				'update_time'=>time()
+		];
+		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$data);
+		if(!$ret){
+			DB::rollBack();
+			return false;
+		}
+		//取消买断单
 		$ret = OrderBuyoutRepository::setOrderBuyoutCancel($buyout['id'],$params['user_id']);
 		if(!$ret){
 			DB::rollBack();

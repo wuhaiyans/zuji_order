@@ -59,12 +59,18 @@ class ImportOrder extends Command
         $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit = 5000;
+            $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
+            $orderId =0;
+
             do {
-                $datas01 = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->forPage($page,$limit)->get();
+
+                $whereArra = [];
+                $whereArra[] = ['business_key','=',1];
+                $whereArra[] = ['order_id','>=',$orderId+1];
+                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -211,28 +217,29 @@ class ImportOrder extends Command
                         }
                         $payData =[
                             'payType' =>$v['payment_type_id'],//支付方式 【必须】<br/>
-                     		'payChannelId' => 2,//支付渠道 【必须】<br/>
-                     		'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
-                     		'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-                     		'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
+                            'payChannelId' => 2,//支付渠道 【必须】<br/>
+                            'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
+                            'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+                            'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
                             'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
-                     		'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
-                     		'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-                     		'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-                           ];
+                            'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
+                            'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+                            'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                        ];
                         $res =OrderCreater::createPay($payData);
                         if(!$res){
                             $arr['order_pay'][$k] =$payData;
                         }
                     }
                     $bar->advance();
+                    $orderId =$v['order_id'];
                 }
-                $page++;
-                sleep(2);
+                ++$page;
+
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-               // LogApi::notify("订单风控信息导入失败",$arr);
+                // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;

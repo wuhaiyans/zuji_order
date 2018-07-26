@@ -9,6 +9,8 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\ShortMessage\BuyoutConfirm;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
@@ -277,8 +279,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"该订单商品正买断进行中");
         }
         //获取订单信息
-        $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->getInfoById($goodsInfo['order_no'],$params['user_id']);
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
         //验证商品是否冻结
         if($orderInfo['freeze_type']>0){
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
@@ -329,14 +330,17 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");
         }
-        $ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
+        $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
-        $notice->notify();
+        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+            'mobile'=>$orderInfo['mobile'],
+            'realName'=>$orderInfo['realname'],
+            'buyoutPrice'=>$data['amount'],
+        ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
         //插入订单设备日志
@@ -354,14 +358,11 @@ class BuyoutController extends Controller
         GoodsLogRepository::add($log);
         DB::commit();
         //加入队列执行超时取消订单
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API"), [
-            'method' => 'api.buyout.cancel',
-            'params' => [
-                'buyout_no'=>$data['buyout_no'],
-                'user_id'=>$data['user_id'],
-            ],
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderCancelBuyout_".$data['buyout_no'],config("ordersystem.ORDER_API")."/CancelOrderBuyout", [
+            'buyout_no'=>$data['buyout_no'],
+            'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -398,8 +399,7 @@ class BuyoutController extends Controller
         }
         $goodsInfo = $goodsObj->getData();
         //获取订单信息
-        $this->OrderRepository= new OrderRepository;
-        $orderInfo = $this->OrderRepository->getInfoById(['order_no'=>$goodsInfo['order_no'],"user_id"=>$goodsInfo['user_id']]);
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
         if(empty($orderInfo)){
             return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
         }
@@ -441,14 +441,17 @@ class BuyoutController extends Controller
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单商品状态失败");
         }
-        $ret = $this->OrderRepository->orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
+        $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Buyout);
         if(!$ret){
             DB::rollBack();
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        $notice = new \App\Order\Modules\Service\OrderNotice(OrderStatus::BUSINESS_GIVEBACK,$data['buyout_no'],"BuyoutConfirm");
-        $notice->notify();
+        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+            'mobile'=>$orderInfo['mobile'],
+            'realName'=>$orderInfo['realname'],
+            'buyoutPrice'=>$data['amount'],
+        ]);
         //插入订单日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"客服操作提前买断","创建买断成功");
         //插入订单设备日志
@@ -471,7 +474,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 

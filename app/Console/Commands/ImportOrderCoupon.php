@@ -71,7 +71,7 @@ class ImportOrderCoupon extends Command
                         $bar->advance();
                     }
                 $page++;
-                sleep(1);
+
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
