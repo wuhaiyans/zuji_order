@@ -72,6 +72,7 @@ class ImportNewOrder extends Command
 //        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
+
             $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
@@ -88,9 +89,6 @@ class ImportNewOrder extends Command
                     })->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
-//                if (!self::isAllowImport($v['order_no'])) {
-//                   continue;
-//                }
                     //获取渠道
                     $channel_id =$this->getChannel($v['appid']);
                     //获取订单类型
@@ -281,12 +279,10 @@ class ImportNewOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $whereArra = [];
-        $whereArra[] = ['order_no','=',$order_no];
         $whereArra[] = ['create_time','<=','1532588400'];
         $status =[2,3,10,21,23,26];
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($whereArra)->whereNotIn('status', $status)
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(array(['order_no','=',$order_no]))->whereIn("appid",$appid)->where($whereArra)->whereNotIn('status', $status)
             ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
                 $query->where(array(['create_time','>','1532588400']));
 

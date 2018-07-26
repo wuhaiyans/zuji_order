@@ -8,15 +8,16 @@ use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
-class ImportOrder extends Command
+class ImportNewOrder extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportOrder';
+    protected $signature = 'command:ImportNewOrder';
 
     /**
      * The console command description.
@@ -56,27 +57,38 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
+
         $status =[2,3,10,21,23,26];
-        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
+        $countWhereArra = [];
+        $countWhereArra[] = ['create_time','<=','1532588400'];
+
+        $orWhere[] = ['create_time','>','1532588400'];
+        $status =[2,3,10,21,23,26];
+        //3点之前非关闭的订单，3点之后所有订单
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
+            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                $query->where(array(['create_time','>','1532588400']));
+            })->count();
+//        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
+
             $limit = 500;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
             $orderId =0;
-
             do {
 
-                $whereArra = [];
-                $whereArra[] = ['business_key','=',1];
-                $whereArra[] = ['order_id','>=',$orderId+1];
-                $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn("appid",$appid)->orderBy('order_id','asc')->take($limit)->get();
+//                $whereArra = [];
+//                $whereArra[] = ['order_id','>=',$orderId+1];
+
+                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
+                    ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                        $query->where(array(['create_time','>','1532588400']));
+                    })->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
-                if (!self::isAllowImport($v['order_no'])) {
-                   continue;
-                }
                     //获取渠道
                     $channel_id =$this->getChannel($v['appid']);
                     //获取订单类型
@@ -221,15 +233,15 @@ class ImportOrder extends Command
                         }
                         $payData =[
                             'payType' =>$v['payment_type_id'],//支付方式 【必须】<br/>
-                     		'payChannelId' => 2,//支付渠道 【必须】<br/>
-                     		'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
-                     		'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-                     		'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
+                            'payChannelId' => 2,//支付渠道 【必须】<br/>
+                            'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
+                            'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
+                            'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
                             'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
-                     		'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
-                     		'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-                     		'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-                           ];
+                            'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
+                            'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
+                            'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+                        ];
                         $res =OrderCreater::createPay($payData);
                         if(!$res){
                             $arr['order_pay'][$k] =$payData;
@@ -243,7 +255,7 @@ class ImportOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-               // LogApi::notify("订单风控信息导入失败",$arr);
+                // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;
@@ -267,11 +279,14 @@ class ImportOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $whereArra = [];
-        $whereArra[] = ['order_no','=',$order_no];
         $whereArra[] = ['create_time','<=','1532588400'];
         $status =[2,3,10,21,23,26];
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
+        //3点之前非关闭的订单，3点之后所有订单
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(array(['order_no','=',$order_no]))->whereIn("appid",$appid)->where($whereArra)->whereNotIn('status', $status)
+            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                $query->where(array(['create_time','>','1532588400']));
+
+            })->count();
         if($total >0){
             return true;
         }
