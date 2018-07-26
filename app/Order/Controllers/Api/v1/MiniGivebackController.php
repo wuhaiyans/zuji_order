@@ -41,7 +41,9 @@ class MiniGivebackController extends Controller
 
         //初始化最终返回数据数组
         $data = [];
+        var_dump($paramsArr);
         $orderGoodsInfo = $this->__getOrderGoodsInfo($goodsNo);
+        var_dump($orderGoodsInfo);die;
         if( !$orderGoodsInfo ) {
             return apiResponse([], get_code(), get_msg());
         }
@@ -159,6 +161,7 @@ class MiniGivebackController extends Controller
         //创建商品服务层对象
         $orderGoodsService = new OrderGoods();
         $orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+        var_dump($orderGoodsInfo);
         if( !$orderGoodsInfo ) {
             return [];
         }
