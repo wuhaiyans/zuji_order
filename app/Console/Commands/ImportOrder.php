@@ -60,6 +60,7 @@ class ImportOrder extends Command
         $whereArra[] = ['create_time','<=','1532588400'];
         $status =[2,3,10,21,23,26];
         $total = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->count();
+
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 500;
@@ -69,11 +70,14 @@ class ImportOrder extends Command
             $orderId =0;
 
             do {
-                $whereArra[] = ['order_id','>=',$orderId+1];
-                $whereArra[] = ['order_id','<',$orderId+$limit+1];
+                $begin = $orderId+1;
+                $whereArra[] = ['order_id','>=',$begin];
+                $end =$orderId+$limit+1;
+                $whereArra[] = ['order_id','<',$end];
                 $datas01 = $this->conn->table('zuji_order2')->where($whereArra)->whereIn('status',$status)->whereIn("appid",$appid)->orderBy('order_id','asc')->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
+
                     //获取渠道
                     $channel_id =$this->getChannel($v['appid']);
                     //获取订单类型
@@ -235,6 +239,7 @@ class ImportOrder extends Command
                     $bar->advance();
                     $orderId =$v['order_id'];
                 }
+
                 ++$page;
 
             } while ($page <= $totalpage);

@@ -336,13 +336,13 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"更新订单状态失败");
         }
         //发送短信
-        BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
+        $result = BuyoutConfirm::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_CONFIRM,[
             'mobile'=>$orderInfo['mobile'],
             'realName'=>$orderInfo['realname'],
             'buyoutPrice'=>$data['amount'],
         ]);
         //插入订单日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断","创建买断成功");
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$goodsInfo['order_no'],"用户到期买断",json_encode($result));
         //插入订单设备日志
         $log = [
             'order_no'=>$data['order_no'],
@@ -362,7 +362,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
@@ -474,7 +474,7 @@ class BuyoutController extends Controller
             'buyout_no'=>$data['buyout_no'],
             'user_id'=>$data['user_id'],
         ],time()+config('web.order_cancel_hours'),"");
-
+        $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
 
