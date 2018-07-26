@@ -618,7 +618,7 @@ class OrderRepository
         $specs = '';
         foreach($specsArr as $val){
             echo $val;
-            echo strpos(':',$val);
+            echo stripos($val,':');
             echo substr($val,strpos(':',$val)).'/';die;
             $specs .= substr($val,strpos(':',$val)).'/';
         }
