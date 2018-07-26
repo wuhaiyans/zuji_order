@@ -90,7 +90,10 @@ class DepositComponnet implements OrderCreater
 
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
-                    $this->deposit_detail = $deposit['jianmian_detail'];
+                    foreach ($deposit['jianmian_detail'] as $k=>$v){
+                        $deposit['jianmian_detail'][$k]['jianmian'] = $deposit['jianmian_detail'][$k]['jianmian']/100;
+                    }
+                    $this->deposit_detail = json_encode($deposit['jianmian_detail']);
 
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }
