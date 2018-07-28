@@ -264,7 +264,7 @@ class SkuComponnet implements OrderCreater
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
                     'zuqi_type_name' => $this->zuqiTypeName,
-                    'buyout_price' => normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']),
+                    'buyout_price' => normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi'])) ),
                     'market_price' => normalizeNum($skuInfo['market_price']),
                     'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",
                     'chengse' => $skuInfo['chengse'],
