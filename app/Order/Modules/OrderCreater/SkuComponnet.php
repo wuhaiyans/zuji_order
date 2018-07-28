@@ -209,7 +209,7 @@ class SkuComponnet implements OrderCreater
         return $this->zuqiTypeName;
     }
     public function getOrderYajin(){
-        return $this->orderYajin;
+        return 0;
     }
     public function getOrderZujin(){
         return $this->orderZujin;
