@@ -212,6 +212,7 @@ class OrderReturnCreater
     }
     /**
      *申请退款
+	 * 2018-07-28 注意：待退款金额为0时，不能直接关闭订单（订单关闭，需要做很多事情，不单单是更新订单状态），必须创建退款单
      * @param array $params 业务参数
      * [
      *       'order_no'      => '',   商品编号 string  【必选】
@@ -255,17 +256,18 @@ class OrderReturnCreater
             //代扣+预授权
             if($order_info['pay_type'] == PayInc::WithhodingPay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+				// 
                 //如果押金为0
-                if($data['auth_unfreeze_amount'] == 0){
-                   //取消订单
-                    $cancelOrder = $order->refundFinish();
-                    if(!$cancelOrder){
-                        //事务回滚
-                        DB::rollBack();
-                        return false;
-                    }
-                    return true;
-                }
+//                if($data['auth_unfreeze_amount'] == 0){
+//                   //取消订单
+//                    $cancelOrder = $order->refundFinish();
+//                    if(!$cancelOrder){
+//                        //事务回滚
+//                        DB::rollBack();
+//                        return false;
+//                    }
+//                    return true;
+//                }
             }
             //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay || $order_info['pay_type'] == PayInc::UnionPay ){
@@ -273,16 +275,16 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
                 //如果押金为0 或者实付租金和意外险的总和为0
-                if( $data['auth_unfreeze_amount'] == 0 && $data['pay_amount'] == 0 ){
-                    //取消订单
-                    $cancelOrder=$order->refundFinish();
-                    if(!$cancelOrder){
-                        //事务回滚
-                        DB::rollBack();
-                        return false;
-                    }
-                    return true;
-                }
+//                if( $data['auth_unfreeze_amount'] == 0 && $data['pay_amount'] == 0 ){
+//                    //取消订单
+//                    $cancelOrder=$order->refundFinish();
+//                    if(!$cancelOrder){
+//                        //事务回滚
+//                        DB::rollBack();
+//                        return false;
+//                    }
+//                    return true;
+//                }
             }
             //冻结订单
             $orderFreeze = $order->refundOpen();
@@ -651,6 +653,31 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+				//-+------------------------------------------------------------
+				// 2018-07-28 liuhongxing
+				// 如果待退款金额为0，则直接调退款成功的回调
+				if( !(
+						$return_info['pay_amount']>0 
+						|| $return_info['auth_unfreeze_amount']>0 
+						|| $return_info['auth_deduction_amount']>0
+					) ){
+					// 不需要清算，直接调起退款成功
+					$b = self::refundUpdate([
+						'business_type' => $return_info['business_type'],
+						'business_no'	=> $return_info['business_no'],
+						'status'		=> 'success',
+					], $userinfo);
+					if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+						//事务提交
+						DB::commit();
+						return true;
+					}
+					// 失败
+					DB::rollBack();
+					return false;
+				}
+				//-+------------------------------------------------------------
+
                 //获取订单的支付信息
                 $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
                 if(!$pay_result){
