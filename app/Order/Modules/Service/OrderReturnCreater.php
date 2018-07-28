@@ -664,8 +664,8 @@ class OrderReturnCreater
 					) ){
 					// 不需要清算，直接调起退款成功
 					$b = self::refundUpdate([
-						'business_type' => $return_info['business_type'],
-						'business_no'	=> $return_info['business_no'],
+						'business_type' => $return_info['business_key'],
+						'business_no'	=> $return_info['refund_no'],
 						'status'		=> 'success',
 					], $userinfo);
 					if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
