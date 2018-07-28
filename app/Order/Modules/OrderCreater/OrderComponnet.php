@@ -266,7 +266,7 @@ class OrderComponnet implements OrderCreater
             'zuqi_type'=>$this->zuqiType,
             'order_amount' => $order_amount,
             'goods_yajin' => $goods_yajin,
-            'order_yajin' => $order_yajin,
+            'order_yajin' => 0,
             'order_insurance' => $order_insurance,
             'coupon_amount' => $coupon_amount,
             'discount_amount' => $discount_amount,
