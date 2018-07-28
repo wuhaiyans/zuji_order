@@ -639,7 +639,6 @@ class OrderReturnCreater
                 return false;
             }
             $return_info = $return->getData();
-			LogApi::debug('退款单信息',$return_info);
             //获取订单信息
             $order = \App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
             if(!$order){
