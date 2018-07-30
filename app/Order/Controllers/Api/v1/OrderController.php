@@ -285,7 +285,7 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
             $params = $request->all();
-            $params['size'] = 5000;
+            $params['size'] = 250;
             $param['page'] = $params['page'];
             $orderData = Service\OrderOperate::getOrderList($params);
 
