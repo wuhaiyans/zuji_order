@@ -43,10 +43,8 @@ class Excel
             return false;
         }
 
-        $cnt = 0;
         $data = [];
         $rows = 1;
-        $limit = 5000;
 
         if ($headers) {
             foreach ($headers as $k => $v) {
@@ -64,20 +62,10 @@ class Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-
         foreach ($data as $k => $v) {
             $sheet->setCellValue($k, $v);
-            $cnt++;
-            if ($limit == $cnt) {
-                //刷新一下输出buffer，防止由于数据过多造成问题
-                ob_flush();
-                flush();
-                $cnt = 0;
-            }
         }
-        if (ob_get_length()> 0) {
-            ob_end_clean();
-        }
+        ob_end_clean();
 
         $writer = new Xlsx($spreadsheet);
         $writer->setPreCalculateFormulas(false);

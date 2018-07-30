@@ -323,7 +323,6 @@ class OrderController extends Controller
             } else {
 
                 return apiResponse([],ApiStatus::CODE_34007);
-                exit;
             }
 
 
