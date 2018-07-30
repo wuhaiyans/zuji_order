@@ -278,7 +278,81 @@ class MiniGivebackController extends Controller
      * @return array
      */
     public function givebackPay(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+        }
+        $paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'goods_no'     => 'required',//商品编号
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+        }
+        //-+--------------------------------------------------------------------
+        // | 业务处理：获取判断当前还机单状态、更新还机单状态
+        //-+--------------------------------------------------------------------
+        //创建服务层对象
+        $orderGivebackService = new OrderGiveback();
+        //获取还机单基本信息
+        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($paramsArr['goods_no']);
+        if( !$orderGivebackInfo ){
+            return apiResponse([], get_code(), get_msg());
+        }
+        $orderGoodsInfo = $this->__getOrderGoodsInfo($orderGivebackInfo['goods_no']);
+        if( !$orderGoodsInfo ) {
+            return apiResponse([], get_code(), get_msg());
+        }
+        //获取芝麻订单信息
+        $orderMiniInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderGivebackInfo['order_no']);
+        if( !$orderMiniInfo ) {
+            return apiResponse([], get_code(), get_msg());
+        }
+        //判断租金是否为2000以上
+        if($orderMiniInfo['instalment_status'] == 4){
+            return apiResponse([], ApiStatus::CODE_35016,'租金超过2000请在APP主动还款后再进行还机' );
+        }
+        //判断APPid是否有映射
+        if(empty(config('miniappid.'.$params['appid']))){
+            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
+        }
+        $paramsArr['zm_app_id'] = config('miniappid.'.$params['appid']);//小程序APPID
+        //开启事务
+        DB::beginTransaction();
+        try {
+            //-+------------------------------------------------------------------------------
+            // |收货时：查询未完成分期直接进行代扣，并记录代扣状态
+            //-+------------------------------------------------------------------------------
+            if($orderGivebackInfo['instalment_status'] == 1 || $orderGivebackInfo['instalment_status'] == 3){
+                //判断是否有请求过（芝麻支付接口）
+                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'INSTALLMENT',$paramsArr['giveback_no']);
+                if( !$orderMiniCreditPayInfo ) {
+                    return apiResponse([],ApiStatus::CODE_35015,'请求扣款记录不存在');
+                }
+                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                $arr = [
+                    'zm_order_no'=>$orderMiniInfo['zm_order_no'],
+                    'out_order_no'=>$orderGivebackInfo['order_no'],
+                    'pay_amount'=>$orderGivebackInfo['instalment_amount'],
+                    'remark'=>$orderGivebackInfo['giveback_no'],
+                    'app_id'=>$paramsArr['zm_app_id'],
+                ];
+                $orderWithholdResult = \App\Lib\Payment\mini\MiniApi::withhold($arr);
+                if( $orderWithholdResult != 10000  ){
+                    return false;
+                }
+                //处理租金支付成功
 
+            }
+            //支付
+        }catch(\Exception $ex){
+
+        }
     }
 
     /**
@@ -443,7 +517,11 @@ class MiniGivebackController extends Controller
         if( !$orderGivebackInfo ) {
             return apiResponse([], get_code(), get_msg());
         }
-
+        //获取芝麻订单信息
+        $orderMiniInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderGivebackInfo['order_no']);
+        if( !$orderMiniInfo ) {
+            return apiResponse([], get_code(), get_msg());
+        }
         if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
             return apiResponse([], ApiStatus::CODE_92500, '当前还机单不处于待检测状态，不能进行检测处理!');
         }
@@ -454,11 +532,13 @@ class MiniGivebackController extends Controller
         $instalmentAmount = $givebackNeedPay = 0;
         //剩余分期数
         $instalmentNum = 0;
+        $out_trans_no = '';
         if( !empty($instalmentList[$goodsNo]) ){
             foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
                 if( in_array($instalmentInfo['status'], [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]) ){
                     $instalmentAmount += $instalmentInfo['amount'];
                     $instalmentNum++;
+                    $out_trans_no = $instalmentInfo['business_no'];
                 }
             }
         }
@@ -471,6 +551,13 @@ class MiniGivebackController extends Controller
         $paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
         $paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
         $paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
+        $paramsArr['zm_order_no'] = $orderMiniInfo['zm_order_no'];//芝麻订单号
+        $paramsArr['out_trans_no'] = $out_trans_no;//芝麻请求流水号
+        //判断APPid是否有映射
+        if(empty(config('miniappid.'.$params['appid']))){
+            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
+        }
+        $paramsArr['zm_app_id'] = config('miniappid.'.$params['appid']);//小程序APPID
 
         //开启事务
         DB::beginTransaction();
@@ -509,16 +596,7 @@ class MiniGivebackController extends Controller
                 throw new \Exception('这简直就是一个惊天大bug，天上有漏洞----->你需要一个女娲—.—');
             }
 
-            //存在未完成分期单，关闭分期单
-            $instalmentResult = true;
-            if( $instalmentNum ){
-                $instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
-            }
-            //分期关闭失败，回滚
-            if( !$instalmentResult ) {
-                DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_92700, '订单分期关闭失败!');
-            }
+
 
 
             //更新还机表状态失败回滚
@@ -554,6 +632,307 @@ class MiniGivebackController extends Controller
         return apiResponse([], ApiStatus::CODE_0, '检测结果同步成功');
     }
 
+    /**
+     * 检测结果处理【检测合格-代扣成功(无剩余分期)】
+     * @param OrderGiveback $orderGivebackService 还机单服务对象
+     * @param array $paramsArr 业务处理的必要参数数组
+     * $paramsArr = [<br/>
+     *		'goods_no' => '',//商品编号	【必须】<br/>
+     *		'evaluation_status' => '',//检测结果 【必须】<br/>
+     *		'evaluation_time' => '',//检测时间 【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+     *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+     *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+     *		'order_no' => '',//订单编号 【必须】<br/>
+     *		'user_id' => '',//用户id 【必须】<br/>
+     *		'giveback_no' => '',//还机单编号 【必须】<br/>
+     *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+     *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+     *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+     * ]
+     * @param int $status 还机单最新还机单状态
+     * @return bool 处理结果【true:处理完成;false:处理出错】
+     */
+    private function __dealEvaYesWitYes( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
+        //初始化更新还机单的数据
+        $data = $this->__givebackUpdateDataInit($paramsArr);
+        //-+--------------------------------------------------------------------
+        // | 有押金->退押金处理（小程序关闭订单解冻押金）
+        //-+--------------------------------------------------------------------
+        if( $paramsArr['yajin'] ){
+            //判断是否有请求过（芝麻支付接口）
+            $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'FINISH',$paramsArr['giveback_no']);
+            if( $orderMiniCreditPayInfo ) {
+                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+            }else{
+                $arr['out_trans_no'] = createNo();
+            }
+            $arr = [
+                'zm_order_no'=>$paramsArr['zm_order_no'],
+                'out_order_no'=>$paramsArr['order_no'],
+                'pay_amount'=>$paramsArr['compensate_amount'],
+                'remark'=>$paramsArr['giveback_no'],
+                'app_id'=>$paramsArr['zm_app_id'],
+            ];
+            $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
+            if( $orderCloseResult != 10000  ){
+                return false;
+            }
+            //拼接需要更新还机单状态
+            $data['status'] = $status =$goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
+            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+            $data['payment_time'] = time();
+            $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
+        }
+        //-+--------------------------------------------------------------------
+        // | 无押金->直接修改订单
+        //-+--------------------------------------------------------------------
+        else{
+            //更新商品表状态
+            $orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
+            if( !$orderGoods ){
+                return false;
+            }
+            $orderGoodsResult = $orderGoods->givebackFinish();
+            if(!$orderGoodsResult){
+                return false;
+            }
+            //解冻订单
+            if(!OrderGiveback::__unfreeze($paramsArr['order_no'])){
+                set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
+                return false;
+            }
+            //拼接需要更新还机单状态
+            $data['status'] = $status = $goodsStatus = OrderGivebackStatus::STATUS_DEAL_DONE;
+            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+            $data['payment_time'] = time();
+            $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN;
+        }
+
+        //更新还机单
+        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
+        //发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(
+            \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+            $paramsArr['goods_no'],
+            "GivebackWithholdSuccess");
+        $notice->notify();
+
+
+        return $orderGivebackResult ? true : false;
+    }
+
+    /**
+     * 检测结果处理【检测合格-代扣失败(有剩余分期)】
+     * @param OrderGiveback $orderGivebackService 还机单服务对象
+     * @param array $paramsArr 业务处理的必要参数数组
+     * $paramsArr = [<br/>
+     *		'goods_no' => '',//商品编号	【必须】<br/>
+     *		'evaluation_status' => '',//检测结果 【必须】<br/>
+     *		'evaluation_time' => '',//检测时间 【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+     *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+     *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+     *		'order_no' => '',//订单编号 【必须】<br/>
+     *		'user_id' => '',//用户id 【必须】<br/>
+     *		'giveback_no' => '',//还机单编号 【必须】<br/>
+     *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+     *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+     *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+     * ]
+     * @param int $status 还机单最新还机单状态
+     * @return bool 处理结果【true:处理完成;false:处理出错】
+     */
+    private function __dealEvaYesWitNo( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
+        //初始化更新还机单的数据
+        $data = $this->__givebackUpdateDataInit($paramsArr);
+        //-+--------------------------------------------------------------------
+        // | 订单关闭扣除用户租金，更新还机单
+        //-+--------------------------------------------------------------------
+        //分期金额大于两千则通过APP还款
+        if( $paramsArr['instalment_amount'] < 2000.00 ){
+            //判断是否有请求过（芝麻支付接口）
+            $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'INSTALLMENT',$paramsArr['giveback_no']);
+            if( $orderMiniCreditPayInfo ) {
+                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+            }else{
+                $arr['out_trans_no'] = $paramsArr['out_trans_no'];
+            }
+            $arr = [
+                'zm_order_no'=>$paramsArr['zm_order_no'],
+                'out_order_no'=>$paramsArr['order_no'],
+                'pay_amount'=>$paramsArr['instalment_amount'],
+                'remark'=>$paramsArr['giveback_no'],
+                'app_id'=>$paramsArr['zm_app_id'],
+            ];
+            $orderWithholdResult = \App\Lib\Payment\mini\MiniApi::withhold($arr);
+            if( $orderWithholdResult != 10000  ){
+                return false;
+            }
+        }else{
+            $data['remark'] = '小程序还机代扣金额一次性不能超过2000，剩余租金请用户主动到APP支付 ';
+        }
+        //拼接需要更新还机单状态
+        $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_time'] = time();
+        //更新还机单
+        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+        //发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(
+            \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+            $paramsArr['goods_no'],
+            "GivebackWithholdFail");
+        $notice->notify();
+
+        return $orderGivebackResult ? true : false;
+    }
+
+    /**
+     * 检测结果处理【检测不合格-代扣成功(无剩余分期)】
+     * @param OrderGiveback $orderGivebackService 还机单服务对象
+     * @param array $paramsArr 业务处理的必要参数数组
+     * $paramsArr = [<br/>
+     *		'goods_no' => '',//商品编号	【必须】<br/>
+     *		'evaluation_status' => '',//检测结果 【必须】<br/>
+     *		'evaluation_time' => '',//检测时间 【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+     *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+     *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+     *		'order_no' => '',//订单编号 【必须】<br/>
+     *		'user_id' => '',//用户id 【必须】<br/>
+     *		'giveback_no' => '',//还机单编号 【必须】<br/>
+     *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+     *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+     *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+     * ]
+     * @param int $status 还机单最新还机单状态
+     * @return bool 处理结果【true:处理完成;false:处理出错】
+     */
+    private function __dealEvaNoWitYes( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
+        //初始化更新还机单的数据
+        $data = $this->__givebackUpdateDataInit($paramsArr);
+
+        //-+--------------------------------------------------------------------
+        // | 业务验证（押金>=赔偿金：还机清算 || 押金<赔偿金：还机支付）、更新还机单
+        //-+--------------------------------------------------------------------
+        //押金>=赔偿金：还机清算
+        if( $paramsArr['yajin'] >= $paramsArr['compensate_amount'] ){
+
+            //拼接需要更新还机单状态更新还机单状态
+            $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
+            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+            $data['payment_time'] = time();
+            $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
+
+            //发送短信
+            $notice = new \App\Order\Modules\Service\OrderNotice(
+                \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+                $paramsArr['goods_no'],
+                'GivebackEvaNoWitYesEno',
+                ['amount' => $paramsArr['compensate_amount'] ]);
+            $notice->notify();
+        }
+        //押金<赔偿金：还机支付
+        else{
+            $tradeResult = $this->__orderPayment($paramsArr);
+
+            //拼接需要更新还机单状态更新还机单状态
+            $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+            $data['payment_time'] = time();
+
+            //发送短信
+            $notice = new \App\Order\Modules\Service\OrderNotice(
+                \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+                $paramsArr['goods_no'],
+                'GivebackEvaNoWitYesEnoNo',
+                ['amount' => $paramsArr['compensate_amount'] ]);
+            $notice->notify();
+        }
+        //清算或者支付结果失败，返回错误
+        if( !$tradeResult ){
+            return false;
+        }
+
+        //更新还机单
+        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+        return $orderGivebackResult ? true : false;
+
+    }
+
+    /**
+     * 检测结果处理【检测不合格-代扣失败(有剩余分期)】
+     * @param OrderGiveback $orderGivebackService 还机单服务对象
+     * @param array $paramsArr 业务处理的必要参数数组
+     * $paramsArr = [<br/>
+     *		'goods_no' => '',//商品编号	【必须】<br/>
+     *		'evaluation_status' => '',//检测结果 【必须】<br/>
+     *		'evaluation_time' => '',//检测时间 【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+     *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
+     *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+     *		'order_no' => '',//订单编号 【必须】<br/>
+     *		'user_id' => '',//用户id 【必须】<br/>
+     *		'giveback_no' => '',//还机单编号 【必须】<br/>
+     *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
+     *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
+     *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+     * ]
+     * @param int $status 还机单最新还机单状态
+     * @return bool 处理结果【true:处理完成;false:处理出错】
+     */
+    private function __dealEvaNoWitNo( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
+        //初始化更新还机单的数据
+        $data = $this->__givebackUpdateDataInit($paramsArr);
+        //-+--------------------------------------------------------------------
+        // | 生成支付单，更新还机单
+        //-+--------------------------------------------------------------------
+        //还机单支付
+        $orderPayment = $this->__orderPayment($paramsArr);
+        if( !$orderPayment ){
+            return false;
+        }
+
+        //拼接需要更新还机单状态
+        $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_time'] = time();
+
+        if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
+            $smsModel = "GivebackEvaNoWitNoEnoNo";
+        }else{
+            $smsModel = "GivebackEvaNoWitNoEno";
+        }
+
+        //发送短信
+        $notice = new \App\Order\Modules\Service\OrderNotice(
+            \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+            $paramsArr['goods_no'],
+            $smsModel,
+            ['amount' => $paramsArr['compensate_amount'] ]);
+        $notice->notify();
+
+        //更新还机单
+        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+        return $orderGivebackResult ? true : false;
+    }
+
+    /**
+     * 还机支付状态查询接口
+     * @params request
+     * @return array
+     */
+    public function givebackPayStatus( Request $request ){
+
+    }
+
+    /**
+     * 获取还机商品信息
+     * @param $goodsNo
+     * @return array
+     */
     private function __getOrderGoodsInfo( $goodsNo ){
 
         //获取商品基础数据
@@ -567,5 +946,37 @@ class MiniGivebackController extends Controller
         $orderGoodsInfo['goods_specs'] = filterSpecs($orderGoodsInfo['specs']);//商品规格信息
         $orderGoodsInfo['goods_img'] = $orderGoodsInfo['goods_thumb'];//商品缩略图
         return $orderGoodsInfo;
+    }
+
+    /**
+     * 还机单检测完成需要更新的基础数据初始化
+     * @param array $paramsArr
+     * $paramsArr = [<br/>
+     *		'evaluation_status' => '',//检测结果 【必须】<br/>
+     *		'evaluation_time' => '',//检测时间 【必须】<br/>
+     *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
+     *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/>
+     *		'instalment_amount' => '',//剩余分期金额 【可选】【存在未支付分期时必须】<br/>
+     *		'instalment_num' => '',//剩余分期数 【可选】【存在未支付分期时必须】<br/>
+     * ]
+     * @return array $data
+     * $data = [<br/>
+     *		'evaluation_status' => '',//检测结果 <br/>
+     *		'evaluation_time' => '',//检测时间 <br/>
+     *		'evaluation_remark' => '',//检测备注 <br/>
+     *		'compensate_amount' => '',//赔偿金额 【<br/>
+     *		'instalment_amount' => '',//赔偿金额 【<br/>
+     *		'instalment_num' => '',//赔偿金额 【<br/>
+     * ]
+     */
+    private function __givebackUpdateDataInit( $paramsArr ) {
+        return [
+            'evaluation_status' => $paramsArr['evaluation_status'],
+            'evaluation_time' => $paramsArr['evaluation_time'],
+            'evaluation_remark' => isset($paramsArr['evaluation_remark']) ? $paramsArr['evaluation_remark'] : '',
+            'compensate_amount' => isset($paramsArr['compensate_amount']) ? $paramsArr['compensate_amount'] : 0,
+            'instalment_amount' => isset($paramsArr['instalment_amount']) ? $paramsArr['instalment_amount'] : 0,
+            'instalment_num' => isset($paramsArr['instalment_num']) ? $paramsArr['instalment_num'] : 0,
+        ];
     }
 }
