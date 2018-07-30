@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Storage;
+use Mockery\CountValidator\Exception;
 
 
 class ImeiController extends Controller
@@ -69,6 +70,25 @@ class ImeiController extends Controller
         return \apiResponse(['imeis' => $imeis]);
     }
 
+    /**
+     * 根据IMEI查询返回一条记录
+     *     前段修改用
+     *
+     * @param string $imei
+     * @return array 一维数组
+     */
+    public function getRow(){
+        $rules = ['imei' => 'required'];
+        $params = $this->_dealParams($rules);
+
+        try{
+            $row = ImeiRepository::getRow($params['imei']);
+        } catch (\Exception $e){
+            return apiResponse([], ApiStatus::CODE_42002, $e->getMessage());
+        }
+        return \apiResponse([$row]);
+    }
+
 
     /**
      * 导入imei
@@ -100,10 +120,8 @@ class ImeiController extends Controller
         $params = $this->_dealParams([]);
         $list = $this->imei->export($params);
 
-
-
         return redirect()->action('UserController@profile', ['id'=>1]);
-        return \apiResponse($list);
+        //return \apiResponse($list);
     }
 
 
