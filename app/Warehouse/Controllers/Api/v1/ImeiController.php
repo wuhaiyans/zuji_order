@@ -120,10 +120,8 @@ class ImeiController extends Controller
         $params = $this->_dealParams([]);
         $list = $this->imei->export($params);
 
-
-
         return redirect()->action('UserController@profile', ['id'=>1]);
-        return \apiResponse($list);
+        //return \apiResponse($list);
     }
 
 
