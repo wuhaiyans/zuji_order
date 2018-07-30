@@ -71,7 +71,7 @@ class Excel
 
 
 //        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
-        $writer = new Xlsx();
+        $writer = new Xlsx($spreadsheet);
         $writer->setPreCalculateFormulas(false);
         header("Content-Type:application/download");
         header("Content-Disposition: attachment; filename=" . $title . ".xlsx");
