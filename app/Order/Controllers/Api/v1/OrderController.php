@@ -318,9 +318,9 @@ class OrderController extends Controller
                         $item['order_insurance'],
                     ];
                 }
-
+                
+                echo Excel::write($data, $headers,'后台订单列表数据导出'.$page);
                 ++$page;
-                return Excel::write($data, $headers,'后台订单列表数据导出'.$page);
                 sleep(3);
 //            return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
