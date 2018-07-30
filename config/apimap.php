@@ -294,11 +294,11 @@ return [
     //小程序获取用户最新下单订单号接口
     'mini.order.getorderno' => 'MiniOrderController@getOrderNo',
     //小程序还机信息详情接口
-    'mini.order.givebackinfo' => 'MiniGivebackController@GivebackInfo',
+    'mini.order.givebackinfo' => 'MiniGivebackController@givebackInfo',
     //小程序订单还机提交申请接口
-    'mini.order.givebackcreate' => 'MiniGivebackController@GivebackCreate',
+    'mini.order.givebackcreate' => 'MiniGivebackController@givebackCreate',
     //小程序订单还机支付接口
-    'mini.order.givebackpay' => 'MiniGivebackController@GivebackPay',
+    'mini.order.givebackpay' => 'MiniGivebackController@givebackPay',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************
