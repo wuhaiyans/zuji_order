@@ -273,7 +273,7 @@ class SkuComponnet implements OrderCreater
                     'channel_id'=>intval($spuInfo['channel_id']),
                     'discount_amount' => normalizeNum($skuInfo['buyout_price']),
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
-                    'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
+                    'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
@@ -290,7 +290,7 @@ class SkuComponnet implements OrderCreater
      *  计算押金
      * @param int $amount
      */
-    public function discrease_yajin(int $jianmian,$yajin,$mianyajin,$sku_id): array{
+    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
         if( $jianmian<0 ){
             return [];
         }
