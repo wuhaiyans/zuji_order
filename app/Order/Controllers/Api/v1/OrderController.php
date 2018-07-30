@@ -285,11 +285,11 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
             $params = $request->all();
-            $params['size'] = 500;
+            $params['size'] = 250;
             $param['page'] = $params['page'];
             $orderData = Service\OrderOperate::getOrderList($params);
 
-            if ($params['page']>10) {
+            if ($params['page']>20) {
                 return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
                 exit;
             }

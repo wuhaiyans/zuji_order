@@ -65,12 +65,14 @@ class Excel
         foreach ($data as $k => $v) {
             $sheet->setCellValue($k, $v);
         }
-        ob_end_clean();
+        if (ob_get_length()> 0) {
+            ob_end_clean();
+        }
 
         $writer = new Xlsx($spreadsheet);
         $writer->setPreCalculateFormulas(false);
         header("Content-Type:application/download");
-        header("Content-Disposition: attachment; filename=" . $title . ".csv");
+        header("Content-Disposition: attachment; filename=" . $title . ".xlsx");
         $writer->save('php://output');
     }
 }
