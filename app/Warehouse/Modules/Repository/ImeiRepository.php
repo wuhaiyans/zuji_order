@@ -110,12 +110,24 @@ class ImeiRepository
             ->limit($limit)
             ->get()->toArray();
 
-//        $result = [];
-//        foreach ($list as $v) {
-//            $result[$v['imei']] = $v;
-//        }
-
         return $list;
+    }
+
+    /**
+     * 根据IMEI查询返回一条记录
+     *
+     * @param string $imei
+     * @return array 一维数组
+     */
+    public static function getRow($imei)
+    {
+        $row = Imei::where(['imei'=>$imei])->first();
+
+        if(!$row){
+            throw new \Exception('设备表IMEI号:'.$imei.'未找到');
+        }
+
+        return $row->toArray();
     }
 
     /**
