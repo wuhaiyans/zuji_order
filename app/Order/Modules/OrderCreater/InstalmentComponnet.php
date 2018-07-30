@@ -75,10 +75,10 @@ class InstalmentComponnet implements OrderCreater
                     'discount_amount' =>(float)$sku['order_coupon_amount'],
                     'zuqi_policy' =>CouponStatus::CouponTypeAvg,
                 ],
-                [
-                    'discount_amount' =>(float)$sku['discount_amount'],
-                    'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
-                ]
+//                [
+//                    'discount_amount' =>(float)$sku['discount_amount'],
+//                    'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
+//                ]
             ];
             $_data = [
          		'zujin'		    => $sku['zujin'],	    //【必选】price 每期租金

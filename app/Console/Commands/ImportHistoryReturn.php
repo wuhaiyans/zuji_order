@@ -14,6 +14,7 @@ use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderReturn;
 use function GuzzleHttp\Psr7\str;
 use Illuminate\Console\Command;
+use ToQueue\loginLog;
 
 class ImportHistoryReturn extends Command
 {
@@ -41,6 +42,7 @@ class ImportHistoryReturn extends Command
      */
     public function __construct()
     {
+        ini_set('memory_limit','1024M');
         parent::__construct();
         $this->conn = \DB::connection('mysql_01');
     }
@@ -110,12 +112,11 @@ class ImportHistoryReturn extends Command
 
                 foreach($newData as $keys=>$values) {
 
-
-                    if (!ImportOrder::isAllowImport($values['order_no'])){
-
-                        $continueReturnArr[] = $values['return_id'];
-                        continue;
-                    }
+//                    if (!ImportOrder::isAllowImport($values['order_no'])){
+//
+//                        $continueReturnArr[] = $values['return_id'];
+//                        continue;
+//                    }
                     $success = $this->insertSelectReturn($values);
                     //更新order_goods表记录
 
@@ -131,7 +132,6 @@ class ImportHistoryReturn extends Command
                 LogApi::info("导入退货offset".$offset);
                 echo "导入退货offset".$offset."\n";
                 if ($offset>$returnCount) {
-                    echo "被过滤的列表总数".count($continueReturnArr)."列表" .json_encode($continueReturnArr);
                     LogApi::info('导入退货end ' . date("Y-m-d H:i:s", time()));
                     echo '导入退货end ' . date("Y-m-d H:i:s", time()) . "\n";exit;
                 }
@@ -214,6 +214,8 @@ class ImportHistoryReturn extends Command
     private function insertSelectReturn($data)
     {
 
+        LogApi::info('导入退货数据：',$data);
+
         if ($data['return_status']==6 || $data['reason_id']==6) {
             $bussness_key = 3;
         } else {
@@ -261,7 +263,9 @@ class ImportHistoryReturn extends Command
             'check_time'  => $data['return_check_time'],
             'update_time'  => $data['update_time'],
         ];
+        LogApi::info('导入退货数据的$orderRefundData：',$orderRefundData);
         if ($orderRefundData) unset($datas['refund_no']);
+        LogApi::info('导入退货数据的参数：',$datas);
         $succsss = OrderReturn::updateOrCreate($datas);
         //更新退货退款表记录
         $this->setOrderGoodsStatus($data['order_no'],$bussness_key,$data['return_status'],$refundNo);

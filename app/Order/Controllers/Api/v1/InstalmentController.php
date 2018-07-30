@@ -290,5 +290,70 @@ class InstalmentController extends Controller
     }
 
 
+    /*
+    * 分期备注信息
+    * @param array $request
+    * [
+    *		'instalment_id'		=> '', //【必选】string 分期id
+    *		'contact_status'	=> '', //【必选】int 是否联系到用户
+    *		'remark'		    => '', //【必选】string 备注信息
+    * ]
+    * @return bool
+    */
+    public function instalmentRemark(Request $request){
+        $params     = $request->all();
+        // 参数过滤
+        $rules = [
+            'instalment_id'         => 'required',  //商品编号
+            'contact_status'        => 'required',  //是否联系到用户
+            'remark'                => 'required',  //备注信息
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $data = $params['params'];
+
+        $data['create_time'] = time();
+
+        $remarkId = \App\Order\Models\OrderGoodsInstalmentRemark::insert($data);
+        if(!$remarkId){
+            return apiResponse([],ApiStatus::CODE_20001, "分期备注失败");
+        }
+
+        return apiResponse([],ApiStatus::CODE_0,"success");
+
+    }
+
+    /*
+   * 分期联系日历
+   * @param array $request
+   * [
+   *		'instalment_id'		=> '', //【必选】string 分期id
+   * ]
+   * @return array instalmentList
+   */
+    public function instalmentRemarkList(Request $request){
+        $params     = $request->all();
+
+        // 参数过滤
+        $rules = [
+            'instalment_id'         => 'required',  //商品编号
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $instalment_id      = $params['params']['instalment_id'];
+
+        $remarkList = \App\Order\Models\OrderGoodsInstalmentRemark::query()
+            ->where(['instalment_id' => $instalment_id])
+            ->get()->toArray();
+
+        return apiResponse($remarkList, ApiStatus::CODE_0);
+
+    }
+
 
 }
