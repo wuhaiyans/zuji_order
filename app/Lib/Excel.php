@@ -69,8 +69,13 @@ class Excel
             ob_end_clean();
         }
 
-        $writer = new Xlsx($spreadsheet);
-        $writer->setPreCalculateFormulas(false);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
+        $writer->setDelimiter(';');
+        $writer->setEnclosure('');
+        $writer->setLineEnding("\r\n");
+        $writer->setSheetIndex(0);
+//        $writer->setPreCalculateFormulas(false);
 //        header("Content-Type:application/download");
 //        header("Content-Disposition: attachment; filename=" . $title . ".xlsx");
 //
@@ -80,19 +85,19 @@ class Excel
 //
 //        $writer->save('php://output');
 //
-
+        $writer->save($title . ".csv ");
 
 //        $csvContent = "qwe,qwe,qwe,qwe,qwe,qwe,qwe /n";
-        header("Content-Type: application/vnd.ms-excel; charset=GB2312");
-        header("Pragma: public");
-        header("Expires: 0");
-        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header("Content-Disposition: attachment;filename=" . $title . ".csv ");
-        header("Content-Transfer-Encoding: binary ");
-        $writer->save('php://output');
+//        header("Content-Type: application/vnd.ms-excel; charset=GB2312");
+//        header("Pragma: public");
+//        header("Expires: 0");
+//        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+//        header("Content-Type: application/force-download");
+//        header("Content-Type: application/octet-stream");
+//        header("Content-Type: application/download");
+//        header("Content-Disposition: attachment;filename=" . $title . ".csv ");
+//        header("Content-Transfer-Encoding: binary ");
+//        $writer->save('php://output');
 //        $csvContent = iconv("utf-8","gb2312",$csvContent);
 //        echo $csvContent;
 //        exit;
