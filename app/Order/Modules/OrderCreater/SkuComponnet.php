@@ -225,15 +225,15 @@ class SkuComponnet implements OrderCreater
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
             //首月0租金优惠金额
-            $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['first_coupon_amount']):0.00;
+            $first_coupon_amount =isset($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['first_coupon_amount']):0.00;
             //订单固定金额优惠券
-            $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['order_coupon_amount']):0.00;
+            $order_coupon_amount =isset($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['order_coupon_amount']):0.00;
             //计算后的押金金额 - 应缴押金金额
-            $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['deposit_yajin']):$skuInfo['yajin'];
+            $deposit_yajin =isset($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['deposit_yajin']):$skuInfo['yajin'];
             //计算减免金额
-            $mianyajin = !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00;
+            $mianyajin = isset($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00;
             //计算免押金金额
-            $jianmian =!empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00;
+            $jianmian =isset($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00;
             //计算买断金额
             $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
 
