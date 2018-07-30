@@ -285,40 +285,54 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
         $params = $request->all();
-        $params['page'] = 1;
-        $params['size'] = 1000;
-        $orderData = Service\OrderOperate::getOrderList($params);
+        $page   =   1;
+        while (true) {
+            $params['size'] = 500;
+            $param['page'] = $page;
+            $orderData = Service\OrderOperate::getOrderList($params);
 
-        if ($orderData['code']===ApiStatus::CODE_0) {
+            if ($page>10) {
+                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
+                exit;
+            }
 
-            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
-                '订单实际总租金','订单总押金','意外险总金额'];
+            if ($orderData['code']===ApiStatus::CODE_0) {
 
-            foreach ($orderData['data']['data'] as $item) {
-                $data[] = [
-                    $item['order_no'],
-                    date('Y-m-d H:i:s', $item['create_time']),
-                    $item['order_status_name'],
-                    $item['appid_name'],
-                    $item['pay_type_name'],
-                    $item['visit_name'],
-                    $item['name'],
-                    $item['mobile'],
-                    $item['address_info'],
-                    implode(",",array_column($item['goodsInfo'],"goods_name")),
-                    $item['order_amount'],
-                    $item['order_yajin'],
-                    $item['order_insurance'],
-                ];
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
+                    '订单实际总租金','订单总押金','意外险总金额'];
+                $data = array();
+                foreach ($orderData['data']['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_status_name'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
+                        $item['visit_name'],
+                        $item['name'],
+                        $item['mobile'],
+                        $item['address_info'],
+                        implode(",",array_column($item['goodsInfo'],"goods_name")),
+                        $item['order_amount'],
+                        $item['order_yajin'],
+                        $item['order_insurance'],
+                    ];
+                }
+
+                ++$page;
+                return Excel::write($data, $headers,'后台订单列表数据导出'.$page);
+                sleep(3);
+//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_34007);
+                exit;
             }
 
 
-            return Excel::write($data, $headers,'后台订单列表数据导出');
-//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-        } else {
 
-            return apiResponse([],ApiStatus::CODE_34007);
         }
+
 
     }
 
