@@ -89,6 +89,37 @@ class ImeiController extends Controller
         return \apiResponse([$row]);
     }
 
+    /**
+     * 根据IMEI修改一条记录
+     *     前段修改用
+     *
+     * @param string $imei
+     * @return array 一维数组
+     */
+    public function setRow(){
+        $rules = [
+            'imei' => 'required',
+            'brand' => 'required',
+            'name' => 'required',
+            'price' => 'required',
+            'apple_serial' => 'required',
+            'quality' => 'required',
+            'color' => 'required',
+            'business' => 'required',
+            'storage' => 'required',
+            'status' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        try{
+            ImeiRepository::setRow($params['imei']);
+        } catch (\Exception $e){
+            return apiResponse([], ApiStatus::CODE_42003, $e->getMessage());
+        }
+        return \apiResponse([]);
+
+    }
+
 
     /**
      * 导入imei
