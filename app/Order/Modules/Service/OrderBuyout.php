@@ -240,7 +240,7 @@ class OrderBuyout
 			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
 					'mobile'=>$orderInfo['mobile'],
 					'realName'=>$orderInfo['realname'],
-					'buyoutPrice'=>$buyout['amount'],
+					'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
 			]);
 			//日志记录
 			$orderLog = [
@@ -266,7 +266,7 @@ class OrderBuyout
 		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
-				'buyoutPrice'=>$buyout['amount'],
+				'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
 		]);
 		//日志记录
 		$orderLog = [
@@ -383,7 +383,7 @@ class OrderBuyout
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
-				'tuihuanYajin'=>$goodsInfo['yajin']
+				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
 		]);
 		return true;
 	}

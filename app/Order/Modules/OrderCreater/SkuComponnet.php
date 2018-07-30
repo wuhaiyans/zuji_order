@@ -233,12 +233,12 @@ class SkuComponnet implements OrderCreater
             $specs =json_decode($spuInfo['specs'],true);
             $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
             $this->orderYajin =normalizeNum($deposit_yajin);
-            $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount);
+            $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$first_coupon_amount-$order_coupon_amount);
             if($amount_after_discount <0){
                 $amount_after_discount =0.00;
             }
 
-            $this->orderZujin =normalizeNum($amount_after_discount+$spuInfo['yiwaixian']);
+            $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
 
             $arr['sku'][] = [
@@ -264,7 +264,7 @@ class SkuComponnet implements OrderCreater
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
                     'zuqi_type_name' => $this->zuqiTypeName,
-                    'buyout_price' => normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']),
+                    'buyout_price' => normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  ),
                     'market_price' => normalizeNum($skuInfo['market_price']),
                     'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",
                     'chengse' => $skuInfo['chengse'],
@@ -273,13 +273,13 @@ class SkuComponnet implements OrderCreater
                     'channel_id'=>intval($spuInfo['channel_id']),
                     'discount_amount' => normalizeNum($skuInfo['buyout_price']),
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
-                    'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
+                    'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00,
-                    'deposit_yajin' => normalizeNum($deposit_yajin),
-                    'amount_after_discount'=>normalizeNum($amount_after_discount),
+                    'deposit_yajin' => $this->orderYajin,
+                    'amount_after_discount'=>$amount_after_discount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
             ];
@@ -290,7 +290,7 @@ class SkuComponnet implements OrderCreater
      *  计算押金
      * @param int $amount
      */
-    public function discrease_yajin(int $jianmian,$yajin,$mianyajin,$sku_id): array{
+    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
         if( $jianmian<0 ){
             return [];
         }
