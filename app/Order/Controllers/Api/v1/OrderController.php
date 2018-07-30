@@ -284,7 +284,7 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        $params = $request->all();
+            $params = $request->all();
             $params['size'] = 500;
             $param['page'] = $params['page'];
             $orderData = Service\OrderOperate::getOrderList($params);
@@ -328,7 +328,7 @@ class OrderController extends Controller
 
 
 
-        }
+
 
 
     }
