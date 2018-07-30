@@ -12,6 +12,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Warehouse\Config;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
+use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use Illuminate\Support\Facades\Log;
@@ -322,7 +323,20 @@ class DeliveryService
                     }
                 }unset($g);
 
-                $it['imeis'] = $item->imeis->toArray();
+                $imeis_all = $item->imeis->toArray();
+                if($imeis_all){
+                    foreach ($imeis_all as $key=>$item){
+                        $imei_row = Imei::where(['imei'=>$item['imei']])->first();
+                        if($imei_row){
+                            $imei_row = $imei_row->toArray();
+                            $imeis_all[$key]['quality'] = $imei_row['quality'];
+                            $imeis_all[$key]['color'] = $imei_row['color'];
+                            $imeis_all[$key]['business'] = $imei_row['business'];
+                            $imeis_all[$key]['storage'] = $imei_row['storage'];
+                        }
+                    }
+                }
+                $it['imeis'] = $imeis_all;
                 $it['goods'] = $goods_list;
             }
 
