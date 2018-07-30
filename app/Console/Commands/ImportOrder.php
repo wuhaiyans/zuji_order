@@ -65,10 +65,8 @@ class ImportOrder extends Command
         $orWhere[] = ['create_time','>','1532588400'];
         $status =[2,3,10,21,23,26];
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
-            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
-                $query->where(array(['create_time','>','1532588400']));
-            })->count();
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)
+           ->count();
 //        $total = $this->conn->table('zuji_order2')->where(['business_key'=>1])->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
@@ -83,10 +81,8 @@ class ImportOrder extends Command
 //                $whereArra = [];
 //                $whereArra[] = ['order_id','>=',$orderId+1];
 
-                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->where($countWhereArra)->whereNotIn('status', $status)
-                    ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
-                        $query->where(array(['create_time','>','1532588400']));
-                    })->get();
+                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)
+                   ->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -282,11 +278,8 @@ class ImportOrder extends Command
         $whereArra[] = ['create_time','<=','1532588400'];
         $status =[2,3,10,21,23,26];
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(array(['order_no','=',$order_no]))->whereIn("appid",$appid)->where($whereArra)->whereNotIn('status', $status)
-            ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
-                $query->where(array(['create_time','>','1532588400']));
-
-            })->count();
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(array(['order_no','=',$order_no]))->whereIn("appid",$appid)
+            ->count();
         if($total >0){
             return true;
         }
