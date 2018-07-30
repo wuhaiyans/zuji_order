@@ -61,7 +61,9 @@ class ImportHistoryInstalmentTwo extends Command
 
                 // 未导入的订单id
                 $arr = [];
+
                 $res =  \App\Order\Models\Order::query()
+                    ->select('order_info.*')
                     ->where([
                         ['order_goods_instalment.id', '=', null],
                     ])
@@ -74,9 +76,9 @@ class ImportHistoryInstalmentTwo extends Command
 
                 foreach($result as &$item) {
                     ++$_count1;
-                    $bar->advance();
+
                     // 旧系统 订单信息
-                    $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'goods_id', 'user_id', 'zujin', "appid", "business_key")->where(['order_no' => $item['order_no']])->first();
+                    $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_no', 'goods_id', 'user_id', 'zujin')->where(['order_no' => $item['order_no']])->first();
                     $orderInfo = objectToArray($orderInfo);
                     if(!$orderInfo){
                         continue;
@@ -92,7 +94,7 @@ class ImportHistoryInstalmentTwo extends Command
                     // 分期数据
 
                     $instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')
-                        ->where(['order_no' => $item['order_no']])
+                        ->where(['order_id' => $item['id']])
                         ->get()->toArray();
                     $instalmentList = objectToArray($instalment);
 
@@ -135,6 +137,7 @@ class ImportHistoryInstalmentTwo extends Command
 
                     }
 
+                    $bar->advance();
                 }
 
                 $page++;
