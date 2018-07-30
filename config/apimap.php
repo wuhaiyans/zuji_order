@@ -303,6 +303,8 @@ return [
     'mini.order.givebackcreate' => 'MiniGivebackController@givebackCreate',
     //小程序订单还机支付接口
     'mini.order.givebackpay' => 'MiniGivebackController@givebackPay',
+    //小程序订单还机支付状态查询接口
+    'mini.order.givebackpaystatus' => 'MiniGivebackController@givebackPayStatus',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************

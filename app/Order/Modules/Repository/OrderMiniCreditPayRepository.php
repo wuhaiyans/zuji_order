@@ -23,38 +23,36 @@ class OrderMiniCreditPayRepository
         return $info->getQueueableId();
     }
 
-//    /**
-//     * 根据商品编号获取单条商品信息
-//     * @param string $goodsNo 商品编号
-//     * @return array $goodsInfo 商品基础信息|空<br/>
-//     * $goodsInfo = [<br/>
-//     *		'id' => '',//订单商品自增id<br/>
-//     *		'order_no' => '',//业务平台订单号<br/>
-//     *		'zm_order_no' => '',//芝麻订单号<br/>
-//     *		'transaction_id' => '',//芝麻请求流水号<br/>
-//     *		'cert_no' => '',//证件号<br/>
-//     *		'mobile' => '',//手机号<br/>
-//     *		'house' => '',//住宅地址<br/>
-//     *		'zm_grade' => '',//级别<br/>
-//     *		'credit_amount' => '',//信用权益金额<br/>
-//     *		'zm_score' => '',//
-//     *		'zm_risk' => '',//芝麻风控产品集联合结果<br/>
-//     *		'zm_face' => '',//人脸核身结果<br/>
-//     *		'user_id' => '',//支付宝 userid<br/>
-//     *		'channel_id' => '',//渠道来源<br/>
-//     *		'create_time' => '',//创建时间<br/>
-//     * ]
-//     */
-//    public static function getMiniOrderInfo( $orderNo ) {
-//        $MiniOrder = new MiniOrderCreditPay();
-//        $result =  $MiniOrder->where(['order_no'=> $orderNo])->first();
-//        if (!$result) {
-//            get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');
-//            return [];
-//        }
-//        $miniOrderInfo = $result->toArray();
-////		var_dump($miniOrderInfo);exit;
-////		$miniOrderInfo['create_time'] = date('Y-m-d H:i:s',$miniOrderInfo['create_time']);
-//        return $miniOrderInfo;
-//    }
+    /**
+     * 根据订单号获取芝麻支付信息
+     * @param string $orderNo 订单编号
+     * @param string $orderOperateType 订单完结类型
+     * @return array $zmOrderInfo 订单基础信息|空<br/>
+     * $zmOrderInfo = [<br/>
+     *		'id' => '',//自增id<br/>
+     *		'order_operate_type' => '',//订单完结类型，目前包括取消(CANCEL)、完结(FINISH) 、分期扣款(INSTALLMENT)<br/>
+     *		'out_order_no' => '',//商户订单号<br/>
+     *		'zm_order_no' => '',//芝麻订单号<br/>
+     *		'out_trans_no' => '',//资商户资金交易号<br/>
+     *		'remark' => '',//报错取消原因或完结补充说明<br/>
+     *		'pay_amount' => '',//该次支付总金额<br/>
+     *		'create_time' => '',//创建时间<br/>
+     * ]
+     */
+    public static function getMiniCreditPayInfo( $orderNo,$orderOperateType ,$remark = false ) {
+        $MiniOrder = new OrderMiniCreditPay();
+        $where['order_no'] = $orderNo;
+        $where['order_operate_type'] = $orderOperateType;
+        if($remark){
+            $where['remark'] = $remark;
+        }
+        $result =  $MiniOrder->where($where)->first();
+        if (!$result) {
+            get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');
+            return [];
+        }
+        $miniOrderInfo = $result->toArray();
+		$miniOrderInfo['create_time'] = date('Y-m-d H:i:s',$miniOrderInfo['create_time']);
+        return $miniOrderInfo;
+    }
 }
