@@ -79,7 +79,6 @@ class Excel
 
 
 
-
         $writer->save('php://output');
 //
 //        $writer->save($title . ".csv ");
