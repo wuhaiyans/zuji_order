@@ -285,13 +285,11 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
         $params = $request->all();
-        $page   =   1;
-        while (true) {
             $params['size'] = 500;
-            $param['page'] = $page;
+            $param['page'] = $params['page'];
             $orderData = Service\OrderOperate::getOrderList($params);
 
-            if ($page>10) {
+            if ($params['page']>10) {
                 return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
                 exit;
             }
@@ -318,10 +316,9 @@ class OrderController extends Controller
                         $item['order_insurance'],
                     ];
                 }
-                
-                echo Excel::write($data, $headers,'后台订单列表数据导出'.$page);
-                ++$page;
-                sleep(3);
+
+                return Excel::write($data, $headers,'后台订单列表数据导出'.$params['page']);
+
 //            return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
 

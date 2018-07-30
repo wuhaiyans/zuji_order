@@ -43,8 +43,10 @@ class Excel
             return false;
         }
 
+        $cnt = 0;
         $data = [];
         $rows = 1;
+        $limit = 5000;
 
         if ($headers) {
             foreach ($headers as $k => $v) {
@@ -65,6 +67,13 @@ class Excel
 
         foreach ($data as $k => $v) {
             $sheet->setCellValue($k, $v);
+            $cnt++;
+            if ($limit == $cnt) {
+                //刷新一下输出buffer，防止由于数据过多造成问题
+                ob_flush();
+                flush();
+                $cnt = 0;
+            }
         }
         if (ob_get_length()> 0) {
             ob_end_clean();
@@ -73,7 +82,7 @@ class Excel
         $writer = new Xlsx($spreadsheet);
         $writer->setPreCalculateFormulas(false);
         header("Content-Type:application/download");
-        header("Content-Disposition: attachment; filename=" . $title . ".xlsx");
+        header("Content-Disposition: attachment; filename=" . $title . ".csv");
         $writer->save('php://output');
     }
 }
