@@ -233,7 +233,7 @@ class SkuComponnet implements OrderCreater
             $specs =json_decode($spuInfo['specs'],true);
             $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
             $this->orderYajin =normalizeNum($deposit_yajin);
-            $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$skuInfo['buyout_price']-$first_coupon_amount-$order_coupon_amount);
+            $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$first_coupon_amount-$order_coupon_amount);
             if($amount_after_discount <0){
                 $amount_after_discount =0.00;
             }
@@ -279,7 +279,7 @@ class SkuComponnet implements OrderCreater
                     'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
                     'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00,
                     'deposit_yajin' => $this->orderYajin,
-                    'amount_after_discount'=>normalizeNum($amount_after_discount),
+                    'amount_after_discount'=>$amount_after_discount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
             ];
