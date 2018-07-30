@@ -111,21 +111,21 @@ class RiskComponnet implements OrderCreater
             $strategies= '';
             if($k=="zhima_score"){
                 $score =$v['score'];
-                $v =$v['grade'];
+                $decision =$v['grade'];
             }
             if($k=="yidun"){
                 $score =$v['score'];
                 $strategies =$v['strategies'];
-                $v =$v['decision'];
+                $decision =$v['decision'];
             }
             if($v===false){
-                $v ="false";
+                $decision="false";
             }
             if($v===true){
-                $v ="true";
+                $decision="true";
             }
             $riskData =[
-                'decision' => $v,
+                'decision' => $decision,
                 'order_no'=>$orderNo,  // 编号
                 'score' => $score,
                 'strategies' =>$strategies,

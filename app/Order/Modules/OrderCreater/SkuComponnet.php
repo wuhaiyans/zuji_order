@@ -74,8 +74,11 @@ class SkuComponnet implements OrderCreater
             if(empty($goodsArr[$skuId]['spu_info']['payment_list'])){
                 throw new Exception("商品支付方式错误");
             }
+            //默认 获取 商品列表的第一个支付方式
             $this->payType =$payType?$payType:$goodsArr[$skuId]['spu_info']['payment_list'][0]['id'];
+            //租期类型
             $this->zuqiType = $goodsArr[$skuId]['sku_info']['zuqi_type'];
+            //如果为短租 商品租期为前端传递过来
             $goodsArr[$skuId]['sku_info']['begin_time'] =isset($sku[$i]['begin_time'])&&$this->zuqiType == 1?$sku[$i]['begin_time']:"";
             $goodsArr[$skuId]['sku_info']['end_time'] =isset($sku[$i]['end_time'])&&$this->zuqiType == 1?$sku[$i]['end_time']:"";
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
@@ -83,6 +86,7 @@ class SkuComponnet implements OrderCreater
 
             if ($this->zuqiType == 1) {
                 $this->zuqiTypeName = "day";
+                //计算短租租期
                 $goodsArr[$skuId]['sku_info']['zuqi'] = ((strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400)+1;
             } elseif ($this->zuqiType == 2) {
                 $this->zuqiTypeName = "month";
@@ -125,7 +129,7 @@ class SkuComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        //判断租期类型
+        //判断租期类型 长租只能租一个商品
         $skuInfo = array_column($this->goodsArr,'sku_info');
         for ($i=0;$i<count($skuInfo);$i++){
             if($this->zuqiType ==2 && (count($skuInfo) >1 || $skuInfo[$i]['sku_num'] >1)){
@@ -137,14 +141,6 @@ class SkuComponnet implements OrderCreater
         foreach ($this->goodsArr as $k=>$v){
             $skuInfo =$v['sku_info'];
             $spuInfo =$v['spu_info'];
-
-            //计算短租租期
-            if($this->zuqiType ==1){
-                if(strtotime($skuInfo['end_time'])-strtotime($skuInfo['begin_time'])<86400*2){
-                    $this->getOrderCreater()->setError('短租时间错误');
-                    $this->flag = false;
-                }
-            }
 
             // 计算金额
             $amount = $skuInfo['zuqi']*$skuInfo['shop_price']+$spuInfo['yiwaixian'];
@@ -168,8 +164,8 @@ class SkuComponnet implements OrderCreater
                 $this->flag = false;
             }
             if( $this->zuqiType == 1 ){ // 天
-                // 租期[1,12]之间的正整数
-                if( $skuInfo['zuqi']<1 || $skuInfo['zuqi']>31 ){
+                // 租期[3,31]之间的正整数
+                if( $skuInfo['zuqi']<3 || $skuInfo['zuqi']>31 ){
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
@@ -228,18 +224,29 @@ class SkuComponnet implements OrderCreater
 
             $skuInfo = $v['sku_info'];
             $spuInfo = $v['spu_info'];
+            //首月0租金优惠金额
             $first_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['first_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['first_coupon_amount']):0.00;
+            //订单固定金额优惠券
             $order_coupon_amount =!empty($this->sku[$skuInfo['sku_id']]['order_coupon_amount'])?normalizeNum($this->sku[$skuInfo['sku_id']]['order_coupon_amount']):0.00;
-            $specs =json_decode($spuInfo['specs'],true);
-            $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?$this->deposit[$skuInfo['sku_id']]['deposit_yajin']:$skuInfo['yajin'];
-            $this->orderYajin =normalizeNum($deposit_yajin);
+            //计算后的押金金额 - 应缴押金金额
+            $deposit_yajin =!empty($this->deposit[$skuInfo['sku_id']]['deposit_yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['deposit_yajin']):$skuInfo['yajin'];
+            //计算减免金额
+            $mianyajin = !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00;
+            //计算免押金金额
+            $jianmian =!empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00;
+            //计算买断金额
+            $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
+
+            //计算优惠后的总租金
             $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$first_coupon_amount-$order_coupon_amount);
             if($amount_after_discount <0){
                 $amount_after_discount =0.00;
             }
-
+            //设置订单金额的赋值 （目前一个商品 就暂时写死 多个商品后 根据文案 进行修改）
             $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
+            $this->orderYajin =$deposit_yajin;
+
 
             $arr['sku'][] = [
                     'sku_id' => intval($skuInfo['sku_id']),
@@ -254,31 +261,31 @@ class SkuComponnet implements OrderCreater
                     'sku_num' => intval($skuInfo['sku_num']),
                     'brand_id' => intval($spuInfo['brand_id']),
                     'category_id' => intval($spuInfo['catid']),
-                    'machine_id' => intval($spuInfo['machine_id']),
-                    'specs' => $this->specs,
-                    'thumb' => $spuInfo['thumb'],
-                    'insurance' =>$spuInfo['yiwaixian'],
-                    'insurance_cost' => $spuInfo['yiwaixian_cost'],
-                    'zujin' => $skuInfo['shop_price'],
-                    'yajin' => normalizeNum($skuInfo['yajin']),
+                    'machine_id' => intval($spuInfo['machine_id']),//机型ID
+                    'specs' => $this->specs, //规格
+                    'thumb' => $spuInfo['thumb'], //商品缩略图
+                    'insurance' =>$spuInfo['yiwaixian'], //意外险
+                    'insurance_cost' => $spuInfo['yiwaixian_cost'], //意外险成本价
+                    'zujin' => $skuInfo['shop_price'], //租金
+                    'yajin' => $skuInfo['yajin'], //商品押金
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
                     'zuqi_type_name' => $this->zuqiTypeName,
-                    'buyout_price' => normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  ),
-                    'market_price' => normalizeNum($skuInfo['market_price']),
-                    'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",
-                    'chengse' => $skuInfo['chengse'],
+                    'buyout_price' => $buyout_amount,
+                    'market_price' => $skuInfo['market_price'],
+                    'machine_value' => isset($spuInfo['machine_name'])?$spuInfo['machine_name']:"",//机型名称
+                    'chengse' => $skuInfo['chengse'],//商品成色
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
-                    'discount_amount' => normalizeNum($skuInfo['buyout_price']),
+                    'discount_amount' => $skuInfo['buyout_price'], //商品优惠金额 （商品系统为buyout_price字段）
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
-                    'all_amount'=>$skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian'],
+                    'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,
-                    'mianyajin' => !empty($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00,
-                    'jianmian' => !empty($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00,
-                    'deposit_yajin' => $this->orderYajin,
+                    'mianyajin' => $mianyajin,
+                    'jianmian' => $jianmian,
+                    'deposit_yajin' => $this->orderYajin,//应缴押金
                     'amount_after_discount'=>$amount_after_discount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
