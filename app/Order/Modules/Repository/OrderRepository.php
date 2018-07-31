@@ -463,7 +463,7 @@ class OrderRepository
         page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
-    public static function getOrderList1($param = array(), $pagesize=5)
+    public static function getOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
         $orWhereArray = array();
@@ -540,7 +540,7 @@ class OrderRepository
 //            ->where('a.id','>',1)
 //            ->get();
 
-        sql_profiler();
+//        sql_profiler();
         $orderList =
             DB::table('order_info')
             ->select('order_info.order_no')
@@ -565,8 +565,32 @@ class OrderRepository
 //            ->where($whereArray)
 
 
-        //dd(objectToArray($orderList));
-        return $orderList;
+
+//        p(objectToArray($orderList));
+        $orderArray = objectToArray($orderList);
+        if ($orderArray) {
+            $orderIds = array_column($orderArray['data'],"order_no");
+//           dd($orderIds);
+//            sql_profiler();
+            $orderList =  DB::table('order_info')
+                ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
+                ->whereIn('order_info.order_no', $orderIds)
+                ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+                ->join('order_info_visit',function($join){
+                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+                }, null,null,'left')
+                ->join('order_delivery',function($join){
+                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+                }, null,null,'left')
+                ->get();
+
+            return $orderList;
+//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
+
+        }
+        return false;
 
     }
 
@@ -583,7 +607,7 @@ class OrderRepository
     page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
-    public static function getOrderList($param = array(), $pagesize=5)
+    public static function getOrderList1($param = array(), $pagesize=5)
     {
         $whereArray = array();
         $orWhereArray = array();
