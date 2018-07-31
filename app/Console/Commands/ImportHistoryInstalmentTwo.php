@@ -52,7 +52,6 @@ class ImportHistoryInstalmentTwo extends Command
         ];
 
         $total = \App\Order\Models\Order::query()
-            ->whereIn("appid",$appid)
             ->count();
 
         $bar = $this->output->createProgressBar($total);
@@ -65,11 +64,13 @@ class ImportHistoryInstalmentTwo extends Command
 
             do {
 
+
                 $res =  \App\Order\Models\Order::query()
-                    ->whereIn("appid",$appid)
+                    ->select('order_no')
                     ->forPage($page,$limit)
                     ->orderBy('id', 'DESC')
-                    ->get()->toArray();
+                    ->get();
+
                 $result = objectToArray($res);
 
 
@@ -82,8 +83,8 @@ class ImportHistoryInstalmentTwo extends Command
                     $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::query()
                         ->where([
                             ['order_no', '=', $order['order_no']]
-                        ])->first();
-                    if($instalmentInfo){
+                        ])->count();
+                    if($instalmentInfo>0){
                         continue;
                     }
 
@@ -98,9 +99,9 @@ class ImportHistoryInstalmentTwo extends Command
                     // 分期数据
                     $instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')
                         ->where(['order_id' => $orderInfo['order_id']])
-                        ->get()->toArray();
+                        ->get();
                     $instalmentList = objectToArray($instalment);
-                    if($instalmentList == []){
+                    if(empty($instalmentList)){
                         ++$_count2;
                         continue;
                     }
@@ -127,16 +128,7 @@ class ImportHistoryInstalmentTwo extends Command
                         $data['original_amount']  = !empty($orderInfo['zujin']) ? $orderInfo['zujin'] / 100 : '0.00';
                         $data['amount']           = !empty($item['amount']) ? $item['amount'] / 100 : '0.00';
 
-                        //有记录则跳出
-                        $info = \App\Order\Models\OrderGoodsInstalment::query()
-                            ->where([
-                                ['times', '=', $item['times']],
-                                ['goods_no', '=', $orderInfo['goods_id']]
-                            ])->first();
 
-                        if($info){
-                            continue;
-                        }
                         // 插入数据
                         $ret = \App\Order\Models\OrderGoodsInstalment::insert($data);
                         if(!$ret){
@@ -147,6 +139,8 @@ class ImportHistoryInstalmentTwo extends Command
 
 
                 }
+
+                ++$page;
 
             } while ($page <= $totalpage);
 
