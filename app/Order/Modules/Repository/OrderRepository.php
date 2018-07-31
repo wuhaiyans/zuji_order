@@ -586,7 +586,9 @@ class OrderRepository
                 }, null,null,'left')
                 ->get();
 
-            return $orderList;
+            $orderArray['data'] = objectToArray($orderList);
+
+            return $orderArray;
 //            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
 
         }

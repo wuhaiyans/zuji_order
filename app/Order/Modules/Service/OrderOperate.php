@@ -969,9 +969,9 @@ class OrderOperate
         $newParam['uid']=  $param['userinfo']['uid'];
 
 
-        $orderList = OrderRepository::getClientOrderList($newParam);
+        $orderListArray = OrderRepository::getClientOrderList($newParam);
 
-        $orderListArray = objectToArray($orderList);
+//        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
 
@@ -1041,9 +1041,9 @@ class OrderOperate
     {
         //根据用户id查找订单列表
 
-        $orderList = OrderRepository::getOrderList($param);
+        $orderListArray = OrderRepository::getOrderList($param);
 
-        $orderListArray = objectToArray($orderList);
+//        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
 
