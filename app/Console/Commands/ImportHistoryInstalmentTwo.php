@@ -104,24 +104,24 @@ class ImportHistoryInstalmentTwo extends Command
                     foreach($instalmentList as $item){
 
                         //$data['id']               = $item['id'];
-                        $data['order_no']         = $orderInfo['order_no'];
-                        $data['goods_no']         = $orderInfo['goods_id'];
-                        $data['user_id']          = $orderInfo['user_id'];
+                        $data['order_no']         = !empty($orderInfo['order_no']) ? $orderInfo['order_no'] : 0;
+                        $data['goods_no']         = !empty($orderInfo['goods_id']) ? $orderInfo['goods_id'] : 0;
+                        $data['user_id']          = !empty($orderInfo['user_id']) ? $orderInfo['user_id'] : 0;
 
-                        $data['term']             = $item['term'];
-                        $data['times']            = $item['times'];
-                        $data['discount_amount']  = $item['discount_amount'];
-                        $data['status']           = $item['status'];
-                        $data['payment_time']     = $item['payment_time'];
-                        $data['update_time']      = $item['update_time'];
-                        $data['remark']           = $item['remark'];
-                        $data['fail_num']         = $item['fail_num'];
-                        $data['unfreeze_status']  = $item['unfreeze_status'];
+                        $data['term']             = !empty($item['term']) ? $item['term'] : 0;
+                        $data['times']            = !empty($item['times']) ? $item['times'] : 0;
+                        $data['discount_amount']  = !empty($item['discount_amount']) ? $item['discount_amount'] : '0.00';
+                        $data['status']           = !empty($item['status']) ? $item['status'] : 0;
+                        $data['payment_time']     = !empty($item['payment_time']) ? $item['payment_time'] : 0;
+                        $data['update_time']      = !empty($item['update_time']) ? $item['update_time'] : 0;
+                        $data['remark']           = !empty($item['remark']) ? $item['remark'] : "";
+                        $data['fail_num']         = !empty($item['fail_num']) ? $item['fail_num'] : 0;
+                        $data['unfreeze_status']  = !empty($item['unfreeze_status']) ? $item['unfreeze_status'] : 0;
 
 
                         $data['day']              = 15;
-                        $data['original_amount']  = $orderInfo['zujin'] / 100;
-                        $data['amount']           = $item['amount'] / 100;
+                        $data['original_amount']  = !empty($orderInfo['zujin']) ? $orderInfo['zujin'] / 100 : '0.00';
+                        $data['amount']           = !empty($item['amount']) ? $item['amount'] / 100 : '0.00';
 
                         //有记录则跳出
                         $info = \App\Order\Models\OrderGoodsInstalment::query()
@@ -150,6 +150,7 @@ class ImportHistoryInstalmentTwo extends Command
                 LogApi::notify("订单分期数据导入失败",$arr);
             }
             $bar->finish();
+            LogApi::info("分期数据导入",[$_count1,$_count2,$_count3]);
             echo "导入成功（{$_count1},{$_count2},{$_count3}）";die;
         }catch (\Exception $e){
             echo $e->getMessage();
