@@ -128,16 +128,7 @@ class ImportHistoryInstalmentTwo extends Command
                         $data['original_amount']  = !empty($orderInfo['zujin']) ? $orderInfo['zujin'] / 100 : '0.00';
                         $data['amount']           = !empty($item['amount']) ? $item['amount'] / 100 : '0.00';
 
-                        //有记录则跳出
-                        $info = \App\Order\Models\OrderGoodsInstalment::query()
-                            ->where([
-                                ['times', '=', $item['times']],
-                                ['goods_no', '=', $orderInfo['goods_id']]
-                            ])->first();
 
-                        if($info){
-                            continue;
-                        }
                         // 插入数据
                         $ret = \App\Order\Models\OrderGoodsInstalment::insert($data);
                         if(!$ret){
