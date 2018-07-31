@@ -76,4 +76,88 @@ class Excel
         header("Content-Disposition: attachment; filename=" . $title . ".xlsx");
         $writer->save('php://output');
     }
+
+
+    public static function csvWrite($body, $headers=[] , $title='数据导出')
+    {
+
+
+        // csv文件内容不要以字母开始
+        $title = '报表'."\n";
+        // 准备字段
+        $titles = [
+            'id' => 'ID',
+            'type' => '类型',
+            'content' => '内容',
+            'create_time' => '创建时间',
+            'mark' => '备注'
+        ];
+        $fields = '';
+        foreach ($titles as $k => $v) {
+            $title .= $v.',';
+            $fields .= $k.',';
+        }
+        $fields = rtrim($fields, ',');
+    // 数据库查询
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=test', 'root', 'root');
+        $res = $pdo->query('SELECT '.$fields.' from excel_test LIMIT 100000');
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+    //  结果处理
+        $csv = $title."\n";
+        $fields = explode(',', $fields);
+        foreach ($res as $value) {
+            $row = '';
+            foreach ($fields as $field) {
+                // 按照 fputcsv() 函数的处理方式
+                if (strpos($value[$field],',') !== FALSE || strpos($value[$field],'"') !== FALSE) {
+                    $row .= '"'.str_replace('"','""',$value[$field]).'",';
+                }else{
+                    $row .= $value[$field].',';
+                }
+            }
+            $csv .= $row."\n";
+        }
+        file_put_contents('./test.csv',mb_convert_encoding($csv, "GBK", "UTF-8"),FILE_APPEND);
+
+
+    }
+
+
+    public static function csvWrite1($export_data, $column_name=[] , $title='数据导出')
+    {
+
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", ".$title." ) . ".csv" );
+
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+
+        // 将中文标题转换编码，否则乱码
+        foreach ($column_name as $i => $v) {
+            $column_name[$i] = iconv('utf-8', 'GB18030', $v);
+        }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $column_name);
+
+//        $pre_count = 5000;
+//        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+//            $export_data = $db->getAll($sql." limit ".strval($i*$pre_count).",{$pre_count}");
+            foreach ( $export_data as $item ) {
+                $rows = array();
+                foreach ( $item as $export_obj){
+                    $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+                }
+                fputcsv($fp, $rows);
+            }
+
+            // 将已经写到csv中的数据存储变量销毁，释放内存占用
+            unset($export_data);
+            ob_flush();
+            flush();
+//        }
+
+        exit ();
+
+
+    }
 }

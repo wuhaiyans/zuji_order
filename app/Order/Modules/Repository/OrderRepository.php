@@ -463,10 +463,10 @@ class OrderRepository
         page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
-    public static function getOrderList($param = array(), $pagesize=5)
+    public static function getOrderList1($param = array(), $pagesize=5)
     {
         $whereArray = array();
-		$orWhereArray = array();
+        $orWhereArray = array();
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -539,9 +539,128 @@ class OrderRepository
 //            }, null,null,'left')
 //            ->where('a.id','>',1)
 //            ->get();
-        
 
-//        sql_profiler();
+        sql_profiler();
+        $orderList =
+            DB::table('order_info')
+            ->select('order_info.order_no')
+            ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+            ->join('order_info_visit',function($join){
+                $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+            }, null,null,'left')
+            ->where($whereArray)
+            ->where($orWhereArray)
+            ->orderBy('order_info.id', 'DESC')
+            ->orderBy('order_info_visit.id','desc')
+            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+
+//        $orderList = DB::table('order_info')
+//            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
+//            ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
+//            ->where($whereArray)
+
+
+        //dd(objectToArray($orderList));
+        return $orderList;
+
+    }
+
+
+
+
+    /**
+     *  获取订单列表
+     *  heaven
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+    columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+    pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+    page:表示查询第几页及查询页码
+     * @param array $param  获取订单列表参数
+     */
+    public static function getOrderList($param = array(), $pagesize=5)
+    {
+        $whereArray = array();
+        $orWhereArray = array();
+//        $visitWhere = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['order_info.user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_info.order_no', '=', $param['order_no']];
+        }
+
+        //根据手机号
+        if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
+        {
+            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
+            $orWhereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords'],'or'];
+        }
+        //根据订单号
+        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
+        }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
+        }
+
+        //应用来源ID
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+        }
+
+        //支付类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
+        }
+
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_info.create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+        if (isset($param['visit_id'])) {
+            $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
+        }
+
+
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+//        //dd($whereArray);
+
+//        DB::table('order_info')
+//            ->join('order_user_address',function($join){
+//                $join->on('order_info.order_no', '=', 'order_user_address.order_no')
+//                    ->where('b.status','=','SUCCESS')
+//                    ->where('b.type','=','UNLOCK');
+//            }, null,null,'left')
+//            ->where('a.id','>',1)
+//            ->get();
+
+
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
             ->join('order_user_address',function($join){
@@ -564,9 +683,10 @@ class OrderRepository
 //            ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
 //            ->where($whereArray)
 
-
-        //dd(objectToArray($orderList));
+//        objectToArray($orderList);
+//        //dd(objectToArray($orderList));
         return $orderList;
+
 
     }
 

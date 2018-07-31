@@ -317,7 +317,7 @@ class OrderController extends Controller
                     ];
                 }
 
-                return Excel::write($data, $headers,'后台订单列表数据导出'.$params['page']);
+                return Excel::csvWrite1($data, $headers,'后台订单列表数据导出'.$params['page']);
 
 //            return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
