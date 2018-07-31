@@ -325,8 +325,8 @@ class DeliveryService
 
                 $imeis_all = $item->imeis->toArray();
                 if($imeis_all){
-                    foreach ($imeis_all as $key=>$item){
-                        $imei_row = Imei::where(['imei'=>$item['imei']])->first();
+                    foreach ($imeis_all as $key=>$value){
+                        $imei_row = Imei::where(['imei'=>$value['imei']])->first();
                         if($imei_row){
                             $imei_row = $imei_row->toArray();
                             $imeis_all[$key]['quality'] = $imei_row['quality'];

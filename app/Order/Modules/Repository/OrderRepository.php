@@ -541,6 +541,7 @@ class OrderRepository
 //            ->get();
         
 
+//        sql_profiler();
         $orderList = DB::table('order_info')
             ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
             ->join('order_user_address',function($join){
