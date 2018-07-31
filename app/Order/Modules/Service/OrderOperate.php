@@ -969,9 +969,9 @@ class OrderOperate
         $newParam['uid']=  $param['userinfo']['uid'];
 
 
-        $orderListArray = OrderRepository::getClientOrderList($newParam);
+        $orderList = OrderRepository::getClientOrderList($newParam);
 
-//        $orderListArray = objectToArray($orderList);
+        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
 
