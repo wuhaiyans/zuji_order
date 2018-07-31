@@ -42,18 +42,27 @@ class ImportHistoryInstalmentTwo extends Command
         $_count2 = 0;
         $_count3 = 0;
         //$totalSql = 'select count(order_info.id) as num from order_info left join order_goods_instalment ON order_info.order_no=order_goods_instalment.order_no WHERE order_goods_instalment.id IS NULL';
-
+        $appid =[
+            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
+            40,41,42,43,44,45,46,47,48,49,
+            50,51,52,53,54,55,56,57,58,59,
+            60,61,62,63,64,65,66,67,68,69,
+            70,71,72,73,74,75,76,77,78,79,
+            80,81,82,83,84,85,86,87,88,89,
+            93,94,95,96,97,98,122,123,131,132,
+        ];
 
         $total = \App\Order\Models\Order::query()
             ->where([
                 ['order_goods_instalment.id', '=', null],
             ])
+            ->whereIn("order_info.appid",$appid)
             ->leftJoin('order_goods_instalment', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->count();
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 10;
+            $limit  = 500;
             $page   = 1;
             $totalpage = ceil($total/$limit);
             $arr =[];
@@ -68,6 +77,7 @@ class ImportHistoryInstalmentTwo extends Command
                     ->where([
                         ['order_goods_instalment.id', '=', null],
                     ])
+                    ->whereIn("order_info.appid",$appid)
                     ->leftJoin('order_goods_instalment', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->orderBy('order_info.id', 'DESC')
                     ->forPage($page,$limit)
