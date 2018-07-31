@@ -137,7 +137,7 @@ class Excel
             $column_name[$i] = iconv('utf-8', 'GB18030', $v);
         }
         // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, '');
+        fputcsv($fp, $column_name);
 
 //        $pre_count = 5000;
 //        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
@@ -147,7 +147,7 @@ class Excel
                 foreach ( $item as $export_obj){
                     $rows[] = iconv('utf-8', 'GB18030', $export_obj);
                 }
-                fputcsv($fp, '');
+                fputcsv($fp, $rows);
             }
 
             // 将已经写到csv中的数据存储变量销毁，释放内存占用

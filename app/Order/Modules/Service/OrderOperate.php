@@ -1306,6 +1306,7 @@ class OrderOperate
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
             $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
             $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
             if (empty($actArray)){
                 $goodsList[$keys]['act_goods_state']= [];
