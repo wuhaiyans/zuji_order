@@ -40,8 +40,7 @@ class ImportHistoryInstalmentTwo extends Command
     public function handle(){
         $_count1 = 0;
         $_count2 = 0;
-        $_count3 = 0;
-        //$totalSql = 'select count(order_info.id) as num from order_info left join order_goods_instalment ON order_info.order_no=order_goods_instalment.order_no WHERE order_goods_instalment.id IS NULL';
+
         $appid =[
             1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
             40,41,42,43,44,45,46,47,48,49,
@@ -53,54 +52,48 @@ class ImportHistoryInstalmentTwo extends Command
         ];
 
         $total = \App\Order\Models\Order::query()
-            ->where([
-                ['order_goods_instalment.id', '=', null],
-            ])
-            ->whereIn("order_info.appid",$appid)
-            ->leftJoin('order_goods_instalment', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+            ->whereIn("appid",$appid)
             ->count();
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 500;
+            $limit  = 1000;
             $page   = 1;
             $totalpage = ceil($total/$limit);
+
             $arr =[];
 
-            while($page <= $totalpage) {
-
-                // 未导入的订单id
-                $arr = [];
+            do {
 
                 $res =  \App\Order\Models\Order::query()
-                    ->select('order_info.*')
-                    ->where([
-                        ['order_goods_instalment.id', '=', null],
-                    ])
-                    ->whereIn("order_info.appid",$appid)
-                    ->leftJoin('order_goods_instalment', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-                    ->orderBy('order_info.id', 'DESC')
+                    ->whereIn("appid",$appid)
                     ->forPage($page,$limit)
+                    ->orderBy('id', 'DESC')
                     ->get()->toArray();
                 $result = objectToArray($res);
 
 
-                foreach($result as &$item) {
+                foreach($result as &$order) {
+
                     ++$_count1;
+                    $bar->advance();
+
+                    //查询分期数据  有记录则跳出
+                    $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::query()
+                        ->where([
+                            ['order_no', '=', $order['order_no']]
+                        ])->first();
+                    if($instalmentInfo){
+                        continue;
+                    }
 
                     // 旧系统 订单信息
-                    $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_id', 'order_no', 'goods_id', 'user_id', 'zujin')->where(['order_no' => $item['order_no']])->first();
+                    $orderInfo = \DB::connection('mysql_01')->table('zuji_order2')->select('order_id', 'order_no', 'goods_id', 'user_id', 'zujin')->where(['order_no' => $order['order_no']])->first();
                     $orderInfo = objectToArray($orderInfo);
                     if(!$orderInfo){
                         continue;
                     }
 
-                    // 去除小程序分期
-                    $isAllow = \App\Console\Commands\ImportOrder::isAllowImport($orderInfo['order_no']);
-                    if(!$isAllow){
-                        ++$_count2;
-                        continue;
-                    }
 
                     // 分期数据
                     $instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')
@@ -108,9 +101,10 @@ class ImportHistoryInstalmentTwo extends Command
                         ->get()->toArray();
                     $instalmentList = objectToArray($instalment);
                     if($instalmentList == []){
-                        ++$_count3;
+                        ++$_count2;
                         continue;
                     }
+
                     foreach($instalmentList as $item){
 
                         //$data['id']               = $item['id'];
@@ -151,17 +145,17 @@ class ImportHistoryInstalmentTwo extends Command
 
                     }
 
-                    $bar->advance();
+
                 }
 
-                $page++;
-            }
+            } while ($page <= $totalpage);
+
             if(count($arr)>0){
                 LogApi::notify("订单分期数据导入失败",$arr);
             }
             $bar->finish();
-            LogApi::info("分期数据导入",[$_count1,$_count2,$_count3]);
-            echo "导入成功（{$_count1},{$_count2},{$_count3}）";die;
+            LogApi::info("分期数据导入",[$_count1,$_count2]);
+            echo "导入成功（{$_count1},{$_count2}）";die;
         }catch (\Exception $e){
             echo $e->getMessage();
             die;
