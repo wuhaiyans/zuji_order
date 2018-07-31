@@ -8,6 +8,7 @@ namespace App\Order\Controllers\Api\v1;
 
 use Illuminate\Support\Facades\Redis;
 use App\Order\Modules\Service\OrderGiveback;
+use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 
 class MiniNotifyController extends Controller
@@ -100,7 +101,37 @@ class MiniNotifyController extends Controller
                 $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($data['out_order_no']);
                 //请求关闭订单接口
                 if($orderGivebackInfo){
+                    //修改租金支付成功状态
+                    $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$orderGivebackInfo['goods_no']], [
+                        'instalment_status' => OrderGivebackStatus::ZUJIN_SUCCESS,
+                    ]);
+                    if( !$orderGivebackResult ){
+                        //事务回滚 记录日志
 
+                    }
+                    //判断是否有请求过（芝麻支付接口）
+                    $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($data['out_order_no'],'FINISH',$orderGivebackInfo['giveback_no']);
+                    if( $orderMiniCreditPayInfo ) {
+                        $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                    }else{
+                        $arr['out_trans_no'] = createNo();
+                    }
+                    $arr = [
+                        'zm_order_no'=>$orderMiniCreditPayInfo['zm_order_no'],
+                        'out_order_no'=>$orderGivebackInfo['order_no'],
+                        'pay_amount'=>$orderGivebackInfo['compensate_amount'],
+                        'remark'=>$orderGivebackInfo['giveback_no'],
+                        'app_id'=>$data['notify_app_id'],
+                    ];
+                    $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
+                    //提交事务
+                    if( $orderCloseResult['code'] == 10000  ){
+                        //事务回滚 记录日志
+
+                    }else{
+                        //事务回滚 记录日志
+
+                    }
                 }
             }else{
                 $business_no = $data['out_trans_no'];
