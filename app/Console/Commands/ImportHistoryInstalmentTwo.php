@@ -52,7 +52,6 @@ class ImportHistoryInstalmentTwo extends Command
         ];
 
         $total = \App\Order\Models\Order::query()
-            ->whereIn("appid",$appid)
             ->count();
 
         $bar = $this->output->createProgressBar($total);
@@ -68,7 +67,6 @@ class ImportHistoryInstalmentTwo extends Command
 
                 $res =  \App\Order\Models\Order::query()
                     ->select('order_no')
-                    ->whereIn("appid",$appid)
                     ->forPage($page,$limit)
                     ->orderBy('id', 'DESC')
                     ->get();
