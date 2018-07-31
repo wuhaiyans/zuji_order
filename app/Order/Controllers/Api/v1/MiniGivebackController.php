@@ -326,7 +326,7 @@ class MiniGivebackController extends Controller
                 if( !$orderGivebackResult ){
                     //事务回滚
                     DB::rollBack();
-                    return apiResponse([],ApiStatus::CODE_92701);
+                    return apiResponse([],ApiStatus::CODE_92701,'更新还机单数据失败');
                 }
             }else{
                 return apiResponse([], ApiStatus::CODE_35016,'您还有剩余租金未结清，请在拿趣用APP中进行还款在进行还机操作' );
@@ -343,7 +343,7 @@ class MiniGivebackController extends Controller
             //-+------------------------------------------------------------------------------
             // |收货时：查询未完成分期直接进行代扣，并记录代扣状态
             //-+------------------------------------------------------------------------------
-            if($orderGivebackInfo['instalment_status'] == 1 || $orderGivebackInfo['instalment_status'] == 3){
+            if($orderGivebackInfo['instalment_status'] == OrderGivebackStatus::ZUJIN_INIT || $orderGivebackInfo['instalment_status'] == OrderGivebackStatus::ZUJIN_FAIL){
                 //判断是否有请求过（芝麻支付接口）
                 $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'INSTALLMENT',$paramsArr['giveback_no']);
                 if( !$orderMiniCreditPayInfo ) {
@@ -362,6 +362,17 @@ class MiniGivebackController extends Controller
                 DB::commit();
                 //判断请求发送是否成功
                 if($pay_status == 'PAY_SUCCESS'){
+                    //租金支付发起成功，如有赔偿金额则未支付修改为支付中
+                    if($orderGivebackInfo['instalment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY){
+                        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+                            'payment_status' => OrderGivebackStatus::PAYMENT_STATUS_IN_PAY,
+                        ]);
+                        if( !$orderGivebackResult ){
+                            //事务回滚
+                            DB::rollBack();
+                            return apiResponse([],ApiStatus::CODE_92701,'更新还机单数据失败');
+                        }
+                    }
                     return apiResponse([], ApiStatus::CODE_0, '小程序支付扣除租金成功');
                 }elseif($pay_status =='PAY_FAILED'){
                     return apiResponse([], ApiStatus::CODE_35006, '小程序扣除租金失败');
@@ -851,6 +862,13 @@ class MiniGivebackController extends Controller
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_SUCCESS;
+                //分期扣款成功，关闭分期单
+                $instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$paramsArr['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
+                //分期关闭失败，回滚
+                if( !$instalmentResult ) {
+                    DB::rollBack();
+                    return false;
+                }
             }elseif($pay_status =='PAY_FAILED'){
                 $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
             }elseif($pay_status == 'PAY_INPROGRESS'){
@@ -864,7 +882,7 @@ class MiniGivebackController extends Controller
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
         $data['payment_time'] = time();
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
@@ -990,7 +1008,7 @@ class MiniGivebackController extends Controller
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
         $data['payment_time'] = time();
         if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
             $smsModel = "GivebackEvaNoWitNoEnoNo";

@@ -7,6 +7,8 @@
 namespace App\Order\Controllers\Api\v1;
 
 use Illuminate\Support\Facades\Redis;
+use App\Order\Modules\Service\OrderGiveback;
+use App\Order\Modules\Inc\OrderGivebackStatus;
 
 class MiniNotifyController extends Controller
 {
@@ -23,7 +25,6 @@ class MiniNotifyController extends Controller
      * 芝麻支付宝小程序 代扣接口(订单关闭 订单取消)异步回调
      */
     public function withholdingCloseCancelNotify(){
-        echo 111;die;
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
@@ -31,6 +32,7 @@ class MiniNotifyController extends Controller
         $appid = $_POST['notify_app_id'];
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
+
         if(!$b){
             \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
             echo '签名验证失败fail';exit;
@@ -90,14 +92,28 @@ class MiniNotifyController extends Controller
         }
         // 扣款成功 修改分期状态
         if($data['pay_status'] == "PAY_SUCCESS"){
-            $business_no = $data['out_trans_no'];
-            $params = [
-                'status'=>'success',
-                'out_trade_no'=>$business_no,
-            ];
-            //修改分期状态
-            $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
-            $Instalment->paySuccess($params);
+            //判断订单是否为还机冻结状态
+            if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){
+                //还机扣款操作
+                $orderGivebackService = new OrderGiveback();
+                //获取还机单基本信息
+                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($data['out_order_no']);
+                //请求关闭订单接口
+                if($orderGivebackInfo){
+
+                }
+            }else{
+                $business_no = $data['out_trans_no'];
+                $params = [
+                    'status'=>'success',
+                    'out_trade_no'=>$business_no,
+                ];
+                //修改分期状态
+                $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
+                $Instalment->paySuccess($params);
+            }
+
+
         }
         echo 'success';return;
     }
