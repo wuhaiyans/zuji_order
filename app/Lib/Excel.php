@@ -78,7 +78,7 @@ class Excel
     }
 
 
-    public static function csvWrite($body, $headers=[] , $title='数据导出')
+    public static function csvWrite($body, $headers=[] , $name='数据导出')
     {
 
 
@@ -117,7 +117,7 @@ class Excel
             }
             $csv .= $row."\n";
         }
-        file_put_contents('./test.csv',mb_convert_encoding($csv, "GBK", "UTF-8"),FILE_APPEND);
+        file_put_contents($name,mb_convert_encoding($csv, "GBK", "UTF-8"),FILE_APPEND);
 
 
     }
@@ -152,8 +152,12 @@ class Excel
 
             // 将已经写到csv中的数据存储变量销毁，释放内存占用
             unset($export_data);
-            ob_flush();
-            flush();
+            if(ob_get_level()>0){
+
+                ob_flush();
+                flush();
+            }
+
 //        }
 
         exit ();
