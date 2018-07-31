@@ -65,11 +65,14 @@ class ImportHistoryInstalmentTwo extends Command
 
             do {
 
+
                 $res =  \App\Order\Models\Order::query()
+                    ->select('order_no')
                     ->whereIn("appid",$appid)
                     ->forPage($page,$limit)
                     ->orderBy('id', 'DESC')
-                    ->get()->toArray();
+                    ->get();
+
                 $result = objectToArray($res);
 
 
@@ -82,8 +85,8 @@ class ImportHistoryInstalmentTwo extends Command
                     $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::query()
                         ->where([
                             ['order_no', '=', $order['order_no']]
-                        ])->first();
-                    if($instalmentInfo){
+                        ])->count();
+                    if($instalmentInfo>0){
                         continue;
                     }
 
@@ -98,9 +101,9 @@ class ImportHistoryInstalmentTwo extends Command
                     // 分期数据
                     $instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')
                         ->where(['order_id' => $orderInfo['order_id']])
-                        ->get()->toArray();
+                        ->get();
                     $instalmentList = objectToArray($instalment);
-                    if($instalmentList == []){
+                    if(empty($instalmentList)){
                         ++$_count2;
                         continue;
                     }
@@ -147,6 +150,8 @@ class ImportHistoryInstalmentTwo extends Command
 
 
                 }
+
+                ++$page;
 
             } while ($page <= $totalpage);
 
