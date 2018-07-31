@@ -342,16 +342,82 @@ class MiniGivebackController extends Controller
                     'remark'=>$orderGivebackInfo['giveback_no'],
                     'app_id'=>$paramsArr['zm_app_id'],
                 ];
-                $orderWithholdResult = \App\Lib\Payment\mini\MiniApi::withhold($arr);
-                if( $orderWithholdResult != 10000  ){
-                    return false;
+                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($arr);
+                //提交事务
+                DB::commit();
+                //判断请求发送是否成功
+                if($pay_status == 'PAY_SUCCESS'){
+                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款请求成功');
+                }elseif($pay_status =='PAY_FAILED'){
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                }elseif($pay_status == 'PAY_INPROGRESS'){
+                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                }else{
+                    return apiResponse([], ApiStatus::CODE_35000, '小程序扣款处理失败（内部失败）');
                 }
-                //处理租金支付成功
-
+            }else{
+                //租金已支付（扣除赔偿金，关闭订单）
+                //判断是否有请求过（芝麻支付接口）
+                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'FINISH',$paramsArr['giveback_no']);
+                if( $orderMiniCreditPayInfo ) {
+                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                }else{
+                    $arr['out_trans_no'] = createNo();
+                }
+                $arr = [
+                    'zm_order_no'=>$orderMiniInfo['zm_order_no'],
+                    'out_order_no'=>$orderGivebackInfo['order_no'],
+                    'pay_amount'=>$orderGivebackInfo['compensate_amount'],
+                    'remark'=>$orderGivebackInfo['giveback_no'],
+                    'app_id'=>$paramsArr['zm_app_id'],
+                ];
+                $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
+                //提交事务
+                DB::commit();
+                if( $orderCloseResult['code'] == 10000  ){
+                    return apiResponse([], ApiStatus::CODE_0, '小程序赔偿金支付请求成功');
+                }else{
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序赔偿金支付失败'.$orderCloseResult['msg']);
+                }
             }
-            //支付
         }catch(\Exception $ex){
+            //事务回滚
+            DB::rollBack();
+            return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
+        }
+    }
 
+    /**
+     * 还机支付状态查询接口
+     * @params request
+     * @return array
+     */
+    public function givebackPayStatus( Request $request ){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+        }
+        $paramsArr = isset($params['params'])? $params['params'] :'';
+        $rules = [
+            'goods_no'     => 'required',//商品编号
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+        }
+        //-+--------------------------------------------------------------------
+        // | 业务处理：获取判断当前还机单状态、更新还机单状态
+        //-+--------------------------------------------------------------------
+        //创建服务层对象
+        $orderGivebackService = new OrderGiveback();
+        //获取还机单基本信息
+        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($paramsArr['goods_no']);
+        if( !$orderGivebackInfo ){
+            return apiResponse([], get_code(), get_msg());
         }
     }
 
@@ -595,10 +661,6 @@ class MiniGivebackController extends Controller
             else {
                 throw new \Exception('这简直就是一个惊天大bug，天上有漏洞----->你需要一个女娲—.—');
             }
-
-
-
-
             //更新还机表状态失败回滚
             if( !$dealResult ){
                 DB::rollBack();
@@ -675,7 +737,7 @@ class MiniGivebackController extends Controller
                 'app_id'=>$paramsArr['zm_app_id'],
             ];
             $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
-            if( $orderCloseResult != 10000  ){
+            if( $orderCloseResult['code'] != 10000  ){
                 return false;
             }
             //拼接需要更新还机单状态
@@ -766,9 +828,16 @@ class MiniGivebackController extends Controller
                 'remark'=>$paramsArr['giveback_no'],
                 'app_id'=>$paramsArr['zm_app_id'],
             ];
-            $orderWithholdResult = \App\Lib\Payment\mini\MiniApi::withhold($arr);
-            if( $orderWithholdResult != 10000  ){
-                return false;
+            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($arr);
+            //判断请求发送是否成功
+            if($pay_status == 'PAY_SUCCESS'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_SUCCESS;
+            }elseif($pay_status =='PAY_FAILED'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
+            }elseif($pay_status == 'PAY_INPROGRESS'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_INIT;
+            }else{
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
             }
         }else{
             $data['remark'] = '小程序还机代扣金额一次性不能超过2000，剩余租金请用户主动到APP支付 ';
@@ -821,8 +890,8 @@ class MiniGivebackController extends Controller
         if( $paramsArr['yajin'] >= $paramsArr['compensate_amount'] ){
 
             //拼接需要更新还机单状态更新还机单状态
-            $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
-            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+            $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+            $data['payment_status'] = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
             $data['payment_time'] = time();
             $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
 
@@ -833,27 +902,6 @@ class MiniGivebackController extends Controller
                 'GivebackEvaNoWitYesEno',
                 ['amount' => $paramsArr['compensate_amount'] ]);
             $notice->notify();
-        }
-        //押金<赔偿金：还机支付
-        else{
-            $tradeResult = $this->__orderPayment($paramsArr);
-
-            //拼接需要更新还机单状态更新还机单状态
-            $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
-            $data['payment_time'] = time();
-
-            //发送短信
-            $notice = new \App\Order\Modules\Service\OrderNotice(
-                \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-                $paramsArr['goods_no'],
-                'GivebackEvaNoWitYesEnoNo',
-                ['amount' => $paramsArr['compensate_amount'] ]);
-            $notice->notify();
-        }
-        //清算或者支付结果失败，返回错误
-        if( !$tradeResult ){
-            return false;
         }
 
         //更新还机单
@@ -889,23 +937,46 @@ class MiniGivebackController extends Controller
         //-+--------------------------------------------------------------------
         // | 生成支付单，更新还机单
         //-+--------------------------------------------------------------------
-        //还机单支付
-        $orderPayment = $this->__orderPayment($paramsArr);
-        if( !$orderPayment ){
-            return false;
+        //分期金额大于两千则通过APP还款
+        if( $paramsArr['instalment_amount'] < 2000.00 ){
+            //判断是否有请求过（芝麻支付接口）
+            $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'INSTALLMENT',$paramsArr['giveback_no']);
+            if( $orderMiniCreditPayInfo ) {
+                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+            }else{
+                $arr['out_trans_no'] = $paramsArr['out_trans_no'];
+            }
+            $arr = [
+                'zm_order_no'=>$paramsArr['zm_order_no'],
+                'out_order_no'=>$paramsArr['order_no'],
+                'pay_amount'=>$paramsArr['instalment_amount'],
+                'remark'=>$paramsArr['giveback_no'],
+                'app_id'=>$paramsArr['zm_app_id'],
+            ];
+            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($arr);
+            //判断请求发送是否成功
+            if($pay_status == 'PAY_SUCCESS'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_SUCCESS;
+            }elseif($pay_status =='PAY_FAILED'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
+            }elseif($pay_status == 'PAY_INPROGRESS'){
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_INIT;
+            }else{
+                $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
+            }
+        }else{
+            $data['remark'] = '小程序还机代扣金额一次性不能超过2000，剩余租金请用户主动到APP支付 ';
         }
-
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
         $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['instalment_status'] = OrderGivebackStatus::ZUJIN_INIT;
         $data['payment_time'] = time();
-
         if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
             $smsModel = "GivebackEvaNoWitNoEnoNo";
         }else{
             $smsModel = "GivebackEvaNoWitNoEno";
         }
-
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
             \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
@@ -917,15 +988,6 @@ class MiniGivebackController extends Controller
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
         return $orderGivebackResult ? true : false;
-    }
-
-    /**
-     * 还机支付状态查询接口
-     * @params request
-     * @return array
-     */
-    public function givebackPayStatus( Request $request ){
-
     }
 
     /**
