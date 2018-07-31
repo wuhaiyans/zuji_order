@@ -381,7 +381,7 @@ class OrderCreater
                 //把无法下单的原因放入到用户表中
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
-            $schemaData = $orderCreater->getDataSchema();
+            $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
             $result = [
                 'coupon'         => $data['coupon'],
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
