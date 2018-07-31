@@ -56,7 +56,26 @@ class OrderGivebackStatus{
      * @var int 7
      */
     const STATUS_DEAL_DONE = 7;
-
+    /**
+     * 租金待支付
+     * @var int 1
+     */
+    const ZUJIN_INIT = 1;
+    /**
+     * 租金扣款失败
+     * @var int 3
+     */
+    const ZUJIN_FAIL = 3;
+    /**
+     * 租金扣款成功
+     * @var int 2
+     */
+    const ZUJIN_SUCCESS = 2;
+    /**
+     * 租金超过2000元
+     * @var int 4
+     */
+    const ZUJIN_EXCEED = 4;
 
     /**
      * 订单还机状态列表

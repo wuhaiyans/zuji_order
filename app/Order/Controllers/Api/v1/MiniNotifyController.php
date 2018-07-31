@@ -23,6 +23,7 @@ class MiniNotifyController extends Controller
      * 芝麻支付宝小程序 代扣接口(订单关闭 订单取消)异步回调
      */
     public function withholdingCloseCancelNotify(){
+        echo 111;die;
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;

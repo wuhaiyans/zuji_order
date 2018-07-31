@@ -26,6 +26,9 @@ Route::get('order/{action}', function(App\Order\Controllers\Api\v1\OrderControll
 Route::any('order/pay/{action}', function(App\Order\Controllers\Api\v1\PayController $index, $action){
     return $index->$action();
 });
+Route::any('order/mini/{action}', function(App\Order\Controllers\Api\v1\MiniNotifyController $index, $action){
+    return $index->$action();
+});
 
 Route::any('common/pay/{action}', function(App\Common\Controllers\Api\v1\PayController $index, $action){
     return $index->$action();
