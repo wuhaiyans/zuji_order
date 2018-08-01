@@ -19,10 +19,11 @@ class Delivery
     /**
      * 客户收货或系统自动签收会通知到此方法
      * @param string $orderNo
-     * @param array $row[
-     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>用户ID（管理员或用户必须）,
-     *      'user_name'=>用户名（管理员或用户必须）,
+     * @param array $row  用户信息
+     * [
+     *      'receive_type'=>签收类型:1管理员，2用户,3系统，4线下,   int    【必传】
+     *      'user_id'     =>用户ID（管理员或用户必须）,             int    【必传】
+     *      'user_name'  =>用户名（管理员或用户必须）,              string  【必传】
      * ]
      *
      * int receive_type  在 App\Lib\publicInc 中;
@@ -30,8 +31,9 @@ class Delivery
      *  const Type_User = 2;    //用户
      *  const Type_System = 3; // 系统自动化任务
      *  const Type_Store =4;//线下门店
+     *
+     * @return  bool
      */
-
     public static function receive($orderNo,$row)
     {
         try{
@@ -55,8 +57,9 @@ class Delivery
         }
         return true;
     }
-     //申请退货审核通过-》客户发货后，会通知此方法
-
+    /**
+     * 申请退货审核通过-》客户发货后，会通知此方法
+     */
     public static function user_receive($params)
     {
         $base_api = config('ordersystem.ORDER_API');
@@ -78,24 +81,32 @@ class Delivery
      * 换货发货新商品反馈到此方法 order_good_extend
      * @param $orderDetail array
      * [
-     *  'order_no'=>'',//【必须】 类型：String 订单编号
-     *  'logistics_id'=>'',//【必须】 类型：String 物流渠道ID
-     *  'logistics_no'=>'',//【必须】 类型：String 物流单号
+     *  'order_no'    =>'',//订单编号   string   【必传】
+     *  'logistics_id'=>''//物流渠道ID  int      【必传】
+     *  'logistics_no'=>''//物流单号    string   【必传】
      * ]
-     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * @param $goodsInfo array 商品信息 【必须】 参数内容如下
      * [
      *   [
-     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *      'goods_no'=>'abcd',  商品编号   string  【必传】
+     *      'imei1'   =>'imei1', 商品imei1  string  【必传】
+     *      'imei2'   =>'imei2', 商品imei2  string  【必传】
+     *      'imei3'   =>'imei3', 商品imei3  string  【必传】
+     *      'serial_number'=>'abcd' 商品序列号  string  【必传】
      *   ]
      *   [
-     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *      'goods_no'=>'abcd',  商品编号   string  【必传】
+     *      'imei1'   =>'imei1', 商品imei1  string  【必传】
+     *      'imei2'   =>'imei2', 商品imei2  string  【必传】
+     *      'imei3'   =>'imei3', 商品imei3  string  【必传】
+     *      'serial_number'=>'abcd' 商品序列号  string  【必传】
      *   ]
      * ]
-     *@param $operatorInfo array 操作人员信息
+     * @param array $operatorInfo 用户信息参数
      * [
-     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,//用户ID
-     *      'user_name'=>1,//用户名
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      * 需要写成curl形式 供发货系统使用
      */

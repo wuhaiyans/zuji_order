@@ -120,7 +120,7 @@ class OrderNotice{
 					'data' => $this->data,
 				]);
 			}
-			
+
 			// 通知
 			$b = $short_message->notify();
 			\App\Lib\Common\LogApi::debug('短信通知',[

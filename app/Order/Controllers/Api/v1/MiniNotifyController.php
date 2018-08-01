@@ -29,6 +29,16 @@ class MiniNotifyController extends Controller
      * @return string
      */
     public function withholdingCloseCancelNotify(){
+//        $_POST = [
+//            'fund_type'=>'WITHHOLD',
+//            'order_create_time'=>'2018-08-01 14:42:34',
+//            'notify_app_id'=>'2018032002411058',
+//            'out_order_no'=>'A801105262638398',
+//            'notify_type'=>'ZM_RENT_ORDER_CREATE',
+//            'credit_privilege_amount'=>'1.00',
+//            'channel'=>'rent',
+//            'zm_order_no'=>'2018080100001001094287623139',
+//        ];
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
@@ -56,7 +66,7 @@ class MiniNotifyController extends Controller
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
                 }
-                $redis_order = Redis::get('dev:zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
+                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
                 if( $redis_order == 'MiniWithhold' ){
                     $this->withholdingNotify();
                     return;
