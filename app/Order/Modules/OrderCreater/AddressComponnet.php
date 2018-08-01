@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 
 class AddressComponnet implements OrderCreater
@@ -91,6 +92,7 @@ class AddressComponnet implements OrderCreater
         ];
         $id =OrderUserAddressRepository::add($addressData);
         if(!$id){
+            LogApi::error(config('app.env')."[下单]保存用户地址信息失败",$addressData);
             $this->getOrderCreater()->setError("保存用户地址信息失败");
             return false;
         }

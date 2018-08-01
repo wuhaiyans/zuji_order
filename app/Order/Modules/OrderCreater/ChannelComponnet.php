@@ -157,6 +157,7 @@ class ChannelComponnet implements OrderCreater
         //保存订单渠道信息
         $b= OrderRepository::updateChannel($data['order']['order_no'],$this->channelId);
         if(!$b){
+            LogApi::error(config('app.env')."[下单]保存渠道信息失败",$data['order']['order_no']);
             $this->getOrderCreater()->setError('保存渠道信息失败');
             return false;
         }

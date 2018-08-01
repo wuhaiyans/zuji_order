@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Common\LogApi;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\PayInc;
@@ -420,12 +421,14 @@ class SkuComponnet implements OrderCreater
 
                     $b =ServicePeriod::createService($unitData);
                     if(!$b){
+                        LogApi::error(config('app.env')."[下单]保存设备周期表信息失败",$unitData);
                         $this->getOrderCreater()->setError("保存设备周期表信息失败");
                         return false;
                     }
                 }
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
+                    LogApi::error(config('app.env')."[下单]保存商品信息失败",$goodsData);
                     $this->getOrderCreater()->setError("保存商品信息失败");
                     return false;
                 }
@@ -438,6 +441,7 @@ class SkuComponnet implements OrderCreater
          */
         $b =Goods::reduceStock($goodsArr);
         if(!$b){
+            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
             $this->getOrderCreater()->setError("减少库存失败");
             return false;
         }
