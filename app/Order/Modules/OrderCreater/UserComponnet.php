@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 
+use App\Lib\Common\LogApi;
 use App\Lib\User\User;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
@@ -163,6 +164,7 @@ class UserComponnet implements OrderCreater
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
         if(!$id){
+            LogApi::error(config('app.env')."[下单]保存用户认证信息失败",$RiskData);
             $this->getOrderCreater()->setError("保存用户认证信息失败");
             return false;
         }

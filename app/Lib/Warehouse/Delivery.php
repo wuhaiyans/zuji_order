@@ -98,9 +98,18 @@ class Delivery
 
 
     /**
-     * 订单请求 发货申请
-     *
-     * @param string $order_no 订单号, 根据订单号获取商品数据
+     * 订单请求(确认订单) 发货申请
+     * @author wuhaiyan
+     * @param $orderInfo 订单信息
+     * $orderInfo =[
+     *  'order_no'  => '', //【必须】string 订单编号
+     *  'business_key'=>'',//【必须】string 业务编码
+     *  'business_no'=>'',//【必须】string 业务编号
+     *  'customer'  => '',//【必须】string 收货人姓名
+     *  'customer_mobile' => '',//【必须】string 收货人手机号
+     *  'customer_address' = '',//【必须】string 收货人地址
+     * ]
+     * $param $goodsInfo 订单商品表的信息
      * @return boolean
      */
     public static function apply($orderInfo,$goodsInfo)
@@ -206,13 +215,13 @@ class Delivery
     }
     /**
      * 订单请求 确认收货
-     *
+     * @author wuhaiyan
      * @param $params
      * [
-     *      'order_no'=>'',
-     *      'receive_type'=>''//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
-     *      'user_id'=>'',
-     *      'user_name'=>''
+     *      'order_no'=>'', //【必须】string 订单编号
+     *      'receive_type'=>''//【必须】 类型：int  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
+     *      'user_id'=>'', //【必须】 类型：int 操作人员id
+     *      'user_name'=>'' //【必须】 类型：String 操作人员姓名
      * ]
      * @return boolean
      */
@@ -274,10 +283,9 @@ class Delivery
      * 发货反馈 ok
      * @param $orderDetail array
      * [
-     *  'order_no'=>'',//订单编号
-     *  'logistics_id'=>'',//物流渠道ID
-     *  'logistics_no'=>'',//物流单号
-     *  'logistics_note'=>''//备注
+     *  'order_no'=>'',//【必须】 类型：String 订单编号
+     *  'logistics_id'=>'',//【必须】 类型：String 物流渠道ID
+     *  'logistics_no'=>'',//【必须】 类型：String 物流单号
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [

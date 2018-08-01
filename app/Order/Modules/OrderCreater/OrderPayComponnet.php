@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Common\LogApi;
 use App\Order\Controllers\Api\v1\InstalmentController;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoodsInstalment;
@@ -178,6 +179,11 @@ class OrderPayComponnet implements OrderCreater
                         'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                     ]);
                     if (!$b) {
+                        LogApi::error(config('app.env')."[下单]绑定订单代扣协议失败 用户：".$this->userId,[
+                            'business_type' => $param['businessType'],  // 【必须】int    业务类型
+                            'business_no' => $param['businessNo'],  // 【必须】string  业务编码
+                        ]);
+
                         $this->getOrderCreater()->setError('绑定订单代扣协议失败');
                         return false;
                     }

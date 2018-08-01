@@ -104,14 +104,13 @@ class InstalmentController extends Controller
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
         }
 
-        // 总页数
-        $total =  \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
-        $list['total'] =  ceil( $total / $additional['limit'] );
+        $result['data']     = $list;
+        $result['total']    = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
 
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
-        return apiResponse($list,ApiStatus::CODE_0,"success");
+        return apiResponse($result,ApiStatus::CODE_0,"success");
 
     }
 
