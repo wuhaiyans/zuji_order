@@ -140,6 +140,8 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
 			return false;
 		}
+		print_r($params);
+		print_r($result);die;
 		$this->result = $result;
 		//查询成功记录表（插入）
 		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));
