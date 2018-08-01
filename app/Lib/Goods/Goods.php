@@ -53,51 +53,26 @@ class Goods  extends \App\Lib\BaseApi{
 			$params['list_sku_id'][]['sku_id'] = $id;
 		}
 		return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
-		
-		
-//        $data['method'] ='zuji.goods.spusku.get';
-//        $data['params'] = [
-//            'list_sku_id'=>$sku,
-//        ];
-//        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-//        $info =json_decode($info,true);
-//       // var_dump($info);die;
-//        if(!is_array($info)){
-//            return ApiStatus::CODE_60000;
-//        }
-//        if($info['code']!=0){
-//            return $info['code'];
-//        }
-//        return $info['data'];
-
     }
     /**
      * 增加库存
      * heaven
      * @param $goods_arr
-     "goods_arr": - [                //类型：Array  必有字段  备注：参数集
-        "spu_id=>1",                //类型：String  必有字段  备注：spu_id
-        "sku_id=>2",                //类型：String  必有字段  备注：sku_id
-        "num=>1"                    //类型：String  必有字段  备注：数量
+     * "goods_arr": - [                //类型：Array  必有字段  备注：参数集
+     *   "spu_id=>1",                //类型：String  必有字段  备注：spu_id
+     *   "sku_id=>2",                //类型：String  必有字段  备注：sku_id
+     *   "num=>1"                    //类型：String  必有字段  备注：数量
      ]
-     * @return string or array
+     * @return bool
+     * @throws \Exception			请求失败时抛出异常
      */
     public static function addStock($goods_arr){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.number.add';
-        $data['params'] = [
-            'goods_arr'=>$goods_arr
-        ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-        //var_dump($info);
-        if(!is_array($info)){
-            return false;
+
+        $result =self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.number.add', '1.0', ['goods_arr'=>$goods_arr]);
+        if(is_array($result)){
+            return true;
         }
-        if($info['code']!=0){
-            return false;
-        }
-        return true;
+        return false;
     }
     /**
      * 减少库存
@@ -107,24 +82,16 @@ class Goods  extends \App\Lib\BaseApi{
         "sku_id=>2",                //类型：String  必有字段  备注：sku_id
         "num=>1"                    //类型：String  必有字段  备注：数量
     ]
-     * @return string or array
+     * @return bool
+     * @throws \Exception			请求失败时抛出异常
      */
     public static function reduceStock($goods_arr){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.number.minus';
-        $data['params'] = [
-            'goods_arr'=>$goods_arr
-        ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-        //var_dump($info);
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+
+        $result =self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.number.minus', '1.0', ['goods_arr'=>$goods_arr]);
+        if(is_array($result)){
+            return true;
         }
-        if($info['code']!=0){
-            return $info['code'];
-        }
-        return true;
+        return false;
     }
 
 }
