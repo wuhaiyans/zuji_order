@@ -91,7 +91,6 @@ class User{
         }else{
             $zm_face = 0;
         }
-        print_r($params['zm_risk']);die;
         if($params['zm_risk'] == 'Y'){
             $zm_risk = 1;
         }else{
