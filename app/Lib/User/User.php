@@ -78,9 +78,9 @@ class User{
     }
 
     /**
-     * 获取用户id生成用户
-     *  @param $data
-     * @param $user_id
+     * 小程序获取用户id生成用户
+     * @author zhanhgjinhui
+     * @param $params
      * @return string or array
      */
     public static function getUserId($params){

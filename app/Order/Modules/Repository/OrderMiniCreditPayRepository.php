@@ -41,7 +41,7 @@ class OrderMiniCreditPayRepository
      */
     public static function getMiniCreditPayInfo( $orderNo,$orderOperateType ,$remark = false ) {
         $MiniOrder = new OrderMiniCreditPay();
-        $where['order_no'] = $orderNo;
+        $where['out_order_no'] = $orderNo;
         $where['order_operate_type'] = $orderOperateType;
         if($remark){
             $where['remark'] = $remark;

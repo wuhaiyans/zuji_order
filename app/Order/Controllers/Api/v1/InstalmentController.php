@@ -106,12 +106,14 @@ class InstalmentController extends Controller
 
         // 总页数
         $total =  \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
-        $list['total'] =  ceil( $total / $additional['limit'] );
+
+        $result['data']     = $list;
+        $result['total']    = ceil( $total / $additional['limit'] );
 
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
-        return apiResponse($list,ApiStatus::CODE_0,"success");
+        return apiResponse($result,ApiStatus::CODE_0,"success");
 
     }
 
