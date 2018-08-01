@@ -139,7 +139,6 @@ class OrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-        LogApi::info("下单请求数据",$params);
 
         $data =[
             'appid'=>$appid,
@@ -154,6 +153,7 @@ class OrderController extends Controller
         if(!$res){
             LogApi::info("下单失败",get_msg());
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
+
         }
 
         return apiResponse($res,ApiStatus::CODE_0);
