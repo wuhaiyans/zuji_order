@@ -39,18 +39,13 @@ class OrderController extends Controller
 	 * [
 	 *		// 【注：】下单时不再支持[支付方式]参数，下单成功后，由用户选择
 	 *		'pay_type'	=> '',	//【必选】string 支付方式
-     *      'pay_channel_id'=>''//【必选】string 支付渠道
-     *      'coupon'    =>[  //【可选】 优惠券信息
-     *                  '23432rdfss','fdsafdsfdas'//优惠券码
-     *          ]
 	 *		'sku_info'	=> [	//【必选】string	SKU信息
 	 *			[
 	 *				'sku_id' => '',		//【必选】SKU ID
 	 *				'sku_num' => '',	//【必选】SKU 数量
 	 *			]
 	 *		]',
-     *      'userinfo'=>[
-     *          ],//
+	 *		'coupon'	=> '',	//【可选】string 优惠券
 	 * ]
 	 * @return type
 	 */

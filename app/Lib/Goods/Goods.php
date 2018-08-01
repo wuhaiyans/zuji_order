@@ -17,16 +17,16 @@ class Goods  extends \App\Lib\BaseApi{
      * 获取商品信息
      * @param array $skuids		SKU ID 数组
      * @return array
-	 * @throws \Exception			请求失败时抛出异常
+     * @throws \Exception			请求失败时抛出异常
      */
     public static function getSkuList( array $skuids ){
-		$_params = [];
-		foreach( $skuids as $id){
-			$_params[] =['sku_id'=>$id];
-		}
-		return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
+        $_params = [];
+        foreach( $skuids as $id){
+            $_params[] =['sku_id'=>$id];
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', ['list_sku_id'=>$_params]);
 
-	}
+    }
 
     /**
      * 获取商品信息
@@ -43,26 +43,27 @@ class Goods  extends \App\Lib\BaseApi{
      * 获取商品信息
      * @param $data 配置参数
      * @param $sku_id
-     * @return string or array
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
      */
     public static function getSku( array $skuid ){
-		$params = [
+        $params = [
             'list_sku_id'=>[],
-		];
-		foreach($skuid as $id){
-			$params['list_sku_id'][]['sku_id'] = $id;
-		}
-		return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
+        ];
+        foreach($skuid as $id){
+            $params['list_sku_id'][]['sku_id'] = $id;
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', $params);
     }
     /**
      * 增加库存
-     * heaven
+     *  @author wuhaiyan
      * @param $goods_arr
      * "goods_arr": - [                //类型：Array  必有字段  备注：参数集
      *   "spu_id=>1",                //类型：String  必有字段  备注：spu_id
      *   "sku_id=>2",                //类型：String  必有字段  备注：sku_id
      *   "num=>1"                    //类型：String  必有字段  备注：数量
-     ]
+    ]
      * @return bool
      * @throws \Exception			请求失败时抛出异常
      */
@@ -76,11 +77,12 @@ class Goods  extends \App\Lib\BaseApi{
     }
     /**
      * 减少库存
+     * @author wuhaiyan
      * @param $goods_arr
-        "goods_arr": - [                //类型：Array  必有字段  备注：参数集
-        "spu_id=>1",                //类型：String  必有字段  备注：spu_id
-        "sku_id=>2",                //类型：String  必有字段  备注：sku_id
-        "num=>1"                    //类型：String  必有字段  备注：数量
+     * "goods_arr": - [                //类型：Array  必有字段  备注：参数集
+     *   "spu_id=>1",                //类型：String  必有字段  备注：spu_id
+     *   "sku_id=>2",                //类型：String  必有字段  备注：sku_id
+     *   "num=>1"                    //类型：String  必有字段  备注：数量
     ]
      * @return bool
      * @throws \Exception			请求失败时抛出异常

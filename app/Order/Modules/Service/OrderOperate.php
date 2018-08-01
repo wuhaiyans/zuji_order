@@ -52,7 +52,6 @@ class OrderOperate
      *  'order_no'=>'',//订单编号
      *  'logistics_id'=>''//物流渠道ID
      *  'logistics_no'=>''//物流单号
-     * ‘logistics_note’ //发货备注
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [

@@ -12,69 +12,60 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use Illuminate\Support\Facades\Log;
-class User{
+class User extends \App\Lib\BaseApi{
+
+
     /**
      * 获取用户信息
-     *  @param $data 配置参数
-     * @param $user_id
-     * @return string or array
+     * @author wuhaiyan
+     * @param $user_id //【必须】 用户id
+     * @param $address_id //【可选】 用户地址id  如果为 0 则不查询地址信息
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
      */
 
     public static function getUser($user_id,$address_id=0){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.goods.user.get';
-        $data['params'] = [
+        $params= [
             'user_id'=>$user_id,
             'address_id'=>$address_id,
         ];
-        //var_dump($data);
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
-        }
-        if($info['code']!=0){
-            return $info['code'];
-        }
-        return $info['data'];
+
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
     }
+
+    /**
+     * 获取用户的支付宝信息
+     * @author wuhaiyan
+     * @param $user_id //【必须】string 用户id
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
 
     public static function getUserAlipayId($user_id){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.user.query.alipayid';
-        $data['params'] = [
-            'user_id'=>$user_id,
-        ];
-        //var_dump($data);
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
-        }
-        if($info['code']!=0){
-            return $info['code'];
-        }
-        return $info['data'];
+
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.query.alipayid', '1.0',['user_id'=>$user_id]);
     }
 
+    /**
+     * 设置不能下单原因到用户信息表中
+     * @author wuhaiyan
+     * @param $user_id  //【必须】 string 用户id
+     * @param $remark  //【必须】string 无法下单原因
+     * @return bool
+     */
+
     public static function setRemark($user_id,$remark){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.user.remark.set';
-        $data['params'] = [
+        $params = [
             'user_id'=>$user_id,
             'order_remark'=>$remark,
         ];
-        //var_dump($data);
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
-        //var_dump($info);die;
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+
+        $result = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.remark.set', '1.0',$params);
+        if(!is_array($result)){
+            return false;
         }
-        if($info['code']!=0){
-            return $info['code'];
-        }
-        return $info['data'];
+        return true;
+
     }
 
     /**
