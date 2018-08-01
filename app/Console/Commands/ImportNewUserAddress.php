@@ -63,9 +63,9 @@ class ImportNewUserAddress extends Command
                 $addressList = array_keys_arrange($addressList,"order_id");
 
                 foreach ($orderList as $k=>$v) {
-                    $bar->advance();
                     $address = OrderUserAddress::query()->where(['order_no'=>$v['order_no']])->first();
                     if(!empty($addressList[$v['order_id']]) && ImportOrder::isAllowImport($v['order_no']) && !$address){
+                        $bar->advance();
                         $province = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['province_id'])->first();
                         $city = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['city_id'])->first();
                         $area = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['country_id'])->first();
