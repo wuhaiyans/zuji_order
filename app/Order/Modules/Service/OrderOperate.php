@@ -906,9 +906,9 @@ class OrderOperate
 
 
         //订单金额
-        $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
+        $orderData['order_gooods_amount']  = normalizeNum($orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance']);
         //支付金额
-        $orderData['pay_amount']  = $orderData['order_amount']+$orderData['order_insurance'];
+        $orderData['pay_amount']  = normalizeNum($orderData['order_amount']+$orderData['order_insurance']);
         //总租金
         $orderData['zujin_amount']  =   $orderData['order_amount'];
         //碎屏意外险
