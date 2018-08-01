@@ -140,6 +140,10 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::notify('芝麻接口：返回值错误',$debug_data);
 			return false;
 		}
+		//芝麻风控产品集联合结果,Y/N (字段不存在默认为N)
+		if(!isset($result['zm_risk'])){
+			$result['zm_risk'] = 'N';
+		}
 		$this->result = $result;
 		//查询成功记录表（插入）
 		$res = \App\Order\Modules\Repository\OrderMiniRepository::add(array_merge($params,$this->result));

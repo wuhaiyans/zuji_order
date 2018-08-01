@@ -19,7 +19,6 @@ class OrderMiniRepository
      * @return $last_id
      */
     public static function add($data){
-        print_r($data);die;
         $arr = [
             'order_no'=>$data['out_order_no'],
             'name'=>$data['name'],
