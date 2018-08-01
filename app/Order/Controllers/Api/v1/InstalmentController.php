@@ -94,11 +94,20 @@ class InstalmentController extends Controller
             'term'      => 'required',
         ]);
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
+
+
         foreach($list as &$item){
-            $item['status']         = OrderInstalmentStatus::getStatusList($item['status']);
+            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
             $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
+            $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
+            $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
         }
+
+        // 总页数
+        $total =  \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
+        $list['total'] =  ceil( $total / $additional['limit'] );
+
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
