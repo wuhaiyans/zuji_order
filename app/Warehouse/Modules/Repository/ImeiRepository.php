@@ -110,12 +110,54 @@ class ImeiRepository
             ->limit($limit)
             ->get()->toArray();
 
-//        $result = [];
-//        foreach ($list as $v) {
-//            $result[$v['imei']] = $v;
-//        }
-
         return $list;
+    }
+
+    /**
+     * 根据IMEI查询返回一条记录
+     *
+     * @param string $imei
+     * @return array 一维数组
+     */
+    public static function getRow($imei)
+    {
+        $row = Imei::where(['imei'=>$imei])->first();
+
+        if(!$row){
+            throw new \Exception('设备表IMEI号:'.$imei.'未找到');
+        }
+
+        return $row->toArray();
+    }
+    /**
+     * 根据IMEI修改一条记录
+     *
+     * @param array $imei
+     * @return boolean
+     */
+    public static function setRow($params)
+    {
+        $row = Imei::where(['imei'=>$params['imei']])->first();
+
+        if(!$row){
+            throw new \Exception('设备表IMEI号:'.$params['imei'].'未找到');
+        }
+        $row->brand=$params['brand'];
+        $row->name=$params['name'];
+        $row->price=$params['price'];
+        $row->apple_serial=$params['apple_serial'];
+        $row->quality=$params['quality'];
+        $row->color=$params['color'];
+        $row->business=$params['business'];
+        $row->storage=$params['storage'];
+        $row->status=$params['status'];
+        $row->update_time=time();
+        if($row->update()){
+            return true;
+        }else{
+            throw new \Exception('设备表IMEI号:'.$params['imei'].'修改失败');
+        }
+
     }
 
     /**

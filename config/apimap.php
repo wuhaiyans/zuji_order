@@ -112,13 +112,17 @@ return [
 
     //分期相关
     // 分期列表接口
-    'api.Instalment.instalment_list'    => 'InstalmentController@instalment_list',
+    'api.Instalment.instalment_list'        => 'InstalmentController@instalment_list',
     // 创建分期接口
-    'api.Instalment.create'             => 'InstalmentController@create',
+    'api.Instalment.create'                 => 'InstalmentController@create',
     // 扣款明细接口
-    'api.Instalment.info'               => 'InstalmentController@info',
+    'api.Instalment.info'                   => 'InstalmentController@info',
     // 分期提前还款详情接口
-    'api.Instalment.queryInfo'          => 'InstalmentController@queryInfo',
+    'api.Instalment.queryInfo'              => 'InstalmentController@queryInfo',
+    // 分期提前还款详情接口
+    'api.Instalment.instalmentRemark'       => 'InstalmentController@instalmentRemark',
+    // 分期提前还款详情接口
+    'api.Instalment.instalmentRemarkList'   => 'InstalmentController@instalmentRemarkList',
 
     // 代扣相关
 
@@ -294,11 +298,13 @@ return [
     //小程序获取用户最新下单订单号接口
     'mini.order.getorderno' => 'MiniOrderController@getOrderNo',
     //小程序还机信息详情接口
-    'mini.order.givebackinfo' => 'MiniGivebackController@GivebackInfo',
+    'mini.order.givebackinfo' => 'MiniGivebackController@givebackInfo',
     //小程序订单还机提交申请接口
-    'mini.order.givebackcreate' => 'MiniGivebackController@GivebackCreate',
+    'mini.order.givebackcreate' => 'MiniGivebackController@givebackCreate',
     //小程序订单还机支付接口
-    'mini.order.givebackpay' => 'MiniGivebackController@GivebackPay',
+    'mini.order.givebackpay' => 'MiniGivebackController@givebackPay',
+    //小程序订单还机支付状态查询接口
+    'mini.order.givebackpaystatus' => 'MiniGivebackController@givebackPayStatus',
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************

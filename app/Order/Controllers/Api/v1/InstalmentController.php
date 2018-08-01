@@ -94,11 +94,20 @@ class InstalmentController extends Controller
             'term'      => 'required',
         ]);
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
+
+
         foreach($list as &$item){
-            $item['status']         = OrderInstalmentStatus::getStatusList($item['status']);
+            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
             $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
+            $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
+            $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
         }
+
+        // 总页数
+        $total =  \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
+        $list['total'] =  ceil( $total / $additional['limit'] );
+
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
@@ -289,6 +298,71 @@ class InstalmentController extends Controller
 
     }
 
+
+    /*
+    * 分期备注信息
+    * @param array $request
+    * [
+    *		'instalment_id'		=> '', //【必选】string 分期id
+    *		'contact_status'	=> '', //【必选】int 是否联系到用户
+    *		'remark'		    => '', //【必选】string 备注信息
+    * ]
+    * @return bool
+    */
+    public function instalmentRemark(Request $request){
+        $params     = $request->all();
+        // 参数过滤
+        $rules = [
+            'instalment_id'         => 'required',  //商品编号
+            'contact_status'        => 'required',  //是否联系到用户
+            'remark'                => 'required',  //备注信息
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+        $data = $params['params'];
+
+        $data['create_time'] = time();
+
+        $remarkId = \App\Order\Models\OrderGoodsInstalmentRemark::insert($data);
+        if(!$remarkId){
+            return apiResponse([],ApiStatus::CODE_20001, "分期备注失败");
+        }
+
+        return apiResponse([],ApiStatus::CODE_0,"success");
+
+    }
+
+    /*
+   * 分期联系日历
+   * @param array $request
+   * [
+   *		'instalment_id'		=> '', //【必选】string 分期id
+   * ]
+   * @return array instalmentList
+   */
+    public function instalmentRemarkList(Request $request){
+        $params     = $request->all();
+
+        // 参数过滤
+        $rules = [
+            'instalment_id'         => 'required',  //商品编号
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $instalment_id      = $params['params']['instalment_id'];
+
+        $remarkList = \App\Order\Models\OrderGoodsInstalmentRemark::query()
+            ->where(['instalment_id' => $instalment_id])
+            ->get()->toArray();
+
+        return apiResponse($remarkList, ApiStatus::CODE_0);
+
+    }
 
 
 }

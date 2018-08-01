@@ -154,7 +154,6 @@ class WithholdController extends Controller
         $appid = $params['appid'];
         $rules = [
             'instalment_id'     => 'required|int',
-            'remark'            => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if ($validateParams['code'] != 0) {

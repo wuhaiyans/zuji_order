@@ -10,6 +10,8 @@ return [
     'warehouse.imei.importFromExcel' => 'ImeiController@importFromExcel', //导入
     'warehouse.imei.downTpl' => 'ImeiController@downTpl', //列表
     'warehouse.imei.publics' => 'ImeiController@publics', //公用数据
+    'warehouse.imei.getRow' => 'ImeiController@getRow', //根据IMEI查询返回一条记录
+    'warehouse.imei.setRow' => 'ImeiController@setRow', //根据IMEI修改一条记录
 
 
     //物流
