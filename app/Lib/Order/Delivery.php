@@ -78,9 +78,9 @@ class Delivery
      * 换货发货新商品反馈到此方法 order_good_extend
      * @param $orderDetail array
      * [
-     *  'order_no'=>'',//订单编号
-     *  'logistics_id'=>''//物流渠道ID
-     *  'logistics_no'=>''//物流单号
+     *  'order_no'=>'',//【必须】 类型：String 订单编号
+     *  'logistics_id'=>'',//【必须】 类型：String 物流渠道ID
+     *  'logistics_no'=>'',//【必须】 类型：String 物流单号
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
