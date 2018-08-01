@@ -151,6 +151,7 @@ class OrderController extends Controller
         ];
         $res = $this->OrderCreate->create($data);
         if(!$res){
+            LogApi::info("下单失败",get_msg());
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
         }
 
