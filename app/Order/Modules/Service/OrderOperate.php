@@ -1148,6 +1148,11 @@ class OrderOperate
            foreach($goodsList as $keys=>$values) {
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
+               //获取ime信息
+               $imeInfo = [];
+               $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);
+               $order['imei'] =   $imeInfo['imei1'];
+               $order['serial_number'] =   $imeInfo['serial_number'];
                if ($goodsExtendArray) {
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];

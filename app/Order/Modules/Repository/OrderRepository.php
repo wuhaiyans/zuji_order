@@ -603,6 +603,8 @@ class OrderRepository
                 ->join('order_delivery',function($join){
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
+                ->orderBy('order_info.create_time', 'DESC')
+                ->orderBy('order_info_visit.id','desc')
                 ->get();
 
             $orderArray['data'] = objectToArray($orderList);
