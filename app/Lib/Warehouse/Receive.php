@@ -22,15 +22,35 @@ class Receive
 {
     /**
      * 创建待收货
-     * type 类型: 1：还，2：退，3：换
+     * @params  $type
+     *   type    =>'' 业务类型: 1：还，2：退，3：换   int  【必传】
      *
-     * $goods_info[
-     *      refund_no
+     * @params  $order_no
+     *  order_no  =>'' 订单编号                        string【必传】
+     *
+     * @params  $goods_info
+     * [
+     *      'serial_no'  => '',   序列号      string    【可传】
+     *      'goods_no'   => ‘’, 商品编号    string    【必传】
+     *      'refund_no'  => '',   退换货单号  string    【可传】
+     *      'goods_name' => '',   商品名称    string    【必传】
+     *      'quantity'   => '',    商品数量    int      【可传】
+     *      'imei'       => ''     商品imei    string   【可传】
+     *      'business_no'  => '',   退换货单号  string  【可传】
      * ]
+     * @params  $data
+     * [
+     *   'logistics_id'=>'',  物流id         string  【可传】
+     *   'logistics_no'=>'',  物流编号       string  【可传】
+     *   'business_key'=>'',  业务类型       int     【必传】
+     *   'customer'    =>'',   用户名        string  【必传】
+     *   'customer_mobile'=>'',用户手机号    int     【必传】
+     *   'customer_address'=>'',用户地址     string 【必传】
      *
-     *
+     * ]
+     * @return  bool |array
      */
-    public static function create($order_no, $type, $goods_info,$data)
+    public static function create(string $order_no, int $type, array $goods_info,array $data)
     {
         $receive_detail = [];
 
@@ -53,7 +73,7 @@ class Receive
                 ];
             }
         }
-
+        //转发给创建收货单接口的参数
         $result = [
             'order_no' => $order_no,
             'receive_detail' => $receive_detail,
@@ -72,7 +92,7 @@ class Receive
         $res = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
-            'method'=> 'warehouse.receive.create',//模拟
+            'method'=> 'warehouse.receive.create',//通知收发货系统的创建待收货单接口
             'params' => json_encode($result)
         ]);
 		\App\Lib\Common\LogApi::debug('申请收货',[
@@ -93,13 +113,16 @@ class Receive
 
     /**
      * 更新物流信息
-     *
-     *
+     *@params $params
+     *[
+     * 'receive_no'   =>'' 收货单编号  string  【必传】
+     * 'logistics_id' =>'' 物流id      string  【必传】
+     * 'logistics_no' =>'' 物流编号    string  【必传】
+     * ]
      * @return bool
      *
-     * $params = $receive_no,$logistics_id,$logistics_no
      */
-    public static function updateLogistics($params){
+    public static function updateLogistics(array $params){
 
         try {
             $result = [
@@ -113,7 +136,7 @@ class Receive
             $res = Curl::post($base_api, [
                 'appid'=> 1,
                 'version' => 1.0,
-                'method'=> 'warehouse.receive.logistics',//模拟
+                'method'=> 'warehouse.receive.logistics',//通知收发货系统更新物流信息接口
                 'params' => json_encode($result)
             ]);
 
@@ -137,18 +160,18 @@ class Receive
      * 收货系统 检测结果反馈
      *  $data = [
     [
-    'goods_no' => '123',
-    'check_result' => 'success',//是否合格 fasle/success
-    'check_description' => '原因',
-    'evaluation_time' => '123123123',//检测时间
-    'price' => '342'
+        'goods_no'          => '123',       商品编号
+        'check_result'      => 'success', //是否合格 fasle/success
+        'check_description' => '原因',
+        'evaluation_time'   => '123123123',//检测时间
+        'price'             => '342'
     ],
     [
-    'goods_no' => '123',
-    'check_result' => 'success',//是否合格 fasle/success
-    'check_description' => '原因',
-    'evaluation_time' => '123123123',//检测时间
-    'price' => '21'
+        'goods_no'          => '123',       商品编号
+        'check_result'      => 'success', //是否合格 fasle/success
+        'check_description' => '原因',
+        'evaluation_time'   => '123123123',//检测时间
+        'price'             => '342'
     ]
     ];
      */
@@ -202,9 +225,8 @@ class Receive
      *       'type'       =>'',【请求参数】 请求类型（2前端，1后端）
      *      ‘username’  =>‘’，【请求参数】 用户名
      * ]
-     *
      */
-    public static function checkItemsResult($params,$business_key=0,$userInfo=[])
+    public static function checkItemsResult(array $params,int $business_key=0,array $userInfo=[])
     {
         if (!$params || !is_array($params)) return ;
 
@@ -242,7 +264,7 @@ class Receive
      *      ['goods_no'=>123],
      * ]
      */
-    public static function receive($receive_no,$userinfo)
+    public static function receive(string $receive_no,array $userinfo)
     {
         if (!$receive_no) return;
 
