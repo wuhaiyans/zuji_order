@@ -906,9 +906,9 @@ class OrderOperate
 
 
         //订单金额
-        $orderData['order_gooods_amount']  = $orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance'];
+        $orderData['order_gooods_amount']  = normalizeNum($orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance']);
         //支付金额
-        $orderData['pay_amount']  = $orderData['order_amount']+$orderData['order_insurance'];
+        $orderData['pay_amount']  = normalizeNum($orderData['order_amount']+$orderData['order_insurance']);
         //总租金
         $orderData['zujin_amount']  =   $orderData['order_amount'];
         //碎屏意外险
@@ -1148,6 +1148,11 @@ class OrderOperate
            foreach($goodsList as $keys=>$values) {
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
+               //获取ime信息
+               $imeInfo = [];
+               $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);
+               $goodsList[$keys]['imei'] =   $imeInfo['imei1'] ?? '';
+               $goodsList[$keys]['serial_number'] =   $imeInfo['serial_number'] ?? '';
                if ($goodsExtendArray) {
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
