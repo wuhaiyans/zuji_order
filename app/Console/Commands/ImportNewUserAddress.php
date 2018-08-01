@@ -15,7 +15,7 @@ class ImportNewUserAddress extends Command
      *
      * @var string
      */
-    protected $signature = 'command:ImportUserAddress';
+    protected $signature = 'command:ImportNewUserAddress';
 
     /**
      * The console command description.
