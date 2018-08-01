@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Common\LogApi;
 use App\Order\Controllers\Api\v1\InstalmentController;
 use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Modules\Inc\CouponStatus;
@@ -179,6 +180,7 @@ class InstalmentComponnet implements OrderCreater
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();
                     if (!$id) {
+                        LogApi::error(config('app.env')."[下单]保存分期数据失败",$instalmentData);
                         $this->getOrderCreater()->setError('保存分期数据失败');
                         return false;
                     }

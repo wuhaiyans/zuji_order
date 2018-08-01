@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Risk\Risk;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
@@ -133,6 +134,7 @@ class RiskComponnet implements OrderCreater
             ];
              $id =OrderRiskRepository::add($riskData);
             if(!$id){
+                LogApi::error(config('app.env')."[下单]保存风控数据失败",$riskData);
                 $this->getOrderCreater()->setError('保存风控数据失败');
                 return false;
             }
