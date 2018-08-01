@@ -261,6 +261,7 @@ class OrderGiveback
 			'withhold_status' => 'required',
 			'instalment_num' => 'required',
 			'instalment_amount' => 'required',
+			'instalment_status' => 'required',
 			'payment_status' => 'required',
 			'payment_time' => 'required',
 			'logistics_id' => 'required',
