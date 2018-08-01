@@ -529,6 +529,14 @@ class OrderRepository
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
 //        //dd($whereArray);
 
 //        DB::table('order_info')
@@ -540,10 +548,8 @@ class OrderRepository
 //            ->where('a.id','>',1)
 //            ->get();
 
-//        sql_profiler();
-        $orderList =
-            DB::table('order_info')
-            ->select('order_info.order_no')
+        $count = DB::table('order_info')
+            ->select('order_info.id')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
@@ -556,21 +562,33 @@ class OrderRepository
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('order_info.id', 'DESC')
+            ->count();
+
+//        sql_profiler();
+        $orderList = DB::table('order_info')
+            ->select('order_info.order_no')
+            ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+            ->join('order_info_visit',function($join){
+                $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+            }, null,null,'left')
+            ->where($whereArray)
+            ->where($orWhereArray)
+            ->orderBy('order_info.create_time', 'DESC')
             ->orderBy('order_info_visit.id','desc')
-            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+//            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+//            ->forPage($page, $pagesize)
+//
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
 
-//        $orderList = DB::table('order_info')
-//            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
-//            ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
-//            ->where($whereArray)
-
-
-
-//        p(objectToArray($orderList));
         $orderArray = objectToArray($orderList);
-//        dd($orderArray);
         if ($orderArray) {
-            $orderIds = array_column($orderArray['data'],"order_no");
+            $orderIds = array_column($orderArray,"order_no");
 //           dd($orderIds);
 //            sql_profiler();
             $orderList =  DB::table('order_info')
@@ -588,6 +606,8 @@ class OrderRepository
                 ->get();
 
             $orderArray['data'] = objectToArray($orderList);
+            $orderArray['total'] = $count;
+            $orderArray['last_page'] = ceil($count/$pagesize);
 
             return $orderArray;
 //            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
