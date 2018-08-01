@@ -294,13 +294,14 @@ class MiniGivebackController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
         }
+        $goodsNo = $paramsArr['goods_no'];
         //-+--------------------------------------------------------------------
         // | 业务处理：获取判断当前还机单状态、更新还机单状态
         //-+--------------------------------------------------------------------
         //创建服务层对象
         $orderGivebackService = new OrderGiveback();
         //获取还机单基本信息
-        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($paramsArr['goods_no']);
+        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
         if( !$orderGivebackInfo ){
             return apiResponse([], get_code(), get_msg());
         }
@@ -315,7 +316,21 @@ class MiniGivebackController extends Controller
         }
         //判断租金是否为2000以上
         if($orderMiniInfo['instalment_status'] == 4){
-            return apiResponse([], ApiStatus::CODE_35016,'租金超过2000请在APP主动还款后再进行还机' );
+            //查询用户是否在APP已经进行主动还款操作
+            $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+            if( empty($instalmentList[$goodsNo]) ){
+                //更新还机单租金状态为已还款
+                $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+                    'instalment_status' => OrderGivebackStatus::ZUJIN_SUCCESS,
+                ]);
+                if( !$orderGivebackResult ){
+                    //事务回滚
+                    DB::rollBack();
+                    return apiResponse([],ApiStatus::CODE_92701,'更新还机单数据失败');
+                }
+            }else{
+                return apiResponse([], ApiStatus::CODE_35016,'您还有剩余租金未结清，请在拿趣用APP中进行还款在进行还机操作' );
+            }
         }
         //判断APPid是否有映射
         if(empty(config('miniappid.'.$params['appid']))){
@@ -328,7 +343,7 @@ class MiniGivebackController extends Controller
             //-+------------------------------------------------------------------------------
             // |收货时：查询未完成分期直接进行代扣，并记录代扣状态
             //-+------------------------------------------------------------------------------
-            if($orderGivebackInfo['instalment_status'] == 1 || $orderGivebackInfo['instalment_status'] == 3){
+            if($orderGivebackInfo['instalment_status'] == OrderGivebackStatus::ZUJIN_INIT || $orderGivebackInfo['instalment_status'] == OrderGivebackStatus::ZUJIN_FAIL){
                 //判断是否有请求过（芝麻支付接口）
                 $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($paramsArr['order_no'],'INSTALLMENT',$paramsArr['giveback_no']);
                 if( !$orderMiniCreditPayInfo ) {
@@ -347,13 +362,24 @@ class MiniGivebackController extends Controller
                 DB::commit();
                 //判断请求发送是否成功
                 if($pay_status == 'PAY_SUCCESS'){
-                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款请求成功');
+                    //租金支付发起成功，如有赔偿金额则未支付修改为支付中
+                    if($orderGivebackInfo['instalment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY){
+                        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
+                            'payment_status' => OrderGivebackStatus::PAYMENT_STATUS_IN_PAY,
+                        ]);
+                        if( !$orderGivebackResult ){
+                            //事务回滚
+                            DB::rollBack();
+                            return apiResponse([],ApiStatus::CODE_92701,'更新还机单数据失败');
+                        }
+                    }
+                    return apiResponse([], ApiStatus::CODE_0, '小程序支付扣除租金成功');
                 }elseif($pay_status =='PAY_FAILED'){
-                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣除租金失败');
                 }elseif($pay_status == 'PAY_INPROGRESS'){
-                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣除租金处理中请等待');
                 }else{
-                    return apiResponse([], ApiStatus::CODE_35000, '小程序扣款处理失败（内部失败）');
+                    return apiResponse([], ApiStatus::CODE_35000, '小程序扣除租金处理失败（内部失败）');
                 }
             }else{
                 //租金已支付（扣除赔偿金，关闭订单）
@@ -419,6 +445,10 @@ class MiniGivebackController extends Controller
         if( !$orderGivebackInfo ){
             return apiResponse([], get_code(), get_msg());
         }
+        //还机单存在判断支付状态
+        return apiResponse([
+            'payment_status'=>$orderGivebackInfo['payment_status']
+        ], ApiStatus::CODE_0);
     }
 
     /**
@@ -832,6 +862,13 @@ class MiniGivebackController extends Controller
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_SUCCESS;
+                //分期扣款成功，关闭分期单
+                $instalmentResult = \App\Order\Modules\Repository\Order\Instalment::close(['goods_no'=>$paramsArr['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]]);
+                //分期关闭失败，回滚
+                if( !$instalmentResult ) {
+                    DB::rollBack();
+                    return false;
+                }
             }elseif($pay_status =='PAY_FAILED'){
                 $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_FAIL;
             }elseif($pay_status == 'PAY_INPROGRESS'){
@@ -841,10 +878,11 @@ class MiniGivebackController extends Controller
             }
         }else{
             $data['remark'] = '小程序还机代扣金额一次性不能超过2000，剩余租金请用户主动到APP支付 ';
+            $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_EXCEED;
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
         $data['payment_time'] = time();
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
@@ -966,11 +1004,11 @@ class MiniGivebackController extends Controller
             }
         }else{
             $data['remark'] = '小程序还机代扣金额一次性不能超过2000，剩余租金请用户主动到APP支付 ';
+            $data['instalment_status'] = $status = OrderGivebackStatus::ZUJIN_EXCEED;
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
-        $data['instalment_status'] = OrderGivebackStatus::ZUJIN_INIT;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
         $data['payment_time'] = time();
         if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
             $smsModel = "GivebackEvaNoWitNoEnoNo";
