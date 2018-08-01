@@ -76,10 +76,10 @@ class Repayment implements ShortMessage {
         if( !is_array($userInfo )){
             return false;
         }
+        $alipayUserId = \App\Lib\User\User::getUserAlipayId($instalmentInfo['user_id']);
 
-        $alipayUserId = $userInfo['alipay_user_id'];
         //通过用户id查询支付宝用户id
-        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($alipayUserId);
+        $MessageSingleSendWord = new \App\Lib\AlipaySdk\sdk\MessageSingleSendWord($alipayUserId['alipay_user_id']);
         //查询账单
         $year = substr($instalmentInfo['term'], 0, 4);
         $month = substr($instalmentInfo['term'], -2);
