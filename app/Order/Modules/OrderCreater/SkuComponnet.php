@@ -440,11 +440,11 @@ class SkuComponnet implements OrderCreater
          *
          */
         $b =Goods::reduceStock($goodsArr);
-        if(!$b){
-            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
-            $this->getOrderCreater()->setError("减少库存失败");
-            return false;
-        }
+//        if(!$b){
+//            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
+//            $this->getOrderCreater()->setError("减少库存失败");
+//            return false;
+//        }
 
         return true;
     }
