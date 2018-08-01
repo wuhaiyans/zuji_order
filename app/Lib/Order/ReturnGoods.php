@@ -12,27 +12,35 @@ class ReturnGoods extends \App\Lib\BaseApi
 
     /**
      * 检查项反馈
-     *
+     * @params  $data  业务参数（检测参数）
      * [
      *  [
-     *      'goods_no' => '',//商品编号<br/>
-     *      'evaluation_status' => '',//检测状态【必须】【1：合格；2：不合格】<br/>
-     *      'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
-     *      'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
-     *      'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     *      'goods_no'          => '',//商品编号                        string    【必传】
+     *      'evaluation_status' => '',//检测状态【1：合格；2：不合格】  int    【必传】
+     *      'evaluation_time'   => '',//检测时间（时间戳）              int       【必传】
+     *      'evaluation_remark' => '',//检测备注                        string   【可选】【检测不合格时必有】
+     *      'compensate_amount' => '',//赔偿金额                        string   【可选】【检测不合格时必有】
      *  ],
      *  [
-     *      'goods_no' => '',//商品编号<br/>
-     *      'evaluation_status' => '',//检测状态【必须】【1：合格；2：不合格】<br/>
-     *      'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
-     *      'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
-     *      'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     *      'goods_no'          => '',//商品编号                        string    【必传】
+     *      'evaluation_status' => '',//检测状态【1：合格；2：不合格】  int    【必传】
+     *      'evaluation_time'   => '',//检测时间（时间戳）              int      【必传】
+     *      'evaluation_remark' => '',//检测备注                        string   【可选】【检测不合格时必有】
+     *      'compensate_amount' => '',//赔偿金额                        string   【可选】【检测不合格时必有】
      *  ],
      * ]
+     * @params  $business_key  业务参数
+     *  'business_key '  =>''   int   业务类型   【必传】
      *
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'    =>''     用户id      int      【必传】
+     *      'username' =>''   用户名      string   【必传】
+     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
      */
 
-    public static function checkResult($data,$business_key,$userinfo)
+    public static function checkResult(array $data,int $business_key,array $userinfo)
     {
 
         $params['business_key']=$business_key;

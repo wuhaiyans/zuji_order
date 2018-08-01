@@ -39,7 +39,7 @@ class Receive
     ];
      */
 
-    public static function checkResult($order_no, $business_key,$data)
+    public static function checkResult(string $order_no, int $business_key,array $data)
     {
         try{
             $base_api = config('ordersystem.ORDER_API');
@@ -100,15 +100,17 @@ class Receive
 
     /**
      * 退换货 ---收到货通知
-     * @param $receive_no
+     * @param $refund_no     退货单号  string  【必传】
+     * @param business_key  业务类型    int   【必传】
+     * @param array $userinfo 业务参数        【必传】
      * [
-     *  'refund_no' =>[0]['refund_no'=>'xxxx'], //退货单号(二维数组支持多商品)
-     *  'business_key' =>'',                    //business_key
-     *  'userinfo' =>''                         //用户信息一维数组
+     *       'uid'        =>'',    用户id  int【必传】
+     *       'type'       =>'',   请求类型（2前端，1后端） int 【必传】
+     *      ‘username’  =>‘’，用户名 string【必传】
      * ]
      * @return bool
      */
-    public static function receivedReturn($refund_no,$business_key,$userinfo)
+    public static function receivedReturn(string $refund_no,int $business_key,array $userinfo)
     {
         $data = config('tripartite.Interior_Order_Request_data');
         $data['method'] ='api.Return.returnReceive';
