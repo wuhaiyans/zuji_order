@@ -162,7 +162,7 @@ class WithholdController extends Controller
         $params = $params['params'];
 
         $instalmentId   = $params['instalment_id'];
-        $remark         = $params['remark'];
+        $remark         = !empty($params['remark']) ? $params['remark'] : "主动扣款";
 
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
