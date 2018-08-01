@@ -439,7 +439,7 @@ class SkuComponnet implements OrderCreater
          * 在这里要调用减少库存方法
          *
          */
-        $b =Goods::reduceStock($goodsArr);
+//        $b =Goods::reduceStock($goodsArr);
 //        if(!$b){
 //            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
 //            $this->getOrderCreater()->setError("减少库存失败");
