@@ -73,7 +73,7 @@ class DeliveryDetail {
 	    /*if($this->model->status == 1){
 	        return false;
         }*/
-        $this->model->status=1;
+        $this->model->status=1;   //无效   0：有效   1：无效
 	    return $this->model->save();
 
     }
@@ -160,10 +160,18 @@ class DeliveryDetail {
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
      *   [
-     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *      'goods_no'=>'abcd',  商品编号   string  【必传】
+     *      'imei1'   =>'imei1', 商品imei1  string  【必传】
+     *      'imei2'   =>'imei2', 商品imei2  string  【必传】
+     *      'imei3'   =>'imei3', 商品imei3  string  【必传】
+     *      'serial_number'=>'abcd' 商品序列号  string  【必传】
      *   ]
      *   [
-     *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
+     *      'goods_no'=>'abcd',  商品编号   string  【必传】
+     *      'imei1'   =>'imei1', 商品imei1  string  【必传】
+     *      'imei2'   =>'imei2', 商品imei2  string  【必传】
+     *      'imei3'   =>'imei3', 商品imei3  string  【必传】
+     *      'serial_number'=>'abcd' 商品序列号  string  【必传】
      *   ]
      * ]
      * @return bool
@@ -178,9 +186,9 @@ class DeliveryDetail {
                 'imei2'=>isset($goodsInfo[$k]['imei2'])?$goodsInfo[$k]['imei2']:"",
                 'imei3'=>isset($goodsInfo[$k]['imei3'])?$goodsInfo[$k]['imei3']:"",
                 'serial_number'=>$goodsInfo[$k]['serial_number'] ? $goodsInfo[$k]['serial_number'] : '',
-                'status'=>0,
+                'status'=>0,  //有效状态   0：有效   1：无效
             ];
-            $res =OrderGoodsDelivery::create($data);
+            $res =OrderGoodsDelivery::create($data);//创建商品扩展信息
             $id =$res->getQueueableId();
             if(!$id){
                 return false;
@@ -193,7 +201,7 @@ class DeliveryDetail {
      * 获取商品扩展表信息
      * @param string $order_no
      * @param array $goods_info
-     * return bool
+     * @return DeliveryDetail|bool
      */
     public static function getGoodsDelivery(string $order_no,array $goods_info){
         foreach ($goods_info as $k=>$v){
@@ -207,7 +215,7 @@ class DeliveryDetail {
     }
 
     /**
-     * 获取信息
+     * 获取商品扩展信息
      * @param string $order_no
      * @param string $goods_no
      * @return DeliveryDetail|bool

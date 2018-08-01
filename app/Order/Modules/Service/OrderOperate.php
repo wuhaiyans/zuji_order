@@ -1150,8 +1150,13 @@ class OrderOperate
                //获取ime信息
                $imeInfo = [];
                $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);
-               $goodsList[$keys]['imei'] =   $imeInfo->imei1 ?? '';
-               $goodsList[$keys]['serial_number'] =   $imeInfo->serial_number ?? '';
+               if ($imeInfo) {
+
+                   $imeInfo = $imeInfo->getData();
+               } 
+
+               $goodsList[$keys]['imei'] =   $imeInfo['imei1'] ?? '';
+               $goodsList[$keys]['serial_number'] =   $imeInfo['serial_number']?? '';
                if ($goodsExtendArray) {
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
