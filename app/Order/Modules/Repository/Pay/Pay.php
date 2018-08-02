@@ -96,6 +96,7 @@ class Pay extends \App\Lib\Configurable
 	protected $paymentAmount = 0.00;
 	protected $paymentFenqi = 0;
 	protected $paymentNo = '';
+	protected $paymentInsurance =0;
 	
 	//-+------------------------------------------------------------------------
 	// | 代扣签约相关
@@ -158,6 +159,14 @@ class Pay extends \App\Lib\Configurable
 	public function getFundauthAmount(){
 		return $this->fundauthAmount;
 	}
+
+	public function setInsurance( $insurance ){
+        $this->paymentInsurance = $insurance;
+        return $this;
+    }
+	public function getInsurance(){
+        return $this->paymentInsurance;
+    }
 	/**
 	 * 当前状态
 	 * @access public
@@ -689,18 +698,40 @@ class Pay extends \App\Lib\Configurable
 		if( !$b ){
 			throw new \Exception( '支付环节支付渠道设置失败' );
 		}
+		$data =[
+            'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
+            'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
+            'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
+            'channel_type'	=> $channel,						//【必选】int 支付渠道
+            'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
+            'name'			=> $params['name'],				//【必选】string 交易名称
+            'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+            //【必选】string 后台通知地址
+            'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
+        ];
+		if($channel == Channel::HPpay) {
+            $hppayData['payment_amount_bill_list'] = [
+                [
+                    'key' => 'zuji',
+                    'name' => '租金',
+                    'amount' => ($this->getPaymentAmount() -$this->getInsurance())*100,//【必选】int 交易金额；单位：分
+                ],
+                [
+                    'key' => 'yajin',
+                    'name' => '押金',
+                    'amount' => $this->getFundauthAmount()*100, //【必选】int 交易金额；单位：分
+                ],
+                [
+                    'key' => 'yiwaixian',
+                    'name' => '碎屏险',
+                    'amount' => $this->getInsurance()*100,//【必选】int 交易金额；单位：分
+                ],
+
+            ];
+            $data =array_merge($data,$hppayData);
+        }
 		// 获取url
-		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl([
-			'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-			'payment_amount'	=> $this->getPaymentAmount()*100,//【必选】int 交易金额；单位：分
-			'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
-			'channel_type'	=> $channel,						//【必选】int 支付渠道
-			'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
-			'name'			=> $params['name'],				//【必选】string 交易名称
-			'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-			//【必选】string 后台通知地址		
-			'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
-		]);
+		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl($data);
 		return $url_info;
 	}
 	
