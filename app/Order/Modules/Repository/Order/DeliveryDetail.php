@@ -12,6 +12,7 @@ use App\Lib\Contract\Contract;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
@@ -87,6 +88,12 @@ class DeliveryDetail {
 
     public static function addDeliveryContract(string $orderNo,array $goodsInfo):bool{
         $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
+        $instalment = OrderGoodsInstalmentRepository::queryList(['order_no'=>$orderNo,'times'=>1],['limit'=>1]);
+        $payment_day ="";
+        if($instalment){
+            $payment_day =$instalment[0]['day'];
+        }
+
         $data =[
             'order_no'=>$orderNo,
             'user_id'=>$orderInfo['user_id'],
@@ -95,6 +102,7 @@ class DeliveryDetail {
             'id_cards'=>$orderInfo['cret_no'],
             'mobile'=>$orderInfo['mobile'],
             'address'=>$orderInfo['address_info'],
+            'payment_day'=>$payment_day,
             'delivery_time'=>time(),
         ];
 
@@ -123,6 +131,7 @@ class DeliveryDetail {
                 'mianyajin'=>$v['yajin'],
                 'yiwaixian'=>$v['insurance'],
                 'market_price'=>$v['market_price'],
+                'goods_yajin'=>$v['goods_yajin'],
             ];
             $contractData =array_merge($data,$goodsData);
             $b =Contract::createContract($contractData);

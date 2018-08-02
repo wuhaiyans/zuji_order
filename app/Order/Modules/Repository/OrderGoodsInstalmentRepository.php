@@ -102,6 +102,10 @@ class OrderGoodsInstalmentRepository
         if (isset($param['term']) && !empty($param['term'])) {
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
+        //根据分期日期
+        if (isset($param['times']) && !empty($param['times'])) {
+            $whereArray[] = ['order_goods_instalment.times', '=', $param['times']];
+        }
 
 
         $result =  OrderGoodsInstalment::query()

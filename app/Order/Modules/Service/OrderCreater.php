@@ -59,6 +59,7 @@ class OrderCreater
         $orderType =OrderStatus::orderOnlineService;
         try{
             DB::beginTransaction();
+            $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
