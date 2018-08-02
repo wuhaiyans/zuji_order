@@ -107,9 +107,15 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.times', '=', $param['times']];
         }
 
+        //根据分期日期
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
 
         $result =  OrderGoodsInstalment::query()
+            ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)
             ->get();
