@@ -155,7 +155,7 @@ class OrderNotice{
 				]);
 			}
 			// 通知
-			$alipay_message->alipay_notify();
+			//$alipay_message->alipay_notify();
 		}
 
 		return true;

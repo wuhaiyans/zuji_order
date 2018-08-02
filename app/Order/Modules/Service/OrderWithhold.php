@@ -281,7 +281,7 @@ class OrderWithhold
             $notice->notify();
 
             // 发送支付宝消息通知
-            $notice->alipay_notify();
+            //$notice->alipay_notify();
 
 
             // 提交蚁盾用户还款数据
