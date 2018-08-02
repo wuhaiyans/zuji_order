@@ -16,6 +16,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected $namespace_order = 'App\Order\Controllers\api\v1';
     protected $namespace_warehouse = 'App\Warehouse\Controllers\api\v1';
+    protected $namespace_orderuser = 'App\OrderUser\Controllers\api\v1';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -41,6 +42,8 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapWebRoutes();
 
         $this->mapWarehouseRoutes();
+
+        $this->mapOrderUserRoutes();
     }
 
     /**
@@ -85,5 +88,20 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('warehouse')
             ->namespace($this->namespace_warehouse)
             ->group(base_path('routes/warehouse.php'));
+    }
+
+    /**
+     * Define the "orderuser" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
+    protected function mapOrderUserRoutes()
+    {
+        Route::prefix('orderuser')
+            ->middleware('orderuser')
+            ->namespace($this->namespace_orderuser)
+            ->group(base_path('routes/orderuser.php'));
     }
 }
