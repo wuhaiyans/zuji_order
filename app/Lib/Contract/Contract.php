@@ -106,7 +106,7 @@ class Contract{
             'mobile' => 'required',
             'address' => 'required',
             'delivery_time'=>'required',
-            'goods_zujin' => 'required',
+            'goods_yajin' => 'required',
             //'payment_day'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
