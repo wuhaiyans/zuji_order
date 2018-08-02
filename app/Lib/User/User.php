@@ -140,14 +140,14 @@ class User extends \App\Lib\BaseApi{
      */
     public static function checkToken($token){
         $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.login.user.info.get';
-        $data['auth_token'] =$token;
+        $data['method'] ='zuji.login.user.info.get';//获取用户信息接口
+        $data['auth_token'] =$token; //登录用户token
         $data['params'] = [
         ];
         $header = ['Content-Type: application/json'];
         $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
-        Log::debug("checkToken获取用户信息",$list);
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
+        Log::debug("checkToken获取用户信息". $data['method'],$list);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);//通过token获取用户信息
         Log::debug("checkToken返回结果".$info);
         $info = str_replace("\r\n","",$info);
         $info =json_decode($info,true);
