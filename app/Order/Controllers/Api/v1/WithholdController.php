@@ -16,7 +16,7 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 class WithholdController extends Controller
 {
 
-    /*
+    /**
      * 代扣协议查询
      * @param array $request
 	 * [

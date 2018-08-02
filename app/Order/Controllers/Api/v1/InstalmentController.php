@@ -13,74 +13,18 @@ use Illuminate\Support\Facades\Log;
 class InstalmentController extends Controller
 {
 
-
-    // 创建订单分期
-    public function create(Request $request){
-        $request    = $request->all();
-
-        $order      = $request['params']['order'];
-        $sku        = $request['params']['sku'];
-        $coupon     = !empty($request['params']['coupon']) ? $request['params']['coupon'] : "";
-        $user       = $request['params']['user'];
-
-        //获取goods_no
-        $order = filter_array($order, [
-            'order_no'=>'required',
-        ]);
-        if(count($order) < 1){
-            return apiResponse([],ApiStatus::CODE_20001,"order_no不能为空");
-        }
-
-        //获取sku
-        $sku = filter_array($sku, [
-            'goods_no'      => 'required',
-            'zuqi'          => 'required',
-            'zuqi_type'     => 'required',
-            'all_amount'    => 'required',
-            'amount'        => 'required',
-            'insurance'     => 'required',
-            'zujin'         => 'required',
-            'pay_type'      => 'required',
-        ]);
-        if(count($sku) < 8){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误");
-        }
-
-        filter_array($coupon, [
-            'discount_amount'   => 'required',    //fool；优惠金额
-            'coupon_type'       => 'required',    //int；优惠券类型
-        ]);
-
-
-        $user = filter_array($user, [
-            'user_id' => 'required',            //【必须】用户ID
-            'withholding_no' => 'required',    //【必须】string；代扣协议号
-            
-        ]);
-
-        if(empty($user)){
-            return apiResponse([],ApiStatus::CODE_20001,"用户代扣协议号不能为空");
-        }
-
-        $params = [
-            'order'     => $order,
-            'sku'       => $sku,
-            'coupon'    => $coupon,
-            'user'      => $user,
-        ];
-
-        $res        = new \App\Order\Modules\Repository\Order\Instalment();
-        $data       = $res->create($params);
-
-        if(!$data){
-            return apiResponse([],ApiStatus::CODE_20001, "创建分期失败");
-        }
-
-        return apiResponse([],ApiStatus::CODE_0,"success");
-
-    }
-
-    //分期列表接口
+    /*
+     * 分期列表接口
+     * @$params array
+     * [
+     *      'goods_no'  => 'GA80106950235887',  // 商品编号
+     *      'order_no'  => 'A801106950194751',  // 订单号
+     *      'status'    => '1',                 // 状态
+     *      'mobile'    => '13654565804',       // 手机号
+     *      'term'      => '201806',            // 分期
+     * ]
+     * return  array $result
+     */
     public function instalment_list(Request $request){
         $request               = $request->all()['params'];
         $additional['page']    = isset($request['page']) ? $request['page'] : 1;
