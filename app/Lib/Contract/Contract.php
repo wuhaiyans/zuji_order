@@ -106,12 +106,12 @@ class Contract{
             'mobile' => 'required',
             'address' => 'required',
             'delivery_time'=>'required',
-            'goods_zujin' => 'required',
-            'payment_day'=>'required'
+            //'goods_zujin' => 'required',
+            //'payment_day'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
-            return false;
+            //return false;
         }
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
 		$url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
