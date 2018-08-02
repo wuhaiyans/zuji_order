@@ -7,19 +7,10 @@
 namespace App\OrderUser\Modules\Repository;
 
 use App\OrderUser\Models\ThirdPartyUser;
-use App\Warehouse\Models\Receive;
-use Illuminate\Support\Facades\DB;
-use App\Warehouse\Models\Imei;
+use PHPUnit\Framework\MockObject\Stub\Exception;
+
 class ThirdPartyUserRepository
 {
-
-    private $imei;
-
-
-    public function __construct(Imei $imei)
-    {
-        $this->imei = $imei;
-    }
 
     /**
      * 导入imei数据
@@ -97,75 +88,74 @@ class ThirdPartyUserRepository
     }
 
     /**
-     * 根据IMEI查询返回一条记录
+     * 根据第三方用户ID返回一条记录
      *
-     * @param string $imei
+     * @param string $id
      * @return array 一维数组
      */
-    public static function getRow($imei)
+    public static function getRow($id)
     {
-        $row = Imei::where(['imei'=>$imei])->first();
+        $row = ThirdPartyUser::find($id);
 
         if(!$row){
-            throw new \Exception('设备表IMEI号:'.$imei.'未找到');
+            throw new \Exception('第三方用户ID:'.$id.'未找到');
         }
 
         return $row->toArray();
     }
     /**
-     * 根据IMEI修改一条记录
+     * 根据第三方用户ID修改一条记录
      *
      * @param array $imei
      * @return boolean
      */
     public static function setRow($params)
     {
-        $row = Imei::where(['imei'=>$params['imei']])->first();
+        $row = ThirdPartyUser::find($params['id']);
 
         if(!$row){
-            throw new \Exception('设备表IMEI号:'.$params['imei'].'未找到');
+            throw new \Exception('第三方用户ID:'.$params['id'].'未找到');
         }
-        $row->brand=$params['brand'];
-        $row->name=$params['name'];
-        $row->price=$params['price'];
-        $row->apple_serial=$params['apple_serial'];
-        $row->quality=$params['quality'];
-        $row->color=$params['color'];
-        $row->business=$params['business'];
-        $row->storage=$params['storage'];
         $row->status=$params['status'];
-        $row->update_time=time();
+        $row->start_time=($params['start_time']?strtotime($params['start_time']):0);
+        $row->end_time=($params['end_time']?strtotime($params['end_time']):0);
+        $row->user_name=$params['user_name'];
+        $row->identity=$params['identity'];
+        $row->order_no=$params['order_no'];
+        $row->imei=$params['imei'];
+        $row->remarks=$params['remarks'];
         if($row->update()){
             return true;
         }else{
-            throw new \Exception('设备表IMEI号:'.$params['imei'].'修改失败');
+            throw new \Exception('第三方用户ID:'.$params['id'].'修改失败');
         }
 
     }
 
-    /**
-     * 修改IMEI状态仓库中(确认收货入库)
-     */
-    public static function updateStatus($receive_no){
-        $model = Receive::find($receive_no);
-        //目前是一个收货单对应一个商品一个IMEI
-        $imei = $model->imeis;
-
-        if(!$imei) {
-            return false;
+    public static function add($params){
+        if(!$params){
+            throw new \Exception('第三方用户添加失败 params 为空');
         }
-        foreach($imei as $imeModel) {
-
-            $imeModel->status = Imei::STATUS_IN;
-            if (!$imeModel->update()){
-
-                return false;
-            }
-
+        $data = [
+            'phone'=>$params['phone'],
+            'consignee'=>$params['consignee'],
+            'shipping_address'=>$params['shipping_address'],
+            'status'=>$params['status'],
+            'platform'=>$params['platform'],
+            'start_time'=>($params['start_time'] ? strtotime($params['start_time']) : 0),
+            'end_time'=>($params['end_time'] ? strtotime($params['end_time']) : 0),
+            'user_name'=>($params['user_name']?$params['user_name']:0),
+            'identity'=>($params['identity']?$params['identity']:0),
+            'order_no'=>($params['order_no']?$params['order_no']:0),
+            'imei'=>($params['imei']?$params['imei']:0),
+            'remarks'=>($params['remarks']?$params['remarks']:0),
+        ];
+        if(ThirdPartyUser::create($data)){
+            return true;
+        }else{
+            throw new \Exception('第三方用户添加失败:'.json_encode($data));
         }
-
-        return true;
-
     }
+
 
 }

@@ -4,6 +4,8 @@ return [
 
     //第三方平台下单用户
     'orderuser.thirdpartyuser.lists' => 'ThirdPartyUserController@lists', //列表
+    'orderuser.thirdpartyuser.add' => 'ThirdPartyUserController@add', //添加
+    'orderuser.thirdpartyuser.update' => 'ThirdPartyUserController@updatess', //修改
 
 
 ];

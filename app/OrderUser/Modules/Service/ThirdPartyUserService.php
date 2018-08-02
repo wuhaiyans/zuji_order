@@ -76,5 +76,21 @@ class ThirdPartyUserService
         return [$params['kw_type'] => $params['keywords']];
     }
 
+    /**
+     * 添加
+     * @param $params
+     */
+    public static function add($params){
+        ThirdPartyUserRepository::add($params);
+    }
+
+    /**
+     * 修改
+     * @param $params
+     */
+    public static function update($params){
+        ThirdPartyUserRepository::setRow($params);
+    }
+
 
 }
