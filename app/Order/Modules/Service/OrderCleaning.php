@@ -283,15 +283,21 @@ class OrderCleaning
 
             } else {
 
+
                 //小程序待退还押金大于0，并且处于待退押金状态
                 if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
 
+
+
                     $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderCleanData['order_no']);
+
                     if (empty($miniOrderData))
                     {
                         LogApi::error(__method__.'[cleanAccount发起]没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
                         return apiResponseArray(31202,[],"没有找到芝麻订单号相关信息");
                     }
+
+
 
                     //查询分期有没有代扣并且扣款成功的记录
                     $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>OrderInstalmentStatus::SUCCESS, 'pay_type'=>0]);
@@ -302,7 +308,7 @@ class OrderCleaning
                             'out_trans_no'=>$orderCleanData['clean_no'],//资金交易号
                             'pay_amount'=>$orderCleanData['auth_deduction_amount'],//支付金额
                             'remark'=>'小程序退押金',//订单操作说明
-                            'app_id'=> config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
+                            'app_id'=> $miniOrderData['app_id'],//芝麻小程序APPID
                         ];
                         $succss =  miniApi::OrderClose($params);
                         LogApi::info(__method__.'[cleanAccount发起]支付小程序解冻押金', [$succss,  $params]);
@@ -315,11 +321,13 @@ class OrderCleaning
                           *      'app_id'=>'',//芝麻小程序APPID
                           * ]
                           */
+
                         $orderParams = [
                             'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
                             'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
-                            'app_id'=>config('MiniApi.ALIPAY_MINI_APP_ID'),//芝麻小程序APPID
+                            'app_id'=>  $miniOrderData['app_id'],//芝麻小程序APPID
                         ];
+//                        dd($orderParams);
                         $success =  miniApi::OrderCancel($orderParams);
                         LogApi::info(__method__.'[cleanAccount发起]支付小程序解冻押金', [$success,  $orderParams]);
                     }
