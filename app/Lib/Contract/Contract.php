@@ -106,18 +106,18 @@ class Contract{
             'mobile' => 'required',
             'address' => 'required',
             'delivery_time'=>'required',
-            //'goods_zujin' => 'required',
+            'goods_zujin' => 'required',
             //'payment_day'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
-            //return false;
+            return false;
         }
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
 		$url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
         LogApi::info("发货时生成合同URL:".$url,json_encode($params));
         $info = Curl::post($url, json_encode($params));
-        LogApi::info("发货时生成合同返回信息",$info);
+        //LogApi::info("发货时生成合同返回信息",$info);
         if(!$info){
             return false;
         }
