@@ -115,9 +115,9 @@ class Contract{
         }
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
 		$url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
-        LogApi::debug("发货时生成合同URL:".$url,json_encode($params));
+        LogApi::info("发货时生成合同URL:".$url,json_encode($params));
         $info = Curl::post($url, json_encode($params));
-        LogApi::debug("发货时生成合同返回信息",$info);
+        LogApi::info("发货时生成合同返回信息",$info);
         if(!$info){
             return false;
         }
