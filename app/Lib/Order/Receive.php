@@ -110,7 +110,7 @@ class Receive
      * ]
      * @return bool
      */
-    public static function receivedReturn(string $refund_no,int $business_key,array $userinfo)
+    public static function receivedReturn($refund_no,int $business_key,array $userinfo)
     {
         $data = config('tripartite.Interior_Order_Request_data');
         $data['method'] ='api.Return.returnReceive';
