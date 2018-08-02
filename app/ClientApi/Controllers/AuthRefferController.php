@@ -31,13 +31,12 @@ class AuthRefferController extends Controller{
     public function header(Request $request)
     {
         try{
-            //默认订单都需要验证，除了主动扣款
             $params = $request->all();
             $header = ['Content-Type: application/json'];
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
-                LogApi::debug("无需登录直接转发接口信息及结果",[
+                LogApi::debug("无需登录直接转发接口信息及结果".$params['method'],[
                     'url' => config('ordersystem.ORDER_API'),
                     'request' => $params,
                     'response' => $info,
@@ -57,8 +56,8 @@ class AuthRefferController extends Controller{
                 return response()->json($info);
             }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
                 $token     = $params['auth_token'];
-                $checkInfo = User::checkToken($token);
-                LogApi::debug("验证token调用第三方User::checkToken返回的结果",$checkInfo);
+                $checkInfo = User::checkToken($token);//获取用户信息
+                LogApi::debug("验证token调用第三方User::checkToken返回的结果".$params['method'],$checkInfo);
                 //验证不通过
                 if (is_null($checkInfo)
                     || !is_array($checkInfo)
@@ -75,14 +74,13 @@ class AuthRefferController extends Controller{
                         'username' =>$checkInfo['data'][0]['mobile']
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
-                    LogApi::debug("通过登录转发接口的url及参数",[
+                    LogApi::debug("通过登录转发接口的url及参数".$params['method'],[
                         'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
                     ]);
-                    LogApi::debug("通过登录转发接口的参数",$params);
                     $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
                     $info =json_decode($info,true);
-                    LogApi::debug("登录转发接口结果",$info);
+                    LogApi::debug("登录转发接口结果".$params['method'],$info);
                     if( is_null($info)
                         || !is_array($info)
                         || !isset($info['code'])

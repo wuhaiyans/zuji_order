@@ -11,7 +11,7 @@ return [
 	// 订单系统接口
 	'ORDER_API' => $order_domain.'/api',
 	
-	// 旧版业务系统域名
+	// 旧版业务系统域名 
 	'OLD_ORDER_DOMAIN' => $old_order_domain,
 	
 	// 旧版业务系统接口
