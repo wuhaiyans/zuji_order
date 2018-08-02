@@ -26,7 +26,7 @@ class Coupon extends \App\Lib\BaseApi{
      */
     public static function getCoupon($coupon){
 
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', ['coupon'=>$coupon]);
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.coupon.rows.get', '1.0', ['coupon'=>$coupon]);
 
     }
 
