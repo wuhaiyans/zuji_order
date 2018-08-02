@@ -131,6 +131,7 @@ class DepositComponnet implements OrderCreater
         //保存减免押金详情信息
         $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);
         if(!$b){
+            LogApi::error(config('app.env')."[下单]保存用户减免押金详情信息失败",$this->orderNo);
             $this->getOrderCreater()->setError('保存用户减免押金详情信息失败');
             return false;
         }

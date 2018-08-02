@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
@@ -278,6 +279,7 @@ class OrderComponnet implements OrderCreater
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {
+            LogApi::error(config('app.env')."[下单]保存订单数据失败",$orderData);
             $this->getOrderCreater()->setError('保存订单数据失败');
             return false;
         }

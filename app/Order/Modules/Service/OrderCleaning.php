@@ -80,7 +80,7 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
-                $orderCleanList['data'][$keys]['app_id_name'] = $channelData['name'];
+                $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
 
             }
 

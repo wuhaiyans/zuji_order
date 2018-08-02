@@ -62,7 +62,7 @@ class OrderPayNotify
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
             //发送支付宝推送消息
-            $orderNoticeObj->alipay_notify();
+            //$orderNoticeObj->alipay_notify();
             //增加操作日志
             OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderInfo['order_no'],"支付","支付成功");
 

@@ -310,7 +310,11 @@ class MiniOrderController extends Controller
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'pay_type' => 'required', //【必须】string；支付方式id
+            'error_code' => 'required', //【必须】string；支付code码
+            'error_msg' => 'required', //【必须】string；错误描述
+            'order_create_time' => 'required', //【必须】string；订单创建时间
+            'order_status' => 'required', //【必须】string；当前订单状态
+            'success' => 'required', //【必须】bool；标识
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
@@ -322,7 +326,7 @@ class MiniOrderController extends Controller
             \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
             return apiResponse( [], ApiStatus::CODE_0);
         }else{
-            return apiResponse( [], ApiStatus::CODE_35004,'小程序处理中');
+            return apiResponse( [], ApiStatus::CODE_35004,'小程序同步接口状态错误');
         }
     }
 

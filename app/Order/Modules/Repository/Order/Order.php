@@ -326,11 +326,12 @@ class Order {
         if( $this->model->freeze_type !=0 ){
             return false;
         }
+        //修改冻结状态为退货
         $this->model->freeze_type = OrderFreezeStatus::GoodsReturn;
         return $this->model->save();
     }
     /**
-     * 取消退货-取消换货-取消退款-检测不合格拒绝退款 ---换货检测不合格 --换货完成 共用
+     * 取消退货-取消换货-取消退款-检测不合格拒绝退款 ---换货检测不合格 --换货完成   --退款完成 共用
      * @return bool
      */
     public function returnClose( ):bool{
@@ -353,14 +354,16 @@ class Order {
     // | 换货
     //-+------------------------------------------------------------------------
     /**
-     * @return bool
      * 申请换货
+     * @return bool
+     *
      */
     public function barterOpen( ):bool{
         //订单必须是租用中
         if( $this->model->freeze_type !=0 ){
             return false;
         }
+        //订单冻结状态为换货
         $this->model->freeze_type = OrderFreezeStatus::Exchange;
         return $this->model->save();
     }
@@ -543,7 +546,7 @@ class Order {
 
 	
 	/**
-	 * 获取订单
+	 * 通过订单编号获取订单
 	 * <p>当订单不存在时，抛出异常</p>
 	 * @param string $order_no		订单编号
 	 * @param int		$lock			锁

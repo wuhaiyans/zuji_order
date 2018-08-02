@@ -450,14 +450,14 @@ class PayController extends Controller
 			LogApi::type('data-error')::error('数据未找到',$exc);
 			DB::rollBack();
 			echo json_encode([
-				'status' => 'ok',
+				'status' => 'error',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		} catch (\Exception $exc) {
 			LogApi::error('预授权通知处理异常',$exc);
 			DB::rollBack();
 			echo json_encode([
-				'status' => 'ok',
+				'status' => 'error',
 				'msg' => $exc->getMessage(),
 			]);exit;
 		}

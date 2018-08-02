@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Coupon\Coupon;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderCouponRepository;
@@ -134,6 +135,7 @@ class CouponComponnet implements OrderCreater
                 ];
                 $couponId = OrderCouponRepository::add($couponData);
                 if(!$couponId){
+                    LogApi::error(config('app.env')."[下单]保存订单优惠券信息失败",$couponData);
                     $this->getOrderCreater()->setError("保存订单优惠券信息失败");
                     return false;
                 }
@@ -147,6 +149,7 @@ class CouponComponnet implements OrderCreater
          */
         $coupon = Coupon::useCoupon($coupon);
         if($coupon !=ApiStatus::CODE_0){
+            LogApi::error(config('app.env')."[下单]调用使用优惠券接口失败",$coupon);
             $this->getOrderCreater()->setError("调用使用优惠券接口失败");
             return false;
         }

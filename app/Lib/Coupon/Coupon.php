@@ -11,34 +11,22 @@ namespace App\Lib\Coupon;
 use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
-class Coupon{
+class Coupon extends \App\Lib\BaseApi{
 
     /**
      * 获取优惠券信息
+     * @author wuhaiyan
      * @param $coupon 二维数组
      * 0=>[
-     *  'user_id'=>,
-     *  'coupon_on'
+     *  'user_id'=>'',//【必须】 string 用户id
+     *  'coupon_on'=>''//【必须】string 优惠券码
      * ]
-     * @return string
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
      */
     public static function getCoupon($coupon){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.coupon.rows.get';
-        $data['params'] = [
-            'coupon'=>$coupon,
-        ];
-        //var_dump($data);die;
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info = json_decode($info,true);
-        //var_dump($info);die;
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
-        }
-        if($info['code']!=0){
-            return $info;
-        }
-        return $info['data'];
+
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.spusku.get', '1.0', ['coupon'=>$coupon]);
 
     }
 
@@ -67,14 +55,15 @@ class Coupon{
 
     }
     /**
-     *  使用优惠券
+     *  使用优惠券接口
+     * @author wuhaiyan
      * @param $arr[
-     * coupon_id
+     *      1,2,3 // 【必须】array 优惠券id
      * ]
      * @return string or array
      */
     public static function useCoupon($arr){
-        $data = config('tripartite.Interior_Goods_Request_data');
+        $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
         $data['method'] ='zuji.goods.coupon.status1.set';
         $data['params'] = [
             'coupon_id'=>$arr,
@@ -92,14 +81,15 @@ class Coupon{
 
     /**
      * 优惠券恢复
-     * @param$arr[
-     * $user_id //spu_id
-     * $coupon_id //优惠券id
+     * @author wuhaiyan
+     * @param  $arr[
+     *      $user_id // 【必须】string 用户id
+     *      $coupon_id =>[12,23,]//【必须】 array 优惠券id
      * ]
      * @return string or array
      */
     public static function setCoupon($arr){
-        $data = config('tripartite.Interior_Goods_Request_data');
+        $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
         $data['method'] ='zuji.goods.coupon.status0.set';
         $data['params'] = [
             'user_id'=>$arr['user_id'],
