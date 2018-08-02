@@ -17,11 +17,13 @@ class InstalmentController extends Controller
      * 分期列表接口
      * @$params array
      * [
-     *      'goods_no'  => 'GA80106950235887',  // 商品编号
-     *      'order_no'  => 'A801106950194751',  // 订单号
-     *      'status'    => '1',                 // 状态
-     *      'mobile'    => '13654565804',       // 手机号
-     *      'term'      => '201806',            // 分期 日期筛选
+     *      'goods_no'      => 'GA80106950235887',  // 商品编号
+     *      'order_no'      => 'A801106950194751',  // 订单号
+     *      'status'        => '1',                 // 状态
+     *      'mobile'        => '13654565804',       // 手机号
+     *      'term'          => '201806',            // 分期
+     *      'begin_time'    => '201806',            // 开始时间
+     *      'end_time'      => '201808',            // 结束时间
      * ]
      * return  array $result
      */
@@ -31,14 +33,16 @@ class InstalmentController extends Controller
         $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
 
         $params         = filter_array($request, [
-            'goods_no'  => 'required',
-            'order_no'  => 'required',
-            'status'    => 'required',
-            'mobile'    => 'required',
-            'term'      => 'required',
+            'begin_time'    => 'required',
+            'end_time'      => 'required',
+            'goods_no'      => 'required',
+            'order_no'      => 'required',
+            'status'        => 'required',
+            'mobile'        => 'required',
+            'term'          => 'required',
         ]);
+        
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
-
 
         foreach($list as &$item){
 
@@ -54,7 +58,7 @@ class InstalmentController extends Controller
 
             // 还款日
             $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
-            
+
             // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
         }
