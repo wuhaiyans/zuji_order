@@ -88,12 +88,13 @@ class Goods  extends \App\Lib\BaseApi{
      * @throws \Exception			请求失败时抛出异常
      */
     public static function reduceStock($goods_arr){
-
-        $result =self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.number.minus', '1.0', ['goods_arr'=>$goods_arr]);
-        if(is_array($result)){
+        try{
+            $result =self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.number.minus', '1.0', ['goods_arr'=>$goods_arr]);
             return true;
+        }catch (\Exception $e){
+            return false;
         }
-        return false;
+
     }
 
 }
