@@ -1,9 +1,9 @@
 <?php
 namespace App\Lib\Payment;
+
 /**
- * 公共支付接口
- *
- * @author 
+ * 统一支付接口
+ * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
 class CommonPaymentApi extends \App\Lib\BaseApi {
 	/**
@@ -23,7 +23,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * [
 	 *		'payment_url' => '',//支付链接
 	 * ]
-	 * @throws \Exception			请求失败时抛出异常
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
 		$info = self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.url', '1.0', $params);
@@ -48,7 +48,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 *		'status'			=> '',	//【必选】string success：支付成功；init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
 	 *		'trade_time'			=> '',	//【必选】string 时间戳
 	 * ]
-	 * @throws \Exception			请求失败时抛出异常
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function query( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.query', '1.0', $params);
