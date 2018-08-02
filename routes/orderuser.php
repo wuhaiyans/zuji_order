@@ -13,7 +13,7 @@
 
 $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
-    'namespace' => 'App\Warehouse\Controllers\Api\v1',
+    'namespace' => 'App\OrderUser\Controllers\Api\v1',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
     'middleware' => 'api'
