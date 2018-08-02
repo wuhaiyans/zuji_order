@@ -39,7 +39,7 @@ class ThirdPartyUserService
         $whereParams = [];
 
 
-        $search = self::paramsSearch($params);
+        $search = $this->paramsSearch($params);
 
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
