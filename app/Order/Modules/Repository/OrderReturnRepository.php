@@ -36,6 +36,23 @@ class OrderReturnRepository
     /**
      * 创建退换货单
      * @param array $data
+     * [
+     *   'goods_no'      => '', string  商品编号
+     *   'order_no'      => '', string  订单编号
+     *   'business_key'  => '', int     业务类型
+     *   'reason_id'     => '', int     退换货id
+     *   'reason_text'   => '', string  退货说明
+     *   'user_id'       => '', int     用户id
+     *   'status'        => '', int     退换货单状态
+     *   'refund_no'     => '', string  退换货单号
+     *   'pay_amount'    =>'' ,         实付金额
+     *   'auth_unfreeze_amount'  => '', 应退押金
+     *   'refund_amount'  => '' ,       应退金额
+     *   'create_time'   => '', int    创建时间
+     *
+     *
+     * ]
+     * @return  bool
      *
      */
    public static function createReturn(array $data){
@@ -49,6 +66,17 @@ class OrderReturnRepository
     /**
      * 创建退款单
      * @param array $data
+     * [
+     *   'order_no'      => '', string  订单编号
+     *   'business_key'  => '', int     业务类型
+     *   'user_id'       => '', int     用户id
+     *   'status'        => '', int     退换货单状态
+     *   'refund_no'     => '', string  退款单号
+     *   'pay_amount'    =>'' ,         实付金额
+     *   'auth_unfreeze_amount'  => '', 应退押金
+     *   'refund_amount'  => '' ,       应退金额
+     *   'create_time'   => '', int    创建时间
+     * ]
      * @return bool
      */
    public static function createRefund(array $data){
@@ -66,7 +94,7 @@ class OrderReturnRepository
      * @return array
      *
      */
-    public static function get_list($where,$additional){
+    public static function get_list(array $where,array $additional){
         $parcels = DB::table('order_return')
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
@@ -86,7 +114,7 @@ class OrderReturnRepository
      * @return array
      *
      */
-    public static function getReturnList($where){
+    public static function getReturnList(array $where){
         $parcels = DB::table('order_return')
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
@@ -104,7 +132,7 @@ class OrderReturnRepository
      * @param $business_type
      * @param $business_no
      */
-    public static function  getPayNo($business_type,$business_no){
+    public static function  getPayNo(int $business_type,string $business_no){
         $Data=OrderPayModel::where([['business_type','=',$business_type],['business_no','=',$business_no]])->first();
         if(!$Data){
             return false;
@@ -113,10 +141,16 @@ class OrderReturnRepository
     }
     /**
      * 获取退换货单数据
-     * @param $where
-     *
+     * @param $where  条件参数
+     **[
+     *   'order_no'    =>'' ,订单编号   string   【必传】
+     *   'business_key'=>'',业务类型    int      【必传】
+     *   'status'      =>'',退货单状态  int
+     *   'evaluation_status' =>'', 检测状态   int    注：退货单状态和检测状态二传一即可
+     * ]
+     * @return array
      */
-    public static function returnApplyList($where){
+    public static function returnApplyList(array $where){
         $return_result= DB::table('order_return')
             ->leftJoin('order_goods', [['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
             ->where($where)
@@ -133,7 +167,7 @@ class OrderReturnRepository
      * @param $order_no
      * @return bool|\Illuminate\Support\Collection
      */
-    public static function getGoodsInfo($order_no){
+    public static function getGoodsInfo(string $order_no){
         $where[]=['order_no','=',$order_no];
         $getGoods=OrderGoods::where($where)->get();
         if(!$getGoods){
@@ -158,10 +192,10 @@ class OrderReturnRepository
      * @param $order_no
      * @param $gods_no
      */
-    public static function returnList($order_no,$goods_no){
+    public static function returnList(string $order_no,string $goods_no){
         $where[]=['goods_no','=',$goods_no];
         $where[]=['order_no','=',$order_no];
-        $where[]=['status','!=',ReturnStatus::ReturnCanceled];
+        $where[]=['status','!=',ReturnStatus::ReturnCanceled];  //状态不为已取消
         $getReturn=orderReturn::where($where)->first();
         if(!$getReturn){
             return false;

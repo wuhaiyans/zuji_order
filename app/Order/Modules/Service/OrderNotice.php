@@ -120,7 +120,7 @@ class OrderNotice{
 					'data' => $this->data,
 				]);
 			}
-			
+
 			// 通知
 			$b = $short_message->notify();
 			\App\Lib\Common\LogApi::debug('短信通知',[
@@ -155,7 +155,7 @@ class OrderNotice{
 				]);
 			}
 			// 通知
-			$alipay_message->alipay_notify();
+			//$alipay_message->alipay_notify();
 		}
 
 		return true;

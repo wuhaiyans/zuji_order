@@ -27,19 +27,19 @@ class ReturnController extends Controller
      * 申请退货
      * @param array $params 业务参数
      * [
-     *      'user_id'      =>''     用户id     int    【必选】
-     *      'business_key' =>''   业务类型     int    【必选】
-     *      'reason_id'    =>''   退货原因id   int    【必选】
-     *      'reason_text'  =>''   退货原因     string 【必选】
-     *      'loss_type'     => '',商品损耗     string 【必选】
-     *      'order_no’    =>''   订单编号     string 【必选】
-     *      'goods_no'     =>['','']商品编号   string【必选】
+     *      'user_id'       =>''     用户id       int    【必选】
+     *      'business_key'  =>''    业务类型      int    【必选】
+     *      'reason_id'     =>''    退货原因id    int    【必选】
+     *      'reason_text'   =>''    退货原因      string 【必选】
+     *      'loss_type'     => '',  商品损耗      string 【必选】
+     *      'order_no’     =>''    订单编号      string 【必选】
+     *      'goods_no'      =>['','']商品编号     string 【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
-     *      'uid'    =>''     用户id      int      【必传】
+     *      'uid'      =>''     用户id      int    【必传】
      *      'username' =>''   用户名      string   【必传】
-     *      'type'    =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *      'type'     =>''   渠道类型     int     【必传】  1  管理员，2 用户，3 系统自动化
      * ]
      *
      * @return array
@@ -93,7 +93,7 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $data = filter_array($params,[
-            'order_no'=>'required',     //订单编号
+            'order_no'=>'required', //订单编号
             'user_id' =>'required', //用户
         ]);
         if(count($data)<2){
@@ -109,7 +109,6 @@ class ReturnController extends Controller
     /**
      *   退换货审核
      * @param array  $params 业务参数
-     * 选中即同意
      * [
      *   'detail'=>[
      *     [
@@ -240,7 +239,7 @@ class ReturnController extends Controller
      */
     public function returnListExport(Request $request){
         $params = $request->all();
-        $refundData =$this->OrderReturnCreater->getReturnList($params);
+        $refundData =$this->OrderReturnCreater->getReturnList($params);//获取退换货信息
         $returnListArray = objectToArray($refundData);
         $data=[];
         if ($returnListArray['original']['code']===ApiStatus::CODE_0) {
@@ -372,7 +371,6 @@ class ReturnController extends Controller
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $ret = $this->OrderReturnCreater->returnResult($params);
-		//\App\Lib\Common\LogApi::debug('退货结果',$ret);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
         }

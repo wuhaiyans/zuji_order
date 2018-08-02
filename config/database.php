@@ -128,6 +128,21 @@ return [
 			'engine' => null,
 		],
 
+        'orderuser' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_ORDERUSER_DATABASE', 'zuji_order_user'),
+            'username' => env('DB_ORDERUSER_USERNAME', 'root'),
+            'password' => env('DB_ORDERUSER_PASSWORD', 'd^GHL,Oc@De3jW'),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
 		'pgsql' => [
             'driver' => 'pgsql',
             'host' => env('DB_HOST', '127.0.0.1'),

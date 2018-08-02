@@ -123,9 +123,9 @@ class Goods {
         if( $this->model->goods_status != OrderGoodStatus::RENTING_MACHINE ){
            return false;
         }
+        //业务类型为退货业务
         $this->model->business_key = OrderStatus::BUSINESS_RETURN;
         $this->model->business_no = $business_no;
-        $this->model->goods_status = OrderGoodStatus::REFUNDS;
         // 状态改为退货中
         $this->model->goods_status = OrderGoodStatus::REFUNDS;
         return $this->model->save();
@@ -164,7 +164,7 @@ class Goods {
      * @return bool
      */
     public function returnFinish( ):bool{
-        $this->model->goods_status=OrderGoodStatus::REFUNDED;
+        $this->model->goods_status=OrderGoodStatus::REFUNDED;  //退货完成
         return $this->model->save();
     }
 	
@@ -197,7 +197,7 @@ class Goods {
         if($this->model->goods_status==OrderGoodStatus::RENTING_MACHINE){
             return false;
         }
-        $this->model->goods_status=OrderGoodStatus::RENTING_MACHINE;
+        $this->model->goods_status=OrderGoodStatus::RENTING_MACHINE;  //租用中
         return $this->model->save();
     }
 	
@@ -317,11 +317,11 @@ class Goods {
     // | 静态方法
     //-+------------------------------------------------------------------------
     /**
-     * 获取商品列表
+     * 通过订单编号获取商品列表
      * @param string	$order_no		订单编号
      * @param int		$lock			锁
      * @return \App\Order\Modules\Repository\Order\Goods
-     *
+     * @return  bool
      */
     public static function getOrderNo( string $order_no, int $lock=0 ) {
 
@@ -339,7 +339,7 @@ class Goods {
     }
 	
 	/**
-	 * 获取商品
+	 * 通过商品id获取商品
 	 * <p>当订单不存在时，抛出异常</p>
 	 * @param int   	$id		    ID
 	 * @param int		$lock		锁
@@ -360,8 +360,7 @@ class Goods {
 		return new Goods( $goods_info );
 	}
     /**
-    * 获取商品
-    * <p>当订单不存在时，抛出异常</p>
+    * 通过商品编号获取商品信息
     * @param int   	$goods_no		    商品编号
     * @param int		$lock		锁
     * @return \App\Order\Modules\Repository\Order\Goods
