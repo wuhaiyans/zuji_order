@@ -15,6 +15,7 @@
  */
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 function apiResponse($data=[], $errno=0, $errmsg='')
 {
     if (empty($errmsg)) {
@@ -575,4 +576,21 @@ function create_withhold_create_pay_no($time=null){
 	$milliseconds = round(($utimestamp - $timestamp) * 1000000);
 
 	return date(preg_replace('`(?<!\\\\)u`', $milliseconds, $format), $timestamp);
+}
+
+/**
+ * 原子计数器
+ * Author: heaven
+ * @param $keys 键名
+ * @param $expireTime 设置的过期时间
+ */
+function redisIncr($keys, $expireTime)
+{
+
+        //限制用户提交的次数
+        if ($keys || $expireTime) return false;
+        $feddAuto = $this->redis->incr($keys);
+        $this->redis->expire($keys, $expireTime);
+        return $feddAuto;
+
 }
