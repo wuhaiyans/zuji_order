@@ -3,6 +3,11 @@ namespace App\Order\Modules\Inc;
 
 class PayInc{
     /**
+     * @var int 乐百分支付
+     */
+    const  HappyPercentPay = 6;
+
+    /**
      * @var int 支付宝小程序支付
      */
     const  MiniAlipay = 5;

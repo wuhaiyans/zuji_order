@@ -31,6 +31,9 @@ class PayCreater {
 	 *		'businessNo'		=> '',	// 业务编号
 	 *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
 	 *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+     *
+     *      'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
+     *      'yiwaixian'         =>'',   //意外险 单位:元
 	 * ]
 	 * @return \App\Order\Modules\Repository\Pay\Pay
 	 */
@@ -38,6 +41,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]P创建');
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
+        $params['fundauthStatus'] = FundauthStatus::NO_FUNDAUTH;
 		
 		$payModel = new OrderPayModel();
 		$data = [
@@ -52,6 +56,11 @@ class PayCreater {
 			'payment_no'		=> \creage_payment_no(),
 			'payment_amount'	=> $params['paymentAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
+
+            'fundauth_status'   =>$params['fundauthStatus'],
+            'fundauth_amount'	=>$params['fundauthAmount'],
+            'payment_insurance' =>$params['insurance'],
+
 		];
 		//sql_profiler();
 		$b = $payModel->insert( $data );

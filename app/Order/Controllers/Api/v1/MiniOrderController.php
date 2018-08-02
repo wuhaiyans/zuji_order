@@ -279,6 +279,9 @@ class MiniOrderController extends Controller
         }
         //确认订单查询（芝麻小程序数据）
         $res = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderNo);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_35002,"小程序订单查询失败");
+        }
         $data = [
             'appid'=>$appid,
             'pay_type'=>$payType,
