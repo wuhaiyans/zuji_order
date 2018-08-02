@@ -39,11 +39,14 @@ class MiniNotifyController extends Controller
 //            'channel'=>'rent',
 //            'zm_order_no'=>'2018080100001001094287623139',
 //        ];
+        $json = '{"pay_amount":"0.02","out_trans_no":"123456789","notify_app_id":"2018032002411058","out_order_no":"A801105262638398","alipay_fund_order_no":"2018080121001004030537202543","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-01 18:45:30","channel":"rent","zm_order_no":"2018080100001001094287623139","pay_status":"PAY_SUCCESS","sign":"DBRSya9E0AfBTzI4dqyBplJoledp+bCzt6pdX9S\/0m8\/UucAw6YDtoLRqccD23fco1fwBgRIimMnSvsJ8inRzkNrtKdeZWY6wvenm3xHfEYvtnjEcZOr6vVmaOmf7eBWgY2bC5nFGHiDFJfCGVWD+9OH8g8PtYAXLqU0\/qyParbl2OnWv+kc6MZLaoVe3kncFKdEQowiNTwHTTZdlyhdWYT9RZdfl\/kW+tfMP1xYWWKW9v4Zh2bPjc6qT+HHsCvubikBuTRm+q3gOxuET5o2bmdPzNnu3aAdBEIHie9YjWWziGMcTwsDG1cS7WpCW1qavh7TrBZ5qGq0djRBtrlhhA==","sign_type":"RSA2"}';
+        $_POST = json_encode($json,true);
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
         }
+        echo 111;die;
         $appid = $_POST['notify_app_id'];
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
