@@ -88,6 +88,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
+                    LogApi::info(config('app.env')."环境-订单发货时更新订单状态失败 ",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
@@ -95,6 +96,7 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
+                    LogApi::info(config('app.env')."环境-订单发货时 订单发货信息失败",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
@@ -102,6 +104,7 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
+                    LogApi::info(config('app.env')."环境-订单发货时 发货详情",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
