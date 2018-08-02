@@ -654,7 +654,7 @@ class ReturnController extends Controller
     public function refundUpdate(Request $request){
         $orders = $request->all();
         $params = $orders['params'];
-        $aa=$this->OrderReturnCreater->allowReturn($params);
+        $aa=OrderReturnCreater::refundUpdate($params,$orders['userinfo']);
         p($aa);
 
     }
