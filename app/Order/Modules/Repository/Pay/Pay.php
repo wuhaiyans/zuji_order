@@ -713,7 +713,7 @@ class Pay extends \App\Lib\Configurable
             $data['payment_amount'] += $this->getFundauthAmount()*100;
             $data['payment_amount_bill_list'] = [
                 [
-                    'key' => 'zuji',
+                    'key' => 'zujin',
                     'name' => '租金',
                     'amount' => ($this->getPaymentAmount() -$this->getInsurance())*100,//【必选】int 交易金额；单位：分
                 ],
