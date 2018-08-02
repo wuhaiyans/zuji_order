@@ -1921,9 +1921,7 @@ class OrderReturnCreater
      * 换货用户收到货
      * @throws \Exception
      * @param $params
-     *[
      *    'refund_no' =>'111'      //业务编号  string  【必传】
-     * ]
      * @param array $userinfo 用户信息参数
      * [
      *      'uid'      =>''     用户id      int      【必传】
@@ -2115,7 +2113,7 @@ class OrderReturnCreater
      * ]
      * @return bool
      */
-    public static function refundUpdate(array $params,array $userinfo){
+    public function refundUpdate(array $params,array $userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
