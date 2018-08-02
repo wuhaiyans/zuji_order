@@ -586,11 +586,10 @@ function create_withhold_create_pay_no($time=null){
  */
 function redisIncr($keys, $expireTime)
 {
-
         //限制用户提交的次数
-        if ($keys || $expireTime) return false;
-        $feddAuto = $this->redis->incr($keys);
-        $this->redis->expire($keys, $expireTime);
+        if (empty($keys) || empty($expireTime)) return false;
+        $feddAuto = Redis::incr($keys);
+        Redis::expire($keys, $expireTime);
         return $feddAuto;
 
 }
