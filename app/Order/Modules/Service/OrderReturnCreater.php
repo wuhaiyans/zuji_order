@@ -2113,7 +2113,7 @@ class OrderReturnCreater
      * ]
      * @return bool
      */
-    public static function refundUpdate(array $params,array $userinfo){
+    public function refundUpdate(array $params,array $userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型

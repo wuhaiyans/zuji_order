@@ -21,7 +21,7 @@ class InstalmentController extends Controller
      *      'order_no'  => 'A801106950194751',  // 订单号
      *      'status'    => '1',                 // 状态
      *      'mobile'    => '13654565804',       // 手机号
-     *      'term'      => '201806',            // 分期
+     *      'term'      => '201806',            // 分期 日期筛选
      * ]
      * return  array $result
      */
@@ -41,10 +41,21 @@ class InstalmentController extends Controller
 
 
         foreach($list as &$item){
-            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
+
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
             $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
+
+            // 姓名
+            $member = \App\Lib\User\User::getUser($item['user_id']);
+            $item['realname']       = !empty($member) ? $member['realname'] : "--";
+
+            // 状态
+            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
+
+            // 还款日
             $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
+            
+            // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
         }
 
