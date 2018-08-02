@@ -39,7 +39,7 @@ class Contract{
         return $info['data'];
     }
     /**
-     * 根据订单编号获取合同信息
+     * 根据订单编号和设备编号获取合同信息
      * @param string $orderNo
      * @param string $goodsNo
      * @return array
@@ -64,7 +64,7 @@ class Contract{
         return $info['data'];
     }
     /**
-     * 根据订单编号获取合同信息
+     * 创建电子合同
      * @param  $params [array]
      * [
      * ’spu_id‘=>'' //【必须】商品id
@@ -85,7 +85,7 @@ class Contract{
      * 'address' =>''  //【必须】通讯地址
      * 'delivery_time'=> //【必须】发货时间
      * ]
-     * @return array
+     * @return  boolean
      */
     public static function createContract($params){
         $rule= [
@@ -105,7 +105,9 @@ class Contract{
             'id_cards' => 'required',
             'mobile' => 'required',
             'address' => 'required',
-            'delivery_time'=>'required'
+            'delivery_time'=>'required',
+            'goods_zujin' => 'required',
+            'payment_day'=>'required'
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {

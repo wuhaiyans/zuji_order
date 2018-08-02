@@ -59,6 +59,7 @@ class OrderCreater
         $orderType =OrderStatus::orderOnlineService;
         try{
             DB::beginTransaction();
+            $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
@@ -173,8 +174,8 @@ class OrderCreater
             // 商品
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
-            //风控
-            $orderCreater = new RiskComponnet($orderCreater);
+            //风控(小程序风控信息接口不处理)
+//            $orderCreater = new RiskComponnet($orderCreater);
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
             //收货地址
@@ -354,8 +355,8 @@ class OrderCreater
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
-            //风控
-            $orderCreater = new RiskComponnet($orderCreater);
+            //风控(小程序风控信息接口不处理)
+//            $orderCreater = new RiskComponnet($orderCreater);
 
             //押金
 
