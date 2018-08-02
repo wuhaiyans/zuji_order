@@ -20,7 +20,8 @@ class ThirdPartyUserController extends Controller
         $params = $this->_dealParams([]);
 
         $list = ThirdPartyUserService::lists($params);
-        return \apiResponse($list);
+        return apiResponse($list);
+
     }
 
     /**

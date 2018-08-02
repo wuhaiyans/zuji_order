@@ -43,7 +43,7 @@ class ImportHistoryInstalmentRemark extends Command
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 10;
+            $limit  = 1000;
             $page   = 1;
             $totalpage = ceil($total/$limit);
             $arr =[];
@@ -76,7 +76,7 @@ class ImportHistoryInstalmentRemark extends Command
                 }
 
                 $page++;
-                sleep(2);
+//                sleep(2);
             } while ($page <= $totalpage);
             if(count($arr)>0){
                 LogApi::notify("分期备注信息修改",$arr);
