@@ -39,7 +39,7 @@ class ThirdPartyUserService
         $whereParams = [];
 
 
-        $search = $this->paramsSearch($params);
+        $search = self::paramsSearch($params);
 
         if ($search) {
             $whereParams = array_merge($whereParams, $search);
@@ -63,7 +63,7 @@ class ThirdPartyUserService
     /**
      * 查找类型
      */
-    public function paramsSearch($params)
+    public static function paramsSearch($params)
     {
         if (!isset($params['kw_type']) || !$params['kw_type']) {
             return false;
