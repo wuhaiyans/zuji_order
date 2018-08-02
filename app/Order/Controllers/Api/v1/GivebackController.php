@@ -316,6 +316,9 @@ class GivebackController extends Controller
 		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
+		if(redisIncr($orderGivebackInfo['giveback_no'], 60)>1){
+			return apiResponse([],ApiStatus::CODE_92500,'当前还机单正在操作，不能重复操作');
+		}
 		//开启事务
 		DB::beginTransaction();
 		try{

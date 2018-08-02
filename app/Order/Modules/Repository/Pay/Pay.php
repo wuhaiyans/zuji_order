@@ -709,8 +709,9 @@ class Pay extends \App\Lib\Configurable
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];
-		if($channel == Channel::HPpay) {
-            $hppayData['payment_amount_bill_list'] = [
+		if($channel == Channel::Lebaifen) {
+            $data['payment_amount'] += $this->getFundauthAmount()*100;
+            $data['payment_amount_bill_list'] = [
                 [
                     'key' => 'zuji',
                     'name' => '租金',
@@ -726,9 +727,7 @@ class Pay extends \App\Lib\Configurable
                     'name' => '碎屏险',
                     'amount' => $this->getInsurance()*100,//【必选】int 交易金额；单位：分
                 ],
-
             ];
-            $data =array_merge($data,$hppayData);
         }
 		// 获取url
 		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl($data);

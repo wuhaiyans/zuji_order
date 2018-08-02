@@ -24,7 +24,7 @@ class Channel {
     /**
      * 乐百分支付
      */
-    const HPpay = 5;
+    const Lebaifen = 5;
 
 
 	/**
@@ -36,7 +36,7 @@ class Channel {
 			self::Unionpay 	=> '银联',
 			self::Alipay 	=> '支付宝',
 			self::Jdpay 	=> '京东支付',
-			self::HPpay 	=> '乐百分支付',
+			self::Lebaifen 	=> '乐百分支付',
 		];
 	}
 
