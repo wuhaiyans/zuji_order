@@ -44,6 +44,17 @@ class OrderGoodsInstalmentRepository
      */
     public static function queryCount($param = []){
         $whereArray = [];
+
+        // 开始时间（可选）
+        if( isset($param['begin_time']) && $param['begin_time'] != ""){
+            $whereArray[] =  ['term', '>=', $param['begin_time']];
+        }
+
+        // 开始时间（可选）
+        if( isset($param['end_time']) && $param['end_time'] != ""){
+            $whereArray[] =  ['term', '<=', $param['end_time']];
+        }
+
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
@@ -69,8 +80,19 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
 
+        //根据分期期数
+        if (isset($param['times']) && !empty($param['times'])) {
+            $whereArray[] = ['order_goods_instalment.times', '=', $param['times']];
+        }
+
+        //根据用户手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
+
 
         $result = OrderGoodsInstalment::query()->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->count();
         return $result;//count($result);
     }
@@ -83,10 +105,22 @@ class OrderGoodsInstalmentRepository
         $offset     = ($page - 1) * $pageSize;
 
         $whereArray = [];
+
+        // 开始时间（可选）
+        if( isset($param['begin_time']) && $param['begin_time'] != ""){
+            $whereArray[] =  ['term', '>=', $param['begin_time']];
+        }
+
+        // 开始时间（可选）
+        if( isset($param['end_time']) && $param['end_time'] != ""){
+            $whereArray[] =  ['term', '<=', $param['end_time']];
+        }
+
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
+
 
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
@@ -102,14 +136,20 @@ class OrderGoodsInstalmentRepository
         if (isset($param['term']) && !empty($param['term'])) {
             $whereArray[] = ['order_goods_instalment.term', '=', $param['term']];
         }
-        //根据分期日期
+        //根据分期期数
         if (isset($param['times']) && !empty($param['times'])) {
             $whereArray[] = ['order_goods_instalment.times', '=', $param['times']];
         }
 
+        //根据用户手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
 
         $result =  OrderGoodsInstalment::query()
+            ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)
             ->get();

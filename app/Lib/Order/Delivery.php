@@ -116,14 +116,14 @@ class Delivery
         $params['order_info'] =$orderDetail;
         $params['goods_info'] =$goodsInfo;
         $params['operator_info'] =$operatorInfo;
-        LogApi::debug("发货请求参数url:".$base_api,$params);
+        LogApi::info("发货请求参数url:".$base_api,$params);
         $response = Curl::post($base_api, [
             'appid'=> 1,
             'version' => 1.0,
             'method'=> 'api.order.delivery',//模拟
             'params' => $params
         ]);
-        LogApi::debug("发货请求返回",$response);
+        LogApi::info("发货请求返回",$response);
 
         return $response;
 

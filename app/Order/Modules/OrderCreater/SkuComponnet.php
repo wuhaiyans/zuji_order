@@ -43,10 +43,10 @@ class SkuComponnet implements OrderCreater
     //规格
     private $specs;
 
-    //总押金
-    private $orderYajin=0;
-    private $orderZujin=0;
-    private $orderFenqi=0;
+    private $orderYajin=0;   //订单押金
+    private $orderZujin=0;  //订单租金+意外险
+    private $orderFenqi=0; //订单分期数
+    private $orderInsurance=0;//订单 意外险
 
 
 	/**
@@ -216,6 +216,14 @@ class SkuComponnet implements OrderCreater
     }
 
     /**
+     * 获取订单意外险
+     * @return string
+     */
+    public function getOrderInsurance(){
+        return $this->orderInsurance;
+    }
+
+    /**
      * 获取数据结构
      * @return array
      */
@@ -247,6 +255,7 @@ class SkuComponnet implements OrderCreater
             $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
             $this->orderYajin =$deposit_yajin;
+            $this->orderInsurance =$spuInfo['yiwaixian'];
 
 
             $arr['sku'][] = [
@@ -440,6 +449,7 @@ class SkuComponnet implements OrderCreater
          *
          */
 //        $b =Goods::reduceStock($goodsArr);
+//        var_dump($b);die;
 //        if(!$b){
 //            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
 //            $this->getOrderCreater()->setError("减少库存失败");

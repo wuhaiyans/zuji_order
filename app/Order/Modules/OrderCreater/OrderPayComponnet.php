@@ -81,6 +81,7 @@ class OrderPayComponnet implements OrderCreater
         $this->orderYajin =$this->getOrderCreater()->getSkuComponnet()->getOrderYajin();
         $this->orderZujin =$this->getOrderCreater()->getSkuComponnet()->getOrderZujin();
         $this->orderFenqi =$this->getOrderCreater()->getSkuComponnet()->getOrderFenqi();
+
         //-+--------------------------------------------------------------------
         // | 判断租金支付方式（分期/代扣）
         //-+--------------------------------------------------------------------
@@ -99,7 +100,7 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay ){
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::HappyPercentPay){
             $this->paymentStatus =true;
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
@@ -153,6 +154,7 @@ class OrderPayComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+        $orderInsurance =$this->getOrderCreater()->getSkuComponnet()->getOrderInsurance();
         $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
         if($zuqiType ==1){
             $this->orderFenqi =0;
@@ -167,6 +169,7 @@ class OrderPayComponnet implements OrderCreater
             'fundauthAmount' =>$this->orderYajin,//Price 预授权金额（押金），单位：元【必须】<br/>
             'paymentAmount' => $this->orderZujin,//Price 支付金额（总租金），单位：元【必须】<br/>
             'paymentFenqi' => $this->orderFenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
+            'insurance' =>$orderInsurance,//Price 订单的意外险金额 单位：元 一次性 普通支付 必须
         ];
         try{
             //代扣方式支付租金
@@ -207,6 +210,10 @@ class OrderPayComponnet implements OrderCreater
                 }else{
                     \App\Order\Modules\Repository\Pay\PayCreater::createPaymentFundauth($param);
                 }
+            }
+            // 乐百分支付方式 一次性普通支付
+            elseif($this->payType == PayInc::HappyPercentPay){
+                \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
             }
 
         }catch (Exception $e){
