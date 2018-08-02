@@ -741,6 +741,7 @@ class OrderOperate
     public static function isOrderComplete($orderNo){
         //查询订单商品信息
         $goods = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
+        LogApi::info("order查询订单商品信息",$goods);
         if(!$goods){
             return false;
         }
@@ -759,16 +760,20 @@ class OrderOperate
                 return true;
             }
         }
+
         if($orderStatus!=0){
             //如果订单完成 更新订单状态
             $order = Order::getByNo($orderNo);
+            LogApi::info("order查询订单信息",$order);
             $b =$order->updateStatus($orderStatus,0);
             if(!$b){
                 return false;
             }
             $orderInfo =$order->getData();
+            LogApi::info("order查询订单信息转成数组",$orderInfo);
             //解除代扣的订单绑定
             $b =self::orderUnblind($orderInfo);
+            LogApi::info("order解除代扣的订单绑定",$b);
             if(!$b){
                 return false;
             }
@@ -786,6 +791,7 @@ class OrderOperate
      */
 
     public static function orderUnblind($orderInfo){
+        LogApi::info("order获取订单信息",$orderInfo);
         //支付方式为代扣 需要解除订单代扣
         if($orderInfo['pay_type'] == Inc\PayInc::WithhodingPay){
             //查询是否签约代扣 如果签约 解除代扣
@@ -796,6 +802,7 @@ class OrderOperate
                     'business_no'	=>$orderInfo['order_no'],	// 【必须】string	业务编码
                 ];
                 $b =$withhold->unbind($params);
+                LogApi::info("order解除代扣",$orderInfo);
                 if(!$b){
                     return false;
                 }

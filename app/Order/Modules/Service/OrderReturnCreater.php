@@ -1921,9 +1921,7 @@ class OrderReturnCreater
      * 换货用户收到货
      * @throws \Exception
      * @param $params
-     *[
      *    'refund_no' =>'111'      //业务编号  string  【必传】
-     * ]
      * @param array $userinfo 用户信息参数
      * [
      *      'uid'      =>''     用户id      int      【必传】
