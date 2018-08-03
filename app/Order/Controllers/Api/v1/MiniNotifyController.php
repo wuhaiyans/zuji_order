@@ -57,10 +57,12 @@ class MiniNotifyController extends Controller
                     'zm_order_no'=>$_POST['zm_order_no'],
                     'out_order_no'=>$_POST['out_order_no'],
                     'channel'=>$_POST['channel'],
-                    'cancel_time'=>$_POST['cancel_time'],
                     'notify_app_id'=>$_POST['notify_app_id'],
                     'data_text'=>json_encode($_POST),
                 ];
+                if(isset($_POST['cancel_time'])){
+                    $arr_log['cancel_time'] = $_POST['cancel_time'];
+                }
                 $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
