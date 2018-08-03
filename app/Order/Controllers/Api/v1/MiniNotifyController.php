@@ -205,7 +205,6 @@ class MiniNotifyController extends Controller
         \DB::beginTransaction();
         //小程序清算订单
         $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
-        var_dump($b);
         if(!$b){
             //事物回滚 记录日志
             \DB::rollBack();
