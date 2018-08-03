@@ -445,11 +445,11 @@ class OrderOperate
 
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
-            if(!$b){
-                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$unitData);
-                DB::rollBack();
-                return false;
-            }
+//            if(!$b){
+//                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$orderNo);
+//                DB::rollBack();
+//                return false;
+//            }
 
             if($system==1){
                 $remark="系统自动执行任务";
@@ -485,6 +485,7 @@ class OrderOperate
             if($orderInfo['pay_type'] == PayInc::LebaifenPay){
                 $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
                 if($b){
+                    LogApi::error(config('app.env')."环境 确认收货调用乐百分 失败",$orderNo);
                     DB::rollBack();
                     return false;
                 }
@@ -526,12 +527,12 @@ class OrderOperate
             $payInfo = OrderPayRepository::find($orderNo);
 
             if(empty($payInfo)){
-                LogApi::error(config('app.env')."环境 乐百分支付order_pay表为空",$orderNo);
+                LogApi::error(config('app.env')."环境 确认收货乐百分支付order_pay表为空",$orderNo);
                 return false;
             }
             $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
             if(empty($paymentInfo)){
-                LogApi::error(config('app.env')."环境 乐百分支付order_pay_payment表为空",$payInfo['payment_no']);
+                LogApi::error(config('app.env')."环境 确认收货乐百分支付order_pay_payment表为空",$payInfo['payment_no']);
                 return false;
             }
 
@@ -541,10 +542,13 @@ class OrderOperate
                         'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
-                return $res;
+                if(is_array($res)){
+                    return true;
+                }
+                return false;
 
             }catch (\Exception $e){
-                LogApi::error(config('app.env')."环境 乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
+                LogApi::error(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
                 return false;
             }
 
