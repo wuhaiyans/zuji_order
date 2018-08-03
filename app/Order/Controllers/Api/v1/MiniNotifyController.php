@@ -60,18 +60,41 @@ class MiniNotifyController extends Controller
         try{
             if($this->data['notify_type'] == $this->CANCEL){
                 //入库取消订单回调信息
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'channel'=>$_POST['channel'],
+                    'cancel_time'=>$_POST['cancel_time'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'data_text'=>json_encode($_POST),
+                ];
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
                 }
                 $this->orderCloseCancelNotify();
             } if($this->data['notify_type'] == $this->FINISH){
                 //入库 完成 或 扣款 回调信息
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
+                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_trans_no'=>$_POST['out_trans_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'alipay_fund_order_no'=>$_POST['alipay_fund_order_no'],
+                    'pay_amount'=>$_POST['pay_amount'],
+                    'pay_status'=>$_POST['pay_status'],
+                    'channel'=>$_POST['channel'],
+                    'pay_time'=>$_POST['pay_time'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'redis_key'=>$redis_order,
+                    'data_text'=>json_encode($_POST),
+                ];
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
                 }
-                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
                 if( $redis_order == 'MiniWithhold' ){
                     $this->withholdingNotify();
                     return;
@@ -81,7 +104,19 @@ class MiniNotifyController extends Controller
                 }
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
             }else if($this->data['notify_type'] == $this->CREATE){
-                $result = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::add($_POST);
+                //入库 确认订单 回调信息
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'credit_privilege_amount'=>$_POST['credit_privilege_amount'],
+                    'fund_type'=>$_POST['fund_type'],
+                    'channel'=>$_POST['channel'],
+                    'order_create_time'=>$_POST['order_create_time'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'data_text'=>json_encode($_POST),
+                ];
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序订单确认支付回调记录失败',$_POST);
                 }

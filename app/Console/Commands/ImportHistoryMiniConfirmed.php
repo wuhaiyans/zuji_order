@@ -64,7 +64,7 @@ class ImportHistoryMiniConfirmed extends Command
                     $arr = $val;
                     $arr['out_order_no'] = $val['order_no'];
                     unset($arr['order_no']);
-                    $result = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::add($arr);
+                    $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr);
                     if (!$result) {
                         DB::rollBack();
                         \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录导出新订单插入失败', $val);

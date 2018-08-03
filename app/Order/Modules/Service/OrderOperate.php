@@ -537,8 +537,8 @@ class OrderOperate
 
             try{
                 $param =[
-                        'payment_no'		=> $payInfo['payment_no'],// 支付系统 支付交易码
-                        'out_payment_no'	=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                        'payment_no'		=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                        'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
                 return $res;
