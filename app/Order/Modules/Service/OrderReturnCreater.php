@@ -275,13 +275,15 @@ class OrderReturnCreater
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
             }
-            //获取订单的支付信息
-            $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$params['order_no']);
-            if(!$pay_result){
-                return false;
-            }
+
+
             //乐百分支付
             if($order_info['pay_type'] == PayInc::LebaifenPay){
+                //获取订单的支付信息
+                $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$params['order_no']);
+                if(!$pay_result){
+                    return false;
+                }
                 $data['pay_amount'] = $pay_result['payment_amount'];//实际支付金额=支付金额
             }
             //冻结订单

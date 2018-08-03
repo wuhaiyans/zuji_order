@@ -150,6 +150,7 @@ class OrderCreater
             }
 
     }
+
     /**
      * 小程序下单
      * @param $data
@@ -216,13 +217,13 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
-            //发送取消订单队列（小程序取消订单队列）
-//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API"), [
-//                'method' => 'api.inner.miniCancelOrder',
-////                'order_no'=>$data['order_no'],
-////                'user_id'=>$data['user_id'],
-////                'time' => time(),
-//            ],time()+1800,"");
+//            发送取消订单队列（小程序取消订单队列）
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
+                'method' => 'api.inner.miniCancelOrder',
+                'order_no'=>$data['order_no'],
+                'user_id'=>$data['user_id'],
+                'time' => time(),
+            ],time()+config('web.mini_order_cancel_hours'),"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
             return $result;
 
