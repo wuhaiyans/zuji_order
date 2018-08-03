@@ -99,7 +99,7 @@ class InnerServiceController extends Controller
 
         $input = file_get_contents("php://input");
 
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        LogApi::info(__METHOD__.'() '.microtime(true).'小程序订单取消处理接口消费处理参数:'.$input);
         $params = json_decode($input,true);
         $rules = [
             'order_no'  => 'required',
@@ -127,7 +127,7 @@ class InnerServiceController extends Controller
         ];
         $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
         if($b === false){
-            \App\Lib\Common\LogApi::info('小程序订单取消失败（芝麻）',\App\Lib\Payment\mini\MiniApi::getError());
+            \App\Lib\Common\LogApi::info('小程序订单取消失败（30分钟定时取消）',\App\Lib\Payment\mini\MiniApi::getError());
             return apiResponse(['reason'=>\App\Lib\Payment\mini\MiniApi::getError()],ApiStatus::CODE_35005);
         }
 

@@ -82,6 +82,7 @@ class MiniApi {
      * params [
      *      'out_order_no'=>'',//商户端订单号
      *      'zm_order_no'=>'',//芝麻订单号
+     *      'remark' => '',//订单操作说明'
      *      'app_id'=>'',//芝麻小程序APPID
      * ]
      */
