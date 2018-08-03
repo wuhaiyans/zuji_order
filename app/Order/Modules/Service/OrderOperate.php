@@ -343,6 +343,9 @@ class OrderOperate
      * [
      *      'order_no'=>''//订单编号
      *      'remark'=>''//备注
+     *      'userinfo'=[ //用户/后台登陆信息
+     *
+     *          ]
      * ]
      * @return boolean
      */
@@ -491,9 +494,19 @@ class OrderOperate
         $endTime = $beginTime + $day*86400;
         return $endTime;
     }
+    /**
+     * 根据订单编号查询支付单信息
+     * @author wuhaiyan
+     * $params $orderNo 【必须】 订单编号
+     * @return array
+     */
+    public static function getOrderPay($orderNo){
+        
+    }
 
     /**
      * 订单统计查询
+     * @author wuhaiyan
      * @return array
      */
 

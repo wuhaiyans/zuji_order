@@ -100,7 +100,7 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::FundSharePay){
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay){
             $this->paymentStatus =true;
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
@@ -214,7 +214,7 @@ class OrderPayComponnet implements OrderCreater
                 }
             }
             // 乐百分支付方式 一次性普通支付单
-            elseif($this->payType == PayInc::FundSharePay){
+            elseif($this->payType == PayInc::LebaifenPay){
                 \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
             }
 
