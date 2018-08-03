@@ -543,7 +543,7 @@ class OrderOperate
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
                 LogApi::info(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口 返回数据",$res);
-                return $res;
+                return true;
 
             }catch (\Exception $e){
                 LogApi::error(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
