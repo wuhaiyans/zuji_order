@@ -650,6 +650,27 @@ class OrderReturnCreater
 						|| $return_info['auth_unfreeze_amount']>0 
 						|| $return_info['auth_deduction_amount']>0
 					) ){
+                    //如果是小程序的订单
+                    if($order_info['order_type'] == OrderStatus::orderMiniService){
+                        //查询芝麻订单
+                        $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($return_info['order_no']);
+                        $data = [
+                            'out_order_no' => $return_info['order_no'],//商户端订单号
+                            'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                            'remark' => $param['remark'],//订单操作说明
+                            'app_id' => $miniOrderInfo['app_id'],//小程序appid
+                        ];
+                        //发送取消请求
+                        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                        if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+                            //事务提交
+                            DB::commit();
+                            return true;
+                        }
+                        // 失败
+                        DB::rollBack();
+                        return false;
+                    }
 					// 不需要清算，直接调起退款成功
 					$b = self::refundUpdate([
 						'business_type' => $return_info['business_key'],
