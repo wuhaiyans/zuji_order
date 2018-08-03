@@ -45,7 +45,7 @@ class PayCreater {
 		$paymentAmountBillList =[
             'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
             'yajin'=>$params['fundauthAmount'],
-            'yiwaixian'=>$params['yiwaixian'],
+            'yiwaixian'=>$params['insurance'],
         ];
 
 		$payModel = new OrderPayModel();
