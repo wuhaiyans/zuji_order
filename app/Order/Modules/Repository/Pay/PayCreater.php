@@ -41,12 +41,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]P创建');
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
-        $params['yiwaixian']  =isset($params['yiwaixian'])?$params['yiwaixian']:0.00;
-		$paymentAmountBillList =[
-            'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
-            'yajin'=>$params['fundauthAmount'],
-            'yiwaixian'=>$params['yiwaixian'],
-        ];
+
 
 		$payModel = new OrderPayModel();
 		$data = [
@@ -62,8 +57,6 @@ class PayCreater {
 			'payment_amount'	=> $params['paymentAmount']+$params['fundauthAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
 
-            'payment_amount_bill_list' =>json_encode($paymentAmountBillList),
-
 		];
 
 		//sql_profiler();
@@ -75,6 +68,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]P创建成功');
 		return new Pay($data);
 	}
+
 	
 	/**
 	 * 创建第2种支付方式
@@ -316,6 +310,62 @@ class PayCreater {
 		LogApi::debug('[支付阶段]PWF创建成功',$data);
 		return new Pay( $data );
 	}
+    /**
+     * 创建第7种支付方式
+     * <p>乐百分支付</p>
+     * @param	array	$params		普通支付参数
+     * [
+     *		'userId'			=> '',	// 业务用户ID
+     *		'orderNo'			=> '',	// 订单编号
+     *		'businessType'		=> '',	// 业务类型
+     *		'businessNo'		=> '',	// 业务编号
+     *		'paymentAmount'		=> '',	// Price 支付金额，单位：元
+     *		'paymentFenqi		=> '',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+     *
+     *      'fundauthAmount'	=> '',	// Price 预授权金额，单位：元
+     *      'yiwaixian'         =>'',   //意外险 单位:元
+     * ]
+     * @return \App\Order\Modules\Repository\Pay\Pay
+     */
+    public static function createLebaifenPayment( array $params ): Pay{
+        LogApi::debug('[支付阶段]P创建');
+        $params['status'] = PayStatus::WAIT_PAYMENT;
+        $params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
+        $params['yiwaixian']  =isset($params['yiwaixian'])?$params['yiwaixian']:0.00;
+        $paymentAmountBillList =[
+            'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
+            'yajin'=>$params['fundauthAmount'],
+            'yiwaixian'=>$params['yiwaixian'],
+        ];
+
+        $payModel = new OrderPayModel();
+        $data = [
+            'user_id'		=> $params['userId'],
+            'order_no'		=> $params['orderNo'],
+            'business_type'	=> $params['businessType'],
+            'business_no'	=> $params['businessNo'],
+            'status'		=> $params['status'],
+            'create_time'	=> time(),
+
+            'payment_status'	=> $params['paymentStatus'],
+            'payment_no'		=> \creage_payment_no(),
+            'payment_amount'	=> $params['paymentAmount']+$params['fundauthAmount'],
+            'payment_fenqi'		=> $params['paymentFenqi'],
+
+            'payment_amount_bill_list' =>json_encode($paymentAmountBillList),
+
+        ];
+
+        //sql_profiler();
+        $b = $payModel->insert( $data );
+        if( !$b ){
+            LogApi::error('[支付阶段]P创建失败',$data);
+            throw new \Exception( '创建支付记录失败' );
+        }
+        LogApi::debug('[支付阶段]P创建成功');
+        return new Pay($data);
+    }
+
 
 
 	/**

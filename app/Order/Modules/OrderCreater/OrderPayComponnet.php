@@ -215,7 +215,7 @@ class OrderPayComponnet implements OrderCreater
             }
             // 乐百分支付方式 一次性普通支付单
             elseif($this->payType == PayInc::LebaifenPay){
-                \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
+                \App\Order\Modules\Repository\Pay\PayCreater::createLebaifenPayment($param);
             }
 
         }catch (Exception $e){
