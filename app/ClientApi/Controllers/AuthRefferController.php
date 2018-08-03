@@ -33,6 +33,9 @@ class AuthRefferController extends Controller{
         try{
             $params = $request->all();
             $header = ['Content-Type: application/json'];
+			
+			LogApi::setSource('Client-Api-Reforward');
+			LogApi::id($params['method']);
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
