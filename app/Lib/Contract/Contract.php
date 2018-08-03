@@ -112,7 +112,7 @@ class Contract{
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
-            LogApi::info("发货时生成合同URL:".$url,json_encode($params));
+            LogApi::type("contract")::info($validator->errors()->first());
             return false;
         }
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
