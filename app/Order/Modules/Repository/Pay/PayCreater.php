@@ -41,8 +41,13 @@ class PayCreater {
 		LogApi::debug('[支付阶段]P创建');
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
-        $params['fundauthStatus'] = FundauthStatus::NO_FUNDAUTH;
-		
+
+		$paymentAmountBillList =[
+            'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
+            'yajin'=>$params['fundauthAmount'],
+            'yiwaixian'=>$params['yiwaixian'],
+        ];
+
 		$payModel = new OrderPayModel();
 		$data = [
 			'user_id'		=> $params['userId'],
@@ -54,14 +59,13 @@ class PayCreater {
 			
 			'payment_status'	=> $params['paymentStatus'],
 			'payment_no'		=> \creage_payment_no(),
-			'payment_amount'	=> $params['paymentAmount'],
+			'payment_amount'	=> $params['paymentAmount']+$params['fundauthAmount'],
 			'payment_fenqi'		=> $params['paymentFenqi'],
 
-            'fundauth_status'   =>$params['fundauthStatus'],
-            'fundauth_amount'	=>$params['fundauthAmount'],
-            'payment_insurance' =>$params['insurance'],
+            'payment_amount_bill_list' =>json_encode($paymentAmountBillList),
 
 		];
+
 		//sql_profiler();
 		$b = $payModel->insert( $data );
 		if( !$b ){
