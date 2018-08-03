@@ -542,6 +542,7 @@ class OrderOperate
                         'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
+                LogApi::error(config('app.env')."环境 确认收货调用乐百分 返回数据",$res);
                 return $res;
 
             }catch (\Exception $e){
