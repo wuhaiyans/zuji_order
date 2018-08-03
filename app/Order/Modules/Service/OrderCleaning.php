@@ -561,6 +561,7 @@ class OrderCleaning
             if (!isset($param['out_order_no'])) return false;
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
+            print_r($orderCleanInfo);
             if ($orderCleanInfo['code']) {
                 LogApi::error(__METHOD__."() ".microtime(true)." 订单清算记录不存在");
                 return false;
@@ -575,6 +576,7 @@ class OrderCleaning
                     'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
                 ];
                 $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
+                print_r($success);die;
                 if (!$success) {
                     //更新业务系统的状态
                     $businessParam = [
