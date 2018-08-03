@@ -268,12 +268,20 @@ class OrderReturnCreater
             }
             //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
-                || $order_info['pay_type'] == PayInc::UnionPay
-                || $order_info['pay_type'] == PayInc::LebaifenPay){
+                || $order_info['pay_type'] == PayInc::UnionPay){
                 $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
+            }
+            //获取订单的支付信息
+            $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$params['order_no']);
+            if(!$pay_result){
+                return false;
+            }
+            //乐百分支付
+            if($order_info['pay_type'] == PayInc::LebaifenPay){
+                $data['pay_amount'] = $pay_result['payment_amount'];//实际支付金额=支付金额
             }
             //冻结订单
             $orderFreeze = $order->refundOpen();
