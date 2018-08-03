@@ -11,6 +11,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\Contract\Contract;
 use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
+use App\Lib\Payment\LebaifenApi;
 use App\Lib\Risk\Risk;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
@@ -30,6 +31,8 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderMiniRepository;
+use App\Order\Modules\Repository\OrderPayPaymentRepository;
+use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
@@ -472,6 +475,13 @@ class OrderOperate
                 return false;
             }
 
+            //调用乐百分确认收货
+            $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
+            if($b){
+                DB::rollBack();
+                return false;
+            }
+
            // DB::commit();
             //签收后发送短信
             if($orderInfo['zuqi_type'] ==1){
@@ -499,12 +509,36 @@ class OrderOperate
      * @author wuhaiyan
      * @params $orderNo 【必须】 订单编号
      * @params $payType 【必须】 支付方式
-     * @return array
+     * @return bool
      */
     public static function lebaifenDelivery($orderNo,$payType){
 
         if($payType == PayInc::LebaifenPay){
 
+            $payInfo = OrderPayRepository::find($orderNo);
+
+            if(empty($payInfo)){
+                LogApi::error(config('app.env')."环境 乐百分支付order_pay表为空",$orderNo);
+                return false;
+            }
+            $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
+            if(empty($paymentInfo)){
+                LogApi::error(config('app.env')."环境 乐百分支付order_pay_payment表为空",$payInfo['payment_no']);
+                return false;
+            }
+
+            try{
+                $param =[
+                        'payment_no'		=> $payInfo['payment_no'],// 支付系统 支付交易码
+                        'out_payment_no'	=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                ];
+                $res =LebaifenApi::confirmReceipt($param);
+                return $res;
+
+            }catch (\Exception $e){
+                LogApi::error(config('app.env')."环境 乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
+                return false;
+            }
 
         }
         return true;
