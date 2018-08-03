@@ -88,6 +88,7 @@ class Contract{
      * @return  boolean
      */
     public static function createContract($params){
+        return true;die;
         $url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
         LogApi::info("发货时生成合同URL:".$url,json_encode(createContract));
         $rule= [
