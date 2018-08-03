@@ -489,7 +489,7 @@ class OrderOperate
                     return false;
                 }
             }
-        
+
            // DB::commit();
             //签收后发送短信
             if($orderInfo['zuqi_type'] ==1){
