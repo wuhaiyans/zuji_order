@@ -445,11 +445,11 @@ class OrderOperate
 
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
-//            if(!$b){
-//                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$orderNo);
-//                DB::rollBack();
-//                return false;
-//            }
+            if(!$b){
+                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$orderNo);
+                DB::rollBack();
+                return false;
+            }
 
             if($system==1){
                 $remark="系统自动执行任务";

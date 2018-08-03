@@ -67,7 +67,7 @@ class MiniNotifyController extends Controller
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
                 }
-                $this->orderCloseCancelNotify();
+                $this->orderCancelNotify();
             } if($this->data['notify_type'] == $this->FINISH){
                 //入库 完成 或 扣款 回调信息
                 $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
@@ -93,7 +93,7 @@ class MiniNotifyController extends Controller
                     $this->withholdingNotify();
                     return;
                 }else if( $redis_order == 'MiniOrderClose' ){
-                    $this->orderCloseCancelNotify();
+                    $this->orderCloseNotify();
                     return;
                 }
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
@@ -129,7 +129,7 @@ class MiniNotifyController extends Controller
      * @param $this->data
      * @return string
      */
-    private function orderCloseCancelNotify(){
+    private function orderCloseNotify(){
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
@@ -183,6 +183,34 @@ class MiniNotifyController extends Controller
                     echo "fail";return;
                 }
             }
+        }
+        \DB::commit();
+        echo 'success';return;
+    }
+
+    /**
+     * 芝麻支付宝小程序 订单关闭接口异步回调
+     * Author: zhangjinhui
+     * @param $this->data
+     * @return string
+     */
+    private function orderCancelNotify(){
+        $data = $this->data;
+        //查询订单信息
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
+        if( $orderInfo == false ){
+            echo '订单不存在';return;
+        }
+        //开启事务
+        \DB::beginTransaction();
+        //小程序清算订单
+        $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
+        var_dump($b);
+        if(!$b){
+            //事物回滚 记录日志
+            \DB::rollBack();
+            \App\Lib\Common\LogApi::debug('订单关闭处理失败',$data);
+            echo "fail";return;
         }
         \DB::commit();
         echo 'success';return;
