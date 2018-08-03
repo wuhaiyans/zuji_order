@@ -1,15 +1,15 @@
 <?php
 namespace App\Lib\Payment;
-use App\Lib\ApiRequest;
+
 /**
- *
  * 统一预授权接口
- * @author zjh
+ * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
 class CommonFundAuthApi extends \App\Lib\BaseApi {
 
     /**
      * 预授权获取URL接口
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      * @param array $params
      * [
      *		'out_fundauth_no'	=> '', //业务系统授权码 
@@ -25,6 +25,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'url'		=> '',	// 预授权地址
      *		'params'	=> '',	// 预授权地址
      * ]
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function fundAuthUrl( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.url', '1.0', $params);
@@ -32,6 +33,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 
     /**
      * 预授权状态查询接口
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      * @param string $appid		应用ID
      * @param array $params
      * [
@@ -50,6 +52,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'user_id'				=> '',//用户id
      *		'auth_time'				=> '',//授权完成时间
      * ]
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function queryFundAuthStatus( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.query', '1.0', $params);
@@ -57,7 +60,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
 
     /**
      * 查询授权解冻 转支付 状态接口
-     * @param string $appid		应用ID
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      * @param array $params
      * [
      *		'name'		=> '', //交易名称
@@ -76,26 +79,15 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'trade_time'	=> '',//交易成功时间戳
      *		'type'			=> '',//请求类型 1:转支付 ;2:解冻 ;
      * ]
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function unfreezeAndPayStatus( array $params ){
-		
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.api.unfreezeandpaystatus', '1.0', $params);
-//		
-//        $ApiRequest = new ApiRequest();
-//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.api.unfreezeandpaystatus');
-//        $ApiRequest->setParams($params);
-//        $Response = $ApiRequest->send();
-//        if( !$Response->isSuccessed() ){
-//            self::$error = '查询授权解冻 转支付 状态失败';
-//            return false;
-//        }
-//        return $Response->getData();
     }
 
     /**
      * 预授权解冻接口
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      * @param array $params
      * [
      *		'name'			=> '', //交易名称
@@ -111,25 +103,15 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'trade_no'		=> '',//业务系统交易码
      *		'out_auth_no'	=> '',//支付系统授权码
      * ]
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function unfreeze( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.unfreeze', '1.0', $params);
-		
-//        $ApiRequest = new ApiRequest();
-//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.api.unfreeze');
-//        $ApiRequest->setParams($params);
-//        $Response = $ApiRequest->send();
-//        if( !$Response->isSuccessed() ){
-//            self::$error = '解冻预授权金额失败';
-//            return false;
-//        }
-//        return $Response->getData();
     }
 
     /**
      * 预授权转支付接口
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
      * @param array $params
      * [
      *		'name'			=> '', //交易名称
@@ -146,20 +128,9 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
      *		'out_trade_no'	=> '',//业务系统交易码
      *		'fundauth_no'	=> '',//支付系统授权码
      * ]
+	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function unfreezeAndPay( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.topay.apply', '1.0', $params);
-		
-//        $ApiRequest = new ApiRequest();
-//        $ApiRequest->setUrl(env('PAY_SYSTEM_URL'));
-//        $ApiRequest->setAppid( config('paysystem.PAY_APPID') );	// 业务应用ID
-//        $ApiRequest->setMethod('pay.api.unfreezeandpay');
-//        $ApiRequest->setParams($params);
-//        $Response = $ApiRequest->send();
-//        if( !$Response->isSuccessed() ){
-//            self::$error = '支付宝预授权转支付失败';
-//            return false;
-//        }
-//        return $Response->getData();
     }
 }

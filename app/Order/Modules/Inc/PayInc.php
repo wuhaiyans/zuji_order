@@ -5,7 +5,7 @@ class PayInc{
     /**
      * @var int 乐百分支付
      */
-    const  HappyPercentPay = 6;
+    const  LebaifenPay = 6;
 
     /**
      * @var int 支付宝小程序支付
@@ -39,6 +39,7 @@ class PayInc{
             self::FlowerDepositPay => '押金预授权/作废',
             self::UnionPay => '银联支付',
             self::MiniAlipay=>'支付宝小程序支付',
+            self::LebaifenPay=>'乐百分支付',
         ];
     }
 

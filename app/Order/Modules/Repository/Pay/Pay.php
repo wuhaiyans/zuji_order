@@ -96,7 +96,7 @@ class Pay extends \App\Lib\Configurable
 	protected $paymentAmount = 0.00;
 	protected $paymentFenqi = 0;
 	protected $paymentNo = '';
-	protected $paymentInsurance =0;
+	protected $paymentAmountBillList =0;
 	
 	//-+------------------------------------------------------------------------
 	// | 代扣签约相关
@@ -160,12 +160,12 @@ class Pay extends \App\Lib\Configurable
 		return $this->fundauthAmount;
 	}
 
-	public function setInsurance( $insurance ){
-        $this->paymentInsurance = $insurance;
+	public function setPaymentAmountBillList( $paymentAmountBillList ){
+        $this->paymentAmountBillList = $paymentAmountBillList;
         return $this;
     }
-	public function getInsurance(){
-        return $this->paymentInsurance;
+	public function getPaymentAmountBillList(){
+        return $this->paymentAmountBillList;
     }
 	/**
 	 * 当前状态
@@ -710,22 +710,23 @@ class Pay extends \App\Lib\Configurable
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];
 		if($channel == Channel::Lebaifen) {
-            $data['payment_amount'] += $this->getFundauthAmount()*100;
+            $paymentAmountBillList = json_decode($this->getPaymentAmountBillList(),true);
+
             $data['payment_amount_bill_list'] = [
                 [
-                    'key' => 'zuji',
+                    'key' => 'zujin',
                     'name' => '租金',
-                    'amount' => ($this->getPaymentAmount() -$this->getInsurance())*100,//【必选】int 交易金额；单位：分
+                    'amount' => $paymentAmountBillList['zujin']*100,//【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yajin',
                     'name' => '押金',
-                    'amount' => $this->getFundauthAmount()*100, //【必选】int 交易金额；单位：分
+                    'amount' => $paymentAmountBillList['yajin']*100, //【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yiwaixian',
                     'name' => '碎屏险',
-                    'amount' => $this->getInsurance()*100,//【必选】int 交易金额；单位：分
+                    'amount' => $paymentAmountBillList['yiwaixian']*100,//【必选】int 交易金额；单位：分
                 ],
             ];
         }

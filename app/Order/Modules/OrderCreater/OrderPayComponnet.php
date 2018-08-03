@@ -100,7 +100,7 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::HappyPercentPay){
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay){
             $this->paymentStatus =true;
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
@@ -169,7 +169,7 @@ class OrderPayComponnet implements OrderCreater
             'fundauthAmount' =>$this->orderYajin,//Price 预授权金额（押金），单位：元【必须】<br/>
             'paymentAmount' => $this->orderZujin,//Price 支付金额（总租金），单位：元【必须】<br/>
             'paymentFenqi' => $this->orderFenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-            'insurance' =>$orderInsurance,//Price 订单的意外险金额 单位：元 一次性 普通支付 必须
+            'insurance' =>$orderInsurance,//Price 订单的意外险金额 单位：元 【必须】
         ];
         try{
             //代扣方式支付租金
@@ -203,16 +203,18 @@ class OrderPayComponnet implements OrderCreater
                 elseif(!$this->withholdStatus && $param['fundauthAmount']!=0){
                     \App\Order\Modules\Repository\Pay\PayCreater::createFundauth($param);
                 }
-                //不需要签约代扣+预授权金额为0 【不创建支付单】
+                //不需要签约代扣【创建支付单】
             }elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay ){
                 if($param['fundauthAmount'] == 0){
+                    //预授权金额为0  橙黄见普通支付
                     \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
                 }else{
+                    //预授权金额不为0 【创建预授权支付单】
                     \App\Order\Modules\Repository\Pay\PayCreater::createPaymentFundauth($param);
                 }
             }
-            // 乐百分支付方式 一次性普通支付
-            elseif($this->payType == PayInc::HappyPercentPay){
+            // 乐百分支付方式 一次性普通支付单
+            elseif($this->payType == PayInc::LebaifenPay){
                 \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
             }
 

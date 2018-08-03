@@ -77,6 +77,7 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
+                $goodsInfo=$goods->getData();//商品信息数组
                 // 订单
                 $order = $goods->getOrder();
                 if(!$order){
@@ -86,14 +87,18 @@ class OrderReturnCreater
                 if( $order_info['user_id'] != $params['user_id'] ){
                     return false;
                 }
-                //用户必须在收货后7天内才可以申请退换货
-                $nowdata = time()+3600*8;
-                if( $order_info['delivery_time'] !=0 ){
-                    $time = $nowdata-$order_info['delivery_time'];
-                    if( abs($time)>604800 ){
+                //乐百分支付的用户在14天内可申请退货
+                if( $order_info['pay_type'] == PayInc::LebaifenPay){
+                    if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time()) {
+                        return false;
+                    }
+                }else{
+                    //拿趣用平台下单用户必须在收货后7天内才可以申请退换货
+                    if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.month_service_days')) < time()) {
                         return false;
                     }
                 }
+
                 //获取商品数组
                 $goods_info = $goods->getData();
                 //代扣+预授权
@@ -103,7 +108,9 @@ class OrderReturnCreater
                     }
                 }
                 //直接支付
-                if( $order_info['pay_type'] == PayInc::FlowerStagePay || $order_info['pay_type'] == PayInc::UnionPay ) {
+                if( $order_info['pay_type'] == PayInc::FlowerStagePay
+                    || $order_info['pay_type'] == PayInc::UnionPay
+                    || $order_info['pay_type'] == PayInc::LebaifenPay) {
                     if ( $goods_info['yajin'] > 0 ) {
                         $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
                         $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
@@ -257,35 +264,15 @@ class OrderReturnCreater
             //代扣+预授权
             if($order_info['pay_type'] == PayInc::WithhodingPay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
-				// 
-                //如果押金为0
-//                if($data['auth_unfreeze_amount'] == 0){
-//                   //取消订单
-//                    $cancelOrder = $order->refundFinish();
-//                    if(!$cancelOrder){
-//                        //事务回滚
-//                        DB::rollBack();
-//                        return false;
-//                    }
-//                    return true;
-//                }
             }
             //直接支付
-            if($order_info['pay_type'] == PayInc::FlowerStagePay || $order_info['pay_type'] == PayInc::UnionPay ){
+            if($order_info['pay_type'] == PayInc::FlowerStagePay
+                || $order_info['pay_type'] == PayInc::UnionPay
+                || $order_info['pay_type'] == PayInc::LebaifenPay){
                 $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
-                //如果押金为0 或者实付租金和意外险的总和为0
-//                if( $data['auth_unfreeze_amount'] == 0 && $data['pay_amount'] == 0 ){
-//                    //取消订单
-//                    $cancelOrder=$order->refundFinish();
-//                    if(!$cancelOrder){
-//                        //事务回滚
-//                        DB::rollBack();
-//                        return false;
-//                    }
-//                    return true;
-//                }
+
             }
             //冻结订单
             $orderFreeze = $order->refundOpen();
@@ -1610,6 +1597,27 @@ class OrderReturnCreater
 					
 					// 退货业务，创建清算单
                     if($business_key == OrderStatus::BUSINESS_RETURN){
+                        // 如果待退款金额为0，则直接调退款成功的回调
+                        if( !(
+                            $return_info['pay_amount']>0
+                            || $return_info['auth_unfreeze_amount']>0
+                            || $return_info['auth_deduction_amount']>0
+                        ) ){
+                            // 不需要清算，直接调起退款成功
+                            $b = self::refundUpdate([
+                                'business_type' => $business_key,
+                                'business_no'	=> $return_info['refund_no'],
+                                'status'		=> 'success',
+                            ], $userinfo);
+                            if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+                                //事务提交
+                                DB::commit();
+                                return true;
+                            }
+                            // 失败
+                            DB::rollBack();
+                            return false;
+                        }
                         //获取订单的支付信息
                         $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$return_info['order_no']);
                         if(!$pay_result){
@@ -1638,6 +1646,7 @@ class OrderReturnCreater
                             $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
 
                         }
+
                         $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                         if(!$create_clear){
                             //事务回滚

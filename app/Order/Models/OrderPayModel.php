@@ -26,7 +26,7 @@ class OrderPayModel extends Model
 
     protected $primaryKey='id';
 
-	protected $fillable = ['user_id','business_type','business_no','status','create_time','update_time','payment_status','payment_channel','payment_amount','payment_fenqi','payment_no','withhold_status','withhold_channel','withhold_no','fundauth_status','fundauth_channel','fundauth_amount','fundauth_no','payment_insurance'];
+	protected $fillable = ['user_id','business_type','business_no','status','create_time','update_time','payment_status','payment_channel','payment_amount','payment_amount_bill_list','payment_fenqi','payment_no','withhold_status','withhold_channel','withhold_no','fundauth_status','fundauth_channel','fundauth_amount','fundauth_no'];
     /**
      * 获取当前时间
      *

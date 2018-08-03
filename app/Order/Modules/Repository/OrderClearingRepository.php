@@ -29,6 +29,7 @@ class OrderClearingRepository
             return false;
         }
 
+
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
@@ -86,6 +87,10 @@ class OrderClearingRepository
         }
 
         if (empty($orderInfo)) return false;
+        if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
+            return false;
+        }
+
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],
