@@ -133,7 +133,6 @@ class MiniNotifyController extends Controller
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
-        print_r($orderInfo);die;
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
@@ -176,6 +175,7 @@ class MiniNotifyController extends Controller
             }else{
                 //小程序清算订单
                 $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
+                var_dump($b);
                 if(!$b){
                     //事物回滚 记录日志
                     \DB::rollBack();
