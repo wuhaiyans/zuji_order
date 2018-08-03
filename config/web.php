@@ -10,6 +10,8 @@ return [
     'pre_page_size' => 20,
     //长租收货后七天内出现售后
     'month_service_days'=>7*24*3600,
+    //乐百分长租收货后14天内出现售后
+    'lebaifen_service_days'=>14*24*3600,
     //长租到期一个月内出现到期处理
     'month_expiry_process_days' => 30*24*3600,
     //短期多长时间出现到期处理
