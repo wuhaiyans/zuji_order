@@ -376,7 +376,7 @@ class ReturnController extends Controller
         if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(redisIncr($params['goods_no'],'_returnResult',60)>1) {
+        if(redisIncr($params['goods_no'].'_returnResult',60)>1) {
             return apiResponse([],ApiStatus::CODE_36001);
         }
         $ret = $this->OrderReturnCreater->returnResult($params);
