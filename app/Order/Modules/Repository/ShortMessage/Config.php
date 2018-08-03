@@ -91,11 +91,14 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_113461138', //财务系统完成押金退还时发送
 				//买断
-				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
-				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461145', //买断支付短信
-				SceneConfig::BUYOUT_PAYMENT_END		=> 'SMS_113461161', //买断支付完成短信
+				SceneConfig::BUYOUT_CONFIRM				=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT				=> 'SMS_113461145', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END			=> 'SMS_113461161', //买断支付完成短信
 				//退押金
-				SceneConfig::RETURN_DEPOSIT	=> 'SMS_113461138', //财务系统完成押金退还时发送
+				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
+
+				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
+
 
 			],
 

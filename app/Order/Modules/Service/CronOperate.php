@@ -368,4 +368,67 @@ class CronOperate
 
     }
 
+
+    /**
+     * 定时任务
+     * $return bool
+     */
+    public static function cronPrepayment(){
+
+        try{
+            $arr =[];
+            $limit  = 5;
+            $page   = 1;
+            $sleep  = 10;
+
+            do {
+
+                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['term', '=', date('Ym')];
+
+                // 查询总数
+                $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->count();
+                $totalpage = ceil($total/$limit);
+
+                // 查询数据
+                $result =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->select('order_goods_instalment.id')
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->limit($limit)
+                    ->get()
+                    ->toArray();
+                if (!$result) {
+                    continue;
+                }
+
+                foreach($result as $item){
+                    //发送短信
+                    $notice = new \App\Order\Modules\Service\OrderNotice(
+                        \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                        $item['id'],
+                        "CronRepayment");
+                    $sendMessage = $notice->notify();
+                    if(!$sendMessage){
+                        $arr[]  = $item['id'];
+                    }
+                }
+
+                $page++;
+                sleep($sleep);
+            } while ($page <= $totalpage);
+
+            if(count($arr) > 0){
+                LogApi::notify("提前还款短信", $arr);
+            }
+
+        }catch(\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>$exc->getMessage()]);
+        }
+    }
 }

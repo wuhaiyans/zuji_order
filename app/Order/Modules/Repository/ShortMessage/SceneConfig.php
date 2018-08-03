@@ -159,4 +159,9 @@ class SceneConfig {
      */
     const RETURN_DEPOSIT = 'ReturnDeposit';
 
+    /**
+     * 场景：<b>【押金退还】</b>
+     */
+    const CRONREPAYMENT = 'CronRepayment';
+
 }
