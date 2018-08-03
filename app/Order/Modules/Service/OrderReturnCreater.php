@@ -262,18 +262,29 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
-            //代扣+预授权  或小程序
-            if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
+            //代扣+预授权
+            if($order_info['pay_type'] == PayInc::WithhodingPay ){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
             }
-            //直接支付
+            //直接支付或小程序
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
-                || $order_info['pay_type'] == PayInc::LebaifenPay){
+                || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
+            }
+
+
+            //乐百分支付
+            if($order_info['pay_type'] == PayInc::LebaifenPay){
+                //获取订单的支付信息
+                $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$params['order_no']);
+                if(!$pay_result){
+                    return false;
+                }
+                $data['pay_amount'] = $pay_result['payment_amount'];//实际支付金额=支付金额
             }
             //冻结订单
             $orderFreeze = $order->refundOpen();
