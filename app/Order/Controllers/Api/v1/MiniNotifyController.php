@@ -44,19 +44,18 @@ class MiniNotifyController extends Controller
 //        $json = '{"fund_type":"WITHHOLD","order_create_time":"2018-08-02 15:16:53","notify_app_id":"2018032002411058","out_order_no":"A802194043548953","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"1.00","channel":"rent","zm_order_no":"2018080200001001094481153785","sign":"cZzCRlU3Ap5zLWP5NkhrFxRDH3TbV0FOFm\/mAVMjHQav5VBuZUHCeJdwL4MXN0O6DgNO5lPyaX49kpvQhq8ay6oUNBa\/ge+R73YU0T+LJbIlWv7pLvRRreOZ3rMFJ3xDjM0PyYO27oeKeYL\/OWThjswxLayyejjiY5RB986wBgtJpo6Q4aQjJWdZnOah9hTotTGRWmWEwS\/BWyaN3eOBJ8JLbpd\/IqkvC6rYJQ9T12yWUEsMRsNFSTh6CnD7N60tH+uiqEma91Js+4Ymt5bpwQZwRsWWtfRpez8tkAyyTfkdgR8jOarXhD9v\/F2gzcXkFStffrFREguir080QXC3ZQ==","sign_type":"RSA2"}';
 //        $json = '';
 //        $_POST = json_decode($json,true);
-        print_r($_POST);die;
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
         if( !isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
-        $b = $CommonMiniApi->verify( $_POST );
-        if(!$b){
-            \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
-            echo '签名验证失败fail';exit;
-        }
+//        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
+//        $b = $CommonMiniApi->verify( $_POST );
+//        if(!$b){
+//            \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
+//            echo '签名验证失败fail';exit;
+//        }
         $this->data = $_POST;
         try{
             if($this->data['notify_type'] == $this->CANCEL){
@@ -105,6 +104,7 @@ class MiniNotifyController extends Controller
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
+        print_r($orderInfo);die;
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
