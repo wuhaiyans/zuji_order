@@ -561,11 +561,13 @@ class OrderCleaning
             if (!isset($param['out_order_no'])) return false;
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
+
             if ($orderCleanInfo['code']) {
                 LogApi::error(__method__.'[minicleanAccount小程序 订单清算记录不存在');
                 return false;
             }
             $orderCleanInfo = $orderCleanInfo['data'];
+
             //查看清算状态是否已支付
             if ($orderCleanInfo['auth_unfreeze_status']==OrderCleaningStatus::depositDeductionStatusUnpayed){
 
@@ -586,7 +588,7 @@ class OrderCleaning
                     LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
                     return $success ?? false;
                 } else {
-                        LogApi::error(___method__.'[minicleanAccount小程序 更新订单清算状态失败');
+                        LogApi::error(__method__.'[minicleanAccount小程序 更新订单清算状态失败');
                         return false;
                      }
             } else {
