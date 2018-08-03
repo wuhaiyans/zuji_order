@@ -112,7 +112,7 @@ class OrderOperate
                     return false;
                 }
                 //增加发货时生成合同
-               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+//               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
 //                if(!$b) {
 //                    LogApi::info(config('app.env')."环境-订单发货时生成合同失败",$orderDetail['order_no']);
 //                    DB::rollBack();
