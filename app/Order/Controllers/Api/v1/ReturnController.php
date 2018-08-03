@@ -66,9 +66,9 @@ class ReturnController extends Controller
         if(empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001);
         }
-        if(redisIncr($params['goods_no'].'_returnApply',60)>1) {
+        /*if(redisIncr($params['goods_no'].'_returnApply',60)>1) {
             return apiResponse([],ApiStatus::CODE_36001);
-        }
+        }*/
         $return = $this->OrderReturnCreater->add($params,$orders['userinfo']);
         if(!$return){
             return apiResponse([],ApiStatus::CODE_34006,"申请失败");
@@ -344,9 +344,9 @@ class ReturnController extends Controller
         if(strlen($params['logistics_no'])>20){
             return apiResponse([], ApiStatus::CODE_33003,'物流编号输入错误');
         }
-        if(redisIncr($params['goods_info'][0].'_updateDeliveryNo',60)>1) {
+      /*  if(redisIncr($params['goods_info'][0].'_updateDeliveryNo',60)>1) {
             return apiResponse([],ApiStatus::CODE_36001);
-        }
+        }*/
         $res= $this->OrderReturnCreater->uploadWuliu($params);
         if(!$res){
             return apiResponse([], ApiStatus::CODE_33003,'上传物流失败');
@@ -376,9 +376,9 @@ class ReturnController extends Controller
         if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if(redisIncr($params['goods_no'].'_returnResult',60)>1) {
+      /*  if(redisIncr($params['goods_no'].'_returnResult',60)>1) {
             return apiResponse([],ApiStatus::CODE_36001);
-        }
+        }*/
         $ret = $this->OrderReturnCreater->returnResult($params);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
@@ -414,9 +414,9 @@ class ReturnController extends Controller
         if(empty($params['user_id'])){
             return apiResponse( [], ApiStatus::CODE_20001);
         }
-        if(redisIncr($params['refund_no'],'_cancelApply',60)>1) {
+      /*  if(redisIncr($params['refund_no'],'_cancelApply',60)>1) {
             return apiResponse([],ApiStatus::CODE_36001);
-        }
+        }*/
         $ret = $this->OrderReturnCreater->cancelApply($params,$orders['userinfo']);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_33004);//取消退换货失败

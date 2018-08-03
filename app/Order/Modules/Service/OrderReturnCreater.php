@@ -65,6 +65,7 @@ class OrderReturnCreater
      * ]
      */
     public function add(array $params,array $userinfo){
+
         //开启事务
         DB::beginTransaction();
         try{
@@ -678,10 +679,14 @@ class OrderReturnCreater
 
                 //创建清单
                 $create_data['order_no']=$order_info['order_no'];//订单类型
-                $create_data['order_type']=$order_info['order_type'];//订单类型
+                if($order_info['pay_type'] == PayInc::LebaifenPay){
+                    $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+                }else{
+                    $create_data['order_type']=$order_info['order_type'];//订单类型
+                }
                 $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;//业务类型
                 $create_data['business_no']=$return_info['refund_no'];//业务编号
-                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态  待退款
+                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态待退款
                 $create_data['refund_amount']=$return_info['pay_amount'];//应退金额
                 $create_data['auth_unfreeze_amount']=$return_info['auth_unfreeze_amount'];//应退押金
                 $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金
@@ -1624,7 +1629,11 @@ class OrderReturnCreater
                             return false;
                         }
                         $create_data['order_no']=$return_info['order_no']; //订单类型
-                        $create_data['order_type']=$order_info['order_type'];//订单类型
+                        if($order_info['pay_type'] == PayInc::LebaifenPay){
+                            $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+                        }else{
+                            $create_data['order_type']=$order_info['order_type'];//订单类型
+                        }
                         $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
                         $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
@@ -1636,7 +1645,10 @@ class OrderReturnCreater
                         $create_data['refund_amount']=0;//退款金额
 
                         //退款：直接支付
-                        if($order_info['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
+                        if($order_info['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerStagePay
+                            ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay
+                            ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::LebaifenPay
+                        ){
                             $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                             $create_data['refund_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
 
