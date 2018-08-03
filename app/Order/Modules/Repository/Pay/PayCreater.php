@@ -41,7 +41,7 @@ class PayCreater {
 		LogApi::debug('[支付阶段]P创建');
 		$params['status'] = PayStatus::WAIT_PAYMENT;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
-
+        $params['yiwaixian']  =isset($params['yiwaixian'])?$params['yiwaixian']:0.00;
 		$paymentAmountBillList =[
             'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
             'yajin'=>$params['fundauthAmount'],
