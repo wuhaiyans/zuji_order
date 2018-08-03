@@ -43,9 +43,9 @@ class PayCreater {
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 
 		$paymentAmountBillList =[
-            'zujin'=>normalizeNum($params['paymentAmount']-$params['yiwaixian']),
+            'zujin'=>normalizeNum($params['paymentAmount']-$params['insurance']),
             'yajin'=>$params['fundauthAmount'],
-            'yiwaixian'=>$params['yiwaixian'],
+            'yiwaixian'=>$params['insurance'],
         ];
 
 		$payModel = new OrderPayModel();

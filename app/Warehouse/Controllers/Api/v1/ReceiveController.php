@@ -179,11 +179,13 @@ class ReceiveController extends Controller
 
         try {
             $this->receive->logistics($params);
+            LogApi::debug("退货修改物流信息成功，对应参数",$params);
         } catch (\Exception $e) {
+            LogApi::debug("退货修改物流信息失败",$e->getMessage());
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
 
-        return \apiResponse([]);
+        return \apiResponse([], ApiStatus::CODE_0);
     }
 
 
