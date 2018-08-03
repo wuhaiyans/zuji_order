@@ -383,6 +383,7 @@ class OrderOperate
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[0]['goods_no']);
                 $b =$goods->updateGoodsServiceTime($goodsData);
                 if(!$b){
+                    LogApi::error(config('app.env')."环境 确认收货更新商品表失败",$goodsInfo);
                     DB::rollBack();
                     return false;
                 }
@@ -398,6 +399,7 @@ class OrderOperate
                 ];
                 $b =ServicePeriod::createService($unitData);
                 if(!$b){
+                    LogApi::error(config('app.env')."环境 确认收货 增加商品租期表失败",$unitData);
                     DB::rollBack();
                     return false;
                 }
@@ -414,6 +416,7 @@ class OrderOperate
                         $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[$k]['goods_no']);
                         $b =$goods->updateGoodsServiceTime($goodsData);
                         if(!$b){
+                            LogApi::error(config('app.env')."环境 确认收货更新商品表失败",$goodsInfo);
                             DB::rollBack();
                             return false;
                         }
@@ -430,6 +433,7 @@ class OrderOperate
                         ];
                         $b =ServicePeriod::createService($unitData);
                         if(!$b){
+                            LogApi::error(config('app.env')."环境 确认收货 增加商品租期表失败",$unitData);
                             DB::rollBack();
                             return false;
                         }
@@ -442,6 +446,7 @@ class OrderOperate
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
             if(!$b){
+                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$unitData);
                 DB::rollBack();
                 return false;
             }
@@ -471,15 +476,18 @@ class OrderOperate
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
             if(!$b){
+                LogApi::error(config('app.env')."环境 通知发货系统确认收货失败",$orderNo);
                 DB::rollBack();
                 return false;
             }
 
             //调用乐百分确认收货
-            $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
-            if($b){
-                DB::rollBack();
-                return false;
+            if($orderInfo['pay_type'] == PayInc::LebaifenPay){
+                $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
+                if($b){
+                    DB::rollBack();
+                    return false;
+                }
             }
 
            // DB::commit();
@@ -529,8 +537,8 @@ class OrderOperate
 
             try{
                 $param =[
-                        'payment_no'		=> $payInfo['payment_no'],// 支付系统 支付交易码
-                        'out_payment_no'	=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                        'payment_no'		=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                        'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
                 return $res;
