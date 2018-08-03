@@ -10,9 +10,9 @@ class TestController extends Controller
 
 
 		$dataSms = [
-			
+			'code' =>'123456',
 		];
-		$a = \App\Lib\Common\SmsApi::sendMessage('13654565804', 'SMS_113461164  ', $dataSms);
+		$a = \App\Lib\Common\SmsApi::sendMessage('13654565804', 'SMS_113461091  ', $dataSms);
 		v($a);
 //		//发送短信
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
