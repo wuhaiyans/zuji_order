@@ -575,9 +575,7 @@ class OrderCleaning
                     'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
                 ];
                 $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
-                var_dump($success);
                 if (!$success) {
-                    echo 2;die;
                     //更新业务系统的状态
                     $businessParam = [
                         'business_type' => $orderCleanInfo['business_type'],	// 业务类型
