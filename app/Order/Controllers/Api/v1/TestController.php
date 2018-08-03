@@ -9,6 +9,12 @@ class TestController extends Controller
 	public function sendSms() {
 
 
+		$dataSms = [
+			'realName' =>'马晓雨',
+			'buyoutPrice'	=> '123',
+		];
+		$a = \App\Lib\Common\SmsApi::sendMessage('13654565804', 'SMS_113461145  ', $dataSms);
+		v($a);
 //		//发送短信
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
 //			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
