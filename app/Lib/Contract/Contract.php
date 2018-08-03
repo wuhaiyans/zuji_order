@@ -88,10 +88,12 @@ class Contract{
      * @return  boolean
      */
     public static function createContract($params){
-        return true;die;
         $url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
         LogApi::info("发货时生成合同URL:".$url,json_encode(createContract));
-        $rule= [
+        if(empty($params)){
+            return false;
+        }
+        /*$rule= [
             'spu_id'=>'required',
             'order_no'=>'required',
             'goods_no'=>'required',
@@ -115,7 +117,7 @@ class Contract{
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             return false;
-        }
+        }*/
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
         $info = Curl::post($url, json_encode($params));
         //LogApi::info("发货时生成合同返回信息",$info);
