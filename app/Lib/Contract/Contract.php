@@ -89,11 +89,7 @@ class Contract{
      */
     public static function createContract($params){
         $url = config('ordersystem.OLD_ORDER_API').'?m=contract&c=api&a=create';
-        LogApi::info("发货时生成合同URL:".$url,json_encode(createContract));
-        if(empty($params)){
-            return false;
-        }
-        /*$rule= [
+        $rule= [
             'spu_id'=>'required',
             'order_no'=>'required',
             'goods_no'=>'required',
@@ -114,8 +110,9 @@ class Contract{
             'goods_yajin' => 'required',
             //'payment_day'=>'required'
         ];
-        $validator = app('validator')->make($params, $rule);
+        /*$validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
+            LogApi::type("contract")::info($validator->errors()->first());
             return false;
         }*/
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
