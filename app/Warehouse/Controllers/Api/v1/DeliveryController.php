@@ -205,7 +205,7 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
-        return \apiResponse([]);
+        return \apiResponse([],ApiStatus::CODE_0);
     }
 
 

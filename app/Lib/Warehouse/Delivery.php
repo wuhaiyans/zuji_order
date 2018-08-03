@@ -237,9 +237,10 @@ class Delivery
         ]));
 
         $res = json_decode($res, true);
-        //LogApi::info("收发货系统返回",$res);
+
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            LogApi::info("收发货系统返回",$res);
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);
             return false;
         }
