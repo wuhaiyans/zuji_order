@@ -495,13 +495,19 @@ class OrderOperate
         return $endTime;
     }
     /**
-     * 根据订单编号查询支付单信息
+     * 乐百分支付 --- 确认收货调用接口
      * @author wuhaiyan
-     * $params $orderNo 【必须】 订单编号
+     * @params $orderNo 【必须】 订单编号
+     * @params $payType 【必须】 支付方式
      * @return array
      */
-    public static function getOrderPay($orderNo){
-        
+    public static function lebaifenDelivery($orderNo,$payType){
+
+        if($payType == PayInc::LebaifenPay){
+
+
+        }
+        return true;
     }
 
     /**
