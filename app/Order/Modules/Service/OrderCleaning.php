@@ -575,9 +575,7 @@ class OrderCleaning
                     'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
                 ];
                 $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
-                var_dump($success);
                 if (!$success) {
-                    echo 2;die;
                     //更新业务系统的状态
                     $businessParam = [
                         'business_type' => $orderCleanInfo['business_type'],	// 业务类型
@@ -588,8 +586,7 @@ class OrderCleaning
                     LogApi::info(__method__.'[cleanAccount小程序订单清算回调结果{$success}OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
                     return $success ?? false;
                 } else {
-echo 1;die;
-                        LogApi::error(__method__.'[cleanAccount小程序更新订单清算状态失败');
+                        LogApi::error(__METHOD__."() ".microtime(true)." 更新订单清算状态失败");
                         return false;
                      }
             } else {
