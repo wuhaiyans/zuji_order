@@ -169,7 +169,7 @@ class OrderPayComponnet implements OrderCreater
             'fundauthAmount' =>$this->orderYajin,//Price 预授权金额（押金），单位：元【必须】<br/>
             'paymentAmount' => $this->orderZujin,//Price 支付金额（总租金），单位：元【必须】<br/>
             'paymentFenqi' => $this->orderFenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-            'insurance' =>$orderInsurance,//Price 订单的意外险金额 单位：元 【必须】
+            'yiwaixian' =>$orderInsurance,//Price 订单的意外险金额 单位：元 【必须】
         ];
         try{
             //代扣方式支付租金
