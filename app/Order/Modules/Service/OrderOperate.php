@@ -484,7 +484,7 @@ class OrderOperate
             //调用乐百分确认收货
             if($orderInfo['pay_type'] == PayInc::LebaifenPay){
                 $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
-                if($b){
+                if(!$b){
                     LogApi::error(config('app.env')."环境 确认收货调用乐百分 失败",$orderNo);
                     DB::rollBack();
                     return false;
@@ -542,15 +542,15 @@ class OrderOperate
                         'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
-                if(is_array($res)){
-                    return true;
-                }
-                return false;
+                LogApi::info(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口 返回数据",$res);
+                return true;
 
             }catch (\Exception $e){
                 LogApi::error(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
                 return false;
             }
+            return true;
+
 
         }
         return true;
