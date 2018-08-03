@@ -110,11 +110,11 @@ class Contract{
             'goods_yajin' => 'required',
             //'payment_day'=>'required'
         ];
-        $validator = app('validator')->make($params, $rule);
+        /*$validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
             LogApi::type("contract")::info($validator->errors()->first());
             return false;
-        }
+        }*/
         //$info = Curl::post(config('tripartite.Contract_Create_Url'), json_encode($params));
         $info = Curl::post($url, json_encode($params));
         //LogApi::info("发货时生成合同返回信息",$info);
