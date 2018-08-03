@@ -74,4 +74,12 @@ class CronController extends Controller
         Service\CronOperate::cronBarterDelivey();
         echo "complete";die;
     }
+
+    /**
+     * 定时任务  月初发送提前还款短信
+     */
+    public function cronPrepayment(){
+        Service\CronOperate::cronPrepayment();
+        echo "complete";die;
+    }
 }
