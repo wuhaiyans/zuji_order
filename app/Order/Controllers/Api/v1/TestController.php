@@ -10,7 +10,7 @@ class TestController extends Controller
 
 
 		$dataSms = [
-			
+			'a' =>'1',
 		];
 		$a = \App\Lib\Common\SmsApi::sendMessage('13654565804', 'SMS_113461164  ', $dataSms);
 		v($a);
