@@ -29,60 +29,88 @@ class MiniNotifyController extends Controller
      * @return string
      */
     public function withholdingCloseCancelNotify(){
-//        $_POST = [
-//            'fund_type'=>'WITHHOLD',
-//            'order_create_time'=>'2018-08-01 14:42:34',
-//            'notify_app_id'=>'2018032002411058',
-//            'out_order_no'=>'A801105262638398',
-//            'notify_type'=>'ZM_RENT_ORDER_CREATE',
-//            'credit_privilege_amount'=>'1.00',
-//            'channel'=>'rent',
-//            'zm_order_no'=>'2018080100001001094287623139',
-//        ];
+        //关闭订单回调
 //        $json = '{"pay_amount":"0.02","out_trans_no":"123456789","notify_app_id":"2018032002411058","out_order_no":"A801105262638398","alipay_fund_order_no":"2018080121001004030537202543","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-01 18:45:30","channel":"rent","zm_order_no":"2018080100001001094287623139","pay_status":"PAY_SUCCESS","sign":"DBRSya9E0AfBTzI4dqyBplJoledp+bCzt6pdX9S\/0m8\/UucAw6YDtoLRqccD23fco1fwBgRIimMnSvsJ8inRzkNrtKdeZWY6wvenm3xHfEYvtnjEcZOr6vVmaOmf7eBWgY2bC5nFGHiDFJfCGVWD+9OH8g8PtYAXLqU0\/qyParbl2OnWv+kc6MZLaoVe3kncFKdEQowiNTwHTTZdlyhdWYT9RZdfl\/kW+tfMP1xYWWKW9v4Zh2bPjc6qT+HHsCvubikBuTRm+q3gOxuET5o2bmdPzNnu3aAdBEIHie9YjWWziGMcTwsDG1cS7WpCW1qavh7TrBZ5qGq0djRBtrlhhA==","sign_type":"RSA2"}';
+        //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
-//        $json = '{"fund_type":"WITHHOLD","order_create_time":"2018-08-02 15:16:53","notify_app_id":"2018032002411058","out_order_no":"A802194043548953","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"1.00","channel":"rent","zm_order_no":"2018080200001001094481153785","sign":"cZzCRlU3Ap5zLWP5NkhrFxRDH3TbV0FOFm\/mAVMjHQav5VBuZUHCeJdwL4MXN0O6DgNO5lPyaX49kpvQhq8ay6oUNBa\/ge+R73YU0T+LJbIlWv7pLvRRreOZ3rMFJ3xDjM0PyYO27oeKeYL\/OWThjswxLayyejjiY5RB986wBgtJpo6Q4aQjJWdZnOah9hTotTGRWmWEwS\/BWyaN3eOBJ8JLbpd\/IqkvC6rYJQ9T12yWUEsMRsNFSTh6CnD7N60tH+uiqEma91Js+4Ymt5bpwQZwRsWWtfRpez8tkAyyTfkdgR8jOarXhD9v\/F2gzcXkFStffrFREguir080QXC3ZQ==","sign_type":"RSA2"}';
-//        $json = '';
-//        $_POST = json_decode($json,true);
-        print_r($_POST);die;
+        //取消订单回调
+        $json = '{"notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"Yosi\/ZKTDVvPGUwvseryPC0bh0ZBk7DtRsoXKim8CZOKyjUI1zJXJcSkYE1L7PBoU0G4Ccq527M+BuN5MteH4yPjtjTBlsAsPLme+0jsvcXuy2+rJetmMSqsfU5OsAvET1uue2NpABd65lUT0rf\/Xe2sRR8SmBQyXWNyA2sQNN6XbD8hcSa1ZkY0ijSNlJAju85VQGxF6aDLe04UNtP\/CDVaQYavdMvqoUIIIIzVaAQx88Rs87xulAA+jwdI63e6tNvxmh\/c2O\/TySEayzbOEXWokTt3WtwYMjyqFE251l+zuDM7GstFkooBxiC34IqNvjfQgPDtkyOIyTtxyYQGNQ==","sign_type":"RSA2"}';
+        $_POST = json_decode($json,true);
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
         if( !isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
-        $b = $CommonMiniApi->verify( $_POST );
-        if(!$b){
-            \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
-            echo '签名验证失败fail';exit;
-        }
+//        $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
+//        $b = $CommonMiniApi->verify( $_POST );
+//        if(!$b){
+//            \App\Lib\Common\LogApi::error('扣款回调验签','签名验证失败fail');
+//            echo '签名验证失败fail';exit;
+//        }
         $this->data = $_POST;
         try{
             if($this->data['notify_type'] == $this->CANCEL){
                 //入库取消订单回调信息
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'channel'=>$_POST['channel'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'data_text'=>json_encode($_POST),
+                ];
+                if(isset($_POST['cancel_time'])){
+                    $arr_log['cancel_time'] = $_POST['cancel_time'];
+                }
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序取消订单回调记录失败',$_POST);
                 }
-                $this->orderCloseCancelNotify();
+                $this->orderCancelNotify();
             } if($this->data['notify_type'] == $this->FINISH){
                 //入库 完成 或 扣款 回调信息
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($_POST);
+                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_trans_no'=>$_POST['out_trans_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'alipay_fund_order_no'=>$_POST['alipay_fund_order_no'],
+                    'pay_amount'=>$_POST['pay_amount'],
+                    'pay_status'=>$_POST['pay_status'],
+                    'channel'=>$_POST['channel'],
+                    'pay_time'=>$_POST['pay_time'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'redis_key'=>$redis_order,
+                    'data_text'=>json_encode($_POST),
+                ];
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
                 }
-                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
                 if( $redis_order == 'MiniWithhold' ){
                     $this->withholdingNotify();
                     return;
                 }else if( $redis_order == 'MiniOrderClose' ){
-                    $this->orderCloseCancelNotify();
+                    $this->orderCloseNotify();
                     return;
                 }
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
             }else if($this->data['notify_type'] == $this->CREATE){
-                $result = \App\Order\Modules\Repository\OrderMiniRentNotifyRepository::add($_POST);
+                //入库 确认订单 回调信息
+                $arr_log = [
+                    'notify_type'=>$_POST['notify_type'],
+                    'zm_order_no'=>$_POST['zm_order_no'],
+                    'out_order_no'=>$_POST['out_order_no'],
+                    'credit_privilege_amount'=>$_POST['credit_privilege_amount'],
+                    'fund_type'=>$_POST['fund_type'],
+                    'channel'=>$_POST['channel'],
+                    'order_create_time'=>$_POST['order_create_time'],
+                    'notify_app_id'=>$_POST['notify_app_id'],
+                    'data_text'=>json_encode($_POST),
+                ];
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
                 if( !$result ){
                     \App\Lib\Common\LogApi::debug('小程序订单确认支付回调记录失败',$_POST);
                 }
@@ -101,7 +129,7 @@ class MiniNotifyController extends Controller
      * @param $this->data
      * @return string
      */
-    private function orderCloseCancelNotify(){
+    private function orderCloseNotify(){
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
@@ -147,6 +175,7 @@ class MiniNotifyController extends Controller
             }else{
                 //小程序清算订单
                 $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
+                var_dump($b);
                 if(!$b){
                     //事物回滚 记录日志
                     \DB::rollBack();
@@ -154,6 +183,34 @@ class MiniNotifyController extends Controller
                     echo "fail";return;
                 }
             }
+        }
+        \DB::commit();
+        echo 'success';return;
+    }
+
+    /**
+     * 芝麻支付宝小程序 订单关闭接口异步回调
+     * Author: zhangjinhui
+     * @param $this->data
+     * @return string
+     */
+    private function orderCancelNotify(){
+        $data = $this->data;
+        //查询订单信息
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
+        if( $orderInfo == false ){
+            echo '订单不存在';return;
+        }
+        //开启事务
+        \DB::beginTransaction();
+        //小程序清算订单
+        $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
+        var_dump($b);
+        if(!$b){
+            //事物回滚 记录日志
+            \DB::rollBack();
+            \App\Lib\Common\LogApi::debug('订单关闭处理失败',$data);
+            echo "fail";return;
         }
         \DB::commit();
         echo 'success';return;

@@ -61,10 +61,13 @@ class ReturnController extends Controller
 
         ]);
         if(count($data)<4){
-            return ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
         }
         if(empty($params['goods_no'])){
-            return ApiStatus::CODE_20001;
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        if(redisIncr($params['goods_no'].'_returnApply',60)>1) {
+            return apiResponse([],ApiStatus::CODE_36001);
         }
         $return = $this->OrderReturnCreater->add($params,$orders['userinfo']);
         if(!$return){
@@ -317,7 +320,7 @@ class ReturnController extends Controller
      * 'logistics_name' =>'',  物流名称 string 【必传】
      * 'logistics_no'   =>'',  物流编号 string 【必传】
      * 'user_id'        =>'',  用户id   int    【必传】
-     * 'refund_no'      =>['','']  业务编号 string 【必传】
+     * 'goods_info'      =>['','']  业务编号(数组中值为业务编号即 refund_no) string 【必传】
      * ]
      * @return string
      */
@@ -340,6 +343,9 @@ class ReturnController extends Controller
         }
         if(strlen($params['logistics_no'])>20){
             return apiResponse([], ApiStatus::CODE_33003,'物流编号输入错误');
+        }
+        if(redisIncr($params['goods_info'][0].'_updateDeliveryNo',60)>1) {
+            return apiResponse([],ApiStatus::CODE_36001);
         }
         $res= $this->OrderReturnCreater->uploadWuliu($params);
         if(!$res){
@@ -369,6 +375,9 @@ class ReturnController extends Controller
         ]);
         if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        if(redisIncr($params['goods_no'].'_returnResult',60)>1) {
+            return apiResponse([],ApiStatus::CODE_36001);
         }
         $ret = $this->OrderReturnCreater->returnResult($params);
         if(!$ret){
@@ -404,6 +413,9 @@ class ReturnController extends Controller
         }
         if(empty($params['user_id'])){
             return apiResponse( [], ApiStatus::CODE_20001);
+        }
+        if(redisIncr($params['refund_no'],'_cancelApply',60)>1) {
+            return apiResponse([],ApiStatus::CODE_36001);
         }
         $ret = $this->OrderReturnCreater->cancelApply($params,$orders['userinfo']);
         if(!$ret){

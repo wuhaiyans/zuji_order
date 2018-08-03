@@ -265,6 +265,7 @@ class OrderClearingRepository
      * @return bool
      */
     public static function upMiniOrderCleanStatus($param){
+        print_r($param);
         if (empty($param)) {
             return false;
         }
