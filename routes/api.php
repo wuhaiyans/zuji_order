@@ -117,6 +117,9 @@ $api->version('v1', [
     // 定时任务 换货确认收货
     $api->get('cronBarterDelivey', 'CronController@cronBarterDelivey');
 
+    // 定时任务 月初发送提前还款短信
+    $api->get('cronPrepayment', 'CronController@cronPrepayment');
+
 
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************

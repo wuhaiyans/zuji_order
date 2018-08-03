@@ -262,18 +262,26 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
-            //代扣+预授权
-            if($order_info['pay_type'] == PayInc::WithhodingPay){
+            //代扣+预授权  或小程序
+            if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
             }
             //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
-                || $order_info['pay_type'] == PayInc::UnionPay
-                || $order_info['pay_type'] == PayInc::LebaifenPay){
+                || $order_info['pay_type'] == PayInc::UnionPay){
                 $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
+            }
+            //获取订单的支付信息
+            $pay_result = $this->orderReturnRepository->getPayNo(OrderStatus::BUSINESS_ZUJI,$params['order_no']);
+            if(!$pay_result){
+                return false;
+            }
+            //乐百分支付
+            if($order_info['pay_type'] == PayInc::LebaifenPay){
+                $data['pay_amount'] = $pay_result['payment_amount'];//实际支付金额=支付金额
             }
             //冻结订单
             $orderFreeze = $order->refundOpen();
@@ -650,6 +658,22 @@ class OrderReturnCreater
 						|| $return_info['auth_unfreeze_amount']>0 
 						|| $return_info['auth_deduction_amount']>0
 					) ){
+                    //如果是小程序的订单
+                    if($order_info['order_type'] == OrderStatus::orderMiniService){
+                        //查询芝麻订单
+                        $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($return_info['order_no']);
+                        $data = [
+                            'out_order_no' => $return_info['order_no'],//商户端订单号
+                            'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                            'remark' => $param['remark'],//订单操作说明
+                            'app_id' => $miniOrderInfo['app_id'],//小程序appid
+                        ];
+                        //通知芝麻取消请求
+                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                        if( !$canceRequest){
+                            return false;
+                        }
+                    }
 					// 不需要清算，直接调起退款成功
 					$b = self::refundUpdate([
 						'business_type' => $return_info['business_key'],
