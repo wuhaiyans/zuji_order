@@ -262,8 +262,8 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
-            //代扣+预授权
-            if($order_info['pay_type'] == PayInc::WithhodingPay){
+            //代扣+预授权  或小程序
+            if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
             }
             //直接支付
@@ -660,7 +660,7 @@ class OrderReturnCreater
                             'remark' => $param['remark'],//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
-                        //发送取消请求
+                        //通知芝麻取消请求
                         $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
                             return false;
