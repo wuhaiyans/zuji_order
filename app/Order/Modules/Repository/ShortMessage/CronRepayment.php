@@ -74,9 +74,10 @@ class CronRepayment implements ShortMessage {
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'zuJin'         => $instalmentInfo['amount'],
-            'zhifuLianjie'  => $zhifuLianjie,
+            'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
