@@ -7,6 +7,7 @@ return [
     'orderuser.thirdpartyuser.add' => 'ThirdPartyUserController@add', //添加
     'orderuser.thirdpartyuser.update' => 'ThirdPartyUserController@updatess', //修改
     'orderuser.thirdpartyuser.matching' => 'ThirdPartyUserController@matching', //根据新增数据查询相似订单
+    'orderuser.thirdpartyuser.publics' => 'ThirdPartyUserController@publics', //公共数据
 
 
 ];

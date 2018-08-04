@@ -40,6 +40,10 @@ class ThirdPartyUser extends OrderUser
     const CHENGSE_QUANXIAN  = 2;//全新
     const CHENGSE_CIXIN     = 3;//次新
 
+    //订单类型
+    const TYPE_CHANGZU   = 1;//长租
+    const TYPE_DUANZU    = 2;//短租
+
     protected $table = 'third_party_user';
 
     protected $primaryKey='id';
@@ -151,5 +155,23 @@ class ThirdPartyUser extends OrderUser
         if ($status === null) return $cs;
 
         return isset($cs[$status]) ? $cs[$status] : '';
+    }
+
+    /**
+     * 类型转换
+     *
+     * @param null $status
+     * @return array|mixed|string
+     */
+    public static function types($status=null)
+    {
+        $cz = [
+            self::TYPE_CHANGZU   => '长租',
+            self::TYPE_DUANZU    => '短租'
+        ];
+
+        if ($status === null) return $cz;
+
+        return isset($cz[$status]) ? $cz[$status] : '';
     }
 }

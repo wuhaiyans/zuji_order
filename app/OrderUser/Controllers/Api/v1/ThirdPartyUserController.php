@@ -10,6 +10,7 @@ namespace App\OrderUser\Controllers\Api\v1;
 
 
 use App\Lib\ApiStatus;
+use App\OrderUser\Models\ThirdPartyUser;
 use App\OrderUser\Modules\Repository\ThirdPartyUserRepository;
 use App\OrderUser\Modules\Service\ThirdPartyUserService;
 
@@ -103,11 +104,12 @@ class ThirdPartyUserController extends Controller
         }
 
         try {
-            ThirdPartyUserService::add($params);
+            $id = ThirdPartyUserService::add($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
         }
         $ret = [
+            'id'=>$id,
             'phone'=>$params['phone'],
             'identity'=>$params['identity'],
             'consignee'=>$params['consignee'],
@@ -188,8 +190,11 @@ class ThirdPartyUserController extends Controller
     public function publics()
     {
         $data = [
-//            'status_list' => Imei::sta(),
-            'kw_types'    => ImeiService::searchKws()
+            'status_list' => ThirdPartyUser::sta(),
+            'platform_list'    => ThirdPartyUser::platform(),
+            'pinpai_list'    => ThirdPartyUser::pinpai(),
+            'chengse_list'    => ThirdPartyUser::chengse(),
+            'types_list'    => ThirdPartyUser::types(),
         ];
         return apiResponse($data);
     }

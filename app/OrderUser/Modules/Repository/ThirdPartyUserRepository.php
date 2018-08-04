@@ -243,6 +243,7 @@ class ThirdPartyUserRepository
             $all[$key]['platform_name'] = ThirdPartyUser::platform($item['platform']);
             $all[$key]['pinpai_name'] = ThirdPartyUser::pinpai($item['pinpai']);
             $all[$key]['colour_name'] = ThirdPartyUser::chengse($item['colour']);
+            $all[$key]['types_name'] = ThirdPartyUser::types($item['types']);
         }
         return $all;
 
@@ -259,6 +260,7 @@ class ThirdPartyUserRepository
         $row['platform_name'] = ThirdPartyUser::platform($row['platform']);
         $row['pinpai_name'] = ThirdPartyUser::pinpai($row['pinpai']);
         $row['colour_name'] = ThirdPartyUser::chengse($row['colour']);
+        $row['types_name'] = ThirdPartyUser::types($row['types']);
 
         return $row;
 
