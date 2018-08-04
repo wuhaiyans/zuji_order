@@ -92,9 +92,11 @@ class OrderPayComponnet implements OrderCreater
             if(!$this->isWithholdStatus){
                 $this->withholdStatus =true;
             }
+            //判断 如果押金大于0 需要预授权
             if($this->orderYajin>0){
                 $this->fundauthStatus =true;
             }
+            //判断是否需要去支付 （代扣+预授权状态）
             if(!$this->withholdStatus && !$this->fundauthStatus){
                 $this->isPay =false;
             }

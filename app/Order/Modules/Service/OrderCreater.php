@@ -41,17 +41,29 @@ class OrderCreater
     }
 
     /**
-     * 线上下单
+     * 线上下单 创建订单
      * @param $data
      * [
-     *'appid'=>1, //appid
-     *'pay_type'=>1, //支付方式
-     *'address_id'=>$address_id, //收货地址
-     *'sku'=>[0=>['sku_id'=>1,'sku_num'=>2]], //商品数组
-     *'coupon'=>["b997c91a2cec7918","b997c91a2cec7000"], //优惠券组信息
-     *'user_id'=>18,  //增加用户ID
-     * 'pay_channel_id'=>,//支付渠道
-     *];
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
+     *		'pay_type'	=> '',	        //【必选】int 支付方式
+     *		'address_id'	=> '',	    //【必选】int 用户收货地址
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     *		'coupon'	=> [1,1],	//【可选】array 优惠券
+     *      $userinfo [
+     *          'type'=>'',     【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *          'user_id'=>1,   【必须】int用户ID
+     *          'user_name'=>1, 【必须】string用户名
+     *          'mobile'=>1,    【必须】string手机号
+     *      ]
+     * @return array
      */
 
     public function create($data){
@@ -240,7 +252,7 @@ class OrderCreater
         $first_amount =0;
         $total_amount =0;
         $payType =$schemaData['order']['pay_type'];
-        if($payType == PayInc::WithhodingPay){
+        if($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay){
             foreach ($schemaData['sku'] as $key=>$value){
                 $schemaData['sku'][$key]['first_amount'] = $value['instalment'][0]['amount']; //首期支付金额
                 $schemaData['sku'][$key]['instalment_total_amount'] = $value['amount_after_discount'] +$value['insurance'];
