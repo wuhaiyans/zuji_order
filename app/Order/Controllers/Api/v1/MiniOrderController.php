@@ -327,12 +327,14 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         $param = $params['params'];
+        \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
         // 验签 验证 通过 修改数据
         if($param['order_status'] == 'SUCCESS'){
-            \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
             return apiResponse( [], ApiStatus::CODE_0);
-        }else{
-            return apiResponse( [], ApiStatus::CODE_35004,'小程序同步接口状态错误');
+        }else if($param['order_status'] == 'FAIL'){
+            return apiResponse( [], ApiStatus::CODE_35019,'小程序同步接口状态错误FAIL');
+        }else if($param['order_status'] == 'UNKOWN'){
+            return apiResponse( [], ApiStatus::CODE_35020,'小程序同步接口状态错误UNKOWN');
         }
     }
 
