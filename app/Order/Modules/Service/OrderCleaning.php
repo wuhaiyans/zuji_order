@@ -72,6 +72,8 @@ class OrderCleaning
         if (!empty($orderCleanList['data'])) {
 
             foreach($orderCleanList['data'] as $keys=>$values){
+                $orderCleanList['data'][$keys]['is_add_recover_remark'] = ($values['order_type']==OrderStatus::miniRecover && empty(floatval($values['mini_recover_transfer_num'])) && $values['status']==OrderCleaningStatus::orderCleaning) ?? false;
+//                dd($orderCleanList);
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
@@ -80,6 +82,9 @@ class OrderCleaning
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
+                //是否显示乐百分备注，是乐百分出账，并且之前没有增加过备注信息
+
+
 
             }
 
