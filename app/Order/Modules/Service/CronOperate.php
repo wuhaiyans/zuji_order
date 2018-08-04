@@ -370,7 +370,8 @@ class CronOperate
 
 
     /**
-     * 定时任务
+     * 定时任务 月初发送提前还款短信
+     * 每个十秒发送五条数据
      * $return bool
      */
     public static function cronPrepayment(){
@@ -392,6 +393,7 @@ class CronOperate
                     ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
                     ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->count();
+                $total = 1;
                 $totalpage = ceil($total/$limit);
 
                 // 查询数据
@@ -403,6 +405,9 @@ class CronOperate
                     ->limit($limit)
                     ->get()
                     ->toArray();
+                $result = [
+                    'id'    => 763495,
+                ];
                 if (!$result) {
                     continue;
                 }

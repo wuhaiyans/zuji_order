@@ -172,6 +172,12 @@ class WithholdController extends Controller
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
+        $instalmentKey = "instalmentWithhold_" . $instalmentId;
+        // 频次限制
+        if(redisIncr($instalmentKey, 300) > 1){
+            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
+        }
+
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码
@@ -338,6 +344,14 @@ class WithholdController extends Controller
                 Log::error("参数错误");
                 continue;
             }
+
+            $instalmentKey = "instalmentWithhold_" . $instalmentId;
+            // 频次限制
+            if(redisIncr($instalmentKey, 300) > 1){
+                Log::error("当前分期正在操作，不能重复操作");
+                continue;
+            }
+
             $remark = "代扣多项扣款";
 
             // 分期详情
@@ -533,6 +547,12 @@ class WithholdController extends Controller
             }
 
             foreach($result as $item) {
+                $instalmentKey = "instalmentWithhold_" . $item['id'];
+                // 频次限制
+                if(redisIncr($instalmentKey, 300) > 1){
+                    Log::error("当前分期正在操作，不能重复操作");
+                    continue;
+                }
 
                 // 生成交易码
                 $business_no = createNo();
@@ -707,6 +727,12 @@ class WithholdController extends Controller
         $instalmentId   = $params['instalment_id'];
         // 渠道
         $channelId      = $params['channel'];
+
+        $instalmentKey = "instalmentWithhold_" . $instalmentId;
+        // 频次限制
+        if(redisIncr($instalmentKey, 300) > 1){
+            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
+        }
 
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
