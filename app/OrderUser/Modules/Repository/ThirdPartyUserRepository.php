@@ -63,29 +63,12 @@ class ThirdPartyUserRepository
     public static function lists($where='1=1', $limit, $page=null)
     {
         $query = ThirdPartyUser::where($where);
+        $all = $query->paginate($limit,['*'],'page', $page);
+        $all = self::zhuanhuan($all);
 
-        return $query->paginate($limit,
-            [
-                '*'
-            ],
-            'page', $page);
+        return $all;
     }
 
-
-    /**
-     * @param $imei
-     *
-     * 模糊查询
-     */
-    public static function search($imei, $limit)
-    {
-        $list = \App\Warehouse\Models\Imei::where('imei','like','%'.$imei.'%')
-            ->where(['status' => \App\Warehouse\Models\Imei::STATUS_IN])
-            ->limit($limit)
-            ->get()->toArray();
-
-        return $list;
-    }
 
     /**
      * 根据第三方用户ID返回一条记录
@@ -132,6 +115,12 @@ class ThirdPartyUserRepository
 
     }
 
+    /**
+     * 添加
+     * @param $params
+     * @return bool
+     * @throws \Exception
+     */
     public static function add($params){
         if(!$params){
             throw new \Exception('第三方用户添加失败 params 为空');
@@ -139,6 +128,9 @@ class ThirdPartyUserRepository
         $data = [
             'phone'=>$params['phone'],
             'consignee'=>$params['consignee'],
+            'province'=>$params['province'],
+            'city'=>$params['city'],
+            'county'=>$params['county'],
             'shipping_address'=>$params['shipping_address'],
             'status'=>$params['status'],
             'platform'=>$params['platform'],
@@ -149,12 +141,79 @@ class ThirdPartyUserRepository
             'order_no'=>($params['order_no']?$params['order_no']:0),
             'imei'=>($params['imei']?$params['imei']:0),
             'remarks'=>($params['remarks']?$params['remarks']:0),
+            'types'=>$params['types'],
+            'order_time'=>($params['order_time']?$params['order_time']:0),
+            'order_model'=>($params['order_model']?$params['order_model']:0),
+            'colour'=>($params['colour']?$params['colour']:0),
+            'total_amount'=>($params['total_amount']?$params['total_amount']:0),
+            'deposit'=>($params['remarks']?$params['deposit']:0),
         ];
-        if(ThirdPartyUser::create($data)){
-            return true;
+        $t = ThirdPartyUser::create($data);
+        if($t){
+            return $t->id;
         }else{
             throw new \Exception('第三方用户添加失败:'.json_encode($data));
         }
+    }
+
+    /**
+     * 查询相似订单 三维数组
+     * @param $matching
+     * @return array
+     */
+    public static function matching($matching){
+        $data = [];
+        foreach ($matching as $key=>$item){
+            //判断手机号
+            if($item['phone']){
+                $all = ThirdPartyUser::where(['phone'=>$item['phone']])->all();
+                if($all){
+                    $all = $all->toArray();
+                    $all = self::zhuanhuan($all);
+                    $data[] = $all;
+                    continue;
+                }
+            }
+
+            //判断身份证
+            if($item['identity']){
+                $all = ThirdPartyUser::where(['identity'=>$item['identity']])->all();
+                if($all){
+                    $all = $all->toArray();
+                    $all = self::zhuanhuan($all);
+                    $data[] = $all;
+                    continue;
+                }
+            }
+
+            //判断收货人 收货地址
+            if($item['consignee'] && $item['shipping_address']){
+                $all = ThirdPartyUser::where([
+                    'consignee'=>$item['consignee'],
+                    'province'=>$item['province'],
+                    'city'=>$item['city'],
+                    'county'=>$item['county']
+                ])->all();
+                if($all){
+                    $all = $all->toArray();
+                    $all = self::zhuanhuan($all);
+                    $data[] = $all;
+                    continue;
+                }
+            }
+
+        }
+        return $data;
+
+    }
+
+    public static function zhuanhuan($all){
+        foreach ($all as $key=>$item){
+            $all[$key]['status_name'] = ThirdPartyUser::sta($item['status']);
+            $all[$key]['platform_name'] = ThirdPartyUser::platform($item['platform']);
+        }
+        return $all;
+
     }
 
 

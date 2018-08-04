@@ -1674,7 +1674,6 @@ class OrderReturnCreater
                         //退款：直接支付
                         if($order_info['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerStagePay
                             ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay
-                            ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::LebaifenPay
                         ){
                             $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                             $create_data['refund_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
@@ -1685,6 +1684,14 @@ class OrderReturnCreater
                             $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
 
                         }
+                        //乐百分
+                        if($order_info['pay_type'] == PayInc::LebaifenPay){
+                            //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
+                            $result['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                            //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
+                            $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                        }
+
 
                         $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                         if(!$create_clear){
