@@ -291,6 +291,7 @@ class OrderCleaning
 
                     $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderCleanData['order_no']);
 
+
                     if (empty($miniOrderData))
                     {
                         LogApi::error(__method__.'[minicleanAccount发起]小程序没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
@@ -311,6 +312,7 @@ class OrderCleaning
                             'app_id'=> $miniOrderData['app_id'],//芝麻小程序APPID
                         ];
                         $succss =  miniApi::OrderClose($params);
+
                         LogApi::info(__method__.'[minicleanAccount发起]支付小程序解冻押金', [$succss,  $params]);
                     } else {
                         /*
@@ -327,8 +329,9 @@ class OrderCleaning
                             'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
                             'app_id'=>  $miniOrderData['app_id'],//芝麻小程序APPID
                         ];
-//                        dd($orderParams);
+
                         $success =  miniApi::OrderCancel($orderParams);
+                        //dd($success);
                         LogApi::info(__method__.'[minicleanAccount发起]支付小程序解冻押金', [$success,  $orderParams]);
                     }
 
@@ -546,7 +549,9 @@ class OrderCleaning
      */
     public static function miniUnfreezeAndPayClean($param)
     {
+
         try{
+
             LogApi::info(__method__.'[minicleanAccount小程序订单清算退押金回调接口回调参数:', $param);
             /**
             支付宝小程序解压预授权成功后返回的值
@@ -561,6 +566,9 @@ class OrderCleaning
             if (!isset($param['out_order_no'])) return false;
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
+
+
+
 
             if ($orderCleanInfo['code']) {
                 LogApi::error(__method__.'[minicleanAccount小程序 订单清算记录不存在');
@@ -577,14 +585,17 @@ class OrderCleaning
                     'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
                 ];
                 $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
-                if (!$success) {
+
+                if ($success) {
                     //更新业务系统的状态
                     $businessParam = [
                         'business_type' => $orderCleanInfo['business_type'],	// 业务类型
                         'business_no'	=> $orderCleanInfo['business_no'],	// 业务编码
                         'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
                     ];
+
                     $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
+//                    dd($success);
                     LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
                     return $success ?? false;
                 } else {
