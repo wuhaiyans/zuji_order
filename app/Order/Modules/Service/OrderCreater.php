@@ -42,6 +42,7 @@ class OrderCreater
 
     /**
      * 线上下单 创建订单
+     * @author wuhaiyan
      * @param $data
      * [
      *      'appid'	=> '',	            //【必选】int 渠道入口
@@ -58,10 +59,10 @@ class OrderCreater
      *		]',
      *		'coupon'	=> [1,1],	//【可选】array 优惠券
      *      $userinfo [
-     *          'type'=>'',     【必须】string 用户类型:1管理员，2用户,3系统，4线下,
-     *          'user_id'=>1,   【必须】int用户ID
-     *          'user_name'=>1, 【必须】string用户名
-     *          'mobile'=>1,    【必须】string手机号
+     *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *          'user_id'=>1,   //【必须】int用户ID
+     *          'user_name'=>1, //【必须】string用户名
+     *          'mobile'=>1,    //【必须】string手机号
      *      ]
      * @return array
      */
@@ -105,8 +106,8 @@ class OrderCreater
             $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
 
-
-          $b = $orderCreater->filter();
+            //调用各个组件 过滤一些参数 和无法下单原因
+            $b = $orderCreater->filter();
             if(!$b){
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
@@ -114,7 +115,8 @@ class OrderCreater
                 set_msg($orderCreater->getOrderCreater()->getError());
                 return false;
             }
-           $schemaData = $orderCreater->getDataSchema();
+            $schemaData = $orderCreater->getDataSchema();
+            //调用各个组件 创建方法
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
             if(!$b){
@@ -124,7 +126,7 @@ class OrderCreater
             }
 
             DB::commit();
-
+            //组合数据
             $result = [
                 'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
@@ -150,7 +152,7 @@ class OrderCreater
             'user_id'=>$data['user_id'],
             'time' => time(),
         ],time()+config('web.order_cancel_hours'),"");
-
+            //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 			
             return $result;
@@ -247,6 +249,13 @@ class OrderCreater
         }
     }
 
+    /**
+     * 过滤一些分期的数据
+     * @author wuhaiyan
+     * @param $schemaData array 订单组装的数据
+     * @return array
+     */
+
     public static function dataSchemaFormate($schemaData){
 
         $first_amount =0;
@@ -279,6 +288,27 @@ class OrderCreater
     /**
      * 订单确认查询
      * 结构 同create()方法 少个地址组件
+     * @author wuhaiyan
+     * @param $data
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     *		'coupon'	=> [1,1],	//【可选】array 优惠券
+     *      $userinfo [
+     *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *          'user_id'=>1,   //【必须】int用户ID
+     *          'user_name'=>1, //【必须】string用户名
+     *          'mobile'=>1,    //【必须】string手机号
+     *      ]
+     * @return array
      */
     public function confirmation($data)
     {
@@ -314,12 +344,14 @@ class OrderCreater
             //支付
             $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
+            //调用各个组件 过滤方法
             $b = $orderCreater->filter();
             if(!$b){
                 //把无法下单的原因放入到用户表中
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
 
             }
+            //调用过滤的参数方法
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
 
             $result = [
@@ -337,7 +369,6 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
             ];
-            LogApi::debug("确认订单返回",$result);
             return $result;
         } catch (\Exception $exc) {
             LogApi::info("确认订单异常：".$exc->getMessage());
@@ -475,7 +506,7 @@ class OrderCreater
     }
 	
 	/**
-	 * 创建支付单
+	 * 创建支付单  ---  旧系统 导入新订单系统用  后期 可以删除
 	 * @param array $param 创建支付单数组
 	 * $param = [<br/>
 	 *		'payType' => '',//支付方式 【必须】<br/>
