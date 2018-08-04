@@ -242,19 +242,19 @@ class OrderCreater
         $payType =$schemaData['order']['pay_type'];
         if($payType == PayInc::WithhodingPay){
             foreach ($schemaData['sku'] as $key=>$value){
-                $schemaData['sku'][$key]['first_amount'] = $value['instalment'][0]['amount']; //首期支付金额
-                $schemaData['sku'][$key]['instalment_total_amount'] = $value['amount_after_discount'] +$value['insurance'];
+                $schemaData['sku'][$key]['first_amount'] = number_format($value['instalment'][0]['amount'],2); //首期支付金额
+                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] +$value['insurance'],2);
             }
 
         }else{
             foreach ($schemaData['sku'] as $key=>$value){
                 if($schemaData['order']['zuqi_type']==1){
-                    $schemaData['sku'][$key]['first_amount'] = $value['amount_after_discount'] +$value['insurance'];
+                    $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] +$value['insurance'],2);
                 }else{
                     $schemaData['sku'][$key]['first_amount'] = number_format(($value['amount_after_discount'] +$value['insurance'])/$value['zuqi'],2); //首期支付金额
                 }
 
-                $schemaData['sku'][$key]['instalment_total_amount'] = $value['amount_after_discount'] +$value['insurance'];
+                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] +$value['insurance'],2);
             }
 
         }
