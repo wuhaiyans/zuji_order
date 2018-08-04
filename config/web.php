@@ -30,4 +30,11 @@ return [
     'check_verify_app_android' => env('CHECK_VERIFY_APP_ANDROID',false),
     //检查ios审核情况
     'check_verify_app_ios' => env('CHECK_VERIFY_APP_IOS',false),
+    //物流配置
+     'logistics' => [
+            '1' => '顺丰',
+    //        '2' => '中通',
+    //        '3' => '圆通',
+    //        '100' => '其它'
+        ],
 ];

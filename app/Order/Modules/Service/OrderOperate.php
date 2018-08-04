@@ -1005,6 +1005,9 @@ class OrderOperate
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
         $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
+        if ($goodsExtendData) {
+            $goodsExtendData['logistics_name'] = config('web.logistics')[$goodsExtendData['logistics_id']];
+        }
         $order['goods_extend_info'] = $goodsExtendData;
         //优惠券信息
         $couponInfo =    OrderRepository::getCouponByOrderNo($orderNo);
