@@ -19,8 +19,32 @@ class OrderMiniCreditPayRepository
      * @return $last_id
      */
     public static function add($data){
-        $info =OrderMiniCreditPay::create($data);
-        return $info->getQueueableId();
+
+        //判断当前订单已经存在（已存在则修改）
+        $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($data['out_order_no'] , $data['order_operate_type']);
+        if(empty($miniOrderCreditPayInfo)){
+            $info =OrderMiniCreditPay::create($data);
+            return $info->getQueueableId();
+        }else{
+            $b =self::update( [
+                'out_order_no'=>$data['out_order_no']
+            ], $data);
+            if(!$b){
+                return false;
+            }
+            return $miniOrderCreditPayInfo['id'];
+        }
+    }
+
+    /**
+     * 判断是否调用修改订单数据
+     * @params $where //传入修改条件
+     * @params $arr //传入修改数据
+     */
+    public static function update( $where , $arr ) {
+        $OrderMiniCreditPay = new OrderMiniCreditPay();
+        $b = $OrderMiniCreditPay->update($where,$arr);
+        return $b;
     }
 
     /**
