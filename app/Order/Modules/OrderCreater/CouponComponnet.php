@@ -122,6 +122,7 @@ class CouponComponnet implements OrderCreater
         $orderNo =$this->getOrderCreater()->getOrderNo();
         $coupon =[];
         foreach ($data['coupon'] as $k=>$v){
+            //判断 如果优惠券已使用 存放到订单优惠券表中
             if($v['is_use'] ==1){
                 $couponData =[
                     'business_type'=>OrderStatus::BUSINESS_ZUJI,

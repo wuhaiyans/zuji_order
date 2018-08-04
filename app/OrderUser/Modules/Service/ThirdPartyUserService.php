@@ -92,5 +92,14 @@ class ThirdPartyUserService
         ThirdPartyUserRepository::setRow($params);
     }
 
+    /**
+     * 查询相似订单
+     * @param $matching
+     * @return array 三维数组|空数组
+     */
+    public static function matching($matching){
+        return ThirdPartyUserRepository::matching($matching);
+    }
+
 
 }

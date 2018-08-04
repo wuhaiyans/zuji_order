@@ -40,6 +40,10 @@ class OrderMiniNotifyLog extends Model
         'pay_amount',
         'channel',
         'notify_app_id',
+        'credit_privilege_amount',
+        'order_create_time',
+        'fund_type',
+        'notify_app_id',
         'data_text',
     ];
 
