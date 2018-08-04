@@ -370,7 +370,8 @@ class CronOperate
 
 
     /**
-     * 定时任务
+     * 定时任务 月初发送提前还款短信
+     * 每个十秒发送五条数据
      * $return bool
      */
     public static function cronPrepayment(){
