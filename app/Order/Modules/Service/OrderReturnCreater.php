@@ -264,11 +264,11 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
-            //代扣+预授权
+            //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
             }
-            //直接支付或小程序
+            //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
                 ){
@@ -1687,9 +1687,9 @@ class OrderReturnCreater
                         //乐百分
                         if($order_info['pay_type'] == PayInc::LebaifenPay){
                             //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
-                            $result['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                            $create_data['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                             //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
-                            $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                            $create_data['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                         }
 
 
