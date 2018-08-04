@@ -81,7 +81,7 @@ class CronController extends Controller
     public function cronPrepayment(){
         // 超时时间
         ini_set('max_execution_time', '0');
-
+        p(11);
         Service\CronOperate::cronPrepayment();
         echo "complete";die;
     }

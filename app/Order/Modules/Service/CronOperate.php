@@ -405,7 +405,7 @@ class CronOperate
                     ->limit($limit)
                     ->get()
                     ->toArray();
-                p($result);
+
                 $result = [
                     ['id'    => 763495],
                 ];
