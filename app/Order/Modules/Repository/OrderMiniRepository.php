@@ -37,8 +37,31 @@ class OrderMiniRepository
             'overdue_time'=>$data['overdue_time'],
             'create_time'=>time(),
         ];
-        $info =OrderMini::create($arr);
-        return $info->getQueueableId();
+        //判断当前订单已经存在（已存在则修改）
+        $miniOrderInfo = self::getMiniOrderInfo($data['out_order_no']);
+        if(empty($miniOrderInfo)){
+            $info =OrderMini::create($arr);
+            return $info->getQueueableId();
+        }else{
+            $b =self::update( [
+                'order_no'=>$data['out_order_no']
+            ], $arr);
+            if(!$b){
+                return false;
+            }
+            return $miniOrderInfo['id'];
+        }
+    }
+
+    /**
+     * 判断是否调用修改订单数据
+     * @params $where //传入修改条件
+     * @params $arr //传入修改数据
+     */
+    public static function update( $where , $arr ) {
+        $OrderMini = new OrderMini();
+        $b = $OrderMini->update($where,$arr);
+        return $b;
     }
 
     /**
@@ -60,6 +83,7 @@ class OrderMiniRepository
      *		'zm_face' => '',//人脸核身结果<br/>
      *		'user_id' => '',//支付宝 userid<br/>
      *		'channel_id' => '',//渠道来源<br/>
+     *		'app_id' => '',//app_id<br/>
      *		'create_time' => '',//创建时间<br/>
      * ]
      */
@@ -71,8 +95,6 @@ class OrderMiniRepository
             return [];
         }
         $miniOrderInfo = $result->toArray();
-//		var_dump($miniOrderInfo);exit;
-//		$miniOrderInfo['create_time'] = date('Y-m-d H:i:s',$miniOrderInfo['create_time']);
         return $miniOrderInfo;
     }
 }

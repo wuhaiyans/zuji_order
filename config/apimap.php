@@ -91,6 +91,9 @@ return [
     //创建订单清算单
     'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
 
+    //更新订单备注
+    'api.orderClean.addRemark'=>'OrderCleaningController@upOrderCleanminiRecoverRemark',
+
     //订单清算单操作退款
     'api.orderClean.opereate'=>'OrderCleaningController@orderCleanOperate',
 

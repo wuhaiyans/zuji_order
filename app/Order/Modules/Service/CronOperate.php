@@ -404,6 +404,7 @@ class CronOperate
                     ->limit($limit)
                     ->get()
                     ->toArray();
+
                 if (!$result) {
                     continue;
                 }
