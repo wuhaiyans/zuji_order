@@ -33,6 +33,7 @@ class CronRepayment implements ShortMessage {
     }
 
     public function notify(){
+
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
@@ -77,7 +78,6 @@ class CronRepayment implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
-
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

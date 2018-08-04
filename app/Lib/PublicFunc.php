@@ -619,9 +619,10 @@ function createShortUrl($url){
     $header = ['Content-Type: application/json'];
 
     $data['longURL'] = $url;
+    $shortUrl  =  env('SHORT_URL');
 
-    $info = \App\Lib\Curl::post(env('SHORT_URL'), json_encode($data), $header);
-    $info =json_decode($info,true);
+    $info = \App\Lib\Curl::post($shortUrl, json_encode($data), $header);
+    $info = json_decode($info,true);
     if(!is_array($info)){
         return false;
     }
