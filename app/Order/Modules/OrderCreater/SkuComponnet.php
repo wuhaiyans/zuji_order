@@ -178,7 +178,8 @@ class SkuComponnet implements OrderCreater
                 }
             }
             // 押金必须
-            if( $skuInfo['yajin'] < 0.01 && $this->payType != PayInc::MiniAlipay){
+            //if( $skuInfo['yajin'] < 0.01 && $this->payType != PayInc::MiniAlipay){
+            if( $skuInfo['yajin'] < 0.01){
                 $this->getOrderCreater()->setError('商品押金错误');
                 $this->flag = false;
             }
