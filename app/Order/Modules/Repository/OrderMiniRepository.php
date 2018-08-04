@@ -83,6 +83,7 @@ class OrderMiniRepository
      *		'zm_face' => '',//人脸核身结果<br/>
      *		'user_id' => '',//支付宝 userid<br/>
      *		'channel_id' => '',//渠道来源<br/>
+     *		'app_id' => '',//app_id<br/>
      *		'create_time' => '',//创建时间<br/>
      * ]
      */

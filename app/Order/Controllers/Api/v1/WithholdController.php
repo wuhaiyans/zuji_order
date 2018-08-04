@@ -599,21 +599,22 @@ class WithholdController extends Controller
                 if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
                     //获取订单的芝麻订单编号
                     $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($item['order_no']);
-                        if (empty($miniOrderInfo)) {
-                            \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
-                            Log::error("本地小程序确认订单回调记录查询失败");
-                            continue;
-                        }
-                        //芝麻小程序扣款请求
-                        $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
-                        $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
-                        //扣款交易号
-                        $miniParams['out_trans_no'] = $item['id'];
-                        $miniParams['pay_amount'] = $amount;
-                        $miniParams['remark'] = $subject;
-                        $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
-                        //判断请求发送是否成功
-                        if ($pay_status == 'PAY_SUCCESS') {
+                    if (empty($miniOrderInfo)) {
+                        \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
+                        Log::error("本地小程序确认订单回调记录查询失败");
+                        continue;
+                    }
+                    //芝麻小程序扣款请求
+                    $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
+                    $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+                    $miniParams['app_id'] = $miniOrderInfo['app_id'];
+                    //扣款交易号
+                    $miniParams['out_trans_no'] = $item['business_no'];
+                    $miniParams['pay_amount'] = $amount;
+                    $miniParams['remark'] = $subject;
+                    $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+                    //判断请求发送是否成功
+                    if ($pay_status == 'PAY_SUCCESS') {
                         return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
                     } elseif ($pay_status == 'PAY_FAILED') {
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
