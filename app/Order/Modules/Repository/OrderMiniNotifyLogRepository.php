@@ -13,7 +13,7 @@ class OrderMiniNotifyLogRepository
 {
     public function __construct(){}
 
-    /**
+    /**s
      * 添加芝麻订单信息
      * @param $data
      * @return $last_id
