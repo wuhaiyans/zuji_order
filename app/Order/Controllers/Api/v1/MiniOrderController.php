@@ -296,7 +296,10 @@ class MiniOrderController extends Controller
             'cert_no'=>$res['cert_no'],
         ];
         $res = $this->OrderCreate->miniCreate($data);
-        if(!$res){
+        if($res == false){
+            if(get_msg() == ApiStatus::CODE_35017){
+                return apiResponse([],ApiStatus::CODE_35017,'有未完成订单');
+            }
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
         }
 

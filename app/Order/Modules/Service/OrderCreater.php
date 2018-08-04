@@ -204,7 +204,7 @@ class OrderCreater
                 DB::rollBack();
                 //把无法下单的原因放入到用户表中
                 User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-                set_msg($orderCreater->getOrderCreater()->getError());
+                set_msg(ApiStatus::CODE_35017);
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();

@@ -41,11 +41,10 @@ class OrderCleaning
     {
 
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
-
+        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         $orderCleanData['order_type_name'] = OrderStatus::getTypeName($orderCleanData['order_type']);
         $orderCleanData['out_account_name'] = PayInc::getPayName($orderCleanData['out_account']);
 
-       if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
 
         $orderInfo = OrderUserAddressRepository::getUserAddressInfo(array('order_no'=>$orderCleanData['order_no']));
@@ -567,7 +566,7 @@ class OrderCleaning
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
 
-
+            dd($orderCleanInfo);
 
 
             if ($orderCleanInfo['code']) {

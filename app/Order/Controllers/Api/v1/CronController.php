@@ -79,6 +79,9 @@ class CronController extends Controller
      * 定时任务  月初发送提前还款短信
      */
     public function cronPrepayment(){
+        // 超时时间
+        ini_set('max_execution_time', '0');
+
         Service\CronOperate::cronPrepayment();
         echo "complete";die;
     }
