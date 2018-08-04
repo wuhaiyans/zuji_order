@@ -393,7 +393,6 @@ class CronOperate
                     ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
                     ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->count();
-                $total = 1;
                 $totalpage = ceil($total/$limit);
 
                 // 查询数据
@@ -406,9 +405,6 @@ class CronOperate
                     ->get()
                     ->toArray();
 
-                $result = [
-                    ['id'    => 763495],
-                ];
                 if (!$result) {
                     continue;
                 }
