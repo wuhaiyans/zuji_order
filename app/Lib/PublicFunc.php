@@ -607,3 +607,24 @@ function createLinkstringUrlencode($para)
     }
     return $arg;
 }
+
+
+/**
+ * 获取短连接
+ * @param $url URL
+ * @param $shortUrl 返回的短连接
+ */
+function createShortUrl($url){
+
+    $header = ['Content-Type: application/json'];
+
+    $data['longURL'] = $url;
+
+    $info = \App\Lib\Curl::post(env('SHORT_URL'), json_encode($data), $header);
+    $info =json_decode($info,true);
+    if(!is_array($info)){
+        return false;
+    }
+    return $info['shortURL'];
+
+}
