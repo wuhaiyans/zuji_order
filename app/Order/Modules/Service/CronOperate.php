@@ -406,7 +406,7 @@ class CronOperate
                     ->get()
                     ->toArray();
                 $result = [
-                    'id'    => 763495,
+                    ['id'    => 763495],
                 ];
                 if (!$result) {
                     continue;
