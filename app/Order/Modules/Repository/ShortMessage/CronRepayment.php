@@ -33,7 +33,7 @@ class CronRepayment implements ShortMessage {
     }
 
     public function notify(){
-        p($this->business_no);
+        
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
