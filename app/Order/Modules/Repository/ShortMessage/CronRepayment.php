@@ -40,6 +40,12 @@ class CronRepayment implements ShortMessage {
             return false;
         }
 
+        // 查询订单
+        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+        if( !$orderInfo ){
+            return false;
+        }
+
         // 用户信息
         $userInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
         if( !is_array($userInfo )){
@@ -52,9 +58,17 @@ class CronRepayment implements ShortMessage {
             return false;
         }
 
-        $App_url = env('APP_URL');
+        $url = env('WEB_H5_URL') . 'myBillDetail?';
 
-        $zhifuLianjie   = $App_url . "";
+        $urlData = [
+            'orderNo'       => $instalmentInfo['order_no'],     //  订单号
+            'zuqi_type'     => $orderInfo['zuqi_type'],         //  租期类型
+            'id'            => $instalmentInfo['id'],           //  分期ID
+            'appid'         => $orderInfo['appid'],             //  商品编号
+            'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
+        ];
+
+        $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
         // 短信参数
         $dataSms =[
