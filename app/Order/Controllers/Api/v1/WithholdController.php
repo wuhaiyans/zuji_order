@@ -231,7 +231,7 @@ class WithholdController extends Controller
                 return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
             }
             //芝麻小程序扣款请求
-            $miniParams['out_order_no']     = $miniOrderInfo['out_order_no'];
+            $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
             $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
             //扣款交易号
             $miniParams['out_trans_no']     = $instalmentId;
@@ -419,7 +419,7 @@ class WithholdController extends Controller
                     continue;
                 }
                 //芝麻小程序扣款请求
-                $miniParams['out_order_no']     = $miniOrderInfo['out_order_no'];
+                $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
                 $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
                 //扣款交易号
                 $miniParams['out_trans_no']     = $instalmentId;
@@ -605,7 +605,7 @@ class WithholdController extends Controller
                         continue;
                     }
                     //芝麻小程序扣款请求
-                    $miniParams['out_order_no'] = $miniOrderInfo['out_order_no'];
+                    $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
                     $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
                     //扣款交易号
                     $miniParams['out_trans_no'] = $item['id'];
