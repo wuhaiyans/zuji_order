@@ -593,3 +593,17 @@ function redisIncr($keys, $expireTime)
         return $feddAuto;
 
 }
+
+//拼接url
+function createLinkstringUrlencode($para)
+{
+    $arg = "";
+    while (list ($key, $val) = each($para)) {
+        $arg .= $key . "=" . urlencode($val) . "&";
+    }
+    $arg = substr($arg, 0, count($arg) - 2);
+    if (get_magic_quotes_gpc()) {
+        $arg = stripslashes($arg);
+    }
+    return $arg;
+}
