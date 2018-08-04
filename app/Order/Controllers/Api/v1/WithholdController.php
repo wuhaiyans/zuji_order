@@ -172,11 +172,11 @@ class WithholdController extends Controller
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
 
-        $instalmentKey = "instalmentWithhold_" . $instalmentId;
-        // 频次限制
-        if(redisIncr($instalmentKey, 300) > 1){
-            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
-        }
+//        $instalmentKey = "instalmentWithhold_" . $instalmentId;
+//        // 频次限制
+//        if(redisIncr($instalmentKey, 300) > 1){
+//            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
+//        }
 
         // 生成交易码
         $business_no = createNo();
