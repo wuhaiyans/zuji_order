@@ -34,20 +34,35 @@ class OrderController extends Controller
     }
 
     /**
-	 * 
+	 * 确认订单接口
+     * @author wuhaiyan
 	 * @param Request $request
+     * $request['appid']
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     * ]
+     * $request['params']               //【注：】确认订单不再支持[支付方式]参数，支付方式默认商品的第一个
 	 * [
-	 *		// 【注：】下单时不再支持[支付方式]参数，下单成功后，由用户选择
-	 *		'pay_type'	=> '',	//【必选】string 支付方式
-	 *		'sku_info'	=> [	//【必选】string	SKU信息
+	 *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
+	 *		'sku_info'	=> [	        //【必选】array	SKU信息
 	 *			[
-	 *				'sku_id' => '',		//【必选】SKU ID
-	 *				'sku_num' => '',	//【必选】SKU 数量
+	 *				'sku_id' => '',		//【必选】int SKU ID
+	 *				'sku_num' => '',	//【必选】int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
 	 *			]
 	 *		]',
-	 *		'coupon'	=> '',	//【可选】string 优惠券
-	 * ]
-	 * @return type
+	 *		'coupon'	=> [],	        //【可选】array 优惠券
+     * $request['userinfo']             //【必须】array 用户信息  - 转发接口获取
+     * $userinfo [
+     *      'type'=>'',     【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   【必须】string//用户ID
+     *      'user_name'=>1, 【必须】string//用户名
+     *      'mobile'=>1,    【必须】string//手机号
+     *
+     * ]
+
+	 * @return \Illuminate\Http\JsonResponse
 	 */
     public function confirmation(Request $request){
         $params = $request->all();
@@ -95,14 +110,38 @@ class OrderController extends Controller
 
     }
     /**
-     * 下单接口
+     *  订单生成接口
+     * @author wuhaiyan
      * @param Request $request
-     * $params[
-     *      'pay_type'=>'',//支付方式ID
-     *      'address_id'=>'',//收货地址ID
+     * $request['appid']
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     * ]
+     * $request['params']
+     * [
+     *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
+     *		'pay_type'	=> '',	        //【必选】int 支付方式
+     *		'address_id'	=> '',	    //【必选】int 用户收货地址
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     *		'coupon'	=> [],	//【可选】array 优惠券
+     * $request['userinfo']     //【必须】array 用户信息  - 转发接口获取
+     * $userinfo [
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】string 用户ID
+     *      'user_name'=>1, //【必须】string 用户名
+     *      'mobile'=>1,    //【必须】string手机号
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
+
+    
     public function create(Request $request){
 
         $params = $request->all();
@@ -162,8 +201,8 @@ class OrderController extends Controller
      * 门店下单接口
      * @param Request $request
      * $params[
-     *      'pay_type'=>'',//支付方式ID
-     *      'address_id'=>'',//收货地址ID
+     *      'pay_type'=>'',     //支付方式ID
+     *      'address_id'=>'',   //收货地址ID
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
@@ -336,7 +375,11 @@ class OrderController extends Controller
 
     /**
      * 获取订单状态流
-     * @param Request $request
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',//【必须】string 订单编号
+     *      ]
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -365,7 +408,14 @@ class OrderController extends Controller
 
     /**
      *  增加订单出险/取消 记录
-     * @param Request $request
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'goods_no'=>'',     //【必须】string 商品编号
+     *          'remark'=>'',       //【必须】string 备注信息
+     *          'type'=>'',         //【必须】int 类型 1出险 2取消出险
+     *      ]
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -428,7 +478,13 @@ class OrderController extends Controller
 
     /**
      *  增加联系备注
-     * @param Request $request
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'visit_id'=>'',     //【必须】int 联系备注ID
+     *          'visit_text'=>'',   //【必须】string 备注信息
+     *      ]
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -458,7 +514,11 @@ class OrderController extends Controller
 
     /**
      * 获取订单操作日志
-     * @param Request $request
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *      ]
      * @return \Illuminate\Http\JsonResponse
      */
 
@@ -480,13 +540,15 @@ class OrderController extends Controller
 
     /**
      *  发货接口
+     * @author wuhaiyan
+     * @param Request $request['params']
      * @param $orderDetail array
      * [
-     *  'order_no'=>'',//订单编号
-     *  'logistics_id'=>''//物流渠道ID
-     *  'logistics_no'=>''//物流单号
+     *  'order_no'=>'',         //【必须】string 订单编号
+     *  'logistics_id'=>''      //【必须】int 物流渠道ID
+     *  'logistics_no'=>''      //【必须】string 物流单号
      * ]
-     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * @param $goods_info       //【必须】 array 商品信息 参数内容如下
      * [
      *   [
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
@@ -495,11 +557,11 @@ class OrderController extends Controller
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
-     * @param $operator_info array 操作人员信息
+     * @param $operator_info //【必须】 array 操作人员信息
      * [
-     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,//用户ID
-     *      'user_name'=>1,//用户名
+     *      'type'=>'',     【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   【必须】string//用户ID
+     *      'user_name'=>1, 【必须】string//用户名
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -524,11 +586,12 @@ class OrderController extends Controller
     }
     /**
      * 确认收货接口
+     * @author wuhaiyan
      * @param Request $request
      * $params
      * [
-     *  'order_no' =>'',//订单编号
-     *  'remark'=>'',//备注
+     *  'order_no' =>'',//【必须】string 订单编号
+     *  'remark'=>'',   //【必须】string 备注
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
@@ -552,7 +615,7 @@ class OrderController extends Controller
     }
     /**
      * 所有有关订单统计查询
-
+     * @author wuhaiyan
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -569,17 +632,17 @@ class OrderController extends Controller
 
     /**
      * 确认订单接口
+     * @author wuhaiyan
+     * @param Request $request
      * $params[
-     *   'order_no'  => '',//订单编号
-     *   'remark'=>'',//操作备注
-     *  'userinfo'  //转发过来的信息
+     *   'order_no'  => '', //【必须】string 订单编号
+     *   'remark'=>'',      //【必须】string 备注
      * ]
      * $userinfo [
-     *  'uid'=>'',
-     *  'mobile'=>'',
-     *  'type'=>'',
-     *  'username'=>'',
-     *
+     *      'type'=>'',     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】int用户ID
+     *      'user_name'=>1, //【必须】string用户名
+     *      'mobile'=>1,    //【必须】string手机号
      * ]
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
