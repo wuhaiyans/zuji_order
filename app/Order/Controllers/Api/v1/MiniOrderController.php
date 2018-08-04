@@ -296,7 +296,7 @@ class MiniOrderController extends Controller
             'cert_no'=>$res['cert_no'],
         ];
         $res = $this->OrderCreate->miniCreate($data);
-        if(!$res){
+        if($res == false){
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
         }
 
