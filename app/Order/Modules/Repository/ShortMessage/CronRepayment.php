@@ -59,6 +59,8 @@ class CronRepayment implements ShortMessage {
             return false;
         }
 
+        $web_url = env('WEB_H5_URL') ? env('WEB_H5_URL') : "https://dev-h5.nqyong.com/";
+
         $url = env('WEB_H5_URL') . 'myBillDetail?';
 
         $urlData = [
