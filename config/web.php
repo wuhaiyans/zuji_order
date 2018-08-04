@@ -23,7 +23,7 @@ return [
     //订单多长时间未支付取消订单
     'order_cancel_hours' =>2*3600,
     //小程序订单多长时间未支付取消订单
-    'mini_order_cancel_hours' =>60,
+    'mini_order_cancel_hours' =>1800,
     //买断单多长时间未支付取消买断支付单
     'buyout_cancel_hours' =>60*10,
     //检查androd审核情况
