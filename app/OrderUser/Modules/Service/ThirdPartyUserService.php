@@ -79,9 +79,10 @@ class ThirdPartyUserService
     /**
      * 添加
      * @param $params
+     * @return id
      */
     public static function add($params){
-        ThirdPartyUserRepository::add($params);
+        return ThirdPartyUserRepository::add($params);
     }
 
     /**

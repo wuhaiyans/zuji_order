@@ -164,6 +164,42 @@ class OrderCleaningController extends Controller
     }
 
 
+
+
+
+    /**
+     *
+     * 订单清算更新备注
+     * Author: heaven
+     * @param Request $request
+     * params": - {
+    "clean_no":"mock",    //类型：String  必有字段  备注：出账类型编号
+    "mini_recover_transfer_num":"mock"       //类型：String  必有字段  备注：出账金额
+    }
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function upOrderCleanminiRecoverRemark(Request $request){
+
+        $params = $request->all();
+
+        $rules = [
+            'clean_no'  => 'required',
+            'mini_recover_transfer_num' => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $res = OrderCleaning::upOrderCleanStatus($validateParams['data']);
+        return apiResponse([] , $res);
+
+    }
+
+
     /**
      *
      * 创建订单清单
