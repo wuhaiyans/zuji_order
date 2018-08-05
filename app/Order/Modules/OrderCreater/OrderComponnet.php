@@ -181,14 +181,12 @@ class OrderComponnet implements OrderCreater
      */
     public function filter(): bool
     {
-        //判断是否有其他活跃 未完成订单(小程序不限制)
+        //判断是否有其他活跃 未完成订单
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
-        if( $this->payType !=  PayInc::MiniAlipay){
-            $b =OrderRepository::unCompledOrder($this->userId);
-            if($b) {
-                $this->getOrderCreater()->setError('有未完成订单');
-                return false;
-            }
+        $b =OrderRepository::unCompledOrder($this->userId);
+        if($b) {
+            $this->getOrderCreater()->setError('有未完成订单');
+            return false;
         }
 
         $b = $this->userComponnet->filter();

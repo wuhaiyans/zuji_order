@@ -83,8 +83,10 @@ class DepositComponnet implements OrderCreater
                         'market_price'=>$v['market_price']*100,
                     ];
                     try{
+                        //调用风控押金计算接口
                         $deposit = Yajin::calculate($arr);
                     }catch (\Exception $e){
+                        //如果押金接口请求失败 押金不进行减免
                         $this->getOrderCreater()->setError('商品押金接口错误');
                         $this->flag = false;
                         $deposit['jianmian'] =0;
@@ -94,6 +96,8 @@ class DepositComponnet implements OrderCreater
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
 
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
+
+                    //存放押金减免信息
                     if (!empty($deposit['jianmian_detail'])){
                         foreach ($deposit['jianmian_detail'] as $key=>$value){
                             $deposit['jianmian_detail'][$key]['jianmian'] = $deposit['jianmian_detail'][$key]['jianmian']/100;

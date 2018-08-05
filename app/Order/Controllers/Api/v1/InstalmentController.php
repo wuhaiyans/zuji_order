@@ -164,6 +164,7 @@ class InstalmentController extends Controller
     * @param array $request
     * [
     *		'instalment_id'		=> '', //【必选】string 分期id
+    *		'no_login'		    => '', //【可选】int 是否登录 1 不用登录
     * ]
     * @return array instalmentList
     */
@@ -187,8 +188,10 @@ class InstalmentController extends Controller
         }
 
         // 用户验证
-        if($uid != $instalmentInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
+        if(empty($params['params']['no_login'])){
+            if($uid != $instalmentInfo['user_id']){
+                return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
+            }
         }
 
         // 订单详情
@@ -249,10 +252,6 @@ class InstalmentController extends Controller
         $instalmentInfo['withhold_date']    = withholdDate($instalmentInfo['term'],$instalmentInfo['day']);
 
         return apiResponse($instalmentInfo, ApiStatus::CODE_0);
-
-
-
-
 
     }
 

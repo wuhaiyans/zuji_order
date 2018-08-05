@@ -593,3 +593,39 @@ function redisIncr($keys, $expireTime)
         return $feddAuto;
 
 }
+
+//拼接url
+function createLinkstringUrlencode($para)
+{
+    $arg = "";
+    while (list ($key, $val) = each($para)) {
+        $arg .= $key . "=" . urlencode($val) . "&";
+    }
+    $arg = substr($arg, 0, count($arg) - 2);
+    if (get_magic_quotes_gpc()) {
+        $arg = stripslashes($arg);
+    }
+    return $arg;
+}
+
+
+/**
+ * 获取短连接
+ * @param $url URL
+ * @param $shortUrl 返回的短连接
+ */
+function createShortUrl($url){
+
+    $header = ['Content-Type: application/json'];
+
+    $data['longURL'] = $url;
+    $shortUrl  =  env('SHORT_URL');
+
+    $info = \App\Lib\Curl::post($shortUrl, json_encode($data), $header);
+    $info = json_decode($info,true);
+    if(!is_array($info)){
+        return false;
+    }
+    return $info['shortURL'];
+
+}

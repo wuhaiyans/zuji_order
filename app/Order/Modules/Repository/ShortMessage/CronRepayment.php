@@ -33,10 +33,17 @@ class CronRepayment implements ShortMessage {
     }
 
     public function notify(){
+
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
             // 提交事务
+            return false;
+        }
+
+        // 查询订单
+        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+        if( !$orderInfo ){
             return false;
         }
 
@@ -52,15 +59,23 @@ class CronRepayment implements ShortMessage {
             return false;
         }
 
-        $App_url = env('APP_URL');
+        $url = env('WEB_H5_URL') . 'myBillDetail?';
 
-        $zhifuLianjie   = $App_url . "";
+        $urlData = [
+            'orderNo'       => $instalmentInfo['order_no'],     //  订单号
+            'zuqi_type'     => $orderInfo['zuqi_type'],         //  租期类型
+            'id'            => $instalmentInfo['id'],           //  分期ID
+            'appid'         => $orderInfo['appid'],             //  商品编号
+            'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
+        ];
+
+        $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'zuJin'         => $instalmentInfo['amount'],
-            'zhifuLianjie'  => $zhifuLianjie,
+            'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
         // 发送短息
