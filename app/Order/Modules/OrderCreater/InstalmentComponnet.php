@@ -151,9 +151,6 @@ class InstalmentComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        if( $this->payType == PayInc::LebaifenPay ){
-            return true;
-        }
         //支持分期支付方式
         $payType = [
             PayInc::WithhodingPay,
