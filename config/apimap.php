@@ -79,6 +79,10 @@ return [
     'api.order.getRiskInfo'=>'OrderController@getRiskInfo',
 
 
+    //获取乐百分订单的分期列表
+    'api.order.getLebaifenInstalment'=>'OrderController@getLebaifenInstalment',
+
+
 
     //订单结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@cleanList',
