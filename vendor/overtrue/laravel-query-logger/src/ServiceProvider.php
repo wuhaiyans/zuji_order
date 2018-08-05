@@ -23,19 +23,19 @@ class ServiceProvider extends LaravelServiceProvider
      */
     public function boot()
     {
-        if (config('app.debug')) {
-            Log::info('============ URL: ' . request()->fullUrl() . ' ===============');
-            DB::listen(function (QueryExecuted $query) {
-                $sqlWithPlaceholders = str_replace(['%', '?'], ['%%', '%s'], $query->sql);
-
-                $bindings = $query->connection->prepareBindings($query->bindings);
-                $pdo = $query->connection->getPdo();
-                $realSql = vsprintf($sqlWithPlaceholders, array_map([$pdo, 'quote'], $bindings));
-                $duration = $this->formatDuration($query->time / 1000);
-
-                Log::debug(sprintf('[%s] %s', $duration, $realSql));
-            });
-        }
+//        if (config('app.debug')) {
+//            Log::info('============ URL: ' . request()->fullUrl() . ' ===============');
+//            DB::listen(function (QueryExecuted $query) {
+//                $sqlWithPlaceholders = str_replace(['%', '?'], ['%%', '%s'], $query->sql);
+//
+//                $bindings = $query->connection->prepareBindings($query->bindings);
+//                $pdo = $query->connection->getPdo();
+//                $realSql = vsprintf($sqlWithPlaceholders, array_map([$pdo, 'quote'], $bindings));
+//                $duration = $this->formatDuration($query->time / 1000);
+//
+//                Log::debug(sprintf('[%s] %s', $duration, $realSql));
+//            });
+//        }
     }
 
     /**
