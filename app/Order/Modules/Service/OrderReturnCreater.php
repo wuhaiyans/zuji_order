@@ -2302,7 +2302,7 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        $where[]=['order','=',$returnData['order_no']];
+                        $where[]=['order_no','=',$returnData['order_no']];
                         $where[]=['goods_no','=',$returnData['goods_no']];
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
                         if(!$orderGoodsInstalment){
