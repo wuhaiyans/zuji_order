@@ -288,7 +288,7 @@ class SkuComponnet implements OrderCreater
                     'stock' => intval($skuInfo['number']),
                     'pay_type' => $this->payType,
                     'channel_id'=>intval($spuInfo['channel_id']),
-                    'discount_amount' => $skuInfo['buyout_price'], //商品优惠金额 （商品系统为buyout_price字段）
+                    'discount_amount' => 0,//$skuInfo['buyout_price'], //商品优惠金额 （商品系统为buyout_price字段）
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'first_coupon_amount' => $first_coupon_amount,
