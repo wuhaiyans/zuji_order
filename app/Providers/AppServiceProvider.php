@@ -18,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
 
         if (config('app.debug')) {
             Log::info('============ URL: ' . request()->fullUrl() . ' ===============');
+            Log::info('============ URL的method: ' . request()->input('method') . ' ===============');
             DB::listen(function (QueryExecuted $query) {
                 $sqlWithPlaceholders = str_replace(['%', '?'], ['%%', '%s'], $query->sql);
 
