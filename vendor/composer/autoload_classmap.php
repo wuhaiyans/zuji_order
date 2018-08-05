@@ -2300,6 +2300,7 @@ return array(
     'Namshi\\JOSE\\Signer\\SecLib\\RSA' => $vendorDir . '/namshi/jose/src/Namshi/JOSE/Signer/SecLib/RSA.php',
     'Namshi\\JOSE\\Signer\\SignerInterface' => $vendorDir . '/namshi/jose/src/Namshi/JOSE/Signer/SignerInterface.php',
     'Namshi\\JOSE\\SimpleJWS' => $vendorDir . '/namshi/jose/src/Namshi/JOSE/SimpleJWS.php',
+    'Overtrue\\LaravelQueryLogger\\ServiceProvider' => $vendorDir . '/overtrue/laravel-query-logger/src/ServiceProvider.php',
     'PHPUnit\\Exception' => $vendorDir . '/phpunit/phpunit/src/Exception.php',
     'PHPUnit\\Framework\\Assert' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert.php',
     'PHPUnit\\Framework\\AssertionFailedError' => $vendorDir . '/phpunit/phpunit/src/Framework/AssertionFailedError.php',

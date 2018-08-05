@@ -552,7 +552,6 @@ class OrderRepository
 //            ->get();
 
         $count = DB::table('order_info')
-            ->select('order_info.id')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
@@ -565,7 +564,7 @@ class OrderRepository
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('order_info.id', 'DESC')
-            ->count();
+            ->count('order_info.id');
 
 //        sql_profiler();
         $orderList = DB::table('order_info')
