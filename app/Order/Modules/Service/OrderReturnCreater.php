@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderLogRepository;
 use \App\Order\Modules\Inc\Reason;
 use App\Lib\Curl;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 class OrderReturnCreater
 {
     protected $orderReturnRepository;
@@ -264,11 +265,11 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
-            //代扣+预授权
+            //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
             }
-            //直接支付或小程序
+            //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
                 ){
@@ -1687,9 +1688,9 @@ class OrderReturnCreater
                         //乐百分
                         if($order_info['pay_type'] == PayInc::LebaifenPay){
                             //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
-                            $result['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                            $create_data['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                             //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
-                            $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                            $create_data['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                         }
 
 
@@ -2301,6 +2302,12 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
+                        $where[]=['order_no','=',$returnData['order_no']];
+                        $where[]=['goods_no','=',$returnData['goods_no']];
+                        $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                        if(!$orderGoodsInstalment){
+                            return true;
+                        }
                         $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
                         if (!$success) {
                             LogApi::debug("关闭商品分期失败");
