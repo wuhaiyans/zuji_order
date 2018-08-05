@@ -78,9 +78,11 @@ class DepositComponnet implements OrderCreater
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }else{//其他入口
                     $arr =[
-                        'user_id'=>$this->schema['user']['user_id'],
+                        'appid'=>$this->schema['order']['app_id'],
+                        'zujin'=>$v['zujin']*$v['zuqi'] * 100,
                         'yajin'=>$v['yajin'] * 100,
                         'market_price'=>$v['market_price']*100,
+                        'user_id'=>$this->schema['user']['user_id'],
                     ];
                     try{
                         //调用风控押金计算接口
