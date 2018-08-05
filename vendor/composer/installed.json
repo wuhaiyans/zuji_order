@@ -5056,5 +5056,50 @@
             "profiler",
             "webprofiler"
         ]
+    },
+    {
+        "name": "overtrue/laravel-query-logger",
+        "version": "1.0.2",
+        "version_normalized": "1.0.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/overtrue/laravel-query-logger.git",
+            "reference": "3d9f54faa5ac5fd757098a93e386dc7e6ae9358a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/overtrue/laravel-query-logger/zipball/3d9f54faa5ac5fd757098a93e386dc7e6ae9358a",
+            "reference": "3d9f54faa5ac5fd757098a93e386dc7e6ae9358a",
+            "shasum": ""
+        },
+        "require": {
+            "laravel/framework": "5.*"
+        },
+        "time": "2018-06-20T06:47:48+00:00",
+        "type": "library",
+        "extra": {
+            "laravel": {
+                "providers": [
+                    "Overtrue\\LaravelQueryLogger\\ServiceProvider"
+                ]
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Overtrue\\LaravelQueryLogger\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "overtrue",
+                "email": "anzhengchao@gmail.com"
+            }
+        ],
+        "description": "A dev tool to log all queries for laravel application."
     }
 ]
