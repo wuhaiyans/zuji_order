@@ -611,6 +611,7 @@ class OrderOperate
 	 		        'first_other_amount' => normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
 	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；单位：分
+                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余总金额；单位：分
                 ];
                 return $instalmentInfo;
 
@@ -623,7 +624,7 @@ class OrderOperate
         return true;
     }
     /**
-     * 订单统计查询
+     * 订单统计查询{"item":{"name":"first_other_amount","must":1,"type":0,"remark":"","mock":"99.00","drag":1,"show":0},"index":8}
      * @author wuhaiyan
      * @return array
      */
