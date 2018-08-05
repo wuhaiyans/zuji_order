@@ -603,14 +603,14 @@ class OrderOperate
 	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
 	 		        'out_payment_no'=> $res['out_payment_no'],	// 业务系统 支付交易码
 	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
-	 		        'txn_amount'	=> normalizeNum($res['txn_amount']),	// 总金额；单位：分
+	 		        'txn_amount'	=> normalizeNum($res['txn_amount']/100),	// 总金额；单位：分
 	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
-	 		        'rent_amount'	=> normalizeNum($res['rent_amount']),	// 总租金；单位：分
-	 		        'month_amount'	=> normalizeNum($res['month_amount']),	// 每月租金；单位：分
-	 		        'remainder_amount' => normalizeNum($res['remainder_amount']),	// 每月租金取整后,总租金余数；单位：分
-	 		        'first_other_amount' => normalizeNum($res['first_other_amount']),// 首期额外金额；单位：分
-	 		        'sum_amount'	=> normalizeNum($res['sum_amount']),	// 已还总金额；单位：分
-	 		        'sum_terms'		=> normalizeNum($res['sum_terms']),	// 已还总期数；单位：分
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
+	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
+	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
+	 		        'first_other_amount' => normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分
+	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
+	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；单位：分
                 ];
                 return $instalmentInfo;
 
