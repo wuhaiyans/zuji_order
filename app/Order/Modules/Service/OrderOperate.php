@@ -579,17 +579,28 @@ class OrderOperate
         $payType =$orderInfo['pay_type'];//获取支付方式
         $orderNo =$orderInfo['order_no'];
 
+        $instalmentInfo =[
+            'txn_amount'	=> normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']+$orderInfo['order_yajin']),	// 总金额；单位：分
+            'txn_terms'		=> 15,	// 总分期数
+            'rent_amount'	=> normalizeNum($orderInfo['order_amount']),	// 总租金；单位：分
+            'month_amount'	=> normalizeNum($orderInfo['order_amount']/15),	// 每月租金；单位：分
+            'remainder_amount' => normalizeNum($orderInfo['order_amount']-normalizeNum($orderInfo['order_amount']/15)*14),	// 每月租金取整后,总租金余数；单位：分
+            'first_other_amount' => normalizeNum($orderInfo['order_insurance']),// 首期额外金额；单位：分
+            'sum_amount'	=> 0.00,	// 已还总金额；单位：分
+            'sum_terms'		=> 0,	// 已还总期数；单位：分
+            'remain_amount' =>  normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']+$orderInfo['order_yajin']),	// 剩余总金额；单位：分
+        ];
+
+
         if($payType == PayInc::LebaifenPay){
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
             if(empty($payInfo)){
-                LogApi::error(config('app.env')."环境 获取乐百分分期 信息 order_pay表为空",$orderNo);
-                return false;
+                return $instalmentInfo;
             }
             $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
             if(empty($paymentInfo)){
-                LogApi::error(config('app.env')."环境 获取乐百分分期 信息 order_pay_payment表为空",$payInfo['payment_no']);
-                return false;
+                return $instalmentInfo;
             }
 
             try{
