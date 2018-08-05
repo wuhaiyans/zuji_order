@@ -62,6 +62,9 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
+        if($this->payType == PayInc::LebaifenPay){
+            return $schema;
+        }
         foreach ($schema['sku'] as $k=>$sku){
 			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
@@ -147,6 +150,9 @@ class InstalmentComponnet implements OrderCreater
         $b = $this->componnet->create();
         if( !$b ){
             return false;
+        }
+        if( $this->payType == PayInc::LebaifenPay ){
+            return true;
         }
         //支持分期支付方式
         $payType = [
