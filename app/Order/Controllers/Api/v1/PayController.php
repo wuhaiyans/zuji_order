@@ -570,7 +570,7 @@ class PayController extends Controller
 									$userinfo);
 							if( !$b ){
                                 DB::rollBack();
-                                LogApi::error(__method__.'[cleanAccount回调退款]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo]);
+                                LogApi::error(__method__.'[cleanAccount回调退款]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$b]);
                                 $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款回调业务接口失败');
 							}
 
