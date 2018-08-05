@@ -29,6 +29,7 @@ use App\Order\Modules\Repository\OrderLogRepository;
 use \App\Order\Modules\Inc\Reason;
 use App\Lib\Curl;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 class OrderReturnCreater
 {
     protected $orderReturnRepository;
@@ -2301,6 +2302,12 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
+                        $where[]=['order_no','=',$returnData['order_no']];
+                        $where[]=['goods_no','=',$returnData['goods_no']];
+                        $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                        if(!$orderGoodsInstalment){
+                            return true;
+                        }
                         $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
                         if (!$success) {
                             LogApi::debug("关闭商品分期失败");
