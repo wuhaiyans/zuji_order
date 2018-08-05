@@ -550,7 +550,6 @@ class OrderOperate
                         'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::confirmReceipt($param);
-                LogApi::info(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口 返回数据",$res);
                 return true;
 
             }catch (\Exception $e){
@@ -563,7 +562,66 @@ class OrderOperate
         }
         return true;
     }
+    /**
+     *  获取乐百分 支付分期结果
+     * @author wuhaiyan
+     * @params $orderNo 【必须】string 订单编号
+     * @return bool|array
+     */
+    public static function getLebaifenInstalment($orderNo){
 
+        //获取订单信息
+        $order = Order::getByNo($orderNo);
+        if(!$order){
+            return false;
+        }
+        $orderInfo = $order->getData();
+        $payType =$orderInfo['pay_type'];//获取支付方式
+        $orderNo =$orderInfo['order_no'];
+
+        if($payType == PayInc::LebaifenPay){
+            //查询支付单信息
+            $payInfo = OrderPayRepository::find($orderNo);
+            if(empty($payInfo)){
+                LogApi::error(config('app.env')."环境 获取乐百分分期 信息 order_pay表为空",$orderNo);
+                return false;
+            }
+            $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
+            if(empty($paymentInfo)){
+                LogApi::error(config('app.env')."环境 获取乐百分分期 信息 order_pay_payment表为空",$payInfo['payment_no']);
+                return false;
+            }
+
+            try{
+                //调用乐百分分期信息接口
+                $param =[
+                    'payment_no'		=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
+                    'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
+                ];
+                $res =LebaifenApi::getPaymentInfo($param);
+                $instalmentInfo =[
+	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
+	 		        'out_payment_no'=> $res['out_payment_no'],	// 业务系统 支付交易码
+	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
+	 		        'txn_amount'	=> normalizeNum($res['txn_amount']),	// 总金额；单位：分
+	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']),	// 总租金；单位：分
+	 		        'month_amount'	=> normalizeNum($res['month_amount']),	// 每月租金；单位：分
+	 		        'remainder_amount' => normalizeNum($res['remainder_amount']),	// 每月租金取整后,总租金余数；单位：分
+	 		        'first_other_amount' => normalizeNum($res['first_other_amount']),// 首期额外金额；单位：分
+	 		        'sum_amount'	=> normalizeNum($res['sum_amount']),	// 已还总金额；单位：分
+	 		        'sum_terms'		=> normalizeNum($res['sum_terms']),	// 已还总期数；单位：分
+                ];
+                return $instalmentInfo;
+
+            }catch (\Exception $e){
+                LogApi::error(config('app.env')."环境 获取乐百分分期 信息 接口失败",$e->getMessage());
+                return false;
+            }
+
+        }
+        return true;
+    }
     /**
      * 订单统计查询
      * @author wuhaiyan
