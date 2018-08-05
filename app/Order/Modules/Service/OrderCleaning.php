@@ -41,11 +41,10 @@ class OrderCleaning
     {
 
        $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param);
-
+        if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         $orderCleanData['order_type_name'] = OrderStatus::getTypeName($orderCleanData['order_type']);
         $orderCleanData['out_account_name'] = PayInc::getPayName($orderCleanData['out_account']);
 
-       if (empty($orderCleanData))  return apiResponseArray(ApiStatus::CODE_31205,$orderCleanData);
         //根据订单号查询订单信息
 
         $orderInfo = OrderUserAddressRepository::getUserAddressInfo(array('order_no'=>$orderCleanData['order_no']));
@@ -73,6 +72,8 @@ class OrderCleaning
         if (!empty($orderCleanList['data'])) {
 
             foreach($orderCleanList['data'] as $keys=>$values){
+                $orderCleanList['data'][$keys]['is_add_recover_remark'] = ($values['order_type']==OrderStatus::miniRecover && empty(floatval($values['mini_recover_transfer_num'])) && $values['status']==OrderCleaningStatus::orderCleaning) ?? false;
+//                dd($orderCleanList);
                 $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
@@ -81,6 +82,9 @@ class OrderCleaning
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
+                //是否显示乐百分备注，是乐百分出账，并且之前没有增加过备注信息
+
+
 
             }
 
@@ -567,7 +571,7 @@ class OrderCleaning
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
 
-
+            dd($orderCleanInfo);
 
 
             if ($orderCleanInfo['code']) {

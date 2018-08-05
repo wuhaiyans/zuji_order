@@ -50,13 +50,14 @@ class OrderOperate
 {
     /**
      * 订单发货接口
+     * @author wuhaiyan
      * @param $orderDetail array
      * [
-     *  'order_no'=>'',//订单编号
-     *  'logistics_id'=>''//物流渠道ID
-     *  'logistics_no'=>''//物流单号
+     *  'order_no'=>'',         //【必须】string 订单编号
+     *  'logistics_id'=>''      //【必须】int 物流渠道ID
+     *  'logistics_no'=>''      //【必须】string 物流单号
      * ]
-     * @param $goods_info array 商品信息 【必须】 参数内容如下
+     * @param $goods_info       //【必须】 array 商品信息 参数内容如下
      * [
      *   [
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
@@ -65,14 +66,11 @@ class OrderOperate
      *      'goods_no'=>'abcd',imei1=>'imei1',imei2=>'imei2',imei3=>'imei3','serial_number'=>'abcd'
      *   ]
      * ]
-     *@param $operatorInfo array 操作人员信息
-     *
-     *
-     *
+     *@param $operatorInfo //【必须】 array 操作人员信息
      * [
-     *      'type'=>发货类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,//用户ID
-     *      'user_name'=>1,//用户名
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】string 用户ID
+     *      'user_name'=>1, //【必须】string 用户名
      * ]
      * @return boolean
      */
@@ -158,6 +156,7 @@ class OrderOperate
 
     /**
      * 获取订单状态流
+     * @author wuhaiyan
      * @param $orderNo 订单编号
      * @return array
      */
@@ -197,11 +196,13 @@ class OrderOperate
 
     /**
      *  增加订单出险/取消出险记录
+     * @author wuhaiyan
      * @param $params
      * [
-     *  'order_no'  => '',//订单编号
-     *  'remark'=>'',//备注
-     *  'type'=>'',// 类型 1出险 2取消出险
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'goods_no'=>'',     //【必须】string 商品编号
+     *          'remark'=>'',       //【必须】string 备注信息
+     *          'type'=>'',         //【必须】int 类型 1出险 2取消出险
      * ]
      * @return array|bool
      */
@@ -274,11 +275,12 @@ class OrderOperate
 
     /**
      * 保存回访标识
+     * @author wuhaiyan
      * @param $params
      * [
-     *  'order_no'  => '',//订单编号
-     *  'visit_id'=>'',//回访标识ID
-     *  'visit_text'=>'',//回访备注
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'visit_id'=>'',     //【必须】int 联系备注ID
+     *          'visit_text'=>'',   //【必须】string 备注信息
      * ]
      * @return array|bool
      */
@@ -322,6 +324,7 @@ class OrderOperate
 
     /**
      * 获取订单日志接口
+     * @author wuhaiyan
      * @param $orderNo
      * @return array|bool
      */
@@ -341,14 +344,18 @@ class OrderOperate
     }
     /**
      * 确认收货接口
-     * @param  $system //0 前后端操作,1 自动执行任务
+     * @author wuhaiyan
+     * @param  $system //【可选】int 0 前后端操作,1 自动执行任务
      * @param $params
      * [
-     *      'order_no'=>''//订单编号
-     *      'remark'=>''//备注
-     *      'userinfo'=[ //用户/后台登陆信息
-     *
-     *          ]
+     *  'order_no' =>'',//【必须】string 订单编号
+     *  'remark'=>'',   //【必须】string 备注
+     * ],
+     * $userinfo [
+     *      'type'=>'',     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】int 用户ID
+     *      'user_name'=>1, //【必须】string 用户名
+     *      'mobile'=>1,    //【必须】string 手机号
      * ]
      * @return boolean
      */
@@ -359,12 +366,13 @@ class OrderOperate
 
         if(empty($orderNo)){set_msg("参数错误");return false;}
         DB::beginTransaction();
-            //更新订单状态
+            //获取订单信息
             $order = Order::getByNo($orderNo);
             if(!$order){
                 DB::rollBack();
                 return false;
             }
+            //更新订单状态
             $b =$order->sign();
             if(!$b){
                 DB::rollBack();
@@ -516,16 +524,15 @@ class OrderOperate
     /**
      * 乐百分支付 --- 确认收货调用接口
      * @author wuhaiyan
-     * @params $orderNo 【必须】 订单编号
-     * @params $payType 【必须】 支付方式
+     * @params $orderNo 【必须】string 订单编号
+     * @params $payType 【必须】int 支付方式
      * @return bool
      */
     public static function lebaifenDelivery($orderNo,$payType){
 
         if($payType == PayInc::LebaifenPay){
-
+            //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
-
             if(empty($payInfo)){
                 LogApi::error(config('app.env')."环境 确认收货乐百分支付order_pay表为空",$orderNo);
                 return false;
@@ -537,6 +544,7 @@ class OrderOperate
             }
 
             try{
+                //调用乐百分确认收货接口
                 $param =[
                         'payment_no'		=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
                         'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
@@ -579,17 +587,17 @@ class OrderOperate
 
     /**
      * 后台确认订单操作
-     * $data =[
-     *   'order_no'  => '',//订单编号
-     *   'remark'=>'',//操作备注
-     *    'userinfo'
-     * ]
-     *  $userinfo [
-     *  'uid'=>'',
-     *  'mobile'=>'',
-     *  'type'=>'',
-     *  'username'=>'',
-     *
+     * @author wuhaiyan
+     * @param
+     * $data[
+     *   'order_no'  => '', //【必须】string 订单编号
+     *   'remark'=>'',      //【必须】string 备注
+     *   'userinfo '=>[
+     *      'type'=>'',     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】int用户ID
+     *      'user_name'=>1, //【必须】string用户名
+     *      'mobile'=>1,    //【必须】string手机号
+     *      ]
      * ]
      * @return boolean
      */
@@ -745,6 +753,7 @@ class OrderOperate
 
     /**
      * 获取风控和认证信息
+     * @author wuhaiyan
      * @param $orderNo
      * @return array
      */
@@ -765,6 +774,7 @@ class OrderOperate
         //获取风控系统信息
         $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo);
         if($orderRisk){
+            //组装数据进行返回
             foreach ($orderRisk as $k=>$v){
                 if($v['type'] == Risk::RiskYidun){
                     $arr['name'] = '蚁盾分数';
@@ -803,6 +813,7 @@ class OrderOperate
     }
     /**
      * 查询订单的商品的状态是否全部完成 完成后更新状态
+     * @author wuhaiyan
      * @param $orderNo 订单编号
      * @return boolean
      */
@@ -854,6 +865,7 @@ class OrderOperate
 
     /**
      * 根据支付方式 解除订单代扣信息
+     * @author wuhaiyan
      * @param $orderInfo 订单信息
      * @return bool
      */
@@ -1005,6 +1017,9 @@ class OrderOperate
         $order['goods_info'] = $goodsData;
         //设备扩展信息表
         $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
+        if ($goodsExtendData) {
+            $goodsExtendData['logistics_name'] = config('web.logistics')[$goodsExtendData['logistics_id']];
+        }
         $order['goods_extend_info'] = $goodsExtendData;
         //优惠券信息
         $couponInfo =    OrderRepository::getCouponByOrderNo($orderNo);
