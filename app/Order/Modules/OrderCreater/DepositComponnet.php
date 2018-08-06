@@ -92,6 +92,7 @@ class DepositComponnet implements OrderCreater
                         //如果押金接口请求失败 押金不进行减免
 //                        $this->getOrderCreater()->setError('商品押金接口错误');
 //                        $this->flag = false;
+                        LogApi::error(config('app.env')."[下单/确认订单]商品押金接口错误",$arr);
                         $deposit['jianmian'] =0;
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
