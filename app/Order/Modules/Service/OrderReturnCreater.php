@@ -2279,6 +2279,7 @@ class OrderReturnCreater
                 LogApi::debug("操作关闭订单失败");
                 return false;
             }
+            LogApi::debug("获取订单对应的商品信息,释放库存",$orderGoods);
             //释放库存
             if ($orderGoods){
                 foreach ($orderGoods as $orderGoodsValues){
@@ -2288,8 +2289,9 @@ class OrderReturnCreater
                         'spu_id'=>$orderGoodsValues['prod_id'],
                         'num'=>$orderGoodsValues['quantity']
                     ];
-
+                    LogApi::debug("释放库存的参数",$orderGoods);
                     $success =Goods::addStock($goods_arr); //释放库存
+                    LogApi::debug("释放库返回结果",$success);
                     if (!$success) {
                         LogApi::debug("释放库存失败");
                         return false;

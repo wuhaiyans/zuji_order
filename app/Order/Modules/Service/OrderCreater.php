@@ -86,6 +86,8 @@ class OrderCreater
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //押金
            $orderCreater = new DepositComponnet($orderCreater);
@@ -96,8 +98,7 @@ class OrderCreater
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
@@ -332,14 +333,14 @@ class OrderCreater
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
 
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);

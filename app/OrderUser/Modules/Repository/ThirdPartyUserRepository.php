@@ -133,7 +133,7 @@ class ThirdPartyUserRepository
     /**
      * 添加
      * @param $params
-     * @return bool
+     * @return mixed
      * @throws \Exception
      */
     public static function add($params){
@@ -172,9 +172,15 @@ class ThirdPartyUserRepository
             'suipingbao'=>($params['suipingbao']?$params['suipingbao']:0),
             'zuqi'=>($params['zuqi']?$params['zuqi']:0),
         ];
+        $matching_row = self::matching_row([$data]);
         $t = ThirdPartyUser::create($data);
         if($t){
-            return $t->id;
+            if($matching_row){
+                $data['id']=$t->id;
+                $matching_row[]=$data;
+                return $matching_row;
+            }
+            return [];
         }else{
             throw new \Exception('第三方用户添加失败:'.json_encode($data));
         }
@@ -191,6 +197,25 @@ class ThirdPartyUserRepository
             return $id;
         }else{
             throw new \Exception('第三方用户删除失败:'.$id);
+        }
+    }
+
+    /**
+     * 审核通过
+     * @param $id
+     * @return bool
+     * @throws \Exception
+     */
+    public static function audit($id){
+        $obj = ThirdPartyUser::find($id);
+        if($obj){
+            $obj->status = ThirdPartyUser::STATUS_NONE;
+            if($obj->update()){
+                return true;
+            }
+            throw new \Exception('第三方用户删除失败:'.$id);
+        }else{
+            throw new \Exception('第三方用户删除失败:未找到 '.$id);
         }
     }
 
@@ -241,6 +266,52 @@ class ThirdPartyUserRepository
             }
 
         }
+        return $data;
+
+    }
+
+    /**
+     * 匹配一条数据
+     * @param $matching
+     * @return array|\Illuminate\Database\Eloquent\Collection|mixed|static[]
+     */
+    public static function matching_row($matching){
+        $data = [];
+        //判断手机号
+        if($matching['phone']){
+            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->all();
+            if($all){
+                $all = $all->toArray();
+                $all = self::zhuanhuan($all);
+                return $all;
+            }
+        }
+
+        //判断身份证
+        if($matching['identity']){
+            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->all();
+            if($all){
+                $all = $all->toArray();
+                $all = self::zhuanhuan($all);
+                return $all;
+            }
+        }
+
+        //判断收货人 收货地址
+        if($matching['consignee'] && $matching['shipping_address']){
+            $all = ThirdPartyUser::where([
+                'consignee'=>$matching['consignee'],
+                'province'=>$matching['province'],
+                'city'=>$matching['city'],
+                'county'=>$matching['county']
+            ])->all();
+            if($all){
+                $all = $all->toArray();
+                $all = self::zhuanhuan($all);
+                return $all;
+            }
+        }
+
         return $data;
 
     }
