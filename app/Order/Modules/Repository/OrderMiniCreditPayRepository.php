@@ -75,7 +75,6 @@ class OrderMiniCreditPayRepository
             return [];
         }
         $miniOrderInfo = $result->toArray();
-		$miniOrderInfo['create_time'] = date('Y-m-d H:i:s',$miniOrderInfo['create_time']);
         return $miniOrderInfo;
     }
 }
