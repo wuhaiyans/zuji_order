@@ -89,8 +89,8 @@ class DepositComponnet implements OrderCreater
                         $deposit = Yajin::calculate($arr);
                     }catch (\Exception $e){
                         //如果押金接口请求失败 押金不进行减免
-                        $this->getOrderCreater()->setError('商品押金接口错误');
-                        $this->flag = false;
+//                        $this->getOrderCreater()->setError('商品押金接口错误');
+//                        $this->flag = false;
                         $deposit['jianmian'] =0;
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
