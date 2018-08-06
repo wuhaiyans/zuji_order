@@ -41,11 +41,15 @@ class RiskComponnet implements OrderCreater
 //        $yidun = Risk::getRisk($params);
         //var_dump($yidun);die;
         //获取白骑士信息
-        $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
-        $this->knight =[];
-        if(is_array($knight)){
+        try{
+            $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
             $this->knight =$knight;
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[下单/确认订单] 获取风控接口失败",$data['user']['user_id']);
+            $this->knight =[];
         }
+
+
     }
     /**
      * 获取订单创建器

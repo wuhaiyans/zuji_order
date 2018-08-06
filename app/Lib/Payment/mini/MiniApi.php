@@ -46,7 +46,7 @@ class MiniApi {
         //加redis订单扣款标示
         Redis::set('zuji:order:miniorder:orderno:'.$params['out_order_no'], 'MiniWithhold');
         //返回字符串
-        return $result['zhima_merchant_order_credit_pay_response']['pay_status'];
+        return $result['pay_status'];
     }
 
     /*

@@ -78,17 +78,21 @@ class DepositComponnet implements OrderCreater
                     $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }else{//其他入口
                     $arr =[
-                        'user_id'=>$this->schema['user']['user_id'],
+                        'appid'=>$this->schema['order']['app_id'],
+                        'zujin'=>$v['zujin']*$v['zuqi'] * 100,
                         'yajin'=>$v['yajin'] * 100,
                         'market_price'=>$v['market_price']*100,
+                        'user_id'=>$this->schema['user']['user_id'],
+                        'is_order'=>1,
                     ];
                     try{
                         //调用风控押金计算接口
                         $deposit = Yajin::calculate($arr);
                     }catch (\Exception $e){
                         //如果押金接口请求失败 押金不进行减免
-                        $this->getOrderCreater()->setError('商品押金接口错误');
-                        $this->flag = false;
+//                        $this->getOrderCreater()->setError('商品押金接口错误');
+//                        $this->flag = false;
+                        LogApi::error(config('app.env')."[下单/确认订单]商品押金接口错误",$arr);
                         $deposit['jianmian'] =0;
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
