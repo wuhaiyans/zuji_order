@@ -616,7 +616,7 @@ class OrderOperate
 	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
 	 		        'txn_amount'	=> normalizeNum($res['txn_amount']/100),	// 总金额；单位：分
 	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
-	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100 -$orderInfo['order_yajin']),	// 总租金；单位：分
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100+$orderInfo['order_insurance'] -$orderInfo['order_yajin']),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
