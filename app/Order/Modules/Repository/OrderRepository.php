@@ -565,7 +565,9 @@ class OrderRepository
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('order_info.id', 'DESC')
-            ->count('order_info.id');
+            ->count();
+
+
 
 //        sql_profiler();
         $orderList = DB::table('order_info')
@@ -590,6 +592,7 @@ class OrderRepository
             ->get();
 
         $orderArray = objectToArray($orderList);
+
         if ($orderArray) {
             $orderIds = array_column($orderArray,"order_no");
 //           dd($orderIds);
@@ -610,11 +613,11 @@ class OrderRepository
                 ->orderBy('order_info_visit.id','desc')
                 ->get();
 
-            $orderArray['data'] = objectToArray($orderList);
-            $orderArray['total'] = $count;
-            $orderArray['last_page'] = ceil($count/$pagesize);
+            $orderArrays['data'] = objectToArray($orderList);
+            $orderArrays['total'] = $count;
+            $orderArrays['last_page'] = ceil($count/$pagesize);
 
-            return $orderArray;
+            return $orderArrays;
 //            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
 
         }

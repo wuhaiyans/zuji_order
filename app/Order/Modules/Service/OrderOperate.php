@@ -248,7 +248,7 @@ class OrderOperate
      * @param $params
      * @return mixed
      */
-    public static function getInsuranceInfo($params){
+    public static function getInsuranceInfo($params, $column='*'){
 
         $whereArray[] = ['order_no', '=', $params['order_no']];
         if (isset($params['goods_no'])) {
@@ -256,7 +256,7 @@ class OrderOperate
         }
 
 
-        $insuranceData =  OrderInsurance::where($whereArray)->get();
+        $insuranceData =  OrderInsurance::where($whereArray)->select($column)->get();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
@@ -1205,6 +1205,7 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderListArray = OrderRepository::getOrderList($param);
+//        dd($orderListArray);
 
 //        $orderListArray = objectToArray($orderList);
 
@@ -1538,7 +1539,8 @@ class OrderOperate
     public static function getManageGoodsActAdminState($orderNo, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo, array('goods_yajin','yajin','discount_amount','amount_after_discount',
+            'goods_status','coupon_amount','goods_name','goods_no','specs'));
         if (empty($goodsList)) return [];
 
         //到期时间多于1个月不出现到期处理
@@ -1565,7 +1567,7 @@ class OrderOperate
                 }
                 //是否已经操作过保险
 
-                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
+                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']],array('type'));
 //                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                 if ($insuranceData){
                     $goodsList[$keys]['act_goods_state']['Insurance'] = false;
