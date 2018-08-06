@@ -498,9 +498,9 @@ class OrderRepository
             $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
         }
 
-        //应用来源ID
+        //应用渠道
         if (isset($param['order_appid']) && !empty($param['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+            $whereArray[] = ['order_info.channel_id', '=', $param['order_appid']];
         }
 
         //支付类型

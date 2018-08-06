@@ -178,6 +178,52 @@ class ThirdPartyUserController extends Controller
     }
 
     /**
+     * 删除
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function del(){
+        $rules = [
+            'id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params['id']){
+            return apiResponse([], ApiStatus::CODE_10104, '参数错误');
+        }
+
+        try{
+            ThirdPartyUserRepository::del($params['id']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+        }
+
+        return apiResponse([]);
+
+    }
+
+    /**
+     * 审核通过
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function audit(){
+        $rules = [
+            'id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params['id']){
+            return apiResponse([], ApiStatus::CODE_10104, '参数错误');
+        }
+
+        try{
+            ThirdPartyUserRepository::audit($params['id']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+        }
+
+        return apiResponse([]);
+
+    }
+
+    /**
      * 导入历史已下单用户execl表
      */
     public function excel(){
