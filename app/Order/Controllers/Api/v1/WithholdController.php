@@ -292,6 +292,11 @@ class WithholdController extends Controller
                 // 请求代扣接口
                 $withholding->deduct($withholding_data);
 
+            }catch(\App\Lib\ApiException $exc){
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
+				return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
+				
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
