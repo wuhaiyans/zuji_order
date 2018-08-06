@@ -181,6 +181,20 @@ class ThirdPartyUserRepository
     }
 
     /**
+     * 删除一条记录
+     * @param $id
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function del($id){
+        if(ThirdPartyUser::destroy($id)){
+            return $id;
+        }else{
+            throw new \Exception('第三方用户删除失败:'.$id);
+        }
+    }
+
+    /**
      * 查询相似订单 三维数组
      * @param $matching
      * @return array
