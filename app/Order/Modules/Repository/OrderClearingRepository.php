@@ -114,6 +114,7 @@ class OrderClearingRepository
             'create_time'=>time(),
             'update_time'=>time(),
             'app_id' => $orderInfo['appid'],
+            'channel_id' => $orderInfo['channel_id'],
             'out_account'=> $orderInfo['pay_type'],
             'out_refund_no'=>   $param['out_refund_no'] ??  '',
             'out_unfreeze_trade_no'=> $param['out_unfreeze_trade_no'] ??  '',
@@ -191,7 +192,7 @@ class OrderClearingRepository
 
         //应用来源ID
         if (isset($param['app_id']) && !empty($param['app_id'])) {
-            $whereArray[] = ['app_id', '=', $param['app_id']];
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
         }
 
         //出账类型
