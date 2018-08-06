@@ -49,6 +49,7 @@ class ImportHistoryInstalmentRepayment extends Command
         try{
             $limit  = 300;
             $page   = 1;
+            $affect_num = 0;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
@@ -92,7 +93,7 @@ class ImportHistoryInstalmentRepayment extends Command
                     if(!$ret){
                         $arr[] = $item['instalment_id'];
                     }
-
+                    ++$affect_num;
                     $bar->advance();
                 }
 
@@ -105,7 +106,7 @@ class ImportHistoryInstalmentRepayment extends Command
                 LogApi::notify("分期主动还款修改",$arr);
             }
             $bar->finish();
-            echo "导入成功";die;
+            echo "导入成功:" . $affect_num . '个数据';die;
         }catch (\Exception $e){
             echo $e->getMessage();
             die;
