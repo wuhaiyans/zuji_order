@@ -10,9 +10,11 @@ class Yajin extends \App\Lib\BaseApi {
 	 * 根据风控结果，计算押金
 	 * @param array		
 	 * [
-	 *		'yajin'			=> '',	// 商品押金，单位：分
-	 *		'market_price'	=> '',	// 商品市场价格，单位：分
-	 *		'user_id'		=> '',	// 用户ID
+	 *		'appid'			=> '',	// 【必选】渠道入口ID（微回收入口时必须）
+	 *		'zujin'			=> '',	// 【必选】商品总租金，单位：分
+	 *		'yajin'			=> '',	// 【必选】商品总押金，单位：分
+	 *		'market_price'	=> '',	// 【必选】商品市场价格，单位：分
+	 *		'user_id'		=> '',	// 【必选】用户ID
 	 * ]
 	 * @return array
 	 * [
