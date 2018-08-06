@@ -579,25 +579,25 @@ class OrderOperate
         $payType =$orderInfo['pay_type'];//获取支付方式
         $orderNo =$orderInfo['order_no'];
 
+        $rentAmount =normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']);
+        $totalAmount =normalizeNum($rentAmount+$orderInfo['order_yajin']);
+        $txnTerms =15;
+
         $instalmentInfo =[
-            'txn_amount'	=> normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']+$orderInfo['order_yajin']),	// 总金额；单位：分
-            'txn_terms'		=> 15,	// 总分期数
-            'rent_amount'	=> normalizeNum($orderInfo['order_amount']),	// 总租金；单位：分
-            'month_amount'	=> normalizeNum($orderInfo['order_amount']/15),	// 每月租金；单位：分
-            'remainder_amount' => normalizeNum($orderInfo['order_amount']-normalizeNum($orderInfo['order_amount']/15)*14),	// 每月租金取整后,总租金余数；单位：分
-            'first_other_amount' => normalizeNum($orderInfo['order_insurance']),// 首期额外金额；单位：分
+            'txn_amount'	=> $totalAmount,	// 总金额；单位：分
+            'txn_terms'		=> $txnTerms,	// 总分期数
+            'rent_amount'	=> $rentAmount,	// 总租金；单位：分
+            'month_amount'	=> normalizeNum($rentAmount/$txnTerms),	// 每月租金；单位：分
+            'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
-            'sum_terms'		=> 0,	// 已还总期数；单位：分
-            'remain_amount' =>  normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']+$orderInfo['order_yajin']),	// 剩余总金额；单位：分
+            'sum_terms'		=> 0,	// 已还总期数
+            'remain_amount' =>  $totalAmount,	// 剩余总金额；单位：分
         ];
 
 
         if($payType == PayInc::LebaifenPay){
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
-            if(empty($payInfo)){
-                return $instalmentInfo;
-            }
             $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
             if(empty($paymentInfo)){
                 return $instalmentInfo;
@@ -619,9 +619,8 @@ class OrderOperate
 	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
-	 		        'first_other_amount' => normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
-	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；单位：分
+	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
                     'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余总金额；单位：分
                 ];
                 return $instalmentInfo;
@@ -632,7 +631,7 @@ class OrderOperate
             }
 
         }
-        return true;
+        return [];
     }
     /**
      * 订单统计查询{"item":{"name":"first_other_amount","must":1,"type":0,"remark":"","mock":"99.00","drag":1,"show":0},"index":8}

@@ -43,7 +43,7 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	 *		'remainder_amount' => '',	// 每月租金取整后,总租金余数；单位：分
 	 *		'first_other_amount' => '',// 首期额外金额；单位：分
 	 *		'sum_amount'	=> '',	// 已还总金额；单位：分
-	 *		'sum_terms'		=> '',	// 已还总期数；单位：分
+	 *		'sum_terms'		=> '',	// 已还总期数
 	 *		'remain_amount' => '',	// 剩余总金额；单位：分
 	 * ]
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常

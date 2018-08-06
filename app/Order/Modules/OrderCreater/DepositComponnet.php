@@ -83,6 +83,7 @@ class DepositComponnet implements OrderCreater
                         'yajin'=>$v['yajin'] * 100,
                         'market_price'=>$v['market_price']*100,
                         'user_id'=>$this->schema['user']['user_id'],
+                        'is_order'=>1,
                     ];
                     try{
                         //调用风控押金计算接口
