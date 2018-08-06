@@ -44,6 +44,11 @@ class ThirdPartyUser extends OrderUser
     const TYPE_CHANGZU   = 1;//长租
     const TYPE_DUANZU    = 2;//短租
 
+    //碎屏保成本价
+    const SPB_CB48   = 48;
+    const SPB_CB150   = 150;
+    const SPB_CB34   = 34;
+
     protected $table = 'third_party_user';
 
     protected $primaryKey='id';
@@ -56,8 +61,12 @@ class ThirdPartyUser extends OrderUser
      * 可填充字段
      */
     protected $fillable = [
+        'id',
         'phone',
         'consignee',
+        'province',
+        'city',
+        'county',
         'shipping_address',
         'status',
         'platform',
@@ -67,7 +76,22 @@ class ThirdPartyUser extends OrderUser
         'identity',
         'order_no',
         'imei',
-        'remarks'
+        'remarks',
+        'types',
+        'order_time',
+        'order_model',
+        'colour',
+        'total_amount',
+        'deposit',
+        'pinpai',
+        'jixing',
+        'yanse',
+        'rongliang',
+        'zujin',
+        'total_zujin',
+        'suipingbao_chengben',
+        'suipingbao',
+        'zuqi',
     ];
 
     /**
@@ -174,4 +198,24 @@ class ThirdPartyUser extends OrderUser
 
         return isset($cz[$status]) ? $cz[$status] : '';
     }
+
+    /**
+     * 碎屏保成本价转换
+     *
+     * @param null $status
+     * @return array|mixed|string
+     */
+    public static function spb_cb($status=null)
+    {
+        $spb = [
+            self::SPB_CB48   => '48.00',
+            self::SPB_CB150   => '150.00',
+            self::SPB_CB34   => '34.00',
+        ];
+
+        if ($status === null) return $spb;
+
+        return isset($spb[$status]) ? $spb[$status] : '';
+    }
+
 }

@@ -229,6 +229,7 @@ class OrderReturnCreater
      * [
      *       'order_no'      => '',   商品编号 string  【必选】
      *       'user_id'      => '',    用户id  int     【必选】
+     *       'reason_text'  => '',    退款申请说明  string     【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
@@ -311,8 +312,8 @@ class OrderReturnCreater
             //创建退款单
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
-            $data['user_id'] = $params['user_id'];
-
+            $data['user_id']  = $params['user_id'];
+            $data['reason_text']   =  $params['reason_text'];
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
             $data['create_time'] = time();
