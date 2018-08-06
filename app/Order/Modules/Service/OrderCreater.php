@@ -330,10 +330,10 @@ class OrderCreater
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
-            $orderCreater = new RiskComponnet($orderCreater);
+            //$orderCreater = new RiskComponnet($orderCreater);
 
             //押金
-            //$orderCreater = new DepositComponnet($orderCreater);
+            $orderCreater = new DepositComponnet($orderCreater);
 
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
