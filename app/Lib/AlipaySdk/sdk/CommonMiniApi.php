@@ -59,6 +59,7 @@ class CommonMiniApi extends BaseApi {
 		$request->setBizContent (json_encode($biz_content) );
 		//入库请求信息
 		$result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add($biz_content);
+		var_dump($result);
 		if( !$result ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
 			return false;
