@@ -10,6 +10,7 @@ return [
     'orderuser.thirdpartyuser.publics' => 'ThirdPartyUserController@publics', //公共数据
     'orderuser.thirdpartyuser.del' => 'ThirdPartyUserController@del', //删除
     'orderuser.thirdpartyuser.audit' => 'ThirdPartyUserController@audit', //审核通过
+    'orderuser.thirdpartyuser.getRow' => 'ThirdPartyUserController@getRow', //根据ID查询一条数据
 
 
 ];
