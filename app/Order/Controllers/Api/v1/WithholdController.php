@@ -233,8 +233,9 @@ class WithholdController extends Controller
             //芝麻小程序扣款请求
             $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
             $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
+            $miniParams['app_id'] = $miniOrderInfo['app_id'];
             //扣款交易号
-            $miniParams['out_trans_no']     = $instalmentId;
+            $miniParams['out_trans_no']     = $business_no;
             $miniParams['pay_amount']       = $amount;
             $miniParams['remark']           = $subject;
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
@@ -421,8 +422,9 @@ class WithholdController extends Controller
                 //芝麻小程序扣款请求
                 $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
                 $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
+                $miniParams['app_id'] = $miniOrderInfo['app_id'];
                 //扣款交易号
-                $miniParams['out_trans_no']     = $instalmentId;
+                $miniParams['out_trans_no']     = $business_no;
                 $miniParams['pay_amount']       = $amount;
                 $miniParams['remark']           = $subject;
                 $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
