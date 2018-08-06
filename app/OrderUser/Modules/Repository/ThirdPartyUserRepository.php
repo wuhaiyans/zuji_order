@@ -83,8 +83,9 @@ class ThirdPartyUserRepository
         if(!$row){
             throw new \Exception('第三方用户ID:'.$id.'未找到');
         }
+        $row = self::zhuanhuan_row($row->toArray());
 
-        return $row->toArray();
+        return $row;
     }
     /**
      * 根据第三方用户ID修改一条记录
@@ -107,6 +108,20 @@ class ThirdPartyUserRepository
         $row->order_no=$params['order_no'];
         $row->imei=$params['imei'];
         $row->remarks=$params['remarks'];
+        $row->order_time=($params['order_time']?strtotime($params['order_time']):0);
+        $row->order_model=$params['order_model'];
+        $row->colour=$params['colour'];
+        $row->total_amount=$params['total_amount'];
+        $row->deposit=$params['deposit'];
+        $row->pinpai=$params['pinpai'];
+        $row->jixing=$params['jixing'];
+        $row->yanse=$params['yanse'];
+        $row->rongliang=$params['rongliang'];
+        $row->zujin=$params['zujin'];
+        $row->total_zujin=$params['total_zujin'];
+        $row->suipingbao_chengben=$params['suipingbao_chengben'];
+        $row->suipingbao=$params['suipingbao'];
+        $row->zuqi=$params['zuqi'];
         if($row->update()){
             return true;
         }else{
@@ -146,7 +161,16 @@ class ThirdPartyUserRepository
             'order_model'=>($params['order_model']?$params['order_model']:0),
             'colour'=>($params['colour']?$params['colour']:0),
             'total_amount'=>($params['total_amount']?$params['total_amount']:0),
-            'deposit'=>($params['remarks']?$params['deposit']:0),
+            'deposit'=>($params['deposit']?$params['deposit']:0),
+            'pinpai'=>($params['pinpai']?$params['pinpai']:0),
+            'jixing'=>($params['jixing']?$params['jixing']:0),
+            'yanse'=>($params['yanse']?$params['yanse']:0),
+            'rongliang'=>($params['rongliang']?$params['rongliang']:0),
+            'zujin'=>($params['zujin']?$params['zujin']:0),
+            'total_zujin'=>($params['total_zujin']?$params['total_zujin']:0),
+            'suipingbao_chengben'=>($params['suipingbao_chengben']?$params['suipingbao_chengben']:0),
+            'suipingbao'=>($params['suipingbao']?$params['suipingbao']:0),
+            'zuqi'=>($params['zuqi']?$params['zuqi']:0),
         ];
         $t = ThirdPartyUser::create($data);
         if($t){
@@ -207,12 +231,38 @@ class ThirdPartyUserRepository
 
     }
 
+    /**
+     * 状态转换
+     *      二维数组
+     * @param $all
+     * @return mixed
+     */
     public static function zhuanhuan($all){
         foreach ($all as $key=>$item){
             $all[$key]['status_name'] = ThirdPartyUser::sta($item['status']);
             $all[$key]['platform_name'] = ThirdPartyUser::platform($item['platform']);
+            $all[$key]['pinpai_name'] = ThirdPartyUser::pinpai($item['pinpai']);
+            $all[$key]['colour_name'] = ThirdPartyUser::chengse($item['colour']);
+            $all[$key]['types_name'] = ThirdPartyUser::types($item['types']);
         }
         return $all;
+
+    }
+
+    /**
+     * 状态转换
+     *      一维数组
+     * @param $all
+     * @return mixed
+     */
+    public static function zhuanhuan_row($row){
+        $row['status_name'] = ThirdPartyUser::sta($row['status']);
+        $row['platform_name'] = ThirdPartyUser::platform($row['platform']);
+        $row['pinpai_name'] = ThirdPartyUser::pinpai($row['pinpai']);
+        $row['colour_name'] = ThirdPartyUser::chengse($row['colour']);
+        $row['types_name'] = ThirdPartyUser::types($row['types']);
+
+        return $row;
 
     }
 

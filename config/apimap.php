@@ -79,6 +79,10 @@ return [
     'api.order.getRiskInfo'=>'OrderController@getRiskInfo',
 
 
+    //获取乐百分订单的分期列表
+    'api.order.getLebaifenInstalment'=>'OrderController@getLebaifenInstalment',
+
+
 
     //订单结算清单列表接口
     'api.orderClean.list'=>'OrderCleaningController@cleanList',
@@ -90,6 +94,9 @@ return [
     'api.orderClean.upStatus'=>'OrderCleaningController@upOrderCleanStatus',
     //创建订单清算单
     'api.orderClean.create'=>'OrderCleaningController@createOrderClean',
+
+    //更新订单备注
+    'api.orderClean.addRemark'=>'OrderCleaningController@upOrderCleanminiRecoverRemark',
 
     //订单清算单操作退款
     'api.orderClean.opereate'=>'OrderCleaningController@orderCleanOperate',

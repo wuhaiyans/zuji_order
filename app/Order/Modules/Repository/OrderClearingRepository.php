@@ -357,6 +357,11 @@ class OrderClearingRepository
             $orderData->operator_type       =   $param['operator_type'] ??  0;
         }
 
+        if (isset($param['mini_recover_transfer_num'])) {
+            $orderData->mini_recover_transfer_num   =   $param['mini_recover_transfer_num'] ?? '0.00';
+            $orderData->mini_recover_transfer_remark       =   $param['mini_recover_transfer_remark'] ??  '';
+        }
+
         $orderData->update_time = time();
 
         $success =$orderData->save();
