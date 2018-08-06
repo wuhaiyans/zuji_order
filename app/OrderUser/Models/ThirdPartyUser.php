@@ -56,8 +56,12 @@ class ThirdPartyUser extends OrderUser
      * 可填充字段
      */
     protected $fillable = [
+        'id',
         'phone',
         'consignee',
+        'province',
+        'city',
+        'county',
         'shipping_address',
         'status',
         'platform',
@@ -67,7 +71,22 @@ class ThirdPartyUser extends OrderUser
         'identity',
         'order_no',
         'imei',
-        'remarks'
+        'remarks',
+        'types',
+        'order_time',
+        'order_model',
+        'colour',
+        'total_amount',
+        'deposit',
+        'pinpai',
+        'jixing',
+        'yanse',
+        'rongliang',
+        'zujin',
+        'total_zujin',
+        'suipingbao_chengben',
+        'suipingbao',
+        'zuqi',
     ];
 
     /**

@@ -229,6 +229,7 @@ class OrderReturnCreater
      * [
      *       'order_no'      => '',   商品编号 string  【必选】
      *       'user_id'      => '',    用户id  int     【必选】
+     *       'reason_text'  => '',    退款申请说明  string     【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
@@ -311,8 +312,8 @@ class OrderReturnCreater
             //创建退款单
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
-            $data['user_id'] = $params['user_id'];
-
+            $data['user_id']  = $params['user_id'];
+            $data['reason_text']   =  $params['reason_text'];
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
             $data['create_time'] = time();
@@ -2302,9 +2303,14 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        $where[]=['order_no','=',$returnData['order_no']];
-                        $where[]=['goods_no','=',$returnData['goods_no']];
+                        if(isset($returnData['order_no'])){
+                            $where[]=['order_no','=',$returnData['order_no']];
+                        }
+                        if(isset($returnData['goods_no'])){
+                            $where[]=['goods_no','=',$returnData['goods_no']];
+                        }
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                        //如果存在分期则关闭，不存在直接返回true
                         if(!$orderGoodsInstalment){
                             return true;
                         }
