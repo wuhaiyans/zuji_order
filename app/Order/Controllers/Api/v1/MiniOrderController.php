@@ -332,7 +332,7 @@ class MiniOrderController extends Controller
         if($param['order_status'] == 'SUCCESS'){
             return apiResponse( [], ApiStatus::CODE_0);
         }else if($param['order_status'] == 'FAIL'){
-            return apiResponse( [], ApiStatus::CODE_35019,'小程序同步接口状态错误FAIL');
+            return apiResponse( [], ApiStatus::CODE_35019);
         }else if($param['order_status'] == 'UNKOWN'){
             return apiResponse( [], ApiStatus::CODE_35020,'小程序同步接口状态错误UNKOWN');
         }

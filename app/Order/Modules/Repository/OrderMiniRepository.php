@@ -60,7 +60,24 @@ class OrderMiniRepository
      */
     public static function update( $where , $arr ) {
         $OrderMini = new OrderMini();
-        $b = $OrderMini->update($where,$arr);
+        $result =  $OrderMini->where($where)->first();
+        $result->order_no = $arr['order_no'];
+        $result->zm_order_no = $arr['zm_order_no'];
+        $result->transaction_id = $arr['transaction_id'];
+        $result->name = $arr['name'];
+        $result->mobile = $arr['mobile'];
+        $result->cert_no = $arr['cert_no'];
+        $result->house = $arr['house'];
+        $result->zm_grade = $arr['zm_grade'];
+        $result->credit_amount = $arr['credit_amount'];
+        $result->zm_risk = $arr['zm_risk'];
+        $result->zm_face = $arr['zm_face'];
+        $result->create_time = $arr['create_time'];
+        $result->user_id = $arr['user_id'];
+        $result->channel_id = $arr['channel_id'];
+        $result->app_id = $arr['app_id'];
+        $result->overdue_time = $arr['overdue_time'];
+        $b = $result->update();
         return $b;
     }
 

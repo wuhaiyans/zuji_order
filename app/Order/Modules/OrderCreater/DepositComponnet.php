@@ -79,7 +79,7 @@ class DepositComponnet implements OrderCreater
                 }else{//其他入口
                     $arr =[
                         'appid'=>$this->schema['order']['app_id'],
-                        'zujin'=>$v['zujin']*$v['zuqi'] * 100,
+                        'zujin'=>$v['amount_after_discount'] * 100, //优惠后总租金
                         'yajin'=>$v['yajin'] * 100,
                         'market_price'=>$v['market_price']*100,
                         'user_id'=>$this->schema['user']['user_id'],
