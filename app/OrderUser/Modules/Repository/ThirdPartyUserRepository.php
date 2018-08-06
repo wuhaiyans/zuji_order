@@ -271,6 +271,7 @@ class ThirdPartyUserRepository
     }
 
     /**
+     * 匹配一条数据
      * @param $matching
      * @return array|\Illuminate\Database\Eloquent\Collection|mixed|static[]
      */

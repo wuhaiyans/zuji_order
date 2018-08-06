@@ -214,6 +214,39 @@ class ThirdPartyUserController extends Controller
     }
 
     /**
+     * H5、小程序、App下单 匹配
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderMatching(){
+        $rules = [
+            'phone' => 'required',
+            'identity' => 'required',
+            'consignee' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'county' => 'required',
+            'shipping_address' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params){
+            return apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        try{
+            $data = ThirdPartyUserRepository::matching_row($params);
+            if($data){
+                $row = ['matching'=>1,'msg'=>'匹配到数据'];
+            }else{
+                $row = ['matching'=>0,'msg'=>'未匹配到数据'];
+            }
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70003, $e->getMessage());
+        }
+
+        return apiResponse($row);
+
+    }
+
+    /**
      * 导入历史已下单用户execl表
      */
     public function excel(){
