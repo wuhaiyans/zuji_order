@@ -32,7 +32,10 @@ class OrderMiniCreditPayRepository
             $info =OrderMiniCreditPay::create($data);
             return $info->getQueueableId();
         }else{
-            $b =self::update( $where , $data );
+            $data['pay_amount'] = '0.02';
+            $b =self::update( [
+                'id'=>$miniOrderCreditPayInfo['id']
+            ] , $data );
             if(!$b){
                 return false;
             }
@@ -47,7 +50,14 @@ class OrderMiniCreditPayRepository
      */
     public static function update( $where , $arr ) {
         $OrderMiniCreditPay = new OrderMiniCreditPay();
-        $b = $OrderMiniCreditPay->update($where,$arr);
+        $MiniCreditPay = $OrderMiniCreditPay->where($where)->first();
+        $MiniCreditPay->order_operate_type = $arr['order_operate_type'];
+        $MiniCreditPay->out_order_no = $arr['out_order_no'];
+        $MiniCreditPay->zm_order_no = $arr['zm_order_no'];
+        $MiniCreditPay->out_trans_no = $arr['out_trans_no'];
+        $MiniCreditPay->remark = $arr['remark'];
+        $MiniCreditPay->pay_amount = $arr['pay_amount'];
+        $b = $MiniCreditPay->update();
         return $b;
     }
 
