@@ -580,7 +580,7 @@ class OrderOperate
         $orderNo =$orderInfo['order_no'];
 
         $rentAmount =normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']);
-        $totalAmount =$rentAmount+$orderInfo['order_yajin'];
+        $totalAmount =normalizeNum($rentAmount+$orderInfo['order_yajin']);
         $txnTerms =15;
 
         $instalmentInfo =[
@@ -598,9 +598,6 @@ class OrderOperate
         if($payType == PayInc::LebaifenPay){
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
-            if(empty($payInfo)){
-                return $instalmentInfo;
-            }
             $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
             if(empty($paymentInfo)){
                 return $instalmentInfo;
@@ -634,7 +631,7 @@ class OrderOperate
             }
 
         }
-        return true;
+        return [];
     }
     /**
      * 订单统计查询{"item":{"name":"first_other_amount","must":1,"type":0,"remark":"","mock":"99.00","drag":1,"show":0},"index":8}
