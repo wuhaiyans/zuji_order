@@ -42,13 +42,11 @@ class MiniApi {
             return false;
         }
         $result = $CommonMiniApi->getResult();
-        var_dump($result);
         \App\Lib\Common\LogApi::error('发送扣款请求',['request'=>$params,'response'=>$result]);
         //加redis订单扣款标示
         Redis::set('zuji:order:miniorder:orderno:'.$params['out_order_no'], 'MiniWithhold');
-        print_r($result);die;
         //返回字符串
-        return $result;
+        return $result['pay_status'];
     }
 
     /*
