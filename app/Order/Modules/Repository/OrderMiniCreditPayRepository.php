@@ -20,14 +20,19 @@ class OrderMiniCreditPayRepository
      */
     public static function add($data){
         //判断当前订单已经存在（已存在则修改）
-        $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($data['out_order_no'] , $data['order_operate_type']);
+        $where = [
+          'out_order_no'=>$data['out_order_no'],
+          'order_operate_type'=>$data['order_operate_type'],
+        ];
+        if(isset($data['out_trans_no'])){
+            $where['out_trans_no'] = $data['out_trans_no'];
+        }
+        $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($where);
         if(empty($miniOrderCreditPayInfo)){
             $info =OrderMiniCreditPay::create($data);
             return $info->getQueueableId();
         }else{
-            $b =self::update( [
-                'out_order_no'=>$data['out_order_no']
-            ], $data);
+            $b =self::update( $where , $data );
             if(!$b){
                 return false;
             }
@@ -48,8 +53,7 @@ class OrderMiniCreditPayRepository
 
     /**
      * 根据订单号获取芝麻支付信息
-     * @param string $orderNo 订单编号
-     * @param string $orderOperateType 订单完结类型
+     * @param string $where  数据字段条件
      * @return array $zmOrderInfo 订单基础信息|空<br/>
      * $zmOrderInfo = [<br/>
      *		'id' => '',//自增id<br/>
@@ -59,16 +63,10 @@ class OrderMiniCreditPayRepository
      *		'out_trans_no' => '',//资商户资金交易号<br/>
      *		'remark' => '',//报错取消原因或完结补充说明<br/>
      *		'pay_amount' => '',//该次支付总金额<br/>
-     *		'create_time' => '',//创建时间<br/>
      * ]
      */
-    public static function getMiniCreditPayInfo( $orderNo,$orderOperateType ,$remark = false ) {
+    public static function getMiniCreditPayInfo( $where = [] ) {
         $MiniOrder = new OrderMiniCreditPay();
-        $where['out_order_no'] = $orderNo;
-        $where['order_operate_type'] = $orderOperateType;
-        if($remark){
-            $where['remark'] = $remark;
-        }
         $result =  $MiniOrder->where($where)->first();
         if (!$result) {
             get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');
