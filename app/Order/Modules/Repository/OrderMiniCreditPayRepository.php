@@ -23,7 +23,6 @@ class OrderMiniCreditPayRepository
         $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($data['out_order_no'] , $data['order_operate_type']);
         if(empty($miniOrderCreditPayInfo)){
             $info =OrderMiniCreditPay::create($data);
-            var_dump($info);die;
             return $info->getQueueableId();
         }else{
             $b =self::update( [
