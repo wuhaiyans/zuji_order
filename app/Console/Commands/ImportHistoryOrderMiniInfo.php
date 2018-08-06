@@ -12,14 +12,14 @@ use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ImportHistoryMiniCertification extends Command
+class ImportHistoryOrderMiniCreditRent extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:ImportHistoryMiniCertification';
+    protected $signature = 'command:ImportHistoryOrderMiniCreditRent';
 
     /**
      * The console command description.

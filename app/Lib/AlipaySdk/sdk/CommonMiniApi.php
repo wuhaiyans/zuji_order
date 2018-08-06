@@ -80,6 +80,7 @@ class CommonMiniApi extends BaseApi {
 			\App\Lib\Common\LogApi::notify('芝麻接口：'.$msg,$debug_data);
 			return false;
 		}
+
 		$this->result = $result;
 		return true;
 	}
