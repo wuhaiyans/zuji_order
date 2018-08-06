@@ -238,7 +238,6 @@ class WithholdController extends Controller
             $miniParams['out_trans_no']     = $business_no;
             $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
-            print_r($miniParams);
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){

@@ -36,7 +36,6 @@ class MiniApi {
     public static function withhold( $params ){
         $params['order_operate_type'] = self::$INSTALLMENT;
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
-        print_r($params);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b == false){
             self::$error = $CommonMiniApi->getError();

@@ -55,7 +55,6 @@ class CommonMiniApi extends BaseApi {
 		if(isset($params['remark'])){
 			$biz_content['remark'] = $params['remark'];
 		}
-		print_r($biz_content);die;
 		$request = new \ZhimaMerchantOrderCreditPayRequest();
 		$request->setBizContent (json_encode($biz_content) );
 		//入库请求信息
