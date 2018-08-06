@@ -2296,19 +2296,20 @@ class OrderReturnCreater
                     }
                 }
             }
-
+            //查询分期条件
+            if(isset($returnData['order_no'])){
+                $where[]=['order_no','=',$returnData['order_no']];
+            }
+            if(isset($returnData['goods_no'])){
+                $where[]=['goods_no','=',$returnData['goods_no']];
+            }
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        if(isset($returnData['order_no'])){
-                            $where[]=['order_no','=',$returnData['order_no']];
-                        }
-                        if(isset($returnData['goods_no'])){
-                            $where[]=['goods_no','=',$returnData['goods_no']];
-                        }
+
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
                         //如果存在分期则关闭，不存在直接返回true
                         if(!$orderGoodsInstalment){
@@ -2342,6 +2343,11 @@ class OrderReturnCreater
                 $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
                 if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                     $orderParams['order_no']=$return_info['order_no'];
+                    $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                    //如果存在分期则关闭，不存在直接返回true
+                    if(!$orderGoodsInstalment){
+                        return true;
+                    }
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
                     if (!$success) {
                         LogApi::debug("关闭订单分期失败");

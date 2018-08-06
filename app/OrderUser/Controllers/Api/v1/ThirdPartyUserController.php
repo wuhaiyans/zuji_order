@@ -177,6 +177,25 @@ class ThirdPartyUserController extends Controller
 
     }
 
+    public function del(){
+        $rules = [
+            'id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params['id']){
+            return apiResponse([], ApiStatus::CODE_10104, '参数错误');
+        }
+
+        try{
+            ThirdPartyUserRepository::del($params['id']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+        }
+
+        return apiResponse([]);
+
+    }
+
     /**
      * 导入历史已下单用户execl表
      */
