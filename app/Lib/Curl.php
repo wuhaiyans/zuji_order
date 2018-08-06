@@ -187,7 +187,9 @@ class Curl {
 		// 返回 response_header, 该选项非常重要,如果不为 true, 只会获得响应的正文
 		// curl_setopt($ch, CURLOPT_HEADER, true);
 		// 发送请求
+        LogApi::info("ceshi_order",[$url,$params]);
         $output = self::_curl_exec($ch);
+        LogApi::info("ceshi_order",[$url,$params,$output]);
 		self::$curl_info = curl_getinfo($ch);
         curl_close($ch);
         return $output;
