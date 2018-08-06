@@ -591,7 +591,7 @@ class OrderOperate
             'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数
-            'remain_amount' =>  $totalAmount,	// 剩余总金额；单位：分
+            'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
         ];
 
 
@@ -616,12 +616,12 @@ class OrderOperate
 	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
 	 		        'txn_amount'	=> normalizeNum($res['txn_amount']/100),	// 总金额；单位：分
 	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
-	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100+$orderInfo['order_insurance'] -$orderInfo['order_yajin']),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
 	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
-                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余总金额；单位：分
+                    'remain_amount' => normalizeNum($res['remain_amount']/100 -$orderInfo['order_yajin'] ),	// 剩余还款总租金额；单位：分
                 ];
                 return $instalmentInfo;
 
@@ -691,11 +691,13 @@ class OrderOperate
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
             $orderInfo['business_no'] =$data['order_no'];
             $orderInfo['order_no']=$data['order_no'];
+            //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 DB::rollBack();
                 return false;
             }
+            //增加操作日志
             $userInfo =$data['userinfo'];
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
@@ -896,13 +898,15 @@ class OrderOperate
         $goods = objectToArray($goods);
         $orderStatus =0;
         foreach ($goods as $k=>$v){
-            //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
+            //判断订单状态是否是 退款/退货 如果是 状态为 退款关闭
             if($v['goods_status'] == Inc\OrderGoodStatus::REFUNDED || $v['goods_status'] == Inc\OrderGoodStatus::EXCHANGE_REFUND){
                 $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
             }
+            //判断商品状态是 否是完成状态 买断/还机
             if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
                 $orderStatus = Inc\OrderStatus::OrderCompleted;
             }
+            //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
             if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT && $v['goods_status'] != Inc\OrderGoodStatus::EXCHANGE_REFUND){
             //var_dump("订单未完成");die;
                 return true;

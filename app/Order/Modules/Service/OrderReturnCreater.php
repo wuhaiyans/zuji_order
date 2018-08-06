@@ -2302,9 +2302,14 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                        $where[]=['order_no','=',$returnData['order_no']];
-                        $where[]=['goods_no','=',$returnData['goods_no']];
+                        if(isset($returnData['order_no'])){
+                            $where[]=['order_no','=',$returnData['order_no']];
+                        }
+                        if(isset($returnData['goods_no'])){
+                            $where[]=['goods_no','=',$returnData['goods_no']];
+                        }
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                        //如果存在分期则关闭，不存在直接返回true
                         if(!$orderGoodsInstalment){
                             return true;
                         }

@@ -49,12 +49,13 @@ class ImportHistoryInstalmentRepayment extends Command
         try{
             $limit  = 300;
             $page   = 1;
+            $affect_num = 0;
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
                 $result = \DB::connection('mysql_01')->table('zuji_instalment_prepayment')
                     ->where([
-                        ['create_time', ">", '1530806400'],
+                        ['create_time', ">", '1531584000'],
                         ['prepayment_status', "=", 1],
                     ])
                     ->forPage($page,$limit)
@@ -64,6 +65,16 @@ class ImportHistoryInstalmentRepayment extends Command
 
                 foreach($result as &$item) {
 
+                    // 已经支付成功 则跳过
+                    $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::where([
+                        ['order_no', '=', $item['order_no']],
+                        ['term', '=', $item['term']],
+                    ])->first();
+                    $instalmentInfo = objectToArray($instalmentInfo);
+                    if($instalmentInfo['status'] == 2){
+                        continue;
+                    }
+
                     $data = [
                         'business_no'       => $item['trade_no'],
                         'payment_amount'    => $item['payment_amount']/100,
@@ -72,15 +83,17 @@ class ImportHistoryInstalmentRepayment extends Command
                         'remark'            => '旧系统提前还款数据导入',
                         'pay_type'          => 1,
                     ];
+
                     $ret = \App\Order\Models\OrderGoodsInstalment::where([
                             ['order_no', '=', $item['order_no']],
+                            ['status', '!=', 2],
                             ['term', '=', $item['term']],
                         ])
                         ->update($data);
                     if(!$ret){
                         $arr[] = $item['instalment_id'];
                     }
-
+                    ++$affect_num;
                     $bar->advance();
                 }
 
@@ -93,7 +106,7 @@ class ImportHistoryInstalmentRepayment extends Command
                 LogApi::notify("分期主动还款修改",$arr);
             }
             $bar->finish();
-            echo "导入成功";die;
+            echo "导入成功:" . $affect_num . '个数据';die;
         }catch (\Exception $e){
             echo $e->getMessage();
             die;
