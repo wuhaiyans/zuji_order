@@ -159,11 +159,12 @@ class OrderRepository
      *
      */
 
-    public static function getGoodsListByOrderId($orderNo){
+    public static function getGoodsListByOrderId($orderNo,$coulumn='*'){
         if (empty($orderNo)) return false;
+
         $orderGoodData =  OrderGoods::query()->where([
             ['order_no', '=', $orderNo],
-        ])->get();
+        ])->select($coulumn)->get();
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
