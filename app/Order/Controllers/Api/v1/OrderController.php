@@ -535,6 +535,30 @@ class OrderController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
+    /**
+     * 获取乐百分单的分期信息
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *      ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function getLebaifenInstalment(Request $request)
+    {
+        $params =$request->all();
+        $params =$params['params'];
+        if(empty($params['order_no'])){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res = OrderOperate::getLebaifenInstalment($params['order_no']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_60001,"获取订单信息失败");
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+
+    }
 
     /**
      *  发货接口

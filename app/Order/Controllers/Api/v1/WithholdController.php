@@ -233,20 +233,29 @@ class WithholdController extends Controller
             //芝麻小程序扣款请求
             $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
             $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
+            $miniParams['app_id'] = $miniOrderInfo['app_id'];
             //扣款交易号
-            $miniParams['out_trans_no']     = $instalmentId;
-            $miniParams['pay_amount']       = $amount;
+            $miniParams['out_trans_no']     = $business_no;
+            $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
+                // 提交事务
+                DB::commit();
                 return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                // 提交事务
+                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
             }elseif($pay_status == 'PAY_INPROGRESS'){
+                // 提交事务
+                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
             }else{
+                // 事物回滚
+                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
             }
         }else {
@@ -292,6 +301,11 @@ class WithholdController extends Controller
                 // 请求代扣接口
                 $withholding->deduct($withholding_data);
 
+            }catch(\App\Lib\ApiException $exc){
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
+				return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
+				
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
@@ -421,17 +435,30 @@ class WithholdController extends Controller
                 //芝麻小程序扣款请求
                 $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
                 $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
+                $miniParams['app_id'] = $miniOrderInfo['app_id'];
                 //扣款交易号
-                $miniParams['out_trans_no']     = $instalmentId;
-                $miniParams['pay_amount']       = $amount;
+                $miniParams['out_trans_no']     = $business_no;
+                $miniParams['pay_amount']       = $instalmentInfo['amount'];
                 $miniParams['remark']           = $subject;
                 $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
-
                 //判断请求发送是否成功
-                if($pay_status =='PAY_FAILED'){
+                if($pay_status == 'PAY_SUCCESS'){
+                    // 提交事务
+                    DB::commit();
+                    return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+                }elseif($pay_status =='PAY_FAILED'){
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                    // 提交事务
+                    DB::commit();
+                    return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                }elseif($pay_status == 'PAY_INPROGRESS'){
+                    // 提交事务
+                    DB::commit();
+                    return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                }else{
+                    // 事物回滚
                     DB::rollBack();
-                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
-                    Log::error("小程序扣款请求失败");
+                    return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
                 }
             } else {
                 // 保存 备注，更新状态
@@ -610,18 +637,26 @@ class WithholdController extends Controller
                     $miniParams['app_id'] = $miniOrderInfo['app_id'];
                     //扣款交易号
                     $miniParams['out_trans_no'] = $item['business_no'];
-                    $miniParams['pay_amount'] = $amount;
+                    $miniParams['pay_amount'] = $item['amount'];
                     $miniParams['remark'] = $subject;
                     $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
                     //判断请求发送是否成功
-                    if ($pay_status == 'PAY_SUCCESS') {
+                    if($pay_status == 'PAY_SUCCESS'){
+                        // 提交事务
+                        DB::commit();
                         return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
-                    } elseif ($pay_status == 'PAY_FAILED') {
-                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
+                    }elseif($pay_status =='PAY_FAILED'){
+                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['business_no'], $item['term']);
+                        // 提交事务
+                        DB::commit();
                         return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
-                    } elseif ($pay_status == 'PAY_INPROGRESS') {
+                    }elseif($pay_status == 'PAY_INPROGRESS'){
+                        // 提交事务
+                        DB::commit();
                         return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
-                    } else {
+                    }else{
+                        // 事物回滚
+                        DB::rollBack();
                         return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
                     }
                 } else {
