@@ -54,7 +54,7 @@ class ImportHistoryInstalmentRepayment extends Command
             do {
                 $result = \DB::connection('mysql_01')->table('zuji_instalment_prepayment')
                     ->where([
-                        ['create_time', ">", '1530806400'],
+                        ['create_time', ">", '1531584000'],
                         ['prepayment_status', "=", 1],
                     ])
                     ->forPage($page,$limit)
