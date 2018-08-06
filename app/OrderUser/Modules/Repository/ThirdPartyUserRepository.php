@@ -210,9 +210,12 @@ class ThirdPartyUserRepository
         $obj = ThirdPartyUser::find($id);
         if($obj){
             $obj->status = ThirdPartyUser::STATUS_NONE;
-            return $obj->update();
-        }else{
+            if($obj->update()){
+                return true;
+            }
             throw new \Exception('第三方用户删除失败:'.$id);
+        }else{
+            throw new \Exception('第三方用户删除失败:未找到 '.$id);
         }
     }
 
