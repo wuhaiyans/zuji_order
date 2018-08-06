@@ -64,6 +64,16 @@ class ImportHistoryInstalmentRepayment extends Command
 
                 foreach($result as &$item) {
 
+                    // 已经支付成功 则跳过
+                    $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::where([
+                        ['order_no', '=', $item['order_no']],
+                        ['term', '=', $item['term']],
+                    ])->first();
+                    $instalmentInfo = objectToArray($instalmentInfo);
+                    if($instalmentInfo['status'] == 2){
+                        continue;
+                    }
+
                     $data = [
                         'business_no'       => $item['trade_no'],
                         'payment_amount'    => $item['payment_amount']/100,
@@ -72,8 +82,10 @@ class ImportHistoryInstalmentRepayment extends Command
                         'remark'            => '旧系统提前还款数据导入',
                         'pay_type'          => 1,
                     ];
+
                     $ret = \App\Order\Models\OrderGoodsInstalment::where([
                             ['order_no', '=', $item['order_no']],
+                            ['status', '!=', 2],
                             ['term', '=', $item['term']],
                         ])
                         ->update($data);
