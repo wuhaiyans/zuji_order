@@ -236,7 +236,7 @@ class WithholdController extends Controller
             $miniParams['app_id'] = $miniOrderInfo['app_id'];
             //扣款交易号
             $miniParams['out_trans_no']     = $business_no;
-            $miniParams['pay_amount']       = $amount;
+            $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
             print_r($miniParams);
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
@@ -426,7 +426,7 @@ class WithholdController extends Controller
                 $miniParams['app_id'] = $miniOrderInfo['app_id'];
                 //扣款交易号
                 $miniParams['out_trans_no']     = $business_no;
-                $miniParams['pay_amount']       = $amount;
+                $miniParams['pay_amount']       = $instalmentInfo['amount'];
                 $miniParams['remark']           = $subject;
                 $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
 
@@ -613,7 +613,7 @@ class WithholdController extends Controller
                     $miniParams['app_id'] = $miniOrderInfo['app_id'];
                     //扣款交易号
                     $miniParams['out_trans_no'] = $item['business_no'];
-                    $miniParams['pay_amount'] = $amount;
+                    $miniParams['pay_amount'] = $item['amount'];
                     $miniParams['remark'] = $subject;
                     $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
                     //判断请求发送是否成功
