@@ -32,7 +32,6 @@ class OrderMiniCreditPayRepository
             $info =OrderMiniCreditPay::create($data);
             return $info->getQueueableId();
         }else{
-            $data['pay_amount'] = '0.02';
             $b =self::update( [
                 'id'=>$miniOrderCreditPayInfo['id']
             ] , $data );
