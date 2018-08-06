@@ -19,7 +19,6 @@ class OrderMiniCreditPayRepository
      * @return $last_id
      */
     public static function add($data){
-
         //判断当前订单已经存在（已存在则修改）
         $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($data['out_order_no'] , $data['order_operate_type']);
         if(empty($miniOrderCreditPayInfo)){

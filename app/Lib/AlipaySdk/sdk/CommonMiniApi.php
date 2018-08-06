@@ -55,13 +55,13 @@ class CommonMiniApi extends BaseApi {
 		if(isset($params['remark'])){
 			$biz_content['remark'] = $params['remark'];
 		}
-		print_r($biz_content);die;
 		$request = new \ZhimaMerchantOrderCreditPayRequest();
 		$request->setBizContent (json_encode($biz_content) );
 		//入库请求信息
 		$result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add($biz_content);
 		if( !$result ){
 			\App\Lib\Common\LogApi::debug('小程序请求记录失败',$result);
+			return false;
 		}
 		$response = $this->execute($request);
 		$result = json_decode(json_encode($response),true);
