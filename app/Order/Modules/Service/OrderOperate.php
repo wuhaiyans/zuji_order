@@ -591,7 +591,7 @@ class OrderOperate
             'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数
-            'remain_amount' =>  $totalAmount,	// 剩余总金额；单位：分
+            'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
         ];
 
 
@@ -621,7 +621,7 @@ class OrderOperate
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
 	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
-                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余总金额；单位：分
+                    'remain_amount' => normalizeNum($res['remain_amount']/100 -$orderInfo['order_yajin'] ),	// 剩余还款总租金额；单位：分
                 ];
                 return $instalmentInfo;
 
