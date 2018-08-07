@@ -322,4 +322,86 @@ class InstalmentController extends Controller
     }
 
 
+    /**
+     * 分期列表导出接口
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function instalmentListExport(Request $request) {
+        $request               = $request->all();
+        $additional['page']    = isset($request['page']) ? $request['page'] : 1;
+        $additional['limit']   = isset($request['limit']) ? $request['limit'] : 10000;
+
+        $params         = filter_array($request, [
+            'begin_time'    => 'required',
+            'end_time'      => 'required',
+            'goods_no'      => 'required',
+            'order_no'      => 'required',
+            'status'        => 'required',
+            'mobile'        => 'required',
+            'term'          => 'required',
+        ]);
+
+        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
+
+        //定义excel头部参数名称
+        $headers = [
+            '分期ID',
+            '订单编号',
+            '商品编号',
+            '用户名',
+            '手机号',
+            '还款日',
+            '原始金额',
+            '原始优惠金额',
+            '应付金额',
+            '实际支付金额',
+            '支付时优惠金额',
+            '期数',
+            '状态',
+            '支付类型',
+            '扣款时间',
+            '更新时间',
+        ];
+        $data = [];
+        foreach($list as &$item){
+            // 姓名
+            $member = \App\Lib\User\User::getUser($item['user_id']);
+            $item['realname']       = !empty($userInfo['realname']) ? $member['realname'] : "--";
+            // 状态
+            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
+            // 还款日
+            $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
+            // 支付类型
+            $item['pay_type']       = $item['pay_type'] == 1 ? "主动还款" : "代扣";
+
+            $item['payment_time']   = !empty($item['payment_time']) ? date("Y-m-d H:i:s", $item['payment_time'] ) : "--";
+            $item['update_time']    = !empty($item['update_time']) ? date("Y-m-d H:i:s", $item['update_time'] ) : "--";
+
+            $data[] = [
+                $item['id'],                        // 分期ID
+                $item['order_no'],                  // 订单编号
+                $item['goods_no'],                  // 商品编号
+                $item['realname'],                  // 用户名
+                $item['mobile'],                    // 手机号
+                $item['day'],                       // 还款日
+                $item['original_amount'],           // 原始金额
+                $item['discount_amount'],           // 原始优惠金额
+                $item['amount'],                    // 应付金额
+                $item['payment_amount'],            // 实际支付金额
+                $item['payment_discount_amount'],   // 支付时优惠金额
+                $item['term'],                      // 期数
+                $item['status'],                    // 状态
+                $item['pay_type'],                  // 支付类型
+                $item['payment_time'],              // 扣款时间
+                $item['update_time'],               // 更新时间
+            ];
+        }
+
+        return \App\Lib\Excel::write($data, $headers,'后台分期数据导出-');
+
+    }
+
 }
