@@ -77,6 +77,7 @@ class Config {
 				SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_113461052', //即将逾期
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461053', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461067', //提前还款短信
+				SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_113461062', //扣款失败主动发送短信
 
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
@@ -98,6 +99,7 @@ class Config {
 				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
+
 
 
 			],

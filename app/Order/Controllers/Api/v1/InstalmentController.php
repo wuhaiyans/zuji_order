@@ -420,7 +420,7 @@ class InstalmentController extends Controller
             $notice = new \App\Order\Modules\Service\OrderNotice(
                 \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
                 $instalment_id,
-                'GivebackEvaNoWitYesEno',
+                'WithholdFailInitiative',
                 ['mobile' => $mobile]);
             $notice->notify();
 
