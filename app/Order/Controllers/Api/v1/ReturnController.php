@@ -83,6 +83,7 @@ class ReturnController extends Controller
      * [
      *  ‘order_no’=>'' 订单编号  string 【必选】
      *   'user_id '  =>'' 用户id     int  【必选】
+     *  'reason_text'=>'' 退款申请说明    string  【必选】
      * ]
      * @param array $userinfo 用户信息参数
      * [
@@ -98,8 +99,9 @@ class ReturnController extends Controller
         $data = filter_array($params,[
             'order_no'=>'required', //订单编号
             'user_id' =>'required', //用户
+            'reason_text' =>'required', //取消备注
         ]);
-        if(count($data)<2){
+        if(count($data)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);

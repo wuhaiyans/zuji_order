@@ -20,14 +20,21 @@ class OrderMiniCreditPayRepository
      */
     public static function add($data){
         //判断当前订单已经存在（已存在则修改）
-        $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($data['out_order_no'] , $data['order_operate_type']);
+        $where = [
+          'out_order_no'=>$data['out_order_no'],
+          'order_operate_type'=>$data['order_operate_type'],
+        ];
+        if(isset($data['out_trans_no'])){
+            $where['out_trans_no'] = $data['out_trans_no'];
+        }
+        $miniOrderCreditPayInfo = self::getMiniCreditPayInfo($where);
         if(empty($miniOrderCreditPayInfo)){
             $info =OrderMiniCreditPay::create($data);
             return $info->getQueueableId();
         }else{
             $b =self::update( [
-                'out_order_no'=>$data['out_order_no']
-            ], $data);
+                'id'=>$miniOrderCreditPayInfo['id']
+            ] , $data );
             if(!$b){
                 return false;
             }
@@ -42,14 +49,20 @@ class OrderMiniCreditPayRepository
      */
     public static function update( $where , $arr ) {
         $OrderMiniCreditPay = new OrderMiniCreditPay();
-        $b = $OrderMiniCreditPay->update($where,$arr);
+        $MiniCreditPay = $OrderMiniCreditPay->where($where)->first();
+        $MiniCreditPay->order_operate_type = $arr['order_operate_type'];
+        $MiniCreditPay->out_order_no = $arr['out_order_no'];
+        $MiniCreditPay->zm_order_no = $arr['zm_order_no'];
+        $MiniCreditPay->out_trans_no = $arr['out_trans_no'];
+        $MiniCreditPay->remark = $arr['remark'];
+        $MiniCreditPay->pay_amount = $arr['pay_amount'];
+        $b = $MiniCreditPay->update();
         return $b;
     }
 
     /**
      * 根据订单号获取芝麻支付信息
-     * @param string $orderNo 订单编号
-     * @param string $orderOperateType 订单完结类型
+     * @param string $where  数据字段条件
      * @return array $zmOrderInfo 订单基础信息|空<br/>
      * $zmOrderInfo = [<br/>
      *		'id' => '',//自增id<br/>
@@ -59,23 +72,16 @@ class OrderMiniCreditPayRepository
      *		'out_trans_no' => '',//资商户资金交易号<br/>
      *		'remark' => '',//报错取消原因或完结补充说明<br/>
      *		'pay_amount' => '',//该次支付总金额<br/>
-     *		'create_time' => '',//创建时间<br/>
      * ]
      */
-    public static function getMiniCreditPayInfo( $orderNo,$orderOperateType ,$remark = false ) {
+    public static function getMiniCreditPayInfo( $where = [] ) {
         $MiniOrder = new OrderMiniCreditPay();
-        $where['out_order_no'] = $orderNo;
-        $where['order_operate_type'] = $orderOperateType;
-        if($remark){
-            $where['remark'] = $remark;
-        }
         $result =  $MiniOrder->where($where)->first();
         if (!$result) {
             get_instance()->setCode(\App\Lib\ApiStatus::CODE_35002)->setMsg('芝麻小程序订单信息获取失败');
             return [];
         }
         $miniOrderInfo = $result->toArray();
-		$miniOrderInfo['create_time'] = date('Y-m-d H:i:s',$miniOrderInfo['create_time']);
         return $miniOrderInfo;
     }
 }

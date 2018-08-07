@@ -159,11 +159,12 @@ class OrderRepository
      *
      */
 
-    public static function getGoodsListByOrderId($orderNo){
+    public static function getGoodsListByOrderId($orderNo,$coulumn='*'){
         if (empty($orderNo)) return false;
+
         $orderGoodData =  OrderGoods::query()->where([
             ['order_no', '=', $orderNo],
-        ])->get();
+        ])->select($coulumn)->get();
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
@@ -498,9 +499,9 @@ class OrderRepository
             $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
         }
 
-        //应用来源ID
+        //应用渠道
         if (isset($param['order_appid']) && !empty($param['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+            $whereArray[] = ['order_info.channel_id', '=', $param['order_appid']];
         }
 
         //支付类型
@@ -564,7 +565,9 @@ class OrderRepository
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('order_info.id', 'DESC')
-            ->count('order_info.id');
+            ->count();
+
+
 
 //        sql_profiler();
         $orderList = DB::table('order_info')
@@ -589,6 +592,7 @@ class OrderRepository
             ->get();
 
         $orderArray = objectToArray($orderList);
+
         if ($orderArray) {
             $orderIds = array_column($orderArray,"order_no");
 //           dd($orderIds);
@@ -609,11 +613,11 @@ class OrderRepository
                 ->orderBy('order_info_visit.id','desc')
                 ->get();
 
-            $orderArray['data'] = objectToArray($orderList);
-            $orderArray['total'] = $count;
-            $orderArray['last_page'] = ceil($count/$pagesize);
+            $orderArrays['data'] = objectToArray($orderList);
+            $orderArrays['total'] = $count;
+            $orderArrays['last_page'] = ceil($count/$pagesize);
 
-            return $orderArray;
+            return $orderArrays;
 //            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
 
         }

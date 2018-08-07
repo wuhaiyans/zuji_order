@@ -336,7 +336,6 @@ class Instalment {
 				return false;
 			}
 
-
 			// 创建收支明细
 			$incomeData = [
 				'name'           => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "代扣",
@@ -348,7 +347,7 @@ class Instalment {
 				'amount'         => $instalmentInfo['amount'],
 				'create_time'    => time(),
 				'trade_no'       => $param['out_trade_no'],
-				'out_trade_no'   => $param['trade_no'],
+				'out_trade_no'   => isset($param['trade_no'])?$param['trade_no']:'',
 			];
 			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
 			if(!$incomeB){

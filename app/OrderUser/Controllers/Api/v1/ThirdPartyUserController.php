@@ -47,7 +47,7 @@ class ThirdPartyUserController extends Controller
         try {
             ThirdPartyUserService::update($params);
         } catch (\Exception $e) {
-            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+            return apiResponse([], ApiStatus::CODE_70006, $e->getMessage());
         }
 
         return apiResponse([]);
@@ -104,22 +104,12 @@ class ThirdPartyUserController extends Controller
         }
 
         try {
-            $id = ThirdPartyUserService::add($params);
+            $data = ThirdPartyUserService::add($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
         }
-        $ret = [
-            'id'=>$id,
-            'phone'=>$params['phone'],
-            'identity'=>$params['identity'],
-            'consignee'=>$params['consignee'],
-            'province'=>$params['province'],
-            'city'=>$params['city'],
-            'county'=>$params['county'],
-            'shipping_address'=>$params['shipping_address']
-        ];
 
-        return apiResponse($ret);
+        return apiResponse($data);
 
     }
 
@@ -139,7 +129,7 @@ class ThirdPartyUserController extends Controller
         try {
             $row = ThirdPartyUserRepository::getRow($params['id']);
         } catch (\Exception $e) {
-            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+            return apiResponse([], ApiStatus::CODE_70005, $e->getMessage());
         }
 
         return apiResponse($row);
@@ -153,7 +143,7 @@ class ThirdPartyUserController extends Controller
      *      ['phone'=>'手机号','identity'=>'身份证','consignee'=>'收货人','province'=>'省','city'=>'市','county'=>'区县','shipping_address'=>'详细地址'],
      *      ['phone'=>'手机号','identity'=>'身份证','consignee'=>'收货人','province'=>'省','city'=>'市','county'=>'区县','shipping_address'=>'详细地址'],
      * ]
-     * @return array 二维数组
+     * @return array 三维数组
      * [
      *      ['phone'=>'手机号','identity'=>'身份证','consignee'=>'收货人','province'=>'省','city'=>'市','county'=>'区县','shipping_address'=>'详细地址','start_time'=>'开始日期','end_time'=>'结束日期','platform'=>'平台','status'=>'状态'],
      * ]
@@ -170,10 +160,89 @@ class ThirdPartyUserController extends Controller
         try{
             $data = ThirdPartyUserService::matching($params['matching']);
         } catch (\Exception $e) {
-            return apiResponse([], ApiStatus::CODE_70001, $e->getMessage());
+            return apiResponse([], ApiStatus::CODE_70004, $e->getMessage());
         }
 
         return apiResponse($data);
+
+    }
+
+    /**
+     * 删除
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function del(){
+        $rules = [
+            'id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params['id']){
+            return apiResponse([], ApiStatus::CODE_10104, '参数错误');
+        }
+
+        try{
+            ThirdPartyUserRepository::del($params['id']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70002, $e->getMessage());
+        }
+
+        return apiResponse([]);
+
+    }
+
+    /**
+     * 审核通过
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function audit(){
+        $rules = [
+            'id' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params['id']){
+            return apiResponse([], ApiStatus::CODE_10104, '参数错误');
+        }
+
+        try{
+            ThirdPartyUserRepository::audit($params['id']);
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70003, $e->getMessage());
+        }
+
+        return apiResponse([]);
+
+    }
+
+    /**
+     * H5、小程序、App下单 匹配
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderMatching(){
+        $rules = [
+            'phone' => 'required',
+            'identity' => 'required',
+            'consignee' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'county' => 'required',
+            'shipping_address' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params){
+            return apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        try{
+            $data = ThirdPartyUserRepository::matching_row($params);
+            if($data){
+                $row = ['matching'=>1,'msg'=>'匹配到数据'];
+            }else{
+                $row = ['matching'=>0,'msg'=>'未匹配到数据'];
+            }
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70003, $e->getMessage());
+        }
+
+        return apiResponse($row);
 
     }
 
@@ -195,6 +264,7 @@ class ThirdPartyUserController extends Controller
             'pinpai_list'    => ThirdPartyUser::pinpai(),
             'chengse_list'    => ThirdPartyUser::chengse(),
             'types_list'    => ThirdPartyUser::types(),
+            'spb_cb'    => ThirdPartyUser::spb_cb(),
         ];
         return apiResponse($data);
     }
