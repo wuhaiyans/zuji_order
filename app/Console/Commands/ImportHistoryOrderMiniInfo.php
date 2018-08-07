@@ -48,7 +48,6 @@ class ImportHistoryOrderMiniInfo extends Command
         //小程序查询数据表
         $total = \DB::connection('mysql_01')->table('zuji_zhima_certification')
             ->count();
-        print_r($total);die;
         $bar = $this->output->createProgressBar($total);
         try {
             set_time_limit(0);//0表示不限时
