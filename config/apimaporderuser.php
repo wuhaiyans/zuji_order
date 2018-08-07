@@ -13,6 +13,7 @@ return [
     'orderuser.thirdpartyuser.del' => 'ThirdPartyUserController@del', //删除
     'orderuser.thirdpartyuser.audit' => 'ThirdPartyUserController@audit', //审核通过
     'orderuser.thirdpartyuser.getRow' => 'ThirdPartyUserController@getRow', //根据ID查询一条数据
+    'orderuser.thirdpartyuser.importExcel' => 'ThirdPartyUserController@importExcel', //导入已下单用户execl表
 
     // 下单接口
     'orderuser.thirdpartyuser.orderMatching' => 'ThirdPartyUserController@orderMatching', //H5、小程序、App下单匹配

@@ -10,9 +10,13 @@ namespace App\OrderUser\Controllers\Api\v1;
 
 
 use App\Lib\ApiStatus;
+use App\Lib\Excel;
 use App\OrderUser\Models\ThirdPartyUser;
 use App\OrderUser\Modules\Repository\ThirdPartyUserRepository;
 use App\OrderUser\Modules\Service\ThirdPartyUserService;
+use App\Warehouse\Modules\Service\ImeiService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 
 class ThirdPartyUserController extends Controller
 {
@@ -86,6 +90,9 @@ class ThirdPartyUserController extends Controller
         }
         if(!$params['types']){
             return apiResponse([], ApiStatus::CODE_10104, '类型必填');
+        }
+        if(!$params['user_name']){
+            return apiResponse([], ApiStatus::CODE_10104, '实名认证姓名必填');
         }
 
         try {
@@ -264,10 +271,68 @@ class ThirdPartyUserController extends Controller
     }
 
     /**
-     * 导入历史已下单用户execl表
+     * 导入已下单用户execl表
      */
-    public function excel(){
+    public function importExcel(Request $request){
+        $inputFileName = ImeiService::upload($request);
+        $data = \App\OrderUser\Modules\Func\Excel::read($inputFileName);
 
+        unset($data[1]);//第一行文档名
+        unset($data[2]);//第二行标题
+
+        if (count($data) == 0) {
+            return ;
+        }
+
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($data as $cel) {
+                $result = [
+                    'user_name'         => isset($cel['A']) ? $cel['A'] :'',//真实认证姓名
+                    'phone'             => isset($cel['B']) ? $cel['B'] :'',//收货人手机号
+                    'consignee'         => isset($cel['B']) ? $cel['B'] :'',//收货人姓名
+                    'province'          => isset($cel['B']) ? $cel['B'] :'',//省
+                    'city'              => isset($cel['B']) ? $cel['B'] :'',//市
+                    'county'            => isset($cel['B']) ? $cel['B'] :'',//区
+                    'shipping_address'  => isset($cel['B']) ? $cel['B'] :'',//详细地址
+                    'status'            => isset($cel['B']) ? $cel['B'] :'',//订单状态
+                    'platform'          => isset($cel['B']) ? $cel['B'] :'',//下单平台
+                    'types'             => isset($cel['B']) ? $cel['B'] :'',//订单类型
+
+                    'start_time'        => isset($cel['B']) ? $cel['B'] :'',//开始时间
+                    'end_time'          => isset($cel['B']) ? $cel['B'] :'',//结束时间
+                    'identity'          => isset($cel['B']) ? $cel['B'] :'',//身份证号
+                    'order_no'          => isset($cel['B']) ? $cel['B'] :'',//订单号
+                    'imei'              => isset($cel['B']) ? $cel['B'] :'',//IMEI
+                    'order_time'        => isset($cel['B']) ? $cel['B'] :'',//下单时间
+                    'pinpai'            => isset($cel['B']) ? $cel['B'] :'',//品牌
+                    'order_model'       => isset($cel['B']) ? $cel['B'] :'',//机型
+                    'yanse'             => isset($cel['B']) ? $cel['B'] :'',//颜色
+                    'rongliang'         => isset($cel['B']) ? $cel['B'] :'',//容量G
+                    'colour'            => isset($cel['B']) ? $cel['B'] :'',//成色
+                    'total_amount'      => isset($cel['B']) ? $cel['B'] :'',//总金额
+                    'deposit'           => isset($cel['B']) ? $cel['B'] :'',//押金
+                    'zujin'             => isset($cel['B']) ? $cel['B'] :'',//租金
+                    'total_zujin'       => isset($cel['B']) ? $cel['B'] :'',//租金总额
+                    'suipingbao_chengben'=> isset($cel['B']) ? $cel['B'] :'',//碎屏保成本价
+                    'suipingbao'        => isset($cel['B']) ? $cel['B'] :'',//碎屏保价格
+                    'zuqi'              => isset($cel['B']) ? $cel['B'] :'',//租期
+                    'remarks'           => isset($cel['B']) ? $cel['B'] :''//备注
+                ];
+                ThirdPartyUser::insert($result);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            //Log::error('第三方平台下单用户数据导入出错');
+            DB::rollBack();
+
+            return apiResponse([], ApiStatus::CODE_70009, $e->getMessage());
+        }
+
+        return apiResponse();
     }
 
     /**
