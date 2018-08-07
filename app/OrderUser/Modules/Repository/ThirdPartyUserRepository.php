@@ -170,7 +170,7 @@ class ThirdPartyUserRepository
             'suipingbao'=>($params['suipingbao']?$params['suipingbao']:0),
             'zuqi'=>($params['zuqi']?$params['zuqi']:0),
         ];
-        $matching_row = self::matching_row([$data]);
+        $matching_row = self::matching_row($data);
         $t = ThirdPartyUser::create($data);
         if($t){
             if($matching_row){
@@ -349,11 +349,12 @@ class ThirdPartyUserRepository
 
     }
 
+    /**
+     * 开始时间
+     */
     public static function start(){
-        $where = [
-            ''
-        ];
-        ThirdPartyUser::where($where)->update();
+        $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU];
+        ThirdPartyUser::whereIn('status',$in)->update();
     }
 
     public static function end(){
