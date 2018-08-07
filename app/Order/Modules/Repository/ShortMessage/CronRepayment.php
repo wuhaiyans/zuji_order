@@ -80,7 +80,7 @@ class CronRepayment implements ShortMessage {
         ];
         p($dataSms,1);
         // 发送短息
-        //return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
     }
 
