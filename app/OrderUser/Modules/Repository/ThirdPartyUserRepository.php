@@ -60,13 +60,24 @@ class ThirdPartyUserRepository
      *
      * 列表
      */
-    public static function lists($where='1=1', $limit, $page=null)
+    public static function lists($params, $where='1=1', $limit, $page=null)
     {
         $query = ThirdPartyUser::where($where);
+        if(isset($params['order_start']) || $params['order_start']){
+            $query->where('order_time','>=',strtotime($params['order_start']));
+        }
+        if(isset($params['order_end']) || $params['order_end']){
+            $query->where('order_time','<=',strtotime($params['order_end']));
+        }
         $all = $query->paginate($limit,['*'],'page', $page);
-        $all = self::zhuanhuan($all);
+        if($all){
 
-        return $all;
+            $all = self::zhuanhuan($all);
+            return $all;
+        }else{
+            return [];
+        }
+
     }
 
 
@@ -114,7 +125,6 @@ class ThirdPartyUserRepository
         $row->total_amount=$params['total_amount'];
         $row->deposit=$params['deposit'];
         $row->pinpai=$params['pinpai'];
-        $row->jixing=$params['jixing'];
         $row->yanse=$params['yanse'];
         $row->rongliang=$params['rongliang'];
         $row->zujin=$params['zujin'];
@@ -163,7 +173,6 @@ class ThirdPartyUserRepository
             'total_amount'=>($params['total_amount']?$params['total_amount']:0),
             'deposit'=>($params['deposit']?$params['deposit']:0),
             'pinpai'=>($params['pinpai']?$params['pinpai']:0),
-            'jixing'=>($params['jixing']?$params['jixing']:0),
             'yanse'=>($params['yanse']?$params['yanse']:0),
             'rongliang'=>($params['rongliang']?$params['rongliang']:0),
             'zujin'=>($params['zujin']?$params['zujin']:0),
@@ -172,7 +181,7 @@ class ThirdPartyUserRepository
             'suipingbao'=>($params['suipingbao']?$params['suipingbao']:0),
             'zuqi'=>($params['zuqi']?$params['zuqi']:0),
         ];
-        $matching_row = self::matching_row([$data]);
+        $matching_row = self::matching_row($data);
         $t = ThirdPartyUser::create($data);
         if($t){
             if($matching_row){
@@ -279,7 +288,7 @@ class ThirdPartyUserRepository
         $data = [];
         //判断手机号
         if($matching['phone']){
-            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->all();
+            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
@@ -289,7 +298,7 @@ class ThirdPartyUserRepository
 
         //判断身份证
         if($matching['identity']){
-            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->all();
+            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
@@ -304,7 +313,7 @@ class ThirdPartyUserRepository
                 'province'=>$matching['province'],
                 'city'=>$matching['city'],
                 'county'=>$matching['county']
-            ])->all();
+            ])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
@@ -348,6 +357,23 @@ class ThirdPartyUserRepository
         $row['types_name'] = ThirdPartyUser::types($row['types']);
 
         return $row;
+
+    }
+
+    /**
+     * 开始时间
+     */
+    public static function start(){
+        $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU];
+        $t = time();
+        $query = ThirdPartyUser::whereIn('status',$in);
+        $query->where('start_time','<=',$t);
+        $query->where('end_time','>',$t);
+        $query->toArray();
+
+    }
+
+    public static function end(){
 
     }
 

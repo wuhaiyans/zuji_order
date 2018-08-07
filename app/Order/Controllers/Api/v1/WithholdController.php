@@ -151,7 +151,11 @@ class WithholdController extends Controller
      */
     public function createpay(Request $request){
         $params     = $request->all();
-        $appid = $params['appid'];
+        $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+        }
+
         $rules = [
             'instalment_id'     => 'required|int',
         ];
@@ -319,6 +323,24 @@ class WithholdController extends Controller
             }
 
         }
+        //记录日志
+        $logData = [
+            'order_no'      => $instalmentInfo['order_no'],
+            'action'        => '分期扣款',
+            'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
+            'business_no'   => $business_no,
+            'goods_no'      => $instalmentInfo['goods_no'],
+            'operator_id'   => $operateUserInfo['uid'],
+            'operator_name' => $operateUserInfo['username'],
+            'operator_type' => $operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+            'msg'           => '分期扣款',
+        ];
+        $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
+        if( !$goodsLog ){
+            \App\Lib\Common\LogApi::error("分期扣款日志失败",$logData);
+            return apiResponse([], ApiStatus::CODE_71006, '分期扣款日志失败');
+        }
+
         // 提交事务
         DB::commit();
         return apiResponse([],ApiStatus::CODE_0,"success");
@@ -337,7 +359,10 @@ class WithholdController extends Controller
         ini_set('max_execution_time', '0');
 
         $params     = $request->all();
-        $appid = $params['appid'];
+        $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+        }
         $rules = [
             'ids'            => 'required',
         ];
@@ -518,6 +543,25 @@ class WithholdController extends Controller
                 }
 
             }
+
+            //记录日志
+            $logData = [
+                'order_no'      => $instalmentInfo['order_no'],
+                'action'        => '分期扣款',
+                'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
+                'business_no'   => $business_no,
+                'goods_no'      => $instalmentInfo['goods_no'],
+                'operator_id'   => $operateUserInfo['uid'],
+                'operator_name' => $operateUserInfo['username'],
+                'operator_type' => $operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+                'msg'           => '多项扣款',
+            ];
+            $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
+            if( !$goodsLog ){
+                \App\Lib\Common\LogApi::error("多项扣款失败",$logData);
+                continue;
+            }
+
             // 提交事务
             DB::commit();
         }
@@ -719,6 +763,23 @@ class WithholdController extends Controller
                         \App\Lib\Common\LogApi::error("扣款失败",$exc->getMessage());
                         continue;
                     }
+
+                }
+
+                //记录日志
+                $logData = [
+                    'order_no'      => $item['order_no'],
+                    'action'        => '分期扣款',
+                    'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
+                    'business_no'   => $business_no,
+                    'goods_no'      => $item['goods_no'],
+                    'operator_type' => \App\Lib\PublicInc::Type_System,//此处用常量
+                    'msg'           => '定时任务扣款',
+                ];
+                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
+                if( !$goodsLog ){
+                    \App\Lib\Common\LogApi::error("定时任务扣款失败",$logData);
+                    continue;
                 }
 
                 // 提交事务
