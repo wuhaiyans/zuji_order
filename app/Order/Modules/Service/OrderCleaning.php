@@ -578,7 +578,12 @@ class OrderCleaning
             }
             $orderCleanInfo = $orderCleanInfo['data'];
 
-
+        // 操作员信息
+            $userinfo = [
+                'uid'		=> $orderCleanInfo['operator_uid'],
+                'username'	=> $orderCleanInfo['operator_username'],
+                'type'		=> $orderCleanInfo['operator_type'],
+            ];
             //查看清算状态是否已支付
             if ($orderCleanInfo['auth_unfreeze_status']==OrderCleaningStatus::depositDeductionStatusUnpayed){
 
@@ -597,8 +602,9 @@ class OrderCleaning
                         'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
                     ];
 
-                    $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-                    LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$success]);
+                    LogApi::info(__method__.'[minicleanAccount小程序订单清算回调业务接口回调参数:', [$businessParam,$userinfo]);
+                    $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status'], $userinfo);
+                    LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$userinfo,$success]);
                     if (!$success) {
                         DB::rollBack();
                         return false;
