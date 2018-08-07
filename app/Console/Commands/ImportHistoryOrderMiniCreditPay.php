@@ -85,7 +85,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                         $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add($miniOrderCreditPayArr);
                         if (!$result) {
                             DB::rollBack();
-                            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录导出新订单插入失败', $val);
+                            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录导出新订单插入失败', $miniOrderCreditPayArr);
                             $this->error('小程序完成 或 扣款 回调记录导出新订单插入失败');
                             continue;
                         }
