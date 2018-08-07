@@ -36,10 +36,10 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 
 	/**
 	 * 统一支付查询接口
-	 * @param array $params
+	 * @param array $params 参数二选一
 	 * [
-	 *		'payment_no'		=> '',	//【必选】string 支付系统支付编号
-	 *		'out_payment_no'	=> '',	//【必选】string 业务系统支付编号
+	 *		'payment_no'		=> '',	//【可选】string 支付系统支付编号
+	 *		'out_payment_no'	=> '',	//【可选】string 业务系统支付编号
 	 * ]
 	 * @return mixed false：接口请求失败；array：支付信息
 	 * [
