@@ -74,8 +74,9 @@ class TestCreate extends Command
 		
 		$p_count = ceil($total/$pagesize);
 		$min = 0;
-		$n = 0;
-		while($n<$p_count){
+		$p = 0;
+		while($p<$p_count){
+			++$p;
 			
 			// 支付单列表
 			$order_pay_list = $order_pay_model->where($where)
