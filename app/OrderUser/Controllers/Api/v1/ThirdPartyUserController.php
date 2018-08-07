@@ -236,9 +236,15 @@ class ThirdPartyUserController extends Controller
      *  开始时间
      *
      * 进入租用开始时间 已支付,已发货,已签收 改为租用中
+     * @return \Illuminate\Http\JsonResponse
      */
     public function start(){
-        ThirdPartyUserRepository::start();
+        try{
+            ThirdPartyUserRepository::start();
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70007, $e->getMessage());
+        }
+        return apiResponse([]);
     }
 
     /**
@@ -246,9 +252,15 @@ class ThirdPartyUserController extends Controller
      *  结束时间
      *
      * 过租用结束时间 已支付,已发货,已签收,租用中 改为已完成
+     * @return \Illuminate\Http\JsonResponse
      */
     public function end(){
-
+        try{
+            ThirdPartyUserRepository::end();
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70008, $e->getMessage());
+        }
+        return apiResponse([]);
     }
 
     /**

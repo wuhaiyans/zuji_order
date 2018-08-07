@@ -17,5 +17,9 @@ return [
     // 下单接口
     'orderuser.thirdpartyuser.orderMatching' => 'ThirdPartyUserController@orderMatching', //H5、小程序、App下单匹配
 
+    // 定时任务
+    'orderuser.thirdpartyuser.start' => 'ThirdPartyUserController@start', //定时任务开始时间
+    'orderuser.thirdpartyuser.end' => 'ThirdPartyUserController@end', //定时任务结束时间
+
 
 ];
