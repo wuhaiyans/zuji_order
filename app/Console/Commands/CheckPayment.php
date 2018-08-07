@@ -42,7 +42,7 @@ class CheckPayment extends Command
      */
     public function handle()
     {
-		$jump_counter = 0;
+		$query_counter = 0;
 		$query_error_counter = 0;
 		$pay_status_error_counter = 0;
 		
@@ -93,6 +93,7 @@ class CheckPayment extends Command
 				// 如果未支付是，则请求支付接口，查询支付状态
 				if( $item->payment_status == 1 && $item->payment_no ){
 					try{
+						++$query_counter;
 						// 查询 支付系统接口
 						$payment_info = CommonPaymentApi::query([
 							'out_payment_no' => $item->payment_no,
@@ -114,6 +115,7 @@ class CheckPayment extends Command
         $bar->finish();
 		
 		echo "完毕({$total})\n";
+		echo "Query Counter: {$query_counter}\n";
 		echo "Query Error: {$query_error_counter}\n";
 		echo "Status Error: {$pay_status_error_counter}\n";
 		exit;
