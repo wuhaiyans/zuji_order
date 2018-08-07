@@ -8,7 +8,7 @@ use App\Lib\Payment\CommonPaymentApi;
 use App\Lib\ApiException;
 use Illuminate\Support\Facades\DB;
 
-class TestCreate extends Command
+class CheckPayment extends Command
 {
     /**
      * 检测支付是否成功
