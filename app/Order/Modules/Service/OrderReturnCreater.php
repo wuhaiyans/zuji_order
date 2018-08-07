@@ -2393,9 +2393,9 @@ class OrderReturnCreater
             LogApi::debug("退款执行成功");
             return true;
         }catch (\Exception $exc) {
-            LogApi::debug("程序异常");
-            echo $exc->getMessage();
-            die;
+            LogApi::debug("程序异常",$exc);
+            return false;
+
         }
     }
 
