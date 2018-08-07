@@ -277,7 +277,7 @@ class ThirdPartyUserRepository
         $data = [];
         //判断手机号
         if($matching['phone']){
-            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->all();
+            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
@@ -287,7 +287,7 @@ class ThirdPartyUserRepository
 
         //判断身份证
         if($matching['identity']){
-            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->all();
+            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
@@ -302,7 +302,7 @@ class ThirdPartyUserRepository
                 'province'=>$matching['province'],
                 'city'=>$matching['city'],
                 'county'=>$matching['county']
-            ])->all();
+            ])->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
