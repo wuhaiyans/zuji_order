@@ -70,9 +70,14 @@ class ThirdPartyUserRepository
             $query->where('order_time','<=',strtotime($params['order_end']));
         }
         $all = $query->paginate($limit,['*'],'page', $page);
-        $all = self::zhuanhuan($all);
+        if($all){
 
-        return $all;
+            $all = self::zhuanhuan($all);
+            return $all;
+        }else{
+            return [];
+        }
+
     }
 
 
@@ -360,9 +365,12 @@ class ThirdPartyUserRepository
      */
     public static function start(){
         $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU];
-        $where = [];
-        $obj = ThirdPartyUser::whereIn('status',$in);
-        $obj->where($where);
+        $t = time();
+        $query = ThirdPartyUser::whereIn('status',$in);
+        $query->where('start_time','<=',$t);
+        $query->where('end_time','>',$t);
+        $query->toArray();
+
     }
 
     public static function end(){

@@ -32,7 +32,6 @@ class ThirdPartyUserController extends Controller
     /**
      * 修改下单用户信息
      */
-
     public function update(){
         $params = $this->_dealParams([]);
 
