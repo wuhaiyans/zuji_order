@@ -64,7 +64,7 @@ class ImportHistoryOrderMiniInfo extends Command
                     continue;
                 }
                 if(config('miniappid.'.$old_order2[0]['appid'])){
-                    $miniOrderInfoArr['app_id'] = config('miniappid.'.$old_order2[0]['appid']);//芝麻小程序appid
+                    $miniOrderInfoArr['appid'] = config('miniappid.'.$old_order2[0]['appid']);//芝麻小程序appid
                 }else{
                     \App\Lib\Common\LogApi::debug('小程序appid匹配失败', $val);
                     $this->error('小程序appid匹配失败');
@@ -76,8 +76,8 @@ class ImportHistoryOrderMiniInfo extends Command
                     $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+30).' day'));
                 }
                 $miniOrderInfoArr['overdue_time'] = $overdue_time;//订单逾期时间
-                $miniOrderInfoArr['order_no'] = $val['out_order_no'];//商户端订单号
-                $miniOrderInfoArr['zm_order_no'] = $val['order_no'];//芝麻订单号
+                $miniOrderInfoArr['out_order_no'] = $val['out_order_no'];//商户端订单号
+                $miniOrderInfoArr['order_no'] = $val['order_no'];//芝麻订单号
                 $miniOrderInfoArr['transaction_id'] = $val['trade_no'];//芝麻请求流水号
                 $miniOrderInfoArr['name'] = $val['name'];//用户姓名
                 $miniOrderInfoArr['cert_no'] = $val['cert_no'];//身份证号
