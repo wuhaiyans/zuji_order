@@ -271,6 +271,7 @@ class ThirdPartyUserController extends Controller
             'chengse_list'    => ThirdPartyUser::chengse(),
             'types_list'    => ThirdPartyUser::types(),
             'spb_cb'    => ThirdPartyUser::spb_cb(),
+            'select'    => ThirdPartyUser::SELECT,
         ];
         return apiResponse($data);
     }

@@ -49,6 +49,13 @@ class ThirdPartyUser extends OrderUser
     const SPB_CB150   = 150;
     const SPB_CB34   = 34;
 
+    //select
+    const SELECT=[
+        'phone'=>'手机号',
+        'identity'=>'身份证号',
+        'consignee'=>'收货人',
+    ];
+
     protected $table = 'third_party_user';
 
     protected $primaryKey='id';

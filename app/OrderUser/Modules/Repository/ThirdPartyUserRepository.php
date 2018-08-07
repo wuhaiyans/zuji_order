@@ -60,9 +60,15 @@ class ThirdPartyUserRepository
      *
      * 列表
      */
-    public static function lists($where='1=1', $limit, $page=null)
+    public static function lists($params, $where='1=1', $limit, $page=null)
     {
         $query = ThirdPartyUser::where($where);
+        if(isset($params['order_start']) || $params['order_start']){
+            $query->where('order_time','>=',strtotime($params['order_start']));
+        }
+        if(isset($params['order_end']) || $params['order_end']){
+            $query->where('order_time','<=',strtotime($params['order_end']));
+        }
         $all = $query->paginate($limit,['*'],'page', $page);
         $all = self::zhuanhuan($all);
 
@@ -354,7 +360,9 @@ class ThirdPartyUserRepository
      */
     public static function start(){
         $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU];
-        ThirdPartyUser::whereIn('status',$in)->update();
+        $where = [];
+        $obj = ThirdPartyUser::whereIn('status',$in);
+        $obj->where($where);
     }
 
     public static function end(){
