@@ -222,56 +222,73 @@ class ThirdPartyUserRepository
             if($obj->update()){
                 return true;
             }
-            throw new \Exception('第三方用户删除失败:'.$id);
+            throw new \Exception('第三方用户审核失败:'.$id);
         }else{
-            throw new \Exception('第三方用户删除失败:未找到 '.$id);
+            throw new \Exception('第三方用户审核失败:未找到 '.$id);
         }
     }
 
     /**
-     * 查询相似订单 三维数组
-     * @param $matching
-     * @return array
+     * 查询相似订单
+     * @param array $matching 二维数组
+     * @return array 三维数组|空数组
      */
     public static function matching($matching){
         $data = [];
+        $in = [
+            ThirdPartyUser::STATUS_ZHIFU,
+            ThirdPartyUser::STATUS_FAHUO,
+            ThirdPartyUser::STATUS_QIANSHOU,
+            ThirdPartyUser::STATUS_ZUYONG,
+            ThirdPartyUser::STATUS_TUIHUO,
+        ];
+
         foreach ($matching as $key=>$item){
             //判断手机号
             if($item['phone']){
-                $all = ThirdPartyUser::where(['phone'=>$item['phone']])->all();
+                $query = ThirdPartyUser::whereIn('status',$in);
+                $query->where(['phone'=>$item['phone']]);
+                $all = $query->get();
                 if($all){
                     $all = $all->toArray();
                     $all = self::zhuanhuan($all);
                     $data[] = $all;
                     continue;
                 }
+                unset($query);
             }
 
             //判断身份证
             if($item['identity']){
-                $all = ThirdPartyUser::where(['identity'=>$item['identity']])->all();
+                $query = ThirdPartyUser::whereIn('status',$in);
+                $query->where(['identity'=>$item['identity']]);
+                $all = $query->get();
                 if($all){
                     $all = $all->toArray();
                     $all = self::zhuanhuan($all);
                     $data[] = $all;
                     continue;
                 }
+                unset($query);
             }
 
             //判断收货人 收货地址
             if($item['consignee'] && $item['shipping_address']){
-                $all = ThirdPartyUser::where([
+                $query = ThirdPartyUser::whereIn('status',$in);
+                $query->where([
                     'consignee'=>$item['consignee'],
                     'province'=>$item['province'],
                     'city'=>$item['city'],
                     'county'=>$item['county']
-                ])->all();
+                ]);
+                $all = $query->get();
                 if($all){
                     $all = $all->toArray();
                     $all = self::zhuanhuan($all);
                     $data[] = $all;
                     continue;
                 }
+                unset($query);
             }
 
         }
@@ -281,44 +298,61 @@ class ThirdPartyUserRepository
 
     /**
      * 匹配一条数据
-     * @param $matching
-     * @return array|\Illuminate\Database\Eloquent\Collection|mixed|static[]
+     * @param array $matching 一维数组
+     * @return array 二维数组|空数组
      */
     public static function matching_row($matching){
         $data = [];
+        $in = [
+            ThirdPartyUser::STATUS_ZHIFU,
+            ThirdPartyUser::STATUS_FAHUO,
+            ThirdPartyUser::STATUS_QIANSHOU,
+            ThirdPartyUser::STATUS_ZUYONG,
+            ThirdPartyUser::STATUS_TUIHUO,
+        ];
+
         //判断手机号
         if($matching['phone']){
-            $all = ThirdPartyUser::where(['phone'=>$matching['phone']])->get();
+            $query = ThirdPartyUser::whereIn('status',$in);
+            $query->where(['phone'=>$matching['phone']]);
+            $all = $query->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
                 return $all;
             }
+            unset($query);
         }
 
         //判断身份证
         if($matching['identity']){
-            $all = ThirdPartyUser::where(['identity'=>$matching['identity']])->get();
+            $query = ThirdPartyUser::whereIn('status',$in);
+            $query->where(['identity'=>$matching['identity']]);
+            $all = $query->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
                 return $all;
             }
+            unset($query);
         }
 
         //判断收货人 收货地址
         if($matching['consignee'] && $matching['shipping_address']){
-            $all = ThirdPartyUser::where([
+            $query = ThirdPartyUser::whereIn('status',$in);
+            $query->where([
                 'consignee'=>$matching['consignee'],
                 'province'=>$matching['province'],
                 'city'=>$matching['city'],
                 'county'=>$matching['county']
-            ])->get();
+            ]);
+            $all = $query->get();
             if($all){
                 $all = $all->toArray();
                 $all = self::zhuanhuan($all);
                 return $all;
             }
+            unset($query);
         }
 
         return $data;
@@ -362,6 +396,8 @@ class ThirdPartyUserRepository
 
     /**
      * 开始时间
+     * @return bool
+     * @throws \Exception
      */
     public static function start(){
         $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU];
@@ -369,12 +405,31 @@ class ThirdPartyUserRepository
         $query = ThirdPartyUser::whereIn('status',$in);
         $query->where('start_time','<=',$t);
         $query->where('end_time','>',$t);
-        $query->toArray();
+        $r = $query->update(['status'=>ThirdPartyUser::STATUS_ZUYONG]);
+        if($r){
+            return true;
+        }else{
+            throw new \Exception('第三方用户 定时任务 开始时间 执行失败');
+        }
 
     }
 
+    /**
+     * 结束时间
+     * @return bool
+     * @throws \Exception
+     */
     public static function end(){
-
+        $in = [ThirdPartyUser::STATUS_ZHIFU,ThirdPartyUser::STATUS_FAHUO,ThirdPartyUser::STATUS_QIANSHOU,ThirdPartyUser::STATUS_ZUYONG];
+        $t = time();
+        $query = ThirdPartyUser::whereIn('status',$in);
+        $query->where('end_time','<',$t);
+        $r = $query->update(['status'=>ThirdPartyUser::STATUS_WANCHENG]);
+        if($r){
+            return true;
+        }else{
+            throw new \Exception('第三方用户 定时任务 结束时间 执行失败');
+        }
     }
 
 

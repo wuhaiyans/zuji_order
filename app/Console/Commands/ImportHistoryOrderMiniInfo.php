@@ -77,7 +77,7 @@ class ImportHistoryOrderMiniInfo extends Command
                 }
                 $miniOrderInfoArr['overdue_time'] = $overdue_time;//订单逾期时间
                 $miniOrderInfoArr['order_no'] = $val['out_order_no'];//商户端订单号
-                $miniOrderInfoArr['zm_order_no'] = $val['zm_order_no'];//芝麻订单号
+                $miniOrderInfoArr['zm_order_no'] = $val['order_no'];//芝麻订单号
                 $miniOrderInfoArr['transaction_id'] = $val['trade_no'];//芝麻请求流水号
                 $miniOrderInfoArr['name'] = $val['name'];//用户姓名
                 $miniOrderInfoArr['cert_no'] = $val['cert_no'];//身份证号
