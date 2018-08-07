@@ -384,30 +384,37 @@ class CronOperate
 
             do {
 
-                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
-                $whereArray[] = ['term', '=', date('Ym')];
+//                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+//                $whereArray[] = ['term', '=', date('Ym')];
+//
+//                // 查询总数
+//                $total =  \App\Order\Models\OrderGoodsInstalment::query()
+//                    ->where($whereArray)
+//                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+//                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+//                    ->count();
+//                $totalpage = ceil($total/$limit);
+//
+//                // 查询数据
+//                $result =  \App\Order\Models\OrderGoodsInstalment::query()
+//                    ->select('order_goods_instalment.id')
+//                    ->where($whereArray)
+//                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+//                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+//                    ->limit($limit)
+//                    ->get()
+//                    ->toArray();
+//
+//                if (!$result) {
+//                    continue;
+//                }
 
-                // 查询总数
-                $total =  \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where($whereArray)
-                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
-                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-                    ->count();
-                $totalpage = ceil($total/$limit);
-
-                // 查询数据
-                $result =  \App\Order\Models\OrderGoodsInstalment::query()
-                    ->select('order_goods_instalment.id')
-                    ->where($whereArray)
-                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
-                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-                    ->limit($limit)
-                    ->get()
-                    ->toArray();
-
-                if (!$result) {
-                    continue;
-                }
+                $totalpage = 10;
+                $result = [
+                    ['id'=>325626],
+                    ['id'=>325229],
+                    ['id'=>325271],
+                ];
 
                 foreach($result as $item){
                     //发送短信

@@ -59,20 +59,6 @@ class ThirdPartyUserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function add(){
-//        $rules = [
-//            'phone' => 'required',
-//            'consignee' => 'required',//收货人姓名
-//            'shipping_address' => 'required',//收货地址
-//            'status' => 'required',
-//            'platform' => 'required',//下单平台
-//            'start_time' => 'required',
-//            'end_time'=> 'required',
-//            'user_name'=> 'required',
-//            'identity'=> 'required',
-//            'order_no'=> 'required',
-//            'imei'=> 'required',
-//            'remarks'=> 'required',
-//        ];
         $params = $this->_dealParams([]);
 
         if(!$params['phone']){
@@ -214,6 +200,59 @@ class ThirdPartyUserController extends Controller
     }
 
     /**
+     * H5、小程序、App下单 匹配
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderMatching(){
+        $rules = [
+            'phone' => 'required',
+            'identity' => 'required',
+            'consignee' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'county' => 'required',
+            'shipping_address' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        if(!$params){
+            return apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        try{
+            $data = ThirdPartyUserRepository::matching_row($params);
+            if($data){
+                $row = ['matching'=>1,'msg'=>'匹配到数据'];
+            }else{
+                $row = ['matching'=>0,'msg'=>'未匹配到数据'];
+            }
+        } catch (\Exception $e) {
+            return apiResponse([], ApiStatus::CODE_70003, $e->getMessage());
+        }
+
+        return apiResponse($row);
+
+    }
+
+    /**
+     * 定时任务
+     *  开始时间
+     *
+     * 进入租用开始时间 已支付,已发货,已签收 改为租用中
+     */
+    public function start(){
+        ThirdPartyUserRepository::start();
+    }
+
+    /**
+     * 定时任务
+     *  结束时间
+     *
+     * 过租用结束时间 已支付,已发货,已签收,租用中 改为已完成
+     */
+    public function end(){
+
+    }
+
+    /**
      * 导入历史已下单用户execl表
      */
     public function excel(){
@@ -232,6 +271,7 @@ class ThirdPartyUserController extends Controller
             'chengse_list'    => ThirdPartyUser::chengse(),
             'types_list'    => ThirdPartyUser::types(),
             'spb_cb'    => ThirdPartyUser::spb_cb(),
+            'select'    => ThirdPartyUser::SELECT,
         ];
         return apiResponse($data);
     }
