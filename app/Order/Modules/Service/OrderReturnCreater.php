@@ -2395,7 +2395,8 @@ class OrderReturnCreater
         }catch (\Exception $exc) {
             LogApi::debug("程序异常");
             echo $exc->getMessage();
-            die;
+            return false;
+
         }
     }
 
