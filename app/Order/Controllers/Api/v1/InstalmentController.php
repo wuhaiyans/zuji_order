@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 class InstalmentController extends Controller
 {
 
-    /*
+    /**
      * 分期列表接口
      * @$params array
      * [
@@ -73,9 +73,9 @@ class InstalmentController extends Controller
 
     }
 
-    /*
+    /**
      * 扣款明细接口
-     * @param array $request
+     * @$params array
 	 * [
 	 *		'goods_no'		=> '', //【必选】string 商品编号
 	 * ]
@@ -159,9 +159,9 @@ class InstalmentController extends Controller
     }
 
 
-    /*
+    /**
     * 分期提前还款详情接口
-    * @param array $request
+    * @$params array $request
     * [
     *		'instalment_id'		=> '', //【必选】string 分期id
     *		'no_login'		    => '', //【可选】int 是否登录 1 不用登录
@@ -256,9 +256,9 @@ class InstalmentController extends Controller
     }
 
 
-    /*
+    /**
     * 分期备注信息
-    * @param array $request
+    * @$params array $request
     * [
     *		'instalment_id'		=> '', //【必选】string 分期id
     *		'contact_status'	=> '', //【必选】int 是否联系到用户
@@ -291,9 +291,9 @@ class InstalmentController extends Controller
 
     }
 
-    /*
+    /**
    * 分期联系日历
-   * @param array $request
+   * @$params array $request
    * [
    *		'instalment_id'		=> '', //【必选】string 分期id
    * ]
@@ -348,23 +348,9 @@ class InstalmentController extends Controller
 
         //定义excel头部参数名称
         $headers = [
-            '分期ID',
-            '订单编号',
-            '商品编号',
-            '用户名',
-            '手机号',
-            '还款日',
-            '原始金额',
-            '原始优惠金额',
-            '应付金额',
-            '实际支付金额',
-            '支付时优惠金额',
-            '期数',
-            '状态',
-            '支付类型',
-            '扣款时间',
-            '更新时间',
+            '分期ID', '订单编号', '商品编号', '用户名', '手机号', '还款日', '原始金额', '原始优惠金额', '应付金额', '实际支付金额', '支付时优惠金额', '期数', '状态', '支付类型', '扣款时间', '更新时间',
         ];
+
         $data = [];
         foreach($list as &$item){
             // 姓名
@@ -401,6 +387,48 @@ class InstalmentController extends Controller
         }
 
         return \App\Lib\Excel::write($data, $headers,'后台分期数据导出-');
+
+    }
+
+    /**
+     * 扣款失败发送短信
+     * @$params array $request
+     * [
+     * 		'instalment_id'		=> '', //【必选】int 分期ID
+     *		'mobile'		    => '', //【必选】string 电话号
+     * ]
+     * @return array instalmentList
+     */
+    public function sendMessage(Request $request) {
+        $params     = $request->all();
+        // 参数过滤
+        $rules = [
+            'instalment_id'     => 'required',
+            'mobile'            => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $instalment_id          = $params['params']['instalment_id'];
+        $mobile                 = $params['params']['mobile'];
+
+        try{
+
+            //发送短信
+            $notice = new \App\Order\Modules\Service\OrderNotice(
+                \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
+                $instalment_id,
+                'GivebackEvaNoWitYesEno',
+                ['mobile' => $mobile]);
+            $notice->notify();
+
+        } catch (\Exception $ex) {
+            return apiResponse([], ApiStatus::CODE_72000,$ex->getMessage());
+        }
+
+        return apiResponse([], ApiStatus::CODE_0, '发送短信成功');
 
     }
 
