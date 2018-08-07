@@ -479,7 +479,7 @@ class Pay extends \App\Lib\Configurable
 		$paymentModel = new OrderPayPaymentModel();
 		$payment_info = $paymentModel->limit(1)->where([
 			'payment_no' => $this->paymentNo,
-		])->find();
+		])->first();
 		if( !$payment_info ){
 			$b = $paymentModel->insert([
 				'payment_no' => $this->paymentNo,
