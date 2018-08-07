@@ -68,6 +68,11 @@ class SceneConfig {
      */
     const REPAYMENT = 'Repayment';
 
+    /**
+     * 场景:<b>【扣款失败】</b>
+     */
+    const WITHHOLD_FAIL_INITIATIVE = 'WithholdFailInitiative';
+
 	/**
      * 场景：<b>【申请退货】</b>
      */

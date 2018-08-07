@@ -248,7 +248,7 @@ class OrderOperate
      * @param $params
      * @return mixed
      */
-    public static function getInsuranceInfo($params){
+    public static function getInsuranceInfo($params, $column='*'){
 
         $whereArray[] = ['order_no', '=', $params['order_no']];
         if (isset($params['goods_no'])) {
@@ -256,7 +256,7 @@ class OrderOperate
         }
 
 
-        $insuranceData =  OrderInsurance::where($whereArray)->get();
+        $insuranceData =  OrderInsurance::where($whereArray)->select($column)->get();
         $data = array();
         if ($insuranceData) {
             $data = $insuranceData->toArray();
@@ -1205,6 +1205,7 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderListArray = OrderRepository::getOrderList($param);
+//        dd($orderListArray);
 
 //        $orderListArray = objectToArray($orderList);
 
@@ -1255,6 +1256,71 @@ class OrderOperate
 
 
     }
+
+
+    /**
+     * 获取后台订单列表
+     * Author: heaven
+     * @param array $param
+     * @return array
+     */
+    public static function getOrderExportList($param = array())
+    {
+        //根据用户id查找订单列表
+
+        $orderListArray = OrderRepository::getOrderList($param);
+
+//        $orderListArray = objectToArray($orderList);
+
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+//                $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
+
+                //设备名称
+
+                //订单商品列表相关的数据
+//                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+
+
+                $goodsData =  self::getExportActAdminState($values['order_no'], $actArray=array());
+
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
+                // 有冻结状态时
+//                if ($values['freeze_type']>0) {
+//                    $actArray['refund_btn'] = false;
+//                    $actArray['modify_address_btn'] = false;
+//                    $actArray['confirm_btn'] = false;
+//                    $actArray['confirm_receive'] = false;
+//                    $actArray['buy_off'] = false;
+//                    $actArray['Insurance'] = false;
+//                }
+
+//                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
+                //回访标识
+//                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
+
+                //$orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+
+
+    }
+
+
 
 
     /**
@@ -1473,7 +1539,8 @@ class OrderOperate
     public static function getManageGoodsActAdminState($orderNo, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo, array('goods_yajin','yajin','discount_amount','amount_after_discount',
+            'goods_status','coupon_amount','goods_name','goods_no','specs'));
         if (empty($goodsList)) return [];
 
         //到期时间多于1个月不出现到期处理
@@ -1500,7 +1567,7 @@ class OrderOperate
                 }
                 //是否已经操作过保险
 
-                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
+                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']],array('type'));
 //                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                 if ($insuranceData){
                     $goodsList[$keys]['act_goods_state']['Insurance'] = false;
@@ -1517,6 +1584,70 @@ class OrderOperate
             }
 
         }
+
+        return $goodsList;
+
+
+    }
+
+
+
+
+    /**
+     * 获取后台设置的操作列表
+     * Author: heaven
+     * @param $orderNo
+     * @param $actArray
+     * @return array|bool
+     */
+    public static function getExportActAdminState($orderNo, $actArray)
+    {
+
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo,array('goods_name'));
+//        dd($goodsList);
+        if (empty($goodsList)) return [];
+
+        //到期时间多于1个月不出现到期处理
+//        foreach($goodsList as $keys=>$values) {
+//            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+//            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
+//            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
+//            if (empty($actArray)){
+//                $goodsList[$keys]['act_goods_state']= [];
+//            } else {
+
+//                $goodsList[$keys]['act_goods_state']= $actArray;
+                //是否处于售后之中
+
+//                $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
+//                if ($expire_process) {
+//                    $goodsList[$keys]['act_goods_state']['buy_off'] = false;
+//                    $goodsList[$keys]['act_goods_state']['refund_btn'] = false;
+//                    $goodsList[$keys]['act_goods_state']['modify_address_btn'] = false;
+//                    $goodsList[$keys]['act_goods_state']['confirm_btn'] = false;
+//                    $goodsList[$keys]['act_goods_state']['confirm_receive'] = false;
+//                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+//
+//                }
+                //是否已经操作过保险
+
+//                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
+////                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+//                if ($insuranceData){
+//                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+//                    $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+//                    $popInsurance = array_pop($insuranceData);
+//                    if ($popInsurance['type'] == 2) {
+//                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
+//                        $goodsList[$keys]['act_goods_state']['Insurance'] = true;
+//                    }
+//
+//                    $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
+//                }
+
+//            }
+//
+//        }
 
         return $goodsList;
 

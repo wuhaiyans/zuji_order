@@ -553,7 +553,7 @@ class OrderCleaning
      */
     public static function miniUnfreezeAndPayClean($param)
     {
-
+        DB::beginTransaction();
         try{
 
             LogApi::info(__method__.'[minicleanAccount小程序订单清算退押金回调接口回调参数:', $param);
@@ -571,14 +571,13 @@ class OrderCleaning
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['order_no'=>$param['out_order_no'], 'order_type'=>OrderStatus::orderMiniService]);
 
-            dd($orderCleanInfo);
-
 
             if ($orderCleanInfo['code']) {
                 LogApi::error(__method__.'[minicleanAccount小程序 订单清算记录不存在');
                 return false;
             }
             $orderCleanInfo = $orderCleanInfo['data'];
+
 
             //查看清算状态是否已支付
             if ($orderCleanInfo['auth_unfreeze_status']==OrderCleaningStatus::depositDeductionStatusUnpayed){
@@ -588,8 +587,8 @@ class OrderCleaning
                     'order_no' => $param['out_order_no'],
                     'out_unfreeze_pay_trade_no'     => $param['alipay_fund_no'] ?? '',
                 ];
-                $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
 
+                $success = OrderClearingRepository::upMiniOrderCleanStatus($orderParam);
                 if ($success) {
                     //更新业务系统的状态
                     $businessParam = [
@@ -599,10 +598,15 @@ class OrderCleaning
                     ];
 
                     $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status']);
-//                    dd($success);
-                    LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', $businessParam);
+                    LogApi::info(__method__.'[minicleanAccount小程序订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$success]);
+                    if (!$success) {
+                        DB::rollBack();
+                        return false;
+                    }
+                    DB::commit();
                     return $success ?? false;
                 } else {
+                        DB::rollBack();
                         LogApi::error(__method__.'[minicleanAccount小程序 更新订单清算状态失败');
                         return false;
                      }
@@ -613,6 +617,7 @@ class OrderCleaning
             return true;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             LogApi::error(__method__.'[minicleanAccount小程序订单清算押金转支付回调接口异常 ',$e);
             return false;
 

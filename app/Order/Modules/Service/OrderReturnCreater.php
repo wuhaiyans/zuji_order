@@ -2318,6 +2318,7 @@ class OrderReturnCreater
                             return true;
                         }
                         $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
+                        LogApi::debug("关闭分期返回信息",$success);
                         if (!$success) {
                             LogApi::debug("关闭商品分期失败");
                             return false;
@@ -2351,6 +2352,7 @@ class OrderReturnCreater
                         return true;
                     }
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
+                    LogApi::debug("关闭分期返回信息",$success);
                     if (!$success) {
                         LogApi::debug("关闭订单分期失败");
                         return false;
@@ -2359,8 +2361,10 @@ class OrderReturnCreater
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
             }
+
             //获取订单用户认证信息
             $userInfo = OrderRepository::getUserCertified($order_info['order_no']);
+            LogApi::debug("获取订单用户认证信息",$userInfo);
             if(!$userInfo){
                 return false;
             }
