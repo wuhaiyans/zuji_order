@@ -75,6 +75,7 @@ class ImportHistoryOrderMiniInfo extends Command
                 }else{
                     $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+30).' day'));
                 }
+                print_r($old_order2);
                 print_r($val);
                 $miniOrderInfoArr['overdue_time'] = $overdue_time;//订单逾期时间
                 $miniOrderInfoArr['order_no'] = $val['out_order_no'];//商户端订单号
