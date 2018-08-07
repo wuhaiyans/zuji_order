@@ -59,20 +59,6 @@ class ThirdPartyUserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function add(){
-//        $rules = [
-//            'phone' => 'required',
-//            'consignee' => 'required',//收货人姓名
-//            'shipping_address' => 'required',//收货地址
-//            'status' => 'required',
-//            'platform' => 'required',//下单平台
-//            'start_time' => 'required',
-//            'end_time'=> 'required',
-//            'user_name'=> 'required',
-//            'identity'=> 'required',
-//            'order_no'=> 'required',
-//            'imei'=> 'required',
-//            'remarks'=> 'required',
-//        ];
         $params = $this->_dealParams([]);
 
         if(!$params['phone']){
@@ -243,6 +229,26 @@ class ThirdPartyUserController extends Controller
         }
 
         return apiResponse($row);
+
+    }
+
+    /**
+     * 定时任务
+     *  开始时间
+     *
+     * 进入租用开始时间 已支付,已发货,已签收 改为租用中
+     */
+    public function start(){
+        ThirdPartyUserRepository::start();
+    }
+
+    /**
+     * 定时任务
+     *  结束时间
+     *
+     * 过租用结束时间 已支付,已发货,已签收,租用中 改为已完成
+     */
+    public function end(){
 
     }
 

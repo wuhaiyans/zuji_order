@@ -114,7 +114,6 @@ class ThirdPartyUserRepository
         $row->total_amount=$params['total_amount'];
         $row->deposit=$params['deposit'];
         $row->pinpai=$params['pinpai'];
-        $row->jixing=$params['jixing'];
         $row->yanse=$params['yanse'];
         $row->rongliang=$params['rongliang'];
         $row->zujin=$params['zujin'];
@@ -163,7 +162,6 @@ class ThirdPartyUserRepository
             'total_amount'=>($params['total_amount']?$params['total_amount']:0),
             'deposit'=>($params['deposit']?$params['deposit']:0),
             'pinpai'=>($params['pinpai']?$params['pinpai']:0),
-            'jixing'=>($params['jixing']?$params['jixing']:0),
             'yanse'=>($params['yanse']?$params['yanse']:0),
             'rongliang'=>($params['rongliang']?$params['rongliang']:0),
             'zujin'=>($params['zujin']?$params['zujin']:0),
@@ -348,6 +346,17 @@ class ThirdPartyUserRepository
         $row['types_name'] = ThirdPartyUser::types($row['types']);
 
         return $row;
+
+    }
+
+    public static function start(){
+        $where = [
+            ''
+        ];
+        ThirdPartyUser::where($where)->update();
+    }
+
+    public static function end(){
 
     }
 

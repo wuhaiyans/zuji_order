@@ -84,7 +84,6 @@ class ThirdPartyUser extends OrderUser
         'total_amount',
         'deposit',
         'pinpai',
-        'jixing',
         'yanse',
         'rongliang',
         'zujin',
