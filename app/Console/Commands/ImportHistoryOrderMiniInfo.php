@@ -95,10 +95,10 @@ class ImportHistoryOrderMiniInfo extends Command
                     $this->error('小程序trade_no错误');
                     continue;
                 }else{
-                    $result = \App\Order\Modules\Repository\OrderMiniRepository::add($val);
+                    $result = \App\Order\Modules\Repository\OrderMiniRepository::add($miniOrderInfoArr);
                     if( !$result ){
                         DB::rollBack();
-                        \App\Lib\Common\LogApi::debug('小程序认证记录导入失败',$val);
+                        \App\Lib\Common\LogApi::debug('小程序认证记录导入失败',$miniOrderInfoArr);
                         $this->error('小程序认证记录导入失败');
                     }
                 }
