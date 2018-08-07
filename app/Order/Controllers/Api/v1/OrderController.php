@@ -324,9 +324,9 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
             $params = $request->all();
-            $params['size'] = 250;
-            $param['page'] = $params['page'];
-            $orderData = Service\OrderOperate::getOrderList($params);
+            $params['size'] = $params['size'] ?? 500;
+            $param['page'] = $params['page']?? 1;
+            $orderData = Service\OrderOperate::getOrderExportList($params);
 
             if ($params['page']>20) {
                 return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
@@ -335,7 +335,7 @@ class OrderController extends Controller
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 
-                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','回访标识','用户名','手机号','详细地址','设备名称',
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称',
                     '订单实际总租金','订单总押金','意外险总金额'];
                 $data = array();
                 foreach ($orderData['data']['data'] as $item) {
@@ -345,7 +345,7 @@ class OrderController extends Controller
                         $item['order_status_name'],
                         $item['appid_name'],
                         $item['pay_type_name'],
-                        $item['visit_name'],
+//                        $item['visit_name'],
                         $item['name'],
                         $item['mobile'],
                         $item['address_info'],

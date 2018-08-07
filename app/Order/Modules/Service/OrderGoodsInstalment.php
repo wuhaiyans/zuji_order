@@ -127,8 +127,6 @@ class OrderGoodsInstalment
      * @return mixed  false：更新失败；int：受影响记录数
      */
     public static function instalment_failed($fail_num,$instalment_id,$term){
-        //修改扣款失败
-        OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['status'=>OrderInstalmentStatus::FAIL]);
 
         //发送通知
         if ($fail_num == 0) {
@@ -147,19 +145,26 @@ class OrderGoodsInstalment
         }
 
         // 发送短信
-        $notice = new \App\Order\Modules\Service\OrderNotice(
-            OrderStatus::BUSINESS_FENQI,
-            $instalmentInfo['business_no'],
-            $model);
-        $notice->notify();
+//        $notice = new \App\Order\Modules\Service\OrderNotice(
+//            OrderStatus::BUSINESS_FENQI,
+//            $instalmentInfo['business_no'],
+//            $model);
+//        $notice->notify();
 
         $date = date('Ymd');
 
         $fail_num = intval($fail_num) + 1;
+        $data = [
+            'status'                => OrderInstalmentStatus::FAIL,
+            'fail_num'              => $fail_num,
+            'crontab_faile_date'    => $date,
 
+        ];
         //修改失败次数
-        $b = OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],['fail_num'=>$fail_num,'crontab_faile_date'=>$date]);
-        Log::error('更新失败次数失败');
+        $b = OrderGoodsInstalmentRepository::save(['id'=>$instalment_id],$data);
+        if(!$b){
+            Log::error('更新失败次数失败');
+        }
         return $b;
     }
 

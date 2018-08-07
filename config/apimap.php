@@ -130,6 +130,8 @@ return [
     'api.Instalment.instalmentRemark'       => 'InstalmentController@instalmentRemark',
     // 分期提前还款详情接口
     'api.Instalment.instalmentRemarkList'   => 'InstalmentController@instalmentRemarkList',
+    // 分期扣款主动发送短信接口
+    'api.Instalment.sendMessage'            => 'InstalmentController@sendMessage',
 
     // 代扣相关
 

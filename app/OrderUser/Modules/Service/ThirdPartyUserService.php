@@ -48,7 +48,7 @@ class ThirdPartyUserService
 
         $page = isset($params['page']) ? $params['page'] : 1;
 
-        $collect = ThirdPartyUserRepository::lists($whereParams, $limit, $page);
+        $collect = ThirdPartyUserRepository::lists($params, $whereParams, $limit, $page);
         $items = $collect->items();
 
         if (!$items) {
@@ -65,15 +65,17 @@ class ThirdPartyUserService
      */
     public static function paramsSearch($params)
     {
-        if (!isset($params['kw_type']) || !$params['kw_type']) {
-            return false;
+        $where = [];
+        if ( (isset($params['select']) || $params['select']) && (isset($params['keyword']) || $params['keyword']) ){
+            $where[$params['select']] = $params['keyword'];
         }
 
-        if (!isset($params['keywords']) || !$params['keywords']) {
-            return false;
+        if ( isset($params['platform']) || $params['platform'] ){
+            $where['platform'] = $params['platform'];
         }
 
-        return [$params['kw_type'] => $params['keywords']];
+
+        return $where;
     }
 
     /**
