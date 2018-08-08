@@ -301,25 +301,25 @@ class ThirdPartyUserController extends Controller
                     'platform'          => isset($cel['I']) ? $cel['I'] :'',//下单平台
                     'types'             => isset($cel['J']) ? $cel['J'] :'',//订单类型
 
-                    'start_time'        => isset($cel['K']) ? strtotime($cel['K']) :'',//开始时间
-                    'end_time'          => isset($cel['L']) ? strtotime($cel['L']) :'',//结束时间
-                    'identity'          => isset($cel['M']) ? $cel['M'] :'',//身份证号
-                    'order_no'          => isset($cel['N']) ? $cel['N'] :'',//订单号
-                    'imei'              => isset($cel['O']) ? $cel['O'] :'',//IMEI
-                    'order_time'        => isset($cel['P']) ? strtotime($cel['P']) :'',//下单时间
-                    'pinpai'            => isset($cel['Q']) ? $cel['Q'] :'',//品牌
-                    'order_model'       => isset($cel['R']) ? $cel['R'] :'',//机型
-                    'yanse'             => isset($cel['S']) ? $cel['S'] :'',//颜色
-                    'rongliang'         => isset($cel['T']) ? $cel['T'] :'',//容量G
-                    'colour'            => isset($cel['U']) ? $cel['U'] :'',//成色
-                    'total_amount'      => isset($cel['V']) ? $cel['V'] :'',//总金额
-                    'deposit'           => isset($cel['W']) ? $cel['W'] :'',//押金
-                    'zujin'             => isset($cel['X']) ? $cel['X'] :'',//租金
-                    'total_zujin'       => isset($cel['Y']) ? $cel['Y'] :'',//租金总额
-                    'suipingbao_chengben'=> isset($cel['Z']) ? $cel['Z'] :'',//碎屏保成本价
-                    'suipingbao'        => isset($cel['AA']) ? $cel['AA'] :'',//碎屏保价格
-                    'zuqi'              => isset($cel['AB']) ? $cel['AB'] :'',//租期
-                    'remarks'           => isset($cel['AC']) ? $cel['AC'] :''//备注
+                    'start_time'        => isset($cel['K']) ? strtotime($cel['K']) :'0',//开始时间
+                    'end_time'          => isset($cel['L']) ? strtotime($cel['L']) :'0',//结束时间
+                    'identity'          => isset($cel['M']) ? $cel['M'] :'0',//身份证号
+                    'order_no'          => isset($cel['N']) ? $cel['N'] :'0',//订单号
+                    'imei'              => isset($cel['O']) ? $cel['O'] :'0',//IMEI
+                    'order_time'        => isset($cel['P']) ? strtotime($cel['P']) :'0',//下单时间
+                    'pinpai'            => isset($cel['Q']) ? $cel['Q'] :'0',//品牌
+                    'order_model'       => isset($cel['R']) ? $cel['R'] :'0',//机型
+                    'yanse'             => isset($cel['S']) ? $cel['S'] :'0',//颜色
+                    'rongliang'         => isset($cel['T']) ? $cel['T'] :'0',//容量G
+                    'colour'            => isset($cel['U']) ? $cel['U'] :'0',//成色
+                    'total_amount'      => isset($cel['V']) ? $cel['V'] :'0',//总金额
+                    'deposit'           => isset($cel['W']) ? $cel['W'] :'0',//押金
+                    'zujin'             => isset($cel['X']) ? $cel['X'] :'0',//租金
+                    'total_zujin'       => isset($cel['Y']) ? $cel['Y'] :'0',//租金总额
+                    'suipingbao_chengben'=> isset($cel['Z']) ? $cel['Z'] :'0',//碎屏保成本价
+                    'suipingbao'        => isset($cel['AA']) ? $cel['AA'] :'0',//碎屏保价格
+                    'zuqi'              => isset($cel['AB']) ? $cel['AB'] :'0',//租期
+                    'remarks'           => isset($cel['AC']) ? $cel['AC'] :'0'//备注
                 ];
                 ThirdPartyUser::insert($result);
             }
