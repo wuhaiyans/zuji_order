@@ -170,7 +170,6 @@ class InstalmentController extends Controller
     */
     public function queryInfo(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'instalment_id'         => 'required',  //商品编号
@@ -189,7 +188,7 @@ class InstalmentController extends Controller
 
         // 用户验证
         if(empty($params['params']['no_login'])){
-            if($uid != $instalmentInfo['user_id']){
+            if(empty($params['userinfo']['uid']) || $params['userinfo']['uid'] != $instalmentInfo['user_id']){
                 return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
             }
         }
