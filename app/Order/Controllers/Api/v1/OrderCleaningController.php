@@ -313,8 +313,9 @@ class OrderCleaningController extends Controller
     {
 
 
-//        $json = '{"notify_app_id":"2018032002411058","out_order_no":"A803194614389933","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080300001001094675819027","sign":"ccNyRRFmpnvdX6C70pClFBY6xisjS+OiTs8KpY8NGXvgjLVoL6gmw+bjA8eFGM3dd0z6papJ2ep1rbtUcVJPtso0eGb2BcPBx4CcVcIBGRtFWxOlTWvTDsf3KnaFw0J2\/xM9TezWWtT5uDyC+YNEbG9pYuT9YdUXKMvG23heWe5AwYdTx62uj1Sgcv5PoeT1UKV2qCMdXiVIzp1xYXQvGyfd515NVw5YOMkyrfK3Frw7WRgln\/Rgua+JjT0hRYZgdoGC2ruXcx\/PevhkJArhixsxUGjw6aTlN0JHHyryYDyIoEFW8xHuXAKtQ232qwJt+\/swuEdn1RriyVYBN40h8g==","sign_type":"RSA2"}';
+//$json = '	{"notify_app_id":"2018032002411058","out_order_no":"A807136220479005","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080700001001095388413107","sign":"mJ6TXpi+SZTgPLQZjyMVn88Zj4y4iiHtnWeIaloFXmMs3tNSVEDMCp76GTNzaYddVxx8HJ9ZEx4JoktzPp3m2qBv8dWcss97+7r4q3D5uYDZrzkq8+grRNn\/DmAM9P0IBm6S2t8uF\/Dqxh+76eHTTS6\/YI2KVUZdZfroeeHpQcEozd1Knl5MzBJhKx09OBKNFB\/DK1TDwDMHxcfFHQ7zf0lRAJOYx5v6nRGB0dP5hCYhBN6D+wHCV3zq606+dHev6xPNVlfIorsQGC1BPlR99\/mNhZ8i4MISUKDeeoHQGe56XSS6KjQRhaC5FowV+bVhdAok8wG7fqwwsn4n2yW7+w==","sign_type":"RSA2"}';
 //        OrderCleaning::miniUnfreezeAndPayClean(json_decode($json,true));
+//        echo 2334;exit;
 
         try {
             $params = $request->all();

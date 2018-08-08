@@ -2279,6 +2279,7 @@ class OrderReturnCreater
                 LogApi::debug("操作关闭订单失败");
                 return false;
             }
+            LogApi::debug("获取订单对应的商品信息,释放库存",$orderGoods);
             //释放库存
             if ($orderGoods){
                 foreach ($orderGoods as $orderGoodsValues){
@@ -2288,8 +2289,9 @@ class OrderReturnCreater
                         'spu_id'=>$orderGoodsValues['prod_id'],
                         'num'=>$orderGoodsValues['quantity']
                     ];
-
+                    LogApi::debug("释放库存的参数",$orderGoods);
                     $success =Goods::addStock($goods_arr); //释放库存
+                    LogApi::debug("释放库返回结果",$success);
                     if (!$success) {
                         LogApi::debug("释放库存失败");
                         return false;
@@ -2316,6 +2318,7 @@ class OrderReturnCreater
                             return true;
                         }
                         $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
+                        LogApi::debug("关闭分期返回信息",$success);
                         if (!$success) {
                             LogApi::debug("关闭商品分期失败");
                             return false;
@@ -2349,6 +2352,7 @@ class OrderReturnCreater
                         return true;
                     }
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
+                    LogApi::debug("关闭分期返回信息",$success);
                     if (!$success) {
                         LogApi::debug("关闭订单分期失败");
                         return false;
@@ -2357,8 +2361,10 @@ class OrderReturnCreater
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
             }
+
             //获取订单用户认证信息
             $userInfo = OrderRepository::getUserCertified($order_info['order_no']);
+            LogApi::debug("获取订单用户认证信息",$userInfo);
             if(!$userInfo){
                 return false;
             }
@@ -2387,9 +2393,9 @@ class OrderReturnCreater
             LogApi::debug("退款执行成功");
             return true;
         }catch (\Exception $exc) {
-            LogApi::debug("程序异常");
-            echo $exc->getMessage();
-            die;
+            LogApi::debug("程序异常",$exc);
+            return false;
+
         }
     }
 
