@@ -277,9 +277,11 @@ class MiniNotifyController extends Controller
                         $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
                         //提交事务
                         if( $orderCloseResult['code'] == 10000 ){
+                            \DB::commit();
                             //记录日志
                             \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回成功',$orderCloseResult);
                         }else{
+                            \DB::commit();
                             //记录日志
                             \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回失败',$orderCloseResult);
                         }
