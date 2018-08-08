@@ -186,7 +186,7 @@ class Config {
 
             ],
             // 微回收
-            self::CHANNELID_ANDROID => [
+            self::CHANNELID_MICRO_RECOVERY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461173', //用户下单
             ],
 		];
