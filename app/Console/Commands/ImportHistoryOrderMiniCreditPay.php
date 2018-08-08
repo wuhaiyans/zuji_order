@@ -58,7 +58,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
             foreach ($old_orders as $key => $val) {
                 $miniOrderCreditPayArr = [];
                 //查询当前订单是否存在芝麻订单号
-                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['order_id'=>$val['order_no']])->select('zm_order_no')->get();
+                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['order_no'=>$val['order_no']])->select('zm_order_no')->get();
                 $old_mini_orders = objectToArray($old_mini_orders);
                 if(empty($old_mini_orders)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_zhima_certification订单不存在', $val);
