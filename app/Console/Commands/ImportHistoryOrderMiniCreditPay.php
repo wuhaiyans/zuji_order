@@ -81,7 +81,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                             $miniOrderCreditPayArr['order_operate_type'] = 'INSTALLMENT';//请求类型
                             $miniOrderCreditPayArr['out_order_no'] = $val['order_no'];//商户订单号
                             $miniOrderCreditPayArr['zm_order_no'] = $old_mini_orders[0]['order_no'];//芝麻订单号
-                            $miniOrderCreditPayArr['remark'] = $v['order_no'];//备注
+                            $miniOrderCreditPayArr['remark'] = $val['order_no'];//备注
                             $miniOrderCreditPayArr['pay_amount'] = $v['amount']/100;//请求金额
                             $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add( $miniOrderCreditPayArr );
                             if (!$result) {
