@@ -773,10 +773,8 @@ class WithholdController extends Controller
                     'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
                     'business_no'   => $business_no,
                     'goods_no'      => $item['goods_no'],
-                    'operator_type' => \App\Lib\PublicInc::Type_System,//此处用常量
-                    'msg'           => '定时任务扣款',
                 ];
-                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
+                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData, false);
                 if( !$goodsLog ){
                     \App\Lib\Common\LogApi::error("定时任务扣款失败",$logData);
                     continue;
