@@ -57,7 +57,10 @@ class ImportNewOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-
+        //小程序APPID
+//        $appid =[
+//            36,92,91,91,
+//        ];
         $status =[2,3,10,21,23,26];
         $countWhereArra = [];
         $countWhereArra[] = ['create_time','<=','1532588400'];
