@@ -427,7 +427,7 @@ class CronOperate
                 if (!$result) {
                     continue;
                 }
-                p($result);
+
                 foreach($result as $item){
                     //发送短信
                     $notice = new \App\Order\Modules\Service\OrderNotice(
