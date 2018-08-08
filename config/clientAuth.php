@@ -13,6 +13,7 @@ return [
             //提前还款
             'api.Withhold.repayment',
             'api.order.checkVerifyApp',
+            'api.Instalment.queryInfo',
             ]
     ];
 
