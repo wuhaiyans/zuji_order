@@ -83,10 +83,11 @@ class CronRepayment implements ShortMessage {
 
         $urlData = [
             'orderNo'       => $instalmentInfo['order_no'],     //  订单号
-            'zuqi_type'     => $instalmentInfo['zuqi_type'],         //  租期类型
+            'zuqi_type'     => $instalmentInfo['zuqi_type'],    //  租期类型
             'id'            => $instalmentInfo['id'],           //  分期ID
-            'appid'         => $instalmentInfo['appid'],             //  商品编号
+            'appid'         => $instalmentInfo['appid'],        //  商品编号
             'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
+            'nologin'       => 1,                               //  商品编号
         ];
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
@@ -98,7 +99,7 @@ class CronRepayment implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
-        p($dataSms,1);
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($instalmentInfo['mobile'], $code, $dataSms);
 
