@@ -109,9 +109,6 @@ class ImportUpdateOrderGoods extends Command
             $bar->finish();
             LogApi::info("order_import_record_goods_unequal:",$arr['goods_unequal']);
             LogApi::info("order_import_record_goods_error:",$arr['goods_error']);
-            if(count($arr)>0){
-                echo "部分导入成功";die;
-            }
             echo "导入成功";die;
         }catch (\Exception $e){
             echo $e->getMessage();
