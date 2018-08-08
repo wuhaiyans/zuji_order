@@ -1204,7 +1204,7 @@ class OrderOperate
     {
         //根据用户id查找订单列表
 
-        $orderListArray = OrderRepository::getOrderList($param);
+        $orderListArray = OrderRepository::getAdminOrderList($param);
 //        dd($orderListArray);
 
 //        $orderListArray = objectToArray($orderList);
@@ -1268,7 +1268,7 @@ class OrderOperate
     {
         //根据用户id查找订单列表
 
-        $orderListArray = OrderRepository::getOrderList($param);
+        $orderListArray = OrderRepository::getAdminOrderList($param);
 
 //        $orderListArray = objectToArray($orderList);
 

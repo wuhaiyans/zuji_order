@@ -79,6 +79,7 @@ class CronRepayment implements ShortMessage {
             'id'            => $instalmentInfo['id'],           //  分期ID
             'appid'         => $orderInfo['appid'],             //  商品编号
             'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
+            'nologin'       => 1,                               //  不需要登录
         ];
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
