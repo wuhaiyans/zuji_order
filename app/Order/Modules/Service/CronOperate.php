@@ -378,7 +378,7 @@ class CronOperate
 
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 2;
             $page   = 1;
             $sleep  = 10;
 
@@ -401,20 +401,32 @@ class CronOperate
 //                    ->where($whereArray)
 //                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
 //                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-//                    ->limit($limit)
+//                    ->forPage($page,$limit)
 //                    ->get()
 //                    ->toArray();
 //
 //                if (!$result) {
 //                    continue;
 //                }
+//                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+//                $whereArray[] = ['term', '=', date('Ym')];
+//
+                // 查询总数
+                $total =  \App\Order\Models\OrderActive::query()
+                    ->count();
+                $total = 1;
+                $totalpage = ceil($total/$limit);
 
-                $totalpage = 10;
-                $result = [
-                    ['id'=>325626],
-                    ['id'=>325229],
-                    ['id'=>325271],
-                ];
+                // 查询数据
+                $result =  \App\Order\Models\OrderActive::query()
+                    ->select('id')
+                    ->orderBy('id', 'ASC')
+                    ->forPage($page,$limit)
+                    ->get()
+                    ->toArray();
+                if (!$result) {
+                    continue;
+                }
 
                 foreach($result as $item){
                     //发送短信

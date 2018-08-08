@@ -33,33 +33,45 @@ class CronRepayment implements ShortMessage {
     }
 
     public function notify(){
+        $instalmentInfo =  \App\Order\Models\OrderActive::where(['id'=>$this->business_no])
+            ->first();
+        $instalmentInfo = objectToArray($instalmentInfo);
+
+
 
         // 查询分期信息
-        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
-        if( !is_array($instalmentInfo)){
-            // 提交事务
-            return false;
-        }
+//        $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
+//        if( !is_array($instalmentInfo)){
+//            \App\Lib\Common\LogApi::debug('[定时任务短信-分期信息不存在]');
+//            // 提交事务
+//            return false;
+//        }
 
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
+            \App\Lib\Common\LogApi::debug('[定时任务短信-订单信息不存在]');
             return false;
         }
 
         // 用户信息
         $userInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
         if( !is_array($userInfo )){
+            \App\Lib\Common\LogApi::debug('[定时任务短信-用户信息不存在]');
             return false;
         }
 
         // 短息模板
         $code = $this->getCode($this->business_type);
         if( !$code ){
+            \App\Lib\Common\LogApi::debug('[定时任务短信-模板不存在]');
             return false;
         }
 
-        $url = env('WEB_H5_URL') . 'myBillDetail?';
+//        $webUrl = env('WEB_H5_URL');
+//        $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
+        $url = 'https://h5.nqyong.com/';
+        $url = $url  . 'myBillDetail?';
 
         $urlData = [
             'orderNo'       => $instalmentInfo['order_no'],     //  订单号
@@ -78,6 +90,7 @@ class CronRepayment implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 

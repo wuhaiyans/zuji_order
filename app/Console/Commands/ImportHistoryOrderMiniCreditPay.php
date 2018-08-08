@@ -45,7 +45,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
     public function handle()
     {
         $appid =[
-            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22
+            36,92,91,91,
         ];
         //小程序回调数据表
         DB::beginTransaction();
@@ -58,7 +58,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
             foreach ($old_orders as $key => $val) {
                 $miniOrderCreditPayArr = [];
                 //查询当前订单是否存在芝麻订单号
-                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['order_id'=>$val['order_no']])->select('zm_order_no')->get();
+                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->select('order_no')->get();
                 $old_mini_orders = objectToArray($old_mini_orders);
                 if(empty($old_mini_orders)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_zhima_certification订单不存在', $val);
@@ -74,22 +74,24 @@ class ImportHistoryOrderMiniCreditPay extends Command
                     continue;
                 }
                 foreach($old_orders_instalment as $k=>$v){
-                    //当请求交易码存在的时候将记录保存
-                    if ($v['trade_no'] != '') {
-                        $miniOrderCreditPayArr['out_trans_no'] = $v['trade_no'];//请求流水号
-                        $miniOrderCreditPayArr['order_operate_type'] = 'INSTALLMENT';//请求类型
-                        $miniOrderCreditPayArr['out_order_no'] = $val['order_no'];//商户订单号
-                        $miniOrderCreditPayArr['zm_order_no'] = $old_mini_orders[0]['order_no'];//芝麻订单号
-                        $miniOrderCreditPayArr['remark'] = $v['order_no'];//备注
-                        $miniOrderCreditPayArr['pay_amount'] = $v['amount']/100;//请求金额
-                        $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add($miniOrderCreditPayArr);
-                        if (!$result) {
-                            DB::rollBack();
-                            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录导出新订单插入失败', $miniOrderCreditPayArr);
-                            $this->error('小程序完成 或 扣款 回调记录导出新订单插入失败');
-                            continue;
+                    //当请求交易码存在的时候（并且扣款状态为未扣款或扣款失败情况）将记录保存
+                    if( $v['status'] != '1' || $v['status'] != '3' ){
+                        if ( $v['trade_no'] != '' ){
+                            $miniOrderCreditPayArr['out_trans_no'] = $v['trade_no'];//请求流水号
+                            $miniOrderCreditPayArr['order_operate_type'] = 'INSTALLMENT';//请求类型
+                            $miniOrderCreditPayArr['out_order_no'] = $val['order_no'];//商户订单号
+                            $miniOrderCreditPayArr['zm_order_no'] = $old_mini_orders[0]['order_no'];//芝麻订单号
+                            $miniOrderCreditPayArr['remark'] = $val['order_no'];//备注
+                            $miniOrderCreditPayArr['pay_amount'] = $v['amount']/100;//请求金额
+                            $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add( $miniOrderCreditPayArr );
+                            if (!$result) {
+                                DB::rollBack();
+                                \App\Lib\Common\LogApi::debug( '小程序完成 或 扣款 回调记录导出新订单插入失败', $miniOrderCreditPayArr );
+                                $this->error('小程序完成 或 扣款 回调记录导出新订单插入失败');
+                                continue;
+                            }
+                            $bar->advance();
                         }
-                        $bar->advance();
                     }
                 }
             }
