@@ -171,7 +171,6 @@ class WithholdController extends Controller
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
-            DB::rollBack();
             // 提交事务
             return apiResponse([], $instalmentInfo, ApiStatus::$errCodes[$instalmentInfo]);
         }
@@ -263,17 +262,6 @@ class WithholdController extends Controller
                 return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
             }
         }else {
-            // 保存 备注，更新状态
-            $data = [
-                'remark'        => $remark,
-                'payment_time'  => time(),
-                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-            ];
-            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
-            if(!$result){
-                DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_71001, '扣款备注保存失败');
-            }
 
             // 代扣协议编号
             $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
@@ -486,18 +474,6 @@ class WithholdController extends Controller
                     return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
                 }
             } else {
-                // 保存 备注，更新状态
-                $data = [
-                    'remark'        => $remark,
-                    'payment_time'  => time(),
-                    'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-                ];
-                $result = OrderGoodsInstalment::save(['id' => $instalmentId], $data);
-                if (!$result) {
-                    DB::rollBack();
-                    Log::error("扣款备注保存失败");
-                    continue;
-                }
 
                 // 代扣协议编号
                 $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
@@ -704,18 +680,7 @@ class WithholdController extends Controller
                         return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
                     }
                 } else {
-                    $data = [
-                        'remark'        => "定时任务扣款",
-                        'payment_time'  => time(),
-                        'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-                    ];
 
-                    $r = OrderGoodsInstalment::save(['id' => $item['id']], $data);
-                    if (!$r) {
-                        DB::rollBack();
-                        Log::error("扣款备注保存失败");
-                        continue;
-                    }
                     try{
 
                         // 代扣协议编号
