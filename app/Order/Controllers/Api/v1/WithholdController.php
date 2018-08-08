@@ -774,7 +774,7 @@ class WithholdController extends Controller
                     'business_no'   => $business_no,
                     'goods_no'      => $item['goods_no'],
                 ];
-                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData, false);
+                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData, true);
                 if( !$goodsLog ){
                     \App\Lib\Common\LogApi::error("定时任务扣款失败",$logData);
                     continue;
