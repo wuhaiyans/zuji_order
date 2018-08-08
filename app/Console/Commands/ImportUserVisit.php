@@ -42,7 +42,6 @@ class ImportUserVisit extends Command
     public function handle()
     {
         $where = [
-            ['business_key','=',1,],
             ['remark_id','>',0]
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->count();
@@ -57,7 +56,6 @@ class ImportUserVisit extends Command
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
-                    if(ImportOrder::isAllowImport($v['order_no'])) {
                         $data = [
                             'order_no' => $v['order_no'],
                             'visit_id' => $v['remark_id'],
@@ -70,9 +68,6 @@ class ImportUserVisit extends Command
                             $arr[$v['order_no']] = $data;
                         }
                         $bar->advance();
-                    }else{
-                        $arr[$v['order_no']] = $v;
-                    }
                 }
                 $page++;
                 sleep(1);
