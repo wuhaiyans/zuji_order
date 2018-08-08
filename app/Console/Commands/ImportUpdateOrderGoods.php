@@ -186,12 +186,15 @@ class ImportUpdateOrderGoods extends Command
 //                        'update_time'=>intval($goods_info['update_time']),
                     ];
 
+                    $res =OrderGoods::where([
+                        ['order_no', '=', $v['order_no']],
+                    ])->update($goodsData);
 
-                    $res =OrderGoods::update(['order_no'=>$v['order_no']],$goodsData);
-                    if($res){
+                    if($goods_info['yajin'] !=$v['yajin']){
+                        $arr['goods_unequal'][$k] = ['order_no'=>$v['order_no'],$goodsData];
+                    }
+                    if(!$res){
                         $arr['goods_error'][$k] =['order_no'=>$v['order_no'],$goodsData];
-                    }else{
-                        $arr['goods_success'][$k] = ['order_no'=>$v['order_no'],$goodsData];
                     }
                     /**
                      * 判断订单状态 如果是已下单 的 创建支付单
@@ -245,7 +248,8 @@ class ImportUpdateOrderGoods extends Command
 
             } while ($page <= $totalpage);
             $bar->finish();
-            LogApi::info("order_import_record:",$arr);
+            LogApi::info("order_import_record_goods_unequal:",$arr['goods_unequal']);
+            LogApi::info("order_import_record_goods_error:",$arr['goods_error']);
             if(count($arr)>0){
                 echo "部分导入成功";die;
             }
