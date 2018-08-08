@@ -85,8 +85,16 @@ class ImportHistoryOrderMiniInfo extends Command
                 $miniOrderInfoArr['house'] = $val['house'];//用户地址
                 $miniOrderInfoArr['zm_grade'] = $val['zm_grade'];//信用级别
                 $miniOrderInfoArr['credit_amount'] = $val['credit_amount'];//信用权益金额
-                $miniOrderInfoArr['zm_risk'] = $val['zm_risk'];//芝麻风控产品集联合结果
-                $miniOrderInfoArr['zm_face'] = $val['zm_face'];//人脸核身结果
+                if( $val['zm_risk'] == 1 ){
+                    $miniOrderInfoArr['zm_risk'] = 'Y';//芝麻风控产品集联合结果
+                }else{
+                    $miniOrderInfoArr['zm_risk'] = 'N';//芝麻风控产品集联合结果
+                }
+                if( $val['zm_face'] == 1 ){
+                    $miniOrderInfoArr['zm_face'] = 'Y';//人脸核身结果
+                }else{
+                    $miniOrderInfoArr['zm_face'] = 'N';//人脸核身结果
+                }
                 $miniOrderInfoArr['create_time'] = $val['create_time'];//订单查询时间
                 $miniOrderInfoArr['user_id'] = $val['user_id'];//支付宝 userid
                 $miniOrderInfoArr['channel_id'] = $val['channel_id'];//渠道来源
