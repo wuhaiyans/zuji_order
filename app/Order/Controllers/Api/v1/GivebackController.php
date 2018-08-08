@@ -430,9 +430,8 @@ class GivebackController extends Controller
 		$goodsNo = $paramsArr['goods_no'];//商品编号提取
 
 		//-+--------------------------------------------------------------------
-		// | 业务处理
+		// | 业务处理（先进行判断小程序还机收货结果或者H5还机收货结果）
 		//-+--------------------------------------------------------------------
-
 		//创建商品服务层对象
 		$orderGoodsService = new OrderGoods();
 		$orderGivebackService = new OrderGiveback();
@@ -453,6 +452,19 @@ class GivebackController extends Controller
 		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
 			return apiResponse([], ApiStatus::CODE_92500, '当前还机单不处于待检测状态，不能进行检测处理!');
 		}
+
+		//查询订单信息
+		$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $orderGivebackInfo['order_no'] );
+		if( $orderInfo == false ){
+			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
+		}
+		//当为小程序订单则直接调起其他接口进行处理
+		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
+			$MiniGivebackController = new MiniGivebackController();
+			$MiniGivebackController->givebackConfirmEvaluation($params);
+			die;
+		}
+
 
 		//获取当前商品未完成分期列表数据
 		$instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);

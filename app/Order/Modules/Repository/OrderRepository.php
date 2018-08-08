@@ -458,7 +458,7 @@ class OrderRepository
 
 
     /**
-     *  获取订单列表
+     *  获取前台订单列表
      *  heaven
      * ->paginate: 参数
      *  perPage:表示每页显示的条目数量
@@ -541,17 +541,6 @@ class OrderRepository
             $page = 1;
         }
 
-//        //dd($whereArray);
-
-//        DB::table('order_info')
-//            ->join('order_user_address',function($join){
-//                $join->on('order_info.order_no', '=', 'order_user_address.order_no')
-//                    ->where('b.status','=','SUCCESS')
-//                    ->where('b.type','=','UNLOCK');
-//            }, null,null,'left')
-//            ->where('a.id','>',1)
-//            ->get();
-
         $count = DB::table('order_info')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
@@ -629,7 +618,7 @@ class OrderRepository
 
 
     /**
-     *  获取订单列表
+     *  获取后台订单列表
      *  heaven
      * ->paginate: 参数
      *  perPage:表示每页显示的条目数量
@@ -638,7 +627,7 @@ class OrderRepository
     page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
      */
-    public static function getOrderList1($param = array(), $pagesize=5)
+    public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
         $orWhereArray = array();
@@ -670,9 +659,9 @@ class OrderRepository
             $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
         }
 
-        //应用来源ID
+        //应用渠道
         if (isset($param['order_appid']) && !empty($param['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $param['order_appid']];
+            $whereArray[] = ['order_info.channel_id', '=', $param['order_appid']];
         }
 
         //支付类型
@@ -704,20 +693,34 @@ class OrderRepository
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
-//        //dd($whereArray);
 
-//        DB::table('order_info')
-//            ->join('order_user_address',function($join){
-//                $join->on('order_info.order_no', '=', 'order_user_address.order_no')
-//                    ->where('b.status','=','SUCCESS')
-//                    ->where('b.type','=','UNLOCK');
-//            }, null,null,'left')
-//            ->where('a.id','>',1)
-//            ->get();
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
+        $count = DB::table('order_info')
+            ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+            ->join('order_info_visit',function($join){
+                $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+            }, null,null,'left')
+            ->where($whereArray)
+            ->where($orWhereArray)
+            ->orderBy('order_info.id', 'DESC')
+            ->count();
 
 
+
+//        sql_profiler();
         $orderList = DB::table('order_info')
-            ->select('order_info.*','order_user_address.*','order_info_visit.visit_id','order_info_visit.visit_text','order_delivery.logistics_no')
+            ->select('order_info.order_no')
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
@@ -731,17 +734,43 @@ class OrderRepository
             ->where($orWhereArray)
             ->orderBy('order_info.create_time', 'DESC')
             ->orderBy('order_info_visit.id','desc')
-            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+//            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+//            ->forPage($page, $pagesize)
+//
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
 
-//        $orderList = DB::table('order_info')
-//            ->leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
-//            ->leftJoin('order_info_visit','order_info.order_no', '=', 'order_info_visit.order_no')
-//            ->where($whereArray)
+        $orderArray = objectToArray($orderList);
 
-//        objectToArray($orderList);
-//        //dd(objectToArray($orderList));
-        return $orderList;
+        if ($orderArray) {
+            $orderIds = array_column($orderArray,"order_no");
+//           dd($orderIds);
+//            sql_profiler();
+            $orderList =  DB::table('order_info as o')
+                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','v.visit_id','v.visit_text','v.id','l.logistics_no')
+                ->whereIn('o.order_no', $orderIds)
+                ->join('order_user_address as d',function($join){
+                    $join->on('o.order_no', '=', 'd.order_no');
+                }, null,null,'inner')
+                ->join('order_info_visit as v',function($join){
+                    $join->on('o.order_no', '=', 'v.order_no');
+                }, null,null,'left')
+                ->join('order_delivery as l',function($join){
+                    $join->on('o.order_no', '=', 'l.order_no');
+                }, null,null,'left')
+                ->orderBy('o.create_time', 'DESC')
+                ->orderBy('v.id','desc')
+                ->get();
 
+            $orderArrays['data'] = objectToArray($orderList);
+            $orderArrays['total'] = $count;
+            $orderArrays['last_page'] = ceil($count/$pagesize);
+
+            return $orderArrays;
+//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
+
+        }
+        return false;
 
     }
 
