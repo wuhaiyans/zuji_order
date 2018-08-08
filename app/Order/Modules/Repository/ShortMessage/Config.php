@@ -41,6 +41,11 @@ class Config {
      * @var int 23
      */
     const CHANNELID_ANDROID = '23';
+    /**
+     * 渠道配置<b>【微回收渠道】</b>
+     * @var int 33
+     */
+    const CHANNELID_MICRO_RECOVERY  = '33';
 
 	
 	/**
@@ -179,6 +184,10 @@ class Config {
             // 安卓
             self::CHANNELID_ANDROID => [
 
+            ],
+            // 微回收
+            self::CHANNELID_MICRO_RECOVERY => [
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461173', //用户下单
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){
