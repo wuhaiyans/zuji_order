@@ -133,7 +133,7 @@ class BuyoutController extends Controller
 
         foreach($orderList['data'] as &$item){
             $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
-            $item['realname'] = $userList[$item['order_no']]['realname'];
+            $item['realname'] = $userList[$item['order_no']]['realname']?$userList[$item['order_no']]['realname']:"";
             $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
             $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];
             $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
