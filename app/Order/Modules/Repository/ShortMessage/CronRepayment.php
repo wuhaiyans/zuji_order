@@ -63,8 +63,9 @@ class CronRepayment implements ShortMessage {
             return false;
         }
 
-        $webUrl = env('WEB_H5_URL');
-        $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
+//        $webUrl = env('WEB_H5_URL');
+//        $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
+        $url = 'https://h5.nqyong.com/';
         $url = $url  . 'myBillDetail?';
 
         $urlData = [
@@ -84,9 +85,8 @@ class CronRepayment implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
-        p($dataSms,1);
         // 发送短息
-//        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
 
     }
 
