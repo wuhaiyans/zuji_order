@@ -91,6 +91,19 @@ class OrderClearingRepository
             return false;
         }
 
+        //小程序如果是穿已经完成的状态，将其它状态也全部变为已完成的状态
+        if (isset($param['status']) && $param['status']==OrderCleaningStatus::orderCleaningComplete) {
+
+            $status    =   OrderCleaningStatus::orderCleaningComplete;
+
+            $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusPayd;
+
+            $authUnfreezeStatus = OrderCleaningStatus::depositUnfreezeStatusPayd;
+
+            $authRefundStatus = OrderCleaningStatus::refundPayd;
+
+        }
+
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'],

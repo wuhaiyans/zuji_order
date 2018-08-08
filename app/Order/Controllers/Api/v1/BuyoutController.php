@@ -116,7 +116,7 @@ class BuyoutController extends Controller
         if(isset($params['appid'])){
             $where['appid'] = $params['appid'];
         }
-        //$sumCount = OrderBuyout::getCount($where);
+        
         $where['page'] = $params['page']>0?$params['page']-1:0;
         $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
@@ -133,10 +133,10 @@ class BuyoutController extends Controller
 
         foreach($orderList['data'] as &$item){
             $item['status'] = OrderBuyoutStatus::getStatusName($item['status']);
-            $item['realname'] = $userList[$item['order_no']]['realname'];
-            $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
-            $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'];
-            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['realname'] = !empty($userList[$item['order_no']])?$userList[$item['order_no']]['realname']:"";
+            $item['yajin'] = !empty($goodsList[$item['goods_no']])?$goodsList[$item['goods_no']]['yajin']:"";
+            $item['zuqi'] = !empty($goodsList[$item['goods_no']])?$goodsList[$item['goods_no']]['zuqi']:"";
+            $item['zuqi_type']= !empty($goodsList[$item['goods_no']])?OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']):"";
             $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
         }
 

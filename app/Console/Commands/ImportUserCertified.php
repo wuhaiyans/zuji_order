@@ -40,7 +40,7 @@ class ImportUserCertified extends Command
      */
     public function handle()
     {
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
+        $total = DB::connection('mysql_01')->table("zuji_order2")->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -48,11 +48,10 @@ class ImportUserCertified extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->forPage($page,$limit)->get();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
-                    if(ImportOrder::isAllowImport($v['order_no'])){
                         $data = [
                             'order_no'=>$v['order_no'],
                             'certified'=>$v['credit']>0?1:0,
@@ -70,10 +69,6 @@ class ImportUserCertified extends Command
                             $arr[$v['order_no']] = $data;
                         }
                         $bar->advance();
-                    }
-                    else{
-                        $arr[$v['order_no']] = $v;
-                    }
 
                 }
                 $page++;
