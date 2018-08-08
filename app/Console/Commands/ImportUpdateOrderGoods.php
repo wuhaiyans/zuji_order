@@ -72,177 +72,36 @@ class ImportUpdateOrderGoods extends Command
             $orderId =0;
             do {
 
-                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)
-                   ->get();
+                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->forPage($page,$limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
-                    //获取渠道
-//                    $channel_id =$this->getChannel($v['appid']);
-//                    //获取订单类型
-//                    $order_type =$this->getOrderType($v['appid']);
-//                    //获取状态
-//                    $status =$this->getStatus($v['status'],$v);
-//                    //获取发货信息
-//                    $delivery =$this->getOrderDelivery($v['order_no']);
-                    //获取商品信息
-                    $goods_info =$this->getOrderGoods($v['order_id']);
-                    //获取支付时间
-//                    $payment_time = intval($v['payment_time']);
-//                    $follow_info =$this->getOrderFollow($v['order_id'],7);
-//                    if(!empty($follow_info)){
-//                        $payment_time =$follow_info['create_time'];
-//                    }
-//                    $follow_info =$this->getOrderFollow($v['order_id'],22);
-//                    if(!empty($follow_info)){
-//                        $payment_time =$follow_info['create_time'];
-//                    }
-//                    //关闭已退款
-//                    $follow_info =$this->getOrderFollow($v['order_id'],10);
-//                    if(!empty($follow_info)){
-//                        $status['order_status'] =8;
-//                    }
-//                    $follow_info =$this->getOrderFollow($v['order_id'],23);
-//                    if(!empty($follow_info)){
-//                        $status['order_status'] =8;
-//                    }
 
-//
-//
-//                    $orderData =[
-//                        'order_no'=>$v['order_no'], //订单编号
-//                        'mobile'=>$v['mobile'],   //用户手机号
-//                        'user_id'=>$v['user_id'],  //订单类型
-//                        'order_type'=>$order_type, //订单类型 1线上订单2门店订单 3小程序订单
-//                        'order_status'=>$status['order_status'],//
-//                        'freeze_type'=>$status['freeze_type'],//
-//                        'pay_type'=>$v['payment_type_id'],//
-//                        'zuqi_type'=>$v['zuqi_type'],//
-//                        'remark'=>$delivery['delivery_remark'],//
-//                        'order_amount'=>($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 <0?0:($v['zujin']*$v['zuqi']-$v['discount_amount'])/100 ,//订单实际总租金
-//                        'goods_yajin'=>($v['yajin']+$v['mianyajin'])/100,//商品总押金金额
-//                        'discount_amount'=>0,//商品优惠总金额
-//                        'order_yajin'=>$v['yajin']/100,//实付商品总押金金额
-//                        'order_insurance'=>$v['yiwaixian']/100,//意外险总金额
-//                        'coupon_amount'=>$v['discount_amount'],//优惠总金额
-//                        'create_time'=>intval($v['create_time']),//
-//                        'update_time'=>intval($v['update_time']),//
-//                        'pay_time'=>intval($v['payment_time']),//
-//                        'confirm_time'=>intval($delivery['confirm_time']),//
-//                        'delivery_time'=>intval($delivery['delivery_time']),//
-//                        'appid'=>$v['appid'],//
-//                        'channel_id'=>$channel_id,//
-//                        'receive_time'=>intval($delivery['receive_time']),//
-//                        'complete_time'=>intval($status['complete_time']),//
-//                    ];
-//                    $res =Order::insert($orderData);
-//                    if(!$res){
-//                        $arr['order'][$k] =$v['order_no'];
-//                    }
-                    //获取服务周期
-//                    $service = $this->getOrderServiceTime($v['order_no']);
-                    //获取sku信息
+                    $goods_info =$this->getOrderGoods($v['order_id']);
                     $sku_info =$this->getSkuInfo($goods_info['sku_id']);
-                    //获取spu信息
-//                    $spu_info =$this->getSpuInfo($goods_info['spu_id']);
-                    //获取机型信息
-//                    $machine_name =$this->getSpuMachineInfo($spu_info['machine_id']);
                     $goodsData =[
-//                        'order_no'=>$v['order_no'],
-//                        'goods_name'=>$v['goods_name'],
-//                        'zuji_goods_id'=>$goods_info['sku_id'],
-//                        'zuji_goods_sn'=>$sku_info['sn'],
-//                        'goods_no'=>$goods_info['goods_id'],
-//                        'goods_thumb'=>$spu_info['thumb'],
-//                        'prod_id'=>$goods_info['spu_id'],
-//                        'prod_no'=>$spu_info['sn'],
-//                        'brand_id'=>$goods_info['brand_id'],
-//                        'category_id'=>$goods_info['category_id'],
-//                        'machine_id'=>$spu_info['machine_id'],
-//                        'user_id'=>$v['user_id'],
-//                        'quantity'=>1,
                         'goods_yajin'=>($v['yajin']+$v['mianyajin'])/100,   //全部改成 读取 订单表的
                         'yajin'=>$v['yajin']/100,//全部改成 读取 订单表的
                         'zuqi'=>$v['zuqi'],//全部改成 读取 订单表的
                         'zuqi_type'=>$v['zuqi_type'],//全部改成 读取 订单表的
                         'zujin'=>$v['zujin']/100,//全部改成 读取 订单表的
-//                        'machine_value'=>$machine_name,
-//                        'chengse'=>$goods_info['chengse'],
-//                        'discount_amount'=>0,
                         'coupon_amount'=>$v['discount_amount']/100,//全部改成 读取 订单表的
-                        'amount_after_discount'=>($v['zuqi']*$v['zujin']-$v['discount_amount'])/100<0 ?0:($v['zuqi']*$v['zujin']-$v['discount_amount'])/100,//全部改成 读取 订单表的
-//                        'edition'=>$sku_info['edition'],
-//                        'business_key'=>0,
-//                        'business_no'=>'',
-//                        'market_price'=>$sku_info['market_price'],
+                        'amount_after_discount'=>($v['zuqi']*$v['zujin']-$v['discount_amount'])/100<0 ?0:($v['zuqi']*$v['zujin']-$v['discount_amount'])/100,//全部改成
                         'price'=>($v['zuqi']*$v['zujin']-$v['discount_amount']+$v['yiwaixian']+$v['yajin'])/100 <0?0:($v['zuqi']*$v['zujin']-$v['discount_amount']+$v['yiwaixian']+$v['yajin'])/100 ,
-//                        'specs'=>$goods_info['specs'],
                         'insurance'=>$v['yiwaixian']/100,
                         'buyout_price'=>($sku_info['market_price']*1.2 -($v['zuqi']*$v['zujin']/100))<0?0:($sku_info['market_price']*1.2 -($v['zuqi']*$v['zujin']/100)),
-//                        'begin_time'=>$service['begin_time'],
-//                        'end_time'=>$service['end_time'],
-//                        'weight'=>$sku_info['weight'],
-//                        'goods_status'=>$status['goods_status'],
-//                        'create_time'=>intval($goods_info['create_time']),
-//                        'update_time'=>intval($goods_info['update_time']),
                     ];
 
                     $res =OrderGoods::where([
                         ['order_no', '=', $v['order_no']],
                     ])->update($goodsData);
 
-                    if($goods_info['yajin'] !=$v['yajin']){
-                        $arr['goods_unequal'][$k] = ['order_no'=>$v['order_no'],$goodsData];
+                    if($goods_info['zujin'] !=$v['zujin']){
+                        $arr['goods_unequal'][$k] = [['order_no'=>$v['order_no']],$goodsData];
                     }
                     if(!$res){
-                        $arr['goods_error'][$k] =['order_no'=>$v['order_no'],$goodsData];
+                        $arr['goods_error'][$k] =[['order_no'=>$v['order_no']],$goodsData];
                     }
-                    /**
-                     * 判断订单状态 如果是已下单 的 创建支付单
-                     */
-                    /**
-                     * 创建支付单
-                     * @param array $param 创建支付单数组
-                     * $param = [<br/>
-                     *		'payType' => '',//支付方式 【必须】<br/>
-                     *		'payChannelId' => '',//支付渠道 【必须】<br/>
-                     *		'userId' => '',//业务用户ID 【必须】<br/>
-                     *		'businessType' => '',//业务类型（租机业务 ）【必须】<br/>
-                     *		'businessNo' => '',//业务编号（订单编号）【必须】<br/>
-                     *		'paymentAmount' => '',//Price 支付金额（总租金），单位：元【必须】<br/>
-                     *		'fundauthAmount' => '',//Price 预授权金额（押金），单位：元【必须】<br/>
-                     *		'paymentFenqi' => '',//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-                     * ]<br/>
-                     * @return mixed boolen：flase创建失败|array $result 结果数组
-                     * $result = [<br/>
-                     *		'isPay' => '',订单是否需要支付（true：需要支付；false：无需支付）【订单是否创建支付单】//<br/>
-                     *		'withholdStatus' => '',是否需要签代扣（true：需要签约代扣；false：无需签约代扣）//<br/>
-                     *		'paymentStatus' => '',是否需要支付（true：需要支付；false:无需支付）//<br/>
-                     *		'fundauthStatus' => '',是否需要预授权（true：需要预授权；false：无需预授权）//<br/>
-                     * ]
-                     */
-//                    if($v['status'] ==1){
-//                        $fenqi =$goodsData['zuqi'];
-//                        if($goodsData['zuqi_type'] ==1){
-//                            $fenqi=0;
-//                        }
-//                        $payData =[
-//                            'payType' =>$v['payment_type_id'],//支付方式 【必须】<br/>
-//                            'payChannelId' => 2,//支付渠道 【必须】<br/>
-//                            'userId' =>$v['user_id'],//业务用户ID 【必须】<br/>
-//                            'businessType' =>OrderStatus::BUSINESS_ZUJI,//业务类型（租机业务 ）【必须】<br/>
-//                            'businessNo' => $v['order_no'],//业务编号（订单编号）【必须】<br/>
-//                            'orderNo' =>$v['order_no'],//业务编号（订单编号）【必须】<br/>
-//                            'paymentAmount' => $goodsData['amount_after_discount'],//Price 支付金额（总租金），单位：元【必须】<br/>
-//                            'fundauthAmount' => $goodsData['yajin'],//Price 预授权金额（押金），单位：元【必须】<br/>
-//                            'paymentFenqi' => $fenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
-//                        ];
-//                        $res =OrderCreater::createPay($payData);
-//                        if(!$res){
-//                            $arr['order_pay'][$k] =$payData;
-//                        }
-//                    }
                     $bar->advance();
-                    $orderId =$v['order_id'];
                 }
                 ++$page;
 
