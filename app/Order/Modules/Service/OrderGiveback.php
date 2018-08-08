@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Repository\OrderGivebackRepository;
 use App\Order\Modules\Inc\OrderGivebackStatus;
 use Illuminate\Support\Facades\DB;
@@ -261,7 +262,6 @@ class OrderGiveback
 			'withhold_status' => 'required',
 			'instalment_num' => 'required',
 			'instalment_amount' => 'required',
-			'instalment_status' => 'required',
 			'payment_status' => 'required',
 			'payment_time' => 'required',
 			'logistics_id' => 'required',
@@ -342,7 +342,7 @@ class OrderGiveback
 				return false;
 			}
 			//解冻订单
-			if(!self::__unfreeze($orderGivebackInfo['order_no'])){
+			if( !self::__unfreeze($orderGivebackInfo['order_no']) ){
 				\App\Lib\Common\LogApi::debug('[还机清算回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
@@ -494,6 +494,12 @@ class OrderGiveback
 				'out_payment_no' => $paymentNo,//payment_no
 				'out_auth_no' => $fundauthNo,//和funath_no
 			];
+			//判断是否为小程序（小程序清算数据为已完成）
+			if(isset($params['order_type'])){
+				if($params['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
+					$clearData['status'] = OrderCleaningStatus::orderCleaningComplete;//清算单状态为已完成
+				}
+			}
 			//进入清算处理
 			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 			if( !$orderCleanResult ){
@@ -533,6 +539,7 @@ class OrderGiveback
 		}
 		return true;
 	}
+
 	public static function __unfreeze($orderNo) {
 		$orderGivebackRespository = new OrderGivebackRepository();
 		//解冻订单
