@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 //use App\Lib\Common\LogApi;
+use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
@@ -142,7 +143,7 @@ class ImportUpdateOrderGoods extends Command
                     //获取sku信息
                     $sku_info =$this->getSkuInfo($goods_info['sku_id']);
                     //获取spu信息
-                    $spu_info =$this->getSpuInfo($goods_info['spu_id']);
+//                    $spu_info =$this->getSpuInfo($goods_info['spu_id']);
                     //获取机型信息
 //                    $machine_name =$this->getSpuMachineInfo($spu_info['machine_id']);
                     $goodsData =[
@@ -187,8 +188,10 @@ class ImportUpdateOrderGoods extends Command
 
 
                     $res =OrderGoods::update(['order_no'=>$v['order_no']],$goodsData);
-                    if(!$res){
-                        $arr['goods'][$k] =$goodsData;
+                    if($res){
+                        $arr['goods_error'][$k] =['order_no'=>$v['order_no'],$goodsData];
+                    }else{
+                        $arr['goods_success'][$k] = ['order_no'=>$v['order_no'],$goodsData];
                     }
                     /**
                      * 判断订单状态 如果是已下单 的 创建支付单
@@ -242,8 +245,8 @@ class ImportUpdateOrderGoods extends Command
 
             } while ($page <= $totalpage);
             $bar->finish();
+            LogApi::info("order_import_record:",$arr);
             if(count($arr)>0){
-                // LogApi::notify("订单风控信息导入失败",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;
