@@ -747,7 +747,7 @@ class OrderRepository
 //           dd($orderIds);
 //            sql_profiler();
             $orderList =  DB::table('order_info as o')
-                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','v.visit_id','v.visit_text','v.id','l.logistics_no')
+                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no')
                 ->whereIn('o.order_no', $orderIds)
                 ->join('order_user_address as d',function($join){
                     $join->on('o.order_no', '=', 'd.order_no');
@@ -829,6 +829,8 @@ class OrderRepository
         }
         $specs = substr($specs,0,-1);
         $goodsArr[0]['specs'] = $specs;
+        //添加数据字段（租金 碎屏险+总租金）
+        $orderArr['pay_amount'] = $orderArr['order_insurance'] + $orderArr['order_amount'];
         //修改数据格式
         $data = [
             'orderArr'=>$orderArr,

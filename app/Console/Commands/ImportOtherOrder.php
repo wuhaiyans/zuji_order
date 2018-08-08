@@ -119,7 +119,7 @@ class ImportOtherOrder extends Command
                         'discount_amount'=>0,//商品优惠总金额
                         'order_yajin'=>$v['yajin']/100,//实付商品总押金金额
                         'order_insurance'=>$v['yiwaixian']/100,//意外险总金额
-                        'coupon_amount'=>$v['discount_amount'],//优惠总金额
+                        'coupon_amount'=>$v['discount_amount']/100,//优惠总金额
                         'create_time'=>intval($v['create_time']),//
                         'update_time'=>intval($v['update_time']),//
                         'pay_time'=>intval($v['payment_time']),//
