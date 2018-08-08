@@ -372,6 +372,12 @@ class ThirdPartyUserRepository
             $all[$key]['pinpai_name'] = ThirdPartyUser::pinpai($item['pinpai']);
             $all[$key]['colour_name'] = ThirdPartyUser::chengse($item['colour']);
             $all[$key]['types_name'] = ThirdPartyUser::types($item['types']);
+            if($item['start_time']){
+                $all[$key]['start_time'] = date($item['start_time']);
+            }
+            if($item['end_time']){
+                $all[$key]['end_time'] = date($item['end_time']);
+            }
         }
         return $all;
 
@@ -389,6 +395,12 @@ class ThirdPartyUserRepository
         $row['pinpai_name'] = ThirdPartyUser::pinpai($row['pinpai']);
         $row['colour_name'] = ThirdPartyUser::chengse($row['colour']);
         $row['types_name'] = ThirdPartyUser::types($row['types']);
+        if($row['start_time']){
+            $row['start_time'] = date($row['start_time']);
+        }
+        if($row['end_time']){
+            $row['end_time'] = date($row['end_time']);
+        }
 
         return $row;
 
