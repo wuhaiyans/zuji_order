@@ -719,7 +719,7 @@ class OrderOperate
      * @param string $userId 用户id
      * @return bool|string
      */
-    public static function cancelOrder($orderNo,$userInfo='',$reasonId = '')
+    public static function cancelOrder($orderNo,$userInfo='',$reasonId = '', $resonText='')
     {
         if (empty($orderNo)) {
             return  ApiStatus::CODE_31001;
@@ -816,25 +816,26 @@ class OrderOperate
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CANCEL);
             $orderNoticeObj->notify();
             //增加操作日志
+
             $resonInfo = '';
+
             if ($reasonId) {
-                if (is_numeric($reasonId)) {
 
                     $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+            }
 
-                } else {
+            if ($resonText) {
 
-                    $resonInfo = $reasonId;
-
-                }
+                $resonInfo = $resonText;
 
             }
-            OrderLogRepository::add($userId ,$userInfo['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
+            OrderLogRepository::add($userId ,$userInfo['username'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
 
             return ApiStatus::CODE_0;
 
         } catch (\Exception $exc) {
             DB::rollBack();
+            LogApi::info("未支付取消订单异常",$exc);
             return  ApiStatus::CODE_31006;
         }
 

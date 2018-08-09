@@ -109,11 +109,12 @@ class User extends \App\Lib\BaseApi{
      * 小程序获取用户id生成用户
      * @author zhanhgjinhui
      * @param $params
-     * @return string or array
+     * @return false or array
      */
-    public static function getUserId($params){
+    public static function getUserId($params, $token){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.mini.user.id.get';
+        $data['auth_token'] = $token;
         if($params['zm_face'] == 'Y'){
             $zm_face = 1;
         }else{
@@ -132,12 +133,12 @@ class User extends \App\Lib\BaseApi{
             'cert_no'=>$params['cert_no'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
+        $info = json_decode($info,true);
         if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+            return false;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return false;
         }
         return $info['data'];
     }
