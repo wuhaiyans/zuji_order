@@ -95,7 +95,6 @@ class InstalmentController extends Controller
      */
     public function info(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'goods_no'         => 'required',  //商品编号
@@ -120,10 +119,6 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
         }
 
-        // 用户验证
-        if($uid != $orderGoodsInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-        }
 
 
         // 分期列表
