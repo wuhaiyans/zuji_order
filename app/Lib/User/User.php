@@ -64,7 +64,7 @@ class User extends \App\Lib\BaseApi{
             $res =self::request(\config('app.APPID'), \config('ordersystem.ORDER_API'),'orderuser.thirdpartyuser.orderMatching', '1.0', $params);
             return $res;
         }catch (\Exception $e){
-            return 'error';
+            return 0;
         }
 
     }
