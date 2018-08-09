@@ -176,10 +176,10 @@ class WithholdController extends Controller
         }
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
-//        // 频次限制
-//        if(redisIncr($instalmentKey, 300) > 1){
-//            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
-//        }
+        // 频次限制
+        if(redisIncr($instalmentKey, 300) > 1){
+            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
+        }
 
         // 生成交易码
         $business_no = createNo();
