@@ -132,8 +132,13 @@ class User extends \App\Lib\BaseApi{
             'zm_risk'=>$zm_risk,
             'cert_no'=>$params['cert_no'],
         ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info = json_decode($info,true);
+        $result = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info = json_decode($result,true);
+		LogApi::debug('芝麻小程序读取token的用户信息',[
+			'url' => config('tripartite.Interior_Goods_Url'),
+			'params' => json_encode($data),
+			'result' => $result,
+		]);
         if(!is_array($info)){
             return false;
         }

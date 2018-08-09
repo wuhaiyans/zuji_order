@@ -210,13 +210,16 @@ class MiniOrderController extends Controller
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
             }
             $miniData = $miniApi->getResult();
+			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
 			
             //用户处理
             $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token']);
 			if( !$_user ){
-                \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniParams);
+                \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
 			}
+			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
+			
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
 			
@@ -235,6 +238,7 @@ class MiniOrderController extends Controller
                 'mobile'=>$miniData['mobile'],
             ]);
             if(!$address){
+                \App\Lib\Common\LogApi::error('芝麻小程序收货地址设置错误',$miniData);
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
                 //return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
             }
@@ -252,6 +256,7 @@ class MiniOrderController extends Controller
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
                 //return apiResponse([],ApiStatus::CODE_35012,get_msg());
             }
+			\App\Lib\Common\LogApi::debug('芝麻小程序确认订单结果',$res);
         } catch (\Exception $ex) {
             //回滚事务
             DB::rollBack();
