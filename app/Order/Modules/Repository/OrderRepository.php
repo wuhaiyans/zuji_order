@@ -331,7 +331,7 @@ class OrderRepository
                 ->where('order_info.order_no', '=', $param['order_no'])
                 ->select('order_info.*','order_user_address.*','order_user_certified.certified'
                     ,'order_user_certified.certified_platform','order_user_certified.credit','order_user_certified.realname','order_user_certified.cret_no'
-                    ,'order_user_certified.card_img','order_user_certified.deposit_detail','order_user_certified.deposit_msg'
+                    ,'order_user_certified.card_img','order_user_certified.deposit_detail','order_user_certified.deposit_msg','order_user_certified.matching'
                 )
                 ->first();
 
