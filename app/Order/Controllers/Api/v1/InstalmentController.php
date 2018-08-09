@@ -186,13 +186,6 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
         }
 
-        // 用户验证
-        if(empty($params['params']['no_login'])){
-            if(empty($params['userinfo']['uid']) || $params['userinfo']['uid'] != $instalmentInfo['user_id']){
-                return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-            }
-        }
-
         // 订单详情
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getOrderInfo(['order_no'=>$instalmentInfo['order_no']]);
         if(!$orderInfo){

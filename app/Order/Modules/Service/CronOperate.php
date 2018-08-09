@@ -420,6 +420,7 @@ class CronOperate
                 // 查询数据
                 $result =  \App\Order\Models\OrderActive::query()
                     ->select('id')
+                    ->where(['allow'=>1])
                     ->orderBy('id', 'ASC')
                     ->forPage($page,$limit)
                     ->get()
