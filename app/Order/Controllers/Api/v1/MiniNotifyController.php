@@ -139,13 +139,14 @@ class MiniNotifyController extends Controller
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
-        $business_no = $data['out_trans_no'];
+
         //开启事务
         \DB::beginTransaction();
         //判断订单是否为还机关闭订单
         if($data['pay_status'] == "PAY_SUCCESS"){
             //判断订单是否为还机冻结状态
             if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){//还机关闭订单
+                $business_no = $data['out_trans_no'];
                 $orderGivebackService = new OrderGiveback();
                 //获取还机单基本信息
                 $orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($business_no);
