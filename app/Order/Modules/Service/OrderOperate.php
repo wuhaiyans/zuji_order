@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
+use zuji\order\OrderStatus;
 
 
 class OrderOperate
@@ -718,11 +719,12 @@ class OrderOperate
      * @param string $userId 用户id
      * @return bool|string
      */
-    public static function cancelOrder($orderNo,$userId='',$reasonId = '')
+    public static function cancelOrder($orderNo,$userInfo='',$reasonId = '')
     {
         if (empty($orderNo)) {
             return  ApiStatus::CODE_31001;
         }
+        $userId = $userInfo['uid'];
         //查询订单的状态
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
 
@@ -813,6 +815,22 @@ class OrderOperate
             // 订单取消后发送取消短息。;
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CANCEL);
             $orderNoticeObj->notify();
+            //增加操作日志
+            $resonInfo = '';
+            if ($reasonId) {
+                if (is_numeric($reasonId)) {
+
+                    $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+
+                } else {
+
+                    $resonInfo = $reasonId;
+
+                }
+
+            }
+            OrderLogRepository::add($userId ,$userInfo['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
+
             return ApiStatus::CODE_0;
 
         } catch (\Exception $exc) {
@@ -1131,6 +1149,7 @@ class OrderOperate
 
         $newParam['uid']=  $param['userinfo']['uid'];
 
+        $newParam['appid']=  $param['appid'];
 
         $orderList = OrderRepository::getClientOrderList($newParam);
 

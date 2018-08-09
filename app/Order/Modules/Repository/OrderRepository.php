@@ -3,6 +3,7 @@ namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
 use App\Lib\Common\SmsApi;
 use App\Lib\Goods\Goods;
+use App\Lib\Order\OrderInfo;
 use App\Order\Models\Order;
 use App\Order\Models\OrderCoupon;
 use App\Order\Models\OrderExtend;
@@ -430,10 +431,19 @@ class OrderRepository
         $whereArray = array();
         //根据用户id
         $whereArray[] = ['order_info.user_id', '=', $param['uid']];
+
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
             $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
         }
+        //渠道来源
+        if (isset($param['appid']) && !empty($param['appid'])) {
+            if (in_array($param['appid'], config('web.mini_appid'))) {
+                $whereArray[] = ['order_info.appid', '=', $param['appid']];
+            }
+        }
+
+
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
