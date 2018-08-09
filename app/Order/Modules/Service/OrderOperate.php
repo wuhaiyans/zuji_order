@@ -1077,6 +1077,8 @@ class OrderOperate
         $orderData['yajin_amount']  =   $orderData['order_yajin'];
 
         $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
+        //判断是否第三平台下过单
+        $orderData['matching_name']  = $orderData['matching']? '是':'否';
 
         $order['order_info'] = $orderData;
 

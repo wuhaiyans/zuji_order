@@ -219,7 +219,9 @@ class WithholdController extends Controller
         $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
-        $amount = $instalmentInfo['amount'] * 100;
+		$instalmentInfo['amount'] = 558.67;
+        $amount = normalizeNum( $instalmentInfo['amount'] * 100 );
+		var_dump( $amount, ''.$amount );exit;
         if( $amount<0 ){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
