@@ -25,5 +25,5 @@ class OrderActive extends Model
 
 
     // 可以被批量赋值的属性。
-    protected $fillable = ['id','business_no','order_no','goods_no','user_id','term','day','times','amount','status','payment_time','update_time','remark','fail_num'];
+    protected $fillable = ['id','instalment_id','order_no','goods_no','appid','zuji_type','amount','realname','status'];
 }

@@ -84,7 +84,7 @@ class CronRepayment implements ShortMessage {
         $urlData = [
             'orderNo'       => $instalmentInfo['order_no'],     //  订单号
             'zuqi_type'     => $instalmentInfo['zuqi_type'],    //  租期类型
-            'id'            => $instalmentInfo['id'],           //  分期ID
+            'id'            => $instalmentInfo['instalment_id'],//  分期ID
             'appid'         => $instalmentInfo['appid'],        //  商品编号
             'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
             'nologin'       => 1,                               //  商品编号
