@@ -378,6 +378,9 @@ class ThirdPartyUserRepository
             if($item['end_time']){
                 $all[$key]['end_time'] = date('Y-m-d h:i:s',$item['end_time']);
             }
+            if($item['order_time']){
+                $all[$key]['order_time'] = date('Y-m-d h:i:s',$item['order_time']);
+            }
         }
         return $all;
 
@@ -400,6 +403,9 @@ class ThirdPartyUserRepository
         }
         if($row['end_time']){
             $row['end_time'] = date('Y-m-d h:i:s',$row['end_time']);
+        }
+        if($row['order_time']){
+            $row['order_time'] = date('Y-m-d h:i:s',$row['order_time']);
         }
 
         return $row;
