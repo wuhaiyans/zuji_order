@@ -2378,7 +2378,9 @@ class OrderReturnCreater
                 'channel_id'=>$order_info['channel_id'],
                 'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
             ]);
+            LogApi::debug("退款成功获取渠道id",$order_info['channel_id']);
             if($order_info['channel_id']==Config::CHANNELID_MICRO_RECOVERY){
+                LogApi::debug("发送微回收短信，渠道模板参数",Config::CHANNELID_MICRO_RECOVERY);
                 //发送短信，押金解冻短信发送
                 $returnSend = ReturnDeposit::notify($order_info['channel_id'],SceneConfig::REFUND_SUCCESS,[
                         'mobile'=>$order_info['mobile'],

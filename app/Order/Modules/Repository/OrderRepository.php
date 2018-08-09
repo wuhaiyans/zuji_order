@@ -833,7 +833,7 @@ class OrderRepository
         $specs = substr($specs,0,-1);
         $goodsArr[0]['specs'] = $specs;
         //添加数据字段（租金 碎屏险+总租金）
-        $orderArr['pay_amount'] = $orderArr['order_insurance'] + $orderArr['order_amount'];
+        $orderArr['pay_amount'] = normalizeNum($orderArr['order_insurance'] + $orderArr['order_amount']);
         //修改数据格式
         $data = [
             'orderArr'=>$orderArr,
