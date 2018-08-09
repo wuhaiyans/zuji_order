@@ -54,6 +54,7 @@ class InstalmentController extends Controller
             }
         }
 
+
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
         foreach($list as &$item){
@@ -77,7 +78,6 @@ class InstalmentController extends Controller
 
         $result['data']     = $list;
         $result['total']    = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
-
         if(!is_array($list)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
