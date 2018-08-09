@@ -219,7 +219,10 @@ class WithholdController extends Controller
         $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
-        $amount = $instalmentInfo['amount'] * 100;
+		// 2018-08-09 注意：浮点数的乘法计算时，会得到一个另类的值（xxx.999999）,在特殊场景中打印时会出现
+		// 例如json_encode()时，打印成 xxx.9999999
+		// 解决办法： 将结果值 1）先转成字符串类型的值，2）再转换成想用的类型（想使用int值，则再转成init）
+        $amount = intval( strval($instalmentInfo['amount'] * 100) );
         if( $amount<0 ){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
@@ -248,7 +251,7 @@ class WithholdController extends Controller
                 DB::commit();
                 return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
                 // 提交事务
                 DB::commit();
                 return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
@@ -291,7 +294,9 @@ class WithholdController extends Controller
 
             try{
                 // 请求代扣接口
-                $withholding->deduct($withholding_data);
+                $withholdStatus = $withholding->deduct($withholding_data);
+
+                \App\Lib\Common\LogApi::error('分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
                 DB::rollBack();
@@ -301,9 +306,9 @@ class WithholdController extends Controller
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
                     return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
                 } else {
                     return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
@@ -460,7 +465,7 @@ class WithholdController extends Controller
                     DB::commit();
                     return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
                 }elseif($pay_status =='PAY_FAILED'){
-                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
                     // 提交事务
                     DB::commit();
                     return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
@@ -509,10 +514,10 @@ class WithholdController extends Controller
                 }catch(\Exception $exc){
                     DB::rollBack();
                     \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
-
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
                     if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                        OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
+
                         Log::error("买家余额不足");
                         continue;
                     }
@@ -666,7 +671,7 @@ class WithholdController extends Controller
                         DB::commit();
                         return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
                     }elseif($pay_status =='PAY_FAILED'){
-                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['business_no'], $item['term']);
+                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['business_no']);
                         // 提交事务
                         DB::commit();
                         return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
@@ -716,9 +721,10 @@ class WithholdController extends Controller
                         } catch (\Exception $exc) {
                             DB::rollBack();
                             \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                             //捕获异常 买家余额不足
                             if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                                OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id'], $item['term']);
+
                                 \App\Lib\Common\LogApi::error("扣款失败");
                                 continue;
                             }

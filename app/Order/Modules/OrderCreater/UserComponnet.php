@@ -153,6 +153,20 @@ class UserComponnet implements OrderCreater
     {
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
+
+        //调用第三方接口 获取用户是否在第三方平台下过单
+        $params= [
+            'phone'=>$data['user']['user_mobile'],
+            'identity'=>$data['user']['cert_no'],
+            'consignee'=>$data['address']['name'],
+            'province'=>$data['address']['province_name'],
+            'city'=>$data['address']['city_name'],
+            'county'=>$data['address']['country_name'],
+            'shipping_address'=>$data['address']['address'],
+        ];
+        $matching = User::getUserMatching($params);
+
+        //保存用户认证信息
         $RiskData = [
             'order_no'=>$orderNo,
             'certified'=>$data['user']['certified'],
@@ -160,6 +174,7 @@ class UserComponnet implements OrderCreater
             'credit'=>$data['user']['credit'],
             'realname'=>$data['user']['realname'],
             'cret_no'=>$data['user']['cert_no'],
+            'matching'=>$matching,
             'create_time'=>time(),
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
@@ -168,6 +183,8 @@ class UserComponnet implements OrderCreater
             $this->getOrderCreater()->setError("保存用户认证信息失败");
             return false;
         }
+
+
         return true;
     }
 

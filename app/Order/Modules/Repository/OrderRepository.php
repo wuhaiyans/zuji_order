@@ -332,7 +332,7 @@ class OrderRepository
                 ->where('order_info.order_no', '=', $param['order_no'])
                 ->select('order_info.*','order_user_address.*','order_user_certified.certified'
                     ,'order_user_certified.certified_platform','order_user_certified.credit','order_user_certified.realname','order_user_certified.cret_no'
-                    ,'order_user_certified.card_img','order_user_certified.deposit_detail','order_user_certified.deposit_msg'
+                    ,'order_user_certified.card_img','order_user_certified.deposit_detail','order_user_certified.deposit_msg','order_user_certified.matching'
                 )
                 ->first();
 
@@ -757,7 +757,7 @@ class OrderRepository
 //           dd($orderIds);
 //            sql_profiler();
             $orderList =  DB::table('order_info as o')
-                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no')
+                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
                 ->whereIn('o.order_no', $orderIds)
                 ->join('order_user_address as d',function($join){
                     $join->on('o.order_no', '=', 'd.order_no');
@@ -767,6 +767,9 @@ class OrderRepository
                 }, null,null,'left')
                 ->join('order_delivery as l',function($join){
                     $join->on('o.order_no', '=', 'l.order_no');
+                }, null,null,'left')
+                ->join('order_user_certified as c',function($join){
+                    $join->on('o.order_no', '=', 'c.order_no');
                 }, null,null,'left')
                 ->orderBy('o.create_time', 'DESC')
                 ->orderBy('v.id','desc')
@@ -840,7 +843,7 @@ class OrderRepository
         $specs = substr($specs,0,-1);
         $goodsArr[0]['specs'] = $specs;
         //添加数据字段（租金 碎屏险+总租金）
-        $orderArr['pay_amount'] = $orderArr['order_insurance'] + $orderArr['order_amount'];
+        $orderArr['pay_amount'] = normalizeNum($orderArr['order_insurance'] + $orderArr['order_amount']);
         //修改数据格式
         $data = [
             'orderArr'=>$orderArr,

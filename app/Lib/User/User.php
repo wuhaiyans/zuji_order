@@ -32,7 +32,44 @@ class User extends \App\Lib\BaseApi{
 
         return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
     }
+    /**
+     * 获取用户是否在第三方平台下过单
+     * @author wuhaiyan
+     * @param $arr //【必须】 array
+     * [
+     *      'phone'=>'',    //【必须】 string 下单手机号
+     *      'identity'=>'', //【必须】 string 身份证号
+     *      'consignee'=>'',//【可选】 string 收货人姓名
+     *      'province'=>'', //【可选】 string 收货人省份
+     *      'city'=>'',     //【可选】 string 收货人市区
+     *      'county'=>'',   //【可选】 string 收货人区县
+     *      'shipping_address'=>'',//【可选】 string 详细地址
+     *
+     * ]
+     * @return array |string
+     * @throws \Exception			请求失败时抛出异常
+     */
 
+    public static function getUserMatching($arr){
+        $params= [
+            'phone'=>$arr['phone'],
+            'identity'=>$arr['identity'],
+            'consignee'=>$arr['consignee'],
+            'province'=>$arr['province'],
+            'city'=>$arr['city'],
+            'county'=>$arr['county'],
+            'shipping_address'=>$arr['shipping_address'],
+        ];
+        try{
+            $res =self::request(\config('app.APPID'), \config('ordersystem.ORDER_API'),'orderuser.thirdpartyuser.orderMatching', '1.0', $params);
+            if(is_array($res)){
+                return $res['matching'];
+            }
+        }catch (\Exception $e){
+            return 0;
+        }
+        return 0;
+    }
     /**
      * 获取用户的支付宝信息
      * @author wuhaiyan
