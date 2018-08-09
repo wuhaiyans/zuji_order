@@ -147,9 +147,10 @@ class OrderGoodsInstalmentRepository
         }
 
         $result =  OrderGoodsInstalment::query()
-            ->select('order_goods_instalment.*','order_info.mobile')
+            ->select('order_goods_instalment.*','order_info.mobile','order_user_certified.realname')
             ->where($whereArray)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)
             ->get();
