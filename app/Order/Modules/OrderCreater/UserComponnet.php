@@ -154,8 +154,6 @@ class UserComponnet implements OrderCreater
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
 
-        $matching =0; //定义匹配用户是否第三方下过单 0未匹配 1匹配
-
         //调用第三方接口 获取用户是否在第三方平台下过单
         $params= [
             'phone'=>$data['user']['user_mobile'],
@@ -167,9 +165,7 @@ class UserComponnet implements OrderCreater
             'shipping_address'=>$data['address']['address'],
         ];
         $matching = User::getUserMatching($params);
-        if(is_array($matching)){
-            $matching =$matching['matching'];
-        }
+
         //保存用户认证信息
         $RiskData = [
             'order_no'=>$orderNo,

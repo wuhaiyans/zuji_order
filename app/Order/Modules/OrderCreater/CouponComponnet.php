@@ -30,6 +30,7 @@ class CouponComponnet implements OrderCreater
     public function __construct(OrderCreater $componnet, array $coupon=[],int $userId)
     {
         $this->componnet = $componnet;
+
         if(!empty($coupon)){
             //获取优惠券类型接口
             foreach ($coupon as $k=>$v){
