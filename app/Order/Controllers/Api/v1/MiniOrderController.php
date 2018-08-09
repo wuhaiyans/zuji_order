@@ -328,11 +328,7 @@ class MiniOrderController extends Controller
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'error_code' => 'required', //【必须】string；支付code码
-            'error_msg' => 'required', //【必须】string；错误描述
-            'order_create_time' => 'required', //【必须】string；订单创建时间
             'order_status' => 'required', //【必须】string；当前订单状态
-            'success' => 'required', //【必须】bool；标识
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
