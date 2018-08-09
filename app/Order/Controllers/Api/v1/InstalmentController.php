@@ -61,9 +61,9 @@ class InstalmentController extends Controller
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
             $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
 
-            // 姓名
-            $member = \App\Lib\User\User::getUser($item['user_id']);
-            $item['realname']       = !empty($member) ? $member['realname'] : "--";
+//            // 姓名
+//            $member = \App\Lib\User\User::getUser($item['user_id']);
+            $item['realname']       = !empty($item['realname']) ? $item['realname'] : "--";
 
             // 状态
             $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
@@ -95,7 +95,6 @@ class InstalmentController extends Controller
      */
     public function info(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'goods_no'         => 'required',  //商品编号
@@ -120,10 +119,6 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
         }
 
-        // 用户验证
-        if($uid != $orderGoodsInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-        }
 
 
         // 分期列表

@@ -14,6 +14,7 @@ return [
             'api.Withhold.repayment',
             'api.order.checkVerifyApp',
             'api.Instalment.queryInfo',
+            'api.Instalment.info',
             ]
     ];
 
