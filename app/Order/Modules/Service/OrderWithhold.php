@@ -85,21 +85,29 @@ class OrderWithhold
             $miniParams['out_order_no']     = $miniOrderInfo['out_order_no'];
             $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
             //扣款交易号
-            $miniParams['out_trans_no']     = $instalmentId;
-            $miniParams['pay_amount']       = $amount;
+            $miniParams['out_trans_no']     = $business_no;
+            $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
+                // 提交事务
+                DB::commit();
                 return true;
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
-                Log::error("小程序扣款请求失败");
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                // 提交事务
+                DB::commit();
+                Log::error("小程序扣款请求失败（用户余额不足）");
                 return false;
             }elseif($pay_status == 'PAY_INPROGRESS'){
+                // 提交事务
+                DB::commit();
                 Log::error("小程序扣款处理中请等待");
                 return false;
             }else{
+                // 事物回滚
+                DB::rollBack();
                 Log::error("小程序扣款处理失败（内部失败）");
                 return false;
             }

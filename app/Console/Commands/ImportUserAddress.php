@@ -41,7 +41,16 @@ class ImportUserAddress extends Command
      */
     public function handle()
     {
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where('business_key','=',1)->count();
+        $appid =[
+            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
+            40,41,42,43,44,45,46,47,48,49,
+            50,51,52,53,54,55,56,57,58,59,
+            60,61,62,63,64,65,66,67,68,69,
+            70,71,72,73,74,75,76,77,78,79,
+            80,81,82,83,84,85,86,87,88,89,
+            93,94,95,96,97,98,122,123,131,132,
+        ];
+        $total = DB::connection('mysql_01')->table("zuji_order2")->whereNotIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 1000;
@@ -49,7 +58,8 @@ class ImportUserAddress extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where('business_key','=',1)->forPage($page,$limit)->get();
+
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
                 $orderList = array_keys_arrange($orderList,"order_no");
                 $orderIds = array_column($orderList,"order_id");
@@ -60,7 +70,7 @@ class ImportUserAddress extends Command
 
                 foreach ($orderList as $k=>$v) {
                     $bar->advance();
-                    if(!empty($addressList[$v['order_id']]) && ImportOrder::isAllowImport($v['order_no'])){
+                    if(!empty($addressList[$v['order_id']])){
                         $province = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['province_id'])->first();
                         $city = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['city_id'])->first();
                         $area = DB::connection('mysql_01')->table("zuji_district")->where('id','=',$addressList[$v['order_id']]['country_id'])->first();

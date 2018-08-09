@@ -36,12 +36,24 @@ class InstalmentController extends Controller
             'begin_time'    => 'required',
             'end_time'      => 'required',
             'goods_no'      => 'required',
-            'order_no'      => 'required',
             'status'        => 'required',
-            'mobile'        => 'required',
+            'kw_type'       => 'required',
+            'keywords'      => 'required',
             'term'          => 'required',
         ]);
-        
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
+
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
         foreach($list as &$item){
@@ -83,7 +95,6 @@ class InstalmentController extends Controller
      */
     public function info(Request $request){
         $params     = $request->all();
-        $uid        = $params['userinfo']['uid'];
         // 参数过滤
         $rules = [
             'goods_no'         => 'required',  //商品编号
@@ -108,10 +119,6 @@ class InstalmentController extends Controller
             return apiResponse([], ApiStatus::CODE_50000, "订单信息不存在");
         }
 
-        // 用户验证
-        if($uid != $orderGoodsInfo['user_id']){
-            return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-        }
 
 
         // 分期列表
@@ -184,13 +191,6 @@ class InstalmentController extends Controller
         $instalmentInfo     = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$instalment_id]);
         if(!$instalmentInfo){
             return apiResponse([], ApiStatus::CODE_50000, "分期信息不存在");
-        }
-
-        // 用户验证
-        if(empty($params['params']['no_login'])){
-            if(empty($params['userinfo']['uid']) || $params['userinfo']['uid'] != $instalmentInfo['user_id']){
-                return apiResponse([], ApiStatus::CODE_50000, "用户信息错误");
-            }
         }
 
         // 订单详情
@@ -337,11 +337,24 @@ class InstalmentController extends Controller
             'begin_time'    => 'required',
             'end_time'      => 'required',
             'goods_no'      => 'required',
-            'order_no'      => 'required',
             'status'        => 'required',
-            'mobile'        => 'required',
             'term'          => 'required',
+            'kw_type'       => 'required',
+            'keywords'      => 'required',
         ]);
+
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
 
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
