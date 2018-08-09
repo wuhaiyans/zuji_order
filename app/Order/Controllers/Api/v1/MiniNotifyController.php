@@ -32,6 +32,8 @@ class MiniNotifyController extends Controller
      * @return string
      */
     public function withholdingCloseCancelNotify(){
+
+
         //关闭订单回调
 //        $json = '{"pay_amount":"0.01","out_trans_no":"FA80636073263601","notify_app_id":"2018032002411058","out_order_no":"A804165661489550","alipay_fund_order_no":"2018080621001004030557693155","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-06 14:24:12","channel":"rent","zm_order_no":"2018080400001001094871363118","pay_status":"PAY_SUCCESS","sign":"Hr86Bsm9528CckEUm6Ps5ulZDJ5qMMMD+328cNDx6FsCoXOM95GmDS\/sPehs4kGaDuS1G8CCXCTavgkGajXgkQ+9wrWki8M94c+aiEWT\/xlCBUYs+hJMhOwkLZgSglBasPf1EohVA9Z76cgMEqsZ\/o5Gp2La0d4YX8JesGu+X+1i6XmMhpdjIbyL64J0kw3EEzIcO\/ZP8qzq\/ZTlr8d9WF9asfIW9ulvCfbJVexgoPnmqHj+QizqKj5TM4AyCnJzmjZfyMdoGY4a7DXOYPjYxGoB5N4OVHyzhQ2mC8o2nDjqZJkgShNQL94KTCvTvBZywsqVKL1Uucu58CbsjLO2aw==","sign_type":"RSA2"}';
         //创建订单回调
@@ -39,7 +41,12 @@ class MiniNotifyController extends Controller
         //取消订单回调
 //        $json = '{"notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"Yosi\/ZKTDVvPGUwvseryPC0bh0ZBk7DtRsoXKim8CZOKyjUI1zJXJcSkYE1L7PBoU0G4Ccq527M+BuN5MteH4yPjtjTBlsAsPLme+0jsvcXuy2+rJetmMSqsfU5OsAvET1uue2NpABd65lUT0rf\/Xe2sRR8SmBQyXWNyA2sQNN6XbD8hcSa1ZkY0ijSNlJAju85VQGxF6aDLe04UNtP\/CDVaQYavdMvqoUIIIIzVaAQx88Rs87xulAA+jwdI63e6tNvxmh\/c2O\/TySEayzbOEXWokTt3WtwYMjyqFE251l+zuDM7GstFkooBxiC34IqNvjfQgPDtkyOIyTtxyYQGNQ==","sign_type":"RSA2"}';
 //        $_POST = json_decode($json,true);
+        \App\Lib\Common\LogApi::setSource('zm_withholding_close_cancel');
+        if( isset($_POST['out_order_no']) ) {
+            \App\Lib\Common\LogApi::id($_POST['out_order_no']);
+        }
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
+
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
