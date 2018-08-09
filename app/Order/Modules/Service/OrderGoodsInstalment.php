@@ -126,30 +126,7 @@ class OrderGoodsInstalment
      * @param string $business_no	交易码
      * @return mixed  false：更新失败；int：受影响记录数
      */
-    public static function instalment_failed($fail_num,$instalment_id,$term){
-
-        //发送通知
-        if ($fail_num == 0) {
-            $model = 'WithholdFail';
-        } elseif ($fail_num > 0 && $term == date("Ym")) {
-            $model = 'WithholdWarmed';
-        } elseif ($fail_num > 0 && $term <= date("Ym") - 1) {
-            $model = 'WithholdOverdue';
-        }
-
-        // 查询分期信息
-        $instalmentInfo = \APp\Order\Modules\Service\OrderGoodsInstalment::queryByInstalmentId($instalment_id);
-        if( !is_array($instalmentInfo)){
-            // 提交事务
-            return false;
-        }
-
-        // 发送短信
-//        $notice = new \App\Order\Modules\Service\OrderNotice(
-//            OrderStatus::BUSINESS_FENQI,
-//            $instalmentInfo['business_no'],
-//            $model);
-//        $notice->notify();
+    public static function instalment_failed($fail_num,$instalment_id){
 
         $date = date('Ymd');
 
