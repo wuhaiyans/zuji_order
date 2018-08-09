@@ -84,7 +84,7 @@ class OrderController extends Controller
         if($userType!=2 && empty($userInfo)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
-        if(empty($payChannelId)){
+        if(empty($payChannelId) || !isset($payChannelId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
         }
         if(count($sku)<1){
@@ -161,16 +161,16 @@ class OrderController extends Controller
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
-        if(empty($payType)){
+        if(empty($payType) || !isset($payType)){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
         }
         if($userType!=2 && empty($userInfo)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
-        if(empty($addressId)){
+        if(empty($addressId) || !isset($addressId)){
             return apiResponse([],ApiStatus::CODE_20001,"addressId不能为空");
         }
-        if(empty($payChannelId)){
+        if(empty($payChannelId) || !isset($payChannelId)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
         }
         if(count($sku)<1){
