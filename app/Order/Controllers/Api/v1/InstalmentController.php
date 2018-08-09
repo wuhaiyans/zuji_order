@@ -36,12 +36,24 @@ class InstalmentController extends Controller
             'begin_time'    => 'required',
             'end_time'      => 'required',
             'goods_no'      => 'required',
-            'order_no'      => 'required',
             'status'        => 'required',
-            'mobile'        => 'required',
+            'kw_type'       => 'required',
+            'keywords'      => 'required',
             'term'          => 'required',
         ]);
-        
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
+
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
         foreach($list as &$item){
@@ -330,11 +342,24 @@ class InstalmentController extends Controller
             'begin_time'    => 'required',
             'end_time'      => 'required',
             'goods_no'      => 'required',
-            'order_no'      => 'required',
             'status'        => 'required',
-            'mobile'        => 'required',
             'term'          => 'required',
+            'kw_type'       => 'required',
+            'keywords'      => 'required',
         ]);
+
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
 
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
