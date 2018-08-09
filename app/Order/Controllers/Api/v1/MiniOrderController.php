@@ -92,6 +92,10 @@ class MiniOrderController extends Controller
                 //分期数 短租为1期
                 $installmentCount = 1;
             }
+            //判断商品类目来调取芝麻小程序类目
+            if(empty(config('minicategory.'.$spu_info['catid']))){
+                return apiResponse([],ApiStatus::CODE_35021,'小程序获取芝麻商品类目失败');
+            }
             $data = [
                 'order_no' => $orderNo,
                 'sku' => [$params],
@@ -101,6 +105,7 @@ class MiniOrderController extends Controller
                     'deposit'=>$deposit,
                     'out_order_no'=>$orderNo,
                     'overdue_time' => $overdue_time,
+                    'category' => config('minicategory.'.$spu_info['catid']),
                     'products'=>[
                         'count'=>$count,
                         'amount'=>$single_amount,
@@ -172,6 +177,12 @@ class MiniOrderController extends Controller
             $data['pay_type'] = $param['pay_type'];
             $data['appid'] = $params['appid'];
             $data['coupon'] = isset($param['coupon'])?$param['coupon']:[];
+            //小程序自动领取优惠券
+
+
+
+
+
             //判断APPid是否有映射
             if(empty(config('miniappid.'.$data['appid']))){
                 return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
