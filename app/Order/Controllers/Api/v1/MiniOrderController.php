@@ -189,8 +189,14 @@ class MiniOrderController extends Controller
             }
             //查询芝麻订单确认结果
             $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
-            //获取请求流水号
-            $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+            //获取请求流水号（用户是否请求过）
+            //确认订单查询（芝麻小程序数据）
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['zm_order_no']);
+            if($miniOrderInfo){
+                $transactionNo = $miniOrderInfo['transaction_id'];
+            }else{
+                $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+            }
             //添加逾期时间
             $miniParams = [
                 'transaction_id'=>$transactionNo,
