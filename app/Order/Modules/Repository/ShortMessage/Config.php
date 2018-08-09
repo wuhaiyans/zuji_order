@@ -188,6 +188,9 @@ class Config {
             // 微回收
             self::CHANNELID_MICRO_RECOVERY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461173', //用户下单
+                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
+                SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
+
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){
