@@ -715,7 +715,6 @@ class OrderController extends Controller
         $params = $request->all();
         $rule = [
             'order_no'=> 'required',
-            'reason_id'=> 'required',
         ];
 
         $validateParams = $this->validateParams($rule,  $params);
@@ -727,9 +726,23 @@ class OrderController extends Controller
         }
         $uid='';
         if(isset($params['userinfo'])){
-            $uid=$params['userinfo']['uid'];
+            $userInfo = $params['userinfo'];
+            //['uid']
         }
-        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $uid, $validateParams['data']['reason_id']);
+            $resonId = '';
+        if (isset($validateParams['data']['reason_id'])) {
+
+            $resonId = $validateParams['data']['reason_id'];
+
+         } else {
+
+            if (isset($validateParams['data']['reason_text'])) {
+
+                $resonId = $validateParams['data']['reason_text'];
+            }
+
+        }
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userInfo, $resonId);
 
         return apiResponse([],$code);
 
