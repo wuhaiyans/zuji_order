@@ -747,7 +747,7 @@ class OrderRepository
 //           dd($orderIds);
 //            sql_profiler();
             $orderList =  DB::table('order_info as o')
-                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no')
+                ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
                 ->whereIn('o.order_no', $orderIds)
                 ->join('order_user_address as d',function($join){
                     $join->on('o.order_no', '=', 'd.order_no');
@@ -757,6 +757,9 @@ class OrderRepository
                 }, null,null,'left')
                 ->join('order_delivery as l',function($join){
                     $join->on('o.order_no', '=', 'l.order_no');
+                }, null,null,'left')
+                ->join('order_user_certified as c',function($join){
+                    $join->on('o.order_no', '=', 'c.order_no');
                 }, null,null,'left')
                 ->orderBy('o.create_time', 'DESC')
                 ->orderBy('v.id','desc')
