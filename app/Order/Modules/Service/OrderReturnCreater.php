@@ -2315,16 +2315,14 @@ class OrderReturnCreater
 
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
                         //如果存在分期则关闭，不存在直接返回true
-                        if(!$orderGoodsInstalment){
-                            return true;
+                        if($orderGoodsInstalment){
+                            $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
+                            LogApi::debug("关闭分期返回信息",$success);
+                            if (!$success) {
+                                LogApi::debug("关闭商品分期失败");
+                                return false;
+                            }
                         }
-                        $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
-                        LogApi::debug("关闭分期返回信息",$success);
-                        if (!$success) {
-                            LogApi::debug("关闭商品分期失败");
-                            return false;
-                        }
-
                     }
                 }
                 //插入操作日志
@@ -2349,14 +2347,13 @@ class OrderReturnCreater
                     $orderParams['order_no']=$return_info['order_no'];
                     $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
                     //如果存在分期则关闭，不存在直接返回true
-                    if(!$orderGoodsInstalment){
-                        return true;
-                    }
-                    $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
-                    LogApi::debug("关闭分期返回信息",$success);
-                    if (!$success) {
-                        LogApi::debug("关闭订单分期失败");
-                        return false;
+                    if($orderGoodsInstalment) {
+                        $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
+                        LogApi::debug("关闭分期返回信息", $success);
+                        if (!$success) {
+                            LogApi::debug("关闭订单分期失败");
+                            return false;
+                        }
                     }
                 }
                 //插入操作日志
