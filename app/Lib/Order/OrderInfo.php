@@ -73,10 +73,11 @@ class OrderInfo {
         /**
          * 根据应用来源获取应用名称
          * Author: heaven
+         * $channelId 显示渠道id
          * @param $appId
          * @return bool|\Illuminate\Http\JsonResponse|string
          */
-        public static function getAppidInfo($appId)
+        public static function getAppidInfo($appId, $channelId='')
         {
 
             if (empty($appId)) return apiResponse([],ApiStatus::CODE_10104);
@@ -90,8 +91,15 @@ class OrderInfo {
                 if (!empty($info)) {
 
                     $appInfo = json_decode($info, true);
+                    if ($channelId) {
 
-                    return isset($appInfo['data']['appid']['name'])?$appInfo['data']['appid']['name']:'';
+                        return isset($appInfo['data']['appid']['channel_id'])?$appInfo['data']['appid']['channel_id']:'';
+
+                    } else {
+
+                        return isset($appInfo['data']['appid']['name'])?$appInfo['data']['appid']['name']:'';
+                    }
+
 
                 }
                 return false;
