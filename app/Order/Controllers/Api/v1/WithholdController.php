@@ -294,7 +294,9 @@ class WithholdController extends Controller
 
             try{
                 // 请求代扣接口
-                $withholding->deduct($withholding_data);
+                $withholdStatus = $withholding->deduct($withholding_data);
+
+                \App\Lib\Common\LogApi::error('分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
                 DB::rollBack();
