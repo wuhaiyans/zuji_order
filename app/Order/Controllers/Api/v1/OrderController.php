@@ -161,8 +161,8 @@ class OrderController extends Controller
         if(empty($appid)){
             return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
-        if(empty($payType) || !isset($payType)){
-            return apiResponse([],ApiStatus::CODE_20001,"支付方式不能为空");
+        if(empty($payType) || !isset($payType) || $payType <1){
+            return apiResponse([],ApiStatus::CODE_20001,"支付方式错误");
         }
         if($userType!=2 && empty($userInfo)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
