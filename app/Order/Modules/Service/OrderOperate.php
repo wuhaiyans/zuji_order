@@ -835,6 +835,7 @@ class OrderOperate
 
         } catch (\Exception $exc) {
             DB::rollBack();
+            LogApi::info("未支付取消订单异常",$exc);
             return  ApiStatus::CODE_31006;
         }
 
