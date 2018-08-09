@@ -817,11 +817,15 @@ class OrderRepository
      * 根据用户id查询用户最新下单订单信息+商品信息
      * @params $user_id //用户id
      */
-    public static function getUserNewOrder($user_id){
+    public static function getUserNewOrder($user_id, $app_id){
         if(empty($user_id)){
             return false;
         }
+        if(empty($app_id)){
+            return false;
+        }
         $where[]=['user_id','=',$user_id];
+        $where[]=['app_id','=',$app_id];
         $where[]=['order_status', '<=', OrderStatus::OrderInService];
         $order =  Order::query()->where($where)->orderBy('create_time','desc')->first();
         if(!$order){

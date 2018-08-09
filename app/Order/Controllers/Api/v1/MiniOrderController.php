@@ -225,7 +225,6 @@ class MiniOrderController extends Controller
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
 			}
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
-			
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
 			
@@ -392,7 +391,7 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         //查询用户最新订单
-        $Info = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] );
+        $Info = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] ,$params['appid'] );
         if( empty($Info) ){
             \App\Lib\Common\LogApi::info('本地小程序查询用户订单不存在（或无激活订单）',$userinfo['uid']);
             return apiResponse([],ApiStatus::CODE_0,'本地小程序查询用户订单不存在（或无激活订单）');
