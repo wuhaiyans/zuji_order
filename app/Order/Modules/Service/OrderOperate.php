@@ -829,7 +829,7 @@ class OrderOperate
                 }
 
             }
-            OrderLogRepository::add($userId ,$userInfo['name'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
+            OrderLogRepository::add($userId ,$userInfo['username'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
 
             return ApiStatus::CODE_0;
 
