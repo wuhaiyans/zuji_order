@@ -95,7 +95,7 @@ class OrderWithhold
                 DB::commit();
                 return true;
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no, $instalmentInfo['term']);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
                 // 提交事务
                 DB::commit();
                 Log::error("小程序扣款请求失败（用户余额不足）");
@@ -159,9 +159,9 @@ class OrderWithhold
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId, $instalmentInfo['term']);
                     \App\Lib\Common\LogApi::error('买家余额不足');
                     return false;
                 } else {
