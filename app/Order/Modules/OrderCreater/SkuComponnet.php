@@ -72,7 +72,7 @@ class SkuComponnet implements OrderCreater
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
-            if(empty($goodsArr[$skuId]['spu_info']['payment_list'])){
+            if(empty($goodsArr[$skuId]['spu_info']['payment_list'][0]['id']) || !isset($goodsArr[$skuId]['spu_info']['payment_list'][0]['id'])){
                 throw new Exception("商品支付方式错误");
             }
             //默认 获取 商品列表的第一个支付方式
