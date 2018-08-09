@@ -62,11 +62,13 @@ class User extends \App\Lib\BaseApi{
         ];
         try{
             $res =self::request(\config('app.APPID'), \config('ordersystem.ORDER_API'),'orderuser.thirdpartyuser.orderMatching', '1.0', $params);
-            return $res;
+            if(is_array($res)){
+                return $res['matching'];
+            }
         }catch (\Exception $e){
             return 0;
         }
-
+        return 0;
     }
     /**
      * 获取用户的支付宝信息
