@@ -146,7 +146,7 @@ class OrderController extends Controller
 
         //获取appid
         $appid		= $params['appid'];
-        $payType	= $params['params']['pay_type'];//支付方式ID
+        $payType	= isset($params['params']['pay_type'])?$params['params']['pay_type']:0;//支付方式ID
         $sku		= $params['params']['sku_info'];
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
