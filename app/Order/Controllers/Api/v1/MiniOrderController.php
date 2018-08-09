@@ -323,6 +323,7 @@ class MiniOrderController extends Controller
      */
     public function frontTransition(Request $request){
         $params     = $request->all();
+        \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$params);
         // 验证参数
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
@@ -338,7 +339,6 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         $param = $params['params'];
-        \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
         // 验签 验证 通过 修改数据
         if($param['order_status'] == 'SUCCESS'){
             return apiResponse( [], ApiStatus::CODE_0);
