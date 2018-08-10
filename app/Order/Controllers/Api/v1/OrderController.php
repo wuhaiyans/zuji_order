@@ -738,11 +738,11 @@ class OrderController extends Controller
 
             if (isset($validateParams['data']['reason_text'])) {
 
-                $resonId = $validateParams['data']['reason_text'];
+                $resonText = $validateParams['data']['reason_text'];
             }
 
         }
-        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userInfo, $resonId);
+        $code = Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userInfo, $resonId, $resonText);
 
         return apiResponse([],$code);
 

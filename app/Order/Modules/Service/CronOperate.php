@@ -378,9 +378,9 @@ class CronOperate
 
         try{
             $arr =[];
-            $limit  = 2;
+            $limit  = 5;
             $page   = 1;
-            $sleep  = 10;
+            $sleep  = 20;
 
             do {
 
@@ -413,8 +413,9 @@ class CronOperate
 //
                 // 查询总数
                 $total =  \App\Order\Models\OrderActive::query()
+                    ->where(['status'=>1])
                     ->count();
-                $total = 1;
+
                 $totalpage = ceil($total/$limit);
 
                 // 查询数据

@@ -109,11 +109,12 @@ class User extends \App\Lib\BaseApi{
      * 小程序获取用户id生成用户
      * @author zhanhgjinhui
      * @param $params
-     * @return string or array
+     * @return false or array
      */
-    public static function getUserId($params){
+    public static function getUserId($params, $token){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.mini.user.id.get';
+        $data['auth_token'] = $token;
         if($params['zm_face'] == 'Y'){
             $zm_face = 1;
         }else{
@@ -131,13 +132,18 @@ class User extends \App\Lib\BaseApi{
             'zm_risk'=>$zm_risk,
             'cert_no'=>$params['cert_no'],
         ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info =json_decode($info,true);
+        $result = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info = json_decode($result,true);
+		LogApi::debug('芝麻小程序读取token的用户信息',[
+			'url' => config('tripartite.Interior_Goods_Url'),
+			'params' => json_encode($data),
+			'result' => $result,
+		]);
         if(!is_array($info)){
-            return ApiStatus::CODE_60000;
+            return false;
         }
         if($info['code']!=0){
-            return $info['code'];
+            return false;
         }
         return $info['data'];
     }
