@@ -50,7 +50,8 @@ class ImportOrderServe extends Command
             93,94,95,96,97,98,122,123,131,132,
         ];
         $where = [
-            ['service_id','>',0]
+            ['service_id','>',0],
+            ['business_key','<>',10]
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereNotIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);

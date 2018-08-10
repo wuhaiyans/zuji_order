@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 //use App\Lib\Common\LogApi;
+use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Models\OrderGoods;
 use App\Order\Modules\Inc\OrderStatus;
@@ -58,8 +59,10 @@ class ImportOtherOrder extends Command
             93,94,95,96,97,98,122,123,131,132,
         ];
 
+        $whereArr[] =['business_key','<>','10'];
+
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
            ->count();
         $bar = $this->output->createProgressBar($total);
         try{
@@ -71,7 +74,7 @@ class ImportOtherOrder extends Command
             $orderId =0;
             do {
 
-                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
+                $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
                 $orders=objectToArray($datas01);
                 foreach ($orders as $k=>$v){
                     //获取渠道
@@ -238,7 +241,7 @@ class ImportOtherOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                // LogApi::notify("订单风控信息导入失败",$arr);
+                 LogApi::notify("导入订单数据",$arr);
                 echo "部分导入成功";die;
             }
             echo "导入成功";die;
@@ -262,8 +265,11 @@ class ImportOtherOrder extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
+
+        $whereArr[] =['business_key','<>','10'];
+        $whereArr[] =['order_no','=',$order_no];
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where(array(['order_no','=',$order_no]))->whereNotIn("appid",$appid)
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
             ->count();
         if($total >0){
             return true;
@@ -287,7 +293,9 @@ class ImportOtherOrder extends Command
             93,94,95,96,97,98,122,123,131,132,
         ];
 
-        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)->get();
+        $whereArr[] =['business_key','<>','10'];
+
+        $datas01 = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)->get();
         $orders=objectToArray($datas01);
         return $orders;
 

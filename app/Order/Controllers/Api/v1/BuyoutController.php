@@ -44,10 +44,12 @@ class BuyoutController extends Controller
         $params= filter_array($params,[
             'buyout_no'=>'required',
         ]);
+        //查询买断详情
         $buyoutInfo = OrderBuyout::getInfo($params['buyout_no']);
         if(empty($buyoutInfo)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
         }
+        //获取商品详情
         $goodsInfo = Goods::getByGoodsNo($buyoutInfo['goods_no']);
         if(empty($goodsInfo)){
             return apiResponse([],ApiStatus::CODE_50002,"没有找到相关数据");
