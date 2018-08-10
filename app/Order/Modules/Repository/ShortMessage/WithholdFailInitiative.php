@@ -87,7 +87,7 @@ class WithholdFailInitiative implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'lastDate'      => date("Y-m-d",$huankuanData),
             'zhinaJin'      => '租金的万分之五',
-            'serviceTel'    => env("CUSTOMER_SERVICE_PHONE"),
+            'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
 
         // 发送短息
