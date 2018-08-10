@@ -59,10 +59,9 @@ class ImportNewInstalment extends Command
 
         try{
 
-            $limit  = 2;
+            $limit  = 1000;
             $page   = 1;
             $totalpage = ceil($total/$limit);
-            $totalpage = 1;
 
             $arr =[];
 
