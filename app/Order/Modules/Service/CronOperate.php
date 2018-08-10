@@ -384,48 +384,27 @@ class CronOperate
 
             do {
 
-//                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
-//                $whereArray[] = ['term', '=', date('Ym')];
-//
-//                // 查询总数
-//                $total =  \App\Order\Models\OrderGoodsInstalment::query()
-//                    ->where($whereArray)
-//                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
-//                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-//                    ->count();
-//                $totalpage = ceil($total/$limit);
-//
-//                // 查询数据
-//                $result =  \App\Order\Models\OrderGoodsInstalment::query()
-//                    ->select('order_goods_instalment.id')
-//                    ->where($whereArray)
-//                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
-//                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-//                    ->forPage($page,$limit)
-//                    ->get()
-//                    ->toArray();
-//
-//                if (!$result) {
-//                    continue;
-//                }
-//                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
-//                $whereArray[] = ['term', '=', date('Ym')];
-//
-                // 查询总数
-                $total =  \App\Order\Models\OrderActive::query()
-                    ->where(['status'=>1])
-                    ->count();
+                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['term', '=', date('Ym')];
 
+                // 查询总数
+                $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->count();
                 $totalpage = ceil($total/$limit);
 
                 // 查询数据
-                $result =  \App\Order\Models\OrderActive::query()
-                    ->select('id')
-                    ->where(['status'=>1])
-                    ->orderBy('id', 'ASC')
+                $result =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->select('order_goods_instalment.id')
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
+
                 if (!$result) {
                     continue;
                 }
