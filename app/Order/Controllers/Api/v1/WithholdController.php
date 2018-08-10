@@ -151,7 +151,7 @@ class WithholdController extends Controller
      * ]
      */
     public function createpay(Request $request){
-        LogApi::setSource('withhold_pay');
+        LogApi::setSource('');
         $params     = $request->all();
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
@@ -366,16 +366,14 @@ class WithholdController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
-        $ids = $params['ids'];
 
+        $ids = $params['ids'];
         if(!is_array($ids) && empty($ids)){
             return apiResponse([], ApiStatus::CODE_71006, "扣款失败");
         }
 
         foreach ($ids as $instalmentId) {
 
-            return apiResponse($instalmentId,$validateParams['code']);
-            die;
             if ($instalmentId < 1) {
                 Log::error("参数错误");
                 continue;
@@ -513,8 +511,8 @@ class WithholdController extends Controller
 
                 try{
                     // 请求代扣接口
-                    $withholding->deduct($withholding_data);
-
+                    $withStatus = $withholding->deduct($withholding_data);
+                    \App\Lib\Common\LogApi::error('分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\Exception $exc){
                     DB::rollBack();
                     \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
@@ -720,8 +718,8 @@ class WithholdController extends Controller
 
                         try {
                             // 请求代扣接口
-                            $withholding->deduct($withholding_data);
-
+                            $withStatus = $withholding->deduct($withholding_data);
+                            \App\Lib\Common\LogApi::error('分期代扣返回:'.$item['order_no'], $withStatus);
                         } catch (\Exception $exc) {
                             DB::rollBack();
                             \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
