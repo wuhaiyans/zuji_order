@@ -49,24 +49,25 @@ class ImportNewInstalment extends Command
             93,94,95,96,97,98,122,123,131,132,
         ];
 
+        $whereArr[] =['business_key','<>','10'];
+
         //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
             ->count();
         $bar = $this->output->createProgressBar($total);
 
 
         try{
 
-            $limit  = 2;
+            $limit  = 1000;
             $page   = 1;
             $totalpage = ceil($total/$limit);
-            $totalpage = 1;
 
             $arr =[];
 
             do {
 
-                $orderList = \DB::connection('mysql_01')->table('zuji_order2')
+                $orderList = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)
                     ->whereNotIn("appid",$appid)
                     ->orderby('order_id',"DESC")
                     ->forPage($page,$limit)

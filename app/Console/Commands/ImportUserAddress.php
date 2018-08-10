@@ -50,7 +50,8 @@ class ImportUserAddress extends Command
             80,81,82,83,84,85,86,87,88,89,
             93,94,95,96,97,98,122,123,131,132,
         ];
-        $total = DB::connection('mysql_01')->table("zuji_order2")->whereNotIn("appid",$appid)->count();
+        $where[] = ['business_key','<>',10];
+        $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereNotIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 1000;
@@ -59,7 +60,7 @@ class ImportUserAddress extends Command
             $arr =[];
             do {
 
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
+                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where($where)->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
                 $orderList = array_keys_arrange($orderList,"order_no");
                 $orderIds = array_column($orderList,"order_id");

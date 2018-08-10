@@ -244,7 +244,7 @@ class OrderOperateInc
                     //'买断去支付'
                     'buyout_topay' => false,
                     //查看租机协议
-                    'zuji_agreement_btn' => true
+                    'zuji_agreement_btn' => false
 
                 ],
                  //已完成

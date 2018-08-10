@@ -159,6 +159,12 @@ class MiniOrderController extends Controller
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
+		// 当前会话
+        if ( !isset($params['auth_token']) && strlen( $params['auth_token'] ) ) {
+			\App\Lib\Common\LogApi::error('无会话标识', $params);
+            return apiResponse([],ApiStatus::CODE_50000,'请求失败，请稍候重试');
+        }
+		
         $param = $params['params'];
         //开启事务
         DB::beginTransaction();
@@ -170,7 +176,7 @@ class MiniOrderController extends Controller
             //判断当前是否有临时订单
             $data = Redis::get('dev:zuji:order:miniorder:temporaryorderno:'.$param['out_order_no']);
             if(!$data){
-                \App\Lib\Common\LogApi::notify('小程序临时订单不存在',$data);
+                \App\Lib\Common\LogApi::error('小程序临时订单不存在',$data);
                 return apiResponse([], ApiStatus::CODE_35010,'业务临时订单不存在');
             }
             $data = json_decode($data,true);
@@ -189,8 +195,14 @@ class MiniOrderController extends Controller
             }
             //查询芝麻订单确认结果
             $miniApi = new CommonMiniApi(config('miniappid.'.$data['appid']));
-            //获取请求流水号
-            $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+            //获取请求流水号（用户是否请求过）
+            //确认订单查询（芝麻小程序数据）
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['zm_order_no']);
+            if($miniOrderInfo){
+                $transactionNo = $miniOrderInfo['transaction_id'];
+            }else{
+                $transactionNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+            }
             //添加逾期时间
             $miniParams = [
                 'transaction_id'=>$transactionNo,
@@ -200,19 +212,28 @@ class MiniOrderController extends Controller
             ];
             $b = $miniApi->orderConfirm($miniParams);
             if($b === false){
-                \App\Lib\Common\LogApi::notify('芝麻接口请求错误',$miniParams);
-                return apiResponse( [], ApiStatus::CODE_35003, $miniApi->getError());
+                \App\Lib\Common\LogApi::error('芝麻接口请求错误：'.$miniApi->getError(),$miniParams);
+				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
             }
             $miniData = $miniApi->getResult();
+			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
+			
             //用户处理
-            $_user = \App\Lib\User\User::getUserId($miniData);
+            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token']);
+			if( !$_user ){
+                \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
+				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+			}
+			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
+			
             //风控系统处理
             $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
             if($b != true){
-                \App\Lib\Common\LogApi::notify('风控系统接口请求错误',$miniData);
-                return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
+                \App\Lib\Common\LogApi::error('风控系统接口请求错误',$miniData);
+				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                //return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
             }
             //处理用户收货地址
             $address = \App\Lib\User\User::getAddressId([
@@ -222,7 +243,9 @@ class MiniOrderController extends Controller
                 'mobile'=>$miniData['mobile'],
             ]);
             if(!$address){
-                return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
+                \App\Lib\Common\LogApi::error('芝麻小程序收货地址设置错误',$miniData);
+				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                //return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
             }
             $data['mobile']=$miniData['mobile'];
             $data['name']=$miniData['name'];
@@ -234,12 +257,17 @@ class MiniOrderController extends Controller
             if(!$res){
                 //回滚事务
                 DB::rollBack();
-                return apiResponse([],ApiStatus::CODE_35012,get_msg());
+                \App\Lib\Common\LogApi::error('芝麻确认订单失败',$data);
+				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                //return apiResponse([],ApiStatus::CODE_35012,get_msg());
             }
+			\App\Lib\Common\LogApi::debug('芝麻小程序确认订单结果',$res);
         } catch (\Exception $ex) {
             //回滚事务
             DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
+			\App\Lib\Common\LogApi::error('芝麻确认订单异常',$ex);
+			return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+            //return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
         //提交事务
         DB::commit();
@@ -323,22 +351,18 @@ class MiniOrderController extends Controller
      */
     public function frontTransition(Request $request){
         $params     = $request->all();
+        \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$params);
         // 验证参数
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
-            'error_code' => 'required', //【必须】string；支付code码
-            'error_msg' => 'required', //【必须】string；错误描述
-            'order_create_time' => 'required', //【必须】string；订单创建时间
             'order_status' => 'required', //【必须】string；当前订单状态
-            'success' => 'required', //【必须】bool；标识
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         $param = $params['params'];
-        \App\Lib\Common\LogApi::info('芝麻小程序确认订单同步通知参数',$param);
         // 验签 验证 通过 修改数据
         if($param['order_status'] == 'SUCCESS'){
             return apiResponse( [], ApiStatus::CODE_0);
@@ -367,7 +391,7 @@ class MiniOrderController extends Controller
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
         }
         //查询用户最新订单
-        $Info = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] );
+        $Info = \App\Order\Modules\Repository\OrderRepository::getUserNewOrder( $userinfo['uid'] ,$params['appid'] );
         if( empty($Info) ){
             \App\Lib\Common\LogApi::info('本地小程序查询用户订单不存在（或无激活订单）',$userinfo['uid']);
             return apiResponse([],ApiStatus::CODE_0,'本地小程序查询用户订单不存在（或无激活订单）');

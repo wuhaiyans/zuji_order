@@ -15,6 +15,7 @@ return [
             'api.order.checkVerifyApp',
             'api.Instalment.queryInfo',
             'api.Instalment.info',
+            'mini.order.confirmation',
             ]
     ];
 

@@ -380,7 +380,7 @@ class CronOperate
             $arr =[];
             $limit  = 5;
             $page   = 1;
-            $sleep  = 10;
+            $sleep  = 20;
 
             do {
 

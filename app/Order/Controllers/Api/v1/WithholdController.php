@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
@@ -150,6 +151,7 @@ class WithholdController extends Controller
      * ]
      */
     public function createpay(Request $request){
+        LogApi::setSource('withhold_pay');
         $params     = $request->all();
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
