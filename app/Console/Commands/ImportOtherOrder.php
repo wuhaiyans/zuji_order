@@ -241,8 +241,7 @@ class ImportOtherOrder extends Command
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
-                 LogApi::notify("导入订单数据",$arr);
-                echo "部分导入成功";die;
+                 LogApi::notify("导入订单数据失败",$arr);
             }
             echo "导入成功";die;
         }catch (\Exception $e){

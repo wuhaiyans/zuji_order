@@ -71,8 +71,6 @@ class ImportOtherOrderYidun extends Command {
 			$bar->finish();
 			if (count($arr) > 0) {
 				LogApi::notify("订单风控信息导入失败", $arr);
-				echo "部分导入成功";
-				die;
 			}
 			echo "导入成功";
 			die;
