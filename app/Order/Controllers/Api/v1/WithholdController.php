@@ -366,6 +366,7 @@ class WithholdController extends Controller
             return apiResponse([],$validateParams['code']);
         }
         $params = $params['params'];
+        return apiResponse($params, ApiStatus::CODE_71006, "扣款测试");
         p($params);
         $ids = $params['ids'];
         if(!is_array($ids) && empty($ids)){
