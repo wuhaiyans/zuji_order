@@ -167,7 +167,7 @@ class ThirdPartyUserRepository
             'imei'=>($params['imei']?$params['imei']:0),
             'remarks'=>($params['remarks']?$params['remarks']:0),
             'types'=>$params['types'],
-            'order_time'=>($params['order_time']?$params['order_time']:0),
+            'order_time'=>($params['order_time']?strtotime($params['order_time']):0),
             'order_model'=>($params['order_model']?$params['order_model']:0),
             'colour'=>($params['colour']?$params['colour']:0),
             'total_amount'=>($params['total_amount']?$params['total_amount']:0),
