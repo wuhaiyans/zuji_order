@@ -312,7 +312,7 @@ class ThirdPartyUserRepository
         ];
 
         //判断手机号
-        if($matching['phone']){
+        if(isset($matching['phone']) && $matching['phone']){
             $query = ThirdPartyUser::whereIn('status',$in);
             $query->where(['phone'=>$matching['phone']]);
             $all = $query->get();
@@ -325,7 +325,7 @@ class ThirdPartyUserRepository
         }
 
         //判断身份证
-        if($matching['identity']){
+        if(isset($matching['identity']) && $matching['identity']){
             $query = ThirdPartyUser::whereIn('status',$in);
             $query->where(['identity'=>$matching['identity']]);
             $all = $query->get();
@@ -338,7 +338,7 @@ class ThirdPartyUserRepository
         }
 
         //判断收货人 收货地址
-        if($matching['consignee'] && $matching['shipping_address']){
+        if(isset($matching['consignee']) && isset($matching['shipping_address']) && $matching['consignee'] && $matching['shipping_address']){
             $query = ThirdPartyUser::whereIn('status',$in);
             $query->where([
                 'consignee'=>$matching['consignee'],

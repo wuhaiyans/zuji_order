@@ -153,10 +153,11 @@ class UserComponnet implements OrderCreater
     {
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $data =$this->getDataSchema();
+        //var_dump($data);die;
 
         //调用第三方接口 获取用户是否在第三方平台下过单
         $params= [
-            'phone'=>$data['user']['user_mobile'],
+            'phone'=>$data['address']['mobile'],
             'identity'=>$data['user']['cert_no'],
             'consignee'=>$data['address']['name'],
             'province'=>$data['address']['province_name'],

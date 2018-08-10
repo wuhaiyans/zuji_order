@@ -210,16 +210,16 @@ class ThirdPartyUserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function orderMatching(){
-        $rules = [
-            'phone' => 'required',
-            'identity' => 'required',
-            'consignee' => 'required',
-            'province' => 'required',
-            'city' => 'required',
-            'county' => 'required',
-            'shipping_address' => 'required',
-        ];
-        $params = $this->_dealParams($rules);
+//        $rules = [
+//            'phone' => 'required',
+//            'identity' => 'required',
+//            'consignee' => 'required',
+//            'province' => 'required',
+//            'city' => 'required',
+//            'county' => 'required',
+//            'shipping_address' => 'required',
+//        ];
+        $params = $this->_dealParams([]);
         if(!$params){
             return apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
