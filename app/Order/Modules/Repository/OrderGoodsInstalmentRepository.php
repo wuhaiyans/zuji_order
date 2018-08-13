@@ -151,7 +151,8 @@ class OrderGoodsInstalmentRepository
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)
-			->orderBy('order_goods_instalment.order_no','DESC')
+			->orderBy('order_info.create_time','DESC')
+			->orderBy('order_info.id','DESC')
 			->orderBy('order_goods_instalment.term','ASC')
 			->orderBy('order_goods_instalment.times','ASC')
             ->get();
