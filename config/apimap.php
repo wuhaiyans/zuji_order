@@ -329,4 +329,8 @@ return [
 
     'api.order.checkVerifyApp' => 'CheckAppController@index',
 
+    /******************************* 运营活动短信 *************************************/
+
+    'api.active.sendMessage' => 'ActiveController@sendMessage',
+
 ];
