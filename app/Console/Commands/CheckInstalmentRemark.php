@@ -43,7 +43,7 @@ class CheckInstalmentRemark extends Command
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 5;
+            $limit  = 500;
             $page   = 1;
             $totalpage = ceil($total/$limit);
             $arr =[];
