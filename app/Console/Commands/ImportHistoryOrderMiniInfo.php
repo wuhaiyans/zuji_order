@@ -53,7 +53,7 @@ class ImportHistoryOrderMiniInfo extends Command
         try {
             set_time_limit(0);//0表示不限时
             DB::beginTransaction();
-            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('out_order_no,create_time,order_no,trade_no,name,cert_no,mobile,,house,zm_grade,credit_amount,zm_risk,zm_face,create_time,user_id,channel_id')->get();
+            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('out_order_no,order_no,trade_no,name,cert_no,mobile,house,zm_grade,credit_amount,zm_risk,zm_face,create_time,user_id,channel_id')->get();
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
