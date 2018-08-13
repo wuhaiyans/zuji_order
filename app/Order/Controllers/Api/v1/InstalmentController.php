@@ -62,9 +62,9 @@ class InstalmentController extends Controller
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
             $item['update_time']    = $item['update_time'] ? date("Y-m-d H:i:s",$item['update_time']) : "";
 
-//            // 姓名
-//            $member = \App\Lib\User\User::getUser($item['user_id']);
-            $item['realname']       = !empty($item['realname']) ? $item['realname'] : "--";
+            // 姓名
+            $member = \App\Order\Models\OrderUserCertified::where(['order_no'=>$item['order_no']])->first();
+            $item['realname']       = !empty($member['realname']) ? $member['realname'] : "--";
 
             // 状态
             $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
