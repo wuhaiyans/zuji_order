@@ -30,6 +30,7 @@ class ActiveController extends Controller
                     ->where([
                         ['status', '=', 0]
                     ])
+                    ->orderby('id','ASC')
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
