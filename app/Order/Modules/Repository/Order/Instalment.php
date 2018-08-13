@@ -269,6 +269,9 @@ class Instalment {
 
 		$status = ['status'=>OrderInstalmentStatus::CANCEL];
 
+		$where[] = ['status', '<>', OrderInstalmentStatus::SUCCESS];
+
+
 		if( $whereIn ){
 			$result =  OrderGoodsInstalment::where($where)->whereIn('status',$whereIn['status'])->update($status);
 		}else{
