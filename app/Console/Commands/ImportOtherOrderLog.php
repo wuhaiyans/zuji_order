@@ -41,6 +41,7 @@ class ImportOtherOrderLog extends Command
      */
     public function handle()
     {
+
         $total = \DB::connection('mysql_01')->table('zuji_order2_log')->count();
         $bar = $this->output->createProgressBar($total);
         try{
