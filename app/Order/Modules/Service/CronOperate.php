@@ -107,6 +107,7 @@ class CronOperate
 
         }
              return true;
+            echo "success";die;
 
         } catch (\Exception $exc) {
             DB::rollBack();
@@ -146,6 +147,7 @@ class CronOperate
                 }
 
             }
+            echo "success";die;
 
     }
     /**
