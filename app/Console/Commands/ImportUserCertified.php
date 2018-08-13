@@ -52,8 +52,9 @@ class ImportUserCertified extends Command
         ];
 
         $whereArr[] =['business_key','<>','10'];
-
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where($whereArr)->whereNotIn($appid)->count();
+        //3点之前非关闭的订单，3点之后所有订单
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
+            ->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -61,7 +62,7 @@ class ImportUserCertified extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList = DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn($appid)->forPage($page,$limit)->get();
+                $orderList = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
 
                 foreach ($orderList as $k=>$v) {
