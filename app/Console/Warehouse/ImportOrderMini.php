@@ -26,14 +26,12 @@ $spu_id=608;//商品从 608 开始导数据 spu
 // ...
 echo '开始时间:'.date('Y-m-d H:i:s',$t).';<br>';
 //数据库配置
-$user = 'root';//用户名
-$password = 'nqyMysqlDB745';//密码
+$user = 'nqyong_release';//用户名
+$password = 'FM2rVp9x978Xxj6p';//密码
 $dbname1 = 'zuji2';//老数据库库名(小程序)
 $dbname2 = 'zuji';//租机库名 sku_id=3119 spu_id=637 user_id=82081
-$host = '127.0.0.1';//host
+$host = 'rm-wz9vn1v4z6e94x0j9.mysql.rds.aliyuncs.com';//host
 $port = 3306;//端口
-
-
 
 //数据库1 (老)
 $db1=new mysqli($host,$user,$password,$dbname1,$port);

@@ -320,7 +320,7 @@ class ApiStatus {
         self::CODE_20001 =>  '参数必须',
         self::CODE_20002 =>  '访问失败',
         self::CODE_20003 =>  '验证失败',
-        self::CODE_50000 => '程序异常',
+        self::CODE_50000 => '稍后重试',
         self::CODE_60000 => '第三方接口调用出错',
         self::CODE_60001 => '第三方数据未获取成功',
         self::CODE_60002 => '第三方报错',
