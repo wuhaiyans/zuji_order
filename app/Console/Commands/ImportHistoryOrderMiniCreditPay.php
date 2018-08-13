@@ -39,26 +39,27 @@ class ImportHistoryOrderMiniCreditPay extends Command
 
     /**
      * Execute the console command.
-     *
+     * mysql_01 为阿里云 zuji库
+     * mysql_02 为阿里云 zuji2库
      * @return mixed
      */
     public function handle()
     {
         $appid =[
-            36,92,91,91,
+            36,92,91,90,130,
         ];
         //小程序回调数据表
         DB::beginTransaction();
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)
+        $total = \DB::connection('mysql_02')->table('zuji_order2')->whereIn("appid",$appid)
             ->count();
         $bar = $this->output->createProgressBar($total);
         try {
-            $old_orders = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->select('*')->get();
+            $old_orders = \DB::connection('mysql_02')->table('zuji_order2')->whereIn("appid",$appid)->select('*')->get();
             $old_orders = objectToArray($old_orders);
             foreach ($old_orders as $key => $val) {
                 $miniOrderCreditPayArr = [];
                 //查询当前订单是否存在芝麻订单号
-                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->select('order_no')->get();
+                $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->select('order_no')->get();
                 $old_mini_orders = objectToArray($old_mini_orders);
                 if(empty($old_mini_orders)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_zhima_certification订单不存在', $val);
@@ -66,7 +67,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                     continue;
                 }
                 //查询分期数据
-                $old_orders_instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->select('*')->get();
+                $old_orders_instalment = \DB::connection('mysql_02')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->select('*')->get();
                 $old_orders_instalment = objectToArray($old_orders_instalment);
                 if(empty($old_orders_instalment)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_order2_instalment订单不存在', $val);
