@@ -63,6 +63,7 @@ class ImportOtherOrder extends Command
         ];
 
         $whereArr[] =['business_key','<>','10'];
+        $whereArr[] =['order_id','>','32128'];
 
         //3点之前非关闭的订单，3点之后所有订单
         $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
