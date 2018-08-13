@@ -62,7 +62,7 @@ class ImportHistoryMemberAlipay extends Command
                     continue;
                 }
                 //查询阿里云系统用户订单号
-                $new_member = \DB::connection('mysql_01')->table('zuji_member')->where(['mobile'=>$old_member['mobile']])->first();
+                $new_member = \DB::connection('mysql_02')->table('zuji_member')->where(['mobile'=>$old_member['mobile']])->first();
                 $new_member = objectToArray($new_member);
                 if(empty($new_member)){
                     $i++;
