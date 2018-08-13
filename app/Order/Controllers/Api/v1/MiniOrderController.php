@@ -240,7 +240,7 @@ class MiniOrderController extends Controller
                     'payment'=>$data['goods_info']['total_amount'],
                 ];
                 $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                if( is_array($queryCoupon) ){//查询优惠券是否存在
+                if( !empty($queryCoupon) ){//查询优惠券是否存在
                     $data['coupon'] = [
                         $queryCoupon['coupon_no']
                     ];
