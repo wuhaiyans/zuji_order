@@ -75,7 +75,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                 }
                 foreach($old_orders_instalment as $k=>$v){
                     //当请求交易码存在的时候（并且扣款状态为未扣款或扣款失败情况）将记录保存
-                    if( $v['status'] != '1' || $v['status'] != '3' ){
+                    if( $v['status'] == '1' || $v['status'] == '2' || $v['status'] == '3' ){
                         if ( $v['trade_no'] != '' ){
                             $miniOrderCreditPayArr['out_trans_no'] = $v['trade_no'];//请求流水号
                             $miniOrderCreditPayArr['order_operate_type'] = 'INSTALLMENT';//请求类型
