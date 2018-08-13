@@ -724,12 +724,15 @@ class OrderController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+
         $uid='';
         if(isset($params['userinfo'])){
             $userInfo = $params['userinfo'];
             //['uid']
         }
+
             $resonId = '';
+        $resonText = '';
         if (isset($validateParams['data']['reason_id'])) {
 
             $resonId = $validateParams['data']['reason_id'];
