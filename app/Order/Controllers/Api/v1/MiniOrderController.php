@@ -99,6 +99,11 @@ class MiniOrderController extends Controller
             $data = [
                 'order_no' => $orderNo,
                 'sku' => [$params],
+                'goods_info' => [
+                    'sku_id'=>$sku_info['sku_id'],
+                    'spu_id'=>$sku_info['spu_id'],
+                    'total_amount'=> normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])),
+                ],
                 'overdue_time' => $overdue_time,
                 'zhima_params'=>[
                     'amount'=>$total_amount,
@@ -183,12 +188,6 @@ class MiniOrderController extends Controller
             $data['pay_type'] = $param['pay_type'];
             $data['appid'] = $params['appid'];
             $data['coupon'] = isset($param['coupon'])?$param['coupon']:[];
-            //小程序自动领取优惠券
-
-
-
-
-
             //判断APPid是否有映射
             if(empty(config('miniappid.'.$data['appid']))){
                 return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
@@ -227,7 +226,27 @@ class MiniOrderController extends Controller
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
-			
+            //小程序自动领取优惠券
+            $drawCouponArr = [
+                'only_id'=>\App\Lib\Coupon\Coupon::$coupon_only,
+                'user_id'=>$data['user_id'],
+            ];
+            \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
+            if( empty($data['coupon']) ){//前端无传输coupon
+                $queryCouponArr = [
+                    'spu_id'=>$data['goods_info']['spu_id'],
+                    'sku_id'=>$data['goods_info']['sku_id'],
+                    'user_id'=>$data['user_id'],
+                    'payment'=>$data['goods_info']['total_amount'],
+                ];
+                $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
+                if( is_array($queryCoupon) ){//查询优惠券是否存在
+                    $data['coupon'] = [
+                        $queryCoupon['coupon_no']
+                    ];
+                }
+            }
+
             //风控系统处理
             $b = \App\Lib\Risk\Risk::setMiniRisk($miniData);
             if($b != true){
