@@ -468,6 +468,50 @@ class MiniOrderController extends Controller
                 \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败', $orderInfo);
                 return apiResponse([], ApiStatus::CODE_35003, '小程序取消商户端订单失败');
             }
+            //分期关闭
+            //查询分期
+            $isInstalment   =   \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount(['order_no'=>$param['order_no']]);
+            if ($isInstalment) {
+                $success =  \App\Order\Modules\Repository\Order\Instalment::close(['order_no'=>$param['order_no']]);
+                if (!$success) {
+                    DB::rollBack();
+                    return apiResponse([], ApiStatus::CODE_31004, '小程序取消商户端订单关闭分期失败');
+                }
+            }
+            //释放库存
+            //查询商品的信息
+            $orderGoods = \App\Order\Modules\Repository\OrderRepository::getGoodsListByOrderId($param['order_no']);
+            if ($orderGoods) {
+                foreach ($orderGoods as $orderGoodsValues){
+                    //暂时一对一
+                    $goods_arr[] = [
+                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
+                        'spu_id'=>$orderGoodsValues['prod_id'],
+                        'num'=>$orderGoodsValues['quantity']
+                    ];
+                }
+                $success =Goods::addStock($goods_arr);
+            }
+
+            if (!$success || empty($orderGoods)) {
+                DB::rollBack();
+                return apiResponse([], ApiStatus::CODE_31003, '小程序取消商户端订单释放库存失败');
+            }
+
+            //优惠券归还
+            //通过订单号获取优惠券信息
+            $orderCouponData = \App\Order\Modules\Repository\OrderRepository::getCouponListByOrderId($param['order_no']);
+
+            if ($orderCouponData) {
+                $coupon_id = array_column($orderCouponData, 'coupon_id');
+                $success =  \App\Lib\Coupon\Coupon::setCoupon(['user_id'=>$orderInfo['user_id'] ,'coupon_id'=>$coupon_id]);
+
+                if ($success) {
+                    DB::rollBack();
+                    return ApiStatus::CODE_31003;
+                }
+
+            }
             //用户取消订单写入日志系统
             \App\Order\Modules\Repository\OrderLogRepository::add(
                 $orderInfo['user_id'],
@@ -477,14 +521,19 @@ class MiniOrderController extends Controller
                 "取消订单",
                 $remark
             );
+            //提交事务
+            DB::commit();
+            //取消定时任务
+            $cancel = \App\Lib\Common\JobQueueApi::cancel(config('app.env')."OrderCancel_".$param['order_no']);
+            // 订单取消后发送取消短息。;
+            $orderNoticeObj = new \App\Order\Modules\Service\OrderNotice(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$param['order_no'],\App\Order\Modules\Repository\ShortMessage\SceneConfig::ORDER_CANCEL);
+            $orderNoticeObj->notify();
+            return apiResponse([],ApiStatus::CODE_0,'取消小程序订单成功');
         } catch  (\Exception $ex) {
             //回滚事务
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
-        //提交事务
-        DB::commit();
-        return apiResponse([],ApiStatus::CODE_0,'取消小程序订单成功');
     }
 
     /**
