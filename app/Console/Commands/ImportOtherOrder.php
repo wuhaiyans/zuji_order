@@ -63,6 +63,7 @@ class ImportOtherOrder extends Command
         ];
 
         $whereArr[] =['business_key','<>','10'];
+        $whereArr[] =['order_id','>','32128'];
 
         //3点之前非关闭的订单，3点之后所有订单
         $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
@@ -118,6 +119,14 @@ class ImportOtherOrder extends Command
                             echo "用户信息未找到：".$v['mobile'];die;
                         }
                         $v['user_id'] = $userInfo['id'];
+                    }
+
+                    //查询订单是否存在
+                    $where=[];
+                    $where[]=['order_no','=',$v['order_no']];
+                    $order = Order::where($where)->first();
+                    if($order){
+                        continue;
                     }
 
                     $orderData =[
