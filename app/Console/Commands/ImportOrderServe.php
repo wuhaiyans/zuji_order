@@ -31,6 +31,7 @@ class ImportOrderServe extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->conn =\DB::connection('mysql_01');
     }
 
     /**
@@ -72,10 +73,19 @@ class ImportOrderServe extends Command
 
                 foreach ($orderList as $k=>$v) {
                     if($serviceList[$v['service_id']]){
+
+                        if(intval($v['create_time']) >= 1532563200){
+                            $userInfo =$this->getOrderUserId($v['mobile']);
+                            $userId = $userInfo['id'];
+                        }
+                        else{
+                            $userId = $serviceList[$v['service_id']]['user_id'];
+                        }
+
                         $data = [
                             'order_no'=>$v['order_no'],
                             'goods_no'=>$v['goods_id'],
-                            'user_id'=>$serviceList[$v['service_id']]['user_id'],
+                            'user_id'=>$userId,
                             'unit'=>$v['zuqi_type'],
                             'unit_value'=>$v['zuqi'],
                             'begin_time'=>$serviceList[$v['service_id']]['begin_time'],
@@ -105,5 +115,18 @@ class ImportOrderServe extends Command
             die;
         }
     }
+    /**
+     * 获取用户信息
+     * @param $mobile 用户手机号
+     * @return array 用户信息
+     */
+    public function getOrderUserId($mobile){
 
+        $datas01 = $this->conn->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
+        $arr=[];
+        if($datas01){
+            $arr =objectToArray($datas01);
+        }
+        return $arr;
+    }
 }

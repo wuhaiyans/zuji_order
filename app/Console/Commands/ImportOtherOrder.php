@@ -29,6 +29,7 @@ class ImportOtherOrder extends Command
 
 
     private $conn;
+    private $conn2;
 
     /**
      * Create a new command instance.
@@ -39,6 +40,8 @@ class ImportOtherOrder extends Command
     {
         parent::__construct();
         $this->conn =\DB::connection('mysql_01');
+
+        $this->conn2 =\DB::connection('mysql_02');
 
     }
 
@@ -60,6 +63,7 @@ class ImportOtherOrder extends Command
         ];
 
         $whereArr[] =['business_key','<>','10'];
+        $whereArr[] =['order_id','>','32128'];
 
         //3点之前非关闭的订单，3点之后所有订单
         $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
@@ -111,7 +115,18 @@ class ImportOtherOrder extends Command
 
                     if(intval($v['create_time']) >= 1532563200){
                         $userInfo =$this->getOrderUserId($v['mobile']);
+                        if(empty($userInfo)){
+                            echo "用户信息未找到：".$v['mobile'];die;
+                        }
                         $v['user_id'] = $userInfo['id'];
+                    }
+
+                    //查询订单是否存在
+                    $where=[];
+                    $where[]=['order_no','=',$v['order_no']];
+                    $order = Order::where($where)->first();
+                    if($order){
+                        continue;
                     }
 
                     $orderData =[
@@ -150,12 +165,17 @@ class ImportOtherOrder extends Command
 
                     //商品信息查询 如果是 2018-7-26 19:00:00 以后的下单 要根据新的查询
                     if(intval($v['create_time']) >= 1532563200){
-                        $userInfo =$this->getOrderUserId($v['mobile']);
-                        $v['user_id'] = $userInfo['id'];
                         //获取sku信息
                         $sku_info =$this->getSkuInfos($goods_info['sku_id']);
                         //获取spu信息
                         $spu_info =$this->getSpuInfos($goods_info['spu_id']);
+                        if(empty($sku_info)){
+                            //获取sku信息
+                            $sku_info =$this->getSkuInfo($goods_info['sku_id']);
+                        }
+                        if(empty($spu_info)){
+                            $spu_info =$this->getSpuInfo($goods_info['spu_id']);
+                        }
                     }
                     //商品信息查询 如果是 2018-7-26 19:00:00 以前的保持不变
                     else{
@@ -329,7 +349,7 @@ class ImportOtherOrder extends Command
      */
     public function getOrderUserId($mobile){
 
-        $datas01 = $this->conn->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
+        $datas01 = $this->conn2->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
         $arr=[];
         if($datas01){
             $arr =objectToArray($datas01);
@@ -379,7 +399,7 @@ class ImportOtherOrder extends Command
      */
     public function getSpuInfos($spu_id){
 
-        $datas01 = $this->conn->table('zuji_goods_spu')->select('*')->where(['spu_ids'=>$spu_id])->first();
+        $datas01 = $this->conn2->table('zuji_goods_spu')->select('*')->where(['spu_ids'=>$spu_id])->first();
         return objectToArray($datas01);
     }
     /**
@@ -389,7 +409,7 @@ class ImportOtherOrder extends Command
      */
     public function getSkuInfos($sku_id){
 
-        $datas01 = $this->conn->table('zuji_goods_sku')->select('*')->where(['sku_ids'=>$sku_id])->first();
+        $datas01 = $this->conn2->table('zuji_goods_sku')->select('*')->where(['sku_ids'=>$sku_id])->first();
         return objectToArray($datas01);
     }
 

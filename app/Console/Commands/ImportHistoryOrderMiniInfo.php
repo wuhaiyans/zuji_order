@@ -47,34 +47,33 @@ class ImportHistoryOrderMiniInfo extends Command
     public function handle()
     {
         //小程序查询数据表
-        $total = \DB::connection('mysql_02')->table('zuji_zhima_certification')
+        $total = \DB::connection('mysql_01')->table('zuji_zhima_certification')
             ->count();
+        $i = 0;
         $bar = $this->output->createProgressBar($total);
         try {
             set_time_limit(0);//0表示不限时
             DB::beginTransaction();
-            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('*')->get();
+            $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->get();
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
-                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('*')->where(['order_no'=>$val['out_order_no']])->limit(5)->get();
+                $old_order2 = \DB::connection('mysql_01')->table('zuji_order2')->where(['order_no'=>$val['out_order_no']])->first();
                 $old_order2 = objectToArray($old_order2);
                 if(empty($old_order2)){
-                    \App\Lib\Common\LogApi::debug('小程序认证订单查询order2订单不存在', $val);
-                    $this->error('小程序认证订单查询order2订单不存在');
+                    $i++;
                     continue;
                 }
-                if(config('miniappid.'.$old_order2[0]['appid'])){
-                    $miniOrderInfoArr['appid'] = config('miniappid.'.$old_order2[0]['appid']);//芝麻小程序appid
+                if(config('miniappid.'.$old_order2['appid'])){
+                    $miniOrderInfoArr['appid'] = config('miniappid.'.$old_order2['appid']);//芝麻小程序appid
                 }else{
-                    \App\Lib\Common\LogApi::debug('小程序appid匹配失败', $val);
-                    $this->error('小程序appid匹配失败');
+                    $i++;
                     continue;
                 }
-                if( $old_order2[0]['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
-                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+1).' month'));
+                if( $old_order2['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2['zuqi'])+1).' month'));
                 }else{
-                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+30).' day'));
+                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2['zuqi'])+30).' day'));
                 }
                 $miniOrderInfoArr['overdue_time'] = $overdue_time;//订单逾期时间
                 $miniOrderInfoArr['out_order_no'] = $val['out_order_no'];//商户端订单号
@@ -100,21 +99,20 @@ class ImportHistoryOrderMiniInfo extends Command
                 $miniOrderInfoArr['user_id'] = $val['user_id'];//支付宝 userid
                 $miniOrderInfoArr['channel_id'] = $val['channel_id'];//渠道来源
                 if(strlen($val['trade_no']) < 1){
-                    \App\Lib\Common\LogApi::debug('小程序trade_no错误', $val);
-                    $this->error('小程序trade_no错误');
+                    $i++;
                     continue;
                 }else{
                     $result = \App\Order\Modules\Repository\OrderMiniRepository::add($miniOrderInfoArr);
                     if( !$result ){
                         DB::rollBack();
-                        \App\Lib\Common\LogApi::debug('小程序认证记录导入失败',$miniOrderInfoArr);
-                        $this->error('小程序认证记录导入失败');
+                        $i++;
                     }
                 }
                 $bar->advance();
             }
             DB::commit();
             $bar->finish();
+            echo '失败次数'.$i;
             $this->info('导入小程序订单数据成功');
         }catch(\Exception $e){
             DB::rollBack();

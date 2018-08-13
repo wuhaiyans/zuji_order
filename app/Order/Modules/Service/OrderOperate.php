@@ -803,7 +803,7 @@ class OrderOperate
 
                 if ($success) {
                     DB::rollBack();
-                    return ApiStatus::CODE_31003;
+                    return ApiStatus::CODE_35023;
                 }
 
             }
@@ -1079,7 +1079,12 @@ class OrderOperate
 
             $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
 
-            $orderData['zm_order_no']    =    $miniOrderData['zm_order_no'];
+            if ($miniOrderData) {
+
+                $orderData['zm_order_no']    =    $miniOrderData['zm_order_no']?? '';
+
+            }
+
 
         }
 
@@ -1189,9 +1194,9 @@ class OrderOperate
 
                $orderOperateData  = self::getOrderOprate($values['order_no']);
 
-                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? $orderOperateData['button_operate'];
-                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? $orderOperateData['logistics_info'];
-                $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? $orderOperateData['zm_order_no'];
+                $orderListArray['data'][$keys]['act_state'] = $orderOperateData['button_operate'] ?? '';
+                $orderListArray['data'][$keys]['logistics_info'] = $orderOperateData['logistics_info'] ?? '';
+                $orderListArray['data'][$keys]['zm_order_no'] = $orderOperateData['zm_order_no'] ?? '';
 //                if ($values['order_status']==Inc\OrderStatus::OrderWaitPaying) {
 //                    $params = [
 //                    'payType' => $values['pay_type'],//支付方式 【必须】<br/>

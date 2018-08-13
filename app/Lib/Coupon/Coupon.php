@@ -153,11 +153,14 @@ class Coupon extends \App\Lib\BaseApi{
             'user_id'=>$arr['user_id'],
             'spu_id'=>$arr['spu_id'],
             'sku_id'=>$arr['sku_id'],
-            'payment'=>$arr['payment'],
+            'payment'=>$arr['payment']*100,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        print_r($info);die;
+        \App\Lib\Common\LogApi::notify('小程序查询优惠券接口zuji.mini.coupon.get',[
+            'request'=>$data,
+            'response'=>$info
+        ]);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
