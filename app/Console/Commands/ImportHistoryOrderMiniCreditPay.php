@@ -90,7 +90,11 @@ class ImportHistoryOrderMiniCreditPay extends Command
                                 continue;
                             }
                             $bar->advance();
+                        }else{
+                            $i++;
                         }
+                    }else{
+                        $i++;
                     }
                 }
             }
