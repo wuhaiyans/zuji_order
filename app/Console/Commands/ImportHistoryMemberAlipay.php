@@ -50,11 +50,11 @@ class ImportHistoryMemberAlipay extends Command
         $total = \DB::connection('mysql_02')->table('zuji_member_alipay')->count();
         $bar = $this->output->createProgressBar($total);
         try {
-            $old_member_alipay = \DB::connection('mysql_02')->table('zuji_member_alipay')->select('*')->get();
+            $old_member_alipay = \DB::connection('mysql_02')->table('zuji_member_alipay')->get();
             $old_member_alipay = objectToArray($old_member_alipay);
             foreach ($old_member_alipay as $key => $val) {
                 //查询认证数据
-                $old_member = \DB::connection('mysql_02')->table('zuji_member')->where(['id'=>$val['member_id']])->select('mobile')->get();
+                $old_member = \DB::connection('mysql_02')->table('zuji_member')->where(['id'=>$val['member_id']])->first();
                 $old_member = objectToArray($old_member);
                 if(empty($old_member)){
                     \App\Lib\Common\LogApi::debug('小程序认证信息查询zuji_member不存在腾讯云', $val);
@@ -62,7 +62,7 @@ class ImportHistoryMemberAlipay extends Command
                     continue;
                 }
                 //查询阿里云系统用户订单号
-                $new_member = \DB::connection('mysql_01')->table('zuji_member')->where(['mobile'=>$old_member[0]['mobile']])->select('*')->get();
+                $new_member = \DB::connection('mysql_01')->table('zuji_member')->where(['mobile'=>$old_member['mobile']])->first();
                 $new_member = objectToArray($new_member);
                 if(empty($new_member)){
                     \App\Lib\Common\LogApi::debug('小程序认证信息查询zuji_member不存在阿里云', $val);
@@ -71,7 +71,7 @@ class ImportHistoryMemberAlipay extends Command
                 }
                 //入库
                 $zuji_member_alipay = [
-                    'member_id'=>$new_member[0]['id'],
+                    'member_id'=>$new_member['id'],
                     'user_id'=>$val['user_id'],
                     'province'=>$val['province'],
                     'city'=>$val['city'],
