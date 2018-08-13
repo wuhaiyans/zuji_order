@@ -76,11 +76,13 @@ class ImportNewInstalment extends Command
 
                 foreach($orderList as $order) {
                     $NewOrder    = \App\Order\Models\Order::where(['order_no'=>$order['order_no']])->first();
+                    $NewOrder = objectToArray($NewOrder);
                     if(!$NewOrder){
                         $arr[] = $order['order_id'];
                         continue;
                     }
                     $user_id = $NewOrder['user_id'];
+
                     //查询分期
                     $instalmentList = \DB::connection('mysql_01')->table('zuji_order2_instalment')
                         ->where([
