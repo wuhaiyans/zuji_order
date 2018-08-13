@@ -198,6 +198,7 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
         if( !$db3->query($delivery_goods_imei_insert_sql) ){
             echo '导入发货设备IMEI号表失败;';
             echo $delivery_goods_imei_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
             return false;
         }
     }
