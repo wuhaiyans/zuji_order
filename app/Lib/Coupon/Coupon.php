@@ -159,7 +159,7 @@ class Coupon extends \App\Lib\BaseApi{
         $info =json_decode($info,true);
         \App\Lib\Common\LogApi::notify('小程序查询优惠券接口zuji.mini.coupon.get',[
             'request'=>$data,
-            'respeson'=>$info
+            'response'=>$info
         ]);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;

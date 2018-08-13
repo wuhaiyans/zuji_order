@@ -803,7 +803,7 @@ class OrderOperate
 
                 if ($success) {
                     DB::rollBack();
-                    return ApiStatus::CODE_31003;
+                    return ApiStatus::CODE_35023;
                 }
 
             }
@@ -1079,7 +1079,12 @@ class OrderOperate
 
             $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
 
-            $orderData['zm_order_no']    =    $miniOrderData['zm_order_no'];
+            if ($miniOrderData) {
+
+                $orderData['zm_order_no']    =    $miniOrderData['zm_order_no']?? '';
+
+            }
+
 
         }
 
