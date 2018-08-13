@@ -366,8 +366,10 @@ class InstalmentController extends Controller
         $data = [];
         foreach($list as &$item){
             // 姓名
-            $member = \App\Lib\User\User::getUser($item['user_id']);
-            $item['realname']       = !empty($userInfo['realname']) ? $member['realname'] : "--";
+            // 姓名
+            $member = \App\Order\Models\OrderUserCertified::where(['order_no'=>$item['order_no']])->first();
+            $item['realname']       = !empty($member['realname']) ? $member['realname'] : "--";
+
             // 状态
             $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
             // 还款日
