@@ -49,6 +49,7 @@ class RestructInstalment extends Command
             $arr =[];
             do {
                 $result = \App\Order\Models\OrderGoodsInstalment::query()
+                    ->select('id','term','day')
                     ->forPage($page,$limit)
                     ->orderBy('id', 'ASC')
                     ->get()->toArray();
