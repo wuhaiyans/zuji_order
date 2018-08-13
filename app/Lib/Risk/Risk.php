@@ -159,6 +159,16 @@ class Risk extends \App\Lib\BaseApi{
      * @return int
      */
     public static function setMiniRisk($arr){
+        if($arr['zm_face'] == 'Y'){
+            $arr['zm_face'] = '1';
+        }else{
+            $arr['zm_face'] = '0';
+        }
+        if($arr['zm_risk'] == 'Y'){
+            $arr['zm_risk'] = '1';
+        }else{
+            $arr['zm_risk'] = '0';
+        }
         $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='zhima.mini.zhima';
         $data['params'] = $arr;
