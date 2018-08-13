@@ -32,7 +32,6 @@ class ImportOrderServe extends Command
     {
         parent::__construct();
         $this->conn =\DB::connection('mysql_01');
-
     }
 
     /**
@@ -43,13 +42,19 @@ class ImportOrderServe extends Command
     public function handle()
     {
         $appid =[
-            130,92,91,90,36
+            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
+            40,41,42,43,44,45,46,47,48,49,
+            50,51,52,53,54,55,56,57,58,59,
+            60,61,62,63,64,65,66,67,68,69,
+            70,71,72,73,74,75,76,77,78,79,
+            80,81,82,83,84,85,86,87,88,89,
+            93,94,95,96,97,98,122,123,131,132,
         ];
         $where = [
             ['service_id','>',0],
-            ['business_key','<>',10],
+            ['business_key','<>',10]
         ];
-        $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereIn("appid",$appid)->count();
+        $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereNotIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
         try{
             $limit = 5000;
@@ -57,7 +62,7 @@ class ImportOrderServe extends Command
             $totalpage = ceil($total/$limit);
             $arr =[];
             do {
-                $orderList =DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereIn("appid",$appid)->forPage($page,$limit)->get();
+                $orderList =DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
                 $orderList =objectToArray($orderList);
                 $orderList = array_keys_arrange($orderList,"order_no");
                 $serviceIds = array_column($orderList,"service_id");
@@ -68,12 +73,15 @@ class ImportOrderServe extends Command
 
                 foreach ($orderList as $k=>$v) {
                     if($serviceList[$v['service_id']]){
+
                         if(intval($v['create_time']) >= 1532563200){
                             $userInfo =$this->getOrderUserId($v['mobile']);
                             $userId = $userInfo['id'];
-                        }else{
+                        }
+                        else{
                             $userId = $serviceList[$v['service_id']]['user_id'];
                         }
+
                         $data = [
                             'order_no'=>$v['order_no'],
                             'goods_no'=>$v['goods_id'],
@@ -107,7 +115,6 @@ class ImportOrderServe extends Command
             die;
         }
     }
-
     /**
      * 获取用户信息
      * @param $mobile 用户手机号
