@@ -15,7 +15,7 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 2;
             $page   = 1;
             $sleep  = 20;
             $code   = "SMS_113461176";
@@ -24,7 +24,7 @@ class ActiveController extends Controller
 
             $total = OrderActive::query()->where(['status' => 0])->count();
             $totalpage = ceil($total/$limit);
-
+            $totalpage = 1;
             do {
                 $result = OrderActive::query()
                     ->where([
