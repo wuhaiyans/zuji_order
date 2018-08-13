@@ -160,18 +160,18 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
             //imei
             if ($goods_row['serial_number']){
                 //苹果
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','".$goods_row['serial_number']."','1','".$goods_row['recycle_price']."','".($goods_row['create_time']?$goods_row['create_time']:0)."','".$goods_row['update_time']."'),";
                 $num++;
             }else{
                 //安卓
-                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','1','".replaceSpecialChar($goods_row['imei1'])."','0','1','".$goods_row['recycle_price']."','".($goods_row['create_time']?$goods_row['create_time']:0)."','".$goods_row['update_time']."'),";
                 $num++;
                 if($goods_row['imei2']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','2','".replaceSpecialChar($goods_row['imei2'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','2','".replaceSpecialChar($goods_row['imei2'])."','0','1','".$goods_row['recycle_price']."','".($goods_row['create_time']?$goods_row['create_time']:0)."','".$goods_row['update_time']."'),";
                     $num++;
                 }
                 if($goods_row['imei3']){
-                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','3','".replaceSpecialChar($goods_row['imei3'])."','0','1','".$goods_row['recycle_price']."','".$goods_row['create_time']."','".$goods_row['update_time']."'),";
+                    $delivery_goods_imei_insert_sql .= "('".$delivery_no."','".$goods_row['goods_id']."','3','".replaceSpecialChar($goods_row['imei3'])."','0','1','".$goods_row['recycle_price']."','".($goods_row['create_time']?$goods_row['create_time']:0)."','".$goods_row['update_time']."'),";
                     $num++;
                 }
             }
@@ -180,20 +180,22 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
     $delivery_insert_sql = substr($delivery_insert_sql,0,-1);
     $delivery_goods_insert_sql = substr($delivery_goods_insert_sql,0,-1);
     $delivery_goods_imei_insert_sql = substr($delivery_goods_imei_insert_sql,0,-1);
-//    if ($delivery_insert_sql) {
-//        if( !$db3->query($delivery_insert_sql) ){
-//            echo '导入发货单失败;';
-//            echo $delivery_insert_sql;
-//            return false;
-//        }
-//    }
-//    if ($delivery_goods_insert_sql) {
-//        if( !$db3->query($delivery_goods_insert_sql) ){
-//            echo '导入发货商品清单失败;';
-//            echo $delivery_goods_insert_sql;
-//            return false;
-//        }
-//    }
+    if ($delivery_insert_sql) {
+        if( !$db3->query($delivery_insert_sql) ){
+            echo '导入发货单失败;';
+            echo $delivery_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
+            return false;
+        }
+    }
+    if ($delivery_goods_insert_sql) {
+        if( !$db3->query($delivery_goods_insert_sql) ){
+            echo '导入发货商品清单失败;';
+            echo $delivery_goods_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
+            return false;
+        }
+    }
     if ($delivery_goods_imei_insert_sql) {
         if( !$db3->query($delivery_goods_imei_insert_sql) ){
             echo '导入发货设备IMEI号表失败;';
@@ -309,24 +311,27 @@ function orderReceive($order2_all1,$district_all1,$db1,$db3){
     $receive_goods_insert_sql = substr($receive_goods_insert_sql,0,-1);
     $receive_goods_imei_insert_sql = substr($receive_goods_imei_insert_sql,0,-1);
 
-//    if ($receive_insert_sql) {
-//        if( !$db3->query($receive_insert_sql) ){
-//            echo '导入收货检测单失败;';
-//            echo $receive_insert_sql;
-//            return false;
-//        }
-//    }
-//    if ($receive_goods_insert_sql) {
-//        if( !$db3->query($receive_goods_insert_sql) ){
-//            echo '导入收货检测商品清单失败;';
-//            echo $receive_goods_insert_sql;
-//            return false;
-//        }
-//    }
+    if ($receive_insert_sql) {
+        if( !$db3->query($receive_insert_sql) ){
+            echo '导入收货检测单失败;';
+            echo $receive_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
+            return false;
+        }
+    }
+    if ($receive_goods_insert_sql) {
+        if( !$db3->query($receive_goods_insert_sql) ){
+            echo '导入收货检测商品清单失败;';
+            echo $receive_goods_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
+            return false;
+        }
+    }
     if ($receive_goods_imei_insert_sql) {
         if( !$db3->query($receive_goods_imei_insert_sql) ){
             echo '导入收货检测设备IMEI号表失败;';
             echo $receive_goods_imei_insert_sql;
+            echo "---SQL错误描述: " . mysqli_error($db3);
             return false;
         }
     }
