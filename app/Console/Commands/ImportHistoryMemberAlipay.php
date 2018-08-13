@@ -71,7 +71,7 @@ class ImportHistoryMemberAlipay extends Command
                 }
                 //入库
                 $zuji_member_alipay = [
-                    'member_id'=>$new_member['id'],
+                    'member_id'=>$new_member[0]['id'],
                     'user_id'=>$val['user_id'],
                     'province'=>$val['province'],
                     'city'=>$val['city'],
