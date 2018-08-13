@@ -13,7 +13,7 @@ use App\Lib\Curl;
 
 class Coupon extends \App\Lib\BaseApi{
 
-    public static $coupon_only = '';//小程序优惠券id
+    public static $coupon_only = '383c8e805a3410e9ee03481d29a7f76f';//小程序优惠券id
 
     /**
      * 获取优惠券信息
