@@ -57,7 +57,7 @@ class ImportHistoryOrderMiniInfo extends Command
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
-                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('appid,zuqi_type,zuqi')->where(['order_no'=>$val['out_order_no']])->first();
+                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->where(['order_no'=>$val['out_order_no']])->first();
                 $old_order2 = objectToArray($old_order2);
                 if(empty($old_order2)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询order2订单不存在', $val);
