@@ -46,14 +46,14 @@ class ImportOtherOrderYidun extends Command {
 			$totalpage = ceil($total / $limit);
 			$arr = [];
 			do {
-				$datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2', 'zuji_order2.order_id', '=', 'zuji_order2_yidun.order_id')->where('zuji_order2.business_key', '<>', '1')->forPage($page, $limit)->get();
+				$datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->leftJoin('zuji_order2', 'zuji_order2.order_id', '=', 'zuji_order2_yidun.order_id')->where('zuji_order2.business_key', '<>', '10')->forPage($page, $limit)->get();
 				$yiduns = objectToArray($datas01);
 
 				foreach ($yiduns as $k => $v) {
 					$bar->advance();
-					if (!ImportOtherOrder::isAllowImport($v['order_no'])) {
-						continue;
-					}
+//					if (!ImportOtherOrder::isAllowImport($v['order_no'])) {
+//						continue;
+//					}
 					$riskData = [
 						'order_no' => empty($v['order_no']) ? "" : $v['order_no'],
 						'decision' => $v['decision'],

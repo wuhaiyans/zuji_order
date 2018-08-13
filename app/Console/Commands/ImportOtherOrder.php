@@ -107,6 +107,13 @@ class ImportOtherOrder extends Command
                         $status['order_status'] =8;
                     }
 
+                    //判断时间 大于2018-7-26 19:00:00 以后的下单 要根据手机号重新查询user_id
+
+                    if(intval($v['create_time']) >= 1532563200){
+                        $userInfo =$this->getOrderUserId($v['mobile']);
+                        $v['user_id'] = $userInfo['id'];
+                    }
+
                     $orderData =[
                         'order_no'=>$v['order_no'], //订单编号
                         'mobile'=>$v['mobile'],   //用户手机号
@@ -139,20 +146,36 @@ class ImportOtherOrder extends Command
                     }
                     //获取服务周期
                     $service = $this->getOrderServiceTime($v['order_no']);
-                    //获取sku信息
-                    $sku_info =$this->getSkuInfo($goods_info['sku_id']);
-                    //获取spu信息
-                    $spu_info =$this->getSpuInfo($goods_info['spu_id']);
+
+
+                    //商品信息查询 如果是 2018-7-26 19:00:00 以后的下单 要根据新的查询
+                    if(intval($v['create_time']) >= 1532563200){
+                        $userInfo =$this->getOrderUserId($v['mobile']);
+                        $v['user_id'] = $userInfo['id'];
+                        //获取sku信息
+                        $sku_info =$this->getSkuInfos($goods_info['sku_id']);
+                        //获取spu信息
+                        $spu_info =$this->getSpuInfos($goods_info['spu_id']);
+                    }
+                    //商品信息查询 如果是 2018-7-26 19:00:00 以前的保持不变
+                    else{
+                        //获取sku信息
+                        $sku_info =$this->getSkuInfo($goods_info['sku_id']);
+                        //获取spu信息
+                        $spu_info =$this->getSpuInfo($goods_info['spu_id']);
+                    }
+
+
                     //获取机型信息
                     $machine_name =$this->getSpuMachineInfo($spu_info['machine_id']);
                     $goodsData =[
                         'order_no'=>$v['order_no'],
                         'goods_name'=>$v['goods_name'],
-                        'zuji_goods_id'=>$goods_info['sku_id'],
+                        'zuji_goods_id'=>$sku_info['sku_id'],
                         'zuji_goods_sn'=>$sku_info['sn'],
                         'goods_no'=>$goods_info['goods_id'],
                         'goods_thumb'=>$spu_info['thumb'],
-                        'prod_id'=>$goods_info['spu_id'],
+                        'prod_id'=>$spu_info['id'],
                         'prod_no'=>$spu_info['sn'],
                         'brand_id'=>$goods_info['brand_id'],
                         'category_id'=>$goods_info['category_id'],
@@ -300,6 +323,21 @@ class ImportOtherOrder extends Command
 
     }
     /**
+     * 获取用户信息
+     * @param $mobile 用户手机号
+     * @return array 用户信息
+     */
+    public function getOrderUserId($mobile){
+
+        $datas01 = $this->conn->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
+        $arr=[];
+        if($datas01){
+            $arr =objectToArray($datas01);
+        }
+        return $arr;
+    }
+
+    /**
      * 获取follow
      * @param $order_id
      * @param $new_status
@@ -334,6 +372,28 @@ class ImportOtherOrder extends Command
         $datas01 = $this->conn->table('zuji_goods_sku')->select('*')->where(['sku_id'=>$sku_id])->first();
         return objectToArray($datas01);
     }
+    /**
+     * 获取SPU
+     * @param $spu_id
+     * @return array
+     */
+    public function getSpuInfos($spu_id){
+
+        $datas01 = $this->conn->table('zuji_goods_spu')->select('*')->where(['spu_ids'=>$spu_id])->first();
+        return objectToArray($datas01);
+    }
+    /**
+     * 获取SKU
+     * @param $spu_id
+     * @return array
+     */
+    public function getSkuInfos($sku_id){
+
+        $datas01 = $this->conn->table('zuji_goods_sku')->select('*')->where(['sku_ids'=>$sku_id])->first();
+        return objectToArray($datas01);
+    }
+
+
     /**
      * 获取机型信息
      * @param $spu_id

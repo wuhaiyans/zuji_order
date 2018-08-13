@@ -58,7 +58,7 @@ class ImportOtherOrderLog extends Command
                             continue;
                         }
                         $logData = [
-                            'order_no' => $v['order_no'],
+                            'order_no' => empty($v['order_no']) ? "" : $v['order_no'],
                             'action' => $v['action'],
                             'operator_id' => $v['operator_id'],
                             'operator_name' => $v['operator_name'],
@@ -73,7 +73,6 @@ class ImportOtherOrderLog extends Command
                         $bar->advance();
                     }
                 $page++;
-                sleep(1);
             } while ($page <= $totalpage);
             $bar->finish();
             if(count($arr)>0){
