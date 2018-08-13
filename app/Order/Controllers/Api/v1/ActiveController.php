@@ -64,7 +64,7 @@ class ActiveController extends Controller
                         'goodsName'     => $orderInfo['goods_name'],
                         'zuJin'         => $item['amount'],
                         'createTime'    => '2018-08-15',
-                        'zhifuLianjie'  => $zhifuLianjie,
+                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
 
                     ];
