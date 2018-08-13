@@ -803,7 +803,7 @@ class OrderOperate
 
                 if ($success) {
                     DB::rollBack();
-                    return ApiStatus::CODE_31003;
+                    return ApiStatus::CODE_35023;
                 }
 
             }
