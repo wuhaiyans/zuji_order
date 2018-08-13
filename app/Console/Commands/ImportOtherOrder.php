@@ -161,10 +161,10 @@ class ImportOtherOrder extends Command
                         //获取spu信息
                         $spu_info =$this->getSpuInfos($goods_info['spu_id']);
                         if(empty($sku_info)){
-                            echo "商品sku信息未找到：".$goods_info['sku_id'];die;
+                            echo "2018-7-26 19:00:00 以后的下单商品sku信息未找到：".$goods_info['sku_id'];die;
                         }
                         if(empty($spu_info)){
-                            echo "商品spu信息未找到：".$goods_info['spu_id'];die;
+                            echo "2018-7-26 19:00:00 之前的下单商品spu信息未找到：".$goods_info['spu_id'];die;
                         }
                     }
                     //商品信息查询 如果是 2018-7-26 19:00:00 以前的保持不变
