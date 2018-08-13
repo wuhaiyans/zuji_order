@@ -53,28 +53,28 @@ class ImportHistoryOrderMiniInfo extends Command
         try {
             set_time_limit(0);//0表示不限时
             DB::beginTransaction();
-            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('out_order_no,create_time,order_no,trade_no,name,cert_no,mobile,,house,zm_grade,credit_amount,zm_risk,zm_face,create_time,user_id,channel_id')->get();
+            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->get();
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
-                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('appid,zuqi_type,zuqi')->where(['order_no'=>$val['out_order_no']])->first();
+                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->where(['order_no'=>$val['out_order_no']])->first();
                 $old_order2 = objectToArray($old_order2);
                 if(empty($old_order2)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询order2订单不存在', $val);
                     $this->error('小程序认证订单查询order2订单不存在');
                     continue;
                 }
-                if(config('miniappid.'.$old_order2[0]['appid'])){
-                    $miniOrderInfoArr['appid'] = config('miniappid.'.$old_order2[0]['appid']);//芝麻小程序appid
+                if(config('miniappid.'.$old_order2['appid'])){
+                    $miniOrderInfoArr['appid'] = config('miniappid.'.$old_order2['appid']);//芝麻小程序appid
                 }else{
                     \App\Lib\Common\LogApi::debug('小程序appid匹配失败', $val);
                     $this->error('小程序appid匹配失败');
                     continue;
                 }
-                if( $old_order2[0]['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
-                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+1).' month'));
+                if( $old_order2['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2['zuqi'])+1).' month'));
                 }else{
-                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2[0]['zuqi'])+30).' day'));
+                    $overdue_time = date('Y-m-d H:i:s', strtotime($val['create_time'].' +'.(intval($old_order2['zuqi'])+30).' day'));
                 }
                 $miniOrderInfoArr['overdue_time'] = $overdue_time;//订单逾期时间
                 $miniOrderInfoArr['out_order_no'] = $val['out_order_no'];//商户端订单号
