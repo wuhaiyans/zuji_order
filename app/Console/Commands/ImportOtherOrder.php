@@ -63,7 +63,7 @@ class ImportOtherOrder extends Command
         ];
 
         $whereArr[] =['business_key','<>','10'];
-        $whereArr[] =['order_id','>','32129'];
+        $whereArr[] =['order_id','>','32128'];
 
         //3点之前非关闭的订单，3点之后所有订单
         $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
@@ -121,6 +121,14 @@ class ImportOtherOrder extends Command
                         $v['user_id'] = $userInfo['id'];
                     }
 
+                    //查询订单是否存在
+                    $where=[];
+                    $where[]=['order_no','=',$v['order_no']];
+                    $order = Order::where($where)->first();
+                    if($order){
+                        continue;
+                    }
+
                     $orderData =[
                         'order_no'=>$v['order_no'], //订单编号
                         'mobile'=>$v['mobile'],   //用户手机号
@@ -147,8 +155,8 @@ class ImportOtherOrder extends Command
                         'receive_time'=>intval($delivery['receive_time']),//
                         'complete_time'=>intval($status['complete_time']),//
                     ];
-                    $res =Order::updateOrCreate($orderData);
-                    if(!$res->getQueueableId()){
+                    $res =Order::insert($orderData);
+                    if(!$res){
                         $arr['order'][$k] =$v['order_no'];
                     }
                     //获取服务周期
@@ -219,8 +227,8 @@ class ImportOtherOrder extends Command
                         'create_time'=>intval($goods_info['create_time']),
                         'update_time'=>intval($goods_info['update_time']),
                     ];
-                    $res =OrderGoods::updateOrCreate($goodsData);
-                    if(!$res->getQueueableId()){
+                    $res =OrderGoods::insert($goodsData);
+                    if(!$res){
                         $arr['goods'][$k] =$goodsData;
                     }
                     /**
