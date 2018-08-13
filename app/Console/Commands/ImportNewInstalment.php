@@ -75,7 +75,12 @@ class ImportNewInstalment extends Command
                 $orderList = objectToArray($orderList);
 
                 foreach($orderList as $order) {
-
+                    $NewOrder    = \App\Order\Models\Order::where(['order_no'=>$order['order_no']])->first();
+                    if(!$NewOrder){
+                        $arr[] = $order['order_id'];
+                        continue;
+                    }
+                    $user_id = $NewOrder['user_id'];
                     //查询分期
                     $instalmentList = \DB::connection('mysql_01')->table('zuji_order2_instalment')
                         ->where([
@@ -92,7 +97,7 @@ class ImportNewInstalment extends Command
                         //$data['id']               = $instalment['id']; // ID重复
                         $data['order_no']         = $order['order_no'];
                         $data['goods_no']         = $order['goods_id'];
-                        $data['user_id']          = $order['user_id'];
+                        $data['user_id']          = $user_id;
 
                         $data['term']             = $instalment['term'];
                         $data['times']            = $instalment['times'];
