@@ -32,7 +32,6 @@ class ImportOrderServe extends Command
     {
         parent::__construct();
         $this->conn =\DB::connection('mysql_01');
-
     }
 
     /**
@@ -53,7 +52,7 @@ class ImportOrderServe extends Command
         ];
         $where = [
             ['service_id','>',0],
-            ['business_key','<>',10],
+            ['business_key','<>',10]
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereNotIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
@@ -74,12 +73,15 @@ class ImportOrderServe extends Command
 
                 foreach ($orderList as $k=>$v) {
                     if($serviceList[$v['service_id']]){
+
                         if(intval($v['create_time']) >= 1532563200){
                             $userInfo =$this->getOrderUserId($v['mobile']);
                             $userId = $userInfo['id'];
-                        }else{
+                        }
+                        else{
                             $userId = $serviceList[$v['service_id']]['user_id'];
                         }
+
                         $data = [
                             'order_no'=>$v['order_no'],
                             'goods_no'=>$v['goods_id'],
@@ -113,7 +115,6 @@ class ImportOrderServe extends Command
             die;
         }
     }
-
     /**
      * 获取用户信息
      * @param $mobile 用户手机号
