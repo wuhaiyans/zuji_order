@@ -151,7 +151,8 @@ class WithholdController extends Controller
      * ]
      */
     public function createpay(Request $request){
-        LogApi::setSource('');
+        ini_set('max_execution_time', '0');
+        LogApi::setSource('withhold_createpay');
         $params     = $request->all();
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
@@ -352,6 +353,7 @@ class WithholdController extends Controller
     public function multiCreatepay(Request $request)
     {
         ini_set('max_execution_time', '0');
+        LogApi::setSource('withhold_multi_createpay');
 
         $params     = $request->all();
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
@@ -437,7 +439,8 @@ class WithholdController extends Controller
             $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
             // 价格
-            $amount = $instalmentInfo['amount'] * 100;
+            // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
+			$amount = intval( strval($instalmentInfo['amount'] * 100) );
             if ($amount < 0) {
                 DB::rollBack();
                 Log::error("扣款金额不能小于1分");
@@ -558,6 +561,9 @@ class WithholdController extends Controller
      */
     public function crontabCreatepay()
     {
+		LogApi::setSource('crontab_withhold_createpay');
+		LogApi::debug('定时扣款');
+		
         // 执行时间
         ini_set('max_execution_time', '0');
 
@@ -601,6 +607,12 @@ class WithholdController extends Controller
             }
 
             foreach($result as $item) {
+                // 商品
+                $subject = $item['order_no'].'-'.$item['term'];
+				
+				LogApi::id($subject);
+				LogApi::debug($subject.'-扣款');
+				
                 $instalmentKey = "instalmentWithhold_" . $item['id'];
                 // 频次限制
                 if(redisIncr($instalmentKey, 300) > 1){
@@ -608,14 +620,17 @@ class WithholdController extends Controller
                     continue;
                 }
 
-                // 生成交易码
-                $business_no = createNo();
                 // 扣款交易码
                 if( $item['business_no'] == '' ){
+					// 生成交易码
+					$business_no = createNo();
                     // 1)记录租机交易码
                     $b = OrderGoodsInstalment::save(['id'=>$item['id']],['business_no'=>$business_no]);
                     if( $b === false ){
-                        Log::error("数据异常");
+                        LogApi::type('data-save')::error("分期扣款交易码保存失败",[
+							'id' => $item['id'],
+							'business_no'=>$business_no,
+						]);
                         continue;
                     }
                     $item['business_no'] = $business_no;
@@ -629,25 +644,28 @@ class WithholdController extends Controller
                 $orderInfo = OrderRepository::getInfoById($item['order_no']);
                 if (!$orderInfo) {
                     DB::rollBack();
-                    \App\Lib\Common\LogApi::error("数据异常");
+                    \App\Lib\Common\LogApi::error("订单不存在",[
+						'order_no' => $item['order_no']
+					]);
                     continue;
                 }
                 if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
                     DB::rollBack();
-                    \App\Lib\Common\LogApi::error("[代扣]订单状态不在服务中");
+                    \App\Lib\Common\LogApi::error("订单状态禁止");
                     continue;
                 }
 
                 // 商品
                 $subject = $item['order_no'].'-'.$item['times'].'-期扣款';
 
-                // 价格
-                $amount = $item['amount'] * 100;
-                if ($amount < 0) {
+                if ($item['amount'] <= 0) {
                     DB::rollBack();
-                    \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
+                    \App\Lib\Common\LogApi::error("扣款金额错误");
                     continue;
                 }
+                // 价格单位转换
+                // $amount = $item['amount'] * 100; // 浮点计算存在精度问题
+				$amount = intval( strval($item['amount'] * 100) );
 
                 //判断支付方式
                 if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
