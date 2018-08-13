@@ -194,13 +194,13 @@ function orderDelivery($order2_all1,$district_all1,$db1,$db3){
             return false;
         }
     }
-    if ($delivery_goods_imei_insert_sql) {
-        if( !$db3->query($delivery_goods_imei_insert_sql) ){
-            echo '导入发货设备IMEI号表失败;';
-            echo $delivery_goods_imei_insert_sql;
-            return false;
-        }
-    }
+//    if ($delivery_goods_imei_insert_sql) {
+//        if( !$db3->query($delivery_goods_imei_insert_sql) ){
+//            echo '导入发货设备IMEI号表失败;';
+//            echo $delivery_goods_imei_insert_sql;
+//            return false;
+//        }
+//    }
 
     echo '导入发货单,发货商品清单,发货设备IMEI号表成功;';
     return true;
