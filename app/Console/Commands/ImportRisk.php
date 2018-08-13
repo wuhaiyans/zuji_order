@@ -50,6 +50,21 @@ class ImportRisk extends Command
     }
 
     /**
+     * 获取订单蚁盾数据
+     * @param $order_id
+     * @return array
+     */
+    public function getOrderYidun($order_id){
+
+        $datas01 = \DB::connection('mysql_01')->table('zuji_order2_yidun')->select('*')->where(['order_id'=>$order_id])->first();
+        $arr=[];
+        if($datas01){
+            $arr =objectToArray($datas01);
+        }
+        return $arr;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -83,20 +98,34 @@ class ImportRisk extends Command
 
                 foreach ($orderList as $k=>$v) {
                     $zhima =$this->getOrderZhima($v['order_no']);
-                    if(empty($zhima)){
-                        continue;
+                    if(!empty($zhima)){
+
+                        $riskData =[
+                            'decision' => $zhima['zm_grade'],
+                            'order_no'=>$v['order_no'],  // 编号
+                            'score' => $zhima['zm_score'],
+                            'strategies' =>'',
+                            'type'=>'zhima_score',
+                        ];
+                        $id =OrderRiskRepository::add($riskData);
+                        if(!$id){
+                            $arr[$v['order_no']] = $riskData;
+                        }
                     }
 
-                    $riskData =[
-                        'decision' => $zhima['zm_grade'],
-                        'order_no'=>$v['order_no'],  // 编号
-                        'score' => $zhima['zm_score'],
-                        'strategies' =>'',
-                        'type'=>'zhima_score',
-                    ];
-                    $id =OrderRiskRepository::add($riskData);
-                    if(!$id){
-                        $arr[$v['order_no']] = $riskData;
+                    $yidun =$this->getOrderYidun($v['order_id']);
+                    if(!empty($yidun)){
+                        $riskData =[
+                            'decision' => strtoupper($yidun['decision']),
+                            'order_no'=>$v['order_no'],  // 编号
+                            'score' => $yidun['score'],
+                            'strategies' =>$yidun['strategies'],
+                            'type'=>'yidun',
+                        ];
+                        $id =OrderRiskRepository::add($riskData);
+                        if(!$id){
+                            $arr[$v['order_no']] = $riskData;
+                        }
                     }
 
 
