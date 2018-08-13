@@ -114,6 +114,9 @@ class ImportOtherOrder extends Command
 
                     if(intval($v['create_time']) >= 1532563200){
                         $userInfo =$this->getOrderUserId($v['mobile']);
+                        if(empty($userInfo)){
+                            echo "用户信息未找到：".$v['mobile'];die;
+                        }
                         $v['user_id'] = $userInfo['id'];
                     }
 
@@ -153,12 +156,17 @@ class ImportOtherOrder extends Command
 
                     //商品信息查询 如果是 2018-7-26 19:00:00 以后的下单 要根据新的查询
                     if(intval($v['create_time']) >= 1532563200){
-                        $userInfo =$this->getOrderUserId($v['mobile']);
-                        $v['user_id'] = $userInfo['id'];
                         //获取sku信息
                         $sku_info =$this->getSkuInfos($goods_info['sku_id']);
                         //获取spu信息
                         $spu_info =$this->getSpuInfos($goods_info['spu_id']);
+                        if(empty($sku_info)){
+                            //获取sku信息
+                            $sku_info =$this->getSkuInfo($goods_info['sku_id']);
+                        }
+                        if(empty($spu_info)){
+                            $spu_info =$this->getSpuInfo($goods_info['spu_id']);
+                        }
                     }
                     //商品信息查询 如果是 2018-7-26 19:00:00 以前的保持不变
                     else{
