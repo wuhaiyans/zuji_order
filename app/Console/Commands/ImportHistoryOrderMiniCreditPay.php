@@ -48,30 +48,29 @@ class ImportHistoryOrderMiniCreditPay extends Command
         $appid =[
             36,92,91,90,130,
         ];
+        $i = 0;
         //小程序回调数据表
         DB::beginTransaction();
-        $total = \DB::connection('mysql_02')->table('zuji_order2')->whereIn("appid",$appid)
+        $total = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)
             ->count();
         $bar = $this->output->createProgressBar($total);
         try {
-            $old_orders = \DB::connection('mysql_02')->table('zuji_order2')->whereIn("appid",$appid)->select('*')->get();
+            $old_orders = \DB::connection('mysql_01')->table('zuji_order2')->whereIn("appid",$appid)->select('*')->get();
             $old_orders = objectToArray($old_orders);
-            foreach ($old_orders as $key => $val) {
+            foreach ($old_orders as $key => $val){
                 $miniOrderCreditPayArr = [];
                 //查询当前订单是否存在芝麻订单号
-                $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->first();
+                $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->first();
                 $old_mini_orders = objectToArray($old_mini_orders);
                 if(empty($old_mini_orders)){
-                    \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_zhima_certification订单不存在', $val);
-                    $this->error('小程序认证订单查询zuji_zhima_certification订单不存在');
+                    $i++;
                     continue;
                 }
                 //查询分期数据
-                $old_orders_instalment = \DB::connection('mysql_02')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->get();
+                $old_orders_instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->get();
                 $old_orders_instalment = objectToArray($old_orders_instalment);
                 if(empty($old_orders_instalment)){
-                    \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_order2_instalment订单不存在', $val);
-                    $this->error('小程序认证订单查询zuji_order2_instalment订单不存在');
+                    $i++;
                     continue;
                 }
                 foreach($old_orders_instalment as $k=>$v){
@@ -86,9 +85,8 @@ class ImportHistoryOrderMiniCreditPay extends Command
                             $miniOrderCreditPayArr['pay_amount'] = $v['amount']/100;//请求金额
                             $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add( $miniOrderCreditPayArr );
                             if (!$result) {
+                                $i++;
                                 DB::rollBack();
-                                \App\Lib\Common\LogApi::debug( '小程序完成 或 扣款 回调记录导出新订单插入失败', $miniOrderCreditPayArr );
-                                $this->error('小程序完成 或 扣款 回调记录导出新订单插入失败');
                                 continue;
                             }
                             $bar->advance();
@@ -98,10 +96,10 @@ class ImportHistoryOrderMiniCreditPay extends Command
             }
             DB::commit();
             $bar->finish();
+            echo '失败次数'.$i;
             $this->info('导入小程序订单数据成功');
         }catch(\Exception $e){
             DB::rollBack();
-            \App\Lib\Common\LogApi::debug('小程序请求数据导入异常', $e->getMessage());
             $this->error($e->getMessage());
             die;
         }

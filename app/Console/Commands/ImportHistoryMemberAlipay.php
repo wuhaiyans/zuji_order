@@ -47,26 +47,25 @@ class ImportHistoryMemberAlipay extends Command
     {
         //小程序认证数据
         DB::beginTransaction();
-        $total = \DB::connection('mysql_02')->table('zuji_member_alipay')->count();
+        $total = \DB::connection('mysql_01')->table('zuji_member_alipay')->count();
         $bar = $this->output->createProgressBar($total);
+        $i = 0;
         try {
-            $old_member_alipay = \DB::connection('mysql_02')->table('zuji_member_alipay')->get();
+            $old_member_alipay = \DB::connection('mysql_01')->table('zuji_member_alipay')->get();
             $old_member_alipay = objectToArray($old_member_alipay);
             foreach ($old_member_alipay as $key => $val) {
                 //查询认证数据
-                $old_member = \DB::connection('mysql_02')->table('zuji_member')->where(['id'=>$val['member_id']])->first();
+                $old_member = \DB::connection('mysql_01')->table('zuji_member')->where(['id'=>$val['member_id']])->first();
                 $old_member = objectToArray($old_member);
                 if(empty($old_member)){
-                    \App\Lib\Common\LogApi::debug('小程序认证信息查询zuji_member不存在腾讯云', $val);
-                    $this->error('小程序认证信息查询zuji_member不存在');
+                    $i++;
                     continue;
                 }
                 //查询阿里云系统用户订单号
                 $new_member = \DB::connection('mysql_01')->table('zuji_member')->where(['mobile'=>$old_member['mobile']])->first();
                 $new_member = objectToArray($new_member);
                 if(empty($new_member)){
-                    \App\Lib\Common\LogApi::debug('小程序认证信息查询zuji_member不存在阿里云', $val);
-                    $this->error('小程序认证信息查询zuji_member不存在阿里云');
+                    $i++;
                     continue;
                 }
                 //入库
@@ -82,16 +81,16 @@ class ImportHistoryMemberAlipay extends Command
                     'is_certified'=>$val['is_certified'],
                     'gender'=>$val['gender'],
                 ];
-                $result = \DB::connection('mysql_01')->table('zuji_member_alipay')->insert($zuji_member_alipay);
+                $result = \DB::connection('mysql_02')->table('zuji_member_alipay')->insert($zuji_member_alipay);
                 if (!$result) {
                     DB::rollBack();
-                    \App\Lib\Common\LogApi::debug( '小程序认证信息导入失败', $zuji_member_alipay );
-                    $this->error('小程序认证信息导入失败');
+                    $i++;
                     continue;
                 }
             }
             DB::commit();
             $bar->finish();
+            echo '失败次数'.$i;
             $this->info('导入小程序认证信息成功');
         }catch(\Exception $e){
             DB::rollBack();
