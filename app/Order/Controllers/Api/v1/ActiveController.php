@@ -15,21 +15,22 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 2;
             $page   = 1;
             $sleep  = 20;
-            $code   = "";
+            $code   = "SMS_113461176";
 
 
 
             $total = OrderActive::query()->where(['status' => 0])->count();
             $totalpage = ceil($total/$limit);
-
+            $totalpage = 1;
             do {
                 $result = OrderActive::query()
                     ->where([
                         ['status', '=', 0]
                     ])
+                    ->orderby('id','ASC')
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
@@ -37,16 +38,36 @@ class ActiveController extends Controller
                     continue;
                 }
 
+                $webUrl = env('WEB_H5_URL');
+                $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
+                $url = $url  . 'myBillDetail?';
+
+
                 foreach($result as $item){
 
-                    $dataSms = [
+                    $orderInfo = \App\Order\Models\OrderGoods::where(['order_no'=>$item['order_no']])->first();
+                    $orderInfo = objectToArray($orderInfo);
 
-
+                    $urlData = [
+                        'orderNo'       => $item['order_no'],     //  订单号
+                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
+                        'id'            => $item['instalment_id'],//  分期ID
+                        'appid'         => $item['appid'],        //  商品编号
+                        'goodsNo'       => $item['goods_no'],     //  商品编号
                     ];
 
+                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
+                    $dataSms = [
+                        'realName'      => $item['realname'],
+                        'orderNo'       => $item['order_no'],
+                        'goodsName'     => $orderInfo['goods_name'],
+                        'zuJin'         => $item['amount'],
+                        'createTime'    => '2018-08-15',
+                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
+                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
 
-
+                    ];
 
                     // 发送短信
                     $result = \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
@@ -56,8 +77,6 @@ class ActiveController extends Controller
                         )->update(['status' => 1]);
                     }
                 }
-
-
 
                 $page++;
                 sleep($sleep);
