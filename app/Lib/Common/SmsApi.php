@@ -101,6 +101,7 @@ class SmsApi {
 		];
 		$info = Curl::post($url, json_encode($data));
 		$info = json_decode($info,true);
+		v($info);
 		if ($info['code'] != 0) {
 			// 发短信失败
 			return false;
