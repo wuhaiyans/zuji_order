@@ -40,23 +40,24 @@ class ImportHistoryOrderMiniInfo extends Command
 
     /**
      * Execute the console command.
-     *
+     * mysql_01 为阿里云 zuji库
+     * mysql_02 为阿里云 zuji2库
      * @return mixed
      */
     public function handle()
     {
         //小程序查询数据表
-        $total = \DB::connection('mysql_01')->table('zuji_zhima_certification')
+        $total = \DB::connection('mysql_02')->table('zuji_zhima_certification')
             ->count();
         $bar = $this->output->createProgressBar($total);
         try {
             set_time_limit(0);//0表示不限时
             DB::beginTransaction();
-            $old_mini_orders = \DB::connection('mysql_01')->table('zuji_zhima_certification')->select('*')->get();
+            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('*')->get();
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
-                $old_order2 = \DB::connection('mysql_01')->table('zuji_order2')->select('*')->where(['order_no'=>$val['out_order_no']])->limit(5)->get();
+                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('*')->where(['order_no'=>$val['out_order_no']])->limit(5)->get();
                 $old_order2 = objectToArray($old_order2);
                 if(empty($old_order2)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询order2订单不存在', $val);

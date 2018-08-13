@@ -145,13 +145,16 @@ class OrderGoodsInstalmentRepository
         if (isset($param['mobile']) && !empty($param['mobile'])) {
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
-
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)
+			->orderBy('order_info.create_time','DESC')
+			->orderBy('order_info.id','DESC')
+			->orderBy('order_goods_instalment.term','ASC')
+			->orderBy('order_goods_instalment.times','ASC')
             ->get();
         if (!$result) return false;
         return $result->toArray();
