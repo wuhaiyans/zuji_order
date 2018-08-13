@@ -53,11 +53,11 @@ class ImportHistoryOrderMiniInfo extends Command
         try {
             set_time_limit(0);//0表示不限时
             DB::beginTransaction();
-            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('*')->get();
+            $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->select('out_order_no,create_time,order_no,trade_no,name,cert_no,mobile,,house,zm_grade,credit_amount,zm_risk,zm_face,create_time,user_id,channel_id')->get();
             $old_mini_orders = objectToArray($old_mini_orders);
             foreach($old_mini_orders as $key=>$val){
                 $miniOrderInfoArr = [];
-                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('*')->where(['order_no'=>$val['out_order_no']])->limit(5)->get();
+                $old_order2 = \DB::connection('mysql_02')->table('zuji_order2')->select('appid,zuqi_type,zuqi')->where(['order_no'=>$val['out_order_no']])->first();
                 $old_order2 = objectToArray($old_order2);
                 if(empty($old_order2)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询order2订单不存在', $val);
