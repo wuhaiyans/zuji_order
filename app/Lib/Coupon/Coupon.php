@@ -153,7 +153,7 @@ class Coupon extends \App\Lib\BaseApi{
             'user_id'=>$arr['user_id'],
             'spu_id'=>$arr['spu_id'],
             'sku_id'=>$arr['sku_id'],
-            'payment'=>$arr['payment'],
+            'payment'=>$arr['payment']*100,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
