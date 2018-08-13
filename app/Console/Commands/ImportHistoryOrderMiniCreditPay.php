@@ -59,7 +59,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
             foreach ($old_orders as $key => $val) {
                 $miniOrderCreditPayArr = [];
                 //查询当前订单是否存在芝麻订单号
-                $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->select('order_no')->get();
+                $old_mini_orders = \DB::connection('mysql_02')->table('zuji_zhima_certification')->where(['out_order_no'=>$val['order_no']])->first();
                 $old_mini_orders = objectToArray($old_mini_orders);
                 if(empty($old_mini_orders)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_zhima_certification订单不存在', $val);
@@ -67,7 +67,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                     continue;
                 }
                 //查询分期数据
-                $old_orders_instalment = \DB::connection('mysql_02')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->select('*')->get();
+                $old_orders_instalment = \DB::connection('mysql_02')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->get();
                 $old_orders_instalment = objectToArray($old_orders_instalment);
                 if(empty($old_orders_instalment)){
                     \App\Lib\Common\LogApi::debug('小程序认证订单查询zuji_order2_instalment订单不存在', $val);
@@ -81,7 +81,7 @@ class ImportHistoryOrderMiniCreditPay extends Command
                             $miniOrderCreditPayArr['out_trans_no'] = $v['trade_no'];//请求流水号
                             $miniOrderCreditPayArr['order_operate_type'] = 'INSTALLMENT';//请求类型
                             $miniOrderCreditPayArr['out_order_no'] = $val['order_no'];//商户订单号
-                            $miniOrderCreditPayArr['zm_order_no'] = $old_mini_orders[0]['order_no'];//芝麻订单号
+                            $miniOrderCreditPayArr['zm_order_no'] = $old_mini_orders['order_no'];//芝麻订单号
                             $miniOrderCreditPayArr['remark'] = $val['order_no'];//备注
                             $miniOrderCreditPayArr['pay_amount'] = $v['amount']/100;//请求金额
                             $result = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::add( $miniOrderCreditPayArr );
