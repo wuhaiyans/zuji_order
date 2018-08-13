@@ -29,6 +29,7 @@ class ImportOtherOrder extends Command
 
 
     private $conn;
+    private $conn2;
 
     /**
      * Create a new command instance.
@@ -39,6 +40,8 @@ class ImportOtherOrder extends Command
     {
         parent::__construct();
         $this->conn =\DB::connection('mysql_01');
+
+        $this->conn2 =\DB::connection('mysql_02');
 
     }
 
@@ -329,7 +332,7 @@ class ImportOtherOrder extends Command
      */
     public function getOrderUserId($mobile){
 
-        $datas01 = $this->conn->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
+        $datas01 = $this->conn2->table('zuji_member')->select('*')->where(['mobile'=>$mobile])->first();
         $arr=[];
         if($datas01){
             $arr =objectToArray($datas01);
@@ -379,7 +382,7 @@ class ImportOtherOrder extends Command
      */
     public function getSpuInfos($spu_id){
 
-        $datas01 = $this->conn->table('zuji_goods_spu')->select('*')->where(['spu_ids'=>$spu_id])->first();
+        $datas01 = $this->conn2->table('zuji_goods_spu')->select('*')->where(['spu_ids'=>$spu_id])->first();
         return objectToArray($datas01);
     }
     /**
@@ -389,7 +392,7 @@ class ImportOtherOrder extends Command
      */
     public function getSkuInfos($sku_id){
 
-        $datas01 = $this->conn->table('zuji_goods_sku')->select('*')->where(['sku_ids'=>$sku_id])->first();
+        $datas01 = $this->conn2->table('zuji_goods_sku')->select('*')->where(['sku_ids'=>$sku_id])->first();
         return objectToArray($datas01);
     }
 
