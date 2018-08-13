@@ -187,7 +187,7 @@ class MiniOrderController extends Controller
             $data = json_decode($data,true);
             $data['pay_type'] = $param['pay_type'];
             $data['appid'] = $params['appid'];
-            $data['coupon'] = isset($param['coupon'])?$param['coupon']:[];
+            $data['coupon'] = isset($param['coupon'])?$param['coupon']:['ad64ccd2e1c4e2a2'];
             //判断APPid是否有映射
             if(empty(config('miniappid.'.$data['appid']))){
                 return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
@@ -226,13 +226,13 @@ class MiniOrderController extends Controller
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
-            //小程序自动领取优惠券
-            $drawCouponArr = [
-                'only_id'=>\App\Lib\Coupon\Coupon::$coupon_only,
-                'user_id'=>$data['user_id'],
-            ];
-            \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
             if( empty($data['coupon']) ){//前端无传输coupon
+                //小程序自动领取优惠券
+                $drawCouponArr = [
+                    'only_id'=>\App\Lib\Coupon\Coupon::$coupon_only,
+                    'user_id'=>$data['user_id'],
+                ];
+                \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
                 $queryCouponArr = [
                     'spu_id'=>$data['goods_info']['spu_id'],
                     'sku_id'=>$data['goods_info']['sku_id'],
@@ -240,7 +240,7 @@ class MiniOrderController extends Controller
                     'payment'=>$data['goods_info']['total_amount'],
                 ];
                 $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                if( is_array($queryCoupon) ){//查询优惠券是否存在
+                if( !empty($queryCoupon) ){//查询优惠券是否存在
                     $data['coupon'] = [
                         $queryCoupon['coupon_no']
                     ];
