@@ -145,7 +145,6 @@ class OrderGoodsInstalmentRepository
         if (isset($param['mobile']) && !empty($param['mobile'])) {
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
-		sql_profiler();
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
