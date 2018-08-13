@@ -825,7 +825,7 @@ class OrderRepository
             return false;
         }
         $where[]=['user_id','=',$user_id];
-        $where[]=['app_id','=',$app_id];
+        $where[]=['appid','=',$app_id];
         $where[]=['order_status', '<=', OrderStatus::OrderInService];
         $order =  Order::query()->where($where)->orderBy('create_time','desc')->first();
         if(!$order){
