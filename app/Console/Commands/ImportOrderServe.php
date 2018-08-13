@@ -48,7 +48,6 @@ class ImportOrderServe extends Command
         $where = [
             ['service_id','>',0],
             ['business_key','<>',10],
-            ['create_time','>',strtotime("2018-07-26 19:00:00")]
         ];
         $total = DB::connection('mysql_01')->table("zuji_order2")->where($where)->whereIn("appid",$appid)->count();
         $bar = $this->output->createProgressBar($total);
