@@ -51,9 +51,9 @@ class ImportOtherOrderYidun extends Command {
 
 				foreach ($yiduns as $k => $v) {
 					$bar->advance();
-//					if (!ImportOtherOrder::isAllowImport($v['order_no'])) {
-//						continue;
-//					}
+					if (!ImportOtherOrder::isAllowImport($v['order_no'])) {
+						continue;
+					}
 					$riskData = [
 						'order_no' => empty($v['order_no']) ? "" : $v['order_no'],
 						'decision' => $v['decision'],
