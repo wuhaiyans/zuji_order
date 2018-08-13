@@ -67,8 +67,6 @@ class ImportHistoryOrderMiniCreditPay extends Command
                     continue;
                 }
                 //查询分期数据
-                $old_orders_instalment_total = \DB::connection('mysql_01')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->count();
-                echo '分期表数据数量'.$old_orders_instalment_total;
                 $old_orders_instalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')->where(['order_id'=>$val['order_id']])->get();
                 $old_orders_instalment = objectToArray($old_orders_instalment);
                 if(empty($old_orders_instalment)){
@@ -95,6 +93,8 @@ class ImportHistoryOrderMiniCreditPay extends Command
                         }else{
                             $i++;
                         }
+                    }else{
+                        $i++;
                     }
                 }
             }
