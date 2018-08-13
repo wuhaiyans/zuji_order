@@ -187,7 +187,7 @@ class MiniOrderController extends Controller
             $data = json_decode($data,true);
             $data['pay_type'] = $param['pay_type'];
             $data['appid'] = $params['appid'];
-            $data['coupon'] = isset($param['coupon'])?$param['coupon']:['0133f00e7d3f2e32'];
+            $data['coupon'] = isset($param['coupon'])?$param['coupon']:['ad64ccd2e1c4e2a2'];
             //判断APPid是否有映射
             if(empty(config('miniappid.'.$data['appid']))){
                 return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
