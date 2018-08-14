@@ -15,7 +15,7 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 4;
+            $limit  = 5;
             $page   = 1;
             $sleep  = 20;
 //            $code   = "SMS_113461176";
@@ -66,16 +66,13 @@ class ActiveController extends Controller
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
 
                     ];
-					if( $item['mobile'] == '15811269422' || $item['mobile'] == '18201062343' ){
-						// 发送短信
-						\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
-					}
+					// 发送短信
+					\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
                 }
-				break;
                 sleep($sleep);
             } while (true);
 
