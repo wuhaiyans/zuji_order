@@ -2187,6 +2187,12 @@ class OrderReturnCreater
             LogApi::debug("参数错误",$params);
             return false;
         }
+        //必须是退货业务或者退款业务
+        if($params['business_type'] != OrderStatus::BUSINESS_RETURN
+        || $params['business_type'] != OrderStatus::BUSINESS_REFUND
+        ){
+            return false;
+        }
         try{
             //获取退货、退款单信息
             $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['business_no']);
@@ -2215,7 +2221,7 @@ class OrderReturnCreater
             }
             $goodsInfo=$goodInfo->toArray();
             LogApi::debug("查询此订单的商品",$goodsInfo);*/
-
+           //处理退货业务
             if($params['business_type'] == OrderStatus::BUSINESS_RETURN){
                 //修改退货单状态为已退货
                 $updateReturn = $return->returnFinish($params);
@@ -2238,7 +2244,9 @@ class OrderReturnCreater
                 $returnData['goods_no']=$return_info['goods_no'];
                 $returnData['order_no']=$return_info['order_no'];
 
-            }else{
+            }
+            //处理退款业务
+            if($params['business_type'] != OrderStatus::BUSINESS_REFUND){
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
                 if(!$goods){
