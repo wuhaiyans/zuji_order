@@ -2314,10 +2314,13 @@ class OrderReturnCreater
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
 
                         $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
-                        LogApi::debug("退款成功回调，查询分期的条件参数",$where);
+                        LogApi::debug("退款成功回调，查询分期的条件参数及分期信息",[
+                            'params'=>$where,
+                            'info'  =>$orderGoodsInstalment
+                        ]);
                         //如果存在分期则关闭，不存在直接返回true
                         if($orderGoodsInstalment){
-                            LogApi::debug("退款成功回调，关闭分期的条件参数",$where);
+                            LogApi::debug("退款成功回调，关闭分期的条件参数",$returnData);
                             $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
                             LogApi::debug("关闭分期返回信息",$success);
                             if (!$success) {
