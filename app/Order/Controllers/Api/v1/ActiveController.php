@@ -18,7 +18,8 @@ class ActiveController extends Controller
             $limit  = 2;
             $page   = 1;
             $sleep  = 20;
-            $code   = "SMS_113461176";
+//            $code   = "SMS_113461176";
+            $code   = "SMS_113461177";
 
 
 
@@ -70,7 +71,7 @@ class ActiveController extends Controller
                     ];
 
                     // 发送短信
-                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+//                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
