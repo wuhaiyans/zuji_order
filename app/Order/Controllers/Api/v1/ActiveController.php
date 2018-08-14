@@ -71,7 +71,7 @@ class ActiveController extends Controller
                     ];
 
                     // 发送短信
-//                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
