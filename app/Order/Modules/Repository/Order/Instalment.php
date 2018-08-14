@@ -14,6 +14,7 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\CouponStatus;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 /**
  * 商品分期
  *
@@ -271,7 +272,13 @@ class Instalment {
 
 		$where[] = ['status', '<>', OrderInstalmentStatus::SUCCESS];
 
-
+		//qinliping 2018/08/14  修改
+        /**************************/
+        $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+        if(!$orderGoodsInstalment){
+            return true;
+        }
+        /************************/
 		if( $whereIn ){
 			$result =  OrderGoodsInstalment::where($where)->whereIn('status',$whereIn['status'])->update($status);
 		}else{

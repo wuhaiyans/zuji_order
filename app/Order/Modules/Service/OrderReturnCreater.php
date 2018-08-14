@@ -2300,14 +2300,9 @@ class OrderReturnCreater
                     }
                 }
             }
-            //查询分期条件
-            if(isset($returnData['order_no'])){
-                $where[]=['order_no','=',$returnData['order_no']];
+            if(empty($returnData['order_no'])){
+                return false;
             }
-            if(isset($returnData['goods_no'])){
-                $where[]=['goods_no','=',$returnData['goods_no']];
-            }
-            $where[] = ['status', '<>', OrderInstalmentStatus::SUCCESS];
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
@@ -2315,21 +2310,19 @@ class OrderReturnCreater
                 foreach($orderGoods as $k=>$v){
                     if ($orderGoods[$k]['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
 
-                        $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
+                       /* $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
                         LogApi::debug("退款成功回调，查询分期的条件参数及分期信息",[
                             'params'=>$where,
                             'info'  =>$orderGoodsInstalment
-                        ]);
-                        //如果存在分期则关闭，不存在直接返回true
-                        if($orderGoodsInstalment){
-                            LogApi::debug("退款成功回调，关闭分期的条件参数",$returnData);
-                            $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
-                            LogApi::debug("关闭分期返回信息",$success);
-                            if (!$success) {
-                                LogApi::debug("关闭商品分期失败");
-                                return false;
-                            }
+                        ]);*/
+                        LogApi::debug("退款成功回调，关闭分期的条件参数",$returnData);
+                        $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
+                        LogApi::debug("关闭分期返回信息",$success);
+                        if (!$success) {
+                            LogApi::debug("关闭商品分期失败");
+                            return false;
                         }
+
                     }
                 }
                 //插入操作日志
@@ -2347,21 +2340,21 @@ class OrderReturnCreater
                 if(!$goodsLog){
                     return false;
                 }
-            }else{
+            }
+
+            if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
                 //查询订单的状态
-                $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
-                if ($orderInfoData['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
-                    $orderParams['order_no']=$return_info['order_no'];
-                    $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
-                    //如果存在分期则关闭，不存在直接返回true
-                    if($orderGoodsInstalment) {
-                        $success = \App\Order\Modules\Repository\Order\Instalment::close($orderParams);
-                        LogApi::debug("关闭分期返回信息", $success);
-                        if (!$success) {
-                            LogApi::debug("关闭订单分期失败");
-                            return false;
-                        }
+              //  $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
+                if ($order_info['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
+                    /*$orderParams['order_no']=$return_info['order_no'];
+                    $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);*/
+                    $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭订单分期
+                    LogApi::debug("关闭分期返回信息", $success);
+                    if (!$success) {
+                        LogApi::debug("关闭订单分期失败");
+                        return false;
                     }
+
                 }
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
