@@ -66,9 +66,10 @@ class ActiveController extends Controller
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
 
                     ];
-
-                    // 发送短信
-                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+					if( $item['mobile'] == '15811269422' || $item['mobile'] == '18201062343' ){
+						// 发送短信
+						\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+					}
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
