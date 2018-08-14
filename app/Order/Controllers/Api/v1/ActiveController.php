@@ -43,8 +43,8 @@ class ActiveController extends Controller
 
                 foreach($result as $item){
 
-                    $orderInfo = \App\Order\Models\OrderGoods::where(['order_no'=>$item['order_no']])->first();
-                    $orderInfo = objectToArray($orderInfo);
+//                    $orderInfo = \App\Order\Models\OrderGoods::where(['order_no'=>$item['order_no']])->first();
+//                    $orderInfo = objectToArray($orderInfo);
 
                     $urlData = [
                         'orderNo'       => $item['order_no'],     //  订单号
@@ -59,7 +59,7 @@ class ActiveController extends Controller
                     $dataSms = [
                         'realName'      => $item['realname'],
                         'orderNo'       => $item['order_no'],
-                        'goodsName'     => $orderInfo['goods_name'],
+                        'goodsName'     => $item['goods_name'],
                         'zuJin'         => $item['amount'],
                         'createTime'    => '2018-08-15',
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
