@@ -2306,6 +2306,7 @@ class OrderReturnCreater
             if(isset($returnData['goods_no'])){
                 $where[]=['goods_no','=',$returnData['goods_no']];
             }
+            $where[] = ['status', '<>', OrderInstalmentStatus::SUCCESS];
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
