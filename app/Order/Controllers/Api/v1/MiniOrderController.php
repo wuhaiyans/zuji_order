@@ -240,9 +240,9 @@ class MiniOrderController extends Controller
                     'payment'=>$data['goods_info']['total_amount'],
                 ];
                 $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                if( isset($queryCoupon['coupon_no']) ){//查询优惠券是否存在
+                if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                     $data['coupon'] = [
-                        $queryCoupon['coupon_no']
+                        $queryCoupon[0]['coupon_no']
                     ];
                 }
             }
@@ -465,7 +465,7 @@ class MiniOrderController extends Controller
                 //回滚事务
                 DB::rollBack();
                 \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败', $orderInfo);
-                return apiResponse([], ApiStatus::CODE_35003, '小程序取消商户端订单失败');
+                return apiResponse([], $code, '小程序取消商户端订单失败');
             }
             //用户取消订单写入日志系统
             \App\Order\Modules\Repository\OrderLogRepository::add(
