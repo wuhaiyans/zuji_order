@@ -245,7 +245,7 @@ class MiniOrderController extends Controller
                 ]);
                 if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                     $data['coupon'] = [
-                        $queryCoupon['coupon_no']
+                        $queryCoupon[0]['coupon_no']
                     ];
                 }
             }
