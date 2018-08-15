@@ -346,9 +346,9 @@ class MiniNotifyController extends Controller
      * 开发环境转发接口
      */
     private function curl_dev(  $post = [], $timeout = 5 ){
-        if($_SERVER['DEV_ZUJI_URL']){
+        if(env('MINI_ZUJI_URL')){
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $_SERVER['DEV_ZUJI_URL']);
+            curl_setopt($ch, CURLOPT_URL, env('MINI_ZUJI_URL'));
             curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -356,7 +356,7 @@ class MiniNotifyController extends Controller
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             $result = curl_exec($ch);
-            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果'.$_SERVER['DEV_ZUJI_URL'].$result,$_POST);
+            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果'.env('MINI_ZUJI_URL').$result,$_POST);
             curl_close($ch);
         }
     }
