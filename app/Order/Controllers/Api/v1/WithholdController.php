@@ -708,15 +708,14 @@ class WithholdController extends Controller
                     LogApi::info('[crontabCreatepay]小程序发起扣款后：'.$subject.':扣款的结果：'.$pay_status.':发起的参数.',$miniParams);
                     //判断请求发送是否成功
                     if($pay_status == 'PAY_SUCCESS'){
-
-                        return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
+                        continue;
                     }elseif($pay_status =='PAY_FAILED'){
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['business_no']);
-                        return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
+                        continue;
                     }elseif($pay_status == 'PAY_INPROGRESS'){
-                        return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
+                        continue;
                     }else{
-                        return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败）');
+                        continue;
                     }
                 } else {
 
