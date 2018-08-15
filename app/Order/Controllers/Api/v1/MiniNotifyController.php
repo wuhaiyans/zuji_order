@@ -59,6 +59,11 @@ class MiniNotifyController extends Controller
             echo '签名验证失败fail';exit;
         }
         $this->data = $_POST;
+        //当前订单是否需要进行转发（查询订单信息）
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $_POST['out_order_no'] );
+        if( $orderInfo == false ){
+            $this->curl_dev();
+        }
         try{
         if($this->data['notify_type'] == $this->CANCEL){
             //入库取消订单回调信息
@@ -336,4 +341,24 @@ class MiniNotifyController extends Controller
             echo 'success';return;
         }
     }
+
+    /**
+     * 开发环境转发接口
+     */
+    private function curl_dev(  $post = [], $timeout = 5 ){
+        if($_SERVER['DEV_ZUJI_URL']){
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $_SERVER['DEV_ZUJI_URL']);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+            $result = curl_exec($ch);
+            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果'.$result,$_POST);
+            curl_close($ch);
+        }
+    }
+
 }
