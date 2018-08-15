@@ -570,6 +570,7 @@ class WithholdController extends Controller
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
 
+        sql_profiler();
         $whereArray =
             [
                 ['term', '=', date('Ym')],
@@ -604,6 +605,7 @@ class WithholdController extends Controller
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
                         ['crontab_faile_date', '<', $date],
+                        ['order_no', '=', 'A801191738584407']
                     ];
                 $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
                     ->where($whereFailArray)
@@ -616,7 +618,8 @@ class WithholdController extends Controller
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
                         ['crontab_faile_date', '<', $date],
-                        ['status', '=', OrderInstalmentStatus::SUCCESS]
+                        ['status', '=', OrderInstalmentStatus::SUCCESS],
+                        ['order_no', '=', 'A801191738584407']
                     ];
                 $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
                     ->where($whereSuccessArray)
