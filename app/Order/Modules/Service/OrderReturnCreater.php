@@ -2189,7 +2189,7 @@ class OrderReturnCreater
         }
         //必须是退货业务或者退款业务
         if($params['business_type'] != OrderStatus::BUSINESS_RETURN
-        || $params['business_type'] != OrderStatus::BUSINESS_REFUND
+       && $params['business_type'] != OrderStatus::BUSINESS_REFUND
         ){
             return false;
         }
@@ -2245,7 +2245,7 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }
-            //处理退款业务
+            //退款业务
             if($params['business_type'] != OrderStatus::BUSINESS_REFUND){
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
@@ -2267,6 +2267,9 @@ class OrderReturnCreater
                 }
                 $returnData['order_no']=$return_info['order_no'];
 
+            }
+            if(empty($returnData['order_no'])){
+                return false;
             }
             $goodsInfo = $goods->getData();
             //释放库存
@@ -2308,9 +2311,7 @@ class OrderReturnCreater
                     }
                 }
             }
-            if(empty($returnData['order_no'])){
-                return false;
-            }
+
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
@@ -2353,7 +2354,6 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
                 //查询订单的状态
               //  $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
-                if ($order_info['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                     /*$orderParams['order_no']=$return_info['order_no'];
                     $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);*/
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭订单分期
@@ -2363,7 +2363,6 @@ class OrderReturnCreater
                         return false;
                     }
 
-                }
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
             }
