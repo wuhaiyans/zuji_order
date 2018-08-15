@@ -171,6 +171,8 @@ class MiniOrderController extends Controller
         }
 		
         $param = $params['params'];
+        //开启事务
+        DB::beginTransaction();
         try{
             //判断支付状态
             if($param['pay_type'] != \App\Order\Modules\Inc\PayInc::MiniAlipay){
@@ -231,7 +233,6 @@ class MiniOrderController extends Controller
                     'user_id'=>$data['user_id'],
                 ];
                 \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
-                sleep(1);
                 $queryCouponArr = [
                     'spu_id'=>$data['goods_info']['spu_id'],
                     'sku_id'=>$data['goods_info']['sku_id'],
@@ -239,10 +240,6 @@ class MiniOrderController extends Controller
                     'payment'=>$data['goods_info']['total_amount'],
                 ];
                 $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                //小程序订单确认
-                \App\Lib\Common\LogApi::notify('小程序查询优惠券接口日志',[
-                    $queryCoupon
-                ]);
                 if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                     $data['coupon'] = [
                         $queryCoupon[0]['coupon_no']
@@ -274,21 +271,24 @@ class MiniOrderController extends Controller
             $data['address_id']=$address['address_id'];
             $data['credit_amount']=$miniData['credit_amount'];
             //小程序订单确认
-            \App\Lib\Common\LogApi::notify('小程序取确认订单接口临时日志',[
-                $data
-            ]);
             $res = $this->OrderCreate->miniConfirmation($data);
             if(!$res){
+                //回滚事务
+                DB::rollBack();
                 \App\Lib\Common\LogApi::error('芝麻确认订单失败',$data);
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
                 //return apiResponse([],ApiStatus::CODE_35012,get_msg());
             }
 			\App\Lib\Common\LogApi::debug('芝麻小程序确认订单结果',$res);
         } catch (\Exception $ex) {
+            //回滚事务
+            DB::rollBack();
 			\App\Lib\Common\LogApi::error('芝麻确认订单异常',$ex);
 			return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
             //return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
+        //提交事务
+        DB::commit();
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
@@ -465,7 +465,7 @@ class MiniOrderController extends Controller
                 //回滚事务
                 DB::rollBack();
                 \App\Lib\Common\LogApi::debug('小程序取消商户端订单失败', $orderInfo);
-                return apiResponse([], ApiStatus::CODE_35003, '小程序取消商户端订单失败');
+                return apiResponse([], $code, '小程序取消商户端订单失败');
             }
             //用户取消订单写入日志系统
             \App\Order\Modules\Repository\OrderLogRepository::add(
