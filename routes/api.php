@@ -68,6 +68,9 @@ $api->version('v1', [
         //订单清算退押金回调接口
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
+        //分期定时扣款统计数量接口
+        $api->any('crontabCreatepayNum', 'WithholdController@crontabCreatepayNum');
+
         $api->any('orderListExport', 'OrderController@orderListExport');
 		//还机列表导出
         $api->any('givebackListExport', 'GivebackController@listExport');
@@ -121,6 +124,14 @@ $api->version('v1', [
 
     // 定时任务 月初发送提前还款短信
     $api->get('cronPrepayment', 'CronController@cronPrepayment');
+
+    // 定时任务 提前三天 发送扣款短信
+    $api->get('cronWithholdThreeMessage', 'CronController@cronWithholdThreeMessage');
+
+    // 定时任务 提前一天 发送扣款短信
+    $api->get('cronWithholdOneMessage', 'CronController@cronWithholdOneMessage');
+
+
 
 
     /*************************************************************************************************

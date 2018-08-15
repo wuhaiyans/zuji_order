@@ -547,6 +547,31 @@ class WithholdController extends Controller
 
     }
 
+    /**
+     *
+     * Author: heaven
+     *  计算定时扣款的总数
+     */
+    public function crontabCreatepayNum()
+    {
+        // 查询当天没有扣款记录数据
+        $date = date('Ymd');
+        $whereArray =
+            [
+                ['term', '=', date('Ym')],
+                ['day', '=', intval(date('d'))],
+                ['crontab_faile_date', '<', $date],
+            ];
+        $total = DB::table('order_goods_instalment')
+            ->select(DB::raw('min(id) as minId, max(id) as maxId,count(*) as createpayNum'))
+            ->where($whereArray)
+            ->whereIn('status', [1,3])
+            ->first();
+        $payNum = array_values(objectToArray($total));
+        return implode("-",$payNum);
+
+
+    }
 
     /**
      * 定时任务扣款
@@ -567,7 +592,6 @@ class WithholdController extends Controller
                 ['term', '=', date('Ym')],
                 ['day', '=', intval(date('d'))],
                 ['crontab_faile_date', '<', $date],
-                ['order_no', '=', 'A801191738584407']
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
@@ -580,9 +604,9 @@ class WithholdController extends Controller
         /*
          * 隔五分钟执行一次扣款
          */
-        $limit  = 2;
+        $limit  = 100;
         $page   = 1;
-        $time   = 3;
+        $time   = 30;
         $totalpage = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
@@ -596,11 +620,10 @@ class WithholdController extends Controller
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
                         ['crontab_faile_date', '<', $date],
-                        ['order_no', '=', 'A801191738584407']
+                        ['status', '=', OrderInstalmentStatus::FAIL]
                     ];
                 $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
                     ->where($whereFailArray)
-                    ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
                     ->count();
                 LogApi::info('[crontabCreatepay]脚本执行完成后待扣款或者扣款失败的总条数：'.$failTotal);
 
@@ -609,8 +632,7 @@ class WithholdController extends Controller
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
                         ['crontab_faile_date', '<', $date],
-                        ['status', '=', OrderInstalmentStatus::SUCCESS],
-                        ['order_no', '=', 'A801191738584407']
+                        ['status', '=', OrderInstalmentStatus::SUCCESS]
                     ];
                 $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
                     ->where($whereSuccessArray)

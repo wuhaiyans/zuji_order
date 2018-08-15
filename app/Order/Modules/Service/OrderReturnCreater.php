@@ -643,16 +643,19 @@ class OrderReturnCreater
                 return false;
             }
             $return_info = $return->getData();
+            LogApi::info("[refundApply]获取退款单信息",$return_info);
             //获取订单信息
             $order = \App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
             if(!$order){
                 return false;
             }
             $order_info = $order->getData();
+            LogApi::info("[refundApply]获取退款单信息",$return_info);
             if($param['status'] == 0){
                 //更新退款单状态为同意
                 $returnApply = $return->refundAgree($param['remark']);
                 if(!$returnApply){
+                    LogApi::info("[refundApply]更新退款单状态为同意失败信息",$returnApply);
                     //事务回滚
                     DB::rollBack();
                     return false;
@@ -669,15 +672,18 @@ class OrderReturnCreater
                     if($order_info['order_type'] == OrderStatus::orderMiniService){
                         //查询芝麻订单
                         $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($return_info['order_no']);
+                        LogApi::info("[refundApply]查询芝麻订单",$miniOrderInfo);
                         $data = [
                             'out_order_no' => $return_info['order_no'],//商户端订单号
                             'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                             'remark' => $param['remark'],//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
+                        LogApi::info("[refundApply]通知芝麻取消请求参数",$data);
                         //通知芝麻取消请求
                         $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
+                            LogApi::info("[refundApply]通知芝麻取消请求失败",$canceRequest);
                             return false;
                         }
                     }
@@ -687,6 +693,7 @@ class OrderReturnCreater
 						'business_no'	=> $return_info['refund_no'],
 						'status'		=> 'success',
 					], $userinfo);
+                    LogApi::info("[refundApply]不需要清算，直接调起退款成功结果",$b);
 					if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
 						//事务提交
 						DB::commit();
@@ -701,6 +708,7 @@ class OrderReturnCreater
                 if($order_info['order_type'] != OrderStatus::orderMiniService){
                     //获取订单的支付信息
                     $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
+                    LogApi::info("[refundApply]获取订单的支付信息",$pay_result);
                     if(!$pay_result){
                         return false;
                     }
@@ -731,8 +739,10 @@ class OrderReturnCreater
                    // $create_data['refund_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
                     $create_data['auth_unfreeze_amount']=$order_info['order_yajin'];//订单实际支付押金
                 }*/
+                LogApi::info("[refundApply]创建退款清单参数",$create_data);
                 if( $create_data['refund_amount']>0 || $create_data['auth_unfreeze_amount']>0){
                     $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
+                    LogApi::info("[refundApply]创建退款清单执行结果",$create_clear);
                     if(!$create_clear){
                         //事务回滚
                         DB::rollBack();
@@ -746,6 +756,7 @@ class OrderReturnCreater
 
                 //更新退款单状态为审核拒绝
                 $returnApply=$return->refundAccept($param['remark']);
+                LogApi::info("[refundApply]更新退款单状态为审核拒绝结果",$returnApply);
                 if(!$returnApply){
                     //事务回滚
                     DB::rollBack();
@@ -753,6 +764,7 @@ class OrderReturnCreater
                 }
                 //更新订单状态
                 $orderApply = $order->returnClose();
+                LogApi::info("[refundApply]更新订单状态结果",$orderApply);
                 if(!$orderApply){
                     //事务回滚
                     DB::rollBack();
@@ -760,11 +772,13 @@ class OrderReturnCreater
                 }
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no'],true);
+                LogApi::info("[refundApply]获取商品信息结果",$goods);
                 if( !$goods ){
                     return false;
                 }
                 //更新商品状态为退款中
                 $goodsRefund = $goods->refundRefuse();
+                LogApi::info("[refundApply]更新商品状态为退款中结果",$goodsRefund);
                 if( !$goodsRefund ){
                     //事务回滚
                     DB::rollBack();
@@ -2212,7 +2226,6 @@ class OrderReturnCreater
             if($order_info['order_status'] == OrderStatus::OrderClosedRefunded){
                return true;
             }
-
             //查询此订单的商品
            /* $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
             if(!$goodInfo){
@@ -2246,7 +2259,8 @@ class OrderReturnCreater
 
             }
             //退款业务
-            if($params['business_type'] != OrderStatus::BUSINESS_REFUND){
+            if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
+
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
                 if(!$goods){

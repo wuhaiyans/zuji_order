@@ -1630,12 +1630,15 @@ class OrderOperate
     public static function getExportActAdminState($orderNo, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo,array('goods_name'));
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo,array('goods_name','zuqi','zuqi_type','specs'));
 //        dd($goodsList);
         if (empty($goodsList)) return [];
 
         //到期时间多于1个月不出现到期处理
-//        foreach($goodsList as $keys=>$values) {
+        foreach($goodsList as $keys=>$values) {
+            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
+            $goodsList[$keys]['zuqi_name'] = $values['zuqi'].Inc\OrderStatus::getZuqiTypeName($values['zuqi_type']);
+        }
 //            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
 //            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
 //            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);

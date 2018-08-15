@@ -169,4 +169,14 @@ class SceneConfig {
      */
     const CRONREPAYMENT = 'CronRepayment';
 
+    /**
+     * 场景：<b>【押金退还】</b>
+     */
+    const WITHHOLD_ADVANCE_THREE = 'WithholdAdvanceThree';
+
+    /**
+     * 场景：<b>【押金退还】</b>
+     */
+    const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
+
 }
