@@ -356,7 +356,7 @@ class MiniNotifyController extends Controller
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             $result = curl_exec($ch);
-            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果'.$result,$_POST);
+            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果'.$_SERVER['DEV_ZUJI_URL'].$result,$_POST);
             curl_close($ch);
         }
     }
