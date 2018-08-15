@@ -85,4 +85,24 @@ class CronController extends Controller
         Service\CronOperate::cronPrepayment();
         echo "complete";die;
     }
+
+    /**
+     * 定时任务  提前三天 一天 发送扣款短信
+     */
+    public function cronWithholdThreeMessage(){
+        // 超时时间
+        ini_set('max_execution_time', '0');
+        Service\CronOperate::cronPrepaymentMessage(3);
+        echo "complete";die;
+    }
+
+    /**
+     * 定时任务  提前三天 一天 发送扣款短信
+     */
+    public function cronWithholdOneMessage(){
+        // 超时时间
+        ini_set('max_execution_time', '0');
+        Service\CronOperate::cronPrepaymentMessage(1);
+        echo "complete";die;
+    }
 }

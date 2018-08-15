@@ -385,9 +385,10 @@ class CronOperate
             $sleep  = 20;
 
             do {
-
+                $day =  1;
                 $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
                 $whereArray[] = ['term', '=', date('Ym')];
+                $whereArray[] = ['day', '=', $day];
 
                 // 查询总数
                 $total =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -417,6 +418,82 @@ class CronOperate
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                         $item['id'],
                         "CronRepayment");
+                    $sendMessage = $notice->notify();
+                    if(!$sendMessage){
+                        $arr[]  = $item['id'];
+                    }
+                }
+
+                $page++;
+                sleep($sleep);
+            } while ($page <= $totalpage);
+
+            if(count($arr) > 0){
+                LogApi::notify("提前还款短信", $arr);
+            }
+
+        }catch(\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>$exc->getMessage()]);
+        }
+    }
+
+    /**
+     * 定时任务 提前三天 一天 发送扣款短信
+     * 每个十秒发送五条数据
+     * $return bool
+     */
+    public static function cronPrepaymentMessage($type){
+        try{
+            $arr =[];
+            $limit  = 5;
+            $page   = 1;
+            $sleep  = 20;
+
+
+            do {
+                if($type == 1){
+                    $today  = date("Ymd",strtotime("+1 day"));
+                    $model  = 'WithholdAdvanceOne';
+                }else if($type == 3){
+                    $today  = date("Ymd",strtotime("+3 day"));
+                    $model  = 'WithholdAdvanceThree';
+                }
+                $term   = substr($today,0,6);
+                $day    = substr($today,6,2);
+
+                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['term', '=', $term];
+                $whereArray[] = ['day', '=', $day];
+
+                // 查询总数
+                $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->count();
+                $totalpage = ceil($total/$limit);
+
+                // 查询数据
+                $result =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->select('order_goods_instalment.id')
+                    ->where($whereArray)
+                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->forPage($page,$limit)
+                    ->get()
+                    ->toArray();
+
+                if (!$result) {
+                    continue;
+                }
+
+                foreach($result as $item){
+                    //发送短信
+                    $notice = new \App\Order\Modules\Service\OrderNotice(
+                        \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                        $item['id'],
+                        $model
+                    );
                     $sendMessage = $notice->notify();
                     if(!$sendMessage){
                         $arr[]  = $item['id'];
