@@ -86,7 +86,7 @@ class CheckInstalment extends Command
                     $data = [
                         'original_amount' => $original_amount,
                     ];
-                    sql_profiler();
+
                     // 更新新系统 分期信息表
                     $ret = \App\Order\Models\OrderGoodsInstalment::where(
                         ['id'=>$item['id']]
