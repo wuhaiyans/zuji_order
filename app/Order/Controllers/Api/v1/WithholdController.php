@@ -555,6 +555,31 @@ class WithholdController extends Controller
 
     }
 
+    /**
+     *
+     * Author: heaven
+     *  计算定时扣款的总数
+     */
+    public function crontabCreatepayNum()
+    {
+        // 查询当天没有扣款记录数据
+        $date = date('Ymd');
+        $whereArray =
+            [
+                ['term', '=', date('Ym')],
+                ['day', '=', intval(date('d'))],
+                ['crontab_faile_date', '<', $date],
+            ];
+        $total = DB::table('order_goods_instalment')
+            ->select(DB::raw('min(id) as minId, max(id) as maxId,count(*) as createpayNum'))
+            ->where($whereArray)
+            ->whereIn('status', [1,3])
+            ->first();
+        $payNum = array_values(objectToArray($total));
+        return implode("-",$payNum);
+
+
+    }
 
     /**
      * 定时任务扣款
