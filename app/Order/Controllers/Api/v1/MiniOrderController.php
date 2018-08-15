@@ -243,7 +243,7 @@ class MiniOrderController extends Controller
                 \App\Lib\Common\LogApi::notify('小程序查询优惠券接口日志',[
                     $queryCoupon
                 ]);
-                if( isset($queryCoupon['coupon_no']) ){//查询优惠券是否存在
+                if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                     $data['coupon'] = [
                         $queryCoupon['coupon_no']
                     ];
