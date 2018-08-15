@@ -588,19 +588,40 @@ class WithholdController extends Controller
         /*
          * 隔五分钟执行一次扣款
          */
-        $limit  = 100;
+        $limit  = 2;
         $page   = 1;
-        $time   = 60 * 5;
+        $time   = 3;
         $totalpage = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
         while(true) {
 
-            if($page < $totalpage){
-                sleep($time);
-            }
 
             if ($page > $totalpage){
+                //记录执行成功的总数和失败的总数
+                $whereFailArray =
+                    [
+                        ['term', '=', date('Ym')],
+                        ['day', '=', intval(date('d'))],
+                        ['crontab_faile_date', '<', $date],
+                    ];
+                $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereFailArray)
+                    ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
+                    ->count();
+                LogApi::info('[crontabCreatepay]脚本执行完成后待扣款或者扣款失败的总条数：'.$failTotal);
+
+                $whereSuccessArray =
+                    [
+                        ['term', '=', date('Ym')],
+                        ['day', '=', intval(date('d'))],
+                        ['crontab_faile_date', '<', $date],
+                        ['status', '=', OrderInstalmentStatus::SUCCESS]
+                    ];
+                $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereSuccessArray)
+                    ->count();
+                LogApi::info('[crontabCreatepay]脚本执行完成后扣款成功的总条数：'.$successTotal);
                 exit;
             }
 
@@ -730,7 +751,7 @@ class WithholdController extends Controller
                         try {
                             // 请求代扣接口
                             $withStatus = $withholding->deduct($withholding_data);
-                            LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果：'.$withStatus.':调用的参数:', $withholding_data);
+                            LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
                         } catch (\Exception $exc) {
                             LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
                             OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
@@ -765,6 +786,9 @@ class WithholdController extends Controller
 
             }
 
+            if($page < $totalpage){
+                sleep($time);
+            }
             ++$page;
 
 
