@@ -2189,7 +2189,7 @@ class OrderReturnCreater
         }
         //必须是退货业务或者退款业务
         if($params['business_type'] != OrderStatus::BUSINESS_RETURN
-        || $params['business_type'] != OrderStatus::BUSINESS_REFUND
+       && $params['business_type'] != OrderStatus::BUSINESS_REFUND
         ){
             return false;
         }
@@ -2245,7 +2245,7 @@ class OrderReturnCreater
                 $returnData['order_no']=$return_info['order_no'];
 
             }
-            //处理退款业务
+            //退款业务
             if($params['business_type'] != OrderStatus::BUSINESS_REFUND){
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
@@ -2267,6 +2267,9 @@ class OrderReturnCreater
                 }
                 $returnData['order_no']=$return_info['order_no'];
 
+            }
+            if(empty($returnData['order_no'])){
+                return false;
             }
             $goodsInfo = $goods->getData();
             //释放库存
@@ -2308,9 +2311,7 @@ class OrderReturnCreater
                     }
                 }
             }
-            if(empty($returnData['order_no'])){
-                return false;
-            }
+
             //分期关闭
             //查询分期
             //根据订单退和商品退走不同的地方
