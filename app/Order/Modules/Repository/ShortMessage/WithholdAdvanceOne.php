@@ -10,7 +10,7 @@ use App\Order\Modules\Repository\OrderRepository;
  *
  * @author maxiaoyu
  */
-class WithholdAdvanceThree implements ShortMessage {
+class WithholdAdvanceOne implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -42,7 +42,6 @@ class WithholdAdvanceThree implements ShortMessage {
             LogApi::debug("扣款成功短信-分期详情错误",[$this->business_no]);
             return false;
         }
-
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
@@ -85,7 +84,7 @@ class WithholdAdvanceThree implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $date  = date("Y-m-d",strtotime("+3 day"));
+        $date  = date("Y-m-d",strtotime("+1 day"));
 
         // 短信参数
         $dataSms =[
@@ -106,7 +105,7 @@ class WithholdAdvanceThree implements ShortMessage {
 
     // 支付宝内部消息通知
     public function alipay_notify(){
-            return true;
+        return true;
     }
 
 }
