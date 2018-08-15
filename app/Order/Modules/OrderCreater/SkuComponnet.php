@@ -72,6 +72,7 @@ class SkuComponnet implements OrderCreater
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
+            print_r($goodsArr);die;
             if(empty($goodsArr[$skuId]['spu_info']['payment_list'][0]['id']) || !isset($goodsArr[$skuId]['spu_info']['payment_list'][0]['id'])){
                 throw new Exception("商品支付方式错误");
             }
