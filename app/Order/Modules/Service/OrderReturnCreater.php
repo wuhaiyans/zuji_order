@@ -2226,7 +2226,6 @@ class OrderReturnCreater
             if($order_info['order_status'] == OrderStatus::OrderClosedRefunded){
                return true;
             }
-
             //查询此订单的商品
            /* $goodInfo=\App\Order\Modules\Repository\OrderReturnRepository::getGoodsInfo($return_info['order_no']);
             if(!$goodInfo){
@@ -2260,7 +2259,8 @@ class OrderReturnCreater
 
             }
             //退款业务
-            if($params['business_type'] != OrderStatus::BUSINESS_REFUND){
+            if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
+
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
                 if(!$goods){
