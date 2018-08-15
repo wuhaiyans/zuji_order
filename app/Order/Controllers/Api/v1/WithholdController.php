@@ -559,7 +559,7 @@ class WithholdController extends Controller
     /**
      * 定时任务扣款
      */
-    public function crontabCreatepay()
+    public static function crontabCreatepay()
     {
 		LogApi::setSource('crontab_withhold_createpay');
 		LogApi::info('[crontabCreatepay]进入定时扣款start');
@@ -570,7 +570,6 @@ class WithholdController extends Controller
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
 
-        sql_profiler();
         $whereArray =
             [
                 ['term', '=', date('Ym')],
