@@ -233,6 +233,7 @@ class MiniOrderController extends Controller
                     'user_id'=>$data['user_id'],
                 ];
                 \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
+                sleep(1);
                 $queryCouponArr = [
                     'spu_id'=>$data['goods_info']['spu_id'],
                     'sku_id'=>$data['goods_info']['sku_id'],
