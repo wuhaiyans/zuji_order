@@ -574,27 +574,29 @@ class WithholdController extends Controller
     {
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
+        $dateTime  = strtotime(date('Y-m-d',time()));
         $whereArray =
             [
-                ['term', '=', date('Ym')],
-                ['day', '=', intval(date('d'))],
+                ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
         $total = DB::table('order_goods_instalment')
-            ->select(DB::raw('min(id) as minId, max(id) as maxId,count(*) as createpayNum'))
+            ->select(DB::raw('count(*) as createpayNum'))
             ->where($whereArray)
             ->whereIn('status', [1,3])
             ->first();
         $payNum = array_values(objectToArray($total));
-        return implode("-",$payNum);
-
+        if($payNum[0] == 0){
+            return 0;
+        }
+        return  ceil( $payNum[0] / 100 );
 
     }
 
     /**
      * 定时任务扣款
      */
-    public static function crontabCreatepay()
+    public static function crontabCreatepay($page,$end_page)
     {
 		LogApi::setSource('crontab_withhold_createpay');
 		LogApi::info('[crontabCreatepay]进入定时扣款start');
@@ -602,14 +604,15 @@ class WithholdController extends Controller
         // 执行时间
         ini_set('max_execution_time', '0');
 
+        //需要扣款的状态
+        $needPayArray = array(OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL);
+
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
-        $dateTime  = strtotime(date('Y-m-d',time()));
-
+        $dateTime   = strtotime(date('Y-m-d',time()));
+        $limit      = 100;
         $whereArray =
             [
-//                ['term', '=', date('Ym')],
-//                ['day', '=', intval(date('d'))],
                 ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
@@ -621,19 +624,19 @@ class WithholdController extends Controller
         if($total == 0){
             return;
         }
+
+        $startOffset  = ($page-1) * $limit;
         /*
          * 隔30秒执行一次扣款
          */
-        $limit  = 100;
-        $page   = 1;
-        $time   = 30;
+        $time   = 10;
         $totalpage = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
         while(true) {
 
 
-            if ($page > $totalpage){
+            if ($page > $totalpage || $page>$end_page){
                 //记录执行成功的总数和失败的总数
                 $whereFailArray =
                     [
@@ -666,10 +669,10 @@ class WithholdController extends Controller
                 ->where($whereArray)
                 ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
                 ->orderBy('id','DESC')
+                ->offset($startOffset)
                 ->limit($limit)
                 ->get()
                 ->toArray();
-
             if(empty($result)){
                 return;
             }
@@ -716,7 +719,8 @@ class WithholdController extends Controller
                     continue;
                 }
 
-                if($item['status'] != OrderInstalmentStatus::UNPAID && $item['status']  != OrderInstalmentStatus::FAIL){
+
+                if(!(in_array($item['status'],$needPayArray))){
                     LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
                     continue;
                 }
@@ -726,7 +730,6 @@ class WithholdController extends Controller
                     continue;
                 }
                 // 价格单位转换
-                // $amount = $item['amount'] * 100; // 浮点计算存在精度问题
 				$amount = intval( strval($item['amount'] * 100) );
 
                 // 修改分期支付中状态
@@ -736,6 +739,7 @@ class WithholdController extends Controller
                 if(!$paying){
                     LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
                 }
+
 
                 //判断支付方式
                 if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
@@ -769,7 +773,6 @@ class WithholdController extends Controller
                 } else {
 
                     try{
-
                         // 代扣协议编号
                         $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
                         // 查询用户协议
