@@ -88,18 +88,6 @@ class MiniGivebackController extends Controller
                     OrderWithhold::instalment_withhold($instalmentInfo['id']);
                 }
             }else{
-                //租金已支付（扣除赔偿金，关闭订单）
-                //判断是否有请求过（芝麻支付接口）
-                $where = [
-                    'out_trans_no'=>$orderGivebackInfo['giveback_no'],
-                    'order_operate_type'=>'FINISH',
-                ];
-                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
-                if( $orderMiniCreditPayInfo ) {
-                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
-                }else{
-                    $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
-                }
                 $arr = [
                     'zm_order_no'=>$orderMiniInfo['zm_order_no'],
                     'out_order_no'=>$orderGivebackInfo['order_no'],
@@ -107,6 +95,18 @@ class MiniGivebackController extends Controller
                     'remark'=>$orderGivebackInfo['giveback_no'],
                     'app_id'=>$paramsArr['zm_app_id'],
                 ];
+                //租金已支付（扣除赔偿金，关闭订单）
+                //判断是否有请求过（芝麻支付接口）
+                $where = [
+                    'out_trans_no'=>$orderGivebackInfo['giveback_no'],
+                    'order_operate_type'=>'FINISH',
+                ];
+                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
+                if( empty($orderMiniCreditPayInfo) ) {
+                    $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
+                }else{
+                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                }
                 $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
                 //提交事务
                 DB::commit();
@@ -348,6 +348,13 @@ class MiniGivebackController extends Controller
         //-+--------------------------------------------------------------------
         // | 有押金->退押金处理（小程序关闭订单解冻押金）
         //-+--------------------------------------------------------------------
+        $arr = [
+            'zm_order_no'=>$paramsArr['zm_order_no'],
+            'out_order_no'=>$paramsArr['order_no'],
+            'pay_amount'=>$paramsArr['compensate_amount'],
+            'remark'=>$paramsArr['giveback_no'],
+            'app_id'=>$paramsArr['zm_app_id'],
+        ];
         //判断是否有请求过（芝麻支付接口）
         $where = [
             'out_trans_no'=>$paramsArr['giveback_no'],
@@ -359,13 +366,6 @@ class MiniGivebackController extends Controller
         }else{
             $arr['out_trans_no'] = $paramsArr['giveback_no'];
         }
-        $arr = [
-            'zm_order_no'=>$paramsArr['zm_order_no'],
-            'out_order_no'=>$paramsArr['order_no'],
-            'pay_amount'=>$paramsArr['compensate_amount'],
-            'remark'=>$paramsArr['giveback_no'],
-            'app_id'=>$paramsArr['zm_app_id'],
-        ];
         $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
         if( $orderCloseResult['code'] != 10000  ){
             return false;

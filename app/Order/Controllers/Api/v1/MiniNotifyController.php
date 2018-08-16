@@ -272,6 +272,13 @@ class MiniNotifyController extends Controller
                     $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
                     if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
                         //请求关闭订单接口
+                        $arr = [
+                            'zm_order_no'=>$data['zm_order_no'],
+                            'out_order_no'=>$orderGivebackInfo['order_no'],
+                            'pay_amount'=>$orderGivebackInfo['compensate_amount'],
+                            'remark'=>$orderGivebackInfo['giveback_no'],
+                            'app_id'=>$data['notify_app_id'],
+                        ];
                         //判断是否有请求过（芝麻支付接口）
                         $where = [
                             'out_order_no'=>$data['out_order_no'],
@@ -284,13 +291,6 @@ class MiniNotifyController extends Controller
                         }else{
                             $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
                         }
-                        $arr = [
-                            'zm_order_no'=>$data['zm_order_no'],
-                            'out_order_no'=>$orderGivebackInfo['order_no'],
-                            'pay_amount'=>$orderGivebackInfo['compensate_amount'],
-                            'remark'=>$orderGivebackInfo['giveback_no'],
-                            'app_id'=>$data['notify_app_id'],
-                        ];
                         $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
                         //提交事务
                         if( $orderCloseResult['code'] == 10000 ){
