@@ -839,8 +839,18 @@ class GivebackController extends Controller
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
 		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
 		$orderGivebackInfo['yajin_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['yajin_status']);
-		
-		
+
+		//当为小程序订单的时候分期金额与赔偿金额不相加
+		$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $orderGivebackInfo['order_no'] );
+		if( $orderInfo == false ){
+			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
+		}
+		//当为小程序订单则直接调起其他接口进行处理
+		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
+			$compensate_amount = $orderGivebackInfo['compensate_amount'];
+		}else{
+			$compensate_amount = $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'];
+		}
 		
 		//组合最终返回商品基础数据
 		$data['goods_info'] = $orderGoodsInfo;//商品信息
@@ -878,13 +888,14 @@ class GivebackController extends Controller
 		//赔偿金额计算(检测不合格，没有未支付分期金额，押金》赔偿金，才能押金抵扣)
 		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && !$orderGivebackInfo['instalment_amount'] && $orderGoodsInfo['yajin']>=$orderGivebackInfo['compensate_amount'] ){
 			$data['compensate_info'] = [
-				'compensate_all_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
-				'compensate_deduction_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
-				'compensate_release_amount' => $orderGoodsInfo['yajin'] - ($orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount']),
+				'compensate_all_amount' => $compensate_amount,
+				'compensate_deduction_amount' => $compensate_amount,
+				'compensate_release_amount' => $orderGoodsInfo['yajin'] - ($compensate_amount),
 			];
 		}else{
+
 			$data['compensate_info'] = [
-				'compensate_all_amount' => $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'],
+				'compensate_all_amount' => $compensate_amount,
 				'compensate_deduction_amount' => 0,
 				'compensate_release_amount' => $orderGoodsInfo['yajin'],
 			];

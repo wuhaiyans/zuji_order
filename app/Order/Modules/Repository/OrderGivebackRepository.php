@@ -57,9 +57,17 @@ class OrderGivebackRepository
 	 * @return array|false
 	 */
 	public function getNeedpayInfo( $where ) {
+		$where = array_merge($where,['payment_status'=>\App\Order\Modules\Inc\OrderGivebackStatus::PAYMENT_STATUS_IN_PAY]);
 		$result = $this->order_giveback_model->where($where)->get();
-		if( $result ) {
-			return $result->toArray();
+		$result = $result->toArray();
+		if( !empty($result) ) {
+			return $result;
+		}
+		$where1 = array_merge($where,['payment_status'=>\App\Order\Modules\Inc\OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY]);
+		$result1 = $this->order_giveback_model->where($where1)->get();
+		$result1 = $result1->toArray();
+		if( !empty($result1) ) {
+			return $result1;
 		}
 		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
 		return false;

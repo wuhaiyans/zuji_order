@@ -63,11 +63,7 @@ class MiniGivebackController extends Controller
         if( !$orderMiniInfo ) {
             return apiResponse([], get_code(), get_msg());
         }
-        //判断APPid是否有映射
-        if(empty(config('miniappid.'.$params['appid']))){
-            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
-        }
-        $paramsArr['zm_app_id'] = config('miniappid.'.$params['appid']);//小程序APPID
+        $paramsArr['zm_app_id'] = $orderMiniInfo['app_id'];//小程序APPID
         //开启事务
         DB::beginTransaction();
         try {
@@ -85,8 +81,12 @@ class MiniGivebackController extends Controller
                 $notice->notify();
                 //未扣款代扣全部执行
                 foreach ($instalmentList[$paramsArr['goods_no']] as $instalmentInfo) {
-                    OrderWithhold::instalment_withhold($instalmentInfo['id']);
+                    $b = OrderWithhold::instalment_withhold($instalmentInfo['id']);
+                    if(!$b){
+                        return apiResponse([], ApiStatus::CODE_35006, \App\Lib\Payment\mini\MiniApi::getError());
+                    }
                 }
+                return apiResponse([], ApiStatus::CODE_0, '小程序分期金额支付请求成功');
             }else{
                 $arr = [
                     'zm_order_no'=>$orderMiniInfo['zm_order_no'],
@@ -249,12 +249,7 @@ class MiniGivebackController extends Controller
         $paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
         $paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
         $paramsArr['zm_order_no'] = $orderMiniInfo['zm_order_no'];//芝麻订单号
-        //判断APPid是否有映射
-        if(empty(config('miniappid.'.$params['appid']))){
-            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
-        }
-        $paramsArr['zm_app_id'] = config('miniappid.'.$params['appid']);//小程序APPID
-
+        $paramsArr['zm_app_id'] = $orderMiniInfo['app_id'];//小程序APPID
         //开启事务
         DB::beginTransaction();
         try{

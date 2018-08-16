@@ -35,12 +35,12 @@ class MiniNotifyController extends Controller
 
 
         //关闭订单回调
-//        $json = '{"pay_amount":"0.01","out_trans_no":"FA80636073263601","notify_app_id":"2018032002411058","out_order_no":"A804165661489550","alipay_fund_order_no":"2018080621001004030557693155","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-06 14:24:12","channel":"rent","zm_order_no":"2018080400001001094871363118","pay_status":"PAY_SUCCESS","sign":"Hr86Bsm9528CckEUm6Ps5ulZDJ5qMMMD+328cNDx6FsCoXOM95GmDS\/sPehs4kGaDuS1G8CCXCTavgkGajXgkQ+9wrWki8M94c+aiEWT\/xlCBUYs+hJMhOwkLZgSglBasPf1EohVA9Z76cgMEqsZ\/o5Gp2La0d4YX8JesGu+X+1i6XmMhpdjIbyL64J0kw3EEzIcO\/ZP8qzq\/ZTlr8d9WF9asfIW9ulvCfbJVexgoPnmqHj+QizqKj5TM4AyCnJzmjZfyMdoGY4a7DXOYPjYxGoB5N4OVHyzhQ2mC8o2nDjqZJkgShNQL94KTCvTvBZywsqVKL1Uucu58CbsjLO2aw==","sign_type":"RSA2"}';
+        $json = '{"pay_amount":"0.01","out_trans_no":"HA81608685169444","notify_app_id":"2018032002411058","out_order_no":"A816108201423229","alipay_fund_order_no":"2018081621001004760549004743","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-16 20:57:26","channel":"rent","zm_order_no":"2018081600001001097270843743","pay_status":"PAY_SUCCESS","sign":"iKIN4zOWvDG9xpVBO3Ui5BPhEKoet91VMibrHhy2iCjoQjo84fUFEw5kN8YBdkZxsgfLgYle1KhbsHoHOerBoTdVMI03NDv2kWw7R4fpNHhwiMh+wmpnNxBHrj+blFgLPRbBty+nU7oJuoZyAVfU9GXVGW5+Sj3tebGSL9CGzB7bB8PBjgThPnbsMYDqZyORBB1oqErdnxCoA5uhH7+oEYKLn0WPrSvFXGxJ\/y9mMuaGEhB3xR0QQjkVgnP3LpDax7q5ClFu+DjaNmzfcnxcNoCFU\/bEWdEBJ9GXx\/Roxa3t2V2wRgvLyoIlxosDNYpLTPUAqS87zsu2n1znLaEHrA==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
 //        $json = '{"notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"Yosi\/ZKTDVvPGUwvseryPC0bh0ZBk7DtRsoXKim8CZOKyjUI1zJXJcSkYE1L7PBoU0G4Ccq527M+BuN5MteH4yPjtjTBlsAsPLme+0jsvcXuy2+rJetmMSqsfU5OsAvET1uue2NpABd65lUT0rf\/Xe2sRR8SmBQyXWNyA2sQNN6XbD8hcSa1ZkY0ijSNlJAju85VQGxF6aDLe04UNtP\/CDVaQYavdMvqoUIIIIzVaAQx88Rs87xulAA+jwdI63e6tNvxmh\/c2O\/TySEayzbOEXWokTt3WtwYMjyqFE251l+zuDM7GstFkooBxiC34IqNvjfQgPDtkyOIyTtxyYQGNQ==","sign_type":"RSA2"}';
-//        $_POST = json_decode($json,true);
+        $_POST = json_decode($json,true);
         \App\Lib\Common\LogApi::setSource('zm_withholding_close_cancel');
         if( isset($_POST['out_order_no']) ) {
             \App\Lib\Common\LogApi::id($_POST['out_order_no']);
@@ -84,8 +84,9 @@ class MiniNotifyController extends Controller
             }
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
-            //入库 完成 或 扣款 回调信息
-                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_order_no']);
+                //入库 完成 或 扣款 回调信息
+                $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_trans_no']);
+                $redis_order = 'MiniOrderClose';
                 $arr_log = [
                     'notify_type'=>$_POST['notify_type'],
                     'zm_order_no'=>$_POST['zm_order_no'],
@@ -110,8 +111,10 @@ class MiniNotifyController extends Controller
             }else if( $redis_order == 'MiniOrderClose' ){
                     $this->orderCloseNotify();
                 return;
+            }else{
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
+                echo 'redisKey查询不存在';die;
             }
-            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
         }else if($this->data['notify_type'] == $this->CREATE){
                 //入库 确认订单 回调信息
                 $arr_log = [
@@ -151,7 +154,10 @@ class MiniNotifyController extends Controller
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
-
+        if($orderInfo['order_status'] == 9){
+            //当前订单已还机完成
+            echo 'success';return;
+        }
         //开启事务
         \DB::beginTransaction();
         //判断订单是否为还机关闭订单
@@ -239,6 +245,7 @@ class MiniNotifyController extends Controller
      * @return string
      */
     private function  withholdingNotify(){
+
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
