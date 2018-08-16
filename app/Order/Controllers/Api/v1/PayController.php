@@ -853,17 +853,21 @@ class PayController extends Controller
 	 * @return String FAIL：失败  SUCCESS：成功
 	 */
 	public function withholdCreatePayNotify(){
+
 		$input = file_get_contents("php://input");
+		LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑start', $input);
 //		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
 		if( is_null($params) ){
+			LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑参数为空', $params);
 			echo json_encode([
 				'status' => 'error',
 				'msg' => 'notice data is null',
 			]);exit;
 		}
 		if( !is_array($params) ){
+			LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑参数不是数组', $params);
 			echo json_encode([
 				'status' => 'error',
 				'msg' => 'notice data is array',
@@ -877,6 +881,7 @@ class PayController extends Controller
 			// 校验扣款交易状态
 			$status_info = \App\Lib\Payment\CommonWithholdingApi::deductQuery($params);
 			if( $status_info['status'] != 'success' ){//
+				LogApi::error('[crontabCreatepay]进入分期扣款回调逻辑：校验扣款交易状态', $status_info);
 				echo json_encode([
 					'status' => 'error',
 					'msg' => 'status not success',
@@ -888,6 +893,7 @@ class PayController extends Controller
 
 			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
+			LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
 			if( $b ){
 				// 提交事务
 				DB::commit();
@@ -907,14 +913,14 @@ class PayController extends Controller
 
 
 		} catch (\App\Lib\NotFoundException $exc) {
-			LogApi::error('代扣扣款异步处理失败', $exc );
+			LogApi::error('[crontabCreatepay]进入分期扣款回调逻辑：代扣扣款异步处理失败', $exc);
 			echo json_encode([
 				'status' => 'error',
 				'msg' => $exc->getMessage(),
 			]);exit;
 			echo $exc->getMessage();
 		} catch (\Exception $exc) {
-			LogApi::error('代扣扣款异步处理失败', $exc );
+			LogApi::error('[crontabCreatepay]进入分期扣款回调逻辑：代扣扣款异步处理失败', $exc);
 			echo json_encode([
 				'status' => 'error',
 				'msg' => $exc->getMessage(),

@@ -82,12 +82,13 @@ class OrderWithhold
                 return false;
             }
             //芝麻小程序扣款请求
-            $miniParams['out_order_no']     = $miniOrderInfo['out_order_no'];
+            $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
             $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
             //扣款交易号
             $miniParams['out_trans_no']     = $business_no;
             $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
+            $miniParams['app_id']           = $miniOrderInfo['app_id'];
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){

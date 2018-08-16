@@ -316,16 +316,15 @@ class GivebackController extends Controller
 		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
-		if(redisIncr($orderGivebackInfo['giveback_no'], 60)>1){
-			return apiResponse([],ApiStatus::CODE_92500,'当前还机单正在操作，不能重复操作');
-		}
+//		if(redisIncr($orderGivebackInfo['giveback_no'], 60)>1){
+//			return apiResponse([],ApiStatus::CODE_92500,'当前还机单正在操作，不能重复操作');
+//		}
 		//开启事务
 		DB::beginTransaction();
 		try{
 			//-+------------------------------------------------------------------------------
 			// |收货时：查询未完成分期直接进行代扣，并记录代扣状态
 			//-+------------------------------------------------------------------------------
-
 
 
 			//获取当前商品未完成分期列表数据
