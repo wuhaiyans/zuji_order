@@ -84,8 +84,9 @@ class MiniNotifyController extends Controller
             }
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
-            //入库 完成 或 扣款 回调信息
+                //入库 完成 或 扣款 回调信息
                 $redis_order = Redis::get('zuji:order:miniorder:orderno:'.$_POST['out_trans_no']);
+                $redis_order = 'MiniOrderClose';
                 $arr_log = [
                     'notify_type'=>$_POST['notify_type'],
                     'zm_order_no'=>$_POST['zm_order_no'],
@@ -110,8 +111,10 @@ class MiniNotifyController extends Controller
             }else if( $redis_order == 'MiniOrderClose' ){
                     $this->orderCloseNotify();
                 return;
+            }else{
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
+                echo 'redisKey查询不存在';die;
             }
-            \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
         }else if($this->data['notify_type'] == $this->CREATE){
                 //入库 确认订单 回调信息
                 $arr_log = [
@@ -145,14 +148,16 @@ class MiniNotifyController extends Controller
      * @return string
      */
     private function orderCloseNotify(){
-        echo 222;die;
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
-
+        if($orderInfo['order_status'] == 9){
+            //当前订单已还机完成
+            echo 'success';return;
+        }
         //开启事务
         \DB::beginTransaction();
         //判断订单是否为还机关闭订单
@@ -240,7 +245,7 @@ class MiniNotifyController extends Controller
      * @return string
      */
     private function  withholdingNotify(){
-        echo 111;die;
+
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
