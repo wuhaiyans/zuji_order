@@ -2368,7 +2368,6 @@ class OrderReturnCreater
             if($params['business_type'] == OrderStatus::BUSINESS_REFUND){
                 //查询订单的状态
               //  $orderInfoData =  OrderRepository::getInfoById($return_info['order_no'],$return_info['user_id']);
-                if ($order_info['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH){
                     /*$orderParams['order_no']=$return_info['order_no'];
                     $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);*/
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭订单分期
@@ -2378,7 +2377,6 @@ class OrderReturnCreater
                         return false;
                     }
 
-                }
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功");
             }

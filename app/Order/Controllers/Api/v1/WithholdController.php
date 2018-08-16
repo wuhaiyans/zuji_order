@@ -231,6 +231,16 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
         }
 
+        // 修改分期支付中状态
+        $paying = \App\Order\Models\OrderGoodsInstalment::query()
+            ->where(['id' => $instalmentInfo['id']])
+            ->update(['status'=>OrderInstalmentStatus::PAYING]);
+        if(!$paying){
+            DB::rollBack();
+            LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+            return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
+        }
+
         //判断支付方式
         if( $orderInfo['pay_type'] == PayInc::MiniAlipay ){
             //获取订单的芝麻订单编号
@@ -288,7 +298,7 @@ class WithholdController extends Controller
 
             $withholding_data = [
                 'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                'out_trade_no'  => $business_no,               //业务系统业务码
+                'out_trade_no'  => $business_no,            //业务系统业务码
                 'amount'        => $amount,                 //交易金额；单位：分
                 'back_url'      => $backUrl,                //后台通知地址
                 'name'          => $subject,                //交易备注
@@ -445,6 +455,14 @@ class WithholdController extends Controller
                 DB::rollBack();
                 Log::error("扣款金额不能小于1分");
                 continue;
+            }
+
+            // 修改分期支付中状态
+            $paying = \App\Order\Models\OrderGoodsInstalment::query()
+                ->where(['id' => $instalmentId])
+                ->update(['status'=>OrderInstalmentStatus::PAYING]);
+            if(!$paying){
+                LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
             }
 
             //判断支付方式 小程序
@@ -657,8 +675,7 @@ class WithholdController extends Controller
             foreach($result as $item) {
                 // 商品
                 $subject = $item['order_no'].'-'.$item['term'].'-'.$item['times'];
-//				LogApi::id($subject);
-//				LogApi::debug($subject.'-扣款');
+
                 LogApi::info('[crontabCreatepay]操作的扣款订单和期数：'.$subject.'-扣款');
 				
                 $instalmentKey = "instalmentWithhold_" . $item['id'];
@@ -691,11 +708,16 @@ class WithholdController extends Controller
                     LogApi::error('[crontabCreatepay]订单不存在：'.$subject);
                     continue;
                 }
+
                 if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
                     LogApi::error('[crontabCreatepay]订单状态不处于租用中：'.$subject);
                     continue;
                 }
 
+                if($item['status'] != OrderInstalmentStatus::UNPAID && $item['status']  != OrderInstalmentStatus::FAIL){
+                    LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
+                    continue;
+                }
 
                 if ($item['amount'] <= 0) {
                     LogApi::error('[crontabCreatepay]扣款金额错误<=0：'.$subject);
@@ -704,6 +726,14 @@ class WithholdController extends Controller
                 // 价格单位转换
                 // $amount = $item['amount'] * 100; // 浮点计算存在精度问题
 				$amount = intval( strval($item['amount'] * 100) );
+
+                // 修改分期支付中状态
+                $paying = \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where(['id' => $item['id']])
+                    ->update(['status'=>OrderInstalmentStatus::PAYING]);
+                if(!$paying){
+                    LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                }
 
                 //判断支付方式
                 if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {

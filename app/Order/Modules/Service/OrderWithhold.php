@@ -204,7 +204,7 @@ class OrderWithhold
 
             $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$params['business_no']]);
             if( !is_array($instalmentInfo)){
-                \App\Lib\Common\LogApi::error('代扣回调处理分期数据错误-分期错误');
+                \App\Lib\Common\LogApi::error('[repaymentNotify]代扣回调处理分期数据错误-分期错误');
                 return false;
             }
             $instalmentId = $instalmentInfo['id'];
@@ -216,6 +216,7 @@ class OrderWithhold
             ];
             $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($where);
             if(empty($payInfo)){
+                \App\Lib\Common\LogApi::error('[repaymentNotify]代扣回调处理:支付单未找到');
                 return false;
             }
 
@@ -228,18 +229,15 @@ class OrderWithhold
                 'payment_amount'    => $payInfo['payment_amount'], //实际支付金额
             ];
 
-
-
             // 优惠券信息
             $recordData         = [];
 
             $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
+
             if(!empty($counponInfo)){
+                $counponInfo  = $counponInfo[0];
                 // 修改优惠券使用状态
-                $couponStatus = \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
-                if($couponStatus != ApiStatus::CODE_0){
-                    return apiResponse([],ApiStatus::CODE_50010);
-                }
+                \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
 
                 $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
                 $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
@@ -252,23 +250,9 @@ class OrderWithhold
             // 修改分期状态
             $result = \App\Order\Modules\Service\OrderGoodsInstalment::save(['business_no'=>$params['business_no']],$_data);
             if(!$result){
+                \App\Lib\Common\LogApi::error('[repaymentNotify]代扣回调处理:修改分期状态失败');
                 return false;
             }
-
-
-            /*
-             * 修改 收支明细表
-             * */
-            $IncomeData = [
-                'name'          => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "提前还款",
-                'appid'         => \App\Order\Modules\Inc\OrderPayIncomeStatus::REPAYMENT,
-            ];
-            $IncomeId = \App\Order\Modules\Repository\OrderPayIncomeRepository::save($where,$IncomeData);
-            if( !$IncomeId ){
-                \App\Lib\Common\LogApi::error('修改收支明细失败');
-                return false;
-            }
-
 
             // 创建扣款记录数据
             $recordData['instalment_id']        = $instalmentId;
