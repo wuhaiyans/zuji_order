@@ -88,18 +88,6 @@ class MiniGivebackController extends Controller
                     OrderWithhold::instalment_withhold($instalmentInfo['id']);
                 }
             }else{
-                //租金已支付（扣除赔偿金，关闭订单）
-                //判断是否有请求过（芝麻支付接口）
-                $where = [
-                    'out_trans_no'=>$orderGivebackInfo['giveback_no'],
-                    'order_operate_type'=>'FINISH',
-                ];
-                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
-                if( $orderMiniCreditPayInfo ) {
-                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
-                }else{
-                    $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
-                }
                 $arr = [
                     'zm_order_no'=>$orderMiniInfo['zm_order_no'],
                     'out_order_no'=>$orderGivebackInfo['order_no'],
@@ -107,13 +95,25 @@ class MiniGivebackController extends Controller
                     'remark'=>$orderGivebackInfo['giveback_no'],
                     'app_id'=>$paramsArr['zm_app_id'],
                 ];
+                //租金已支付（扣除赔偿金，关闭订单）
+                //判断是否有请求过（芝麻支付接口）
+                $where = [
+                    'out_trans_no'=>$orderGivebackInfo['giveback_no'],
+                    'order_operate_type'=>'FINISH',
+                ];
+                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
+                if( empty($orderMiniCreditPayInfo) ) {
+                    $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
+                }else{
+                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                }
                 $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
                 //提交事务
                 DB::commit();
                 if( $orderCloseResult['code'] == 10000  ){
                     return apiResponse([], ApiStatus::CODE_0, '小程序赔偿金支付请求成功');
                 }else{
-                    return apiResponse([], ApiStatus::CODE_35006, '小程序赔偿金支付失败'.$orderCloseResult['msg']);
+                    return apiResponse([], ApiStatus::CODE_35006, \App\Lib\Payment\mini\MiniApi::getError().$orderCloseResult['msg']);
                 }
             }
         }catch(\Exception $ex){
@@ -160,115 +160,6 @@ class MiniGivebackController extends Controller
             'payment_status'=>$orderGivebackInfo['payment_status']
         ], ApiStatus::CODE_0);
     }
-
-//    /**
-//     * 还机确认收货
-//     * @param Request $request
-//     * @return array
-//     */
-//    public function givebackConfirmDelivery( Request $request ) {
-//        //-+--------------------------------------------------------------------
-//        // | 获取参数并验证
-//        //-+--------------------------------------------------------------------
-//        $params = $request->input();
-//        $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
-//        if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
-//            return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
-//        }
-//        $paramsArr = isset($params['params'])? $params['params'] :'';
-//        $rules = [
-//            'goods_no'     => 'required',//商品编号
-//        ];
-//        $validator = app('validator')->make($paramsArr, $rules);
-//        if ($validator->fails()) {
-//            return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
-//        }
-//        $goodsNo = $paramsArr['goods_no'];
-//        //-+--------------------------------------------------------------------
-//        // | 业务处理：获取判断当前还机单状态、更新还机单状态
-//        //-+--------------------------------------------------------------------
-//        //获取还机单信息
-//        $orderGivebackService = new OrderGiveback();//创建还机单服务层
-//        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
-//        //还机单状态必须为待收货
-//        if( !$orderGivebackInfo ){
-//            return apiResponse([], get_code(), get_msg());
-//        }
-//        if( $orderGivebackInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
-//            return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
-//        }
-//        if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
-//            return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
-//        }
-//        //开启事务
-//        DB::beginTransaction();
-//        try{
-//            //-+------------------------------------------------------------------------------
-//            // |收货时：查询未完成分期直接进行代扣，并记录代扣状态
-//            //-+------------------------------------------------------------------------------
-//            //获取当前商品未完成分期列表数据
-//            $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$goodsNo,'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
-//            if( !empty($instalmentList[$goodsNo]) ){
-//                //发送短信
-//                $notice = new \App\Order\Modules\Service\OrderNotice(
-//                    \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-//                    $goodsNo,
-//                    "GivebackConfirmDelivery");
-//                $notice->notify();
-//                //未扣款代扣全部执行
-//                foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
-//                    OrderWithhold::instalment_withhold($instalmentInfo['id']);
-//                }
-//                //代扣已执行
-//                $withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_ALREADY_WITHHOLD;
-//            } else {
-//                //发送短信
-//                $notice = new \App\Order\Modules\Service\OrderNotice(
-//                    \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-//                    $goodsNo,
-//                    "GivebackConfirmNoWith");
-//                $notice->notify();
-//                //无需代扣
-//                $withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
-//            }
-//
-//            //更新还机单状态到待收货
-//            $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
-//                'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
-//                'withhold_status' => $withhold_status,
-//            ]);
-//            if( !$orderGivebackResult ){
-//                //事务回滚
-//                DB::rollBack();
-//                return apiResponse([],ApiStatus::CODE_92701);
-//            }
-//            //记录日志
-//            $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
-//                'order_no'=>$orderGivebackInfo['order_no'],
-//                'action'=>'还机单收货',
-//                'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
-//                'business_no'=>$orderGivebackInfo['giveback_no'],
-//                'goods_no'=>$orderGivebackInfo['goods_no'],
-//                'operator_id'=>$operateUserInfo['uid'],
-//                'operator_name'=>$operateUserInfo['username'],
-//                'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
-//                'msg'=>'还机单确认收货操作',
-//            ]);
-//            if( !$goodsLog ){
-//                return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
-//            }
-//        } catch (\Exception $ex) {
-//            //事务回滚
-//            DB::rollBack();
-//            return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
-//        }
-//        //提交事务
-//        DB::commit();
-//
-////		$return  = $this->givebackReturn(['status'=>"B","status_text"=>"还机确认收货"]);
-//        return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
-//
-//    }
 
     /**
      * 还机确认收货结果
@@ -457,6 +348,13 @@ class MiniGivebackController extends Controller
         //-+--------------------------------------------------------------------
         // | 有押金->退押金处理（小程序关闭订单解冻押金）
         //-+--------------------------------------------------------------------
+        $arr = [
+            'zm_order_no'=>$paramsArr['zm_order_no'],
+            'out_order_no'=>$paramsArr['order_no'],
+            'pay_amount'=>$paramsArr['compensate_amount'],
+            'remark'=>$paramsArr['giveback_no'],
+            'app_id'=>$paramsArr['zm_app_id'],
+        ];
         //判断是否有请求过（芝麻支付接口）
         $where = [
             'out_trans_no'=>$paramsArr['giveback_no'],
@@ -468,13 +366,6 @@ class MiniGivebackController extends Controller
         }else{
             $arr['out_trans_no'] = $paramsArr['giveback_no'];
         }
-        $arr = [
-            'zm_order_no'=>$paramsArr['zm_order_no'],
-            'out_order_no'=>$paramsArr['order_no'],
-            'pay_amount'=>$paramsArr['compensate_amount'],
-            'remark'=>$paramsArr['giveback_no'],
-            'app_id'=>$paramsArr['zm_app_id'],
-        ];
         $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
         if( $orderCloseResult['code'] != 10000  ){
             return false;
