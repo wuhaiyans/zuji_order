@@ -605,7 +605,7 @@ class WithholdController extends Controller
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
         $dateTime  = strtotime(date('Y-m-d',time()));
-        
+
         $whereArray =
             [
 //                ['term', '=', date('Ym')],
