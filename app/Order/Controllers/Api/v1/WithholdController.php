@@ -604,11 +604,13 @@ class WithholdController extends Controller
 
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
+        $dateTime  = strtotime(date('Y-m-d',time()));
 
         $whereArray =
             [
-                ['term', '=', date('Ym')],
-                ['day', '=', intval(date('d'))],
+//                ['term', '=', date('Ym')],
+//                ['day', '=', intval(date('d'))],
+                ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
@@ -620,7 +622,7 @@ class WithholdController extends Controller
             return;
         }
         /*
-         * 隔五分钟执行一次扣款
+         * 隔30秒执行一次扣款
          */
         $limit  = 100;
         $page   = 1;
