@@ -309,7 +309,12 @@ class Instalment {
 //			LogApi::info("代扣定时任务", $param);
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['business_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
-				\App\Lib\Common\LogApi::error('代扣回调处理分期数据错误');
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期数据错误');
+				return false;
+			}
+
+			if($instalmentInfo['status'] != OrderInstalmentStatus::PAYING){
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期状态错误');
 				return false;
 			}
 
@@ -329,7 +334,7 @@ class Instalment {
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['business_no'=>$param['out_trade_no']], $data);
 			if(!$b){
-				\App\Lib\Common\LogApi::error('修改分期状态失败');
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]修改分期状态失败');
 				return false;
 			}
 
@@ -342,7 +347,7 @@ class Instalment {
 			];
 			$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
 			if(!$record){
-				\App\Lib\Common\LogApi::error('创建扣款记录失败');
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]创建扣款记录失败');
 				return false;
 			}
 
@@ -361,7 +366,7 @@ class Instalment {
 			];
 			$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
 			if(!$incomeB){
-				\App\Lib\Common\LogApi::error('创建收支明细失败');
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]创建收支明细失败');
 				return false;
 			}
 
