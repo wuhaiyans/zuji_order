@@ -284,7 +284,8 @@ class OrderController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function getClientOrderList(Request $request){
-		
+
+
         try{
 
 
