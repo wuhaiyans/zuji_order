@@ -233,9 +233,9 @@ class OrderWithhold
             $recordData         = [];
 
             $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
-            $counponInfo  = $counponInfo[0];
 
             if(!empty($counponInfo)){
+                $counponInfo  = $counponInfo[0];
                 // 修改优惠券使用状态
                 \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
 
