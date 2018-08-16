@@ -698,7 +698,6 @@ class WithholdController extends Controller
 
             // 查询数据
             $result =  \App\Order\Models\OrderGoodsInstalment::query()
-                ->select('id')
                 ->where($whereArray)
                 ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
                 ->orderBy('id','ASC')
