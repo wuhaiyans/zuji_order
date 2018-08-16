@@ -66,7 +66,6 @@ class OrderGiveback
 			set_apistatus(\App\Lib\ApiStatus::CODE_92300,'获取单条还机单数据时，参数为空!');
 			return false;
 		}
-		$where['payment_status'] = [OrderGivebackStatus::PAYMENT_STATUS_IN_PAY, OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY];
 		$order_giveback_repository = new OrderGivebackRepository();
 		return $order_giveback_repository->getNeedpayInfo($where);
 	}

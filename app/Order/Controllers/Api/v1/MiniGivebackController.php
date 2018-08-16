@@ -249,12 +249,7 @@ class MiniGivebackController extends Controller
         $paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
         $paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
         $paramsArr['zm_order_no'] = $orderMiniInfo['zm_order_no'];//芝麻订单号
-        //判断APPid是否有映射
-        if(empty(config('miniappid.'.$params['appid']))){
-            return apiResponse([],ApiStatus::CODE_35011,'匹配小程序appid错误');
-        }
-        $paramsArr['zm_app_id'] = config('miniappid.'.$params['appid']);//小程序APPID
-
+        $paramsArr['zm_app_id'] = $orderMiniInfo['app_id'];//小程序APPID
         //开启事务
         DB::beginTransaction();
         try{
