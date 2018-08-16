@@ -749,6 +749,10 @@ class MiniGivebackController extends Controller
         $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
         $data['payment_time'] = time();
         $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
+        \App\Lib\Common\LogApi::notify('检测合格-代扣成功(无剩余分期)',[
+            $paramsArr,
+            $data
+        ]);
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
         //发送短信
@@ -806,6 +810,10 @@ class MiniGivebackController extends Controller
         $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
         $data['payment_time'] = time();
         //更新还机单
+        \App\Lib\Common\LogApi::notify('检测合格-代扣失败(有剩余分期)',[
+            $paramsArr,
+            $data
+        ]);
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
@@ -846,7 +854,7 @@ class MiniGivebackController extends Controller
         //-+--------------------------------------------------------------------
         //拼接需要更新还机单状态更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
         $data['payment_time'] = time();
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
@@ -855,6 +863,10 @@ class MiniGivebackController extends Controller
             'GivebackEvaNoWitYesEno',
             ['amount' => $paramsArr['compensate_amount'] ]);
         $notice->notify();
+        \App\Lib\Common\LogApi::notify('检测不合格-代扣成功(无剩余分期)',[
+            $paramsArr,
+            $data
+        ]);
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
         return $orderGivebackResult ? true : false;
@@ -917,7 +929,10 @@ class MiniGivebackController extends Controller
             $smsModel,
             ['amount' => $paramsArr['compensate_amount'] ]);
         $notice->notify();
-
+        \App\Lib\Common\LogApi::notify('检测不合格-代扣失败(有剩余分期)',[
+            $paramsArr,
+            $data
+        ]);
         //更新还机单
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
         return $orderGivebackResult ? true : false;
