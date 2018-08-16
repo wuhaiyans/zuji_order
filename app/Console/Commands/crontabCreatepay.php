@@ -12,7 +12,7 @@ class crontabCreatepay extends Command
      *
      * @var string
      */
-    protected $signature = 'command:crontabCreatepay';
+    protected $signature = 'command:crontabCreatepay {--start_page=} {--end_page=}';
 
     /**
      * The console command description.
@@ -38,7 +38,10 @@ class crontabCreatepay extends Command
      */
     public function handle()
     {
-        WithholdController::crontabCreatepay();
+        $start_page = intval($this->option('start_page'));
+        $end_page   = intval($this->option('end_page'));
+
+        WithholdController::crontabCreatepay($start_page,$end_page);
     }
 
 }
