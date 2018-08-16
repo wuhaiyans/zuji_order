@@ -98,9 +98,13 @@ class PayController extends Controller
 	public function paymentNotify()
 	{
 		$input = file_get_contents("php://input");
-		LogApi::info('支付异步通知', $input);
+		LogApi::setSource('payment_notify');
 		
 		$params = json_decode($input,true);
+		
+		LogApi::id($params['out_payment_no']??'');
+		LogApi::info('支付异步通知', $input);
+		
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
