@@ -86,7 +86,7 @@ class MiniGivebackController extends Controller
                         return apiResponse([], ApiStatus::CODE_35006, \App\Lib\Payment\mini\MiniApi::getError());
                     }
                 }
-                return apiResponse([], ApiStatus::CODE_0, '小程序赔偿金支付请求成功');
+                return apiResponse([], ApiStatus::CODE_0, '小程序分期金额支付请求成功');
             }else{
                 $arr = [
                     'zm_order_no'=>$orderMiniInfo['zm_order_no'],
