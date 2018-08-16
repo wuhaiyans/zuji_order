@@ -179,6 +179,7 @@ class InstalmentComponnet implements OrderCreater
                         'discount_amount' => $v['discount_amount'],
                         'amount' => $amount,
                         'status' => 1,
+                        'withhold_day'=>createWithholdDay($v['term'],$v['day']),
                     ];
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();
