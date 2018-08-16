@@ -189,6 +189,7 @@ class Instalment {
 			$item['user_id'] 			= $user_id;
 			$item['status']				= \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID;
 			$item['unfreeze_status']	= 2;
+			$item['withhold_day']		= createWithholdDay($item['term'],$item['day']);
 			OrderGoodsInstalment::create($item);
 		}
 		return true;
