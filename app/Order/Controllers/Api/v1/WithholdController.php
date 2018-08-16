@@ -714,7 +714,7 @@ class WithholdController extends Controller
                     continue;
                 }
 
-                if($item['status'] != OrderInstalmentStatus::UNPAID || $item['status']  != OrderInstalmentStatus::FAIL){
+                if($item['status'] != OrderInstalmentStatus::UNPAID && $item['status']  != OrderInstalmentStatus::FAIL){
                     LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
                     continue;
                 }
