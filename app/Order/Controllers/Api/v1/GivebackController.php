@@ -336,7 +336,6 @@ class GivebackController extends Controller
 					$goodsNo,
 					"GivebackConfirmDelivery");
 				$notice->notify();
-
 				foreach ($instalmentList[$goodsNo] as $instalmentInfo) {
 					OrderWithhold::instalment_withhold($instalmentInfo['id']);
 				}
@@ -352,7 +351,6 @@ class GivebackController extends Controller
 				//无需代扣
 				$withhold_status = OrderGivebackStatus::WITHHOLD_STATUS_NO_NEED_WITHHOLD;
 			}
-
 			//更新还机单状态到待收货
 			$orderGivebackResult = $orderGivebackService->update(['goods_no'=>$goodsNo], [
 				'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
