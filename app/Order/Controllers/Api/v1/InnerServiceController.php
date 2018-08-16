@@ -41,7 +41,12 @@ class InnerServiceController extends Controller
             return apiResponse([],$validateParams['code']);
         }
 
-        $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $validateParams['data']['user_id']);
+        $userinfo =[
+            'uid'=>$validateParams['data']['user_id'],
+            'username'=>'系統',
+        ];
+
+        $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'],$userinfo);
         if ($success) {
 
                 return $this->innerErrMsg(ApiStatus::$errCodes[$success]);

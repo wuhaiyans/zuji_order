@@ -181,11 +181,11 @@ class Config {
             ],
             // IOS
             self::CHANNELID_IOS => [
-
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
             ],
             // 安卓
             self::CHANNELID_ANDROID => [
-
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
             ],
             // 微回收
             self::CHANNELID_MICRO_RECOVERY => [
