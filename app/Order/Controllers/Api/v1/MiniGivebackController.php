@@ -166,6 +166,9 @@ class MiniGivebackController extends Controller
      * @param $params
      */
     public function givebackConfirmEvaluation( $params ) {
+        \App\Lib\Common\LogApi::notify('小程序还机确认收货结果',[
+            $params,
+        ]);
         //-+--------------------------------------------------------------------
         // | 获取参数并验证
         //-+--------------------------------------------------------------------

@@ -402,6 +402,9 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		\App\Lib\Common\LogApi::notify('还机确认收货结果',[
+			$params,
+		]);
 		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
@@ -455,6 +458,11 @@ class GivebackController extends Controller
 		if( $orderInfo == false ){
 			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
 		}
+		//添加日志是否调用小程序接口
+		\App\Lib\Common\LogApi::notify('当为小程序订单则直接调起其他接口进行处理',[
+			$params,
+			$orderInfo,
+		]);
 		//当为小程序订单则直接调起其他接口进行处理
 		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
 			$MiniGivebackController = new MiniGivebackController();
