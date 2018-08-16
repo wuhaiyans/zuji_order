@@ -629,3 +629,19 @@ function createShortUrl($url){
     return $info['shortURL'];
 
 }
+
+
+
+/**
+ * 获取短连接
+ * @param $url URL
+ * @param $shortUrl 返回的短连接
+ */
+function createWithholdDay($term, $day){
+    if($day < 10){
+        $day = '0' . $day;
+    }
+
+    return strtotime($term.$day);
+
+}
