@@ -12,7 +12,7 @@ class crontabCreatepay extends Command
      *
      * @var string
      */
-    protected $signature = 'command:crontabCreatepay {--start_page=} {--end_page=}';
+    protected $signature = 'command:crontabCreatepay {--minId=} {--maxId=}';
 
     /**
      * The console command description.
@@ -38,10 +38,10 @@ class crontabCreatepay extends Command
      */
     public function handle()
     {
-        $start_page = intval($this->option('start_page'));
-        $end_page   = intval($this->option('end_page'));
+        $minId = intval($this->option('minId'));
+        $maxId   = intval($this->option('maxId'));
 
-        WithholdController::crontabCreatepay($start_page,$end_page);
+        WithholdController::crontabCreatepay($minId,$maxId);
     }
 
 }
