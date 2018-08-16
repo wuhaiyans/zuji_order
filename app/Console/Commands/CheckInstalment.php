@@ -71,7 +71,7 @@ class CheckInstalment extends Command
 
                     // 查询旧系统 订单信息  order_no
                     $oldInstalment = \DB::connection('mysql_01')->table('zuji_order2_instalment')
-                        ->select('discount_amount')
+                        ->select('amount','discount_amount')
                         ->where([
                             ['order_id', '=',  $orderInfo['order_id']],
                             ['term', '=', $item['term']],
@@ -82,9 +82,13 @@ class CheckInstalment extends Command
                         continue;
                     }
 
-                    $original_amount = $oldInstalment['discount_amount'] / 100;
+                    $original_amount = $oldInstalment['amount'] / 100;
+                    $payment_amount  = ($oldInstalment['amount'] - $oldInstalment['discount_amount']) > 0 ? $oldInstalment['amount'] - $oldInstalment['discount_amount'] : 0;
+                    $payment_amount  = $payment_amount / 100;
                     $data = [
-                        'original_amount' => $original_amount,
+                        'original_amount'   => $original_amount,    //原始金额（元）
+                        'discount_amount'   => 0,                   //原始优惠金额（元）
+                        'payment_amount'    => $payment_amount,     //实际支付金额（元）
                     ];
 
                     // 更新新系统 分期信息表
