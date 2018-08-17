@@ -62,7 +62,7 @@ class MiniNotifyController extends Controller
         //当前订单是否需要进行转发（查询订单信息）
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $_POST['out_order_no'] );
         if( $orderInfo == false ){
-            $this->curl_dev();
+            $this->curl_dev( $_POST );
         }
         try{
         if($this->data['notify_type'] == $this->CANCEL){

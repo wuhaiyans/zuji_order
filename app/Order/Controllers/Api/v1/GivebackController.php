@@ -458,11 +458,6 @@ class GivebackController extends Controller
 		if( $orderInfo == false ){
 			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
 		}
-		//添加日志是否调用小程序接口
-		\App\Lib\Common\LogApi::notify('当为小程序订单则直接调起其他接口进行处理',[
-			$params,
-			$orderInfo,
-		]);
 		//当为小程序订单则直接调起其他接口进行处理
 		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
 			$MiniGivebackController = new MiniGivebackController();
