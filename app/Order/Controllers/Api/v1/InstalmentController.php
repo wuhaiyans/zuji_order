@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
+use App\Order\Modules\Repository\OrderLogRepository;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
@@ -468,7 +469,9 @@ class InstalmentController extends Controller
     public function repaymentConfirm(Request $request){
         //接收参数
         $params = $request->all();
+        $userInfo = $params['userinfo'];
         $params = $params['params'];
+
         //验证参数
         if (empty($params['instalment_id'])){
             return apiResponse([],ApiStatus::CODE_20001,"instalment_id必须");
@@ -485,7 +488,7 @@ class InstalmentController extends Controller
         if(in_array($instalmentDetail['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
             return apiResponse([],ApiStatus::CODE_50000,"分期单状态异常");
         }
-        //需要更新的参数
+        //更新分期单
         $nowTime = time();
         $data['pay_type'] = 2;
         $data['status'] = 2;
@@ -497,6 +500,9 @@ class InstalmentController extends Controller
         if(!$ret){
             return apiResponse([], ApiStatus::CODE_50000, '还款失败');
         }
+        //插入订单日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$instalmentDetail['order_no'],$instalmentDetail['term']."期线下还款","还款成功");
+
         return apiResponse([], ApiStatus::CODE_0, '还款成功');
     }
 }
