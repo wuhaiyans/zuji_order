@@ -74,6 +74,14 @@ class InstalmentController extends Controller
 
             // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
+
+            //线下手动还款按钮
+            if(in_array($item['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
+                $item['confirm_btn'] = false;
+            }
+            else{
+                $item['confirm_btn'] = true;
+            }
         }
 
         $result['data']     = $list;
