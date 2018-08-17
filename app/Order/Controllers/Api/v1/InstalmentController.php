@@ -446,4 +446,47 @@ class InstalmentController extends Controller
 
     }
 
+    /**
+     * 线下手动还款确认接口
+     * @$params array $request
+     * [
+     * 		'instalment_id'		=> '', //【必选】int 分期ID
+     *		'remark'		    => '', //【可选】string 备注
+     *		'trade_no'		    => '', //【可选】string 交易号
+     * ]
+     * @return bool
+     */
+    public function repaymentConfirm(Request $request){
+        //接收参数
+        $params     = $request->all();
+        //验证参数
+        if (empty($params['instalment_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"instalment_id必须");
+        }
+        if ($params['trade_no']){
+            $data['trade_no'] = $params['trade_no'];
+        }
+        if ($params['remark']){
+            $data['remark'] = $params['remark'];
+        }
+        //获取该条分期详情
+        $instalmentDetail = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfoById($params['instalment_id']);
+        //验证是否已还款或者已取消
+        if(in_array($instalmentDetail['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
+            return apiResponse([],ApiStatus::CODE_50000,"分期单状态异常");
+        }
+        //需要更新的参数
+        $nowTime = time();
+        $data['pay_type'] = 2;
+        $data['status'] = 2;
+        $data['payment_time'] = $nowTime;
+        $data['update_time'] = $nowTime;
+
+        $where['id'] = $params['instalment_id'];
+        $ret = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save($where,$data);
+        if(!$ret){
+            return apiResponse([], ApiStatus::CODE_50000, '还款失败');
+        }
+        return apiResponse([], ApiStatus::CODE_0, '还款成功');
+    }
 }
