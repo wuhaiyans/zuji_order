@@ -314,6 +314,10 @@ class MiniNotifyController extends Controller
                         //查询判断分期是否已经结清
                         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
                         if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
+//                            //支付状态为支付中则请求关闭订单接口
+//                            if( $orderGivebackInfo['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY ){
+//
+//                            }
                             //请求关闭订单接口
                             $arr = [
                                 'zm_order_no'=>$data['zm_order_no'],
