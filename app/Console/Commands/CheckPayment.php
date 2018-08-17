@@ -73,11 +73,19 @@ class CheckPayment extends Command
 		$bar = $this->output->createProgressBar($total);
 		
 		$p_count = ceil($total/$pagesize);
-		$min = 0;
+		$min = $min_id;
 		$p = 0;
+		$payment_no_err_list = [];
 		while($p<$p_count){
 			++$p;
+			$where = [
+				['id','>=',$min],
+				['id','<=',$max_id]
+			];
 			
+			// 更新最新ID值
+			$min += $pagesize; 
+					
 			// 支付单列表
 			$order_pay_list = $order_pay_model->where($where)
 					->select([
@@ -106,6 +114,7 @@ class CheckPayment extends Command
 					} catch (ApiException $ex) {
 						// 接口查询错误
 						++$query_error_counter;
+						$payment_no_err_list[] = $item->payment_no;
 					}
 				}
 			}
@@ -118,6 +127,7 @@ class CheckPayment extends Command
 		echo "Query Counter: {$query_counter}\n";
 		echo "Query Error: {$query_error_counter}\n";
 		echo "Status Error: {$pay_status_error_counter}\n";
+		echo implode(',',$payment_no_err_list);
 		exit;
 		
     }

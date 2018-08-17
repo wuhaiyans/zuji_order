@@ -580,23 +580,52 @@ class WithholdController extends Controller
                 ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
+
         $total = DB::table('order_goods_instalment')
-            ->select(DB::raw('count(*) as createpayNum'))
             ->where($whereArray)
             ->whereIn('status', [1,3])
-            ->first();
-        $payNum = array_values(objectToArray($total));
-        if($payNum[0] == 0){
-            return 0;
+            ->count();
+
+        //根据进程数量，判断每页显示的条数
+        $processNum = 0;
+        $limit  =   0;
+        if (ceil($total / 100)>20 ) {
+
+            $limit  = intval(ceil($total/20));
+            $processNum = 20;
+
+        } else {
+
+            $limit  = 100;
+            $processNum = intval(ceil($total/100));
         }
-        return  ceil( $payNum[0] / 100 );
+        $Array = [];
+        for($i = 1; $i <= $processNum; $i++ ){
+            $offSet = ($i-1)*$limit;
+            $result = DB::table('order_goods_instalment')
+                ->select('id')
+                ->where($whereArray)
+                ->whereIn('status', [1,3])
+                ->orderBy('id',"ASC")
+                ->offset($offSet)
+                ->take($limit)
+                ->get();
+
+            $payNum = objectToArray($result);
+            $minValue  = $payNum[0]['id'];
+            $maxValue = $payNum[count($payNum)-1]['id'];
+
+            $Array[] = array($minValue,$maxValue);
+        }
+       return $Array;
+
 
     }
 
     /**
      * 定时任务扣款
      */
-    public static function crontabCreatepay($page,$end_page)
+    public static function crontabCreatepay($minId,$maxId)
     {
 		LogApi::setSource('crontab_withhold_createpay');
 		LogApi::info('[crontabCreatepay]进入定时扣款start');
@@ -605,14 +634,16 @@ class WithholdController extends Controller
         ini_set('max_execution_time', '0');
 
         //需要扣款的状态
-        $needPayArray = array(OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL);
+        $needPayArray = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL];
 
         // 查询当天没有扣款记录数据
         $date = date('Ymd');
         $dateTime   = strtotime(date('Y-m-d',time()));
-        $limit      = 100;
+
         $whereArray =
             [
+                ['id', '>=', $minId],
+                ['id', '<=', $maxId],
                 ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
@@ -625,18 +656,19 @@ class WithholdController extends Controller
             return;
         }
 
-        $startOffset  = ($page-1) * $limit;
+        $limit          = 100;
+        $page           = 1;
+        $startOffset    = ($page - 1) * $limit;
         /*
-         * 隔30秒执行一次扣款
+         * 隔10秒执行一次扣款
          */
-        $time   = 10;
-        $totalpage = ceil($total/$limit);
+        $time           = 10;
+        $totalpage      = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
         while(true) {
 
-
-            if ($page > $totalpage || $page>$end_page){
+            if ($page > $totalpage ){
                 //记录执行成功的总数和失败的总数
                 $whereFailArray =
                     [
@@ -668,7 +700,7 @@ class WithholdController extends Controller
             $result =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
                 ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
-                ->orderBy('id','DESC')
+                ->orderBy('id','ASC')
                 ->offset($startOffset)
                 ->limit($limit)
                 ->get()

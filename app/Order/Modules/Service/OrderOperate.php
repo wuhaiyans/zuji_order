@@ -1083,6 +1083,7 @@ class OrderOperate
 
                 $orderData['zm_order_no']    =    $miniOrderData['zm_order_no']?? '';
 
+
             }
 
 
@@ -1401,9 +1402,19 @@ class OrderOperate
 
        if (empty($goodsList)) return [];
            //到期时间多于1个月不出现到期处理
+           //获取还机单信息
+           $orderGivebackService = new OrderGiveback();//创建还机单服务层
            foreach($goodsList as $keys=>$values) {
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
+
+
+               $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
+               $goodsList[$keys]['give_back_status'] = '';
+               if ($orderGivebackInfo) {
+                   $goodsList[$keys]['give_back_status'] = $orderGivebackInfo['status'];
+               }
+
                //获取ime信息
                $imeInfo = [];
                $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);

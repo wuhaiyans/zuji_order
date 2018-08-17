@@ -921,11 +921,11 @@ class Pay extends \App\Lib\Configurable
 				'business_no' => $this->businessNo,
 				'status' => 'processing',
 			] );
-			LogApi::debug('[支付阶段]回调业务通知(支付环节完成)');
 			if( !$b ){
 				LogApi::type('callback-error')::error('[支付阶段]回调业务通知(支付环节完成)');
 				throw new \Exception('支付通知业务回调处理失败');
 			}
+			LogApi::debug('[支付阶段]回调业务通知(支付环节完成)');
 		}
 		// 支付阶段完成时，回调业务通知
 		elseif( $this->status == PayStatus::SUCCESS )
