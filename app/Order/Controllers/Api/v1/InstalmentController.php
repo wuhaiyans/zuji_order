@@ -66,6 +66,14 @@ class InstalmentController extends Controller
             $member = \App\Order\Models\OrderUserCertified::where(['order_no'=>$item['order_no']])->first();
             $item['realname']       = !empty($member['realname']) ? $member['realname'] : "--";
 
+            //线下手动还款按钮
+            if(in_array($item['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
+                $item['confirm_btn'] = false;
+            }
+            else{
+                $item['confirm_btn'] = true;
+            }
+
             // 状态
             $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
 
@@ -75,13 +83,6 @@ class InstalmentController extends Controller
             // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
 
-            //线下手动还款按钮
-            if(in_array($item['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
-                $item['confirm_btn'] = false;
-            }
-            else{
-                $item['confirm_btn'] = true;
-            }
         }
 
         $result['data']     = $list;
