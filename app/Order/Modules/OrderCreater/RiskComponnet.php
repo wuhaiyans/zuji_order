@@ -23,24 +23,15 @@ class RiskComponnet implements OrderCreater
     private $userInfo;
     private $flag = true;
 
-    //白骑士
+    //风控信息
     private $knight;
 
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
         $data =$this->componnet->getDataSchema();
-        //提交用户信息到风控
-//        $params = [
-//            'user_id'=>$data['user']['user_id'],
-//            'user_name'=>$data['user']['realname'],
-//            'cert_no'=>$data['user']['cert_no'],
-//            'mobile'=>$data['user']['user_mobile'],
-//            'channel_appid'=>$data['order']['app_id'],
-//        ];
-//        $yidun = Risk::getRisk($params);
-        //var_dump($yidun);die;
-        //获取白骑士信息
+
+        //获取风控信息信息
         try{
             $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
             $this->knight =$knight;
@@ -48,6 +39,8 @@ class RiskComponnet implements OrderCreater
             LogApi::error(config('app.env')."[下单/确认订单] 获取风控接口失败",$data['user']['user_id']);
             $this->knight =[];
         }
+
+        //var_dump($knight['risk_detail']);die;
 
 
     }
@@ -108,42 +101,28 @@ class RiskComponnet implements OrderCreater
             }
         }
 
-        foreach ($this->knight as $k=>$v){
-            if($k=='user_info'){
+        //获取风控信息详情 保存到数据表
+        $riskDetail =$this->knight['risk_detail'];
+        foreach ($riskDetail as $k=>$v){
+            if($k=='baseinfo'){
                 continue;
             }
-            $score =0;
-            $strategies= '';
-            if($k=="zhima_score"){
-                $score =$v['score'];
-                $v =$v['grade'];
-            }
-            if($k=="yidun"){
-                $score =$v['score'];
-                $strategies =$v['strategies'];
-                $v =$v['decision'];
-            }
-            if($v===false){
-                $v ="false";
-            }
-            if($v===true){
-                $v ="true";
-            }
             $riskData =[
-                'decision' => $v,
-                'order_no'=>$orderNo,  // 编号
-                'score' => $score,
-                'strategies' =>$strategies,
+                'decision' => $riskDetail[$k]['decision'],
+                'decision_name' => $riskDetail[$k]['decision_name'],
+                'name' => $riskDetail[$k]['name'],
+                'system_rules' => json_encode($riskDetail[$k]['system_rules']),
+                'hit_rules' => json_encode($riskDetail[$k]['hit_rules']),
+                'order_no'=>$orderNo,  // 订单编号
+                'score' => isset($riskDetail[$k]['score'])?$riskDetail[$k]['score']:'',
                 'type'=>$k,
             ];
-             $id =OrderRiskRepository::add($riskData);
+            $id =OrderRiskRepository::add($riskData);
             if(!$id){
                 LogApi::error(config('app.env')."[下单]保存风控数据失败",$riskData);
                 $this->getOrderCreater()->setError('保存风控数据失败');
                 return false;
             }
-
-            
         }
         return true;
 

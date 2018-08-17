@@ -26,6 +26,6 @@ class OrderRisk extends Model
      *
      * @var array
      */
-    protected $fillable = ['decision','order_no','score','strategies','type'];
+    protected $fillable = ['decision','decision_name','name','system_rules','hit_rules','order_no','score','strategies','type'];
 
 }
