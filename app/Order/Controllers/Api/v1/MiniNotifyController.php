@@ -367,4 +367,38 @@ class MiniNotifyController extends Controller
         }
     }
 
+    /**
+     * 测试发起请求小程序订单后续操作
+     * @author zhangjinhui
+     */
+    public function withholdingCloseCancel(){
+//        $b = \App\Lib\Payment\mini\MiniApi::OrderCancel([
+//            'out_order_no'=>'20180805000429',//商户端订单号
+//            'zm_order_no'=>'2018080500001001096338011605',//芝麻订单号
+//            'remark'=>'取消订单测试操作',//订单操作说明
+//            'app_id'=>'2018032002411058',//小程序appid
+//        ]);
+
+//        $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
+//            'out_order_no'=>'A817186122513088',//商户端订单号
+//            'zm_order_no'=>'2018081700001001097372503747',//芝麻订单号
+//            'out_trans_no'=>'A817186122513088',//商户端交易号
+//            'remark'=>'关闭订单操作',//订单操作说明
+//            'pay_amount'=>'0.00',//关闭金额
+//            'app_id'=>'2018032002411058',//小程序appid
+//        ]);
+
+//        $b = \App\Lib\Payment\mini\MiniApi::withhold([
+//            'out_order_no'=>'20180713000802',//商户端订单号
+//            'zm_order_no'=>'2018071300001001092136454718',//芝麻订单号
+//            'out_trans_no'=>'20180713000802',//商户端交易号
+//            'remark'=>'20180713000802-1-期扣款',//订单操作说明
+//            'pay_amount'=>'554.00',//关闭金额
+//            'app_id'=>'2018032002411058',//小程序appid
+//        ]);
+//        if($b == false){
+//            echo \App\Lib\Payment\mini\MiniApi::getError();die;
+//        }
+        echo '成功';die;
+    }
 }
