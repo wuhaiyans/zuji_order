@@ -333,10 +333,10 @@ class OrderController extends Controller
             $params['page'] = $params['page']?? 1;
             $orderData = Service\OrderOperate::getOrderExportList($params);
 //            dd($orderData);
-            if ($params['page']>20) {
-                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
-                exit;
-            }
+//            if ($params['page']>20) {
+//                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
+//                exit;
+//            }
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 

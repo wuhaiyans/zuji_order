@@ -589,10 +589,11 @@ class WithholdController extends Controller
         //根据进程数量，判断每页显示的条数
         $processNum = 0;
         $limit  =   0;
-        if (ceil($total / 100)>20 ) {
+        $maxProces = 10;
+        if (ceil($total / 100)>$maxProces ) {
 
             $limit  = intval(ceil($total/20));
-            $processNum = 20;
+            $processNum = $maxProces;
 
         } else {
 
@@ -663,7 +664,7 @@ class WithholdController extends Controller
         /*
          * 隔10秒执行一次扣款
          */
-        $time           = 10;
+        $time           = 50;
         $totalpage      = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
