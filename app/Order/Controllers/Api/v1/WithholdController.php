@@ -615,9 +615,10 @@ class WithholdController extends Controller
             $minValue  = $payNum[0]['id'];
             $maxValue = $payNum[count($payNum)-1]['id'];
 
-            $Array[] = array($minValue,$maxValue);
+            $Array[] = $minValue.'-'.$maxValue;
         }
-       return $Array;
+        $json = json_encode($Array);
+        return $json;
 
 
     }
