@@ -466,7 +466,8 @@ class InstalmentController extends Controller
      */
     public function repaymentConfirm(Request $request){
         //接收参数
-        $params     = $request->all();
+        $params = $request->all();
+        $params = $params['params'];
         //验证参数
         if (empty($params['instalment_id'])){
             return apiResponse([],ApiStatus::CODE_20001,"instalment_id必须");
