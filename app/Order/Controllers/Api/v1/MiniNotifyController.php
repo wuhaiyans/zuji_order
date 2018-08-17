@@ -35,12 +35,12 @@ class MiniNotifyController extends Controller
 
 
         //关闭订单回调
-        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817191695584772","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097414123720","pay_status":"PAY_SUCCESS","sign":"Uebjuj3vHgXcbyzSVVtLJqEYuTU1cEX2MqjxRq8q4Lv+Y8cKo6i7F9Cb7ECvb59EtQQBcN4q+7x7s5jYc4I0tAJrKdgtcGjvI41NwK2yAd5kWjL9lieBQfEcvyrwmZ6\/fsat3oMtwdYJNiRSF5wAvwUQjosVPvEVydXFtwnXNIUJstKm6SNtjPja7whxroQcgWjztrDeB1ze8IUir5+FyZKOmLYJnKfSpjfwjn3xit4SkbMIepjR7iXCDsuwsOAXk+Hu0n6BCZqfJtBdUf99PjvWRjAG5AqQGlxiCMnuYzIDnE\/yPPtbzZucIBEuWlJAn+6xOKAr1Xyb3lYKk9+98g==","sign_type":"RSA2"}';
+//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817191695584772","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097414123720","pay_status":"PAY_SUCCESS","sign":"Uebjuj3vHgXcbyzSVVtLJqEYuTU1cEX2MqjxRq8q4Lv+Y8cKo6i7F9Cb7ECvb59EtQQBcN4q+7x7s5jYc4I0tAJrKdgtcGjvI41NwK2yAd5kWjL9lieBQfEcvyrwmZ6\/fsat3oMtwdYJNiRSF5wAvwUQjosVPvEVydXFtwnXNIUJstKm6SNtjPja7whxroQcgWjztrDeB1ze8IUir5+FyZKOmLYJnKfSpjfwjn3xit4SkbMIepjR7iXCDsuwsOAXk+Hu0n6BCZqfJtBdUf99PjvWRjAG5AqQGlxiCMnuYzIDnE\/yPPtbzZucIBEuWlJAn+6xOKAr1Xyb3lYKk9+98g==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
 //        $json = '{"notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CANCEL","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"Yosi\/ZKTDVvPGUwvseryPC0bh0ZBk7DtRsoXKim8CZOKyjUI1zJXJcSkYE1L7PBoU0G4Ccq527M+BuN5MteH4yPjtjTBlsAsPLme+0jsvcXuy2+rJetmMSqsfU5OsAvET1uue2NpABd65lUT0rf\/Xe2sRR8SmBQyXWNyA2sQNN6XbD8hcSa1ZkY0ijSNlJAju85VQGxF6aDLe04UNtP\/CDVaQYavdMvqoUIIIIzVaAQx88Rs87xulAA+jwdI63e6tNvxmh\/c2O\/TySEayzbOEXWokTt3WtwYMjyqFE251l+zuDM7GstFkooBxiC34IqNvjfQgPDtkyOIyTtxyYQGNQ==","sign_type":"RSA2"}';
-        $_POST = json_decode($json,true);
+//        $_POST = json_decode($json,true);
         \App\Lib\Common\LogApi::setSource('zm_withholding_close_cancel');
         if( isset($_POST['out_order_no']) ) {
             \App\Lib\Common\LogApi::id($_POST['out_order_no']);
