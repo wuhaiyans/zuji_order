@@ -663,7 +663,7 @@ class WithholdController extends Controller
         /*
          * 隔10秒执行一次扣款
          */
-        $time           = 10;
+        $time           = 50;
         $totalpage      = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
