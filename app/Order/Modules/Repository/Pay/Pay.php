@@ -460,20 +460,26 @@ class Pay extends \App\Lib\Configurable
 		
 		// 更新 支付阶段 表
 		$payModel = new OrderPayModel();
-		$b = $payModel->limit(1)->where([
+		$_where = [
 			'business_type'	=> $this->businessType,
 			'business_no'	=> $this->businessNo,
-		])->update([
+		];
+		$_data = [
 			'status' => $status,
 			'payment_status' => PaymentStatus::PAYMENT_SUCCESS,
 			'payment_channel' => $params['payment_channel'],
 			'payment_amount' => $params['payment_amount'],
 			'update_time'		=> time(),
-		]);
+		];
+		$b = $payModel->limit(1)->where($_where)->update($_data);
 		if( !$b ){
 			LogApi::error('[支付阶段]支付环节支付保存失败');
 			throw new \Exception( '支付完成保存失败' );
 		}
+		LogApi::debug('更新支付单支付环节状态',[
+			'where' => $_where,
+			'data' => $_data,
+		]);
 		
 		// 更新 支付环节 表
 		$paymentModel = new OrderPayPaymentModel();
@@ -481,16 +487,24 @@ class Pay extends \App\Lib\Configurable
 			'payment_no' => $this->paymentNo,
 		])->first();
 		if( !$payment_info ){
-			$b = $paymentModel->insert([
+			$_data = [
 				'payment_no' => $this->paymentNo,
 				'out_payment_no' => $params['out_payment_no'],
 				'create_time' => $params['payment_time'],
-			]);
+			];
+			$b = $paymentModel->insert($_data);
 			if( !$b ){
 				LogApi::error('[支付阶段]支付环节支付保存失败');
 				throw new \Exception( '支付失败' );
 			}
 		}
+		
+		// 收支明细
+		$income_info = \App\Order\Modules\Repository\OrderPayIncomeRepository::getInfo([
+			'business_type' => $this->businessType,
+			'business_no'   => $this->businessNo,
+		]);
+		if( !$income_info ){
 		// 创建收支明细
 		$incomeData = [
 			'name'          => "业务类型" . $this->businessType . "-支付",
@@ -509,12 +523,14 @@ class Pay extends \App\Lib\Configurable
 			throw new \Exception( '支付失败' );
 		}
 
+		}
 		$this->status = $status;
 		$this->paymentStatus = PaymentStatus::PAYMENT_SUCCESS;
 		
 		LogApi::debug('[支付阶段]支付环节支付处理成功');
 		// 状态回调
 		$this->_statusCallback( 'payment' );
+		LogApi::debug('[支付阶段]支付环节完成业务回调');
 		return true;
 	}
 	
