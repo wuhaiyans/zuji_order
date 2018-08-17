@@ -37,7 +37,7 @@ class MiniNotifyController extends Controller
 
 
         //关闭订单回调
-//        $json = '{"pay_amount":"0.01","out_trans_no":"HA81795658365417","notify_app_id":"2018032002411058","out_order_no":"A817195535265885","alipay_fund_order_no":"2018081721001004760552946042","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-17 17:10:14","channel":"rent","zm_order_no":"2018081700001001097446343789","pay_status":"PAY_SUCCESS","sign":"iobA\/XcHwyNIfYPl6dhQjoPXXkNvBN7qSh6lavSPKYs3aOJEXhd5zeUo692XBO4oa0Ny3M8ubXfLX\/EAq9YQjn4lheaxwxdwx5eWtG1zRICJG+v0ThITl8mY7Ke8zTeGKzfSjxkQbf1uDCkHH\/qOzq4rjf7mbtotIJPLDU4OLzdrVbku3Da1gmAfg5ImDajdpieVlhFaRexMQ16exdticggbkP2jm3nwKzx5IsuNJ8ibjt9PsgbN5fqEpYpYbjMuw8mhhRYxizPtfuUxo5dEhP6jCwxRU3b3Hs3HspXX6SswPTLert\/2Q7CcnJFoyD2CmLAinTw06QEAEPgPFLnKkw==","sign_type":"RSA2"}';
+//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817197746815134","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097446873758","pay_status":"PAY_SUCCESS","sign":"mwmsldN72qGb3L4ihZKKreU7YLt\/CQ+2JnlCNYqUn6nMgANfEum1rClF73qI4uWuT3l1x5zou6GYYBEjcFAqCkoagwjt1dyB6bGIpbQqUvYqgKXJ9c69vuFUfQWVVcSxYZYdI9Na3Pku3hgEH93MuI0DPEALeWEsyIFUWZfRqRawx5urjBDuIA2AacCd\/xtqQZ5nt8siRpLenuqqmqJv+tBamqUX0XTyB\/S2VQuXlA21n8AdlEgTdzAGihzvsGvhE+0atmesDDpTUoeioa1nxqsdJQevlqvaOo3o6AUI7Nz9LT5sQrpGcQMrta4kYBBoTXtNxxlK2qpKzqDvaSfVyg==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
@@ -86,27 +86,35 @@ class MiniNotifyController extends Controller
             }
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
-                //入库 完成 或 扣款 回调信息
-                if(isset($_POST['out_trans_no'])){
-                    $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
-                }else{
-                    $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
-                }
-                $arr_log = [
-                    'notify_type'=>$_POST['notify_type'],
-                    'zm_order_no'=>$_POST['zm_order_no'],
-                    'out_trans_no'=>$_POST['out_trans_no'],
-                    'out_order_no'=>$_POST['out_order_no'],
-                    'alipay_fund_order_no'=>$_POST['alipay_fund_order_no'],
-                    'pay_amount'=>$_POST['pay_amount'],
-                    'pay_status'=>$_POST['pay_status'],
-                    'channel'=>$_POST['channel'],
-                    'pay_time'=>$_POST['pay_time'],
-                    'notify_app_id'=>$_POST['notify_app_id'],
-                    'redis_key'=>$redis_order,
-                    'data_text'=>json_encode($_POST),
-                ];
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
+            //入库 完成 或 扣款 回调信息
+            if(isset($_POST['out_trans_no'])){
+                $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
+                $out_trans_no = $_POST['out_trans_no'];
+                $alipay_fund_order_no = $_POST['alipay_fund_order_no'];
+                $pay_time = $_POST['pay_time'];
+            }else{
+                $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
+                $out_trans_no = '';
+                $alipay_fund_order_no = '';
+                $pay_time = null;
+            }
+//            $redis_order = 'MiniOrderClose';
+//            $redis_order = 'MiniWithhold';
+            $arr_log = [
+                'notify_type'=>$_POST['notify_type'],
+                'zm_order_no'=>$_POST['zm_order_no'],
+                'out_trans_no'=>$out_trans_no,
+                'out_order_no'=>$_POST['out_order_no'],
+                'alipay_fund_order_no'=>$alipay_fund_order_no,
+                'pay_amount'=>$_POST['pay_amount'],
+                'pay_status'=>$_POST['pay_status'],
+                'channel'=>$_POST['channel'],
+                'pay_time'=>$pay_time,
+                'notify_app_id'=>$_POST['notify_app_id'],
+                'redis_key'=>$redis_order,
+                'data_text'=>json_encode($_POST),
+            ];
+            $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
             }
@@ -117,7 +125,7 @@ class MiniNotifyController extends Controller
                     $this->orderCloseNotify();
                 return;
             }else{
-                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调redisKey查询不存在',$_POST);
                 echo 'redisKey查询不存在';die;
             }
         }else if($this->data['notify_type'] == $this->CREATE){
@@ -169,10 +177,12 @@ class MiniNotifyController extends Controller
         if($data['pay_status'] == "PAY_SUCCESS"){
             //判断订单是否为还机冻结状态
             if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){//还机关闭订单
-                $business_no = $data['out_trans_no'];
+                $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                    'order_no'=>$data['out_order_no']
+                ]);
                 $orderGivebackService = new OrderGiveback();
                 //获取还机单基本信息
-                $orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($business_no);
+                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($order_goods['goods_no']);
                 if(empty($orderGivebackInfo)){
                     echo '还机单不存在';return;
                 }
@@ -181,7 +191,7 @@ class MiniNotifyController extends Controller
                 if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ) {//分期结清了
                     $params = [
                         'business_type'=>\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//还机业务编码
-                        'business_no'=>$business_no,
+                        'business_no'=>$orderGivebackInfo['giveback_no'],
                         'status'=>$this->success,
                         'order_type'=>\App\Order\Modules\Inc\OrderStatus::orderMiniService,
                     ];
