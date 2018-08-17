@@ -35,7 +35,7 @@ class MiniNotifyController extends Controller
 
 
         //关闭订单回调
-//        $json = '{"pay_amount":"0.02","out_trans_no":"FA81778129088156","notify_app_id":"2018032002411058","out_order_no":"A817177820029195","alipay_fund_order_no":"2018081721001004760552632285","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-17 11:55:30","channel":"rent","zm_order_no":"2018081700001001097370793794","pay_status":"PAY_SUCCESS","sign":"CfvN1aZAjiC3kNRLSUy2YrDA2otzspxOBXQO7Bnv6Te8XDI6HyOePv25l2Xn2\/idtshWPOVhtxg\/OqF0\/cpKfxab0Dw3A3WEZgjm8MpzzDXBDUglCwc0Ly0+XrYIZ1bIwfXpmzqfaB1jodxvuFew+lXFwORNYC79SO3Z+RC\/dRV8VW9wDN9hhu5Zh7uUuWnRU7oswGL5YgDIpyf6PO7hY917vNQ3YIvgKbGmnxiqiZ0jnXMiTlGQi22EprxM5x\/Iw4OH9FaJ8vCfdYdbd4s1qWwu7CHVW0oP\/W3s+Wh+AFOF+hSR8tgG4RRsZtFd9EPbmorFs+j+vM1O33bzeolM\/g==","sign_type":"RSA2"}';
+//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817191695584772","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097414123720","pay_status":"PAY_SUCCESS","sign":"Uebjuj3vHgXcbyzSVVtLJqEYuTU1cEX2MqjxRq8q4Lv+Y8cKo6i7F9Cb7ECvb59EtQQBcN4q+7x7s5jYc4I0tAJrKdgtcGjvI41NwK2yAd5kWjL9lieBQfEcvyrwmZ6\/fsat3oMtwdYJNiRSF5wAvwUQjosVPvEVydXFtwnXNIUJstKm6SNtjPja7whxroQcgWjztrDeB1ze8IUir5+FyZKOmLYJnKfSpjfwjn3xit4SkbMIepjR7iXCDsuwsOAXk+Hu0n6BCZqfJtBdUf99PjvWRjAG5AqQGlxiCMnuYzIDnE\/yPPtbzZucIBEuWlJAn+6xOKAr1Xyb3lYKk9+98g==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
@@ -85,8 +85,9 @@ class MiniNotifyController extends Controller
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
                 //入库 完成 或 扣款 回调信息
-                $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
-                if($redis_order == ''){
+                if(isset($_POST['out_trans_no'])){
+                    $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
+                }else{
                     $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
                 }
                 $arr_log = [
