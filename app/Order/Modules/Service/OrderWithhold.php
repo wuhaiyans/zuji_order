@@ -89,6 +89,18 @@ class OrderWithhold
             $miniParams['pay_amount']       = $instalmentInfo['amount'];
             $miniParams['remark']           = $subject;
             $miniParams['app_id']           = $miniOrderInfo['app_id'];
+            // 保存 备注，更新状态 修改分期状态为扣款中
+            $data = [
+                'remark'        => $subject,
+                'payment_time'  => time(),
+                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+            ];
+            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
+            if(!$result){
+                DB::rollBack();
+                \App\Lib\Common\LogApi::error("扣款备注保存失败");
+                return false;
+            }
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
