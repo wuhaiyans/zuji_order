@@ -86,7 +86,7 @@ class MiniNotifyController extends Controller
         } if($this->data['notify_type'] == $this->FINISH){
                 //入库 完成 或 扣款 回调信息
                 $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
-                if(!$redis_order){
+                if($redis_order == ''){
                     $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
                 }
                 $arr_log = [
