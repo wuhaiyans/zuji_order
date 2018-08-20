@@ -102,28 +102,32 @@ class RiskComponnet implements OrderCreater
         }
 
         //获取风控信息详情 保存到数据表
-        $riskDetail =$this->knight['risk_detail'];
-        foreach ($riskDetail as $k=>$v){
-            if($k=='baseinfo'){
-                continue;
-            }
-            $riskData =[
-                'decision' => $riskDetail[$k]['decision'],
-                'decision_name' => $riskDetail[$k]['decision_name'],
-                'name' => $riskDetail[$k]['name'],
-                'system_rules' => json_encode($riskDetail[$k]['system_rules']),
-                'hit_rules' => json_encode($riskDetail[$k]['hit_rules']),
-                'order_no'=>$orderNo,  // 订单编号
-                'score' => isset($riskDetail[$k]['score'])?$riskDetail[$k]['score']:'',
-                'type'=>$k,
-            ];
-            $id =OrderRiskRepository::add($riskData);
-            if(!$id){
-                LogApi::error(config('app.env')."[下单]保存风控数据失败",$riskData);
-                $this->getOrderCreater()->setError('保存风控数据失败');
-                return false;
+
+        $riskDetail =$this->knight['risk_detail']?? true;
+        if (is_array($riskDetail) && !empty($riskDetail)) {
+            foreach ($riskDetail as $k=>$v){
+                if($k=='baseinfo'){
+                    continue;
+                }
+                $riskData =[
+                    'decision' => $riskDetail[$k]['decision'],
+                    'decision_name' => $riskDetail[$k]['decision_name'],
+                    'name' => $riskDetail[$k]['name'],
+                    'system_rules' => json_encode($riskDetail[$k]['system_rules']),
+                    'hit_rules' => json_encode($riskDetail[$k]['hit_rules']),
+                    'order_no'=>$orderNo,  // 订单编号
+                    'score' => isset($riskDetail[$k]['score'])?$riskDetail[$k]['score']:'',
+                    'type'=>$k,
+                ];
+                $id =OrderRiskRepository::add($riskData);
+                if(!$id){
+                    LogApi::error(config('app.env')."[下单]保存风控数据失败",$riskData);
+                    $this->getOrderCreater()->setError('保存风控数据失败');
+                    return false;
+                }
             }
         }
+
         return true;
 
     }

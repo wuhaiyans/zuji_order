@@ -38,8 +38,10 @@ class RestructInstalment extends Command
      * @return mixed
      */
     public function handle(){
+        $total = \App\Order\Models\OrderGoodsInstalment::query() ->where([
+            ['withhold_day', '=', 0]
+        ])->count();
 
-        $total = \App\Order\Models\OrderGoodsInstalment::query()->count();
         $bar = $this->output->createProgressBar($total);
 
         try{
@@ -50,6 +52,9 @@ class RestructInstalment extends Command
             do {
                 $result = \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('id','term','day')
+                    ->where([
+                        ['withhold_day', '=', 0]
+                    ])
                     ->forPage($page,$limit)
                     ->orderBy('id', 'ASC')
                     ->get()->toArray();

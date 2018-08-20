@@ -247,7 +247,7 @@ class MiniOrderController extends Controller
                 }
             }
             //风控系统处理
-            $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$params['auth_token']);
+            $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$params['auth_token'],$params['appid']);
             if($b != true){
                 \App\Lib\Common\LogApi::error('风控系统接口请求错误',$miniData);
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
@@ -483,6 +483,47 @@ class MiniOrderController extends Controller
             //回滚事务
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
+        }
+    }
+
+    /**
+     * 小程序查询订单支付状态
+     * $params = [
+     *   'order_no'=>'',
+     * ]
+     */
+    public function orderMiniPayStatus(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $validateParams = $this->validateParams($rules, $params['params']);
+        $param = $params['params'];
+        try {
+            if (empty($validateParams) || $validateParams['code'] != 0) {
+                return apiResponse([], $validateParams['code'], $validateParams['msg']);
+            }
+            //查询商品信息
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($param['order_no']);
+            if (empty($orderInfo)) {
+                \App\Lib\Common\LogApi::info('查询订单信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询订单信息表失败');
+            }
+            $orderGoodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                'order_no'=>$param['order_no']
+            ]);
+            if (empty($orderGoodsInfo)) {
+                \App\Lib\Common\LogApi::info('查询商品信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询商品信息表失败');
+            }
+            //计算押金 减免押金 原押金
+            $orderGoodsInfo['less_yajin'] = normalizeNum($orderGoodsInfo['goods_yajin'] - $orderGoodsInfo['yajin']);
+            return apiResponse([
+                'orderGoodsInfo'=>$orderGoodsInfo,
+                'order_status'=>$orderInfo['order_status']
+            ], ApiStatus::CODE_0);
+        }catch(\Exception $e){
+            return apiResponse([], ApiStatus::CODE_35000, $e->getMessage());
         }
     }
 

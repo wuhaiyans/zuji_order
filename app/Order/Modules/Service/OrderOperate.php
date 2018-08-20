@@ -1411,8 +1411,11 @@ class OrderOperate
 
                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
                $goodsList[$keys]['give_back_status'] = '';
+               $goodsList[$keys]['evaluation_status'] = '';
                if ($orderGivebackInfo) {
                    $goodsList[$keys]['give_back_status'] = $orderGivebackInfo['status'];
+                   $goodsList[$keys]['evaluation_status'] = $orderGivebackInfo['evaluation_status'];
+
                }
 
                //获取ime信息
