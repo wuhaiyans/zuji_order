@@ -575,13 +575,13 @@ class BuyoutController extends Controller
         $where[] = ['create_time', '>=', strtotime("2018-08-13 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime("2018-08-19 23:59:59"),];
 
-        $orderList = \App\Order\Models\Order::query()->where($where)->get();
+        $orderList = \App\Order\Models\Order::query()->where($where)->get()->toArray();
 
         if(!$orderList){
             return apiResponse([],ApiStatus::CODE_0);
         }
         //获取订单商品信息
-        $orderNos = array_column($orderList['data'],"order_no");
+        $orderNos = array_column($orderList,"order_no");
         $goodsList= OrderGoodsRepository::getOrderGoodsColumn($orderNos);
         //获取订单用户信息
         $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
@@ -609,7 +609,7 @@ class BuyoutController extends Controller
             '实际已优惠金额',
         ];
         $data = [];
-        foreach($orderList['data'] as &$item){
+        foreach($orderList as &$item){
             $item['status'] = OrderStatus::getStatusName($item['status']);
             $item['order_type'] = OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = PayInc::getPayName($item['pay_type']);
