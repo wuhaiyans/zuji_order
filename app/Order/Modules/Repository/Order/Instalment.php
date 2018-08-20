@@ -307,7 +307,7 @@ class Instalment {
 	public static function paySuccess( array $param){
 
 		if($param['status'] == "success"){
-//			LogApi::info("代扣定时任务", $param);
+			LogApi::info("[withhold_paySuccess]代扣定时任务", $param);
 			$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfo(['business_no'=>$param['out_trade_no']]);
 			if( !is_array($instalmentInfo)){
 				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期数据错误');
