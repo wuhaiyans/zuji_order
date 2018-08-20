@@ -119,8 +119,8 @@ class Excel
         }
 
         $writer = new Xlsx($spreadsheet);
-        $writer->setPreCalculateFormulas(false);
-        $writer->save(dirname(__FILE__)."/operator/".$title.".xlsx");
+        echo dirname(__FILE__)."/".$title.".xlsx";
+        $writer->save(dirname(__FILE__)."/".$title.".xlsx");
     }
     public static function csvWrite($body, $headers=[] , $name='数据导出')
     {
