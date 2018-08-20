@@ -88,6 +88,7 @@ class Excel
      */
     public static function localWrite($body, $headers=[] , $title='数据导出')
     {
+        echo phpinfo();die;
         if (!$headers || !$body) {
             return false;
         }
