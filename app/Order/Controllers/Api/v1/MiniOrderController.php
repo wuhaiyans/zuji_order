@@ -499,28 +499,30 @@ class MiniOrderController extends Controller
         ];
         $validateParams = $this->validateParams($rules, $params['params']);
         $param = $params['params'];
-        //开启事务
-        DB::beginTransaction();
         try {
             if (empty($validateParams) || $validateParams['code'] != 0) {
                 return apiResponse([], $validateParams['code'], $validateParams['msg']);
             }
-            //查询芝麻订单
-            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
+            //查询商品信息
             $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($param['order_no']);
-            if (empty($miniOrderInfo)) {
-                \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败', $param['order_no']);
-                return apiResponse([], ApiStatus::CODE_35003, '本地小程序查询芝麻订单信息表失败');
+            if (empty($orderInfo)) {
+                \App\Lib\Common\LogApi::info('查询订单信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询订单信息表失败');
             }
-            //提交事务
-            DB::commit();
-            //判断订单支付状态是否为已支付
-            if( $orderInfo['order_status'] == OrderStatus::OrderPayed ){
-                return apiResponse(['orderInfo'=>$orderInfo], ApiStatus::CODE_0);
+            $orderGoodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                'order_no'=>$param['order_no']
+            ]);
+            if (empty($orderGoodsInfo)) {
+                \App\Lib\Common\LogApi::info('查询商品信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询商品信息表失败');
             }
+            //计算押金 减免押金 原押金
+            $orderGoodsInfo['less_yajin'] = normalizeNum($orderGoodsInfo['goods_yajin'] - $orderGoodsInfo['yajin']);
+            return apiResponse([
+                'orderGoodsInfo'=>$orderGoodsInfo,
+                'order_status'=>$orderInfo['order_status']
+            ], ApiStatus::CODE_0);
         }catch(\Exception $e){
-            //回滚事务
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_35000, $e->getMessage());
         }
     }

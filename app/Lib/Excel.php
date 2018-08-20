@@ -30,13 +30,13 @@ class Excel
 
 
     /**
-     * @param string $title
-     * @param $headers 标题 【可选】
-     * @param $body 主体内容 【必须】二维数组
-     * @return bool
-     *
-     * 写文件
-     */
+ * @param string $title
+ * @param $headers 标题 【可选】
+ * @param $body 主体内容 【必须】二维数组
+ * @return bool
+ *
+ * 写文件
+ */
     public static function write($body, $headers=[] , $title='数据导出')
     {
         if (!$headers || !$body) {
@@ -77,7 +77,51 @@ class Excel
         $writer->save('php://output');
     }
 
+    /**
+     * 导出数据到本地服务器
+     * @param $headers 标题 【可选】
+     * @param $body 主体内容 【必须】二维数组
+     * @return bool
+     *
+     * 写文件
+     */
+    public static function localWrite($body, $headers=[] , $title='数据导出')
+    {
+        if (!$headers || !$body) {
+            return false;
+        }
 
+        $data = [];
+        $rows = 1;
+
+        if ($headers) {
+            foreach ($headers as $k => $v) {
+                $data[self::intToChr($k) . $rows] = $v;
+            }
+        }
+
+        foreach ($body as $k => $items) {
+            $rows++;
+            foreach ($items as $key => $item) {
+                $data[self::intToChr($key) . $rows] = $item;
+            }
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+
+        foreach ($data as $k => $v) {
+            $sheet->setCellValue($k, $v);
+        }
+        if (ob_get_length()> 0) {
+            ob_end_clean();
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
+        $writer->save(dirname(__FILE__)."/operator/".$title.".xlsx");
+    }
     public static function csvWrite($body, $headers=[] , $name='数据导出')
     {
 
