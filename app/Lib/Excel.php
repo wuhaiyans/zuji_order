@@ -8,6 +8,7 @@
  */
 
 namespace App\Lib;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class Excel
@@ -87,6 +88,7 @@ class Excel
      */
     public static function localWrite($body, $headers=[] , $title='数据导出')
     {
+        echo phpinfo();die;
         if (!$headers || !$body) {
             return false;
         }
@@ -117,8 +119,7 @@ class Excel
         if (ob_get_length()> 0) {
             ob_end_clean();
         }
-
-        $writer = new Xlsx($spreadsheet);
+        $writer = IOFactory::createWriter($spreadsheet,"Xlsx");
         echo dirname(__FILE__)."/".$title.".xlsx";
         $writer->save(dirname(__FILE__)."/".$title.".xlsx");
     }

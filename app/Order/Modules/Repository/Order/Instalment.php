@@ -380,7 +380,7 @@ class Instalment {
 			$notice->notify();
 
 			// 发送支付宝消息通知
-			$notice->alipay_notify();
+			//$notice->alipay_notify();
 
 
 		}else if($param['status'] == "failed"){
