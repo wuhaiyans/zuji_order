@@ -93,7 +93,7 @@ class WithholdFailInitiative implements ShortMessage {
 //            'zhinaJin'      => '租金的万分之五',
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
-        \App\Lib\Common\LogApi::info('[sendMessage]发送扣款短信请求：' . env('SHORT_URL') , $dataSms);
+        \App\Lib\Common\LogApi::info('[sendMessage]发送扣款短信请求：' , $dataSms);
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
     }
