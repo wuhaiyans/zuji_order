@@ -158,7 +158,8 @@ class Risk extends \App\Lib\BaseApi{
      * 将小程序风控数据传入风控系统
      * @return int
      */
-    public static function setMiniRisk($arr){
+    public static function setMiniRisk($arr,$token = ''){
+
         if($arr['zm_face'] == 'Y'){
             $arr['zm_face'] = '1';
         }else{
@@ -171,6 +172,7 @@ class Risk extends \App\Lib\BaseApi{
         }
         $data=config('tripartite.Interior_Fengkong_Request_data');
         $data['method'] ='zhima.mini.zhima';
+        $data['auth_token'] = $token;
         $data['params'] = $arr;
         $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
         $info =json_decode($info,true);

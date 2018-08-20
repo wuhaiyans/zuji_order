@@ -111,7 +111,7 @@ class User extends \App\Lib\BaseApi{
      * @param $params
      * @return false or array
      */
-    public static function getUserId($params, $token){
+    public static function getUserId($params, $token = ''){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.mini.user.id.get';
         $data['auth_token'] = $token;
