@@ -85,8 +85,8 @@ class WithholdFailInitiative implements ShortMessage {
             'realName'      => $userInfo['realname'],
             'zuJin'         => $instalmentInfo['amount'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-            'lastDate'      => date("Y-m-d",$huankuanData),
-            'zhinaJin'      => '租金的万分之五',
+//            'lastDate'      => date("Y-m-d",$huankuanData),
+//            'zhinaJin'      => '租金的万分之五',
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
 
