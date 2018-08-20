@@ -314,14 +314,16 @@ class Instalment {
 				return false;
 			}
 
-			if($instalmentInfo['status'] != OrderInstalmentStatus::PAYING){
-				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期状态错误');
-				return false;
-			}
 
 			// 已经处理过的请求 直接返回 true
 			if($instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS){
 				return true;
+			}
+
+
+			if($instalmentInfo['status'] != OrderInstalmentStatus::PAYING){
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期状态错误');
+				return false;
 			}
 
 			$data = [
