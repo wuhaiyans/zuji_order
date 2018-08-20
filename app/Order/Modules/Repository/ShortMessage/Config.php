@@ -18,14 +18,14 @@ class Config {
 	const CHANNELID_MINI_ZHIMA = '10';
 	/**
 	 * 渠道配置<b>【大疆渠道】</b>
-	 * @var int 14
-	 */
-	const CHANNELID_MINI_DAJIANG = '14';
-	/**
-	 * 渠道配置<b>【极米渠道】</b>
 	 * @var int 15
 	 */
-	const CHANNELID_MINI_JIMI = '15';
+	const CHANNELID_MINI_DAJIANG = '15';
+	/**
+	 * 渠道配置<b>【极米渠道】</b>
+	 * @var int 14
+	 */
+	const CHANNELID_MINI_JIMI = '14';
     /**
      * 渠道配置<b>【努比亚渠道】</b>
      * @var int 16
