@@ -627,7 +627,7 @@ class BuyoutController extends Controller
             $item['discount_amount'] = $goodsList[$item['order_no']]['discount_amount']+$goodsList[$item['order_no']]['coupon_amount'];
 
             $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
-            $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
+            $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
             $data[] = [
                 $item['order_no'],
