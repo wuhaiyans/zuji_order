@@ -50,6 +50,9 @@ class RestructInstalment extends Command
             do {
                 $result = \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('id','term','day')
+                    ->where([
+                        ['withhold_day', '>', 0]
+                    ])
                     ->forPage($page,$limit)
                     ->orderBy('id', 'ASC')
                     ->get()->toArray();
