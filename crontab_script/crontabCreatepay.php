@@ -1,4 +1,5 @@
 <?php
+ini_set('date.timezone','Asia/Shanghai');
 //此脚本用于在Docker内通过Screen启动多个php
 define("GET_TOTALNUM_API", "http://order.nqyong.com:1081/api/crontabCreatepayNum");
 
