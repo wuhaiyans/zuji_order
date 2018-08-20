@@ -264,7 +264,7 @@ class WithholdController extends Controller
                 DB::commit();
                 return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
                 DB::commit();
                 return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
@@ -308,7 +308,12 @@ class WithholdController extends Controller
             try{
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
+                $withholdStatus = json_decode($withholdStatus);
+                if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
 
+                    \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+                }
                 \App\Lib\Common\LogApi::error('分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
@@ -486,7 +491,7 @@ class WithholdController extends Controller
                 if($pay_status == 'PAY_SUCCESS'){
                     continue;
                 }elseif($pay_status =='PAY_FAILED'){
-                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     continue;
                 }elseif($pay_status == 'PAY_INPROGRESS'){
                     continue;
@@ -525,6 +530,14 @@ class WithholdController extends Controller
                 try{
                     // 请求代扣接口
                     $withStatus = $withholding->deduct($withholding_data);
+
+                    $withStatus = json_decode($withStatus);
+                    if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
+
+                        \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+                        OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+                    }
+
                     \App\Lib\Common\LogApi::error('分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\Exception $exc){
                     DB::rollBack();
@@ -799,7 +812,7 @@ class WithholdController extends Controller
                     if($pay_status == 'PAY_SUCCESS'){
                         continue;
                     }elseif($pay_status =='PAY_FAILED'){
-                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['business_no']);
+                        OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                         continue;
                     }elseif($pay_status == 'PAY_INPROGRESS'){
                         continue;
@@ -837,6 +850,15 @@ class WithholdController extends Controller
                         try {
                             // 请求代扣接口
                             $withStatus = $withholding->deduct($withholding_data);
+
+                            $withStatus = json_decode($withStatus);
+                            if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
+
+                                \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+                                OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
+                            }
+
+
                             LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
                         } catch (\Exception $exc) {
                             LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
