@@ -129,6 +129,15 @@ class OrderGoodsRepository
 		//指定goods_no为数组下标
 		return array_keys_arrange($result,"goods_no");
 	}
+	//根据多个订单号获取商品信息
+	public static function getOrderGoodsColumn($orderNo){
+		if (!is_array($orderNo)) return false;
+		array_unique($orderNo);
+		$result =  orderGoods::query()->wherein('order_no', $orderNo)->get()->toArray();
+		if (!$result) return false;
+		//指定goods_no为数组下标
+		return array_keys_arrange($result,"order_no");
+	}
 	/**
 	 * 根据条件更新数据
 	 * @param array $where

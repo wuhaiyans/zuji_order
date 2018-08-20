@@ -76,6 +76,8 @@ $api->version('v1', [
         $api->any('givebackListExport', 'GivebackController@listExport');
         //买断列表导出
         $api->any('buyoutListExport', 'BuyoutController@listExport');
+        /*******************运营数据列表导出--临时***************************/
+        $api->any('operator', 'BuyoutController@operator');
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
         //退换货列表导出

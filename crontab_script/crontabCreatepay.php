@@ -1,4 +1,5 @@
 <?php
+ini_set('date.timezone','Asia/Shanghai');
 //此脚本用于在Docker内通过Screen启动多个php
 define("GET_TOTALNUM_API", "http://order.nqyong.com:1081/api/crontabCreatepayNum");
 
@@ -6,7 +7,7 @@ function mylog($title, $msg) {
 	$data  =  "\n".date("Y-m-d H:i:s")."\n";
 	$data .= $title;
 	$data .= $msg;
-	file_put_contents("/tmp/crontabCreatepay.txt", $data, FILE_APPEND);
+	file_put_contents("/tmp/logs/crontabCreatepay.txt", $data, FILE_APPEND);
 }
 
 function get_api() {
