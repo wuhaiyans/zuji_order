@@ -25,6 +25,8 @@ class MiniNotifyController extends Controller
     private $data = [];
     //返回成功状态success
     private $success = 'success';
+    //返回失败状态fail
+    private $fail = 'fail';
     /**
      * 芝麻支付宝小程序 代扣接口(订单关闭 订单取消)异步回调
      * Author: zhangjinhui
@@ -35,7 +37,7 @@ class MiniNotifyController extends Controller
 
 
         //关闭订单回调
-//        $json = '{"pay_amount":"0.02","out_trans_no":"FA81778129088156","notify_app_id":"2018032002411058","out_order_no":"A817177820029195","alipay_fund_order_no":"2018081721001004760552632285","notify_type":"ZM_RENT_ORDER_FINISH","pay_time":"2018-08-17 11:55:30","channel":"rent","zm_order_no":"2018081700001001097370793794","pay_status":"PAY_SUCCESS","sign":"CfvN1aZAjiC3kNRLSUy2YrDA2otzspxOBXQO7Bnv6Te8XDI6HyOePv25l2Xn2\/idtshWPOVhtxg\/OqF0\/cpKfxab0Dw3A3WEZgjm8MpzzDXBDUglCwc0Ly0+XrYIZ1bIwfXpmzqfaB1jodxvuFew+lXFwORNYC79SO3Z+RC\/dRV8VW9wDN9hhu5Zh7uUuWnRU7oswGL5YgDIpyf6PO7hY917vNQ3YIvgKbGmnxiqiZ0jnXMiTlGQi22EprxM5x\/Iw4OH9FaJ8vCfdYdbd4s1qWwu7CHVW0oP\/W3s+Wh+AFOF+hSR8tgG4RRsZtFd9EPbmorFs+j+vM1O33bzeolM\/g==","sign_type":"RSA2"}';
+//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817197746815134","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097446873758","pay_status":"PAY_SUCCESS","sign":"mwmsldN72qGb3L4ihZKKreU7YLt\/CQ+2JnlCNYqUn6nMgANfEum1rClF73qI4uWuT3l1x5zou6GYYBEjcFAqCkoagwjt1dyB6bGIpbQqUvYqgKXJ9c69vuFUfQWVVcSxYZYdI9Na3Pku3hgEH93MuI0DPEALeWEsyIFUWZfRqRawx5urjBDuIA2AacCd\/xtqQZ5nt8siRpLenuqqmqJv+tBamqUX0XTyB\/S2VQuXlA21n8AdlEgTdzAGihzvsGvhE+0atmesDDpTUoeioa1nxqsdJQevlqvaOo3o6AUI7Nz9LT5sQrpGcQMrta4kYBBoTXtNxxlK2qpKzqDvaSfVyg==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
@@ -84,26 +86,35 @@ class MiniNotifyController extends Controller
             }
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
-                //入库 完成 或 扣款 回调信息
+            //入库 完成 或 扣款 回调信息
+            if(isset($_POST['out_trans_no'])){
                 $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
-                if(!$redis_order){
-                    $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
-                }
-                $arr_log = [
-                    'notify_type'=>$_POST['notify_type'],
-                    'zm_order_no'=>$_POST['zm_order_no'],
-                    'out_trans_no'=>$_POST['out_trans_no'],
-                    'out_order_no'=>$_POST['out_order_no'],
-                    'alipay_fund_order_no'=>$_POST['alipay_fund_order_no'],
-                    'pay_amount'=>$_POST['pay_amount'],
-                    'pay_status'=>$_POST['pay_status'],
-                    'channel'=>$_POST['channel'],
-                    'pay_time'=>$_POST['pay_time'],
-                    'notify_app_id'=>$_POST['notify_app_id'],
-                    'redis_key'=>$redis_order,
-                    'data_text'=>json_encode($_POST),
-                ];
-                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
+                $out_trans_no = $_POST['out_trans_no'];
+                $alipay_fund_order_no = $_POST['alipay_fund_order_no'];
+                $pay_time = $_POST['pay_time'];
+            }else{
+                $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
+                $out_trans_no = '';
+                $alipay_fund_order_no = '';
+                $pay_time = null;
+            }
+//            $redis_order = 'MiniOrderClose';
+//            $redis_order = 'MiniWithhold';
+            $arr_log = [
+                'notify_type'=>$_POST['notify_type'],
+                'zm_order_no'=>$_POST['zm_order_no'],
+                'out_trans_no'=>$out_trans_no,
+                'out_order_no'=>$_POST['out_order_no'],
+                'alipay_fund_order_no'=>$alipay_fund_order_no,
+                'pay_amount'=>$_POST['pay_amount'],
+                'pay_status'=>$_POST['pay_status'],
+                'channel'=>$_POST['channel'],
+                'pay_time'=>$pay_time,
+                'notify_app_id'=>$_POST['notify_app_id'],
+                'redis_key'=>$redis_order,
+                'data_text'=>json_encode($_POST),
+            ];
+            $result = \App\Order\Modules\Repository\OrderMiniNotifyLogRepository::add($arr_log);
             if( !$result ){
                 \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调记录失败',$_POST);
             }
@@ -114,7 +125,7 @@ class MiniNotifyController extends Controller
                     $this->orderCloseNotify();
                 return;
             }else{
-                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调处理错误',$_POST);
+                \App\Lib\Common\LogApi::debug('小程序完成 或 扣款 回调redisKey查询不存在',$_POST);
                 echo 'redisKey查询不存在';die;
             }
         }else if($this->data['notify_type'] == $this->CREATE){
@@ -156,9 +167,9 @@ class MiniNotifyController extends Controller
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
-        if($orderInfo['order_status'] == 9){
+        if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderCompleted){
             //当前订单已还机完成
-            echo 'success';return;
+            echo $this->success;return;
         }
         //开启事务
         \DB::beginTransaction();
@@ -166,10 +177,12 @@ class MiniNotifyController extends Controller
         if($data['pay_status'] == "PAY_SUCCESS"){
             //判断订单是否为还机冻结状态
             if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){//还机关闭订单
-                $business_no = $data['out_trans_no'];
+                $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                    'order_no'=>$data['out_order_no']
+                ]);
                 $orderGivebackService = new OrderGiveback();
                 //获取还机单基本信息
-                $orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($business_no);
+                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($order_goods['goods_no']);
                 if(empty($orderGivebackInfo)){
                     echo '还机单不存在';return;
                 }
@@ -178,42 +191,49 @@ class MiniNotifyController extends Controller
                 if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ) {//分期结清了
                     $params = [
                         'business_type'=>\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//还机业务编码
-                        'business_no'=>$business_no,
+                        'business_no'=>$orderGivebackInfo['giveback_no'],
                         'status'=>$this->success,
                         'order_type'=>\App\Order\Modules\Inc\OrderStatus::orderMiniService,
                     ];
                     $b = \App\Order\Modules\Service\OrderGiveback::callbackPayment($params);
                     if($b){
                         \DB::commit();
-                        echo 'success';return;
+                        echo $this->success;return;
                     }else{
                         //事物回滚 记录日志
                         \DB::rollBack();
                         \App\Lib\Common\LogApi::debug('小程序还机单扣款回调处理失败',$data);
-                        echo "fail";return;
+                        echo $this->fail;return;
                     }
                 }else{
+                    //未扣款代扣全部执行
+                    foreach ($instalmentList[$orderGivebackInfo['goods_no']] as $instalmentInfo) {
+                        $b = \App\Order\Modules\Service\OrderWithhold::instalment_withhold($instalmentInfo['id']);
+                        if(!$b){
+                            echo $this->fail;return;
+                        }
+                    }
                     \App\Lib\Common\LogApi::debug('小程序还机单扣款未结清',$data);
-                    echo "fail";return;
+                    echo $this->fail;return;
                 }
             }else{
                 //小程序清算订单
                 $b = \App\Order\Modules\Service\OrderCleaning::miniUnfreezeAndPayClean($data);
                 if($b){
                     \DB::commit();
-                    echo 'success';return;
+                    echo $this->success;return;
                 }else{
                     //事物回滚 记录日志
                     \DB::rollBack();
                     \App\Lib\Common\LogApi::debug('订单关闭处理失败',$data);
-                    echo "fail";return;
+                    echo $this->fail;return;
                 }
             }
         }
     }
 
     /**
-     * 芝麻支付宝小程序 订单关闭接口异步回调
+     * 芝麻支付宝小程序 订单取消接口异步回调
      * Author: zhangjinhui
      * @param $this->data
      * @return string
@@ -225,6 +245,11 @@ class MiniNotifyController extends Controller
         if( $orderInfo == false ){
             echo '订单不存在';return;
         }
+        //判断当前订单是否已经取消（或已退款）
+        if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderCancel || $orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderClosedRefunded){
+            //当前订单已经取消（或已退款）
+            echo $this->success;return;
+        }
         //开启事务
         \DB::beginTransaction();
         //小程序清算订单
@@ -233,10 +258,10 @@ class MiniNotifyController extends Controller
             //事物回滚 记录日志
             \DB::rollBack();
             \App\Lib\Common\LogApi::debug('订单关闭处理失败',$data);
-            echo "fail";return;
+            echo $this->fail;return;
         }else{
             \DB::commit();
-            echo 'success';return;
+            echo $this->success;return;
         }
     }
 
@@ -247,7 +272,6 @@ class MiniNotifyController extends Controller
      * @return string
      */
     private function  withholdingNotify(){
-
         $data = $this->data;
         //查询订单信息
         $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $data['out_order_no'] );
@@ -263,64 +287,89 @@ class MiniNotifyController extends Controller
                 'status'=>$this->success,
                 'out_trade_no'=>$business_no,
             ];
-            //修改分期状态
-            $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
-            $b = $Instalment->paySuccess($params);
-            if($b){
-                //提交事物预防下面查询数据出现脏数据
-                \DB::commit();
-                //判断订单是否为还机冻结状态
-                if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){
-                    $orderGivebackService = new OrderGiveback();
-                    //获取还机单基本信息
-                    $orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($business_no);
-                    if(empty($orderGivebackInfo)){
-                        echo '还机单不存在';return;
-                    }
-                    //查询判断分期是否已经结清
-                    $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
-                    if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
-                        //请求关闭订单接口
-                        $arr = [
-                            'zm_order_no'=>$data['zm_order_no'],
-                            'out_order_no'=>$orderGivebackInfo['order_no'],
-                            'pay_amount'=>$orderGivebackInfo['compensate_amount'],
-                            'remark'=>$orderGivebackInfo['giveback_no'],
-                            'app_id'=>$data['notify_app_id'],
-                        ];
-                        //判断是否有请求过（芝麻支付接口）
-                        $where = [
-                            'out_order_no'=>$data['out_order_no'],
-                            'order_operate_type'=>'FINISH',
-                            'remark'=>$orderGivebackInfo['giveback_no'],
-                        ];
-                        $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
-                        if( $orderMiniCreditPayInfo ) {
-                            $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
-                        }else{
-                            $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
+            $instalment = OrderGoodsInstalment::queryInfo(
+                [
+                    'business_no'=>$business_no,
+                ]
+            );
+            //判断当前订单是否已经修改分期状态
+            if($instalment['status'] != \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS){
+                //修改分期状态
+                $Instalment = new \App\Order\Modules\Repository\Order\Instalment();
+                $b = $Instalment->paySuccess($params);
+                if($b){
+                    //提交事物预防下面查询数据出现脏数据
+                    \DB::commit();
+                    //判断订单是否为还机冻结状态
+                    if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){
+                        $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                            'order_no'=>$data['out_order_no']
+                        ]);
+                        $orderGivebackService = new OrderGiveback();
+                        //获取还机单基本信息
+                        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($order_goods['goods_no']);
+                        if(empty($orderGivebackInfo)){
+                            echo '还机单不存在';return;
                         }
-                        $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
-                        //提交事务
-                        if( $orderCloseResult['code'] == 10000 ){
-                            \DB::commit();
-                            //记录日志
-                            \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回成功',$orderCloseResult);
+                        //查询判断分期是否已经结清
+                        $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+                        if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
+//                            //支付状态为支付中则请求关闭订单接口
+//                            if( $orderGivebackInfo['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY ){
+//
+//                            }
+                            //请求关闭订单接口
+                            $arr = [
+                                'zm_order_no'=>$data['zm_order_no'],
+                                'out_order_no'=>$orderGivebackInfo['order_no'],
+                                'pay_amount'=>$orderGivebackInfo['compensate_amount'],
+                                'remark'=>$orderGivebackInfo['giveback_no'],
+                                'app_id'=>$data['notify_app_id'],
+                            ];
+                            //判断是否有请求过（芝麻支付接口）
+                            $where = [
+                                'out_order_no'=>$data['out_order_no'],
+                                'order_operate_type'=>'FINISH',
+                                'remark'=>$orderGivebackInfo['giveback_no'],
+                            ];
+                            $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
+                            if( $orderMiniCreditPayInfo ) {
+                                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                            }else{
+                                $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
+                            }
+                            $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
+                            //提交事务
+                            if( $orderCloseResult['code'] == 10000 ){
+                                \DB::commit();
+                                //记录日志
+                                \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回成功',$orderCloseResult);
+                                echo $this->success;return;
+                            }else{
+                                \DB::commit();
+                                //记录日志
+                                \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回失败',$orderCloseResult);
+                                echo $this->success;return;
+                            }
                         }else{
-                            \DB::commit();
-                            //记录日志
-                            \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回失败',$orderCloseResult);
+                            echo $this->success;return;
                         }
+                    }else{
+                        echo $this->success;return;
                     }
                 }else{
-                    echo "success";return;
+                    //事物回滚 记录日志
+                    \DB::rollBack();
+                    \App\Lib\Common\LogApi::debug('小程序订单扣款回调处理失败',$data);
+                    echo $this->fail;return;
                 }
             }else{
-                //事物回滚 记录日志
-                \DB::rollBack();
-                \App\Lib\Common\LogApi::debug('小程序订单扣款回调处理失败',$data);
-                echo "fail";return;
+                echo $this->success;return;
             }
+        }else{
+            \DB::rollBack();
+            \App\Lib\Common\LogApi::debug('小程序订单扣款回调状态不等于PAY_SUCCESS',$data);
+            echo $this->fail;return;
         }
     }
 
@@ -347,7 +396,7 @@ class MiniNotifyController extends Controller
             echo "小程序订单支付失败";return;
         }else{
             \DB::commit();
-            echo 'success';return;
+            echo $this->success;return;
         }
     }
 
@@ -383,9 +432,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A815121608725347',//商户端订单号
-            'zm_order_no'=>'2018081500001001096947039038',//芝麻订单号
-            'out_trans_no'=>'A815121608725347',//商户端交易号
+            'out_order_no'=>'A817199359629257',//商户端订单号
+            'zm_order_no'=>'2018081700001001097415823700',//芝麻订单号
+            'out_trans_no'=>'A817199359629257',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid

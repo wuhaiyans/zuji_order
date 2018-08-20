@@ -1,6 +1,7 @@
 <?php
+ini_set('date.timezone','Asia/Shanghai');
 //此脚本用于在Docker内通过Screen启动多个php
-define("GET_TOTALNUM_API", "https://dev-api.nqyong.com/api/order/api/crontabCreatepayNum");
+define("GET_TOTALNUM_API", "http://order.nqyong.com:1081/api/crontabCreatepayNum");
 
 function mylog($title, $msg) {
 	$data  =  "\n".date("Y-m-d H:i:s")."\n";
@@ -20,20 +21,21 @@ function get_api() {
 		return 0;
 	}
 	curl_close($ch);
-	//$output= "[]";
+	mylog("get_api():",$output);
 	$arr = json_decode($output);
 	return $arr;
 }
 
 function run(){
-	//如果screen已经存在则不能支持
+	mylog("run():", "crontabCreatepay start!");
+	//如果screen已经存在则不能再次开启
 	$ret = system("screen -ls|grep 'crontabCreatepay_' -c");
 	if ($ret != 0) {
 		mylog("run():", "screen can not start,current screen in docker is $ret");
 		return;
 	}
 
-	$job_args= get_api();
+	$job_args = get_api();
 	if (!is_array($job_args) || empty($job_args)) {
 		mylog("run():", "arr is null or not array");
 		return;
@@ -47,8 +49,7 @@ function run(){
 		}
 		$min_id =$arg[0];
 		$max_id =$arg[1];
-		system("screen -dmS $screen_name /bin/sh -c  'cd /var/www/OrderServe/crontab_script && php test.php $min_id $max_id;'");
-		//system("screen -dmS $screen_name /bin/sh -c  'cd /var/www/OrderServer && php artisan command:crontabCreatepay --minId=$min_id --maxId=$max_id;'");
+		system("screen -dmS $screen_name /bin/sh -c  'cd /var/www/OrderServer && php artisan command:crontabCreatepay --minId=$min_id --maxId=$max_id;'");
 	}
 }
 

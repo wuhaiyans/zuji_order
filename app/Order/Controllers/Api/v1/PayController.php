@@ -160,9 +160,10 @@ class PayController extends Controller
 				'payment_channel'	=> $params['channel'],	// 支付渠道
 				'payment_time' => time(),
 			]);
-			
+			LogApi::debug('支付通知处理成功');
 			// 提交事务
             DB::commit();	
+			LogApi::debug('事务提交成功');
 			echo '{"status":"ok"}';exit;
 			
 		} catch (\App\Lib\NotFoundException $exc) {

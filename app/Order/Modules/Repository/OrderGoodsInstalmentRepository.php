@@ -108,15 +108,12 @@ class OrderGoodsInstalmentRepository
 
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
-
-            $withholdBeginDay = strtotime($param['begin_time']);
-            $whereArray[] =  ['withhold_day', '>=', $withholdBeginDay];
+            $whereArray[] =  ['term', '>=', $param['begin_time']];
         }
 
         // 开始时间（可选）
         if( isset($param['end_time']) && $param['end_time'] != ""){
-            $withholdEndDay = strtotime($param['end_time']);
-            $whereArray[] =  ['withhold_day', '<=', $withholdEndDay];
+            $whereArray[] =  ['term', '<=', $param['end_time']];
         }
 
         //根据goods_no

@@ -87,6 +87,16 @@ class MiniGivebackController extends Controller
                     }
                 }
                 return apiResponse([], ApiStatus::CODE_0, '小程序分期金额支付请求成功');
+//                //修改分期支付状态为支付中
+//                $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+//                //更新还机单
+//                $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+//                if($orderGivebackResult){
+//                    return apiResponse([], ApiStatus::CODE_0, '小程序分期金额支付请求成功');
+//                }else{
+//                    return apiResponse([], ApiStatus::CODE_35006, '小程序分期金额修改支付状态失败');
+//                }
+
             }else{
                 $arr = [
                     'zm_order_no'=>$orderMiniInfo['zm_order_no'],
