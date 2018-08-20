@@ -308,13 +308,16 @@ class WithholdController extends Controller
             try{
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
-//                $withholdStatus = json_decode($withholdStatus);
-//                if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
-//
-//                    \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
-//                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
-//                }
-                \App\Lib\Common\LogApi::error('分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
+                $withholdStatus = json_decode($withholdStatus);
+                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
+
+
+                if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
+
+                    \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+                }
+                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
                 DB::rollBack();
