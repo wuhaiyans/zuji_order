@@ -7,7 +7,7 @@ function mylog($title, $msg) {
 	$data  =  "\n".date("Y-m-d H:i:s")."\n";
 	$data .= $title;
 	$data .= $msg;
-	file_put_contents("/var/tmp/logs/crontabCreatepay.txt", $data, FILE_APPEND);
+	file_put_contents("/tmp/logs/crontabCreatepay.txt", $data, FILE_APPEND);
 }
 
 function get_api() {
