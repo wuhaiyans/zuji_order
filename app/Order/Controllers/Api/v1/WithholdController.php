@@ -578,6 +578,7 @@ class WithholdController extends Controller
         $whereArray =
             [
                 ['withhold_day', '<=', $dateTime],
+                ['withhold_day', '>', 0],
                 ['crontab_faile_date', '<', $date],
             ];
 
@@ -646,6 +647,7 @@ class WithholdController extends Controller
             [
                 ['id', '>=', $minId],
                 ['id', '<=', $maxId],
+                ['withhold_day', '>', 0],
                 ['withhold_day', '<=', $dateTime],
                 ['crontab_faile_date', '<', $date],
             ];
