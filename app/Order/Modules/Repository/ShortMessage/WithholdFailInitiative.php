@@ -73,11 +73,15 @@ class WithholdFailInitiative implements ShortMessage {
             'appid'         => $orderInfo['appid'],             //  商品编号
             'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
         ];
+        if(count($urlData) != 5){
+            \App\Lib\Common\LogApi::info('[sendMessage]发送扣款失败短信链接错误：', $urlData);
+            throw new \Exception('发送短信参数错误');
+        }
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $huankuanData = withholdDate($instalmentInfo['term'],$instalmentInfo['day']);
-        $huankuanData = strtotime($huankuanData) + (3600 * 24 * 14);
+//        $huankuanData = withholdDate($instalmentInfo['term'],$instalmentInfo['day']);
+//        $huankuanData = strtotime($huankuanData) + (3600 * 24 * 14);
 
         \App\Lib\Common\LogApi::info('[sendMessage]发送扣款失败短信链接：' . $zhifuLianjie);
         // 短信参数
