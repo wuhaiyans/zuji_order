@@ -575,7 +575,7 @@ class BuyoutController extends Controller
         $where[] = ['create_time', '>=', strtotime("2018-08-13 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime("2018-08-19 23:59:59"),];
 
-        $orderList = Order::query()->where($where)->get();
+        $orderList = \App\Order\Models\Order::query()->where($where)->get();
 
         if(!$orderList){
             return apiResponse([],ApiStatus::CODE_0);
