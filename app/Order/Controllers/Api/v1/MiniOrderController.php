@@ -487,6 +487,45 @@ class MiniOrderController extends Controller
     }
 
     /**
+     * 小程序查询订单支付状态
+     * $params = [
+     *   'order_no'=>'',
+     * ]
+     */
+    public function orderMiniPayStatus(Request $request){
+        $params = $request->all();
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $validateParams = $this->validateParams($rules, $params['params']);
+        $param = $params['params'];
+        //开启事务
+        DB::beginTransaction();
+        try {
+            if (empty($validateParams) || $validateParams['code'] != 0) {
+                return apiResponse([], $validateParams['code'], $validateParams['msg']);
+            }
+            //查询芝麻订单
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($param['order_no']);
+            if (empty($miniOrderInfo)) {
+                \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '本地小程序查询芝麻订单信息表失败');
+            }
+            //提交事务
+            DB::commit();
+            //判断订单支付状态是否为已支付
+            if( $orderInfo['order_status'] == OrderStatus::OrderPayed ){
+                return apiResponse(['orderInfo'=>$orderInfo], ApiStatus::CODE_0);
+            }
+        }catch(\Exception $e){
+            //回滚事务
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_35000, $e->getMessage());
+        }
+    }
+
+    /**
      * 小程序系统任务取消订单接口（30分钟自动执行）
      */
     public function orderCancelTimedTask(){
