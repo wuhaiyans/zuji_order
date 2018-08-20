@@ -71,11 +71,11 @@ class MiniApi {
         $result = $CommonMiniApi->getResult();
         \App\Lib\Common\LogApi::error('发送关闭订单请求',['request'=>$params,'response'=>$result]);
         //加redis订单完成标示
-        if(isset($params['out_trans_no'])){
-            Redis::set('zuji:order:miniorder:'.$params['out_trans_no'], 'MiniOrderClose');
-        }else{
+//        if(isset($params['out_trans_no'])){
+//        Redis::set('zuji:order:miniorder:'.$params['out_trans_no'], 'MiniOrderClose');
+//        }else{
             Redis::set('zuji:order:miniorder:'.$params['out_order_no'], 'MiniOrderClose');
-        }
+//        }
 
         //返回
         return $result;

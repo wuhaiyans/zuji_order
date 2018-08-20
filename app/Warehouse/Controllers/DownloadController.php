@@ -61,12 +61,14 @@ class DownloadController extends Controller
      */
     public function deliverys()
     {
+
         $delivery = new DeliveryService();
         $params = request()->input();
         $items = $delivery->export($params);
 
         if (!$items) {
-            return false;
+            echo "数据为空";
+            exit;
         }
 
         $headers = ['订单号','客户名','手机号', '地址','物流单号','商品名','价格','状态'];
@@ -87,6 +89,7 @@ class DownloadController extends Controller
                 ];
             }
         }
+
 
         return \App\Lib\Excel::write($data, $headers,'待发货商品导出');
     }
