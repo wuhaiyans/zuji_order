@@ -616,17 +616,17 @@ class BuyoutController extends Controller
             $item['realname'] = $userList[$item['order_no']]['realname'];
             $item['user_address'] = $userAddressList[$item['order_no']]['address_info'];
             $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
-            $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'].OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
-            $item['zujin'] = $goodsList[$item['goods_no']]['zujin'];
-            $item['specs'] = $goodsList[$item['goods_no']]['specs'];
-            $item['goods_yajin'] = $goodsList[$item['goods_no']]['goods_yajin'];
-            $item['mianyajin'] = $goodsList[$item['goods_no']]['goods_yajin']-$goodsList[$item['goods_no']]['yajin'];
-            $item['price'] = $goodsList[$item['goods_no']]['price'];
-            $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
-            $item['insurance'] = $goodsList[$item['goods_no']]['insurance'];
-            $item['discount_amount'] = $goodsList[$item['goods_no']]['discount_amount']+$goodsList[$item['goods_no']]['coupon_amount'];
+            $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
+            $item['zujin'] = $goodsList[$item['order_no']]['zujin'];
+            $item['specs'] = $goodsList[$item['order_no']]['specs'];
+            $item['goods_yajin'] = $goodsList[$item['order_no']]['goods_yajin'];
+            $item['mianyajin'] = $goodsList[$item['order_no']]['goods_yajin']-$goodsList[$item['order_no']]['yajin'];
+            $item['price'] = $goodsList[$item['order_no']]['price'];
+            $item['yajin'] = $goodsList[$item['order_no']]['yajin'];
+            $item['insurance'] = $goodsList[$item['order_no']]['insurance'];
+            $item['discount_amount'] = $goodsList[$item['order_no']]['discount_amount']+$goodsList[$item['order_no']]['coupon_amount'];
 
-            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
 
             $data[] = [
