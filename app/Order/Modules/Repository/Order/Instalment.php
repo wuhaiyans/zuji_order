@@ -382,10 +382,18 @@ class Instalment {
 			// 发送支付宝消息通知
 			$notice->alipay_notify();
 
-			return true;
+
+		}else if($param['status'] == "failed"){
+			// 修改分期状态
+			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['business_no'=>$param['out_trade_no']], ['status'=>OrderInstalmentStatus::FAIL]);
+			if(!$b){
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]修改分期状态失败');
+				return false;
+			}
 		}
 
-		return false;
+		return true;
+
 
 	}
 
