@@ -308,7 +308,7 @@ class WithholdController extends Controller
             try{
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
-                $withholdStatus = json_decode($withholdStatus);
+                
                 \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
 
 
