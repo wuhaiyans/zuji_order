@@ -118,7 +118,7 @@ class Excel
         if (ob_get_length()> 0) {
             ob_end_clean();
         }
-        $writer = IOFactory::createWriter($spreadsheet,"2007");
+        $writer = IOFactory::createWriter($spreadsheet,"Xlsx");
         echo dirname(__FILE__)."/".$title.".xlsx";
         $writer->save(dirname(__FILE__)."/".$title.".xlsx");
     }
