@@ -8,7 +8,10 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\Order\Order;
+use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\ShortMessage\BuyoutConfirm;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Http\Request;
@@ -554,4 +557,100 @@ class BuyoutController extends Controller
         return apiResponse($paymentUrl,ApiStatus::CODE_0);
     }
 
+    /********************临时导出****************************/
+    /*
+     * 用户买断
+     * @param array $params 【必选】
+     * [
+     *      "goods_no"=>"",商品编号
+     *      "user_id"=>"", 用户id
+     * ]
+     * @return json
+     */
+    public function operator(Request $request)
+    {
+        //接收请求参数
+        $params =$request->all();
+
+        $where[] = ['create_time', '>=', strtotime("2018-08-13 00:00:00"),];
+        $where[] = ['create_time', '<=', strtotime("2018-08-19 23:59:59"),];
+
+        $orderList = Order::query()->where($where)->get();
+
+        if(!$orderList){
+            return apiResponse([],ApiStatus::CODE_0);
+        }
+        //获取订单商品信息
+        $orderNos = array_column($orderList['data'],"order_no");
+        $goodsList= OrderGoodsRepository::getOrderGoodsColumn($orderNos);
+        //获取订单用户信息
+        $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
+        //获取订单地址信息
+        $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
+        //定义excel头部参数名称
+        $headers = [
+            '订单编号',
+            '下单时间',
+            '订单状态',
+            '订单来源',
+            '支付方式及通道',
+            '用户名',
+            '手机号',
+            '详细地址',
+            '设备名称',
+            '租期',
+            '租金',
+            '商品属性',
+            '初始押金',
+            '免押金额',
+            '订单实际总租金',
+            '订单实缴押金',
+            '意外险总金额',
+            '实际已优惠金额',
+        ];
+        $data = [];
+        foreach($orderList['data'] as &$item){
+            $item['status'] = OrderStatus::getStatusName($item['status']);
+            $item['order_type'] = OrderStatus::getTypeName($item['order_type']);
+            $item['pay_type'] = PayInc::getPayName($item['pay_type']);
+            $item['realname'] = $userList[$item['order_no']]['realname'];
+            $item['user_address'] = $userAddressList[$item['order_no']]['address_info'];
+            $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
+            $item['zuqi'] = $goodsList[$item['goods_no']]['zuqi'].OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['zujin'] = $goodsList[$item['goods_no']]['zujin'];
+            $item['specs'] = $goodsList[$item['goods_no']]['specs'];
+            $item['goods_yajin'] = $goodsList[$item['goods_no']]['goods_yajin'];
+            $item['mianyajin'] = $goodsList[$item['goods_no']]['goods_yajin']-$goodsList[$item['goods_no']]['yajin'];
+            $item['price'] = $goodsList[$item['goods_no']]['price'];
+            $item['yajin'] = $goodsList[$item['goods_no']]['yajin'];
+            $item['insurance'] = $goodsList[$item['goods_no']]['insurance'];
+            $item['discount_amount'] = $goodsList[$item['goods_no']]['discount_amount']+$goodsList[$item['goods_no']]['coupon_amount'];
+
+            $item['zuqi_type']= OrderStatus::getZuqiTypeName($goodsList[$item['goods_no']]['zuqi_type']);
+            $item['order_time'] = date("Y-m-d H:i:s",$item['order_time']);
+
+            $data[] = [
+                $item['order_no'],
+                $item['create_time'],
+                $item['status'],
+                $item['order_type'],
+                $item['pay_type'],
+                $item['realname'],
+                $item['mobile'],
+                $item['user_address'],
+                $item['goods_name'],
+                $item['zuqi'],
+                $item['zujin'],
+                $item['specs'],
+                $item['goods_yajin'],
+                $item['mianyajin'],
+                $item['price'],
+                $item['yajin'],
+                $item['insurance'],
+                $item['discount_amount'],
+            ];
+        }
+
+        return Excel::write($data, $headers,'运营数据-');
+    }
 }
