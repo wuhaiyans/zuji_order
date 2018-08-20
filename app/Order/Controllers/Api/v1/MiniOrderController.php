@@ -503,17 +503,13 @@ class MiniOrderController extends Controller
             if (empty($validateParams) || $validateParams['code'] != 0) {
                 return apiResponse([], $validateParams['code'], $validateParams['msg']);
             }
-            //查询芝麻订单
-            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($param['order_no']);
-            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($param['order_no']);
-            if (empty($miniOrderInfo)) {
-                \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败', $param['order_no']);
-                return apiResponse([], ApiStatus::CODE_35003, '本地小程序查询芝麻订单信息表失败');
-            }
+            //查询商品信息
+            $orderGoodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                'order_no'=>$param['order_no']
+            ]);
             //计算押金 减免押金 原押金
-            $orderInfo['yajin'] = $orderInfo['order_yajin'];
-            $orderInfo['less_yajin'] = normalizeNum($orderInfo['goods_yajin'] - $orderInfo['order_yajin']);
-            return apiResponse(['orderInfo'=>$orderInfo], ApiStatus::CODE_0);
+            $orderGoodsInfo['less_yajin'] = normalizeNum($orderGoodsInfo['goods_yajin'] - $orderGoodsInfo['yajin']);
+            return apiResponse(['orderGoodsInfo'=>$orderGoodsInfo], ApiStatus::CODE_0);
         }catch(\Exception $e){
             return apiResponse([], ApiStatus::CODE_35000, $e->getMessage());
         }
