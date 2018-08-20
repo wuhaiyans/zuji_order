@@ -79,7 +79,7 @@ class WithholdFailInitiative implements ShortMessage {
         $huankuanData = withholdDate($instalmentInfo['term'],$instalmentInfo['day']);
         $huankuanData = strtotime($huankuanData) + (3600 * 24 * 14);
 
-
+        \App\Lib\Common\LogApi::info('[sendMessage]发送扣款失败短信链接：' . $zhifuLianjie);
         // 短信参数
         $dataSms = [
             'realName'      => $userInfo['realname'],
