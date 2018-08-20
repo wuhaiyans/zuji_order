@@ -308,13 +308,16 @@ class WithholdController extends Controller
             try{
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
-                $withholdStatus = json_decode($withholdStatus);
+
+                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
+
+
                 if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
 
                     \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 }
-                \App\Lib\Common\LogApi::error('分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
+                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
                 DB::rollBack();
@@ -531,7 +534,6 @@ class WithholdController extends Controller
                     // 请求代扣接口
                     $withStatus = $withholding->deduct($withholding_data);
 
-                    $withStatus = json_decode($withStatus);
                     if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
 
                         \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
@@ -851,7 +853,6 @@ class WithholdController extends Controller
                             // 请求代扣接口
                             $withStatus = $withholding->deduct($withholding_data);
 
-                            $withStatus = json_decode($withStatus);
                             if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
 
                                 \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
