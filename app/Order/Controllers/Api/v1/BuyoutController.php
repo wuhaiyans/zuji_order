@@ -651,6 +651,6 @@ class BuyoutController extends Controller
             ];
         }
 
-        return Excel::write($data, $headers,'运营数据-');
+        return Excel::localWrite($data, $headers,'运营数据-');
     }
 }
