@@ -504,12 +504,24 @@ class MiniOrderController extends Controller
                 return apiResponse([], $validateParams['code'], $validateParams['msg']);
             }
             //查询商品信息
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($param['order_no']);
+            if (empty($orderInfo)) {
+                \App\Lib\Common\LogApi::info('查询订单信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询订单信息表失败');
+            }
             $orderGoodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
                 'order_no'=>$param['order_no']
             ]);
+            if (empty($orderGoodsInfo)) {
+                \App\Lib\Common\LogApi::info('查询商品信息表失败', $param['order_no']);
+                return apiResponse([], ApiStatus::CODE_35003, '查询商品信息表失败');
+            }
             //计算押金 减免押金 原押金
             $orderGoodsInfo['less_yajin'] = normalizeNum($orderGoodsInfo['goods_yajin'] - $orderGoodsInfo['yajin']);
-            return apiResponse(['orderGoodsInfo'=>$orderGoodsInfo], ApiStatus::CODE_0);
+            return apiResponse([
+                'orderGoodsInfo'=>$orderGoodsInfo,
+                'order_status'=>$orderInfo['order_status']
+            ], ApiStatus::CODE_0);
         }catch(\Exception $e){
             return apiResponse([], ApiStatus::CODE_35000, $e->getMessage());
         }
