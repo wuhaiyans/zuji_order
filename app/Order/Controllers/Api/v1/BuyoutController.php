@@ -610,7 +610,7 @@ class BuyoutController extends Controller
         ];
         $data = [];
         foreach($orderList as &$item){
-            $item['status'] = OrderStatus::getStatusName($item['status']);
+            $item['order_status'] = OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = PayInc::getPayName($item['pay_type']);
             $item['realname'] = $userList[$item['order_no']]['realname'];
@@ -632,7 +632,7 @@ class BuyoutController extends Controller
             $data[] = [
                 $item['order_no'],
                 $item['create_time'],
-                $item['status'],
+                $item['order_status'],
                 $item['order_type'],
                 $item['pay_type'],
                 $item['realname'],
