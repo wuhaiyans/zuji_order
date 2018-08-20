@@ -630,7 +630,7 @@ class WithholdController extends Controller
     public static function crontabCreatepay($minId,$maxId)
     {
 		LogApi::setSource('crontab_withhold_createpay');
-		LogApi::info('[crontabCreatepay]进入定时扣款start');
+		LogApi::info('[crontabCreatepay]进入定时扣款minId：'.$minId . '----maxId:'. $maxId);
 		
         // 执行时间
         ini_set('max_execution_time', '0');
