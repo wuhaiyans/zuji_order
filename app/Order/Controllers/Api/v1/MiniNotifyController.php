@@ -34,10 +34,8 @@ class MiniNotifyController extends Controller
      * @return string
      */
     public function withholdingCloseCancelNotify(){
-
-
         //关闭订单回调
-//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A817197746815134","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018081700001001097446873758","pay_status":"PAY_SUCCESS","sign":"mwmsldN72qGb3L4ihZKKreU7YLt\/CQ+2JnlCNYqUn6nMgANfEum1rClF73qI4uWuT3l1x5zou6GYYBEjcFAqCkoagwjt1dyB6bGIpbQqUvYqgKXJ9c69vuFUfQWVVcSxYZYdI9Na3Pku3hgEH93MuI0DPEALeWEsyIFUWZfRqRawx5urjBDuIA2AacCd\/xtqQZ5nt8siRpLenuqqmqJv+tBamqUX0XTyB\/S2VQuXlA21n8AdlEgTdzAGihzvsGvhE+0atmesDDpTUoeioa1nxqsdJQevlqvaOo3o6AUI7Nz9LT5sQrpGcQMrta4kYBBoTXtNxxlK2qpKzqDvaSfVyg==","sign_type":"RSA2"}';
+//        $json = '{"pay_amount":"0.00","notify_app_id":"2018032002411058","out_order_no":"A820152365009739","notify_type":"ZM_RENT_ORDER_FINISH","channel":"rent","zm_order_no":"2018082000001001097894683192","pay_status":"PAY_SUCCESS","sign":"lr+QBAo5pLEA1nXIPk4pJPZ1lLk7jQTPDAh9Euvh8XT90SZeMzusMroj0JnNIdZlKmKZ2CbNhE+dt0kd3Hfl2UkvvxlodiTe9EXsaIrHTy5SWdAmB7elBs7+BhEmxVzGDBgrsgKNB6F2uqyyfB95rqChzwvS+JFYex2teq6hVurFOki7u8+EkkftmsRO2vN+6idbEQMsssYvJYSGfXoq8\/joTHLX8jPiOuc4sAMPoAxLZ0PsLuJQ4Jd3xhypdJ76qu0z0oW9PXypheuXiJzNiV2MPs9fEOJkde99\/h9XZ5MJtgHdgiN9IZdQbwyHHRBnkE2yZwKrosAdHCnvurkpZg==","sign_type":"RSA2"}';
         //创建订单回调
 //        $json = '{"fund_type":"ALL","order_create_time":"2018-08-02 15:19:26","notify_app_id":"2018032002411058","out_order_no":"A802193823842289","notify_type":"ZM_RENT_ORDER_CREATE","credit_privilege_amount":"0.00","channel":"rent","zm_order_no":"2018080200001001094519709098","sign":"JfPuvci5BAW3jiHzJCdmVUm3ax1QyAF8MuBsm9FHQqtgeispRePUCbud5AM36l6qCv\/RloHsv0TFjVbFAaQ3mYhIb2H7uSfEuCaIBUWSDY68\/wMyp1wM7BbJ0VmyKvvFHvrqz22lDABK3P8w3QdZptkF2dZ2200FTWLkSf7n+W7jmaOBxoJfgLTPfItDbx4T0FH86i335mG9wydOuSrk2H+4ARpuh7J8\/COkHdqQtJsSUO5L0rfs3cKcWi+licuVoYftjwMjAQo55DOJBrMsC4wZKVjLeZ6JVtsryjD0I2pUQSh5rU+SseQC6ib8gB6QrLMkC9T2MWPdcZi0hJ3L1A==","sign_type":"RSA2"}';
         //取消订单回调
@@ -432,9 +430,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A817190384181243',//商户端订单号
-            'zm_order_no'=>'2018081700001001097445033178',//芝麻订单号
-            'out_trans_no'=>'A817190384181243',//商户端交易号
+            'out_order_no'=>'A817199359629257',//商户端订单号
+            'zm_order_no'=>'2018081700001001097415823700',//芝麻订单号
+            'out_trans_no'=>'A817199359629257',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid
