@@ -143,11 +143,13 @@ class OrderRelet
                         return false;
                     }
                 }else{
-                    if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
-                        DB::rollBack();
-                        set_msg('租期错误');
-                        return false;
-                    }
+                    set_msg('租期错误,当前只支持短租续租');
+                    return false;
+//                    if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
+//                        DB::rollBack();
+//                        set_msg('租期错误');
+//                        return false;
+//                    }
                 }
                 $amount = $goods['zujin']*$params['zuqi'];
 
@@ -187,16 +189,16 @@ class OrderRelet
                                 'user_id'		=> $data['user_id'],
                                 'businessType'	=> OrderStatus::BUSINESS_RELET,
                                 'businessNo'	=> $data['relet_no'],
-
+                                'orderNo'		=> $params['order_no'],	// 订单号
                                 'paymentAmount' => $data['relet_amount'],
-                                'paymentFenqi'	=> $params['zuqi'],
+                                'paymentFenqi'	=> 0,// int 分期数，取值范围[0,3,6,12]，0：不分期
                             ]);
                             $step = $pay->getCurrentStep();
                             //echo '当前阶段：'.$step."\n";
 
                             $_params = [
-                                'name'			=> '订单设备续租',				//【必选】string 交易名称
-                                'front_url'		=> $params['return_url'],	    //【必选】string 前端回跳地址
+                                'name'      => '订单:'.$params['order_no'].'设备续租',//【必选】string 交易名称
+                                'front_url' => $params['return_url'],               //【必选】string 前端回跳地址
                             ];
                             $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
                             DB::commit();

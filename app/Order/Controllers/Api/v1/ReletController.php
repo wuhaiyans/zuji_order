@@ -78,7 +78,7 @@ class ReletController extends Controller
      *  'user_name'     => 'required',//用户名(手机号)
      *  'goods_id'      => 'required', //设备ID
      *  'relet_amount'  => 'required',//续租金额
-     *  'return_url'    => 'required',//前端回调地址
+     *  'return_url'    => 'required'//前端回调地址
      *
      * @return \Illuminate\Http\JsonResponse
      * 成功时data:
