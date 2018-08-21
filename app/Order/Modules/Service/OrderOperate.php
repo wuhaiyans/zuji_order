@@ -77,6 +77,12 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
+
+        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
+        if($res>1){
+            return false;
+        }
+
         DB::beginTransaction();
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
@@ -90,7 +96,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    LogApi::info(config('app.env')."环境-订单发货时更新订单状态失败 ",$orderDetail['order_no']);
+                 //   LogApi::info(config('app.env')."环境-订单发货时更新订单状态失败 ",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
@@ -98,7 +104,7 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                    LogApi::info(config('app.env')."环境-订单发货时 订单发货信息失败",$orderDetail['order_no']);
+                 //   LogApi::info(config('app.env')."环境-订单发货时 订单发货信息失败",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
@@ -106,14 +112,14 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                    LogApi::info(config('app.env')."环境-订单发货时 发货详情",$orderDetail['order_no']);
+                //    LogApi::info(config('app.env')."环境-订单发货时 发货详情",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
                 if(!$b) {
-                    LogApi::info(config('app.env')."环境-订单发货时生成合同失败",$orderDetail['order_no']);
+                 //   LogApi::info(config('app.env')."环境-订单发货时生成合同失败",$orderDetail['order_no']);
                     DB::rollBack();
                     return false;
                 }
@@ -848,6 +854,29 @@ class OrderOperate
      * @return array
      */
     public static function getOrderRisk($orderNo){
+        $riskArray =[];
+        //获取风控系统信息
+        $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo);
+
+        if($orderRisk){
+            foreach ($orderRisk as $k=>$v){
+                if($v['data']==""){
+                    return self::getOrderRiskV1($orderNo);
+                }
+            }
+            return json_decode($orderRisk);
+        }
+
+        return $riskArray;
+    }
+
+    /**
+     * 获取风控和认证信息
+     * @author wuhaiyan
+     * @param $orderNo
+     * @return array
+     */
+    public static function getOrderRiskV1($orderNo){
 
         //获取认证信息
         $orderCertified = OrderUserCertifiedRepository::getUserCertifiedByOrder($orderNo);
@@ -898,6 +927,8 @@ class OrderOperate
             $arr['value'] = '暂无';
             $riskArray[]=$arr;
         }
+
+        $arr['riskinfo'] =$riskArray;
 
         return $riskArray;
     }

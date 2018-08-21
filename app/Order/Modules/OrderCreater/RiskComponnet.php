@@ -106,17 +106,9 @@ class RiskComponnet implements OrderCreater
         $riskDetail =$this->knight['risk_detail']?? true;
         if (is_array($riskDetail) && !empty($riskDetail)) {
             foreach ($riskDetail as $k=>$v){
-                if($k=='baseinfo'){
-                    continue;
-                }
                 $riskData =[
-                    'decision' => $riskDetail[$k]['decision'],
-                    'decision_name' => $riskDetail[$k]['decision_name'],
-                    'name' => $riskDetail[$k]['name'],
-                    'system_rules' => json_encode($riskDetail[$k]['system_rules']),
-                    'hit_rules' => json_encode($riskDetail[$k]['hit_rules']),
                     'order_no'=>$orderNo,  // 订单编号
-                    'score' => isset($riskDetail[$k]['score'])?$riskDetail[$k]['score']:'',
+                    'data' => json_encode($riskDetail[$k]),
                     'type'=>$k,
                 ];
                 $id =OrderRiskRepository::add($riskData);
