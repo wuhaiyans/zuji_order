@@ -81,7 +81,7 @@ class RestructInstalment extends Command
 
                 $page++;
                 sleep(2);
-            } while ($page <= $totalpage);
+            } while (true);
             if(count($arr) > 0){
                 LogApi::notify("分期备注信息修改",$arr);
             }
