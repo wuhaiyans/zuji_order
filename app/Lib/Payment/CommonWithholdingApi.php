@@ -86,7 +86,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
      * @param array $params
      * [
      *		'trade_no'		=> '', //支付系统交易码
-     *		'out_trade_no'	=> '', //支付系统交易码
+     *		'out_trade_no'	=> '', //业务系统交易码
      *		'user_id'		=> '', //用户id
      * ]
      * @return mixed false：失败；array：成功
