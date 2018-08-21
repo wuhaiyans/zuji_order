@@ -865,10 +865,12 @@ class OrderOperate
                 }
                 $riskArray[$v['type']]=json_decode($v['data']);
             }
-
+            $arr['risk_info'] =$riskArray;
+            return $arr;
         }
-        $arr['risk_info'] =$riskArray;
-        return $arr;
+
+        return self::getOrderRiskV1($orderNo);
+
     }
 
     /**
