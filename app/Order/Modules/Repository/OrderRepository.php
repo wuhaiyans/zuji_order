@@ -743,7 +743,6 @@ class OrderRepository
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('order_info.create_time', 'DESC')
-            ->orderBy('order_info_visit.id','desc')
 //            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
 //            ->forPage($page, $pagesize)
 //
@@ -772,7 +771,6 @@ class OrderRepository
                     $join->on('o.order_no', '=', 'c.order_no');
                 }, null,null,'left')
                 ->orderBy('o.create_time', 'DESC')
-                ->orderBy('v.id','desc')
                 ->get();
 
             $orderArrays['data'] = objectToArray($orderList);
