@@ -335,7 +335,7 @@ class Instalment {
 			];
 
 			$withholdStatus = \App\Lib\Payment\CommonWithholdingApi::deductQuery($withholdData);
-			if(!isset($withholdStatus) || $withholdStatus['status'] != 'success'){
+			if(!isset($withholdStatus['status']) || $withholdStatus['status'] != 'success'){
 				return false;
 			}
 
