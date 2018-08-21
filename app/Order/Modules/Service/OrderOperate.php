@@ -928,7 +928,7 @@ class OrderOperate
             $arr['value'] = '暂无';
             $riskArray[]=$arr;
         }
-        
+
         return $riskArray;
     }
     /**
