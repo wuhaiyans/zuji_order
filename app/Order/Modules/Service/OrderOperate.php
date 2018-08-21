@@ -863,11 +863,12 @@ class OrderOperate
                 if($v['data']==""){
                     return self::getOrderRiskV1($orderNo);
                 }
+                $riskArray[$v['type']]=json_decode($v['data']);
             }
-            return json_decode($orderRisk);
-        }
 
-        return $riskArray;
+        }
+        $arr['risk_info'] =$riskArray;
+        return $arr;
     }
 
     /**
