@@ -326,6 +326,22 @@ class Instalment {
 //				return false;
 //			}
 
+
+			// 查询扣款交易
+			$withholdData = [
+					'trade_no'		=> $param['trade_no'], 			//支付系统交易码
+			 		'out_trade_no'	=> $param['out_trade_no'], 		//业务系统交易码
+			 		'user_id'		=> $instalmentInfo['user_id'], 	//用户id
+			];
+
+			$withholdStatus = \App\Lib\Payment\CommonWithholdingApi::deductQuery($withholdData);
+			if(!isset($withholdStatus) || $withholdStatus['status'] != 'success'){
+				return false;
+			}
+
+
+
+
 			$data = [
 				'status'        	=> OrderInstalmentStatus::SUCCESS,
 				'payment_time'      => time(),
