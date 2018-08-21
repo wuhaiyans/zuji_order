@@ -320,11 +320,11 @@ class Instalment {
 				return true;
 			}
 
-
-			if($instalmentInfo['status'] != OrderInstalmentStatus::PAYING){
-				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期状态错误');
-				return false;
-			}
+//
+//			if($instalmentInfo['status'] != OrderInstalmentStatus::PAYING){
+//				\App\Lib\Common\LogApi::error('[crontabCreatepay]代扣回调处理分期状态错误');
+//				return false;
+//			}
 
 			$data = [
 				'status'        	=> OrderInstalmentStatus::SUCCESS,
