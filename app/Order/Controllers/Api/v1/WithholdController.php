@@ -594,7 +594,6 @@ class WithholdController extends Controller
             [
                 ['withhold_day', '<=', $dateTime],
                 ['withhold_day', '>', 0],
-                ['crontab_faile_date', '<', $date],
             ];
 
         $total = DB::table('order_goods_instalment')
@@ -664,7 +663,6 @@ class WithholdController extends Controller
                 ['id', '<=', $maxId],
                 ['withhold_day', '>', 0],
                 ['withhold_day', '<=', $dateTime],
-                ['crontab_faile_date', '<', $date],
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
@@ -693,7 +691,6 @@ class WithholdController extends Controller
                     [
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
-                        ['crontab_faile_date', '<', $date],
                         ['status', '=', OrderInstalmentStatus::FAIL]
                     ];
                 $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
@@ -705,7 +702,6 @@ class WithholdController extends Controller
                     [
                         ['term', '=', date('Ym')],
                         ['day', '=', intval(date('d'))],
-                        ['crontab_faile_date', '<', $date],
                         ['status', '=', OrderInstalmentStatus::SUCCESS]
                     ];
                 $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
