@@ -604,7 +604,7 @@ class WithholdController extends Controller
         //根据进程数量，判断每页显示的条数
         $processNum = 0;
         $limit  =   0;
-        $maxProces = 10;
+        $maxProces = 20;
         if (ceil($total / 100)>$maxProces ) {
 
             $limit  = intval(ceil($total/20));
@@ -679,7 +679,7 @@ class WithholdController extends Controller
         /*
          * 隔10秒执行一次扣款
          */
-        $time           = 50;
+        $time           = 10;
         $totalpage      = ceil($total/$limit);
         LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
 
@@ -689,8 +689,10 @@ class WithholdController extends Controller
                 //记录执行成功的总数和失败的总数
                 $whereFailArray =
                     [
-                        ['term', '=', date('Ym')],
-                        ['day', '=', intval(date('d'))],
+                        ['id', '>=', $minId],
+                        ['id', '<=', $maxId],
+                        ['withhold_day', '>', 0],
+                        ['withhold_day', '<=', $dateTime],
                         ['status', '=', OrderInstalmentStatus::FAIL]
                     ];
                 $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
@@ -700,8 +702,10 @@ class WithholdController extends Controller
 
                 $whereSuccessArray =
                     [
-                        ['term', '=', date('Ym')],
-                        ['day', '=', intval(date('d'))],
+                        ['id', '>=', $minId],
+                        ['id', '<=', $maxId],
+                        ['withhold_day', '>', 0],
+                        ['withhold_day', '<=', $dateTime],
                         ['status', '=', OrderInstalmentStatus::SUCCESS]
                     ];
                 $successTotal = \App\Order\Models\OrderGoodsInstalment::query()

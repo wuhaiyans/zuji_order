@@ -45,10 +45,10 @@ class RestructInstalment extends Command
         $i = 0;
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 500;
+            $limit  = 5;
 
             $arr =[];
-            while($i <= $total) {
+            while($i < $total) {
 
                 $result = \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('id','term','day','withhold_day')
@@ -77,9 +77,11 @@ class RestructInstalment extends Command
                         $arr[]  = $item['id'];
                     }
 
+                    ++$i;
                     $bar->advance();
+
                 }
-                ++$i;
+
             }
 
             if(count($arr) > 0){
