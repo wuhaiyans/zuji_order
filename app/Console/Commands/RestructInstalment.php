@@ -42,21 +42,21 @@ class RestructInstalment extends Command
             ['withhold_day', '=', 0]
         ])->count();
 
+        $i = 0;
         $bar = $this->output->createProgressBar($total);
-
         try{
             $limit  = 500;
-            $page   = 1;
-            $totalpage = ceil($total/$limit);
+
             $arr =[];
-            do {
+            while($i <= $total) {
+
                 $result = \App\Order\Models\OrderGoodsInstalment::query()
-                    ->select('id','term','day')
+                    ->select('id','term','day','withhold_day')
                     ->where([
                         ['withhold_day', '=', 0]
                     ])
-                    ->forPage($page,$limit)
                     ->orderBy('id', 'ASC')
+                    ->limit($limit)
                     ->get()->toArray();
                 $result = objectToArray($result);
 
@@ -69,6 +69,7 @@ class RestructInstalment extends Command
                     $data = [
                         'withhold_day'  => $time
                     ];
+
                     $res = \App\Order\Models\OrderGoodsInstalment::query()
                         ->where(['id'=>$item['id']])
                         ->update($data);
@@ -78,10 +79,9 @@ class RestructInstalment extends Command
 
                     $bar->advance();
                 }
+                ++$i;
+            }
 
-                $page++;
-                sleep(2);
-            } while (true);
             if(count($arr) > 0){
                 LogApi::notify("分期备注信息修改",$arr);
             }
