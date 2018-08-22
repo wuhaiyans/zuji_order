@@ -77,12 +77,12 @@ $api->version('v1', [
         //买断列表导出
         $api->any('buyoutListExport', 'BuyoutController@listExport');
         /*******************运营数据列表导出--临时***************************/
-        $api->any('operator', 'BuyoutController@operator');
-        $api->any('everDay', 'BuyoutController@everDay');
-        $api->any('everWeek', 'BuyoutController@everWeek');
-        $api->any('fiveteen', 'BuyoutController@fiveteen');
-        $api->any('everMonth', 'BuyoutController@everMonth');
-        $api->any('Month', 'BuyoutController@Month');
+        $api->any('operator', 'TestExcelController@operator');
+        $api->any('everDay', 'TestExcelController@everDay');
+        $api->any('everWeek', 'TestExcelController@everWeek');
+        $api->any('fiveteen', 'TestExcelController@fiveteen');
+        $api->any('everMonth', 'TestExcelController@everMonth');
+        $api->any('Month', 'TestExcelController@Month');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
