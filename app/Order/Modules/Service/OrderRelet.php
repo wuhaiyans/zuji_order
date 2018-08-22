@@ -170,8 +170,6 @@ class OrderRelet
                     ];
 
                     if(ReletRepository::createRelet($data)){
-                        DB::commit();
-                        return [];
 //                        //修改设备状态 续租中
 //                        if( !$goodsObj->setGoodsStatusReletOn() ){
 //                            DB::rollBack();
@@ -189,7 +187,7 @@ class OrderRelet
                         if($params['pay_type'] == PayInc::FlowerStagePay){
                             // 创建支付 一次性结清
                             $pay = PayCreater::createPayment([
-                                'user_id'		=> $params['user_id'],
+                                'userId'		=> $params['user_id'],
                                 'businessType'	=> OrderStatus::BUSINESS_RELET,
                                 'businessNo'	=> $data['relet_no'],
                                 'orderNo'		=> $params['order_no'],	// 订单号
