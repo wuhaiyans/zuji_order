@@ -151,9 +151,10 @@ class OrderRelet
 //                        return false;
 //                    }
                 }
-                $amount = $goods['zujin']*$params['zuqi'];
-
-                if($amount == $params['relet_amount']){
+//                $amount = $goods['zujin']*$params['zuqi'];
+//
+//                if($amount == $params['relet_amount']){
+                if($params['relet_amount']){
                     $data = [
                         'user_id'=>$params['user_id'],
                         'zuqi_type'=>$goods['zuqi_type'],
@@ -302,7 +303,7 @@ class OrderRelet
                     }
                 }else{
                     DB::rollBack();
-                    set_msg('金额错误');
+                    set_msg('金额错误'.$amount);
                     return false;
                 }
 
