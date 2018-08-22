@@ -187,7 +187,7 @@ class OrderRelet
                         if($params['pay_type'] == PayInc::FlowerStagePay){
                             // 创建支付 一次性结清
                             $pay = PayCreater::createPayment([
-                                'user_id'		=> $data['user_id'],
+                                'user_id'		=> $params['user_id'],
                                 'businessType'	=> OrderStatus::BUSINESS_RELET,
                                 'businessNo'	=> $data['relet_no'],
                                 'orderNo'		=> $params['order_no'],	// 订单号
@@ -216,8 +216,8 @@ class OrderRelet
                                     [
                                         'zuqi'              =>  $goods['zuqi'],//租期
                                         'zuqi_type'         =>  $goods['zuqi_type'],//租期类型
-                                        'all_amount'        =>  $amount,//总金额
-                                        'amount'            =>  $amount,//实际支付金额
+                                        'all_amount'        =>  $params['relet_amount'],//总金额
+                                        'amount'            =>  $params['relet_amount'],//实际支付金额
                                         'yiwaixian'         =>  0,//意外险
                                         'zujin'             =>  $goods['zujin'],//租金
                                         'pay_type'          =>  PayInc::WithhodingPay,//支付类型
@@ -303,7 +303,7 @@ class OrderRelet
                     }
                 }else{
                     DB::rollBack();
-                    set_msg('金额错误'.$amount);
+                    set_msg('金额错误'.$params['relet_amount']);
                     return false;
                 }
 
