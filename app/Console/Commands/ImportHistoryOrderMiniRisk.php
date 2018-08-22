@@ -54,16 +54,16 @@ class ImportHistoryOrderMiniRisk extends Command
             set_time_limit(0);//0表示不限时
             $new_order_mini_info = \DB::connection('mysql')->table('order_mini_info')->select('zm_grade', 'order_no')->get();
 //            $new_order_mini_info = objectToArray($new_order_mini_info);
-            print_r($new_order_mini_info);die;
             foreach($new_order_mini_info as $key=>$val){
                 //入库小程序的风控信息
                 $riskData =[
-                    'decision' => $val['zm_grade'],
-                    'order_no'=>$val['order_no'],  // 编号
+                    'decision' => $val->zm_grade,
+                    'order_no'=>$val->order_no,  // 编号
                     'score' => 0,
                     'strategies' =>'',
                     'type'=>'zhima_score',
                 ];
+                print_r($riskData);die;
                 $id = \App\Order\Modules\Repository\OrderRiskRepository::add($riskData);
                 if (!$id) {
                     $i++;
