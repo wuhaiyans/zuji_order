@@ -689,9 +689,8 @@ class WithholdController extends Controller
                 //记录执行成功的总数和失败的总数
                 $whereFailArray =
                     [
-                        ['id', '>=', $minId],
-                        ['id', '<=', $maxId],
-                        ['withhold_day', '>', 0],
+                        ['term', '=', date('Ym')],
+                        ['day', '=', intval(date('d'))],
                         ['status', '=', OrderInstalmentStatus::FAIL]
                     ];
                 $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
@@ -701,9 +700,8 @@ class WithholdController extends Controller
 
                 $whereSuccessArray =
                     [
-                        ['id', '>=', $minId],
-                        ['id', '<=', $maxId],
-                        ['withhold_day', '>', 0],
+                        ['term', '=', date('Ym')],
+                        ['day', '=', intval(date('d'))],
                         ['status', '=', OrderInstalmentStatus::SUCCESS]
                     ];
                 $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
