@@ -45,7 +45,7 @@ class RestructInstalment extends Command
         $i = 0;
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 5;
+            $limit  = 500;
 
             $arr =[];
             while($i < $total) {

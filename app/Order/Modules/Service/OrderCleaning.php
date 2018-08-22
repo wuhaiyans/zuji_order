@@ -78,7 +78,7 @@ class OrderCleaning
                 $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
                 //dd(OrderCleaningStatus::getOrderCleaningName($values['status']));
                 $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
-                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4)) ?? 0;
+                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
@@ -170,12 +170,12 @@ class OrderCleaning
      */
     public static function orderCleanOperate($param)
     {
-        DB::beginTransaction();
+
         try {
             LogApi::info(__method__.'[cleanAccount发起]财务发起退款，解除预授权的请求，请求参数：', $param);
             //查询清算表根据业务平台退款码out_refund_no
             $orderCleanData =  OrderClearingRepository::getOrderCleanInfo($param['params']);
-            if ($orderCleanData['status']==OrderCleaningStatus::orderCleaningComplete || $orderCleanData['status']==OrderCleaningStatus::orderCleaning) {
+            if ($orderCleanData['status']==OrderCleaningStatus::orderCleaningComplete) {
                 return apiResponseArray(31202,[],"扣款已经发起过，请不要重复发起请求，请稍等");
             }
             if (empty($orderCleanData)) return apiResponseArray(31202,[],"清算记录不存在");
@@ -203,7 +203,7 @@ class OrderCleaning
             $success = OrderCleaning::upOrderCleanStatus($orderParam);
             LogApi::info(__method__.'[cleanAccount发起]财务发起退款，更新清算状态为清算中，请求参数及结果：', [$orderParam,$success]);
 
-            if ($success) return apiResponseArray(31202,[],"清算记录不存在");
+            if ($success) return apiResponseArray(31202,[],"更新清算发起状态失败");
 
             /**
              * 退款申请接口
@@ -288,7 +288,7 @@ class OrderCleaning
             } else {
 
 
-                //小程序待退还押金大于0，并且处于待退押金状态
+                //小程序待退还押金大于0，并且处于待退押金状态miniUnfreezeAndPayClean
                 if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
 
 
@@ -342,11 +342,9 @@ class OrderCleaning
                 }
 
             }
-            DB::commit();
             return apiResponseArray(0,[],"成功");
 
         } catch (\Exception $e) {
-            DB::rollback();
             LogApi::error(__method__.'[minicleanAccount发起]操作请求异常',$e);
             return apiResponseArray(31202,[],"操作请求异常".$e->getMessage());
 
@@ -413,12 +411,14 @@ class OrderCleaning
                     LogApi::info(__method__.'[cleanAccount发起]财务发起退款请求前，请求的参数：', $params);
                     $succss = CommonRefundApi::apply($params);
                     LogApi::info(__method__.'[cleanAccount发起]财务已经发起退款请求，请求后的参数及结果：',$succss);
+                    return true;
 
                 }
             }
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起退款]操作请求异常',$e);
+            return false;
         }
 
 
@@ -502,12 +502,14 @@ class OrderCleaning
                     LogApi::info(__method__.'[cleanAccount发起]财务发起预授权解冻请求前，请求的参数：', $unFreezeParams);
                     $succss = CommonFundAuthApi::unfreeze($unFreezeParams);
                     LogApi::info(__method__.'[cleanAccount发起]财务已经发起预授权解冻请求，请求后的请求及结果：', $succss);
+                    return true;
                 }
 
             }
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起预授权解除]操作请求异常',$e);
+            return false;
         }
 
 
