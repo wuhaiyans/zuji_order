@@ -1662,6 +1662,9 @@ class OrderOperate
             $orderListArray['data'][$values['order_no']]['goodsInfo'][$keys] = $goodsList[$keys];
 
         }
+        if (isset($orderListArray['orderIds'])) {
+            unset($orderListArray['orderIds']);
+        }
 
         return $orderListArray;
 
