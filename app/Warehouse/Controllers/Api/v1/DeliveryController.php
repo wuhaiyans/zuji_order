@@ -3,6 +3,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
@@ -278,8 +279,8 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
 
             $result = $this->_info($params['delivery_no']);
 
@@ -290,6 +291,10 @@ class DeliveryController extends Controller
                 'logistics_note'=>$params['logistics_note']
             ];
 
+            //修改发货信息
+            $this->delivery->send($params);
+            LogApi::info('delivery send info :',$params);
+
             //操作员信息,用户或管理员操作有
             $user_info['user_id'] = $params['user_id'];
             $user_info['user_name'] = $params['user_name'];
@@ -297,13 +302,11 @@ class DeliveryController extends Controller
 
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            LogApi::info('delivery send order info :',$result['order_no'].$a);
             if(!$a){
                 DB::rollBack();
                 return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口失败");
             }
-
-            //修改发货信息
-            $this->delivery->send($params);
 
             DB::commit();
         } catch (\Exception $e) {
