@@ -249,7 +249,6 @@ class MiniOrderController extends Controller
             //风控系统处理
             $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$params['auth_token'],$params['appid']);
             if($b != true){
-                \App\Lib\Common\LogApi::error('风控系统接口请求错误',$miniData);
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
                 //return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
             }
