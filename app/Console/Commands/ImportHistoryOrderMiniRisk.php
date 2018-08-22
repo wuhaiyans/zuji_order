@@ -52,9 +52,9 @@ class ImportHistoryOrderMiniRisk extends Command
         $bar = $this->output->createProgressBar($total);
         try {
             set_time_limit(0);//0表示不限时
-            DB::beginTransaction();
-            $new_order_mini_info = \DB::connection('mysql')->table('order_mini_info')->get();
+            $new_order_mini_info = \DB::connection('mysql')->table('order_mini_info')->select('zm_grade', 'order_no')->get();
             $new_order_mini_info = objectToArray($new_order_mini_info);
+            print_r($new_order_mini_info);die;
             foreach($new_order_mini_info as $key=>$val){
                 //入库小程序的风控信息
                 $riskData =[
@@ -66,18 +66,15 @@ class ImportHistoryOrderMiniRisk extends Command
                 ];
                 $id = \App\Order\Modules\Repository\OrderRiskRepository::add($riskData);
                 if (!$id) {
-                    DB::rollBack();
                     $i++;
                     continue;
                 }
                 $bar->advance();
             }
-            DB::commit();
             $bar->finish();
             echo '失败次数'.$i;
             $this->info('导入小程序风控数据成功');
         }catch(\Exception $e){
-            DB::rollBack();
             \App\Lib\Common\LogApi::debug('小程序风控数据导入异常', $e->getMessage());
             $this->error($e->getMessage());
             die;
