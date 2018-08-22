@@ -447,7 +447,7 @@ class OrderGiveback
 				}
 				//解冻订单
 				if(!self::__unfreeze($orderGoodsInfo['order_no'])){
-					\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+					\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 					return false;
 				}
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
