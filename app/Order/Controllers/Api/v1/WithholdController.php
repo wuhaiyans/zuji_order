@@ -20,19 +20,19 @@ class WithholdController extends Controller
     /**
      * 代扣协议查询
      * @param array $request
-	 * [
-	 *		'user_id'		=> '', //【必选】int 用户ID
-	 * ]
-	 * @return array
-	 * [
-	 *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
-	 *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
-	 *		'status'			=> '', //【必选】string 状态；init：初始化；signed：已签约；unsigned：已解约
-	 *		'create_time'		=> '', //【必选】int	创建时间
-	 *		'sign_time'			=> '', //【必选】int 签约时间
-	 *		'unsign_time'		=> '', //【必选】int 解约时间
-	 *		'user_id'			=> '', //【必选】int 用户ID
-	 * ]
+     * [
+     *		'user_id'		=> '', //【必选】int 用户ID
+     * ]
+     * @return array
+     * [
+     *		'agreement_no'		=> '', //【必选】string 支付系统签约编号
+     *		'out_agreement_no'	=> '', //【必选】string 业务系统签约编号
+     *		'status'			=> '', //【必选】string 状态；init：初始化；signed：已签约；unsigned：已解约
+     *		'create_time'		=> '', //【必选】int	创建时间
+     *		'sign_time'			=> '', //【必选】int 签约时间
+     *		'unsign_time'		=> '', //【必选】int 解约时间
+     *		'user_id'			=> '', //【必选】int 用户ID
+     * ]
      */
     public function query(Request $request){
         $params    = $request->all();
@@ -61,18 +61,18 @@ class WithholdController extends Controller
             $payWithhold  = $withhold->getData();
             $allowUnsign  = $withhold->getCounter() == 0 ? "Y" : "N";
 
-			// 支付系统查询代扣签约状态
+            // 支付系统查询代扣签约状态
             $withholdInfo = \App\Lib\Payment\CommonWithholdingApi::queryAgreement([
                 'agreement_no'		=> $payWithhold['out_withhold_no'], //【必选】string 支付系统签约编号
                 'out_agreement_no'	=> $payWithhold['withhold_no'], //【必选】string 业务系统签约编号
                 'user_id'			=> $userId, //【必选】string 业务系统用户ID
             ]);
-			
-			$withholdStatus = [
-				"withholding" => $withholdInfo['status'] == "signed" ? 'Y':'N',
-				"allowUnsign" => $allowUnsign
-			];
-			return apiResponse($withholdStatus, ApiStatus::CODE_0);
+
+            $withholdStatus = [
+                "withholding" => $withholdInfo['status'] == "signed" ? 'Y':'N',
+                "allowUnsign" => $allowUnsign
+            ];
+            return apiResponse($withholdStatus, ApiStatus::CODE_0);
         }catch(\Exception $exc){
 
             $withholdStatus = [
@@ -222,9 +222,9 @@ class WithholdController extends Controller
         $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
 
         // 价格
-		// 2018-08-09 注意：浮点数的乘法计算时，会得到一个另类的值（xxx.999999）,在特殊场景中打印时会出现
-		// 例如json_encode()时，打印成 xxx.9999999
-		// 解决办法： 将结果值 1）先转成字符串类型的值，2）再转换成想用的类型（想使用int值，则再转成init）
+        // 2018-08-09 注意：浮点数的乘法计算时，会得到一个另类的值（xxx.999999）,在特殊场景中打印时会出现
+        // 例如json_encode()时，打印成 xxx.9999999
+        // 解决办法： 将结果值 1）先转成字符串类型的值，2）再转换成想用的类型（想使用int值，则再转成init）
         $amount = intval( strval($instalmentInfo['amount'] * 100) );
         if( $amount<0 ){
             DB::rollBack();
@@ -322,8 +322,8 @@ class WithholdController extends Controller
             }catch(\App\Lib\ApiException $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
-				return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
-				
+                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
+
             }catch(\Exception $exc){
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
@@ -458,7 +458,7 @@ class WithholdController extends Controller
 
             // 价格
             // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
-			$amount = intval( strval($instalmentInfo['amount'] * 100) );
+            $amount = intval( strval($instalmentInfo['amount'] * 100) );
             if ($amount < 0) {
                 DB::rollBack();
                 Log::error("扣款金额不能小于1分");
@@ -644,9 +644,9 @@ class WithholdController extends Controller
      */
     public static function crontabCreatepay($minId,$maxId)
     {
-		LogApi::setSource('crontab_withhold_createpay');
-		LogApi::info('[crontabCreatepay]进入定时扣款minId：'.$minId . '----maxId:'. $maxId);
-		
+        LogApi::setSource('crontab_withhold_createpay');
+        LogApi::info('[crontabCreatepay]进入定时扣款minId：'.$minId . '----maxId:'. $maxId);
+
         // 执行时间
         ini_set('max_execution_time', '0');
 
@@ -733,7 +733,7 @@ class WithholdController extends Controller
                 $subject = $item['order_no'].'-'.$item['term'].'-'.$item['times'];
 
                 LogApi::info('[crontabCreatepay]操作的扣款订单和期数：'.$subject.'-扣款');
-				
+
                 $instalmentKey = "instalmentWithhold_" . $item['id'];
                 // 频次限制
                 if(redisIncr($instalmentKey, 300) > 1){
@@ -743,8 +743,8 @@ class WithholdController extends Controller
 
                 // 扣款交易码
                 if( $item['business_no'] == '' ){
-					// 生成交易码
-					$business_no = createNo();
+                    // 生成交易码
+                    $business_no = createNo();
                     // 1)记录租机交易码
                     $b = OrderGoodsInstalment::save(['id'=>$item['id']],['business_no'=>$business_no]);
                     if( $b === false ){
@@ -781,7 +781,7 @@ class WithholdController extends Controller
                     continue;
                 }
                 // 价格单位转换
-				$amount = intval( strval($item['amount'] * 100) );
+                $amount = intval( strval($item['amount'] * 100) );
 
                 // 修改分期支付中状态
                 $paying = \App\Order\Models\OrderGoodsInstalment::query()
@@ -1028,7 +1028,7 @@ class WithholdController extends Controller
 
         // 提交事务
         DB::commit();
-        
+
         return apiResponse($url,ApiStatus::CODE_0);
 
 
