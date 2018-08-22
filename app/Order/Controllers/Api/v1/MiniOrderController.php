@@ -333,33 +333,47 @@ class MiniOrderController extends Controller
         if(empty($sku)){
             return apiResponse([],ApiStatus::CODE_20001,"商品ID不能为空");
         }
-        //确认订单查询（芝麻小程序数据）
-        $res = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderNo);
-        if(!$res){
-            return apiResponse([],ApiStatus::CODE_35002,"小程序订单查询失败");
-        }
-        $data = [
-            'appid'=>$appid,
-            'pay_type'=>$payType,
-            'order_no'=>$orderNo,
-            'sku'=>$sku,
-            'coupon'=>$coupon,
-            'user_id'=>$userId,
-            'address_id'=>$address_id,
-            'name'=>$res['name'],
-            'mobile'=>$res['mobile'],
-            'credit_amount'=>$res['credit_amount'],
-            'cert_no'=>$res['cert_no'],
-        ];
-        $res = $this->OrderCreate->miniCreate($data);
-        if($res == false){
-            if(get_msg() == ApiStatus::CODE_35017){
-                return apiResponse([],ApiStatus::CODE_35017,'有未完成订单');
+
+        //开启事务
+        DB::beginTransaction();
+        try{
+            //确认订单查询（芝麻小程序数据）
+            $res = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderNo);
+            if(!$res){
+                return apiResponse([],ApiStatus::CODE_35002,"小程序订单查询失败");
             }
-            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+            $data = [
+                'appid'=>$appid,
+                'pay_type'=>$payType,
+                'order_no'=>$orderNo,
+                'sku'=>$sku,
+                'coupon'=>$coupon,
+                'user_id'=>$userId,
+                'address_id'=>$address_id,
+                'name'=>$res['name'],
+                'mobile'=>$res['mobile'],
+                'credit_amount'=>$res['credit_amount'],
+                'cert_no'=>$res['cert_no'],
+            ];
+            $res = $this->OrderCreate->miniCreate($data);
+            if($res == false){
+                //回滚事务
+                DB::rollBack();
+                if(get_msg() == ApiStatus::CODE_35017){
+                    return apiResponse([],ApiStatus::CODE_35017,'有未完成订单');
+                }
+                return apiResponse([],ApiStatus::CODE_30005,get_msg());
+            }
+
+            return apiResponse($res,ApiStatus::CODE_0);
+        }catch(\Exception $e){
+            //回滚事务
+            DB::rollBack();
+            \App\Lib\Common\LogApi::error('芝麻创建订单异常',$e);
+            return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+            //return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
 
-        return apiResponse($res,ApiStatus::CODE_0);
     }
 
     /**
