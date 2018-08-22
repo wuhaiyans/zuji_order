@@ -130,6 +130,10 @@ class OrderRepository
                 $whereArray[] = ['user_id', '=', $userId];
             }
             $order =  Order::query()->where($whereArray)->first();
+        \App\Lib\Common\LogApi::debug('小程序临时日志3',[
+            'request'=>$whereArray,
+            'response'=>$order,
+        ]);
             if (!$order) return false;
             return $order->toArray();
     }

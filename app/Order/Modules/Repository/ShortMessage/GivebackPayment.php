@@ -37,10 +37,17 @@ class GivebackPayment implements ShortMessage {
 
         $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
         $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
-
+        \App\Lib\Common\LogApi::debug('小程序临时日志1',[
+            'request'=>$this->business_no,
+            'response'=>$orderGivebackInfo,
+        ]);
 
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($orderGivebackInfo['order_no']);
+        \App\Lib\Common\LogApi::debug('小程序临时日志2',[
+            'request'=>$orderGivebackInfo['order_no'],
+            'response'=>$orderInfo,
+        ]);
         if( !$orderInfo ){
             LogApi::debug("创建还机单-订单详情错误",$orderGivebackInfo);
             return false;
