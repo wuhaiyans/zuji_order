@@ -47,12 +47,12 @@ class ImportHistoryOrderMiniRisk extends Command
     public function handle()
     {
         //小程序查询数据表
-        $total = \DB::connection('mysql')->table('order_mini_info')->count();
+        $total = \DB::connection('mysql_01')->table('order_mini_info')->count();
         $i = 0;
         $bar = $this->output->createProgressBar($total);
         try {
             set_time_limit(0);//0表示不限时
-            $new_order_mini_info = \DB::connection('mysql')->table('order_mini_info')->select('zm_grade', 'order_no')->get();
+            $new_order_mini_info = \DB::connection('mysql_01')->table('order_mini_info')->select('zm_grade', 'order_no')->get();
 //            $new_order_mini_info = objectToArray($new_order_mini_info);
             foreach($new_order_mini_info as $key=>$val){
                 //入库小程序的风控信息
