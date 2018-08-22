@@ -63,7 +63,6 @@ class ImportHistoryOrderMiniRisk extends Command
                     'strategies' =>'',
                     'type'=>'zhima_score',
                 ];
-                print_r($riskData);die;
                 $id = \App\Order\Modules\Repository\OrderRiskRepository::add($riskData);
                 if (!$id) {
                     $i++;
