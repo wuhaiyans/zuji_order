@@ -82,11 +82,13 @@ class Excel
      * 导出数据到本地服务器
      * @param $headers 标题 【可选】
      * @param $body 主体内容 【必须】二维数组
+     * @param $title 标题 【必须】string
+     * @param $path 文件目录 【必须】
      * @return bool
      *
      * 写文件
      */
-    public static function localWrite($body, $headers=[] , $title='数据导出')
+    public static function localWrite($body,$headers, $title='数据导出',$path)
     {
         if (!$headers || !$body) {
             return false;
@@ -118,9 +120,9 @@ class Excel
         if (ob_get_length()> 0) {
             ob_end_clean();
         }
-        $writer = IOFactory::createWriter($spreadsheet,"Xlsx");
-        echo dirname(__FILE__)."/".$title.".xlsx";
-        $writer->save(dirname(__FILE__)."/".$title.".xlsx");
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save(dirname(dirname(dirname(__FILE__)))."/public/excel/".$path."/".$title.".xlsx");
     }
     public static function csvWrite($body, $headers=[] , $name='数据导出')
     {

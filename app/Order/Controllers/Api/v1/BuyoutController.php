@@ -9,6 +9,8 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\OrderExcel\CronCollection;
+use App\Order\Modules\OrderExcel\CronOperator;
 use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
@@ -652,5 +654,25 @@ class BuyoutController extends Controller
         }
 
         return Excel::localWrite($data, $headers,'运营数据-');
+    }
+    public function everDay(){
+        CronOperator::everDay();
+        echo "success";
+    }
+    public function everWeek(){
+        CronOperator::everWeek();
+        echo "success";
+    }
+    public function fiveteen(){
+        CronOperator::fiveteen();
+        echo "success";
+    }
+    public function everMonth(){
+        CronOperator::everMonth();
+        echo "success";
+    }
+    public function Month(){
+        CronCollection::everMonth();
+        echo "success";
     }
 }
