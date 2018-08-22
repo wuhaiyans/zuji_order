@@ -124,14 +124,14 @@ class OrderRelet
     public function createRelet($params){
         DB::beginTransaction();
         try{
-            //获取订单对象
-            $orderObj = Order::getByNo($params['order_no']);
-            //判断是否冻结
-            if( $orderObj->nonFreeze() ){
-                DB::rollBack();
-                set_msg('订单冻结中');
-                return false;
-            }
+//            //获取订单对象
+//            $orderObj = Order::getByNo($params['order_no']);
+//            //判断是否冻结
+//            if( $orderObj->nonFreeze() ){
+//                DB::rollBack();
+//                set_msg('订单冻结中');
+//                return false;
+//            }
             //获取商品对象
             $goodsObj = Goods::getByGoodsId($params['goods_id']);
             if( $goodsObj ){
@@ -169,18 +169,18 @@ class OrderRelet
                     ];
 
                     if(ReletRepository::createRelet($data)){
-                        //修改设备状态 续租中
-                        if( !$goodsObj->setGoodsStatusReletOn() ){
-                            DB::rollBack();
-                            set_msg('修改设备状态续租中失败');
-                            return false;
-                        }
-                        //修改订单冻结类型 续租
-                        if( !$orderObj->reletFreeze() ){
-                            DB::rollBack();
-                            set_msg('修改订单冻结状态续租失败');
-                            return false;
-                        }
+//                        //修改设备状态 续租中
+//                        if( !$goodsObj->setGoodsStatusReletOn() ){
+//                            DB::rollBack();
+//                            set_msg('修改设备状态续租中失败');
+//                            return false;
+//                        }
+//                        //修改订单冻结类型 续租
+//                        if( !$orderObj->reletFreeze() ){
+//                            DB::rollBack();
+//                            set_msg('修改订单冻结状态续租失败');
+//                            return false;
+//                        }
 
                         //创建支付
                         if($params['pay_type'] == PayInc::FlowerStagePay){
@@ -278,11 +278,11 @@ class OrderRelet
                                     return false;
                                 }
                                 //订单解锁
-                                if( !$orderObj->relieveFreeze() ){
-                                    DB::rollBack();
-                                    set_msg('订单解冻失败');
-                                    return false;
-                                }
+//                                if( !$orderObj->relieveReletFreeze() ){
+//                                    DB::rollBack();
+//                                    set_msg('订单解冻失败');
+//                                    return false;
+//                                }
                                 //提交
                                 DB::commit();
                                 //LogApi::notify("续租支付成功", $data['relet_no']);
@@ -392,11 +392,11 @@ class OrderRelet
                 //获取订单对象
                 $orderObj = Order::getByNo($goodsObj->order_no);
                 //订单解锁
-                if( !$orderObj->relieveFreeze() ){
-                    DB::rollBack();
-                    LogApi::notify("订单解冻失败", $reletNo);
-                    return false;
-                }
+//                if( !$orderObj->relieveReletFreeze() ){
+//                    DB::rollBack();
+//                    LogApi::notify("订单解冻失败", $reletNo);
+//                    return false;
+//                }
                 //提交
                 DB::commit();
                 LogApi::notify("续租支付成功", $reletNo);
