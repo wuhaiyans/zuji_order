@@ -312,42 +312,41 @@ class MiniNotifyController extends Controller
                         //查询判断分期是否已经结清
                         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
                         if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
-//                            //支付状态为支付中则请求关闭订单接口
-//                            if( $orderGivebackInfo['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY ){
-//
-//                            }
-                            //请求关闭订单接口
-                            $arr = [
-                                'zm_order_no'=>$data['zm_order_no'],
-                                'out_order_no'=>$orderGivebackInfo['order_no'],
-                                'pay_amount'=>$orderGivebackInfo['compensate_amount'],
-                                'remark'=>$orderGivebackInfo['giveback_no'],
-                                'app_id'=>$data['notify_app_id'],
-                            ];
-                            //判断是否有请求过（芝麻支付接口）
-                            $where = [
-                                'out_order_no'=>$data['out_order_no'],
-                                'order_operate_type'=>'FINISH',
-                                'remark'=>$orderGivebackInfo['giveback_no'],
-                            ];
-                            $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
-                            if( $orderMiniCreditPayInfo ) {
-                                $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
-                            }else{
-                                $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
-                            }
-                            $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
-                            //提交事务
-                            if( $orderCloseResult['code'] == 10000 ){
-                                \DB::commit();
-                                //记录日志
-                                \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回成功',$orderCloseResult);
-                                echo $this->success;return;
-                            }else{
-                                \DB::commit();
-                                //记录日志
-                                \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回失败',$orderCloseResult);
-                                echo $this->success;return;
+                            //支付状态为支付中则请求关闭订单接口
+                            if( $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_IN_PAY || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY){
+                                //请求关闭订单接口
+                                $arr = [
+                                    'zm_order_no'=>$data['zm_order_no'],
+                                    'out_order_no'=>$orderGivebackInfo['order_no'],
+                                    'pay_amount'=>$orderGivebackInfo['compensate_amount'],
+                                    'remark'=>$orderGivebackInfo['giveback_no'],
+                                    'app_id'=>$data['notify_app_id'],
+                                ];
+                                //判断是否有请求过（芝麻支付接口）
+                                $where = [
+                                    'out_order_no'=>$data['out_order_no'],
+                                    'order_operate_type'=>'FINISH',
+                                    'remark'=>$orderGivebackInfo['giveback_no'],
+                                ];
+                                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
+                                if( $orderMiniCreditPayInfo ) {
+                                    $arr['out_trans_no'] = $orderMiniCreditPayInfo['out_trans_no'];
+                                }else{
+                                    $arr['out_trans_no'] = $orderGivebackInfo['giveback_no'];
+                                }
+                                $orderCloseResult = \App\Lib\Payment\mini\MiniApi::OrderClose($arr);
+                                //提交事务
+                                if( $orderCloseResult['code'] == 10000 ){
+                                    \DB::commit();
+                                    //记录日志
+                                    \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回成功',$orderCloseResult);
+                                    echo $this->success;return;
+                                }else{
+                                    \DB::commit();
+                                    //记录日志
+                                    \App\Lib\Common\LogApi::debug('扣款完成进行关闭订单请求返回失败',$orderCloseResult);
+                                    echo $this->success;return;
+                                }
                             }
                         }else{
                             echo $this->success;return;
@@ -430,9 +429,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A817199359629257',//商户端订单号
-            'zm_order_no'=>'2018081700001001097415823700',//芝麻订单号
-            'out_trans_no'=>'A817199359629257',//商户端交易号
+            'out_order_no'=>'A821142849274548',//商户端订单号
+            'zm_order_no'=>'2018082100001001097344268811',//芝麻订单号
+            'out_trans_no'=>'A821142849274548',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid

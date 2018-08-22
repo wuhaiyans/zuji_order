@@ -327,18 +327,33 @@ class Instalment {
 //			}
 
 
-			// 查询扣款交易
-			$withholdData = [
-					'trade_no'		=> $param['trade_no'], 			//支付系统交易码
-			 		'out_trade_no'	=> $param['out_trade_no'], 		//业务系统交易码
-			 		'user_id'		=> $instalmentInfo['user_id'], 	//用户id
-			];
-
-			$withholdStatus = \App\Lib\Payment\CommonWithholdingApi::deductQuery($withholdData);
-			if(!isset($withholdStatus['status']) || $withholdStatus['status'] != 'success'){
+			// 查询订单
+			$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
+			if( !$orderInfo ){
+				\App\Lib\Common\LogApi::error('[crontabCreatepay]分期扣款回调-订单信息错误');
 				return false;
 			}
 
+
+			/*
+			 * 	H5订单查询 订单扣款交易信息
+			 */
+			if($orderInfo['order_type']  == \App\Order\Modules\Inc\OrderStatus::orderOnlineService){
+
+				// 查询扣款交易
+				$withholdData = [
+						'trade_no'		=> $param['trade_no'], 			//支付系统交易码
+						'out_trade_no'	=> $param['out_trade_no'], 		//业务系统交易码
+						'user_id'		=> $instalmentInfo['user_id'], 	//用户id
+				];
+
+				$withholdStatus = \App\Lib\Payment\CommonWithholdingApi::deductQuery($withholdData);
+				if(!isset($withholdStatus['status']) || $withholdStatus['status'] != 'success'){
+					\App\Lib\Common\LogApi::error('[crontabCreatepay]分期扣款回调-扣款交易错误');
+					return false;
+				}
+
+			}
 
 
 

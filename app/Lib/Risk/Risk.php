@@ -181,6 +181,10 @@ class Risk extends \App\Lib\BaseApi{
             return ApiStatus::CODE_60000;
         }
         if($info['code']!=0){
+            \App\Lib\Common\LogApi::error('风控系统接口请求失败',[
+                'request'=>$data,
+                'response'=>$info,
+            ]);
             return false;
         }
         return true;
