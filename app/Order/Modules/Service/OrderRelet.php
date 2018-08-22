@@ -170,6 +170,8 @@ class OrderRelet
                     ];
 
                     if(ReletRepository::createRelet($data)){
+                        DB::commit();
+                        return [];
 //                        //修改设备状态 续租中
 //                        if( !$goodsObj->setGoodsStatusReletOn() ){
 //                            DB::rollBack();
