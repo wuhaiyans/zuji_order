@@ -76,8 +76,7 @@ class CronCollection
         $orderNos = array_column($instalmentList,"order_no");
         array_unique($orderNos);
         asort($orderNos);
-        echo implode(",",$orderNos);
-        echo "<br/>";
+        array_multisort($instalmentList,SORT_ASC,SORT_NUMERIC);
         //获取订单信息
         $orderList = Order::query()->wherein("order_no",$orderNos)->get()->toArray();
         $orderList = array_column($orderList,null,"order_no");
@@ -119,7 +118,6 @@ class CronCollection
         $goodsError = "";
         $addressError = "";
         foreach($instalmentList as $item){
-
             //订单相关信息
             if(empty($orderList[$item['order_no']])){
                 continue;
@@ -174,19 +172,16 @@ class CronCollection
             }
             $item['payment_time'] = $item['payment_time']>0?date("Y-m-d H:i:s",$item['payment_time']):"";
 
-
-
-            echo $item['order_no']."<br/>";
             $data[] = [
                 $item['realname'],
                 $item['mobile'],
-                $item['order_no'],
+                $item['order_no']." ",
                 $item['times'],
                 $item['amount'],
                 $item['trade_no'],
                 $item['payment_time'],
                 $item['sex'],
-                $item['cret_no'],
+                $item['cret_no']." ",
                 $item['create_time'],
                 $item['zuqi'],
                 $item['zujin'],

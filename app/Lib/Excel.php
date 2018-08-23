@@ -113,7 +113,6 @@ class Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-
         foreach ($data as $k => $v) {
             $sheet->setCellValue($k, $v);
         }
@@ -122,6 +121,7 @@ class Excel
         }
 
         $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
         $writer->save(dirname(dirname(dirname(__FILE__)))."/public/excel/".$path."/".$title.".xlsx");
     }
     public static function csvWrite($body, $headers=[] , $name='数据导出')

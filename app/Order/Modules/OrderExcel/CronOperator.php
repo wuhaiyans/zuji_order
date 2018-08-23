@@ -86,7 +86,7 @@ class CronOperator
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
             $data[] = [
-                $item['order_no'],
+                $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
@@ -175,7 +175,7 @@ class CronOperator
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
             $data[] = [
-                $item['order_no'],
+                $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
@@ -264,7 +264,7 @@ class CronOperator
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
             $data[] = [
-                $item['order_no'],
+                $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
@@ -357,7 +357,7 @@ class CronOperator
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
             $data[] = [
-                $item['order_no'],
+                $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
