@@ -1330,6 +1330,7 @@ class OrderOperate
 
         $orderListArray = OrderRepository::getAdminOrderList($param);
 
+        $goodsData =  self::getExportActAdminState($orderListArray['orderIds'], $actArray=array());
 //        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
@@ -1351,9 +1352,9 @@ class OrderOperate
 //                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
 
 
-                $goodsData =  self::getExportActAdminState($values['order_no'], $actArray=array());
 
-                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
+
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData['data'][$keys]['goodsInfo'];
 
                 // 有冻结状态时
 //                if ($values['freeze_type']>0) {
@@ -1687,17 +1688,20 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-    public static function getExportActAdminState($orderNo, $actArray)
+    public static function getExportActAdminState($orderIds, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo,array('goods_name','zuqi','zuqi_type','specs'));
+        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
+        $goodsList = array_column($goodsList,NULL,'goods_no');
 //        dd($goodsList);
         if (empty($goodsList)) return [];
 
+        $orderListArray = array();
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
             $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
             $goodsList[$keys]['zuqi_name'] = $values['zuqi'].Inc\OrderStatus::getZuqiTypeName($values['zuqi_type']);
+            $orderListArray['data'][$values['order_no']]['goodsInfo'][$keys] = $goodsList[$keys];
         }
 //            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
 //            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
@@ -1739,7 +1743,7 @@ class OrderOperate
 //
 //        }
 
-        return $goodsList;
+        return $orderListArray;
 
 
     }
