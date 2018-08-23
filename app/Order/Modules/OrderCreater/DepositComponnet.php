@@ -75,7 +75,7 @@ class DepositComponnet implements OrderCreater
             foreach ($this->schema['sku'] as $k=>$v)
             {
                 if( $this->payType == \App\Order\Modules\Inc\PayInc::MiniAlipay) {//小程序入口
-                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
+                    $this->componnet->getOrderCreater()->getSkuComponnet()->mini_discrease_yajin($this->miniCreditAmount, $v['yajin'], $v['mianyajin'], $v['sku_id']);
                 }else{//其他入口
                     $arr =[
                         'appid'=>$this->schema['order']['app_id'],
@@ -85,6 +85,7 @@ class DepositComponnet implements OrderCreater
                         'user_id'=>$this->schema['user']['user_id'],
                         'is_order'=>1,
                     ];
+                    LogApi::info(config('app.env')."[下单]jisuan_yajin:",$arr);
                     try{
                         //调用风控押金计算接口
                         $deposit = Yajin::calculate($arr);
@@ -94,10 +95,13 @@ class DepositComponnet implements OrderCreater
 //                        $this->flag = false;
                         LogApi::error(config('app.env')."[下单/确认订单]商品押金接口错误",$arr);
                         $deposit['jianmian'] =0;
+                        $deposit['yajin'] = $v['yajin'] * 100;
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
                     }
+                    LogApi::info(config('app.env')."[下单]deposit_yajin:",$deposit);
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
+                    $yajin = priceFormat($deposit['yajin'] / 100);
 
                     $this->deposit_msg = isset($deposit['_msg'])?$deposit['_msg']:"";
 
@@ -110,7 +114,7 @@ class DepositComponnet implements OrderCreater
                     }
 
                     $this->deposit_detail = json_encode($deposit['jianmian_detail']);
-                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $v['yajin'], $v['mianyajin'], $v['sku_id']);
+                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $yajin, $v['mianyajin'], $v['sku_id']);
                 }
             }
         }

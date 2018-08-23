@@ -28,18 +28,43 @@ class CronCollection
      */
     public static function everMonth()
     {
+        error_reporting(E_ALL ^ E_NOTICE);
+
         //cul获取渠道应用信息
         $channelList = Channel::getChannelListName();
 
-        //获取上个月所有催收订单
-        $date = date("Y-m",strtotime('-1 month'));
-        $day = date("t",strtotime($date));
-        $where[] = ['withhold_day', '>=', strtotime($date."-01 00:00:00"),];
-        $where[] = ['withhold_day', '<=', strtotime($date."-".$day." 23:59:59"),];
+        if($_GET['month']==4){
+            $date = "2018-04";
+            $beginTime = strtotime("2018-04-01 00:00:00");
+            $endTime = strtotime("2018-04-30 23:59:59");
+        }
+        elseif($_GET['month']==5){
+            $date = "2018-05";
+            $beginTime = strtotime("2018-05-01 00:00:00");
+            $endTime = strtotime("2018-05-31 23:59:59");
+        }
+        elseif($_GET['month']==6){
+            $date = "2018-06";
+            $beginTime = strtotime("2018-06-01 00:00:00");
+            $endTime = strtotime("2018-06-30 23:59:59");
+        }
+        elseif($_GET['month']==7){
+            $date = "2018-07";
+            $beginTime = strtotime("2018-07-01 00:00:00");
+            $endTime = strtotime("2018-07-31 23:59:59");
+        }
+        else{
+            //获取上个月所有催收订单
+            $date = date("Y-m",strtotime('-1 month'));
+            $day = date("t",strtotime($date));
+            $beginTime = strtotime($date."-01 00:00:00");
+            $endTime = strtotime($date."-".$day." 23:59:59");
+        }
+        $where[] = ['withhold_day', '>=', $beginTime,];
+        $where[] = ['withhold_day', '<=', $endTime,];
         $status = [
             Inc\OrderInstalmentStatus::UNPAID,
-            Inc\OrderInstalmentStatus::FAIL,
-            Inc\OrderInstalmentStatus::PAYING,
+            Inc\OrderInstalmentStatus::FAIL
         ];
 
         $instalmentList = OrderGoodsInstalment::query()->where($where)->wherein("status",$status)->get()->toArray();
@@ -53,7 +78,7 @@ class CronCollection
         asort($orderNos);
         //获取订单信息
         $orderList = Order::query()->wherein("order_no",$orderNos)->get()->toArray();
-        $orderList = array_keys_arrange($orderList,"order_no");
+        $orderList = array_column($orderList,null,"order_no");
         //获取订单商品信息
         $goodsList= OrderGoodsRepository::getOrderGoodsColumn($orderNos);
         //获取订单用户信息
@@ -87,36 +112,68 @@ class CronCollection
 
         ];
         $data = [];
+        $orderError = "";
+        $userError = "";
+        $goodsError = "";
+        $addressError = "";
         foreach($instalmentList as &$item){
-            if(!empty($userList[$item['order_no']])){
-                $item['realname'] = $userList[$item['order_no']]['realname'];
-                $item['cret_no'] = $userList[$item['order_no']]['cret_no'];
-                $item['sex'] = (int)substr($item['cret_no'],16,1)% 2 === 0 ? '女' : '男';
-            }
-            else{
-                $item['realname'] = "";
-                $item['cret_no'] = "";
-                $item['sex'] = "";
+
+            //订单相关信息
+            if(empty($orderList[$item['order_no']])){
+                continue;
             }
 
             $item['mobile'] = $orderList[$item['order_no']]['mobile'];
+            $item['create_time'] = date("Y-m-d H:i:s", $orderList[$item['order_no']]['create_time']);
+            $item['order_amount'] = $orderList[$item['order_no']]['order_amount'];
+            $item['order_yajin'] = $orderList[$item['order_no']]['order_yajin'];
+            $item['pay_type'] = Inc\PayInc::getPayName($orderList[$item['order_no']]['pay_type']);
+            $item['pay_time'] = $orderList[$item['order_no']]['pay_time']>0?date("Y-m-d H:i:s",$orderList[$item['order_no']]['pay_time']):"";
+            $item['app_name'] = $channelList[$orderList[$item['order_no']]['appid']];
+            $item['create_time'] = date("Y-m-d H:i:s",$orderList[$item['order_no']]['create_time']);
+
+            //用户相关信息
+            if(empty($userList[$item['order_no']])){
+                $userError .= $item['order_no'].",";
+                $item['realname'] = "";
+                $item['cret_no'] = "";
+                $item['sex'] = "";
+            }else{
+                $user = $userList[$item['order_no']];
+                $item['realname'] = $user['realname'];
+                $item['cret_no'] = $user['cret_no'];
+                $item['sex'] = (int)substr($item['cret_no'],16,1)% 2 === 0 ? '女' : '男';
+            }
+
+
+            //商品相关信息
+            if(empty($goodsList[$item['order_no']])){
+                $goodsError .= $item['order_no'].",";
+                $item['zuqi'] = "";
+                $item['mianyajin'] = "";
+                $item['zuqi_type']= "";
+                $item['goods_name'] ="";
+                $item['zujin'] = "";
+                $item['specs'] = "";
+            }else{
+                $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
+                $item['mianyajin'] = $goodsList[$item['order_no']]['goods_yajin']-$goodsList[$item['order_no']]['yajin'];
+                $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
+                $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
+                $item['zujin'] = $goodsList[$item['order_no']]['zujin'];
+                $item['specs'] = $goodsList[$item['order_no']]['specs'];
+            }
+            //订单收货地址
+            if(isset($userAddressList[$item['order_no']])){
+                $item['user_address'] = $userAddressList[$item['order_no']]['address_info'];
+            }else{
+                $addressError .= $item['order_no'].",";
+                $item['user_address'] = "";
+            }
             $item['payment_time'] = $item['payment_time']>0?date("Y-m-d H:i:s",$item['payment_time']):"";
 
 
-            $item['create_time'] = date("Y-m-d H:i:s", $orderList[$item['order_no']]['create_time']);
-            $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
-            $item['order_amount'] = $orderList[$item['order_no']]['order_amount'];
-            $item['order_yajin'] = $orderList[$item['order_no']]['order_yajin'];
-            $item['mianyajin'] = $goodsList[$item['order_no']]['goods_yajin']-$goodsList[$item['order_no']]['yajin'];
-            $item['pay_type'] = Inc\PayInc::getPayName($orderList[$item['order_no']]['pay_type']);
-            $item['pay_time'] = date("Y-m-d H:i:s", $orderList[$item['order_no']]['pay_time']);
-            $item['app_name'] = $channelList[$orderList[$item['order_no']]['appid']];
-            $item['user_address'] = $userAddressList[$item['order_no']]['address_info'];
-            $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
-            $item['create_time'] = date("Y-m-d H:i:s",$orderList[$item['order_no']]['create_time']);
-            $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
-            $item['zujin'] = $goodsList[$item['order_no']]['zujin'];
-            $item['specs'] = $goodsList[$item['order_no']]['specs'];
+
 
             $data[] = [
                 $item['realname'],
@@ -144,7 +201,12 @@ class CronCollection
 
             ];
         }
-        return Excel::localWrite($data,$headers,$date."-ever-month","collection");
+        Excel::localWrite($data,$headers,$date."-ever-month","collection");
+        echo "订单：".$orderError."<br/><br/>";
+        echo "用户：".$userError."<br/><br/>";
+        echo "商品：".$goodsError."<br/><br/>";
+        echo "地址：".$addressError."<br/><br/>";
+        return;
     }
 
 
