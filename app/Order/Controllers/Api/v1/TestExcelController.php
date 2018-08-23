@@ -118,23 +118,28 @@ class TestExcelController extends Controller
         return Excel::localWrite($data, $headers,'运营数据-');
     }
     public function everDay(){
-        CronOperator::everDay();
+        $CronOperator = new CronOperator;
+        $CronOperator->everDay();
         echo "success";
     }
     public function everWeek(){
-        CronOperator::everWeek();
+        $CronOperator = new CronOperator;
+        $CronOperator->everWeek();
         echo "success";
     }
     public function fiveteen(){
-        CronOperator::fiveteen();
+        $CronOperator = new CronOperator;
+        $CronOperator->fiveteen();
         echo "success";
     }
     public function everMonth(){
-        CronOperator::everMonth();
+        $CronOperator = new CronOperator;
+        $CronOperator->everMonth();
         echo "success";
     }
     public function Month(){
-        CronCollection::everMonth();
+        $obj = new CronCollection;
+        $obj->everMonth();
         echo "success";
     }
 }

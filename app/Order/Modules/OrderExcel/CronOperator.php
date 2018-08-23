@@ -202,7 +202,7 @@ class CronOperator
      *  每天定时导出今天前15天订单数据
      * @return excel文件
      */
-    public static function fiveteen(){
+    public  function fiveteen(){
         //获取当天所有订单
         $beginDay = date("Y-m-d",strtotime("Yesterday -15 day"));
         $endDay = date("Y-m-d",strtotime("Yesterday"));
@@ -291,7 +291,7 @@ class CronOperator
      *  每月定时导出上月24-下月24号订单数据
      * @return excel文件
      */
-    public static function everMonth(){
+    public  function everMonth(){
         $today = date("d",time());
         if($today != 24){
             //return false;

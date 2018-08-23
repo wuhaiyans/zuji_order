@@ -26,7 +26,7 @@ class CronCollection
      *  每月1号定时导出上个整月订单催收数据
      * @return excel文件
      */
-    public static function everMonth()
+    public function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
 
