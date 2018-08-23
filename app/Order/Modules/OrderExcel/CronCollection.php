@@ -76,6 +76,8 @@ class CronCollection
         $orderNos = array_column($instalmentList,"order_no");
         array_unique($orderNos);
         asort($orderNos);
+        echo implode(",",$orderNos);
+        echo "<br/>";
         //获取订单信息
         $orderList = Order::query()->wherein("order_no",$orderNos)->get()->toArray();
         $orderList = array_column($orderList,null,"order_no");
@@ -174,7 +176,7 @@ class CronCollection
 
 
 
-
+            echo $item['order_no']."<br/>";
             $data[] = [
                 $item['realname'],
                 $item['mobile'],
