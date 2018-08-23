@@ -216,19 +216,16 @@ class OrderWithhold
 
             $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$params['business_no']]);
             if( !is_array($instalmentInfo)){
-                \App\Lib\Common\LogApi::error('[repaymentNotify]代扣回调处理分期数据错误-分期错误');
+                LogApi::error('[repaymentNotify]代扣回调处理：未查到分期数据');
                 return false;
             }
             $instalmentId = $instalmentInfo['id'];
 
-            // 查询支付单数据
-            $where = [
-                'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'    => $params['business_no'],
-            ];
-            $payInfo = \App\Order\Modules\Repository\Pay\PayCreater::getPayData($where);
-            if(empty($payInfo)){
-                \App\Lib\Common\LogApi::error('[repaymentNotify]代扣回调处理:支付单未找到');
+            try{
+                $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,$params['business_no']);
+                $paymentAmount = $payObj->getPaymentAmount();
+            } catch (\Exception $exc) {
+                LogApi::error('[repaymentNotify]代扣回调处理：支付单未找到');
                 return false;
             }
 
@@ -236,13 +233,18 @@ class OrderWithhold
                 'status'            => OrderInstalmentStatus::SUCCESS,
                 'payment_time'      => time(),
                 'update_time'       => time(),
-                'pay_type'          => 1,       //还款类型：0 代扣   1 主动还款
+                'pay_type'          => OrderInstalmentStatus::REPAYMENT,
                 'remark'            => '提前还款',
-                'payment_amount'    => $payInfo['payment_amount'], //实际支付金额
+                'payment_amount'    => $paymentAmount, //实际支付金额
             ];
 
             // 优惠券信息
             $recordData         = [];
+
+            $where = [
+                'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                'business_no'    => $params['business_no'],
+            ];
 
             $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
 
@@ -251,8 +253,8 @@ class OrderWithhold
                 // 修改优惠券使用状态
                 \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
 
-                $_data['payment_amount']    = $payInfo['payment_amount']; // 实际支付金额 元
-                $_data['discount_amount']   = $instalmentInfo['amount'] - $payInfo['payment_amount'];
+                $_data['payment_amount']    = $paymentAmount; // 实际支付金额 元
+                $_data['discount_amount']   = $instalmentInfo['amount'] - $paymentAmount;
 
                 $recordData['discount_type']                = $counponInfo['coupon_type'];
                 $recordData['discount_value']               = $counponInfo['coupon_no'];
@@ -286,7 +288,7 @@ class OrderWithhold
             $notice->notify();
 
             // 发送支付宝消息通知
-            //$notice->alipay_notify();
+            $notice->alipay_notify();
 
 
             // 提交蚁盾用户还款数据
