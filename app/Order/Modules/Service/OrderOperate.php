@@ -1642,19 +1642,25 @@ class OrderOperate
                 }
                 //是否已经操作过保险
 
-                $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
-//                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-                if ($insuranceData){
-                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
-                    $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
-                    $popInsurance = array_pop($insuranceData);
-                    if ($popInsurance['type'] == 2) {
-                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
-                        $goodsList[$keys]['act_goods_state']['Insurance'] = true;
+                if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
+
+                    $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
+                    if ($insuranceData){
+                        $goodsList[$keys]['act_goods_state']['Insurance'] = false;
+                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
+                        $popInsurance = array_pop($insuranceData);
+                        if ($popInsurance['type'] == 2) {
+                            $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
+                            $goodsList[$keys]['act_goods_state']['Insurance'] = true;
+                        }
+
+                        $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
                     }
 
-                    $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
                 }
+
+//                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+
 
             }
 
