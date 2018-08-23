@@ -39,8 +39,7 @@ class CronCollection
         $where[] = ['withhold_day', '<=', strtotime($date."-".$day." 23:59:59"),];
         $status = [
             Inc\OrderInstalmentStatus::UNPAID,
-            Inc\OrderInstalmentStatus::FAIL,
-            Inc\OrderInstalmentStatus::PAYING,
+            Inc\OrderInstalmentStatus::FAIL
         ];
 
         $instalmentList = OrderGoodsInstalment::query()->where($where)->wherein("status",$status)->get()->toArray();
@@ -52,6 +51,9 @@ class CronCollection
         $orderNos = array_column($instalmentList,"order_no");
         array_unique($orderNos);
         asort($orderNos);
+        echo count($instalmentList);
+        echo "<br/>";
+        var_dump($orderNos);die;
         //获取订单信息
         $orderList = Order::query()->wherein("order_no",$orderNos)->get()->toArray();
         $orderList = array_column($orderList,null,"order_no");
@@ -114,7 +116,7 @@ class CronCollection
                 $item['order_amount'] = $orderList[$item['order_no']]['order_amount'];
                 $item['order_yajin'] = $orderList[$item['order_no']]['order_yajin'];
                 $item['pay_type'] = Inc\PayInc::getPayName($orderList[$item['order_no']]['pay_type']);
-                $item['pay_time'] = date("Y-m-d H:i:s", $orderList[$item['order_no']]['pay_time']);
+                $item['pay_time'] = $orderList[$item['order_no']]['pay_time']>0?date("Y-m-d H:i:s",$orderList[$item['order_no']]['pay_time']):"";
                 $item['app_name'] = $channelList[$orderList[$item['order_no']]['appid']];
                 $item['create_time'] = date("Y-m-d H:i:s",$orderList[$item['order_no']]['create_time']);
             }else{
