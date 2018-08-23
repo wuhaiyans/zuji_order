@@ -28,6 +28,7 @@ class CronCollection
      */
     public static function everMonth()
     {
+        error_reporting(E_ALL ^ E_NOTICE);
         //cul获取渠道应用信息
         $channelList = Channel::getChannelListName();
 
