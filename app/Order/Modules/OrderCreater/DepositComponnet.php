@@ -85,6 +85,7 @@ class DepositComponnet implements OrderCreater
                         'user_id'=>$this->schema['user']['user_id'],
                         'is_order'=>1,
                     ];
+                    LogApi::info(config('app.env')."[下单]jisuan_yajin:",$arr);
                     try{
                         //调用风控押金计算接口
                         $deposit = Yajin::calculate($arr);
@@ -98,6 +99,7 @@ class DepositComponnet implements OrderCreater
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
                     }
+                    LogApi::info(config('app.env')."[下单]deposit_yajin:",$deposit);
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
                     $yajin = priceFormat($deposit['yajin'] / 100);
 
