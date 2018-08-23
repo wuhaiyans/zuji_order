@@ -331,7 +331,7 @@ class OrderController extends Controller
             $params['page'] = $params['page']?? 1;
             while(true) {
                 $orderData = Service\OrderOperate::getOrderExportList($params);
-                $total     = $orderData['total'];
+                $total     = $orderData['data']['total'];
                 if ($total==0) break;
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
