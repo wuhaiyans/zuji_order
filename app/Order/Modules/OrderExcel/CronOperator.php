@@ -296,9 +296,9 @@ class CronOperator
         if($today != 24){
             //return false;
         }
-        //获取当天所有订单
-        $beginDay = date("Y-m-24",strtotime("Last Month"));
-        $endDay = date("Y-m-24",time());
+        //获取上月26号-下月23号所有订单
+        $beginDay = date("Y-m-26",strtotime("Last Month"));
+        $endDay = date("Y-m-23",time());
         $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
 
