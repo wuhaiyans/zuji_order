@@ -102,7 +102,7 @@ return [
 			'driver' => 'mysql',
 			'host' => env('DB_HOST_01'),
 			'port' => env('DB_PORT_01'),
-			'database' => env('DB_DATABASE_02'),
+			'database' => env('DB_DATABASE_01'),
 			'username' => env('DB_USERNAME_01'),
 			'password' => env('DB_PASSWORD_01'),
 			'unix_socket' => env('DB_SOCKET', ''),

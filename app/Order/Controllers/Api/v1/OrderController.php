@@ -361,6 +361,7 @@ class OrderController extends Controller
                     }
 
                     ++$params['page'];
+                    if (($params['page']-1)>$orderData['data']['last_page'])
                     return Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
                 } else {
 
