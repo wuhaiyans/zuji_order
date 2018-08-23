@@ -243,6 +243,10 @@ class SkuComponnet implements OrderCreater
             $mianyajin = isset($this->deposit[$skuInfo['sku_id']]['mianyajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['mianyajin']):0.00;
             //计算免押金金额
             $jianmian =isset($this->deposit[$skuInfo['sku_id']]['jianmian'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['jianmian']):0.00;
+            //计算原始押金
+            $yajin =isset($this->deposit[$skuInfo['sku_id']]['yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['yajin']):$skuInfo['yajin'];
+
+
             //计算买断金额
             $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
 
@@ -277,7 +281,7 @@ class SkuComponnet implements OrderCreater
                     'insurance' =>$spuInfo['yiwaixian'], //意外险
                     'insurance_cost' => $spuInfo['yiwaixian_cost'], //意外险成本价
                     'zujin' => $skuInfo['shop_price'], //租金
-                    'yajin' => $skuInfo['yajin'], //商品押金
+                    'yajin' => $yajin, //商品押金
                     'zuqi' => intval($skuInfo['zuqi']),
                     'zuqi_type' => intval($skuInfo['zuqi_type']),
                     'zuqi_type_name' => $this->zuqiTypeName,
@@ -304,10 +308,10 @@ class SkuComponnet implements OrderCreater
         return $arr;
     }
     /**
-     *  计算押金
+     *  小程序计算押金
      * @param int $amount
      */
-    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
+    public function mini_discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
         if( $jianmian<0 ){
             return [];
         }
@@ -321,6 +325,27 @@ class SkuComponnet implements OrderCreater
         $this->deposit =$arr;
         return $arr;
     }
+    /**
+     *  计算押金
+     * @param int $amount
+     */
+    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
+        if( $jianmian<0 ){
+            return [];
+        }
+        // 优惠金额 大于 总金额 时，总金额设置为0.01
+        if( $jianmian >= $yajin ){
+            $jianmian = $yajin;
+        }
+        $arr[$sku_id]['deposit_yajin'] = $yajin;// 更新押金
+        //$arr[$sku_id]['mianyajin'] = $mianyajin +$jianmian;// 更新免押金额
+        $arr[$sku_id]['mianyajin'] = $jianmian;// 更新免押金额
+        $arr[$sku_id]['jianmian'] = $jianmian;
+        $arr[$sku_id]['yajin'] = $yajin+$jianmian;
+        $this->deposit =$arr;
+        return $arr;
+    }
+
     /**
      * 计算优惠券信息
      *
