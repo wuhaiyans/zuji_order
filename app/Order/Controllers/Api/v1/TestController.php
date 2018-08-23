@@ -7,18 +7,6 @@ use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 class TestController extends Controller
 {
 	public function sendSms() {
-		// 查询扣款交易
-		$withholdData = [
-			'trade_no'		=> '31A82067335453525', 			//支付系统交易码
-			'out_trade_no'	=> 'FA82067335430322', 		//业务系统交易码
-			'user_id'		=> '3209', 	//用户id
-		];
-
-		$withholdStatus = \App\Lib\Payment\CommonWithholdingApi::deductQuery($withholdData);
-		p($withholdStatus);
-		if(!isset($withholdStatus) || $withholdStatus['status'] != 'success'){
-			return false;
-		}
 
 	
 //		//发送短信

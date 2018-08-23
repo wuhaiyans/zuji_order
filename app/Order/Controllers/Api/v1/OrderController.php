@@ -331,7 +331,7 @@ class OrderController extends Controller
             $params['page'] = $params['page']?? 1;
             while(true) {
                 $orderData = Service\OrderOperate::getOrderExportList($params);
-                $total     = $orderData['total'];
+                $total     = $orderData['data']['total'];
                 if ($total==0) break;
 
                 if ($orderData['code']===ApiStatus::CODE_0) {
@@ -361,6 +361,7 @@ class OrderController extends Controller
                     }
 
                     ++$params['page'];
+                    if (($params['page']-1)>$orderData['data']['last_page'])
                     return Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
                 } else {
 
