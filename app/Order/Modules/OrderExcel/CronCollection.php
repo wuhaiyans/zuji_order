@@ -29,14 +29,39 @@ class CronCollection
     public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
+
         //cul获取渠道应用信息
         $channelList = Channel::getChannelListName();
 
-        //获取上个月所有催收订单
-        $date = date("Y-m",strtotime('-1 month'));
-        $day = date("t",strtotime($date));
-        $where[] = ['withhold_day', '>=', strtotime($date."-01 00:00:00"),];
-        $where[] = ['withhold_day', '<=', strtotime($date."-".$day." 23:59:59"),];
+        if($_GET['month']==4){
+            $date = "2018-04";
+            $beginTime = strtotime("2018-04-01 00:00:00");
+            $endTime = strtotime("2018-04-30 23:59:59");
+        }
+        elseif($_GET['month']==5){
+            $date = "2018-05";
+            $beginTime = strtotime("2018-05-01 00:00:00");
+            $endTime = strtotime("2018-05-31 23:59:59");
+        }
+        elseif($_GET['month']==6){
+            $date = "2018-06";
+            $beginTime = strtotime("2018-06-01 00:00:00");
+            $endTime = strtotime("2018-06-30 23:59:59");
+        }
+        elseif($_GET['month']==7){
+            $date = "2018-07";
+            $beginTime = strtotime("2018-07-01 00:00:00");
+            $endTime = strtotime("2018-07-31 23:59:59");
+        }
+        else{
+            //获取上个月所有催收订单
+            $date = date("Y-m",strtotime('-1 month'));
+            $day = date("t",strtotime($date));
+            $beginTime = strtotime($date."-01 00:00:00");
+            $endTime = strtotime($date."-".$day." 23:59:59");
+        }
+        $where[] = ['withhold_day', '>=', $beginTime,];
+        $where[] = ['withhold_day', '<=', $endTime,];
         $status = [
             Inc\OrderInstalmentStatus::UNPAID,
             Inc\OrderInstalmentStatus::FAIL
