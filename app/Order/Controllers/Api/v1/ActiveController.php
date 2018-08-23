@@ -18,7 +18,7 @@ class ActiveController extends Controller
             $limit  = 5;
             $page   = 1;
             $sleep  = 20;
-            $code   = "SMS_113461179";
+            $code   = "SMS_113461180";
 
 
             do {
@@ -38,6 +38,7 @@ class ActiveController extends Controller
 
                     $dataSms = [
                         'newPhoneName'      => "iPhone X",
+                        'logisticsNo'       => "11111111111",
                     ];
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
