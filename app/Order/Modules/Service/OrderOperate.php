@@ -1288,9 +1288,7 @@ class OrderOperate
                 $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
 
 
-                $goodsData =  self::getManageGoodsActAdminState($values['order_no'], $actArray);
 
-                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
 				// 有冻结状态时
                 if ($values['freeze_type']>0) {
@@ -1311,6 +1309,8 @@ class OrderOperate
             }
 
         }
+
+        $orderListArray =  self::getManageGoodsActAdminState($orderListArray);
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
@@ -1609,15 +1609,17 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-    public static function getManageGoodsActAdminState($orderNo, $actArray)
+    public static function getManageGoodsActAdminState($orderListArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo, array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi'));
+        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','order_no'));
         if (empty($goodsList)) return [];
+        $goodsList = array_column($goodsList,NULL,'goods_no');
 
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
+            $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];
             $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
             $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
             $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
@@ -1640,7 +1642,7 @@ class OrderOperate
                 }
                 //是否已经操作过保险
 
-                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']],array('type'));
+                $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
 //                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
                 if ($insuranceData){
                     $goodsList[$keys]['act_goods_state']['Insurance'] = false;
@@ -1656,9 +1658,15 @@ class OrderOperate
 
             }
 
+
+            $orderListArray['data'][$values['order_no']]['goodsInfo'][$keys] = $goodsList[$keys];
+
+        }
+        if (isset($orderListArray['orderIds'])) {
+            unset($orderListArray['orderIds']);
         }
 
-        return $goodsList;
+        return $orderListArray;
 
 
     }

@@ -36,8 +36,7 @@ class GivebackPayment implements ShortMessage {
     public function notify(){
 
         $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
-        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
-
+        $orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($this->business_no);
 
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($orderGivebackInfo['order_no']);

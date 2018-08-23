@@ -170,6 +170,26 @@ class OrderRepository
         return $orderGoodData->toArray();
     }
 
+
+    /**
+     *
+     * 根据多个订单id查询设备列表
+     * heaven
+     * @param $orderNo 订单编号
+     * @return array|bool
+     *
+     */
+
+    public static function getGoodsListByOrderIdArray($orderIds,$coulumn='*'){
+        if (empty($orderIds)) return false;
+
+//        sql_profiler();
+        $orderGoodData =  OrderGoods::query()->whereIn('order_no', $orderIds)->select($coulumn)->get();
+        if (!$orderGoodData) return false;
+        return $orderGoodData->toArray();
+    }
+
+
     /**
      * 获取订单扩展表状态
      * @param $orderNo
@@ -773,7 +793,8 @@ class OrderRepository
                 ->orderBy('o.create_time', 'DESC')
                 ->get();
 
-            $orderArrays['data'] = objectToArray($orderList);
+            $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
+            $orderArrays['orderIds'] = $orderIds;
             $orderArrays['total'] = $count;
             $orderArrays['last_page'] = ceil($count/$pagesize);
 
