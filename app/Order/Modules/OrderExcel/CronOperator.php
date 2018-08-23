@@ -296,9 +296,9 @@ class CronOperator
         if($today != 24){
             //return false;
         }
-        //获取当天所有订单
-        $beginDay = date("Y-m-24",strtotime("Last Month"));
-        $endDay = date("Y-m-24",time());
+        //获取上月26号-下月23号所有订单
+        $beginDay = date("Y-m-26",strtotime("Last Month"));
+        $endDay = date("Y-m-23",time());
         $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
 
@@ -340,8 +340,8 @@ class CronOperator
             $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = Inc\OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
-            $item['realname'] = $userList[$item['order_no']]['realname'];
-            $item['user_address'] = $userAddressList[$item['order_no']]['address_info'];
+            $item['realname'] = empty($userList[$item['order_no']]['realname'])?"":$userList[$item['order_no']]['realname'];
+            $item['user_address'] = empty($userAddressList[$item['order_no']]['address_info'])?"":$userAddressList[$item['order_no']]['address_info'];
             $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
             $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['zujin'] = $goodsList[$item['order_no']]['zujin'];

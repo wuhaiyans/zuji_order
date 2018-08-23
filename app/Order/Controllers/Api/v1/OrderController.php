@@ -325,52 +325,54 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
+            set_time_limit(0);
             $params = $request->all();
-            if ($params['size']>5000 ){
-                 $params['size'] =  5000;
-            }
-//            $params['size'] = $params['size'] && $params['size']<500  ?? 500;
+            $params['size'] = 500;
             $params['page'] = $params['page']?? 1;
-            $orderData = Service\OrderOperate::getOrderExportList($params);
-//            dd($orderData);
-//            if ($params['page']>20) {
-//                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
-//                exit;
-//            }
+            while(true) {
+                $orderData = Service\OrderOperate::getOrderExportList($params);
+                $total     = $orderData['data']['total'];
+                if ($total==0) break;
 
-            if ($orderData['code']===ApiStatus::CODE_0) {
+                if ($orderData['code']===ApiStatus::CODE_0) {
 
 //                租期，成色，颜色，容量，网络制式
-                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-                    '订单实际总租金','订单总押金','意外险总金额'];
-                $data = array();
-                foreach ($orderData['data']['data'] as $item) {
-                    $data[] = [
-                        $item['order_no'],
-                        date('Y-m-d H:i:s', $item['create_time']),
-                        $item['order_status_name'],
-                        $item['appid_name'],
-                        $item['pay_type_name'],
+                    $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+                        '订单实际总租金','订单总押金','意外险总金额'];
+                    $data = array();
+                    foreach ($orderData['data']['data'] as $item) {
+                        $data[] = [
+                            $item['order_no'],
+                            date('Y-m-d H:i:s', $item['create_time']),
+                            $item['order_status_name'],
+                            $item['appid_name'],
+                            $item['pay_type_name'],
 //                        $item['visit_name'],
-                        $item['name'],
-                        $item['mobile'],
-                        $item['address_info'],
-                        implode(",",array_column($item['goodsInfo'],"goods_name")),
-                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
-                        implode(",",array_column($item['goodsInfo'],"specs")),
-                        $item['order_amount'],
-                        $item['order_yajin'],
-                        $item['order_insurance'],
-                    ];
+                            $item['name'],
+                            $item['mobile'],
+                            $item['address_info'],
+                            implode(",",array_column($item['goodsInfo'],"goods_name")),
+                            implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                            implode(",",array_column($item['goodsInfo'],"specs")),
+                            $item['order_amount'],
+                            $item['order_yajin'],
+                            $item['order_insurance'],
+                        ];
+                    }
+
+                    ++$params['page'];
+                    if (($params['page']-1)>$orderData['data']['last_page'])
+                    return Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
+                } else {
+
+                    return apiResponse([],ApiStatus::CODE_34007);
+                    break;
                 }
 
-                return Excel::csvWrite1($data, $headers,'后台订单列表数据导出'.$params['page']);
 
-//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-            } else {
 
-                return apiResponse([],ApiStatus::CODE_34007);
             }
+
 
 
 

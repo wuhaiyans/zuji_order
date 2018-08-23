@@ -5,7 +5,6 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
-use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -52,12 +51,12 @@ class OrderWithhold
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
             DB::rollBack();
-            \App\Lib\Common\LogApi::error("订单不存在");
+            LogApi::error("[giveBackWihthold]订单不存在");
             return false;
         }
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
             DB::rollBack();
-            \App\Lib\Common\LogApi::error("订单不在服务中");
+            LogApi::error("[giveBackWihthold]订单不在服务中");
             return false;
         }
 
@@ -68,7 +67,7 @@ class OrderWithhold
         $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
             DB::rollBack();
-            \App\Lib\Common\LogApi::error("扣款金额不能小于1分");
+            LogApi::error("[giveBackWihthold]扣款金额不能小于1分");
             return false;
         }
 
@@ -77,8 +76,7 @@ class OrderWithhold
             //获取订单的芝麻订单编号
             $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
             if( empty($miniOrderInfo) ){
-                \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
-                Log::error("本地小程序确认订单回调记录查询失败");
+                LogApi::info('[giveBackWihthold]本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                 return false;
             }
             //芝麻小程序扣款请求
@@ -92,13 +90,12 @@ class OrderWithhold
             // 保存 备注，更新状态 修改分期状态为扣款中
             $data = [
                 'remark'        => $subject,
-                'payment_time'  => time(),
                 'status'        => OrderInstalmentStatus::PAYING,// 扣款中
             ];
             $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
             if(!$result){
                 DB::rollBack();
-                \App\Lib\Common\LogApi::error("扣款备注保存失败");
+                LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
             $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
@@ -108,33 +105,32 @@ class OrderWithhold
                 DB::commit();
                 return true;
             }elseif($pay_status =='PAY_FAILED'){
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $business_no);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
                 DB::commit();
-                Log::error("小程序扣款请求失败（用户余额不足）");
+                Log::error("[giveBackWihthold]小程序扣款请求失败（用户余额不足）");
                 return false;
             }elseif($pay_status == 'PAY_INPROGRESS'){
                 // 提交事务
                 DB::commit();
-                Log::error("小程序扣款处理中请等待");
+                Log::error("[giveBackWihthold]小程序扣款处理中请等待");
                 return false;
             }else{
                 // 事物回滚
                 DB::rollBack();
-                Log::error("小程序扣款处理失败（内部失败）");
+                Log::error("[giveBackWihthold]小程序扣款处理失败（内部失败）");
                 return false;
             }
         }else {
             // 保存 备注，更新状态
             $data = [
                 'remark'        => $remark,
-                'payment_time'  => time(),
                 'status'        => OrderInstalmentStatus::PAYING,// 扣款中
             ];
             $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
             if(!$result){
                 DB::rollBack();
-                \App\Lib\Common\LogApi::error("扣款备注保存失败");
+                LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
 
@@ -148,7 +144,7 @@ class OrderWithhold
             $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
                 DB::rollBack();
-                \App\Lib\Common\LogApi::error("用户代扣协议编号错误");
+                LogApi::error("[giveBackWihthold]用户代扣协议编号错误");
                 return false;
             }
             // 代扣接口
@@ -164,23 +160,27 @@ class OrderWithhold
                 'name'          => $subject,                //交易备注
                 'user_id'       => $orderInfo['user_id'],   //业务平台用户id
             ];
-
+            
             try{
                 // 请求代扣接口
-                $withholding->deduct($withholding_data);
+                $withStatus = $withholding->deduct($withholding_data);
+                if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
+
+                    LogApi::error('[giveBackWihthold]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentInfo['id']);
+                }
 
             }catch(\Exception $exc){
                 DB::rollBack();
-                \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
-                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+
+                LogApi::error('[giveBackWihthold]分期代扣错误异常：'.$subject, $exc);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentInfo['id']);
                 //捕获异常 买家余额不足
-                if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    \App\Lib\Common\LogApi::error('买家余额不足');
-                    return false;
-                } else {
-                    \App\Lib\Common\LogApi::error("扣款失败");
+                if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                    LogApi::error('[giveBackWihthold]分期扣款余额不足：'.$subject);
                     return false;
                 }
+
             }
         }
         // 提交事务
