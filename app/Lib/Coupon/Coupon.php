@@ -46,7 +46,10 @@ class Coupon extends \App\Lib\BaseApi{
 
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info = json_decode($info,true);
-
+        \App\Lib\Common\LogApi::notify('根据用户id获取用户租金抵用券zuji.coupon.voucher.get',[
+            'request'=>$data,
+            'response'=>$info
+        ]);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
@@ -72,6 +75,10 @@ class Coupon extends \App\Lib\BaseApi{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
+        \App\Lib\Common\LogApi::notify('使用优惠券接口zuji.goods.coupon.status1.set',[
+            'request'=>$data,
+            'response'=>$info
+        ]);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }
@@ -99,6 +106,10 @@ class Coupon extends \App\Lib\BaseApi{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
+        \App\Lib\Common\LogApi::notify('优惠券恢复zuji.goods.coupon.status0.set',[
+            'request'=>$data,
+            'response'=>$info
+        ]);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;
         }

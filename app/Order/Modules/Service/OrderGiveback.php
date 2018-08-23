@@ -479,6 +479,24 @@ class OrderGiveback
 				$paymentNo = $payObj->getPaymentNo();
 				$fundauthNo = $payObj->getFundauthNo();
 				}else{
+					//更新商品状态
+					$orderGoodsResult = $orderGoods->givebackFinish();
+					if(!$orderGoodsResult){
+						\App\Lib\Common\LogApi::debug('[还机支付回调]更新商品表状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
+						return false;
+					}
+					//解冻订单
+					if(!self::__unfreeze($orderGoodsInfo['order_no'])){
+						\App\Lib\Common\LogApi::debug('[还机支付回调]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
+						return false;
+					}
+					$status = OrderGivebackStatus::STATUS_DEAL_DONE;
+					$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
+						'status'=> $status,
+						'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
+						'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
+						'payment_time'=> time(),
+					]);
 					$paymentNo = '';
 					$fundauthNo = '';
 				}
