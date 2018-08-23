@@ -65,7 +65,7 @@ class CronOperator
             '实际已优惠金额',
         ];
         $data = [];
-        foreach($orderList as &$item){
+        foreach($orderList as $item){
             $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = Inc\OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
@@ -154,7 +154,7 @@ class CronOperator
             '实际已优惠金额',
         ];
         $data = [];
-        foreach($orderList as &$item){
+        foreach($orderList as $item){
             $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = Inc\OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
@@ -243,7 +243,7 @@ class CronOperator
             '实际已优惠金额',
         ];
         $data = [];
-        foreach($orderList as &$item){
+        foreach($orderList as $item){
             $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = Inc\OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
@@ -336,7 +336,7 @@ class CronOperator
             '实际已优惠金额',
         ];
         $data = [];
-        foreach($orderList as &$item){
+        foreach($orderList as $item){
             $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
             $item['order_type'] = Inc\OrderStatus::getTypeName($item['order_type']);
             $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);

@@ -116,7 +116,7 @@ class CronCollection
         $userError = "";
         $goodsError = "";
         $addressError = "";
-        foreach($instalmentList as &$item){
+        foreach($instalmentList as $item){
 
             //订单相关信息
             if(empty($orderList[$item['order_no']])){
