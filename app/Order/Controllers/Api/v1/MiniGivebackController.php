@@ -377,20 +377,6 @@ class MiniGivebackController extends Controller
         if( $orderCloseResult['code'] != 10000  ){
             return false;
         }
-        //解冻订单
-        if(!OrderGiveback::__unfreeze($paramsArr['order_no'])){
-            set_apistatus(ApiStatus::CODE_92700, '订单解冻失败!');
-            return false;
-        }
-        //更新商品表状态
-        $orderGoods = Goods::getByGoodsNo($paramsArr['goods_no']);
-        if( !$orderGoods ){
-            return false;
-        }
-        $orderGoodsResult = $orderGoods->givebackFinish();
-        if(!$orderGoodsResult){
-            return false;
-        }
         //拼接需要更新还机单状态
         $data['status'] = $status =$goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
         $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;

@@ -844,7 +844,7 @@ class GivebackController extends Controller
 		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
 			$compensate_amount = $orderGivebackInfo['compensate_amount'];
 		}else{
-			$compensate_amount = $orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount'];
+			$compensate_amount = normalizeNum($orderGivebackInfo['instalment_amount'] + $orderGivebackInfo['compensate_amount']);
 		}
 		
 		//组合最终返回商品基础数据
@@ -881,11 +881,11 @@ class GivebackController extends Controller
 			];
 		}
 		//赔偿金额计算(检测不合格，没有未支付分期金额，押金》赔偿金，才能押金抵扣)
-		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && !$orderGivebackInfo['instalment_amount'] && $orderGoodsInfo['yajin']>=$orderGivebackInfo['compensate_amount'] ){
+		if( $orderGivebackInfo['evaluation_status'] == OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && !intval($orderGivebackInfo['instalment_amount']) && $orderGoodsInfo['yajin']>=$orderGivebackInfo['compensate_amount'] ){
 			$data['compensate_info'] = [
 				'compensate_all_amount' => $compensate_amount,
 				'compensate_deduction_amount' => $compensate_amount,
-				'compensate_release_amount' => $orderGoodsInfo['yajin'] - ($compensate_amount),
+				'compensate_release_amount' => normalizeNum($orderGoodsInfo['yajin'] - $compensate_amount),
 			];
 		}else{
 

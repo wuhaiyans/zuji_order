@@ -85,16 +85,18 @@ class MiniNotifyController extends Controller
                 $this->orderCancelNotify();
         } if($this->data['notify_type'] == $this->FINISH){
             //入库 完成 或 扣款 回调信息
+            $redis_order = null;
             if(isset($_POST['out_trans_no'])){
                 $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_trans_no']);
                 $out_trans_no = $_POST['out_trans_no'];
                 $alipay_fund_order_no = $_POST['alipay_fund_order_no'];
                 $pay_time = $_POST['pay_time'];
-            }else{
+            }
+            if($redis_order == null){
                 $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
-                $out_trans_no = '';
-                $alipay_fund_order_no = '';
-                $pay_time = null;
+                $out_trans_no = isset($_POST['out_trans_no'])?$_POST['out_trans_no']:'';
+                $alipay_fund_order_no = isset($_POST['alipay_fund_order_no'])?$_POST['alipay_fund_order_no']:'';
+                $pay_time = isset($_POST['pay_time'])?$_POST['pay_time']:null;
             }
 //            $redis_order = 'MiniOrderClose';
 //            $redis_order = 'MiniWithhold';
@@ -200,7 +202,7 @@ class MiniNotifyController extends Controller
                     }else{
                         //事物回滚 记录日志
                         \DB::rollBack();
-                        \App\Lib\Common\LogApi::debug('小程序还机单扣款回调处理失败',$data);
+                        \App\Lib\Common\LogApi::debug('小程序还机单关闭订单回调处理失败',$data);
                         echo $this->fail;return;
                     }
                 }else{
@@ -429,9 +431,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A821142849274548',//商户端订单号
-            'zm_order_no'=>'2018082100001001097344268811',//芝麻订单号
-            'out_trans_no'=>'A821142849274548',//商户端交易号
+            'out_order_no'=>'A817199359629257',//商户端订单号
+            'zm_order_no'=>'2018081700001001097415823700',//芝麻订单号
+            'out_trans_no'=>'A817199359629257',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid
