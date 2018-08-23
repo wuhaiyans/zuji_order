@@ -1376,6 +1376,10 @@ class OrderOperate
 
         }
 
+        if (isset($orderListArray['orderIds'])) {
+
+            unset($orderListArray['orderIds']);
+        }
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
 
 
