@@ -92,7 +92,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        if(isset($param['is_instalment_list'])){
+            $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        }
 
         $result = OrderGoodsInstalment::query()->where($whereArray)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
@@ -151,7 +153,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        if(isset($param['is_instalment_list'])){
+            $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        }
 
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')

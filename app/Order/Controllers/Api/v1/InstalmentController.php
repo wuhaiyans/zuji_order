@@ -55,7 +55,7 @@ class InstalmentController extends Controller
             }
         }
 
-
+        $params['is_instalment_list'] = 1;
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
 
         foreach($list as &$item){
