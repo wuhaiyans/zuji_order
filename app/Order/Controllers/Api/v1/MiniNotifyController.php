@@ -175,11 +175,11 @@ class MiniNotifyController extends Controller
         \DB::beginTransaction();
         //判断订单是否为还机关闭订单
         if($data['pay_status'] == "PAY_SUCCESS"){
-            //判断订单是否为还机冻结状态
-            if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){//还机关闭订单
-                $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
-                    'order_no'=>$data['out_order_no']
-                ]);
+            $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                'order_no'=>$data['out_order_no']
+            ]);
+            //判断订单是否为还机状态
+            if($order_goods['goods_status'] == \App\Order\Modules\Inc\OrderGoodStatus::CLOSED_THE_MACHINE || $order_goods['goods_status'] ==\App\Order\Modules\Inc\OrderGoodStatus::BACK_IN_THE_MACHINE){
                 $orderGivebackService = new OrderGiveback();
                 //获取还机单基本信息
                 $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($order_goods['goods_no']);
@@ -300,11 +300,11 @@ class MiniNotifyController extends Controller
                 if($b){
                     //提交事物预防下面查询数据出现脏数据
                     \DB::commit();
-                    //判断订单是否为还机冻结状态
-                    if($orderInfo['freeze_type'] == \App\Order\Modules\Inc\OrderFreezeStatus::Reback){
-                        $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
-                            'order_no'=>$data['out_order_no']
-                        ]);
+                    $order_goods = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow([
+                        'order_no'=>$data['out_order_no']
+                    ]);
+                    //判断订单是否为还机状态
+                    if($order_goods['goods_status'] == \App\Order\Modules\Inc\OrderGoodStatus::CLOSED_THE_MACHINE || $order_goods['goods_status'] ==\App\Order\Modules\Inc\OrderGoodStatus::BACK_IN_THE_MACHINE){
                         $orderGivebackService = new OrderGiveback();
                         //获取还机单基本信息
                         $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($order_goods['goods_no']);
@@ -315,7 +315,7 @@ class MiniNotifyController extends Controller
                         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
                         if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
                             //支付状态为支付中则请求关闭订单接口
-                            if( $orderGivebackInfo['withhold_status'] == OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHHOLD || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY){
+                            if( $orderGivebackInfo['withhold_status'] == OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHHOLD || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY){
                                 //请求关闭订单接口
                                 $arr = [
                                     'zm_order_no'=>$data['zm_order_no'],
