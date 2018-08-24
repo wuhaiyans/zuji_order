@@ -367,31 +367,4 @@ class PayCreater {
     }
 
 
-
-	/**
-	 * 查询支付单
-	 * @param	array	$params		参数
-	 * [
-	 *		'businessType'		=> '',	// 业务类型
-	 *		'businessNo'		=> '',	// 业务编号
-	 * ]
-	 * @return array 支付单数据
-	 */
-	public static function getPayData( array $params )
-	{
-		if(!$params){
-			return [];
-		}
-		$payModel = new OrderPayModel();
-
-		$info = $payModel::query()
-			->where($params)
-			->first();
-		if(!$info){
-			return [];
-		}
-		return $info->toArray();
-	}
-	
-	
 }

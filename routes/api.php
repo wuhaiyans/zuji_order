@@ -83,6 +83,7 @@ $api->version('v1', [
         $api->any('fiveteen', 'TestExcelController@fiveteen');
         $api->any('everMonth', 'TestExcelController@everMonth');
         $api->any('Month', 'TestExcelController@Month');
+        $api->any('riskMonth', 'TestExcelController@riskMonth');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
