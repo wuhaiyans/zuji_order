@@ -319,6 +319,11 @@ class OrderGivebackStatus{
      */
     const WITHHOLD_STATUS_ALREADY_WITHHOLD = 2;
     /**
+     * 代扣执行中
+     * @var int 2
+     */
+    const WITHHOLD_STATUS_IN_WITHHOLD = 2;
+    /**
      * 订单还机代扣状态列表
      * @return array
      */
