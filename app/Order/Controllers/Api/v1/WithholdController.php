@@ -732,10 +732,10 @@ class WithholdController extends Controller
 
                 $instalmentKey = "instalmentWithhold_" . $item['id'];
                 // 频次限制
-                if(redisIncr($instalmentKey, 300) > 1){
-                    LogApi::error('[crontabCreatepay]当前分期正在操作，不能重复操作,操作的key:'.$instalmentKey);
-                    continue;
-                }
+//                if(redisIncr($instalmentKey, 300) > 1){
+//                    LogApi::error('[crontabCreatepay]当前分期正在操作，不能重复操作,操作的key:'.$instalmentKey);
+//                    continue;
+//                }
 
                 // 扣款交易码
                 if( $item['business_no'] == '' ){
