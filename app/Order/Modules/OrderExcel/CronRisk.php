@@ -43,10 +43,12 @@ class CronRisk
         $limit = 500;
         $count = Order::query()->wherein("order_status",$status)->count();
         $data = [];
+        $single = 0;
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i==0?0:$i*$limit+1;
             $orderList = Order::query()->wherein("order_status",$status)->offset($offset)->limit($limit)->get()->toArray();
+            $single += count($orderList);
             //拆分出订单号
             $orderNos = array_column($orderList,"order_no");
 
@@ -251,6 +253,7 @@ class CronRisk
 
 
         Excel::localWrite($data,$headers,date("Y-m-d"),"risk");
+        echo "订单总数:".$single."<br/><br/>";
         echo "订单：".$orderError."<br/><br/>";
         echo "用户：".$userError."<br/><br/>";
         echo "商品：".$goodsError."<br/><br/>";
