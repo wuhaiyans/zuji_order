@@ -325,6 +325,12 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
+        if (redisIncr("mannage_orderlist_export",180)>1){
+
+            echo "已经有数据正在导入，请稍后重试";
+            exit;
+        }
+
             set_time_limit(0);
             try{
 
