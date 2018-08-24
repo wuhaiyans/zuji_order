@@ -291,7 +291,7 @@ class CronOperate
 		$orderGivebackService = new OrderGiveback();
 		$where = [
 			'payment_status' => OrderGivebackStatus::PAYMENT_STATUS_IN_PAY,
-			'payment_end_time' => time() - 7*3600,
+			'payment_end_time' => time() - 7*24*3600,
 		];
 		DB::beginTransaction();
 		try{
