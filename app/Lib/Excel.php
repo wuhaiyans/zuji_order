@@ -172,8 +172,7 @@ class Excel
     public static function csvWrite1($export_data, $column_name=[] , $title='数据导出')
     {
 
-        header ( "Content-type:application/vnd.ms-excel" );
-        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", ".$title." ) . ".csv" );
+
 
         // 打开PHP文件句柄，php://output 表示直接输出到浏览器
         $fp = fopen('php://output', 'a');
@@ -206,7 +205,7 @@ class Excel
 
 //        }
 
-        exit ();
+//        exit ();
 
 
     }

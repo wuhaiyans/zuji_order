@@ -348,6 +348,8 @@ class OrderController extends Controller
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
                 Log::info("进程执行start");
+                header ( "Content-type:application/vnd.ms-excel" );
+                header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
                 while(true) {
 
                     if ($abc>$smallPage) {
@@ -388,10 +390,12 @@ class OrderController extends Controller
                                 ];
                             }
 
-                            //停1秒
-                            sleep(1);
 
-                            $orderExcel =  Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
+
+                            $orderExcel =  Excel::csvWrite1($data, $headers);
+
+                           //停1秒
+                           sleep(1);
 
                         } else {
 
