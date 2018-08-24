@@ -32,7 +32,7 @@ class MiniGivebackController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->input();
-        \App\Lib\Common\LogApi::debug('调用主动支付接口',$params);
+//        \App\Lib\Common\LogApi::debug('调用主动支付接口',$params);
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
             return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
