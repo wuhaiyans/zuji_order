@@ -376,6 +376,7 @@ class OrderController extends Controller
                         exit;
                     }
                     Log::info("i的值:" . $abc);
+                    Log::info("i的值:" . $smallPage);
                     $offset = ($outPages - 1) * $total_export_count;
                     $params['page'] = intval(($offset / $pre_count)+ $abc) ;
                     ++$abc;
