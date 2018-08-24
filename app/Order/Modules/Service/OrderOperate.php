@@ -1330,6 +1330,8 @@ class OrderOperate
 
         $orderListArray = OrderRepository::getAdminOrderList($param);
 
+        if (isset($param['count'])) return $orderListArray;
+
         $goodsData =  self::getExportActAdminState($orderListArray['orderIds'], $actArray=array());
 //        $orderListArray = objectToArray($orderList);
 
@@ -1696,10 +1698,10 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
-        $goodsList = array_column($goodsList,NULL,'goods_no');
+
 //        dd($goodsList);
         if (empty($goodsList)) return [];
-
+        $goodsList = array_column($goodsList,NULL,'goods_no');
         $orderListArray = array();
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
