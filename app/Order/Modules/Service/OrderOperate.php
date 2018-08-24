@@ -954,7 +954,7 @@ class OrderOperate
                 $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
             }
             //判断商品状态是 否是完成状态 买断/还机
-            if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
+            if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::CLOSED_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
                 $orderStatus = Inc\OrderStatus::OrderCompleted;
             }
             //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
