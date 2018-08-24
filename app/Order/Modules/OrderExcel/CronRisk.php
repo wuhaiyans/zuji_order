@@ -32,7 +32,7 @@ class CronRisk
         error_reporting(E_ALL ^ E_NOTICE);
 
         //cul获取渠道应用信息
-        $channelList = Channel::getChannelListName();
+        $channelList = Channel::getChannelAppidListName();
 
 
         //获取所有订单

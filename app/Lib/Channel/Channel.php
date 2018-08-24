@@ -55,7 +55,35 @@ class Channel  extends \App\Lib\BaseApi{
 
     }
 
+    /**
+     *
+     * 获取渠道应用列表
+     * Author: limin
+     * @return mixed|string
+     */
+    public static function getChannelAppidListName()
+    {
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.channel.appid.list.get';
+        $data['params'] = [
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        //var_dump($info);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return false;
+        }
+        foreach($info['data'] as $keys=>$values) {
 
+            $channerName[$values['id']] = $values['name'];
+        }
+        return $channerName;
+
+
+    }
 }
 
 
