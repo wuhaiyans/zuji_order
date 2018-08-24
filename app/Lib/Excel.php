@@ -169,20 +169,8 @@ class Excel
     }
 
 
-    public static function csvWrite1($export_data, $column_name=[] , $title='数据导出')
+    public static function csvWrite1($export_data, $fp , $title='数据导出')
     {
-
-
-
-        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
-        $fp = fopen('php://output', 'a');
-
-        // 将中文标题转换编码，否则乱码
-        foreach ($column_name as $i => $v) {
-            $column_name[$i] = iconv('utf-8', 'GB18030', $v);
-        }
-        // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, $column_name);
 
 //        $pre_count = 5000;
 //        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
@@ -203,9 +191,6 @@ class Excel
                 flush();
             }
 
-//        }
-
-//        exit ();
 
 
     }
