@@ -567,10 +567,11 @@ class OrderGiveback
 		//解冻订单
 		//查询当前订单处于还机未结束的订单数量（大于1则不能解冻订单）
 		$givebackUnfinshedList = $orderGivebackRespository->getUnfinishedListByOrderNo($orderNo);
-		if( $givebackUnfinshedList === false ){
-			\App\Lib\Common\LogApi::debug('[还机订单解冻]解冻异常',['$orderNo'=>$orderNo]);
-			return false;
-		}
+		//逾期违约已经关闭还机单，如果处于逾期违约的支付时解冻订单只判断未结束的还机单数量
+//		if( $givebackUnfinshedList === false ){
+//			\App\Lib\Common\LogApi::debug('[还机订单解冻]解冻异常',['$orderNo'=>$orderNo]);
+//			return false;
+//		}
 		if( count($givebackUnfinshedList) != 1 ){
 			return true;
 		} 

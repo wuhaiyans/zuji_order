@@ -337,7 +337,7 @@ class CronOperate
 			
 		} catch (\Exception $ex) {
 			DB::rollBack();
-			\App\Lib\Common\LogApi::debug('[还机单逾期违约]', ['msg'=>$ex->getMessage()]);
+			\App\Lib\Common\LogApi::debug('giveback-cron-agedfail-result', ['msg'=>$ex->getMessage()]);
 		}
 		DB::commit();
 	}

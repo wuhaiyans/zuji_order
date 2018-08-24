@@ -31,7 +31,7 @@ class CronCollection
         error_reporting(E_ALL ^ E_NOTICE);
 
         //cul获取渠道应用信息
-        $channelList = Channel::getChannelListName();
+        $channelList = Channel::getChannelAppidListName();
 
         if($_GET['month']==4){
             $date = "2018-04";
@@ -52,6 +52,11 @@ class CronCollection
             $date = "2018-07";
             $beginTime = strtotime("2018-07-01 00:00:00");
             $endTime = strtotime("2018-07-31 23:59:59");
+        }
+        elseif($_GET['month']==8){
+            $date = "2018-08";
+            $beginTime = strtotime("2018-08-01 00:00:00");
+            $endTime = strtotime("2018-08-31 23:59:59");
         }
         else{
             //获取上个月所有催收订单

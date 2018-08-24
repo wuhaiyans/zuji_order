@@ -325,11 +325,17 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
+        if (redisIncr("mannage_orderlist_export",100)>1){
+
+            echo "已经有数据正在导入，请稍后重试";
+            exit;
+        }
+
             set_time_limit(0);
             try{
 
                 $params = $request->all();
-                $params['size'] = 5;
+                $params['size'] = 500;
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -339,11 +345,11 @@ class OrderController extends Controller
                 $total     = $orderData['total'];
 
                 unset($params['count']);
-                $total_export_count = 100;
-                if ($total<100) {
+                $total_export_count = 5000;
+                if ($total<5000) {
                     $total_export_count = $total;
                 }
-                $pre_count = 5;
+                $pre_count = 500;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
@@ -370,6 +376,7 @@ class OrderController extends Controller
                         exit;
                     }
                     Log::info("i的值:" . $abc);
+                    Log::info("smallpage的值:" . $smallPage);
                     $offset = ($outPages - 1) * $total_export_count;
                     $params['page'] = intval(($offset / $pre_count)+ $abc) ;
                     ++$abc;
@@ -402,12 +409,10 @@ class OrderController extends Controller
                                 ];
                             }
 
-
-
-                            $orderExcel =  Excel::csvWrite1($data, $fp);
+                            $orderExcel =  Excel::csvOrderListWrite($data, $fp);
 
                            //停1秒
-                           sleep(1);
+//                           usleep(1000*100);
 
                         } else {
 

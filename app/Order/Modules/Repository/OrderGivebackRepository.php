@@ -119,7 +119,7 @@ class OrderGivebackRepository
 			return $result->toArray();
 		}
 		set_apistatus(\App\Lib\ApiStatus::CODE_92400, '获取还机单数据为空!');
-		return false;
+		return [];
 	}
 	/**
 	 * 根据条件更新数据

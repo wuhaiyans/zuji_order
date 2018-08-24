@@ -32,7 +32,7 @@ class CronRisk
         error_reporting(E_ALL ^ E_NOTICE);
 
         //cul获取渠道应用信息
-        $channelList = Channel::getChannelListName();
+        $channelList = Channel::getChannelAppidListName();
 
 
         //获取所有订单
@@ -166,17 +166,24 @@ class CronRisk
                 }
                 /************************分期处理*********************/
                 //初始化分期
-                for($i=1;$i<=12;$i++){
-                    $item['term_'.$i] = "";
+                for($init=1;$init<=12;$init++){
+                    $item['term_'.$init] = "";
                 }
                 if($newInstalment[$item['order_no']]){
                     $instalment = $newInstalment[$item['order_no']];
                     foreach($instalment as $after){
-                        $item['term_'.$after['times']] = $after['amount'];
+                        if($after['status'] == Inc\OrderInstalmentStatus::SUCCESS){
+                            $item['term_'.$after['times']] = $after['amount'];
+                        }
+                        elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
+                            $item['term_'.$after['times']] = "扣款失败";
+                        }
+
                     }
                 }
 
                 $data[] = [
+                    $item['order_no']." ",
                     $item['realname'],
                     $item['sex'],
                     $item['cret_no']." ",
@@ -199,6 +206,7 @@ class CronRisk
                     $item['mianyajin'],
                     $item['app_name'],
                     $item['user_address'],
+                    $item['pay_type'],
                     $item['term_1'],
                     $item['term_2'],
                     $item['term_3'],
@@ -216,6 +224,7 @@ class CronRisk
         }
         //定义excel头部参数名称
         $headers = [
+            "订单号",
             '用户姓名',
             '性别',
             '身份证号',
@@ -237,6 +246,7 @@ class CronRisk
             '免押金',
             '渠道',
             '收货地址',
+            '支付方式',
             '第1期',
             '第2期',
             '第3期',

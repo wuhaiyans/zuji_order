@@ -234,7 +234,7 @@ class WithholdController extends Controller
         // 修改分期支付中状态
         $paying = \App\Order\Models\OrderGoodsInstalment::query()
             ->where(['id' => $instalmentInfo['id']])
-            ->update(['status'=>OrderInstalmentStatus::PAYING]);
+            ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
         if(!$paying){
             DB::rollBack();
             LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
@@ -468,7 +468,7 @@ class WithholdController extends Controller
             // 修改分期支付中状态
             $paying = \App\Order\Models\OrderGoodsInstalment::query()
                 ->where(['id' => $instalmentId])
-                ->update(['status'=>OrderInstalmentStatus::PAYING]);
+                ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
             if(!$paying){
                 LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
             }
@@ -588,22 +588,19 @@ class WithholdController extends Controller
     public function crontabCreatepayNum()
     {
         // 查询当天没有扣款记录数据
-        $date = date('Ymd');
         $dateTime  = strtotime(date('Y-m-d',time()));
         $whereArray =
             [
                 ['withhold_day', '<=', $dateTime],
                 ['withhold_day', '>', 0],
             ];
-
+        $needPayArray = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL,OrderInstalmentStatus::PAYING];
         $total = DB::table('order_goods_instalment')
             ->where($whereArray)
-            ->whereIn('status', [1,3])
+            ->whereIn('status', $needPayArray)
             ->count();
 
         //根据进程数量，判断每页显示的条数
-        $processNum = 0;
-        $limit  =   0;
         $maxProces = 20;
         if (ceil($total / 100)>$maxProces ) {
 
@@ -621,7 +618,7 @@ class WithholdController extends Controller
             $result = DB::table('order_goods_instalment')
                 ->select('id')
                 ->where($whereArray)
-                ->whereIn('status', [1,3])
+                ->whereIn('status', $needPayArray)
                 ->orderBy('id',"ASC")
                 ->offset($offSet)
                 ->take($limit)
@@ -651,10 +648,9 @@ class WithholdController extends Controller
         ini_set('max_execution_time', '0');
 
         //需要扣款的状态
-        $needPayArray = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL];
+        $needPayArray = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL,OrderInstalmentStatus::PAYING];
 
         // 查询当天没有扣款记录数据
-        $date = date('Ymd');
         $dateTime   = strtotime(date('Y-m-d',time()));
 
         $whereArray =
@@ -666,7 +662,7 @@ class WithholdController extends Controller
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
-            ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
+            ->whereIn('status', $needPayArray)
             ->count();
         LogApi::info('[crontabCreatepay]需要扣款的数量'.$total);
         if($total == 0){
@@ -718,7 +714,7 @@ class WithholdController extends Controller
             // 查询数据
             $result =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
-                ->whereIn('status', [OrderInstalmentStatus::UNPAID,OrderInstalmentStatus::FAIL])
+                ->whereIn('status', $needPayArray)
                 ->orderBy('id','ASC')
                 ->offset($startOffset)
                 ->limit($limit)
@@ -783,12 +779,31 @@ class WithholdController extends Controller
                 // 价格单位转换
                 $amount = intval( strval($item['amount'] * 100) );
 
-                // 修改分期支付中状态
-                $paying = \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where(['id' => $item['id']])
-                    ->update(['status'=>OrderInstalmentStatus::PAYING]);
-                if(!$paying){
-                    LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+
+                // 分期若在 支付中状态 则跳出
+                if( $item['status'] == OrderInstalmentStatus::PAYING ){
+                    /**
+                     * 分期时间update_time超过一个小时 则修改为失败状态
+                     */
+                    $pastTimes = time() - 3600;
+                    if($pastTimes >= $item['update_time']){
+                        $updateFailStatus = \App\Order\Models\OrderGoodsInstalment::query()
+                            ->where(['id' => $item['id']])
+                            ->update(['status' => OrderInstalmentStatus::FAIL,'update_time' => time()]);
+                        if(!$updateFailStatus){
+                            LogApi::error('[crontabCreatepay]修改分期状态支付中为失败：'.$subject);
+                        }
+                    }
+                    continue;
+
+                }else{
+                    // 修改分期支付中状态
+                    $paying = \App\Order\Models\OrderGoodsInstalment::query()
+                        ->where(['id' => $item['id']])
+                        ->update(['status' => OrderInstalmentStatus::PAYING,'update_time' => time()]);
+                    if(!$paying){
+                        LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                    }
                 }
 
 
