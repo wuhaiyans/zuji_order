@@ -335,7 +335,7 @@ class OrderController extends Controller
             try{
 
                 $params = $request->all();
-                $params['size'] = 100;
+                $params['size'] = 1000;
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -349,7 +349,7 @@ class OrderController extends Controller
                 if ($total<5000) {
                     $total_export_count = $total;
                 }
-                $pre_count = 100;
+                $pre_count = 1000;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
