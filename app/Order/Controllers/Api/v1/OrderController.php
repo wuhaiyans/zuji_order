@@ -329,7 +329,7 @@ class OrderController extends Controller
             try{
 
                 $params = $request->all();
-                $params['size'] = 5;
+                $params['size'] = 500;
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -339,11 +339,11 @@ class OrderController extends Controller
                 $total     = $orderData['total'];
 
                 unset($params['count']);
-                $total_export_count = 100;
-                if ($total<100) {
+                $total_export_count = 10000;
+                if ($total<10000) {
                     $total_export_count = $total;
                 }
-                $pre_count = 5;
+                $pre_count = 500;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
@@ -402,12 +402,10 @@ class OrderController extends Controller
                                 ];
                             }
 
-
-
                             $orderExcel =  Excel::csvWrite1($data, $fp);
 
                            //停1秒
-                           sleep(1);
+                           usleep(1000*100);
 
                         } else {
 
