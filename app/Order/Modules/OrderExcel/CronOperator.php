@@ -6,6 +6,7 @@
  */
 namespace App\Order\Modules\OrderExcel;
 
+use App\Lib\Channel\Channel;
 use App\Lib\Excel;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -316,7 +317,7 @@ class CronOperator
             //return false;
         }
         //获取上月26号-下月23号所有订单
-        $beginDay = date("Y-m-26",strtotime("Last Month"));
+        $beginDay = date("Y-m-25",strtotime("Last Month"));
         $endDay = date("Y-m-23",time());
         $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
