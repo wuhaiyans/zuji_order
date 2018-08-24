@@ -33,7 +33,6 @@ class CronRisk
 
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-        var_dump($channelList);die;
 
         //获取所有订单
         $status = [
