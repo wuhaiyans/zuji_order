@@ -6,6 +6,7 @@
  */
 namespace App\Order\Modules\OrderExcel;
 
+use App\Lib\Channel\Channel;
 use App\Lib\Excel;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
