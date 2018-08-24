@@ -315,7 +315,7 @@ class MiniNotifyController extends Controller
                         $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$orderGivebackInfo['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
                         if( empty($instalmentList[$orderGivebackInfo['goods_no']]) ){//分期结清请求关闭接口
                             //支付状态为支付中则请求关闭订单接口
-                            if( $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_IN_PAY || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY){
+                            if( $orderGivebackInfo['withhold_status'] == OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHHOLD || $orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY){
                                 //请求关闭订单接口
                                 $arr = [
                                     'zm_order_no'=>$data['zm_order_no'],
@@ -431,9 +431,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A817199359629257',//商户端订单号
-            'zm_order_no'=>'2018081700001001097415823700',//芝麻订单号
-            'out_trans_no'=>'A817199359629257',//商户端交易号
+            'out_order_no'=>'A823119008551174',//商户端订单号
+            'zm_order_no'=>'2018082300001001098442679017',//芝麻订单号
+            'out_trans_no'=>'A823119008551174',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid

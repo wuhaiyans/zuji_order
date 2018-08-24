@@ -86,8 +86,8 @@ class MiniGivebackController extends Controller
                         return apiResponse([], ApiStatus::CODE_35006, \App\Lib\Payment\mini\MiniApi::getError());
                     }
                 }
-                //修改分期支付状态为支付中
-                $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+                //修改代扣状态为代扣中
+                $data['withhold_status'] = OrderGivebackStatus::WITHHOLD_STATUS_IN_WITHHOLD;
                 //更新还机单
                 $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
                 if($orderGivebackResult){
@@ -487,7 +487,7 @@ class MiniGivebackController extends Controller
         //-+--------------------------------------------------------------------
         //拼接需要更新还机单状态更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
         $data['payment_time'] = time();
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
@@ -548,7 +548,7 @@ class MiniGivebackController extends Controller
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
         $data['payment_time'] = time();
         if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
             $smsModel = "GivebackEvaNoWitNoEnoNo";
