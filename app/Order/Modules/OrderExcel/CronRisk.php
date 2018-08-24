@@ -33,7 +33,7 @@ class CronRisk
 
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-
+        var_dump($channelList);die;
 
         //获取所有订单
         $status = [
@@ -85,11 +85,6 @@ class CronRisk
             $goodsError = "";
             $addressError = "";
             foreach($orderList as $item){
-                //订单相关信息
-
-                $item['create_time'] = date("Y-m-d H:i:s", $item['create_time']);
-                $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
-                $item['app_name'] = $channelList[$item['appid']];
 
                 //用户相关信息
                 if(empty($userList[$item['order_no']])){
@@ -130,7 +125,7 @@ class CronRisk
                     $addressError .= $item['order_no'].",";
                     $item['user_address'] = "";
                 }
-                $item['payment_time'] = $item['payment_time']>0?date("Y-m-d H:i:s",$item['payment_time']):"";
+
                 /************************风控处理*********************/
                 $item['yidun_decision_name'] = "";
                 $item['yidun_hit_rules'] = "";
@@ -169,6 +164,7 @@ class CronRisk
                 for($init=1;$init<=12;$init++){
                     $item['term_'.$init] = "";
                 }
+                $item['is_pay'] = "";
                 if($newInstalment[$item['order_no']]){
                     $instalment = $newInstalment[$item['order_no']];
                     foreach($instalment as $after){
@@ -178,9 +174,19 @@ class CronRisk
                         elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
                             $item['term_'.$after['times']] = "扣款失败";
                         }
-
+                        if(date("Ym") == $after['term']){
+                            $item['is_pay'] = $after['status']==Inc\OrderInstalmentStatus::SUCCESS?"是":"否";
+                        }
                     }
                 }
+                if($item['pay_type'] == Inc\PayInc::FlowerStagePay){
+                    $item['is_pay'] = "";
+                }
+                //订单相关信息
+                $item['create_time'] = date("Y-m-d H:i:s", $item['create_time']);
+                $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
+                $item['app_name'] = $channelList[$item['appid']];
+                $item['payment_time'] = $item['payment_time']>0?date("Y-m-d H:i:s",$item['payment_time']):"";
 
                 $data[] = [
                     $item['order_no']." ",
@@ -207,6 +213,7 @@ class CronRisk
                     $item['app_name'],
                     $item['user_address'],
                     $item['pay_type'],
+                    $item['is_pay'],
                     $item['term_1'],
                     $item['term_2'],
                     $item['term_3'],
@@ -247,6 +254,7 @@ class CronRisk
             '渠道',
             '收货地址',
             '支付方式',
+            '最近是否还款',
             '第1期',
             '第2期',
             '第3期',
