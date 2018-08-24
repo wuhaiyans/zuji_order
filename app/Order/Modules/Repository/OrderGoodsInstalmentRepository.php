@@ -68,6 +68,8 @@ class OrderGoodsInstalmentRepository
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+        }else{
+            $whereArray[] = ['order_goods_instalment.status', '!=', \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL];
         }
 
         // 根据还款类型
@@ -90,6 +92,7 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
+        $whereArray[] = ['order_info.order_status', '!=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
 
         $result = OrderGoodsInstalment::query()->where($whereArray)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
@@ -130,6 +133,8 @@ class OrderGoodsInstalmentRepository
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+        }else{
+            $whereArray[] = ['order_goods_instalment.status', '!=', \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL];
         }
 
         //根据分期日期
@@ -145,6 +150,9 @@ class OrderGoodsInstalmentRepository
         if (isset($param['mobile']) && !empty($param['mobile'])) {
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
+
+        $whereArray[] = ['order_info.order_status', '!=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
