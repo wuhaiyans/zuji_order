@@ -42,7 +42,7 @@ class CronRisk
         ];
         $limit = 500;
         $count = Order::query()->wherein("order_status",$status)->count();
-        $data = 0;
+        $data = [];
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i==0?0:$i*$limit+1;
@@ -78,7 +78,6 @@ class CronRisk
             //获取订单地址信息
             $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
 
-            $data = [];
             $orderError = "";
             $userError = "";
             $goodsError = "";
