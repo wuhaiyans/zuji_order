@@ -335,7 +335,7 @@ class OrderController extends Controller
             try{
 
                 $params = $request->all();
-                $params['size'] = 500;
+                $params['size'] = 100;
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -349,7 +349,7 @@ class OrderController extends Controller
                 if ($total<5000) {
                     $total_export_count = $total;
                 }
-                $pre_count = 500;
+                $pre_count = 100;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
@@ -376,7 +376,7 @@ class OrderController extends Controller
                         exit;
                     }
                     Log::info("i的值:" . $abc);
-                    Log::info("i的值:" . $smallPage);
+                    Log::info("smallpage的值:" . $smallPage);
                     $offset = ($outPages - 1) * $total_export_count;
                     $params['page'] = intval(($offset / $pre_count)+ $abc) ;
                     ++$abc;
@@ -412,7 +412,7 @@ class OrderController extends Controller
                             $orderExcel =  Excel::csvWrite1($data, $fp);
 
                            //停1秒
-                           usleep(1000*100);
+//                           usleep(1000*100);
 
                         } else {
 
