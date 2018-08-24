@@ -166,13 +166,19 @@ class CronRisk
                 }
                 /************************分期处理*********************/
                 //初始化分期
-                for($i=1;$i<=12;$i++){
-                    $item['term_'.$i] = "";
+                for($init=1;$init<=12;$init++){
+                    $item['term_'.$init] = "";
                 }
                 if($newInstalment[$item['order_no']]){
                     $instalment = $newInstalment[$item['order_no']];
                     foreach($instalment as $after){
-                        $item['term_'.$after['times']] = $after['amount'];
+                        if($after['status'] == Inc\OrderInstalmentStatus::SUCCESS){
+                            $item['term_'.$after['times']] = $after['amount'];
+                        }
+                        elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
+                            $item['term_'.$after['times']] = "扣款失败";
+                        }
+
                     }
                 }
 
