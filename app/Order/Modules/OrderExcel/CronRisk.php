@@ -141,21 +141,21 @@ class CronRisk
                     $risk = $newRiskList[$item['order_no']];
                     foreach($risk as $stem){
                         if($stem['type'] == "yidun"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem)?"":json_decode($stem,true);
                             if($num){
                                 $item['yidun_decision_name'] = $num['decision_name'];
                                 $item['yidun_hit_rules'] = json_encode($num['hit_rules']);
                             }
                         }
                         elseif($stem['type'] == "mno"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem)?"":json_decode($stem,true);
                             if($num){
                                 $item['tongdun_decision_name'] = $num['decision_name'];
                                 $item['tongdun_hit_rules'] = json_encode($num['hit_rules']);
                             }
                         }
                         elseif($stem['type'] == "yidun"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem)?"":json_decode($stem,true);
                             if($num){
                                 $item['knight_decision_name'] = $num['decision_name'];
                                 $item['knight_hit_rules'] = json_encode($num['hit_rules']);
