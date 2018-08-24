@@ -409,7 +409,7 @@ class OrderController extends Controller
                                 ];
                             }
 
-                            $orderExcel =  Excel::csvWrite1($data, $fp);
+                            $orderExcel =  Excel::csvOrderListWrite($data, $fp);
 
                            //停1秒
 //                           usleep(1000*100);
