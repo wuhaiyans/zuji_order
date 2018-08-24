@@ -26,6 +26,8 @@ class CronOperator
      */
     public static function everDay()
     {
+        //cul获取渠道应用信息
+        $channelList = Channel::getChannelAppidListName();
         //获取当天所有订单
         $date = date("Y-m-d",strtotime("Yesterday"));
         $where[] = ['create_time', '>=', strtotime($date." 00:00:00"),];
@@ -49,6 +51,7 @@ class CronOperator
             '下单时间',
             '订单状态',
             '订单来源',
+            '下单渠道',
             '支付方式及通道',
             '用户名',
             '手机号',
@@ -85,11 +88,14 @@ class CronOperator
             $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
+            $item['app_name'] = $channelList[$item['appid']];
+
             $data[] = [
                 $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
+                $item['app_name'],
                 $item['pay_type'],
                 $item['realname'],
                 $item['mobile'],
@@ -114,6 +120,8 @@ class CronOperator
      * @return excel文件
      */
     public static function everWeek(){
+        //cul获取渠道应用信息
+        $channelList = Channel::getChannelAppidListName();
         //获取当天所有订单
         $monday = date("Y-m-d",strtotime("Last week"));
         $sunday = date("Y-m-d",strtotime("Last Sunday"));
@@ -138,6 +146,7 @@ class CronOperator
             '下单时间',
             '订单状态',
             '订单来源',
+            '下单渠道',
             '支付方式及通道',
             '用户名',
             '手机号',
@@ -174,11 +183,13 @@ class CronOperator
             $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
+            $item['app_name'] = $channelList[$item['appid']];
             $data[] = [
                 $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
+                $item['app_name'],
                 $item['pay_type'],
                 $item['realname'],
                 $item['mobile'],
@@ -203,6 +214,8 @@ class CronOperator
      * @return excel文件
      */
     public  function fiveteen(){
+        //cul获取渠道应用信息
+        $channelList = Channel::getChannelAppidListName();
         //获取当天所有订单
         $beginDay = date("Y-m-d",strtotime("Yesterday -15 day"));
         $endDay = date("Y-m-d",strtotime("Yesterday"));
@@ -227,6 +240,7 @@ class CronOperator
             '下单时间',
             '订单状态',
             '订单来源',
+            '下单渠道',
             '支付方式及通道',
             '用户名',
             '手机号',
@@ -263,11 +277,13 @@ class CronOperator
             $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
+            $item['app_name'] = $channelList[$item['appid']];
             $data[] = [
                 $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
+                $item['app_name'],
                 $item['pay_type'],
                 $item['realname'],
                 $item['mobile'],
@@ -292,6 +308,9 @@ class CronOperator
      * @return excel文件
      */
     public  function everMonth(){
+        //cul获取渠道应用信息
+        $channelList = Channel::getChannelAppidListName();
+
         $today = date("d",time());
         if($today != 24){
             //return false;
@@ -320,6 +339,7 @@ class CronOperator
             '下单时间',
             '订单状态',
             '订单来源',
+            '下单渠道',
             '支付方式及通道',
             '用户名',
             '手机号',
@@ -356,11 +376,13 @@ class CronOperator
             $item['zuqi_type']= Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
             $item['create_time'] = date("Y-m-d H:i:s",$item['create_time']);
 
+            $item['app_name'] = $channelList[$item['appid']];
             $data[] = [
                 $item['order_no']." ",
                 $item['create_time'],
                 $item['order_status'],
                 $item['order_type'],
+                $item['app_name'],
                 $item['pay_type'],
                 $item['realname'],
                 $item['mobile'],
