@@ -350,6 +350,20 @@ class OrderController extends Controller
                 Log::info("进程执行start");
                 header ( "Content-type:application/vnd.ms-excel" );
                 header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
+
+                // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+                $fp = fopen('php://output', 'a');
+
+                // 租期，成色，颜色，容量，网络制式
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+                    '订单实际总租金','订单总押金','意外险总金额'];
+
+                // 将中文标题转换编码，否则乱码
+                foreach ($headers as $i => $v) {
+                    $column_name[$i] = iconv('utf-8', 'GB18030', $v);
+                }
+                // 将标题名称通过fputcsv写到文件句柄
+                fputcsv($fp, $column_name);
                 while(true) {
 
                     if ($abc>$smallPage) {
@@ -366,9 +380,7 @@ class OrderController extends Controller
 
                    if ($orderData['code']===ApiStatus::CODE_0) {
 
-//                租期，成色，颜色，容量，网络制式
-                            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-                                '订单实际总租金','订单总押金','意外险总金额'];
+
                             $data = array();
                             foreach ($orderData['data']['data'] as $item) {
                                 $data[] = [
@@ -392,7 +404,7 @@ class OrderController extends Controller
 
 
 
-                            $orderExcel =  Excel::csvWrite1($data, $headers);
+                            $orderExcel =  Excel::csvWrite1($data, $fp);
 
                            //停1秒
                            sleep(1);
