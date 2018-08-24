@@ -362,44 +362,44 @@ class OrderController extends Controller
                     $orderData = array();
                     $orderData = Service\OrderOperate::getOrderExportList($params);
 
-//                        if ($orderData['code']===ApiStatus::CODE_0) {
-//
-////                租期，成色，颜色，容量，网络制式
-//                            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-//                                '订单实际总租金','订单总押金','意外险总金额'];
-////                            $data = array();
-//                            foreach ($orderData['data']['data'] as $item) {
-//                                $data[] = [
-//                                    $item['order_no'],
-//                                    date('Y-m-d H:i:s', $item['create_time']),
-//                                    $item['order_status_name'],
-//                                    $item['appid_name'],
-//                                    $item['pay_type_name'],
-////                        $item['visit_name'],
-//                                    $item['name'],
-//                                    $item['mobile'],
-//                                    $item['address_info'],
-//                                    implode(",",array_column($item['goodsInfo'],"goods_name")),
-//                                    implode(",",array_column($item['goodsInfo'],"zuqi_name")),
-//                                    implode(",",array_column($item['goodsInfo'],"specs")),
-//                                    $item['order_amount'],
-//                                    $item['order_yajin'],
-//                                    $item['order_insurance'],
-//                                ];
-//                            }
-//
-//                            //停1秒
-////                            sleep(1);
-//
-////                            $orderExcel =  Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
-//
-//                        } else {
-//
-//                            return apiResponse([],ApiStatus::CODE_34007);
-//                        }
+                   if ($orderData['code']===ApiStatus::CODE_0) {
+
+//                租期，成色，颜色，容量，网络制式
+                            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+                                '订单实际总租金','订单总押金','意外险总金额'];
+                            $data = array();
+                            foreach ($orderData['data']['data'] as $item) {
+                                $data[] = [
+                                    $item['order_no'],
+                                    date('Y-m-d H:i:s', $item['create_time']),
+                                    $item['order_status_name'],
+                                    $item['appid_name'],
+                                    $item['pay_type_name'],
+//                        $item['visit_name'],
+                                    $item['name'],
+                                    $item['mobile'],
+                                    $item['address_info'],
+                                    implode(",",array_column($item['goodsInfo'],"goods_name")),
+                                    implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                                    implode(",",array_column($item['goodsInfo'],"specs")),
+                                    $item['order_amount'],
+                                    $item['order_yajin'],
+                                    $item['order_insurance'],
+                                ];
+                            }
+
+                            //停1秒
+                            sleep(1);
+
+                            $orderExcel =  Excel::csvWrite1($data, $headers,'后台订单列表数据导出');
+
+                        } else {
+
+                            return apiResponse([],ApiStatus::CODE_34007);
+                        }
                 }
 
-//              return $orderExcel;
+              return $orderExcel;
 
             } catch (\Exception $e) {
 
