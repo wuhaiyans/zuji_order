@@ -183,6 +183,7 @@ class CronRisk
                 }
 
                 $data[] = [
+                    $item['order_no']." ",
                     $item['realname'],
                     $item['sex'],
                     $item['cret_no']." ",
@@ -223,6 +224,7 @@ class CronRisk
         }
         //定义excel头部参数名称
         $headers = [
+            "订单号",
             '用户姓名',
             '性别',
             '身份证号',
