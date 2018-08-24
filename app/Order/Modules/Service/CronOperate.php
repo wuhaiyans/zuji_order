@@ -296,6 +296,7 @@ class CronOperate
 		DB::beginTransaction();
 		try{
 			do{
+				sql_profiler();
 				//一页一页的查询处理，处理完成后，还机单状态会更新，所以永远查询第一页数据
 				$orderGivebackList = $orderGivebackService->getList($where,['page'=>1]);
 				
