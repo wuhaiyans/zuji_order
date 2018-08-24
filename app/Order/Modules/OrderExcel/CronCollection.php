@@ -53,6 +53,11 @@ class CronCollection
             $beginTime = strtotime("2018-07-01 00:00:00");
             $endTime = strtotime("2018-07-31 23:59:59");
         }
+        elseif($_GET['month']==8){
+            $date = "2018-08";
+            $beginTime = strtotime("2018-08-01 00:00:00");
+            $endTime = strtotime("2018-08-31 23:59:59");
+        }
         else{
             //获取上个月所有催收订单
             $date = date("Y-m",strtotime('-1 month'));
