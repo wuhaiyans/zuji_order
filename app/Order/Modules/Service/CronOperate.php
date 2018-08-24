@@ -298,6 +298,8 @@ class CronOperate
 			do{
 				//一页一页的查询处理，处理完成后，还机单状态会更新，所以永远查询第一页数据
 				$orderGivebackList = $orderGivebackService->getList($where,['page'=>1]);
+				
+			\App\Lib\Common\LogApi::debug('giveback-cron-agedfail-list', ['msg'=>$orderGivebackList]);
 				$orderGivebackListArr = $orderGivebackList['data'];//逾期的还机单列表
 				$total = $orderGivebackList['total'];//逾期的还机单总数
 				$lastPage = $orderGivebackList['last_page'];//逾期的还机单最后一页列表
@@ -337,7 +339,7 @@ class CronOperate
 			
 		} catch (\Exception $ex) {
 			DB::rollBack();
-			\App\Lib\Common\LogApi::debug('[还机单逾期违约]', ['msg'=>$ex->getMessage()]);
+			\App\Lib\Common\LogApi::debug('giveback-cron-agedfail-result', ['msg'=>$ex->getMessage()]);
 		}
 		DB::commit();
 	}
