@@ -169,10 +169,12 @@ class Excel
     }
 
 
+
     public static function csvWrite1($export_data, $column_name=[] , $title='数据导出')
     {
 
-
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", ".$title." ) . ".csv" );
 
         // 打开PHP文件句柄，php://output 表示直接输出到浏览器
         $fp = fopen('php://output', 'a');
@@ -183,6 +185,35 @@ class Excel
         }
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $column_name);
+
+//        $pre_count = 5000;
+//        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+//            $export_data = $db->getAll($sql." limit ".strval($i*$pre_count).",{$pre_count}");
+        foreach ( $export_data as $item ) {
+            $rows = array();
+            foreach ( $item as $export_obj){
+                $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+            }
+            fputcsv($fp, $rows);
+        }
+
+        // 将已经写到csv中的数据存储变量销毁，释放内存占用
+        unset($export_data);
+        if(ob_get_level()>0){
+
+            ob_flush();
+            flush();
+        }
+
+//        }
+
+        exit ();
+
+
+    }
+
+    public static function csvOrderListWrite($export_data, $fp , $title='数据导出')
+    {
 
 //        $pre_count = 5000;
 //        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
@@ -203,9 +234,6 @@ class Excel
                 flush();
             }
 
-//        }
-
-//        exit ();
 
 
     }

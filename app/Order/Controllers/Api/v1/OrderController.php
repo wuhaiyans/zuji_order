@@ -325,11 +325,17 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
+        if (redisIncr("mannage_orderlist_export",100)>1){
+
+            echo "已经有数据正在导入，请稍后重试";
+            exit;
+        }
+
             set_time_limit(0);
             try{
 
                 $params = $request->all();
-                $params['size'] = 5;
+                $params['size'] = 500;
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -339,23 +345,38 @@ class OrderController extends Controller
                 $total     = $orderData['total'];
 
                 unset($params['count']);
-                $total_export_count = 100;
-                if ($total<100) {
+                $total_export_count = 5000;
+                if ($total<5000) {
                     $total_export_count = $total;
                 }
-                $pre_count = 5;
+                $pre_count = 500;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
                 Log::info("进程执行start");
                 header ( "Content-type:application/vnd.ms-excel" );
                 header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
+
+                // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+                $fp = fopen('php://output', 'a');
+
+                // 租期，成色，颜色，容量，网络制式
+                $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+                    '订单实际总租金','订单总押金','意外险总金额'];
+
+                // 将中文标题转换编码，否则乱码
+                foreach ($headers as $i => $v) {
+                    $column_name[$i] = iconv('utf-8', 'GB18030', $v);
+                }
+                // 将标题名称通过fputcsv写到文件句柄
+                fputcsv($fp, $column_name);
                 while(true) {
 
                     if ($abc>$smallPage) {
                         exit;
                     }
                     Log::info("i的值:" . $abc);
+                    Log::info("smallpage的值:" . $smallPage);
                     $offset = ($outPages - 1) * $total_export_count;
                     $params['page'] = intval(($offset / $pre_count)+ $abc) ;
                     ++$abc;
@@ -366,9 +387,7 @@ class OrderController extends Controller
 
                    if ($orderData['code']===ApiStatus::CODE_0) {
 
-//                租期，成色，颜色，容量，网络制式
-                            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-                                '订单实际总租金','订单总押金','意外险总金额'];
+
                             $data = array();
                             foreach ($orderData['data']['data'] as $item) {
                                 $data[] = [
@@ -390,12 +409,10 @@ class OrderController extends Controller
                                 ];
                             }
 
-
-
-                            $orderExcel =  Excel::csvWrite1($data, $headers);
+                            $orderExcel =  Excel::csvOrderListWrite($data, $fp);
 
                            //停1秒
-                           sleep(1);
+//                           usleep(1000*100);
 
                         } else {
 

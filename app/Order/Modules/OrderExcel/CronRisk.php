@@ -42,11 +42,13 @@ class CronRisk
         ];
         $limit = 500;
         $count = Order::query()->wherein("order_status",$status)->count();
-        $data = 0;
+        $data = [];
+        $single = 0;
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
-            $offset = $i==0?0:$i*$limit+1;
+            $offset = $i*$limit;
             $orderList = Order::query()->wherein("order_status",$status)->offset($offset)->limit($limit)->get()->toArray();
+            $single += count($orderList);
             //拆分出订单号
             $orderNos = array_column($orderList,"order_no");
 
@@ -78,7 +80,6 @@ class CronRisk
             //获取订单地址信息
             $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
 
-            $data = [];
             $orderError = "";
             $userError = "";
             $goodsError = "";
@@ -141,21 +142,21 @@ class CronRisk
                     $risk = $newRiskList[$item['order_no']];
                     foreach($risk as $stem){
                         if($stem['type'] == "yidun"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem['data'])?"":json_decode($stem['data'],true);
                             if($num){
                                 $item['yidun_decision_name'] = $num['decision_name'];
                                 $item['yidun_hit_rules'] = json_encode($num['hit_rules']);
                             }
                         }
                         elseif($stem['type'] == "mno"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem['data'])?"":json_decode($stem['data'],true);
                             if($num){
                                 $item['tongdun_decision_name'] = $num['decision_name'];
                                 $item['tongdun_hit_rules'] = json_encode($num['hit_rules']);
                             }
                         }
                         elseif($stem['type'] == "yidun"){
-                            $num = json_decode($stem,true);
+                            $num = empty($stem['data'])?"":json_decode($stem['data'],true);
                             if($num){
                                 $item['knight_decision_name'] = $num['decision_name'];
                                 $item['knight_hit_rules'] = json_encode($num['hit_rules']);
@@ -165,17 +166,24 @@ class CronRisk
                 }
                 /************************分期处理*********************/
                 //初始化分期
-                for($i=1;$i<=12;$i++){
-                    $item['term_'.$i] = "";
+                for($init=1;$init<=12;$init++){
+                    $item['term_'.$init] = "";
                 }
                 if($newInstalment[$item['order_no']]){
                     $instalment = $newInstalment[$item['order_no']];
                     foreach($instalment as $after){
-                        $item['term_'.$after['times']] = $after['amount'];
+                        if($after['status'] == Inc\OrderInstalmentStatus::SUCCESS){
+                            $item['term_'.$after['times']] = $after['amount'];
+                        }
+                        elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
+                            $item['term_'.$after['times']] = "扣款失败";
+                        }
+
                     }
                 }
 
                 $data[] = [
+                    $item['order_no']." ",
                     $item['realname'],
                     $item['sex'],
                     $item['cret_no']." ",
@@ -198,6 +206,7 @@ class CronRisk
                     $item['mianyajin'],
                     $item['app_name'],
                     $item['user_address'],
+                    $item['pay_type'],
                     $item['term_1'],
                     $item['term_2'],
                     $item['term_3'],
@@ -215,6 +224,7 @@ class CronRisk
         }
         //定义excel头部参数名称
         $headers = [
+            "订单号",
             '用户姓名',
             '性别',
             '身份证号',
@@ -236,6 +246,7 @@ class CronRisk
             '免押金',
             '渠道',
             '收货地址',
+            '支付方式',
             '第1期',
             '第2期',
             '第3期',
@@ -252,6 +263,7 @@ class CronRisk
 
 
         Excel::localWrite($data,$headers,date("Y-m-d"),"risk");
+        echo "订单总数:".$single."<br/><br/>";
         echo "订单：".$orderError."<br/><br/>";
         echo "用户：".$userError."<br/><br/>";
         echo "商品：".$goodsError."<br/><br/>";
