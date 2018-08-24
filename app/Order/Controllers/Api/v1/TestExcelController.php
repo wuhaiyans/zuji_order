@@ -7,6 +7,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderExcel\CronCollection;
 use App\Order\Modules\OrderExcel\CronOperator;
+use App\Order\Modules\OrderExcel\CronRisk;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use Illuminate\Http\Request;
 use App\Order\Modules\Repository\OrderGoodsRepository;
@@ -139,6 +140,11 @@ class TestExcelController extends Controller
     }
     public function Month(){
         $obj = new CronCollection;
+        $obj->everMonth();
+        echo "success";
+    }
+    public function riskMonth(){
+        $obj = new CronRisk();
         $obj->everMonth();
         echo "success";
     }
