@@ -309,7 +309,7 @@ class CronOperate
 						//更新商品表状态
 						$orderGoods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($orderGiveBackInfo['goods_no']);
 						if( !$orderGoods ){
-							throw new Exception('商品信息获取失败：'.$orderGiveBackInfo['goods_no']);
+							throw new \Exception('商品信息获取失败：'.$orderGiveBackInfo['goods_no']);
 						}
 						$orderGoodsResult = $orderGoods->givebackClose();
 						if(!$orderGoodsResult){
