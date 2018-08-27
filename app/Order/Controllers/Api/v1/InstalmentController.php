@@ -351,10 +351,6 @@ class InstalmentController extends Controller
             'keywords'      => 'required',
         ]);
 
-        $params = [
-            'order_no'  => 'A827137039016976'
-        ];
-
         if(isset($params['keywords'])){
             if($params['kw_type'] == 1){
                 $params['order_no'] = $params['keywords'];
