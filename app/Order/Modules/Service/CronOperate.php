@@ -23,7 +23,7 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
-
+use \App\Order\Modules\Repository\Order\Order as OrderRespository;
 
 
 class CronOperate
@@ -315,9 +315,18 @@ class CronOperate
 						if(!$orderGoodsResult){
 							throw new \Exception('商品状态更新，还机关闭：'.$orderGiveBackInfo['goods_no']);
 						}
-						//解冻订单
-						if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
-							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
+//						//解冻订单
+//						if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
+//							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
+//						}
+						//订单异常关闭
+						$orderObj = OrderRespository::getByNo($orderGiveBackInfo['order_no']);
+						if( !$orderObj ){
+							throw new \Exception('订单信息获取失败：'.$orderGiveBackInfo['order_no']);
+						}
+						$orderCloseResult = $orderObj->abnormalClose();
+						if( !$orderCloseResult ){
+							throw new \Exception('订单异常关闭失败：'.$orderGiveBackInfo['order_no']);
 						}
 
 						//更新还机单
@@ -328,6 +337,22 @@ class CronOperate
 						]);
 						if(!$orderGivebackUpdate){ 
 							throw new \Exception('还机单状态更新失败：'.$orderGiveBackInfo['giveback_no']);
+						}
+						//记录日志
+						$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+							'order_no'=>$orderGiveBackInfo['order_no'],
+							'action'=>'还机单异常关闭',
+							'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+							'business_no'=>$orderGiveBackInfo['giveback_no'],
+							'goods_no'=>$orderGiveBackInfo['goods_no'],
+							'operator_id'=>0,
+							'operator_name'=>'任务关闭逾期还机单',
+							'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
+							'msg'=>'还机单逾期',
+						]);
+						if( !$goodsLog ){
+							\App\Lib\Common\LogApi::debug('[还机支付回调]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
+							throw new \Exception('还机单设备日志记录失败：'.$orderGiveBackInfo['giveback_no']);
 						}
 					}
 				}

@@ -92,7 +92,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        if(isset($param['is_instalment_list'])){
+            $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        }
 
         $result = OrderGoodsInstalment::query()->where($whereArray)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
@@ -151,7 +153,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
-        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        if(isset($param['is_instalment_list'])){
+            $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+        }
 
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
@@ -219,6 +223,61 @@ class OrderGoodsInstalmentRepository
         return true;
     }
 
+
+    /**
+     * 查询列表
+     */
+    public static function instalmentExport($param = [], $additional = []){
+        $page       = isset($additional['page']) ? $additional['page'] : 1;
+        $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
+        $offset     = ($page - 1) * $pageSize;
+
+        $whereArray = [];
+
+        // 开始时间（可选）
+        if( isset($param['begin_time']) && $param['begin_time'] != ""){
+            $whereArray[] =  ['term', '>=', $param['begin_time']];
+        }
+
+        // 开始时间（可选）
+        if( isset($param['end_time']) && $param['end_time'] != ""){
+            $whereArray[] =  ['term', '<=', $param['end_time']];
+        }
+
+
+        //根据订单号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+            $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
+        }
+
+        //根据分期状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+        }
+
+        //根据用户手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
+
+        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+
+
+
+        $result =  OrderGoodsInstalment::query()
+            ->select('order_goods.goods_name','order_goods.specs','order_goods.zuqi','order_goods_instalment.times','order_goods_instalment.amount','order_goods_instalment.status','order_goods.insurance','order_goods.insurance_cost','order_goods_instalment.payment_time')
+            ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+            ->leftJoin('order_goods', 'order_goods.order_no', '=', 'order_goods_instalment.order_no')
+            ->offset($offset)
+            ->limit($pageSize)
+            ->orderBy('order_goods_instalment.term','ASC')
+            ->orderBy('order_goods_instalment.times','ASC')
+            ->get();
+
+        if (!$result) return false;
+        return $result->toArray();
+    }
 
 
 }

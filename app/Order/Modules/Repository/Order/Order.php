@@ -51,7 +51,16 @@ class Order {
 		$this->model->order_status = OrderStatus::OrderCancel;
 		return $this->model->save();
 	}
-	
+    /**
+     * 异常关闭
+     * 还机逾期异常等
+     * @return bool
+     */
+    public function abnormalClose():bool{
+        $this->model->order_status = OrderStatus::OrderAbnormal;
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
 	/**
 	 * 尝试关闭
 	 * 如果订单中的商品都结束时，关闭订单

@@ -33,7 +33,6 @@ class CronRisk
 
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-        var_dump($channelList);die;
 
         //获取所有订单
         $status = [
@@ -174,7 +173,7 @@ class CronRisk
                         elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
                             $item['term_'.$after['times']] = "扣款失败";
                         }
-                        if(date("Ym") == $after['term']){
+                        if(date("Ym") == $after['term'] && $after['withhold_day']<=time()){
                             $item['is_pay'] = $after['status']==Inc\OrderInstalmentStatus::SUCCESS?"是":"否";
                         }
                     }

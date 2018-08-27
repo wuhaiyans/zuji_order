@@ -197,6 +197,10 @@ class OrderOperate
             $res[] =['time' =>$orderInfo['complete_time'],'status'=>"已完成"];
             return $res;
         }
+        if($orderInfo['order_status'] == Inc\OrderStatus::OrderAbnormal){
+            $res[] =['time' =>$orderInfo['update_time'],'status'=>"异常关闭"];
+            return $res;
+        }
 
         return $res;
     }
@@ -954,11 +958,11 @@ class OrderOperate
                 $orderStatus = Inc\OrderStatus::OrderClosedRefunded;
             }
             //判断商品状态是 否是完成状态 买断/还机
-            if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
+            if($v['goods_status'] == Inc\OrderGoodStatus::COMPLETE_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::CLOSED_THE_MACHINE || $v['goods_status'] == Inc\OrderGoodStatus::BUY_OUT){
                 $orderStatus = Inc\OrderStatus::OrderCompleted;
             }
             //查询是否有 未还机 未退款 未买断 订单就是未结束的 就返回
-            if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT && $v['goods_status'] != Inc\OrderGoodStatus::EXCHANGE_REFUND){
+            if($v['goods_status']!=Inc\OrderGoodStatus::REFUNDED && $v['goods_status']!=Inc\OrderGoodStatus::COMPLETE_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::CLOSED_THE_MACHINE && $v['goods_status']!=Inc\OrderGoodStatus::BUY_OUT && $v['goods_status'] != Inc\OrderGoodStatus::EXCHANGE_REFUND){
             //var_dump("订单未完成");die;
                 return true;
             }
