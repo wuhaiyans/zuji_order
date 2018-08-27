@@ -338,6 +338,22 @@ class CronOperate
 						if(!$orderGivebackUpdate){ 
 							throw new \Exception('还机单状态更新失败：'.$orderGiveBackInfo['giveback_no']);
 						}
+						//记录日志
+						$goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+							'order_no'=>$orderGiveBackInfo['order_no'],
+							'action'=>'还机单异常关闭',
+							'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+							'business_no'=>$orderGiveBackInfo['giveback_no'],
+							'goods_no'=>$orderGiveBackInfo['goods_no'],
+							'operator_id'=>0,
+							'operator_name'=>'任务关闭逾期还机单',
+							'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
+							'msg'=>'还机单逾期',
+						]);
+						if( !$goodsLog ){
+							\App\Lib\Common\LogApi::debug('[还机支付回调]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
+							throw new \Exception('还机单设备日志记录失败：'.$orderGiveBackInfo['giveback_no']);
+						}
 					}
 				}
 			}

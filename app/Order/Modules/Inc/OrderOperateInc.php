@@ -275,6 +275,32 @@ class OrderOperateInc
                     //查看租机协议
                     'zuji_agreement_btn' => true
                 ],
+                Inc\OrderStatus::OrderAbnormal => [
+                    //付款
+                    'payment_btn'   => false,
+                    //取消
+                    'cancel_btn'    => false,
+                    //支付后的取消
+                    'cancel_pay_btn'    => false,
+                    //确认收货
+                    'confirm_btn'   => false,
+                    //查看物流
+                    'logistics_btn' => false,
+                    //申请售后
+                    'service_btn'=> false,
+                    //提前还款
+                    'prePay_btn'=>  false,
+                    //到期处理
+                    'expiry_process'  =>  false,
+                    //提前买断
+                    'ahead_buyout' => false,
+                    //还机去支付
+                    'giveback_topay' => false,
+                    //'买断去支付'
+                    'buyout_topay' => false,
+                    //查看租机协议
+                    'zuji_agreement_btn' => true
+                ],
             ),
             //后台用户出现的按钮
             'adminActBtn'=>array(
@@ -440,6 +466,26 @@ class OrderOperateInc
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
+                    'return_visit_btn'   => true,
+                    //取消订单
+                    'refund_btn'   => false,
+                    //确认订单
+                    'confirm_btn'   => false,
+                    //修改收货信息
+                    'modify_address_btn' => false,
+                    //确认收货
+                    'confirm_receive' => false,
+                    //买断
+                    'buy_off'       => false,
+                    //保险操作
+                    'Insurance'     => false,
+                    //已出险
+                    'alreadyInsurance' => false,
+                    //'保险详情'
+                    'insuranceDetail' => false,
+                ],
+                Inc\OrderStatus::OrderAbnormal => [
+                    //回访按钮
                     'return_visit_btn'   => true,
                     //取消订单
                     'refund_btn'   => false,
