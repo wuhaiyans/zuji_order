@@ -390,9 +390,15 @@ class OrderRelet
                     LogApi::notify("续租添加设备周期表失败", $reletNo);
                     return false;
                 }
-                //获取订单对象
-                $orderObj = Order::getByNo($goodsObj->order_no);
-                //订单解锁
+                //修改订单商品服务结束时间
+                if( !ServicePeriod::updateGoods($data) ){
+                    DB::rollBack();
+                    LogApi::notify("续租修改订单商品服务结束时间失败", $reletNo);
+                    return false;
+                }
+//                //获取订单对象
+//                $orderObj = Order::getByNo($goodsObj->order_no);
+//                //订单解锁
 //                if( !$orderObj->relieveReletFreeze() ){
 //                    DB::rollBack();
 //                    LogApi::notify("订单解冻失败", $reletNo);
