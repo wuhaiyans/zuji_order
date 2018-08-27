@@ -311,14 +311,15 @@ class CronOperator
     public  function everMonth(){
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-
-        $today = date("d",time());
-        if($today != 24){
-            //return false;
+        if($_GET['begin'] && $_GET['end']){
+            $beginDay = $_GET['begin'];
+            $endDay = $_GET['end'];
+        }else{
+            //获取上月26号-下月23号所有订单
+            $beginDay = date("Y-m-25",strtotime("Last Month"));
+            $endDay = date("Y-m-25",time());
         }
-        //获取上月26号-下月23号所有订单
-        $beginDay = date("Y-m-25",strtotime("Last Month"));
-        $endDay = date("Y-m-25",time());
+
         $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
 
