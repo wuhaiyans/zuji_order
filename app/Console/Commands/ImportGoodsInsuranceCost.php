@@ -84,10 +84,10 @@ class ImportGoodsInsuranceCost extends Command
 
             } while ($page <= $totalpage);
             $bar->finish();
-            if(count($arr)>0){
-               LogApi::notify("ImportGoodsInsuranceCost",$arr);
-                echo "部分导入成功";die;
-            }
+//            if(count($arr)>0){
+//               //LogApi::notify("ImportGoodsInsuranceCost",$arr);
+//                echo "部分导入成功";die;
+//            }
             echo "导入成功";die;
         }catch (\Exception $e){
             echo $e->getMessage();
