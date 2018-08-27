@@ -52,6 +52,10 @@ class OrderStatus{
      * @var int 已完成（整个订单完成状态）
      */
     const OrderCompleted= 9;
+    /**
+     * @var int 异常关闭（发生还机异常等）
+     */
+    const OrderAbnormal= 10;
 
     //未联系
     const visitUnContact = 0;
