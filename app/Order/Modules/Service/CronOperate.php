@@ -23,7 +23,7 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
-use \App\Order\Modules\Repository\Order\Order;
+use \App\Order\Modules\Repository\Order\Order as OrderRespository;
 
 
 class CronOperate
@@ -320,7 +320,7 @@ class CronOperate
 //							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
 //						}
 						//订单异常关闭
-						$orderObj = Order::getByNo($orderGiveBackInfo['order_no']);
+						$orderObj = OrderRespository::getByNo($orderGiveBackInfo['order_no']);
 						if( !$orderObj ){
 							throw new \Exception('订单信息获取失败：'.$orderGiveBackInfo['order_no']);
 						}
