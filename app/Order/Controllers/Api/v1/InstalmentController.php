@@ -346,13 +346,14 @@ class InstalmentController extends Controller
         $params         = filter_array($request, [
             'begin_time'    => 'required',
             'end_time'      => 'required',
-            'goods_no'      => 'required',
             'status'        => 'required',
-            'term'          => 'required',
             'kw_type'       => 'required',
             'keywords'      => 'required',
         ]);
 
+        $params = [
+            'order_no'  => 'A827137039016976'
+        ];
 
         if(isset($params['keywords'])){
             if($params['kw_type'] == 1){
@@ -366,47 +367,28 @@ class InstalmentController extends Controller
             }
         }
 
-        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
-
+        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::instalmentExport($params,$additional);
         //定义excel头部参数名称
         $headers = [
-            '分期ID', '订单编号', '商品编号', '用户名', '手机号', '还款日', '原始金额', '原始优惠金额', '应付金额', '实际支付金额', '支付时优惠金额', '期数', '状态', '支付类型', '扣款时间', '更新时间',
+             '商品名称','机型', '租期', '第几期还款', '本月应扣金额', '碎屏险卖价', '碎屏险成本', '扣款状态','扣款成功时间',
         ];
-
         $data = [];
         foreach($list as &$item){
-            // 姓名
-            // 姓名
-            $member = \App\Order\Models\OrderUserCertified::where(['order_no'=>$item['order_no']])->first();
-            $item['realname']       = !empty($member['realname']) ? $member['realname'] : "--";
-
             // 状态
-            $item['status']         = OrderInstalmentStatus::getStatusName($item['status']);
+            $item['status']             = OrderInstalmentStatus::getStatusName($item['status']);
             // 还款日
-            $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
-            // 支付类型
-            $item['pay_type']       = $item['pay_type'] == 1 ? "主动还款" : "代扣";
-
-            $item['payment_time']   = !empty($item['payment_time']) ? date("Y-m-d H:i:s", $item['payment_time'] ) : "--";
-            $item['update_time']    = !empty($item['update_time']) ? date("Y-m-d H:i:s", $item['update_time'] ) : "--";
+            $item['payment_time']       = !empty(strtotime($item['payment_time'])) ? strtotime($item['payment_time']): "--";
 
             $data[] = [
-                $item['id'],                        // 分期ID
-                $item['order_no'],                  // 订单编号
-                $item['goods_no'],                  // 商品编号
-                $item['realname'],                  // 用户名
-                $item['mobile'],                    // 手机号
-                $item['day'],                       // 还款日
-                $item['original_amount'],           // 原始金额
-                $item['discount_amount'],           // 原始优惠金额
-                $item['amount'],                    // 应付金额
-                $item['payment_amount'],            // 实际支付金额
-                $item['payment_discount_amount'],   // 支付时优惠金额
-                $item['term'],                      // 期数
-                $item['status'],                    // 状态
-                $item['pay_type'],                  // 支付类型
-                $item['payment_time'],              // 扣款时间
-                $item['update_time'],               // 更新时间
+                $item['goods_name'],                // 商品名称
+                $item['specs'],                     // 机型
+                $item['zuqi'],                      // 租期
+                $item['times'],                     // 第几期还款
+                $item['amount'],                    // 本月应扣金额
+                $item['insurance'],                 // 碎屏险卖价
+                $item['insurance_cost'],            // 碎屏险成本
+                $item['status'],                    // 扣款状态
+                $item['payment_time'],              // 扣款成功时间
             ];
         }
 
