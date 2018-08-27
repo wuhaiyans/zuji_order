@@ -318,7 +318,7 @@ class CronOperator
         }
         //获取上月26号-下月23号所有订单
         $beginDay = date("Y-m-25",strtotime("Last Month"));
-        $endDay = date("Y-m-23",time());
+        $endDay = date("Y-m-25",time());
         $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
 
