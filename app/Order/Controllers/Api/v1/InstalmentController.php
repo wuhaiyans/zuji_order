@@ -374,7 +374,7 @@ class InstalmentController extends Controller
             // 状态
             $item['status']             = OrderInstalmentStatus::getStatusName($item['status']);
             // 还款日
-            $item['payment_time']       = !empty(strtotime($item['payment_time'])) ? strtotime($item['payment_time']): "--";
+            $item['payment_time']       = !empty($item['payment_time']) ? strtotime('Y-m-d H:i:s',$item['payment_time']) : "--";
 
             $data[] = [
                 $item['goods_name'],                // 商品名称
