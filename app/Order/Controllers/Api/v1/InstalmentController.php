@@ -339,6 +339,7 @@ class InstalmentController extends Controller
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function instalmentListExport(Request $request) {
+        ini_set('max_execution_time', '0');
         $request               = $request->all();
         $additional['page']    = isset($request['page']) ? $request['page'] : 1;
         $additional['limit']   = isset($request['limit']) ? $request['limit'] : 10000;
