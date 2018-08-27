@@ -197,6 +197,10 @@ class OrderOperate
             $res[] =['time' =>$orderInfo['complete_time'],'status'=>"已完成"];
             return $res;
         }
+        if($orderInfo['order_status'] == Inc\OrderStatus::OrderAbnormal){
+            $res[] =['time' =>$orderInfo['update_time'],'status'=>"异常关闭"];
+            return $res;
+        }
 
         return $res;
     }

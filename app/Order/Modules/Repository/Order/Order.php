@@ -53,10 +53,12 @@ class Order {
 	}
     /**
      * 异常关闭
+     * 还机逾期异常等
      * @return bool
      */
     public function abnormalClose():bool{
         $this->model->order_status = OrderStatus::OrderAbnormal;
+        $this->model->update_time = time();
         return $this->model->save();
     }
 	/**
