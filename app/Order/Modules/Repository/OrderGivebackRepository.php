@@ -113,6 +113,7 @@ class OrderGivebackRepository
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_IN_PAY,
 			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI,
+			\App\Order\Modules\Inc\OrderGivebackStatus::STATUS_AGED_FAIL,//逾期违约的可以扭转到正常关闭【用户主动支付赔偿款后】
 		];
 		$result = $this->order_giveback_model->where($where)->whereIn('status',$whereIn['status'])->get();
 		if( $result ) {
