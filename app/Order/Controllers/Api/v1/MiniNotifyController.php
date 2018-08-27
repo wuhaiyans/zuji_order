@@ -92,7 +92,7 @@ class MiniNotifyController extends Controller
                 $alipay_fund_order_no = $_POST['alipay_fund_order_no'];
                 $pay_time = $_POST['pay_time'];
             }
-            if($redis_order == null){
+            if(!$redis_order){
                 $redis_order = Redis::get('zuji:order:miniorder:'.$_POST['out_order_no']);
                 $out_trans_no = isset($_POST['out_trans_no'])?$_POST['out_trans_no']:'';
                 $alipay_fund_order_no = isset($_POST['alipay_fund_order_no'])?$_POST['alipay_fund_order_no']:'';
