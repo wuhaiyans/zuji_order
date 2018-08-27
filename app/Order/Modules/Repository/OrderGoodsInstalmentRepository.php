@@ -227,9 +227,9 @@ class OrderGoodsInstalmentRepository
     /**
      * 查询列表
      */
-    public static function instalmentExport($param = [], $additional = []){
-        $page       = isset($additional['page']) ? $additional['page'] : 1;
-        $pageSize   = isset($additional['limit']) ? $additional['limit'] : 500;
+    public static function instalmentExport($param = []){
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $pageSize   = 500;
         $offset     = ($page - 1) * $pageSize;
 
         $whereArray = [];

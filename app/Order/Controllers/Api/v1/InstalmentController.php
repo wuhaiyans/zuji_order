@@ -344,17 +344,11 @@ class InstalmentController extends Controller
         try{
 
             $params = $request->all();
-            $params['size']     = 500;
+
             $params['page']     = !empty($params['page']) ? $params['page'] : 1;
             $outPages           = !empty($params['page']) ? $params['page'] : 1;
-            $params['count']    = 1;
-
-            $total = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryCount($params);
 
             $total_export_count = 5000;
-            if ($total < 5000) {
-                $total_export_count = $total;
-            }
 
             $pre_count = 500;
 
@@ -384,8 +378,9 @@ class InstalmentController extends Controller
                     exit;
                 }
 
-                $offset = ($outPages - 1) * $total_export_count;
-                $params['page'] = intval(($offset / $pre_count)+ $i) ;
+                $offset = ( $outPages - 1) * $total_export_count;
+
+                $params['page'] = intval(($offset / $pre_count) + $i) ;
                 ++$i;
 
 
