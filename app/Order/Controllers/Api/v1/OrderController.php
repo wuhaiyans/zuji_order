@@ -345,8 +345,8 @@ class OrderController extends Controller
                 $total     = $orderData['total'];
 
                 unset($params['count']);
-                $total_export_count = 5000;
-                if ($total<5000) {
+                $total_export_count = 2500;
+                if ($total<2500) {
                     $total_export_count = $total;
                 }
                 $pre_count = 500;

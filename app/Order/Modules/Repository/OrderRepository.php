@@ -744,7 +744,6 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->orderBy('order_info.id', 'DESC')
             ->count();
 
 
