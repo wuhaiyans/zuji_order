@@ -336,7 +336,7 @@ class OrderController extends Controller
 
                 $params = $request->all();
                 if (isset($params['size']) && $params['size']>=5000) {
-                    $pageSize = $params['size'];
+                    $pageSize = 2500;
                 } else {
 
                     $pageSize = $params['size'] ?? 2500;
