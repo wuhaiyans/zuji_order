@@ -215,6 +215,7 @@ class OrderStatus{
             self::OrderCancel => '已取消（未支付）',
             self::OrderClosedRefunded => '已关闭（已退款）',
             self::OrderCompleted => '已完成',
+            self::OrderAbnormal => '异常关闭',
 
         ];
     }
