@@ -365,8 +365,8 @@ class InstalmentController extends Controller
             $headers = ['商品名称','机型','租期', '第几期还款','本月应扣金额','碎屏险卖价','碎屏险成本','扣款状态','扣款成功时间'];
 
             // 将中文标题转换编码，否则乱码
-            foreach ($headers as $i => $v) {
-                $column_name[$i] = iconv('utf-8', 'GB18030', $v);
+            foreach ($headers as $k => $v) {
+                $column_name[$k] = iconv('utf-8', 'GB18030', $v);
             }
 
             // 将标题名称通过fputcsv写到文件句柄
