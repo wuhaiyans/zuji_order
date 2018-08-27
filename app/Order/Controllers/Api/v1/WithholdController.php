@@ -238,7 +238,7 @@ class WithholdController extends Controller
             //获取订单的芝麻订单编号
             $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
             if( empty($miniOrderInfo) ){
-                \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
+                LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                 return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
             }
             //芝麻小程序扣款请求
@@ -296,22 +296,22 @@ class WithholdController extends Controller
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
 
-                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
+                LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
 
 
                 if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
 
-                    \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
+                    LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 }
-                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
+                LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
-                \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
+                LogApi::error('[createpay]分期代扣失败', $exc);
                 return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
 
             }catch(\Exception $exc){
-                \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                LogApi::error('分期代扣错误', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -336,7 +336,7 @@ class WithholdController extends Controller
         ];
         $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
         if( !$goodsLog ){
-            \App\Lib\Common\LogApi::error("分期扣款日志失败",$logData);
+            LogApi::error("[createpay]分期扣款日志失败",$logData);
             return apiResponse([], ApiStatus::CODE_71006, '分期扣款日志失败');
         }
 
@@ -378,14 +378,14 @@ class WithholdController extends Controller
         foreach ($ids as $instalmentId) {
 
             if ($instalmentId < 1) {
-                Log::error("参数错误");
+                LogApi::error("multiCreatepay参数错误");
                 continue;
             }
 
             $instalmentKey = "instalmentWithhold_" . $instalmentId;
             // 频次限制
             if(redisIncr($instalmentKey, 300) > 1){
-                Log::error("当前分期正在操作，不能重复操作");
+                LogApi::error("multiCreatepay当前分期正在操作，不能重复操作");
                 continue;
             }
 
@@ -394,7 +394,7 @@ class WithholdController extends Controller
             // 分期详情
             $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
             if (!is_array($instalmentInfo)) {
-                Log::error("分期信息查询失败");
+                LogApi::error("multiCreatepay分期信息查询失败");
                 continue;
             }
 
@@ -405,7 +405,7 @@ class WithholdController extends Controller
                 // 1)记录租机交易码
                 $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
                 if( $b === false ){
-                    Log::error("数据异常");
+                    LogApi::error("multiCreatepay数据异常");
                     continue;
                 }
                 $instalmentInfo['business_no'] = $business_no;
@@ -415,7 +415,7 @@ class WithholdController extends Controller
             // 判断是否允许扣款
             $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
             if (!$allow) {
-                Log::error("不允许扣款");
+                LogApi::error("multiCreatepay不允许扣款");
                 continue;
             }
 
@@ -428,7 +428,7 @@ class WithholdController extends Controller
             // 订单
             $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
             if (!$orderInfo) {
-                Log::error("数据异常");
+                LogApi::error("multiCreatepay数据异常");
                 continue;
             }
 
@@ -440,7 +440,7 @@ class WithholdController extends Controller
             // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
             $amount = intval( strval($instalmentInfo['amount'] * 100) );
             if ($amount < 0) {
-                Log::error("扣款金额不能小于1分");
+                LogApi::error("multiCreatepay扣款金额不能小于1分");
                 continue;
             }
 
@@ -449,7 +449,7 @@ class WithholdController extends Controller
                 ->where(['id' => $instalmentId])
                 ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
             if(!$paying){
-                LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                LogApi::error('[multiCreatepay]修改分期支付中状态：'.$subject);
             }
 
             //判断支付方式 小程序
@@ -457,7 +457,7 @@ class WithholdController extends Controller
                 //获取订单的芝麻订单编号
                 $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
                 if( empty($miniOrderInfo) ){
-                    \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
+                    LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                     continue;
                 }
                 //芝麻小程序扣款请求
@@ -493,7 +493,7 @@ class WithholdController extends Controller
                 $agreementNo = $withholdInfo['out_withhold_no'];
                 if (!$agreementNo) {
 
-                    Log::error("用户代扣协议编号错误");
+                    Log::error("multiCreatepay用户代扣协议编号错误");
                     continue;
                 }
                 // 代扣接口
@@ -515,19 +515,19 @@ class WithholdController extends Controller
 
                     if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
 
-                        \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+                        LogApi::error('[multiCreatepay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
                         OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     }
 
-                    \App\Lib\Common\LogApi::error('分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
+                    \App\Lib\Common\LogApi::error('multiCreatepay分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\Exception $exc){
 
-                    \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
+                    \App\Lib\Common\LogApi::error('multiCreatepay分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
                     if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
 
-                        Log::error("买家余额不足");
+                        LogApi::error("multiCreatepay买家余额不足");
                         continue;
                     }
                 }
@@ -548,7 +548,7 @@ class WithholdController extends Controller
             ];
             $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
             if( !$goodsLog ){
-                \App\Lib\Common\LogApi::error("多项扣款失败",$logData);
+                LogApi::error("multiCreatepay多项扣款失败",$logData);
                 continue;
             }
 
