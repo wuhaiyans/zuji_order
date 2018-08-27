@@ -390,7 +390,7 @@ class InstalmentController extends Controller
                 $item['payment_time'],              // 扣款成功时间
             ];
         }
-        p($list);
+
         return \App\Lib\Excel::write($data, $headers,'后台分期数据导出-');
 
     }
