@@ -260,6 +260,10 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
+        $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
+
+
+
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods.goods_name','order_goods.specs','order_goods.zuqi','order_goods_instalment.times','order_goods_instalment.amount','order_goods_instalment.status','order_goods.insurance','order_goods.insurance_cost','order_goods_instalment.payment_time')
             ->where($whereArray)

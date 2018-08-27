@@ -7,6 +7,7 @@
  */
 
 namespace App\Order\Modules\Repository\Order;
+use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodsUnit;
 
 /**
@@ -99,7 +100,6 @@ class ServicePeriod {
      * ]
      * @return bool
      */
-
     public static function createService(array $unitData):bool {
 
         if(count($unitData)!=7){
@@ -111,5 +111,35 @@ class ServicePeriod {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 生成商品服务周期表
+     * @param array $unitData
+     * [
+     *   'order_no'=>'',//订单编号
+     *   'goods_no'=>'',//商品编号
+     *   'end_time'=>'',//服务结束时间
+     * ]
+     * @return bool
+     */
+    public static function updateGoods(array $unitData):bool {
+
+        if(!$unitData['order_no']){
+            return false;
+        }
+        if(!$unitData['goods_no']){
+            return false;
+        }
+        if(!$unitData['end_time']){
+            return false;
+        }
+        $res = OrderGoods::where([
+            'order_no'=>$unitData['order_no'],
+            'goods_no'=>$unitData['goods_no']
+        ])->first();
+        $res->end_time = $unitData['end_time'];
+
+        return $res->update();
     }
 }
