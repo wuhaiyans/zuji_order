@@ -352,6 +352,7 @@ class InstalmentController extends Controller
             'keywords'      => 'required',
         ]);
 
+
         if(isset($params['keywords'])){
             if($params['kw_type'] == 1){
                 $params['order_no'] = $params['keywords'];
@@ -370,11 +371,12 @@ class InstalmentController extends Controller
              '商品名称','机型', '租期', '第几期还款', '本月应扣金额', '碎屏险卖价', '碎屏险成本', '扣款状态','扣款成功时间',
         ];
         $data = [];
+
         foreach($list as &$item){
             // 状态
             $item['status']             = OrderInstalmentStatus::getStatusName($item['status']);
             // 还款日
-            $item['payment_time']       = !empty($item['payment_time']) ? strtotime('Y-m-d H:i:s',$item['payment_time']) : "--";
+            $item['payment_time']       = !empty($item['payment_time']) ? date('Y-m-d H:i:s',$item['payment_time']) : "--";
 
             $data[] = [
                 $item['goods_name'],                // 商品名称
