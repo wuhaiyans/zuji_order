@@ -744,6 +744,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
+            ->distinct()
             ->count();
 
 
