@@ -436,6 +436,7 @@ class SkuComponnet implements OrderCreater
                     'price'=>$v['amount_after_discount'] + $v['insurance'],
                     'specs'=>Specifications::input_format($v['specs']),
                     'insurance'=>$v['insurance'],
+                    'insurance_cost'=>$v['insurance_cost'],
                     'buyout_price'=>$v['buyout_price'],
                     'weight'=>$v['weight'],
                     'create_time'=>time(),
