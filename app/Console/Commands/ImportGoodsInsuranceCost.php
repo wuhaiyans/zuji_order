@@ -67,7 +67,9 @@ class ImportGoodsInsuranceCost extends Command
                     //获取意外险成本价
                     //获取spu信息
                     $spu_info =$this->getSpuInfo($v['prod_id']);
-
+                    if(empty($spu_info)){
+                        continue;
+                    }
                     $updateData=[
                         'insurance_cost'=>$spu_info['yiwaixian_cost'],
                     ];
