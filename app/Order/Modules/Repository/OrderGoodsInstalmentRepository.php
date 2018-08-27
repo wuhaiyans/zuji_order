@@ -257,8 +257,8 @@ class OrderGoodsInstalmentRepository
 
         $whereArray[] = ['order_goods_instalment.status', '!=', \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL];
 
-
-
+        $sql = sql_profiler();
+        \Illuminate\Support\Facades\Log::info('instalmentListExport'.$sql);
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods.order_no','order_goods.specs','order_goods.zuqi','order_goods_instalment.times','order_goods_instalment.amount','order_goods_instalment.status','order_goods.insurance','order_goods.insurance_cost','order_goods_instalment.payment_time')
             ->where($whereArray)
