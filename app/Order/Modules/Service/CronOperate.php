@@ -23,7 +23,7 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
-
+use \App\Order\Modules\Repository\Order\Order;
 
 
 class CronOperate
@@ -315,9 +315,18 @@ class CronOperate
 						if(!$orderGoodsResult){
 							throw new \Exception('商品状态更新，还机关闭：'.$orderGiveBackInfo['goods_no']);
 						}
-						//解冻订单
-						if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
-							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
+//						//解冻订单
+//						if(!OrderGiveback::__unfreeze($orderGiveBackInfo['order_no'])){
+//							throw new \Exception('订单解冻失败：'.$orderGiveBackInfo['order_no']);
+//						}
+						//订单异常关闭
+						$orderObj = Order::getByNo($orderGiveBackInfo['order_no']);
+						if( !$orderObj ){
+							throw new \Exception('订单信息获取失败：'.$orderGiveBackInfo['order_no']);
+						}
+						$orderCloseResult = $orderObj->abnormalClose();
+						if( !$orderCloseResult ){
+							throw new \Exception('订单异常关闭失败：'.$orderGiveBackInfo['order_no']);
 						}
 
 						//更新还机单
