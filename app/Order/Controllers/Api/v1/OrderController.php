@@ -325,7 +325,7 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        if (redisIncr("mannage_orderlist_export",100)>1){
+        if (redisIncr("mannage_orderlist_export",65)>1){
 
             echo "已经有数据正在导入，请稍后重试";
             exit;
@@ -336,10 +336,10 @@ class OrderController extends Controller
 
                 $params = $request->all();
                 if (isset($params['size']) && $params['size']>=5000) {
-                    $pageSize = 2500;
+                    $pageSize = 2000;
                 } else {
 
-                    $pageSize = $params['size'] ?? 2500;
+                    $pageSize = $params['size'] ?? 2000;
                 }
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
@@ -351,7 +351,7 @@ class OrderController extends Controller
 
                 unset($params['count']);
                 $total_export_count = $pageSize;
-                if ($total<$pageSize) {
+                if ($total<intval($pageSize)) {
                     $total_export_count = $total;
                 }
                 $pre_count = 500;
