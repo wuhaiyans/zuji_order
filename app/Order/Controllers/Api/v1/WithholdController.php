@@ -197,24 +197,18 @@ class WithholdController extends Controller
         }
         $business_no = $instalmentInfo['business_no'];
 
-        //开启事务
-        DB::beginTransaction();
-
         // 订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中");
         }
 
         //判断是否允许扣款
         $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
         if(!$allow){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "不允许扣款" );
         }
 
@@ -227,7 +221,6 @@ class WithholdController extends Controller
         // 解决办法： 将结果值 1）先转成字符串类型的值，2）再转换成想用的类型（想使用int值，则再转成init）
         $amount = intval( strval($instalmentInfo['amount'] * 100) );
         if( $amount<0 ){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
         }
 
@@ -236,7 +229,6 @@ class WithholdController extends Controller
             ->where(['id' => $instalmentInfo['id']])
             ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
         if(!$paying){
-            DB::rollBack();
             LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
             return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
         }
@@ -261,20 +253,16 @@ class WithholdController extends Controller
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
             }elseif($pay_status =='PAY_FAILED'){
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
             }elseif($pay_status == 'PAY_INPROGRESS'){
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
             }else{
                 // 事物回滚
-                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败或芝麻处理错误）');
             }
         }else {
@@ -288,7 +276,6 @@ class WithholdController extends Controller
 
             $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
-                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
             }
             // 代扣接口
@@ -320,12 +307,10 @@ class WithholdController extends Controller
                 \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
-                DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
                 return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
 
             }catch(\Exception $exc){
-                DB::rollBack();
                 \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
@@ -355,8 +340,6 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_71006, '分期扣款日志失败');
         }
 
-        // 提交事务
-        DB::commit();
         return apiResponse([],ApiStatus::CODE_0,"success");
     }
 
@@ -436,8 +419,6 @@ class WithholdController extends Controller
                 continue;
             }
 
-            //开启事务
-            DB::beginTransaction();
 
             // 状态在支付中或已支付时，直接返回成功
             if ($instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS && $instalmentInfo['status'] = OrderInstalmentStatus::PAYING) {
@@ -447,7 +428,6 @@ class WithholdController extends Controller
             // 订单
             $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
             if (!$orderInfo) {
-                DB::rollBack();
                 Log::error("数据异常");
                 continue;
             }
@@ -460,7 +440,6 @@ class WithholdController extends Controller
             // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
             $amount = intval( strval($instalmentInfo['amount'] * 100) );
             if ($amount < 0) {
-                DB::rollBack();
                 Log::error("扣款金额不能小于1分");
                 continue;
             }
@@ -513,7 +492,7 @@ class WithholdController extends Controller
                 // 代扣协议编号
                 $agreementNo = $withholdInfo['out_withhold_no'];
                 if (!$agreementNo) {
-                    DB::rollBack();
+
                     Log::error("用户代扣协议编号错误");
                     continue;
                 }
@@ -542,7 +521,7 @@ class WithholdController extends Controller
 
                     \App\Lib\Common\LogApi::error('分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\Exception $exc){
-                    DB::rollBack();
+
                     \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
@@ -573,8 +552,6 @@ class WithholdController extends Controller
                 continue;
             }
 
-            // 提交事务
-            DB::commit();
         }
         return apiResponse([], ApiStatus::CODE_0, "success");
 
