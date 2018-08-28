@@ -176,4 +176,15 @@ $api->version('v1', [
     'middleware' => 'api'
 ], function($api){
     $api->any('header', 'AuthRefferController@header');
+
+	$apiMap = [
+		'third.auth.url' => 'ThirdAuthController@getUrl',
+		'third.auth.query' => 'ThirdAuthController@query',
+	];
+	
+	$method = request()->input('method');
+	if (isset($apiMap[$method])) {
+		$api->post('/',  $apiMap[$method]);
+	}
+	
 });

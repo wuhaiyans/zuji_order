@@ -11,6 +11,82 @@ namespace App\Lib\Wechat;
 class WechatApi {
     
     /**
+     * 获取 用户授权token access_token
+	 * @access public
+	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+     * @param string $appid		应用ID
+     * @param string $secret	应用密钥
+     * @return array
+	 * [
+	 *		'access_token'	=> '', // token值
+	 *		'expires_in'	=> '', // 有效期，单位：秒
+	 * ]
+	 * @throws WechatApiException
+     */
+    public static function getUserAccessToken( string $appid, string $secret, string $code ){ 
+        $url_get='https://api.weixin.qq.com/sns/oauth2/access_token?appid='.$appid.'&secret='.$secret.'&code='.$code.'&grant_type=authorization_code';
+		$result = self::_curl_get($url_get);
+		//$result = '{"access_token":"13_IwYHyTE0AImxx-E8WhqNTRB9hUFHKvySqwY1kF1uLkrIo6CXEnBrU0LwVSLIrQ_FOv52G-dvgzihI9wwSw-BWw","expires_in":7200,"refresh_token":"13_Ra5ZgG9zEIsJ1sWeAdtkb9LzeL5IwC9FuIc3R3q3ebn7ec0rXEnxu2AXqt_nfz6hQy7ayUYH5nhGLYvCv1OXwg","openid":"oBjc20uu9n0R_uv2yAzRA0YHSVIs","scope":"snsapi_userinfo"}';
+		if( empty($result) ){
+			throw new WechatApiException('getUserAccessToken',['appid'=>$appid,'secret'=>$secret,'code'=>$code]);
+		}
+		$data = json_decode($result,true);
+		if( is_null($data) ){
+			throw new WechatApiException('getUserAccessToken',['appid'=>$appid,'secret'=>$secret,'code'=>$code],'解析错误');
+		}
+		if( isset($data['errcode']) ){
+			throw new WechatApiException('getUserAccessToken',['appid'=>$appid,'secret'=>$secret,'code'=>$code],'微信错误',$data);
+		}
+		if( !isset($data['access_token']) ){
+			throw new WechatApiException('getUserAccessToken',['appid'=>$appid,'secret'=>$secret,'code'=>$code],'access_token错误',$data);
+		}
+		return [
+			'access_token'	=> $data['access_token'],
+			'refresh_token'	=> $data['refresh_token'],
+			'expires_in'	=> $data['expires_in'],
+			'openid'	=> $data['openid'],
+		];
+    }
+	
+	/**
+	 * 读取 微信用户信息
+	 * @param string $token
+	 * @param string $openid
+	 * @return array
+	 * [
+	 *		'openid'	=> '',		// 必须
+	 *		'nickname'	=> '',	//
+	 *		'sex'		=> '',//
+	 *		'province'	=> '',//
+	 *		'city'		=> '',//
+	 *		'country'	=> '',//
+	 *		'headimgurl'=> '',//
+	 *		'unionid'	=> '',//【可选】
+	 * ]
+	 * @throws WechatApiException
+	 */
+    public static function getUserInfo( string $token, string $openid ):array{ 
+		
+        $url_get='https://api.weixin.qq.com/sns/userinfo?access_token='.$token.'&openid='.$openid.'&lang=zh_CN';
+		$result = self::_curl_get($url_get);
+		//$result = '{"openid":"oBjc20uu9n0R_uv2yAzRA0YHSVIs","nickname":"刘红星","sex":1,"language":"zh_CN","city":"朝阳","province":"北京","country":"中国","headimgurl":"http:\/\/thirdwx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTK98V6YdT9CJYuDPqsJkj7razFLaMfcnFRewW1X9GichmUQhP2ibJOTcvD43xskMBQxBwbHSSibetQfg\/132","privilege":[]}';
+		if( empty($result) ){
+			throw new WechatApiException('getUserInfo',['access_token'=>$token,'openid'=>$openid]);
+		}
+		$data = json_decode($result,true);
+		if( is_null($data) ){
+			throw new WechatApiException('getUserInfo',['access_token'=>$token,'openid'=>$openid],'解析错误');
+		}
+		if( isset($data['errcode']) ){
+			throw new WechatApiException('getUserInfo',['access_token'=>$token,'openid'=>$openid],'微信错误',$data);
+		}
+		if( !isset($data['openid']) ){
+			throw new WechatApiException('getUserInfo',['access_token'=>$token,'openid'=>$openid],'微信错误',$data);
+		}
+		return $data;
+	}
+	
+    /**
      * 获取 access_token
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
@@ -23,7 +99,7 @@ class WechatApi {
 	 * ]
 	 * @throws WechatApiException
      */
-    public static function getAccessToken( string $appid, string $secret ){ 
+    public static function getApiAccessToken( string $appid, string $secret ){ 
         $url_get='https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$appid.'&secret='.$secret;
         
 		$result = self::_curl_get($url_get);
