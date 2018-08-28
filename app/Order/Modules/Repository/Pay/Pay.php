@@ -696,6 +696,12 @@ class Pay extends \App\Lib\Configurable
 	 *		'payment_amount'=> '',	// 交易名称
 	 *		'back_url'		=> '',	// 后台通知地址
 	 *		'front_url'		=> '',	// 前端回跳地址
+	 *		'extended_params' => [	// 支付扩展参数
+	 *			'wechat_params'	=> [	//【可选】（微信支付时必须）
+	 *				'trade_type' => '',	//【可选】交易类型；MWEB H5支付；JSAPI 公众号支付（包含小程序）；NATIVE 扫码支付；APP APP支付；
+	 *				'openid' => '',		//【可选】trade_type=JSAPI时（即公众号支付），此参数必传
+	 *			]
+	 *		]
 	 * ]
 	 * @return array 
 	 * [
@@ -750,6 +756,14 @@ class Pay extends \App\Lib\Configurable
                 ],
             ];
         }
+		
+		// 
+		if($channel == Channel::Wechat) {
+			if( isset($params['extended_params']) ){
+				$data['extended_params'] = $params['extended_params'];
+			}
+		}
+		
 		// 获取url
 		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl($data);
 		return $url_info;
