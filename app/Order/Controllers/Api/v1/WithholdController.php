@@ -932,17 +932,17 @@ class WithholdController extends Controller
         // 扩展参数
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 		
-//		// 微信支付，交易类型：JSAPI，redis读取openid
-//		if( $channelId == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
-//			if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
-//				$_key = 'wechat_openid_'.$all['auth_token'];
-//				$openid = \Illuminate\Support\Facades\Redis::get($_key);
-//				if( empty($_key) ){
-//					return apiResponse([], ApiStatus::CODE_71000, "参数错误");
-//				}
-//				$extended_params['wechat_params']['openid'] = $openid;
-//			}
-//		}
+		// 微信支付，交易类型：JSAPI，redis读取openid
+		if( $channelId == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+			if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+				$_key = 'wechat_openid_'.$all['auth_token'];
+				$openid = \Illuminate\Support\Facades\Redis::get($_key);
+				if( $openid ){
+					$extended_params['wechat_params']['openid'] = $openid;
+				}
+				//return apiResponse([], ApiStatus::CODE_71000, "参数错误");
+			}
+		}
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
