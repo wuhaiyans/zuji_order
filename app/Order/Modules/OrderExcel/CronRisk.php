@@ -27,7 +27,7 @@ class CronRisk
      *  每月1号定时导出上个整月订单风控数据
      * @return excel文件
      */
-    public function everMonth()
+    public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
 

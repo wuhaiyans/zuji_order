@@ -39,6 +39,12 @@ class crontabPaying extends Command
     public function handle()
     {
 
+        $total = \App\Order\Models\OrderGoodsInstalment::query()
+            ->where([
+                ['status', '=', \App\Order\Modules\Inc\OrderInstalmentStatus::PAYING],
+            ])->count();
+
+        LogApi::info('[updateInstalmentStatus]分期支付中状态总数为：'.$total);
         // 支付中分期列表
         $list = \App\Order\Models\OrderGoodsInstalment::query()
             ->select('id','update_time')
@@ -47,6 +53,7 @@ class crontabPaying extends Command
         ])->get();
         $list = objectToArray($list);
 
+        $num = 0;
         foreach($list as $item){
             // 分期 更新时间 如果大于一小时 则修改为失败
             $pastTimes = time() - 3600;
@@ -59,8 +66,12 @@ class crontabPaying extends Command
                 if(!$instalmentStatus){
                     LogApi::error('[updateInstalmentStatus]修改分期状态为失败：'.$item['id']);
                 }
+                ++$num;
             }
         }
+
+        // 记录总数
+        LogApi::info('[updateInstalmentStatus]修改支付中状态为失败数目为:'.$num);
 
     }
 

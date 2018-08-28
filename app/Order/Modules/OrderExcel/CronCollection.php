@@ -24,15 +24,15 @@ class CronCollection
      *  导出1号-24号定时导出上个整月订单催收数据
      * @return excel文件
      */
-    public function otherMonth(){
+    public static function otherMonth(){
         $_GET['other']=1;
-        $this->everMonth();
+        self::everMonth();
     }
     /**
      *  每月1号定时导出上个整月订单催收数据
      * @return excel文件
      */
-    public function everMonth()
+    public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
 
