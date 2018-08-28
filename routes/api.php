@@ -179,6 +179,7 @@ $api->version('v1', [
 
 	$apiMap = [
 		'third.auth.url' => 'ThirdAuthController@getUrl',
+		'third.auth.query' => 'ThirdAuthController@query',
 	];
 	
 	$method = request()->input('method');
