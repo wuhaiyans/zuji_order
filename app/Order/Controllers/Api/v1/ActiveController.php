@@ -15,7 +15,7 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 20;
             $code   = "SMS_113461181";
