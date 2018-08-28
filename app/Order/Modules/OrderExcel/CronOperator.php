@@ -28,7 +28,7 @@ class CronOperator
     {
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-        if($_GET['day']){
+        if(isset($_GET['day'])){
             $date = $_GET['day'];
         }else{
             //获取当天所有订单
@@ -217,7 +217,7 @@ class CronOperator
      *  每天定时导出今天前15天订单数据
      * @return excel文件
      */
-    public  function fiveteen(){
+    public static  function fiveteen(){
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
         //获取当天所有订单
@@ -311,15 +311,15 @@ class CronOperator
      *  每月定时导出上月24-下月24号订单数据
      * @return excel文件
      */
-    public  function everMonth(){
+    public static  function everMonth(){
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-        if($_GET['begin'] && $_GET['end']){
+        if(isset($_GET['begin']) && isset($_GET['end'])){
             $beginDay = $_GET['begin'];
             $endDay = $_GET['end'];
         }else{
-            //获取上月26号-下月23号所有订单
-            $beginDay = date("Y-m-25",strtotime("Last Month"));
+            //获取上月26号-下月25号所有订单
+            $beginDay = date("Y-m-26",strtotime("Last Month"));
             $endDay = date("Y-m-25",time());
         }
 
