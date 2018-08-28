@@ -216,7 +216,6 @@ class MiniOrderController extends Controller
             }
             $miniData = $miniApi->getResult();
 			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
-			
             //用户处理
             $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token']);
 			if( !$_user ){
@@ -247,7 +246,12 @@ class MiniOrderController extends Controller
                 }
             }
             //风控系统处理
-            $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$params['auth_token'],$params['appid']);
+            if($params['auth_token']){
+                $auth_token = $params['auth_token'];
+            }else{
+                $auth_token = $_user['auth_token'];
+            }
+            $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$auth_token,$params['appid']);
             if($b != true){
 				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
                 //return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
