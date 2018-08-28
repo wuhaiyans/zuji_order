@@ -254,6 +254,8 @@ class Pay extends \App\Lib\Configurable
 	 * [
 	 *		'name'			=> '',	// 交易名称
 	 *		'front_url'		=> '',	// 前端回跳地址
+	 *		'ip'			=> '',	// IP地址
+	 *		'extended_params' => [],
 	 * ]
 	 * @return array			返回参数
 	 * [
@@ -696,6 +698,7 @@ class Pay extends \App\Lib\Configurable
 	 *		'payment_amount'=> '',	// 交易名称
 	 *		'back_url'		=> '',	// 后台通知地址
 	 *		'front_url'		=> '',	// 前端回跳地址
+	 *		'ip'			=> '',	// IP地址
 	 *		'extended_params' => [	// 支付扩展参数
 	 *			'wechat_params'	=> [	//【可选】（微信支付时必须）
 	 *				'trade_type' => '',	//【可选】交易类型；MWEB H5支付；JSAPI 公众号支付（包含小程序）；NATIVE 扫码支付；APP APP支付；
@@ -732,6 +735,7 @@ class Pay extends \App\Lib\Configurable
             'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
             'name'			=> $params['name'],				//【必选】string 交易名称
             'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
+			'ip'			=> $params['ip'],
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];

@@ -925,6 +925,7 @@ class WithholdController extends Controller
             return apiResponse([], $validateParams['code']);
         }
         $params = $params['params'];
+		
         // 判断分期状态
         $instalmentId   = $params['instalment_id'];
         // 渠道
@@ -962,72 +963,82 @@ class WithholdController extends Controller
         //开启事务
         DB::beginTransaction();
 
+		try{
 
-        //分期状态
-        if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
-        }
+			//分期状态
+			if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
+			}
 
-        //查询订单
-        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
-        if( !$orderInfo ){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
-        }
+			//查询订单
+			$orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+			if( !$orderInfo ){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+			}
 
-        // 订单状态
-        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
-        }
+			// 订单状态
+			if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
+			}
 
-        $youhui = 0;
-        // 租金抵用券
-        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+			$youhui = 0;
+			// 租金抵用券
+			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
 
-        if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
-            $youhui = $couponInfo['youhui'];
-        }
-        // 最小支付一分钱
-        $amount = $instalmentInfo['amount'] - $youhui;
-        $amount = $amount > 0 ? $amount : 0.01;
+			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
+				$youhui = $couponInfo['youhui'];
+			}
+			// 最小支付一分钱
+			$amount = $instalmentInfo['amount'] - $youhui;
+			$amount = $amount > 0 ? $amount : 0.01;
 
-        //优惠券信息
-        if($youhui > 0){
+			//优惠券信息
+			if($youhui > 0){
 
-            // 创建优惠券使用记录
-            $couponData = [
-                'coupon_id'         => $couponInfo['coupon_id'],
-                'discount_amount'   => $couponInfo['youhui'],
-                'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'       => $business_no,
-            ];
-            \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-        }
+				// 创建优惠券使用记录
+				$couponData = [
+					'coupon_id'         => $couponInfo['coupon_id'],
+					'discount_amount'   => $couponInfo['youhui'],
+					'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+					'business_no'       => $business_no,
+				];
+				\App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+			}
 
-        // 创建支付单
-        $payData = [
-            'userId'            => $instalmentInfo['user_id'],//用户ID
-            'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $business_no,	                // 业务编号
-            'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
-            'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
-            'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
-        ];
-        $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+			// 创建支付单
+			$payData = [
+				'userId'            => $instalmentInfo['user_id'],//用户ID
+				'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
+				'businessNo'		=> $business_no,	                // 业务编号
+				'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
+				'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
+				'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+			];
+			$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+			//获取支付的url
+			$url = $payResult->getCurrentUrl($channelId, [
+				'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
+				'front_url' => $params['return_url'], //回调URL
+				'extended_params' => $extended_params,// 扩展参数
+				'ip' => $request->getClientIp(), // 客户端IP
+			]);
 
-        //获取支付的url
-        $url = $payResult->getCurrentUrl($channelId, [
-            'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
-            'front_url' => $params['return_url'], //回调URL
-			'extended_params' => $extended_params,// 扩展参数
-        ]);
+			// 提交事务
+			DB::commit();
+		} catch (\App\Lib\ApiException $ex) {
+			DB::rollBack();
+			LogApi::error('系统接口异常',$ex->getOriginalValue());
+			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
+		} catch (\Exception $ex) {
+			DB::rollBack();
+			LogApi::error('系统异常',$ex);
+			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
+		} 
 
-        // 提交事务
-        DB::commit();
-
-        return apiResponse($url,ApiStatus::CODE_0);
+		return apiResponse($url,ApiStatus::CODE_0);
 
 
     }
