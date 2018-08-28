@@ -10,4 +10,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+	
+	public function __construct() {
+		$params = request()->all();
+		if( isset($params) ){
+			\App\Lib\Common\LogApi::setSource($params['method']);
+		}
+	}
+	
 }
