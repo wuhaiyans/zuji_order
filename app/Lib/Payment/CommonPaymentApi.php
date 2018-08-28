@@ -18,10 +18,16 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 *		'back_url'		=> '',	//【必选】string 后台通知地址
 	 *		'front_url'		=> '',	//【必选】string 前端回跳地址
 	 *		'user_id'		=> '',	//【可选】int 业务平台yonghID
+	 *		'extended_params' => [	// 支付扩展参数
+	 *			'wechat_params'	=> [	//【可选】（微信支付时必须）
+	 *				'trade_type' => '',	//【可选】交易类型；MWEB H5支付；JSAPI 公众号支付（包含小程序）；NATIVE 扫码支付；APP APP支付；
+	 *				'openid' => '',		//【可选】trade_type=JSAPI时（即公众号支付），此参数必传
+	 *			]
+	 *		]
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'payment_url' => '',//支付链接
+	 *		'url' => '',//支付链接
 	 * ]
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */

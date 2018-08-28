@@ -21,6 +21,10 @@ class Channel {
 	 * 京东支付
 	 */
 	const Jdpay = 3;
+	/**
+	 * 微信支付
+	 */
+	const Wechat = 4;
     /**
      * 乐百分支付
      */
@@ -36,6 +40,7 @@ class Channel {
 			self::Unionpay 	=> '银联',
 			self::Alipay 	=> '支付宝',
 			self::Jdpay 	=> '京东支付',
+			self::Wechat 	=> '微信支付',
 			self::Lebaifen 	=> '乐百分支付',
 		];
 	}

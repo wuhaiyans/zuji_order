@@ -36,12 +36,15 @@ class PayController extends Controller
             'callback_url'  => 'required',
             'order_no'  => 'required',
             'pay_channel_id'  => 'required',
+            'extended_params'  => 'required',	// 支付扩展参数
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
             return apiResponse([],$validateParams['code']);
         }
         $params =$params['params'];
+        // 扩展参数
+        $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 		
 		LogApi::id($params['order_no']);
 		
@@ -74,6 +77,7 @@ class PayController extends Controller
 			$paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
 					'name'=> $name,
 					'front_url' => $params['callback_url'],
+					'extended_params' => $extended_params,// 扩展参数
 			]);
 			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
