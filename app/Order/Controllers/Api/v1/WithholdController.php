@@ -197,24 +197,18 @@ class WithholdController extends Controller
         }
         $business_no = $instalmentInfo['business_no'];
 
-        //开启事务
-        DB::beginTransaction();
-
         // 订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中");
         }
 
         //判断是否允许扣款
         $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
         if(!$allow){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71000, "不允许扣款" );
         }
 
@@ -227,7 +221,6 @@ class WithholdController extends Controller
         // 解决办法： 将结果值 1）先转成字符串类型的值，2）再转换成想用的类型（想使用int值，则再转成init）
         $amount = intval( strval($instalmentInfo['amount'] * 100) );
         if( $amount<0 ){
-            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
         }
 
@@ -236,7 +229,6 @@ class WithholdController extends Controller
             ->where(['id' => $instalmentInfo['id']])
             ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
         if(!$paying){
-            DB::rollBack();
             LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
             return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
         }
@@ -246,7 +238,7 @@ class WithholdController extends Controller
             //获取订单的芝麻订单编号
             $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
             if( empty($miniOrderInfo) ){
-                \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
+                LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                 return apiResponse([],ApiStatus::CODE_35003,'本地小程序确认订单回调记录查询失败');
             }
             //芝麻小程序扣款请求
@@ -261,20 +253,16 @@ class WithholdController extends Controller
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_0, '小程序扣款操作成功');
             }elseif($pay_status =='PAY_FAILED'){
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35006, '小程序扣款请求失败');
             }elseif($pay_status == 'PAY_INPROGRESS'){
                 // 提交事务
-                DB::commit();
                 return apiResponse([], ApiStatus::CODE_35007, '小程序扣款处理中请等待');
             }else{
                 // 事物回滚
-                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败或芝麻处理错误）');
             }
         }else {
@@ -288,7 +276,6 @@ class WithholdController extends Controller
 
             $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
-                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_71004, '用户代扣协议编号错误');
             }
             // 代扣接口
@@ -309,24 +296,22 @@ class WithholdController extends Controller
                 // 请求代扣接口
                 $withholdStatus = $withholding->deduct($withholding_data);
 
-                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
+                LogApi::error('[createpay_withhold]分期代扣请求返回结果-' , $withholdStatus);
 
 
                 if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
 
-                    \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
+                    LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 }
-                \App\Lib\Common\LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
+                LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error('分期代扣失败', $exc);
+                LogApi::error('[createpay]分期代扣失败', $exc);
                 return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
 
             }catch(\Exception $exc){
-                DB::rollBack();
-                \App\Lib\Common\LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                LogApi::error('分期代扣错误', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -351,12 +336,10 @@ class WithholdController extends Controller
         ];
         $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
         if( !$goodsLog ){
-            \App\Lib\Common\LogApi::error("分期扣款日志失败",$logData);
+            LogApi::error("[createpay]分期扣款日志失败",$logData);
             return apiResponse([], ApiStatus::CODE_71006, '分期扣款日志失败');
         }
 
-        // 提交事务
-        DB::commit();
         return apiResponse([],ApiStatus::CODE_0,"success");
     }
 
@@ -395,14 +378,14 @@ class WithholdController extends Controller
         foreach ($ids as $instalmentId) {
 
             if ($instalmentId < 1) {
-                Log::error("参数错误");
+                LogApi::error("multiCreatepay参数错误");
                 continue;
             }
 
             $instalmentKey = "instalmentWithhold_" . $instalmentId;
             // 频次限制
             if(redisIncr($instalmentKey, 300) > 1){
-                Log::error("当前分期正在操作，不能重复操作");
+                LogApi::error("multiCreatepay当前分期正在操作，不能重复操作");
                 continue;
             }
 
@@ -411,7 +394,7 @@ class WithholdController extends Controller
             // 分期详情
             $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
             if (!is_array($instalmentInfo)) {
-                Log::error("分期信息查询失败");
+                LogApi::error("multiCreatepay分期信息查询失败");
                 continue;
             }
 
@@ -422,7 +405,7 @@ class WithholdController extends Controller
                 // 1)记录租机交易码
                 $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
                 if( $b === false ){
-                    Log::error("数据异常");
+                    LogApi::error("multiCreatepay数据异常");
                     continue;
                 }
                 $instalmentInfo['business_no'] = $business_no;
@@ -432,12 +415,10 @@ class WithholdController extends Controller
             // 判断是否允许扣款
             $allow = OrderGoodsInstalment::allowWithhold($instalmentId);
             if (!$allow) {
-                Log::error("不允许扣款");
+                LogApi::error("multiCreatepay不允许扣款");
                 continue;
             }
 
-            //开启事务
-            DB::beginTransaction();
 
             // 状态在支付中或已支付时，直接返回成功
             if ($instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS && $instalmentInfo['status'] = OrderInstalmentStatus::PAYING) {
@@ -447,8 +428,7 @@ class WithholdController extends Controller
             // 订单
             $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
             if (!$orderInfo) {
-                DB::rollBack();
-                Log::error("数据异常");
+                LogApi::error("multiCreatepay数据异常");
                 continue;
             }
 
@@ -460,8 +440,7 @@ class WithholdController extends Controller
             // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
             $amount = intval( strval($instalmentInfo['amount'] * 100) );
             if ($amount < 0) {
-                DB::rollBack();
-                Log::error("扣款金额不能小于1分");
+                LogApi::error("multiCreatepay扣款金额不能小于1分");
                 continue;
             }
 
@@ -470,7 +449,7 @@ class WithholdController extends Controller
                 ->where(['id' => $instalmentId])
                 ->update(['status'=>OrderInstalmentStatus::PAYING,'update_time' => time()]);
             if(!$paying){
-                LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                LogApi::error('[multiCreatepay]修改分期支付中状态：'.$subject);
             }
 
             //判断支付方式 小程序
@@ -478,7 +457,7 @@ class WithholdController extends Controller
                 //获取订单的芝麻订单编号
                 $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
                 if( empty($miniOrderInfo) ){
-                    \App\Lib\Common\LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
+                    LogApi::info('本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
                     continue;
                 }
                 //芝麻小程序扣款请求
@@ -513,8 +492,8 @@ class WithholdController extends Controller
                 // 代扣协议编号
                 $agreementNo = $withholdInfo['out_withhold_no'];
                 if (!$agreementNo) {
-                    DB::rollBack();
-                    Log::error("用户代扣协议编号错误");
+
+                    Log::error("multiCreatepay用户代扣协议编号错误");
                     continue;
                 }
                 // 代扣接口
@@ -536,19 +515,19 @@ class WithholdController extends Controller
 
                     if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
 
-                        \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+                        LogApi::error('[multiCreatepay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
                         OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     }
 
-                    \App\Lib\Common\LogApi::error('分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
+                    \App\Lib\Common\LogApi::error('multiCreatepay分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\Exception $exc){
-                    DB::rollBack();
-                    \App\Lib\Common\LogApi::error('分期代扣错误', $withholding_data);
+
+                    \App\Lib\Common\LogApi::error('multiCreatepay分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
                     if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
 
-                        Log::error("买家余额不足");
+                        LogApi::error("multiCreatepay买家余额不足");
                         continue;
                     }
                 }
@@ -569,12 +548,10 @@ class WithholdController extends Controller
             ];
             $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData);
             if( !$goodsLog ){
-                \App\Lib\Common\LogApi::error("多项扣款失败",$logData);
+                LogApi::error("multiCreatepay多项扣款失败",$logData);
                 continue;
             }
 
-            // 提交事务
-            DB::commit();
         }
         return apiResponse([], ApiStatus::CODE_0, "success");
 
@@ -927,6 +904,8 @@ class WithholdController extends Controller
      * [
      *      'return_url'         => '', 【必须】 String 前端回调地址
      *      'instalment_id'      => '', 【必须】 Int    分期主键ID
+     *      'channel'			 => '', 【必须】 Int    支付渠道
+     *      'extended_params'    => '', 【可选】 array  支付扩展参数
      * ]
      * @return String url 前端支付URL
      */
@@ -937,6 +916,7 @@ class WithholdController extends Controller
             'return_url'        => 'required',
             'instalment_id'     => 'required|int',
             'channel'           => 'required|int',
+            'extended_params'   => 'required', // 扩展参数
         ];
 
         // 参数过滤
@@ -945,10 +925,13 @@ class WithholdController extends Controller
             return apiResponse([], $validateParams['code']);
         }
         $params = $params['params'];
+		
         // 判断分期状态
         $instalmentId   = $params['instalment_id'];
         // 渠道
         $channelId      = $params['channel'];
+        // 扩展参数
+        $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
@@ -980,71 +963,82 @@ class WithholdController extends Controller
         //开启事务
         DB::beginTransaction();
 
+		try{
 
-        //分期状态
-        if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
-        }
+			//分期状态
+			if( $instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_71000, "该分期不允许提前还款");
+			}
 
-        //查询订单
-        $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
-        if( !$orderInfo ){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
-        }
+			//查询订单
+			$orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+			if( !$orderInfo ){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+			}
 
-        // 订单状态
-        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
-        }
+			// 订单状态
+			if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
+			}
 
-        $youhui = 0;
-        // 租金抵用券
-        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+			$youhui = 0;
+			// 租金抵用券
+			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
 
-        if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
-            $youhui = $couponInfo['youhui'];
-        }
-        // 最小支付一分钱
-        $amount = $instalmentInfo['amount'] - $youhui;
-        $amount = $amount > 0 ? $amount : 0.01;
+			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
+				$youhui = $couponInfo['youhui'];
+			}
+			// 最小支付一分钱
+			$amount = $instalmentInfo['amount'] - $youhui;
+			$amount = $amount > 0 ? $amount : 0.01;
 
-        //优惠券信息
-        if($youhui > 0){
+			//优惠券信息
+			if($youhui > 0){
 
-            // 创建优惠券使用记录
-            $couponData = [
-                'coupon_id'         => $couponInfo['coupon_id'],
-                'discount_amount'   => $couponInfo['youhui'],
-                'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                'business_no'       => $business_no,
-            ];
-            \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-        }
+				// 创建优惠券使用记录
+				$couponData = [
+					'coupon_id'         => $couponInfo['coupon_id'],
+					'discount_amount'   => $couponInfo['youhui'],
+					'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+					'business_no'       => $business_no,
+				];
+				\App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+			}
 
-        // 创建支付单
-        $payData = [
-            'userId'            => $instalmentInfo['user_id'],//用户ID
-            'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
-            'businessNo'		=> $business_no,	                // 业务编号
-            'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
-            'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
-            'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
-        ];
-        $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+			// 创建支付单
+			$payData = [
+				'userId'            => $instalmentInfo['user_id'],//用户ID
+				'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,	// 业务类型
+				'businessNo'		=> $business_no,	                // 业务编号
+				'orderNo'		    => $instalmentInfo['order_no'],	// 订单号
+				'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
+				'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+			];
+			$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+			//获取支付的url
+			$url = $payResult->getCurrentUrl($channelId, [
+				'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
+				'front_url' => $params['return_url'], //回调URL
+				'extended_params' => $extended_params,// 扩展参数
+				'ip' => $request->getClientIp(), // 客户端IP
+			]);
 
-        //获取支付的url
-        $url = $payResult->getCurrentUrl($channelId, [
-            'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
-            'front_url' => $params['return_url'], //回调URL
-        ]);
+			// 提交事务
+			DB::commit();
+		} catch (\App\Lib\ApiException $ex) {
+			DB::rollBack();
+			LogApi::error('系统接口异常',$ex->getOriginalValue());
+			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
+		} catch (\Exception $ex) {
+			DB::rollBack();
+			LogApi::error('系统异常',$ex);
+			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
+		} 
 
-        // 提交事务
-        DB::commit();
-
-        return apiResponse($url,ApiStatus::CODE_0);
+		return apiResponse($url,ApiStatus::CODE_0);
 
 
     }

@@ -732,20 +732,34 @@ class OrderRepository
         }
 
 //        sql_profiler();
-        $count = DB::table('order_info')
-            ->join('order_user_address',function($join){
-                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
-            }, null,null,'inner')
-            ->join('order_info_visit',function($join){
-                $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
-            }, null,null,'left')
-            ->join('order_delivery',function($join){
-                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
-            }, null,null,'left')
-            ->where($whereArray)
-            ->where($orWhereArray)
-            ->orderBy('order_info.id', 'DESC')
-            ->count();
+        if (empty($whereArray) && empty($orWhereArray)) {
+
+            $whereArray[] = ['order_info.create_time', '>', 0];
+            $count = DB::table('order_info')
+                ->where($whereArray)
+                ->count();
+
+
+        } else {
+
+            $whereArray[] = ['order_info.create_time', '>', 0];
+            $count = DB::table('order_info')
+                ->join('order_user_address',function($join){
+                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+                }, null,null,'inner')
+                ->join('order_info_visit',function($join){
+                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+                }, null,null,'left')
+                ->join('order_delivery',function($join){
+                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+                }, null,null,'left')
+                ->where($whereArray)
+                ->where($orWhereArray)
+                ->count();
+
+
+        }
+
 
 
         if (!isset($param['count'])) {

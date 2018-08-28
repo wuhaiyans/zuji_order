@@ -291,6 +291,57 @@ class Instalment {
 		return true;
 	}
 
+
+	/**
+	 * 根据用户id和订单号、商品编号，修改用户的分期为成功
+	 * @param data  array
+	 * [
+	 *      'id'       => '', 主键ID
+	 *      'order_no' => '', 订单编号
+	 *      'goods_no' => '', 商品编号
+	 * ]
+	 * @return boolean	true成功、false失败
+	 */
+	public static function instalmentStatusSuccess( array $data ):bool{
+		if (!is_array($data) || $data == [] ) {
+			return false;
+		}
+
+		$where = [];
+		if(isset($data['id'])){
+			$where[] = ['id', '=', $data['id']];
+		}
+
+		if(isset($data['order_no'])){
+			$where[] = ['order_no', '=', $data['order_no']];
+		}
+
+		if(isset($data['goods_no'])){
+			$where[] = ['goods_no', '=', $data['goods_no']];
+		}
+
+		$where[] = ['status', '=', OrderInstalmentStatus::CANCEL];
+
+		//qinliping 2018/08/14  修改
+		/**************************/
+		$orderGoodsInstalment = OrderGoodsInstalmentRepository::getInfo($where);
+		if(!$orderGoodsInstalment){
+			return true;
+		}
+		/************************/
+
+		$status = [
+			'status'	=> OrderInstalmentStatus::SUCCESS
+		];
+
+		$result =  OrderGoodsInstalment::where($where)->update($status);
+
+		if (!$result) return false;
+
+		return true;
+	}
+
+
 	/**
 	 * 代扣扣款成功
 	 * @param data  array
