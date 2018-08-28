@@ -329,6 +329,16 @@ class OrderRelet
      */
     public static function callback($params)
     {
+        //过滤参数
+        $rule = [
+            'business_type'     => 'required',//业务类型
+            'business_no'       => 'required',//业务编码
+            'status'            => 'required',//支付状态
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return false;
+        }
         //开启事物
         DB::beginTransaction();
         try{
@@ -338,15 +348,15 @@ class OrderRelet
 
             if ($status == "processing") {
                 //续租创建的同时就会去支付,所以不需要支付中状态处理(创建=支付中)
-                LogApi::notify("续租支付处理中", $reletNo);
+                LogApi::notify("OrderRelet:续租支付处理中", $reletNo);
                 return true;
-            } else {
+            } elseif ($params['status'] == "success") {
                 //获取续租对象
                 $reletObj = Relet::getByReletNo($reletNo);
                 //修改续租状态完成
                 if (!$reletObj->setStatusOn()) {
                     DB::rollBack();
-                    LogApi::notify("修改续租状态完成失败", $reletNo);
+                    LogApi::notify("OrderRelet:修改续租状态完成失败", $reletNo);
                     return false;
                 }
                 //查询
@@ -360,7 +370,7 @@ class OrderRelet
                     $goodsUnit = $goodsUnitObj->getData();
                 }else{
                     DB::rollBack();
-                    LogApi::notify("设备周期未找到", $reletNo);
+                    LogApi::notify("OrderRelet:设备周期未找到", $reletNo);
                     return false;
                 }
                 //判断租期类型
@@ -381,19 +391,19 @@ class OrderRelet
                 //修改设备状态 续租完成
                 if( !$goodsObj->setGoodsStatusReletOff() ){
                     DB::rollBack();
-                    LogApi::notify("修改设备状态续租完成失败", $reletNo);
+                    LogApi::notify("OrderRelet:修改设备状态续租完成失败", $reletNo);
                     return false;
                 }
                 //添加设备周期表
                 if( !ServicePeriod::createService($data) ){
                     DB::rollBack();
-                    LogApi::notify("续租添加设备周期表失败", $reletNo);
+                    LogApi::notify("OrderRelet:续租添加设备周期表失败", $reletNo);
                     return false;
                 }
                 //修改订单商品服务结束时间
                 if( !ServicePeriod::updateGoods($data) ){
                     DB::rollBack();
-                    LogApi::notify("续租修改订单商品服务结束时间失败", $reletNo);
+                    LogApi::notify("OrderRelet:续租修改订单商品服务结束时间失败", $reletNo);
                     return false;
                 }
 //                //获取订单对象
@@ -406,9 +416,13 @@ class OrderRelet
 //                }
                 //提交
                 DB::commit();
-                LogApi::notify("续租支付成功", $reletNo);
+                LogApi::notify("OrderRelet:续租支付成功", $reletNo);
                 return true;
 
+            }else{
+                DB::rollBack();
+                LogApi::notify("OrderRelet:支付失败", $reletNo);
+                return false;
             }
         }catch(\Exception $e){
             DB::rollBack();

@@ -36,7 +36,6 @@ class PayController extends Controller
             'callback_url'  => 'required',
             'order_no'  => 'required',
             'pay_channel_id'  => 'required',
-            'extended_params'  => 'required',	// 支付扩展参数
         ];
         $validateParams = $this->validateParams($rules,$params);
         if (empty($validateParams) || $validateParams['code']!=0) {
