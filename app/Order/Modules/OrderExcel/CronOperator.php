@@ -13,7 +13,6 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
-use Illuminate\Support\Facades\DB;
 
 
 
@@ -117,7 +116,7 @@ class CronOperator
                 $item['discount_amount'],
             ];
         }
-        return Excel::localWrite($data,$headers,$date."-ever-day","operator");
+        return Excel::localWrite($data,$headers,$date."-ever-day","operator/day");
     }
 
     /**
@@ -211,7 +210,7 @@ class CronOperator
                 $item['discount_amount'],
             ];
         }
-        return Excel::localWrite($data,$headers,$sunday."-ever-week","operator");
+        return Excel::localWrite($data,$headers,$sunday."-ever-week","operator/week");
     }
 
     /**
@@ -305,7 +304,7 @@ class CronOperator
                 $item['discount_amount'],
             ];
         }
-        return Excel::localWrite($data,$headers,$endDay."-ever-day-15th","operator");
+        return Excel::localWrite($data,$headers,$endDay."-ever-day-15th","operator/15th");
     }
 
     /**
@@ -405,6 +404,6 @@ class CronOperator
                 $item['discount_amount'],
             ];
         }
-        return Excel::localWrite($data,$headers,$endDay."-ever-month","operator");
+        return Excel::localWrite($data,$headers,$endDay."-ever-month","operator/month");
     }
 }
