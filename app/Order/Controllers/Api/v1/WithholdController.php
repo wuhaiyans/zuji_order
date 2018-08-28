@@ -904,6 +904,8 @@ class WithholdController extends Controller
      * [
      *      'return_url'         => '', 【必须】 String 前端回调地址
      *      'instalment_id'      => '', 【必须】 Int    分期主键ID
+     *      'channel'			 => '', 【必须】 Int    支付渠道
+     *      'extended_params'    => '', 【可选】 array  支付扩展参数
      * ]
      * @return String url 前端支付URL
      */
@@ -914,6 +916,7 @@ class WithholdController extends Controller
             'return_url'        => 'required',
             'instalment_id'     => 'required|int',
             'channel'           => 'required|int',
+            'extended_params'   => 'required', // 扩展参数
         ];
 
         // 参数过滤
@@ -926,6 +929,8 @@ class WithholdController extends Controller
         $instalmentId   = $params['instalment_id'];
         // 渠道
         $channelId      = $params['channel'];
+        // 扩展参数
+        $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
@@ -1016,6 +1021,7 @@ class WithholdController extends Controller
         $url = $payResult->getCurrentUrl($channelId, [
             'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
             'front_url' => $params['return_url'], //回调URL
+			'extended_params' => $extended_params,// 扩展参数
         ]);
 
         // 提交事务
