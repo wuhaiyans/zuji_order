@@ -29,8 +29,12 @@ class CronOperator
     {
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
-        //获取当天所有订单
-        $date = date("Y-m-d",strtotime("Yesterday"));
+        if($_GET['day']){
+            $date = $_GET['day'];
+        }else{
+            //获取当天所有订单
+            $date = date("Y-m-d",strtotime("Yesterday"));
+        }
         $where[] = ['create_time', '>=', strtotime($date." 00:00:00"),];
         $where[] = ['create_time', '<=', strtotime($date." 23:59:59"),];
 

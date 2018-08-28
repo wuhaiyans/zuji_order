@@ -325,7 +325,7 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        if (redisIncr("mannage_orderlist_export",100)>1){
+        if (redisIncr("mannage_orderlist_export",65)>1){
 
             echo "已经有数据正在导入，请稍后重试";
             exit;
@@ -335,7 +335,12 @@ class OrderController extends Controller
             try{
 
                 $params = $request->all();
-                $params['size'] = 500;
+                if (isset($params['size']) && $params['size']>=5000) {
+                    $pageSize = 2000;
+                } else {
+
+                    $pageSize = $params['size'] ?? 2000;
+                }
                 $params['page'] = $params['page']?? 1;
                 $outPages       = $params['page']?? 1;
                 $params['count'] = 1;
@@ -345,15 +350,15 @@ class OrderController extends Controller
                 $total     = $orderData['total'];
 
                 unset($params['count']);
-                $total_export_count = 5000;
-                if ($total<5000) {
+                $total_export_count = $pageSize;
+                if ($total<intval($pageSize)) {
                     $total_export_count = $total;
                 }
                 $pre_count = 500;
 
                 $smallPage = ceil($total_export_count/$pre_count);
                 $abc = 1;
-                Log::info("进程执行start");
+//                Log::info("进程执行start");
                 header ( "Content-type:application/vnd.ms-excel" );
                 header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
 
@@ -375,13 +380,9 @@ class OrderController extends Controller
                     if ($abc>$smallPage) {
                         exit;
                     }
-                    Log::info("i的值:" . $abc);
-                    Log::info("smallpage的值:" . $smallPage);
                     $offset = ($outPages - 1) * $total_export_count;
                     $params['page'] = intval(($offset / $pre_count)+ $abc) ;
                     ++$abc;
-                    Log::info("参数:", $params);
-                    Log::info("获取进程".getmypid());
                     $orderData = array();
                     $orderData = Service\OrderOperate::getOrderExportList($params);
 

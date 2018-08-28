@@ -182,6 +182,7 @@ class CronRisk
                     $item['is_pay'] = "";
                 }
                 //订单相关信息
+                $item['order_status'] = Inc\OrderStatus::getStatusName($item['order_status']);
                 $item['create_time'] = date("Y-m-d H:i:s", $item['create_time']);
                 $item['pay_type'] = Inc\PayInc::getPayName($item['pay_type']);
                 $item['app_name'] = $channelList[$item['appid']];
@@ -213,6 +214,7 @@ class CronRisk
                     $item['user_address'],
                     $item['pay_type'],
                     $item['is_pay'],
+                    $item['order_status'],
                     $item['term_1'],
                     $item['term_2'],
                     $item['term_3'],
@@ -254,6 +256,7 @@ class CronRisk
             '收货地址',
             '支付方式',
             '最近是否还款',
+            '订单状态',
             '第1期',
             '第2期',
             '第3期',

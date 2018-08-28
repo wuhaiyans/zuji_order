@@ -10,6 +10,7 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Service\OrderGoods;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Lib\Excel;
 
 class InstalmentController extends Controller
 {
@@ -339,60 +340,84 @@ class InstalmentController extends Controller
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function instalmentListExport(Request $request) {
-        ini_set('max_execution_time', '0');
-        $request               = $request->all();
-        $additional['page']    = isset($request['page']) ? $request['page'] : 1;
-        $additional['limit']   = isset($request['limit']) ? $request['limit'] : 10000;
+        set_time_limit(0);
+        try{
 
-        $params         = filter_array($request, [
-            'begin_time'    => 'required',
-            'end_time'      => 'required',
-            'status'        => 'required',
-            'kw_type'       => 'required',
-            'keywords'      => 'required',
-        ]);
+            $params = $request->all();
+
+            $params['page']     = !empty($params['page']) ? $params['page'] : 1;
+            $outPages           = !empty($params['page']) ? $params['page'] : 1;
+
+            $total_export_count = 5000;
+
+            $pre_count = 500;
+
+            $smallPage = ceil($total_export_count/$pre_count);
+
+            $i = 1;
+            header ( "Content-type:application/vnd.ms-excel" );
+            header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台分期列表数据导出" ) . ".csv" );
+
+            // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+            $fp = fopen('php://output', 'a');
+
+            // 租期，成色，颜色，容量，网络制式
+            $headers = ['商品名称','机型','租期', '第几期还款','本月应扣金额','碎屏险卖价','碎屏险成本','扣款状态','扣款成功时间'];
+
+            // 将中文标题转换编码，否则乱码
+            foreach ($headers as $k => $v) {
+                $column_name[$k] = iconv('utf-8', 'GB18030', $v);
+            }
+
+            // 将标题名称通过fputcsv写到文件句柄
+            fputcsv($fp, $column_name);
 
 
-        if(isset($params['keywords'])){
-            if($params['kw_type'] == 1){
-                $params['order_no'] = $params['keywords'];
+            while(true){
+                if ($i > $smallPage) {
+                    exit;
+                }
+
+                $offset = ( $outPages - 1) * $total_export_count;
+
+                $params['page'] = intval(($offset / $pre_count) + $i) ;
+                ++$i;
+
+
+                $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::instalmentExport($params);
+
+                $data = [];
+
+                foreach($list as &$item){
+                    // 状态
+                    $item['status']             = OrderInstalmentStatus::getStatusName($item['status']);
+                    // 还款日
+                    $item['payment_time']       = !empty($item['payment_time']) ? date('Y-m-d H:i:s',$item['payment_time']) : "--";
+
+                    $data[] = [
+                        $item['goods_name'],                // 商品名称
+                        $item['specs'],                     // 机型
+                        $item['zuqi'],                      // 租期
+                        $item['times'],                     // 第几期还款
+                        $item['amount'],                    // 本月应扣金额
+                        $item['insurance'],                 // 碎屏险卖价
+                        $item['insurance_cost'],            // 碎屏险成本
+                        $item['status'],                    // 扣款状态
+                        $item['payment_time'],              // 扣款成功时间
+                    ];
+                }
+
+                $Excel =  Excel::csvOrderListWrite($data, $fp);
             }
-            elseif($params['kw_type'] == 2){
-                $params['mobile'] = $params['keywords'];
-            }
-            else{
-                $params['order_no'] = $params['keywords'];
-            }
+
+
+            return $Excel;
+
+        } catch (\Exception $e) {
+
+            return apiResponse([],ApiStatus::CODE_50000,$e);
+
         }
-
-        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::instalmentExport($params,$additional);
-        //定义excel头部参数名称
-        $headers = [
-             '商品名称','机型', '租期', '第几期还款', '本月应扣金额', '碎屏险卖价', '碎屏险成本', '扣款状态','扣款成功时间',
-        ];
-        $data = [];
-
-        foreach($list as &$item){
-            // 状态
-            $item['status']             = OrderInstalmentStatus::getStatusName($item['status']);
-            // 还款日
-            $item['payment_time']       = !empty($item['payment_time']) ? date('Y-m-d H:i:s',$item['payment_time']) : "--";
-
-            $data[] = [
-                $item['goods_name'],                // 商品名称
-                $item['specs'],                     // 机型
-                $item['zuqi'],                      // 租期
-                $item['times'],                     // 第几期还款
-                $item['amount'],                    // 本月应扣金额
-                $item['insurance'],                 // 碎屏险卖价
-                $item['insurance_cost'],            // 碎屏险成本
-                $item['status'],                    // 扣款状态
-                $item['payment_time'],              // 扣款成功时间
-            ];
-        }
-
-        return \App\Lib\Excel::write($data, $headers,'后台分期数据导出-');
-
     }
 
     /**
