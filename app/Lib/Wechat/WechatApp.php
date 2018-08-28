@@ -38,10 +38,7 @@ class WechatApp{
 	 * @param string $scope		授权作用域 取值返回：snsapi_base 或 snsapi_userinfo
 	 * @return string
 	 */
-	public function getAuthUrl( string $redirect_uri, string $scope=null ){
-		if( is_null($scope) ){
-			$scope = 'snsapi_userinfo';
-		}
+	public function getAuthUrl( string $redirect_uri, string $scope ){
 		$redirect_uri = urlencode(urldecode($redirect_uri));
 		return 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='.$this->config->getAppId()
 				.'&redirect_uri='.$redirect_uri

@@ -8,11 +8,8 @@ namespace App\ClientApi\Controllers;
 use Illuminate\Http\Request;
 
 use App\Lib\Common\LogApi;
-use App\Lib\User\User;
-use App\ClientApi\Controllers;
-use App\Lib\Curl;
 use App\Lib\ApiStatus;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class ThirdAuthController extends Controller{
 
@@ -75,6 +72,11 @@ class ThirdAuthController extends Controller{
 	/**
 	 * 第三方授权处理
 	 * @param Request $request
+	 * [
+	 *		'channel'		=> '',	//【必须】授权渠道
+	 *		'code'	=> '',	//【必须】回跳地址
+	 *		'scope'	=> '',	//【可选】授权作用域
+	 * ]
 	 * @return type
 	 */
 	public function query(Request $request){
@@ -97,7 +99,11 @@ class ThirdAuthController extends Controller{
 		// 微信授权
 		if( $params['channel'] == 'WECHAT' ){
 			try{
-				$data = $this->_wechatQuery($params);
+				$user_info = $this->_wechatQuery($params);
+				// 当前会话 微信openid缓存（用于微信JSAPI支付时使用）
+				$_key = 'wechat_openid_'.$all['auth_token'];
+				Redis::set($_key,$user_info['openid']);
+				Redis::expire($_key, 60);
 			} catch (\App\Lib\Wechat\WechatApiException $ex) {
 				LogApi::type('exception')::error('微信授权接口错误',[
 					'error' => $ex->getMessage(),
@@ -138,7 +144,8 @@ class ThirdAuthController extends Controller{
 					throw new \Exception( '参数错误' );
 				}
 			}else{
-				$params['scope'] = null;
+				// 这里默认为 snsapi_userinfo 需要授权用户信息
+				$params['scope'] = 'snsapi_userinfo';
 			}
 			return $App->getAuthUrl($params['redirect_uri'],$params['scope']);
 			
@@ -148,13 +155,13 @@ class ThirdAuthController extends Controller{
 	 * 微信授权处理
 	 * @return array
 	 * [
-	 *		'openid'	=> '',		// 必须
-	 *		'nickname'	=> '',	//
-	 *		'sex'		=> '',//
-	 *		'province'	=> '',//
-	 *		'city'		=> '',//
-	 *		'country'	=> '',//
-	 *		'headimgurl'=> '',//
+	 *		'openid'	=> '',//【必选】
+	 *		'nickname'	=> '',//【可选】
+	 *		'sex'		=> '',//【可选】
+	 *		'province'	=> '',//【可选】
+	 *		'city'		=> '',//【可选】
+	 *		'country'	=> '',//【可选】
+	 *		'headimgurl'=> '',//【可选】
 	 *		'unionid'	=> '',//【可选】
 	 * ]
 	 */
@@ -164,8 +171,29 @@ class ThirdAuthController extends Controller{
 		$App = new \App\Lib\Wechat\WechatApp( $config );
 		$token_info = $App->getUserAccessToken( $params['code'] );
 		$openid = $token_info['openid'];
-		$third_user_info = $App->getUserInfo( $token_info['access_token'], $token_info['openid'] );
-		return $third_user_info;		
+
+		if( isset( $params['scope'] ) ){
+			if( !in_array($params['scope'], ['snsapi_base','snsapi_userinfo']) ){
+				LogApi::type('params-error')::error('授权查询参数错误',[
+					'error' => 'scope错误',
+					'params' => $params,
+				]);
+				throw new \Exception( '参数错误' );
+			}
+		}else{
+			// 这里默认为 snsapi_base 不读取用户信息
+			$params['scope'] = 'snsapi_base';
+		}
+		
+		// 读取用户信息
+		if( $params['scope'] == 'snsapi_userinfo' ){
+			$third_user_info = $App->getUserInfo( $token_info['access_token'], $token_info['openid'] );
+			return $third_user_info;	
+		}
+		
+		return [
+			'openid' => $openid,
+		];
 	}
 	
 	
