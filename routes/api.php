@@ -140,27 +140,7 @@ $api->version('v1', [
 
     // 定时任务 提前一天 发送扣款短信
     $api->get('cronWithholdOneMessage', 'CronController@cronWithholdOneMessage');
-
-
-    /************************定时任务导出订单相关数据excel文件****************************************/
-    // 导出运营数据    每天执行导出每天数据
-    $api->get('everDayOperator', 'OrderExportController@everDayOperator');
-    //                 每周执行导出每周数据
-    $api->get('everWeekOperator', 'OrderExportController@everWeekOperator');
-    //                 每15天执行导出15天数据
-    $api->get('fiveteenOperator', 'OrderExportController@fiveteenOperator');
-    //                 每月天执行导出每月数据
-    $api->get('everMonthOperator', 'OrderExportController@everMonthOperator');
-
-    // 导出催收数据    每月1号执行导出整月数据
-    $api->get('everMonthCollection', 'OrderExportController@everMonthCollection');
-    //                 每月25号执行导出1-24号数据
-    $api->get('otherMonthCollection', 'OrderExportController@otherMonthCollection');
-
-    // 导出风控数据    每月1号执行导出所有订单风控数据
-    $api->get('riskMonthRisk', 'OrderExportController@riskMonthRisk');
-
-
+    
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
      ************************************************************************************************/
