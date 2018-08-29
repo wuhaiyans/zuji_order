@@ -158,6 +158,7 @@ $api->version('v1', [
     $api->any('header', 'AuthRefferController@header');
 
 	$apiMap = [
+		'third.wechat.jsapi.sign' => 'WechatController@jsapiSign',
 		'third.auth.url' => 'ThirdAuthController@getUrl',
 		'third.auth.query' => 'ThirdAuthController@query',
 	];
