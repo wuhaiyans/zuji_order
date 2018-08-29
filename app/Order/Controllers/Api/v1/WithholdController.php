@@ -1029,6 +1029,7 @@ class WithholdController extends Controller
 				'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
 			];
 			
+			LogApi::debug('请求头',$_SERVER);
 			LogApi::debug('请求头',$request->header());
 			LogApi::debug('客户端IP',$request->getClientIp());
 			// 设置可信任的IP
