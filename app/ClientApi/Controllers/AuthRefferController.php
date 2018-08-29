@@ -39,6 +39,7 @@ class AuthRefferController extends Controller{
 			LogApi::id($params['method']);
 			LogApi::debug('请求头',$request->header());
 			LogApi::debug('客户端IP',$request->getClientIp());
+			// 设置可信任的IP
 			Request::setTrustedProxies([$request->getClientIp()]);
 			LogApi::debug('客户端真实IP',$request->getClientIp());
             //是否需要验证
