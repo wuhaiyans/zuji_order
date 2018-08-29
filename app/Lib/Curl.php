@@ -78,7 +78,7 @@ class Curl {
 	 * @return array
 	 */
 	public static function getInfo():string{
-		return self::$errno;
+		return self::$curl_info;
 	}
 	/**
 	 * 
