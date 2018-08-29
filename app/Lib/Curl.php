@@ -77,7 +77,7 @@ class Curl {
      * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 * @return array
 	 */
-	public static function getInfo():string{
+	public static function getInfo():array{
 		return self::$curl_info;
 	}
 	/**
