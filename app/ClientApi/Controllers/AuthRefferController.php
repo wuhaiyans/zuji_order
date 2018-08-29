@@ -38,6 +38,9 @@ class AuthRefferController extends Controller{
 			LogApi::setSource('Client-Api-Reforward');
 			LogApi::id($params['method']);
 			LogApi::debug('请求头',$request->header());
+			LogApi::debug('客户端IP',$request->getClientIp());
+			Request::setTrustedProxies([$request->getClientIp()]);
+			LogApi::debug('客户端真实IP',$request->getClientIp());
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
