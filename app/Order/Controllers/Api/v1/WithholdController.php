@@ -1028,14 +1028,6 @@ class WithholdController extends Controller
 				'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
 				'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
 			];
-			
-			LogApi::debug('请求头',$_SERVER);
-			LogApi::debug('请求头',$request->header());
-			LogApi::debug('客户端IP',$request->getClientIp());
-			// 设置可信任的IP
-			Request::setTrustedProxies([$request->getClientIp()]);
-			LogApi::debug('客户端真实IP',$request->getClientIp());
-			
 			$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
 			//获取支付的url
 			$url = $payResult->getCurrentUrl($channelId, [

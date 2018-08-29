@@ -27,7 +27,8 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * ]
 	 * @return mixed false：失败；array：成功
 	 * [
-	 *		'url' => '',//支付链接
+	 *		'url'		=> '',//string 支付链接
+	 *		'params'	=> '',//array 支付参数
 	 * ]
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
