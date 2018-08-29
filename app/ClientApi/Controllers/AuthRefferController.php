@@ -39,14 +39,14 @@ class AuthRefferController extends Controller{
 			//LogApi::debug('请求头',$request->header());
 			//LogApi::debug('请求头',$_SERVER);
 			//LogApi::debug('客户端IP',$request->getClientIp());
-			// 设置可信任的IP
+			// 设置可信任的IP，获取代理扣的真实IP
 			Request::setTrustedProxies([$request->getClientIp()]);
 			//LogApi::debug('客户端真实IP',$request->getClientIp());
 			$header = [];
             $header[] = 'Content-Type: application/json';
 			// 客户端IP
-            $header[] = 'HTTP_X_REAL_IP1: '.$request->getClientIp();
-            $header[] = 'HTTP_X_FORWARDED_FOR1: '.$request->getClientIp();
+            $header[] = 'HTTP_X_REAL_IP: '.$request->getClientIp();
+            $header[] = 'HTTP_X_FORWARDED_FOR: '.$request->getClientIp();
 			
 			$params['ip'] = $request->getClientIp();
 			
