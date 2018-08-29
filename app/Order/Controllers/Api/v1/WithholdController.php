@@ -1042,7 +1042,7 @@ class WithholdController extends Controller
 				'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
 				'front_url' => $params['return_url'], //回调URL
 				'extended_params' => $extended_params,// 扩展参数
-				'ip' => $request->getClientIp(), // 客户端IP
+				'ip' => $all['ip'], // 客户端IP
 			]);
 
 			// 提交事务

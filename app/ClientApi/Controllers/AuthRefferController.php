@@ -48,6 +48,8 @@ class AuthRefferController extends Controller{
             $header[] = 'HTTP_X_REAL_IP1: '.$request->getClientIp();
             $header[] = 'HTTP_X_FORWARDED_FOR1: '.$request->getClientIp();
 			
+			$params['ip'] = $request->getClientIp();
+			
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
