@@ -45,8 +45,8 @@ class AuthRefferController extends Controller{
 			$header = [];
             $header[] = 'Content-Type: application/json';
 			// 客户端IP
-            $header[] = 'HTTP_X_REAL_IP: '.$request->getClientIp();
-            $header[] = 'HTTP_X_FORWARDED_FOR: '.$request->getClientIp();
+            $header[] = 'HTTP_X_REAL_IP1: '.$request->getClientIp();
+            $header[] = 'HTTP_X_FORWARDED_FOR1: '.$request->getClientIp();
 			
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
