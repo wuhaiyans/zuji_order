@@ -57,7 +57,6 @@ class AuthRefferController extends Controller{
                     'url' => config('ordersystem.ORDER_API'),
                     'request' => $params,
                     'response' => $info,
-                    '_curl_info_' => Curl::getInfo(),
                 ]);
                 $info =json_decode($info,true);
                 if( is_null($info)
