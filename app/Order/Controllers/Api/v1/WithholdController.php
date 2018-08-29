@@ -910,21 +910,20 @@ class WithholdController extends Controller
      * @return String url 前端支付URL
      */
     public function repayment(Request $request){
-        $params     = $request->all();
+        $all     = $request->all();
 
         $rules = [
             'return_url'        => 'required',
             'instalment_id'     => 'required|int',
             'channel'           => 'required|int',
-            'extended_params'   => 'required', // 扩展参数
         ];
 
         // 参数过滤
-        $validateParams = $this->validateParams($rules,$params);
+        $validateParams = $this->validateParams($rules,$all);
         if ($validateParams['code'] != 0) {
             return apiResponse([], $validateParams['code']);
         }
-        $params = $params['params'];
+        $params = $all['params'];
 		
         // 判断分期状态
         $instalmentId   = $params['instalment_id'];
@@ -932,6 +931,18 @@ class WithholdController extends Controller
         $channelId      = $params['channel'];
         // 扩展参数
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
+		
+		// 微信支付，交易类型：JSAPI，redis读取openid
+		if( $channelId == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+			if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+				$_key = 'wechat_openid_'.$all['auth_token'];
+				$openid = \Illuminate\Support\Facades\Redis::get($_key);
+				if( $openid ){
+					$extended_params['wechat_params']['openid'] = $openid;
+				}
+				//return apiResponse([], ApiStatus::CODE_71000, "参数错误");
+			}
+		}
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
@@ -1017,13 +1028,21 @@ class WithholdController extends Controller
 				'paymentAmount'		=> $amount,	                    // Price 支付金额，单位：元
 				'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
 			];
+			
+			LogApi::debug('请求头',$_SERVER);
+			LogApi::debug('请求头',$request->header());
+			LogApi::debug('客户端IP',$request->getClientIp());
+			// 设置可信任的IP
+			Request::setTrustedProxies([$request->getClientIp()]);
+			LogApi::debug('客户端真实IP',$request->getClientIp());
+			
 			$payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
 			//获取支付的url
 			$url = $payResult->getCurrentUrl($channelId, [
 				'name'=>'订单' .$orderInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款',
 				'front_url' => $params['return_url'], //回调URL
 				'extended_params' => $extended_params,// 扩展参数
-				'ip' => $request->getClientIp(), // 客户端IP
+				'ip' => $all['ip'], // 客户端IP
 			]);
 
 			// 提交事务

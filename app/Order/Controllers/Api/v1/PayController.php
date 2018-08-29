@@ -308,6 +308,7 @@ class PayController extends Controller
 	public function withholdUnsignNotify()
 	{
 		$input = file_get_contents("php://input");
+		LogApi::setSource('withhold_unsign_notify');
 		LogApi::info('代扣解约异步通知', $input);
 		
 		$params = json_decode($input,true);
@@ -329,7 +330,7 @@ class PayController extends Controller
 			'status'            => 'required',
 			'agreement_no'      => 'required',
 			'out_agreement_no'  => 'required',
-			'user_id'           => 'required',
+//			'user_id'           => 'required',
 		];
 		// 参数过滤
 		$validateParams = $this->validateParams($rules,$params);
@@ -337,7 +338,7 @@ class PayController extends Controller
 			
 			echo json_encode([
 				'status' => 'error',
-				'msg' => 'params error'.$validateParams['msg'],
+				'msg' => 'params error '.$validateParams['msg'],
 			]);exit;
 		}
 
