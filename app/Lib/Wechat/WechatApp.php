@@ -138,7 +138,7 @@ class WechatApp{
 		if( ($data = $this->storage->get($key)) ){
 			return $data['ticket'];
 		}
-		$ticket_info = WechatApi::getJsapiTicket( $this->getAccessToken() );
+		$ticket_info = WechatApi::getJsapiTicket( $this->getApiAccessToken() );
 		// 更新缓存
 		$this->storage->set($key,
 				['ticket' => $ticket_info['ticket'],],
