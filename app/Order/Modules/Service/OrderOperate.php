@@ -1593,7 +1593,7 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','begin_time'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
 
@@ -1602,6 +1602,7 @@ class OrderOperate
             $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];
             $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
             $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
+            $goodsList[$keys]['begin_time'] = date('Y-m-d H:i:s', $values['begin_time']);
             $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
             if (empty($actArray)){
                 $goodsList[$keys]['act_goods_state']= [];
