@@ -431,6 +431,21 @@ class OrderGiveback
 				\App\Lib\Common\LogApi::debug('[还机支付回调]商品信息获取失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
+			
+			//-+--------------------------------------------------------------------
+			// | 判断支付单是否存在未完成分期的期数，存在则将关闭的分期单转为支付成功
+			// | 添加时间：2018-08-28 12:06:35 【协调人：吴天堂、王昌俊】
+			//-+--------------------------------------------------------------------
+			$instalmentResult = true;//初始化分期状态扭转结果
+			if( $orderGivebackInfo['instalment_num'] ){
+				$instalmentResult = \App\Order\Modules\Repository\Order\Instalment::instalmentStatusSuccess(['goods_no'=>$orderGivebackInfo['goods_no']]);
+			}
+			if( !$instalmentResult ){
+				\App\Lib\Common\LogApi::debug('[还机支付回调]分期状态扭转失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			
+			
 			//-+--------------------------------------------------------------------
 			// | 判断订单押金，是否生成清算单
 			//-+--------------------------------------------------------------------

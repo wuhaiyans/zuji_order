@@ -20,13 +20,19 @@ use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 
 class CronCollection
 {
-
-
+    /**
+     *  导出1号-24号定时导出上个整月订单催收数据
+     * @return excel文件
+     */
+    public static function otherMonth(){
+        $_GET['other']=1;
+        self::everMonth();
+    }
     /**
      *  每月1号定时导出上个整月订单催收数据
      * @return excel文件
      */
-    public function everMonth()
+    public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
 
@@ -64,6 +70,12 @@ class CronCollection
             $day = date("t",strtotime($date));
             $beginTime = strtotime($date."-01 00:00:00");
             $endTime = strtotime($date."-".$day." 23:59:59");
+        }
+        if($_GET['other']==1){
+            $moth = "2018-".date("m",time());
+            $date = $moth."-24";
+            $beginTime = strtotime($moth."-01 00:00:00");
+            $endTime = strtotime($moth."-24 23:59:59");
         }
         $where[] = ['withhold_day', '>=', $beginTime,];
         $where[] = ['withhold_day', '<=', $endTime,];

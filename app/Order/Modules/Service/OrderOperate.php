@@ -1328,65 +1328,34 @@ class OrderOperate
      * @param array $param
      * @return array
      */
-    public static function getOrderExportList($param = array())
+    public static function getOrderExportList($param = array(),$pagesize=5)
     {
         //根据用户id查找订单列表
 
-        $orderListArray = OrderRepository::getAdminOrderList($param);
+        $orderListArray = OrderRepository::getAdminExportOrderList($param, $pagesize);
 
-        if (isset($param['count'])) return $orderListArray;
+        if (empty($orderListArray)) return false;
 
-        $goodsData =  self::getExportActAdminState($orderListArray['orderIds'], $actArray=array());
-//        $orderListArray = objectToArray($orderList);
+        $goodsData =  self::getExportActAdminState(array_keys($orderListArray), $actArray=array());
 
-        if (!empty($orderListArray['data'])) {
+        if (!empty($orderListArray)) {
 
-            foreach ($orderListArray['data'] as $keys=>$values) {
+            foreach ($orderListArray as $keys=>$values) {
 
                 //订单状态名称
-                $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                $orderListArray[$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
                 //支付方式名称
-                $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
+                $orderListArray[$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
-                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
-                //订单冻结名称
-//                $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
+                $orderListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
 
-                //设备名称
-
-                //订单商品列表相关的数据
-//                $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
-
-
-
-
-                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData['data'][$keys]['goodsInfo'];
-
-                // 有冻结状态时
-//                if ($values['freeze_type']>0) {
-//                    $actArray['refund_btn'] = false;
-//                    $actArray['modify_address_btn'] = false;
-//                    $actArray['confirm_btn'] = false;
-//                    $actArray['confirm_receive'] = false;
-//                    $actArray['buy_off'] = false;
-//                    $actArray['Insurance'] = false;
-//                }
-
-//                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
-                //回访标识
-//                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
-
-                //$orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+                $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
 
             }
 
         }
 
-        if (isset($orderListArray['orderIds'])) {
-
-            unset($orderListArray['orderIds']);
-        }
-        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+        return $orderListArray;
 
 
     }
@@ -1451,7 +1420,7 @@ class OrderOperate
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
 
-
+               $goodsList[$keys]['begin_time'] = date('Y-m-d H:i:s', $values['begin_time']);
                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
                $goodsList[$keys]['give_back_status'] = '';
                $goodsList[$keys]['evaluation_status'] = '';
@@ -1624,7 +1593,7 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','order_no'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','begin_time'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
 
@@ -1703,7 +1672,6 @@ class OrderOperate
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
 
-//        dd($goodsList);
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
         $orderListArray = array();
@@ -1711,48 +1679,8 @@ class OrderOperate
         foreach($goodsList as $keys=>$values) {
             $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
             $goodsList[$keys]['zuqi_name'] = $values['zuqi'].Inc\OrderStatus::getZuqiTypeName($values['zuqi_type']);
-            $orderListArray['data'][$values['order_no']]['goodsInfo'][$keys] = $goodsList[$keys];
+            $orderListArray[$values['order_no']]['goodsInfo'][$keys] = $goodsList[$keys];
         }
-//            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
-//            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
-//            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
-//            if (empty($actArray)){
-//                $goodsList[$keys]['act_goods_state']= [];
-//            } else {
-
-//                $goodsList[$keys]['act_goods_state']= $actArray;
-                //是否处于售后之中
-
-//                $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
-//                if ($expire_process) {
-//                    $goodsList[$keys]['act_goods_state']['buy_off'] = false;
-//                    $goodsList[$keys]['act_goods_state']['refund_btn'] = false;
-//                    $goodsList[$keys]['act_goods_state']['modify_address_btn'] = false;
-//                    $goodsList[$keys]['act_goods_state']['confirm_btn'] = false;
-//                    $goodsList[$keys]['act_goods_state']['confirm_receive'] = false;
-//                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
-//
-//                }
-                //是否已经操作过保险
-
-//                $insuranceData = self::getInsuranceInfo(['order_no'  => $orderNo , 'goods_no'=>$values['goods_no']]);
-////                $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-//                if ($insuranceData){
-//                    $goodsList[$keys]['act_goods_state']['Insurance'] = false;
-//                    $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = true;
-//                    $popInsurance = array_pop($insuranceData);
-//                    if ($popInsurance['type'] == 2) {
-//                        $goodsList[$keys]['act_goods_state']['alreadyInsurance'] = false;
-//                        $goodsList[$keys]['act_goods_state']['Insurance'] = true;
-//                    }
-//
-//                    $goodsList[$keys]['act_goods_state']['insuranceDetail'] = true;
-//                }
-
-//            }
-//
-//        }
-
         return $orderListArray;
 
 

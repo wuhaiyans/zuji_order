@@ -68,8 +68,6 @@ class OrderGoodsInstalmentRepository
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
-        }else{
-            $whereArray[] = ['order_goods_instalment.status', '!=', \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL];
         }
 
         // 根据还款类型
@@ -135,8 +133,6 @@ class OrderGoodsInstalmentRepository
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
             $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
-        }else{
-            $whereArray[] = ['order_goods_instalment.status', '!=', \App\Order\Modules\Inc\OrderInstalmentStatus::CANCEL];
         }
 
         //根据分期日期

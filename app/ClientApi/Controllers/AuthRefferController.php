@@ -31,11 +31,25 @@ class AuthRefferController extends Controller{
     public function header(Request $request)
     {
         try{
-            $params = $request->all();
-            $header = ['Content-Type: application/json'];
 			
+            $params = $request->all();
 			LogApi::setSource('Client-Api-Reforward');
 			LogApi::id($params['method']);
+			
+			//LogApi::debug('请求头',$request->header());
+			//LogApi::debug('请求头',$_SERVER);
+			//LogApi::debug('客户端IP',$request->getClientIp());
+			// 设置可信任的IP，获取代理扣的真实IP
+			Request::setTrustedProxies([$request->getClientIp()]);
+			//LogApi::debug('客户端真实IP',$request->getClientIp());
+			$header = [];
+            $header[] = 'Content-Type: application/json';
+			// 客户端IP
+            $header[] = 'HTTP_X_REAL_IP: '.$request->getClientIp();
+            $header[] = 'HTTP_X_FORWARDED_FOR: '.$request->getClientIp();
+			
+			$params['ip'] = $request->getClientIp();
+			
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);

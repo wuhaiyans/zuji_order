@@ -83,6 +83,7 @@ $api->version('v1', [
         $api->any('fiveteen', 'TestExcelController@fiveteen');
         $api->any('everMonth', 'TestExcelController@everMonth');
         $api->any('Month', 'TestExcelController@Month');
+        $api->any('otherMonth', 'TestExcelController@otherMonth');
         $api->any('riskMonth', 'TestExcelController@riskMonth');
 
         //退款列表导出
@@ -139,10 +140,7 @@ $api->version('v1', [
 
     // 定时任务 提前一天 发送扣款短信
     $api->get('cronWithholdOneMessage', 'CronController@cronWithholdOneMessage');
-
-
-
-
+    
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
      ************************************************************************************************/
@@ -158,4 +156,16 @@ $api->version('v1', [
     'middleware' => 'api'
 ], function($api){
     $api->any('header', 'AuthRefferController@header');
+
+	$apiMap = [
+		'third.wechat.jsapi.sign' => 'WechatJsapiController@sign',
+		'third.auth.url' => 'ThirdAuthController@getUrl',
+		'third.auth.query' => 'ThirdAuthController@query',
+	];
+	
+	$method = request()->input('method');
+	if (isset($apiMap[$method])) {
+		$api->post('/',  $apiMap[$method]);
+	}
+	
 });

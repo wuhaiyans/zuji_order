@@ -27,7 +27,7 @@ class CronRisk
      *  每月1号定时导出上个整月订单风控数据
      * @return excel文件
      */
-    public function everMonth()
+    public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
 
@@ -109,6 +109,7 @@ class CronRisk
                     $item['goods_name'] ="";
                     $item['zujin'] = "";
                     $item['specs'] = "";
+                    $item['market_price'] = "";
                 }else{
                     $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
                     $item['mianyajin'] = $goodsList[$item['order_no']]['goods_yajin']-$goodsList[$item['order_no']]['yajin'];
@@ -116,6 +117,7 @@ class CronRisk
                     $item['goods_name'] = $goodsList[$item['order_no']]['goods_name'];
                     $item['zujin'] = $goodsList[$item['order_no']]['zujin'];
                     $item['specs'] = $goodsList[$item['order_no']]['specs'];
+                    $item['market_price'] = $goodsList[$item['order_no']]['market_price'];
                 }
                 //订单收货地址
                 if(isset($userAddressList[$item['order_no']])){
@@ -207,6 +209,7 @@ class CronRisk
                     $item['credit'],
                     $item['goods_name'],
                     $item['order_amount'],
+                    $item['market_price'],
                     $item['order_insurance'],
                     $item['order_yajin'],
                     $item['mianyajin'],
@@ -249,6 +252,7 @@ class CronRisk
             '信用分',
             '选购产品',
             '订单金额',
+            '市场价',
             '碎屏意外险',
             '实押金',
             '免押金',
