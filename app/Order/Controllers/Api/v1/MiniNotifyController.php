@@ -431,8 +431,8 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A730139501212361',//商户端订单号
-            'zm_order_no'=>'2018073000001001093909089036',//芝麻订单号
+            'out_order_no'=>'A730138799584988',//商户端订单号
+            'zm_order_no'=>'2018073000001001093861579004',//芝麻订单号
             'out_trans_no'=>'A823119008551174',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
