@@ -325,11 +325,8 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        if (redisIncr("mannage_orderlist_export",65)>1){
+        set_time_limit(0);
 
-            echo "已经有数据正在导入，请稍后重试";
-            exit;
-        }
 
         $params = $request->all();
         if (isset($params['size']) && $params['size']>=5000) {
@@ -338,48 +335,75 @@ class OrderController extends Controller
 
             $pageSize = $params['size'] ?? 2000;
         }
-        $params['size'] =$pageSize;
         $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
+        $params['count'] = 1;
+
         $orderData = Service\OrderOperate::getOrderExportList($params);
-//            dd($orderData);
-//            if ($params['page']>20) {
-//                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
-//                exit;
-//            }
 
-        if ($orderData['code']===ApiStatus::CODE_0) {
+        if (empty($orderData)) echo '数据为空！';exit;
 
-//                租期，成色，颜色，容量，网络制式
-            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-                '订单实际总租金','订单总押金','意外险总金额'];
-            $data = array();
-            foreach ($orderData['data']['data'] as $item) {
-                $data[] = [
-                    $item['order_no'],
-                    date('Y-m-d H:i:s', $item['create_time']),
-                    $item['order_status_name'],
-                    $item['appid_name'],
-                    $item['pay_type_name'],
-//                        $item['visit_name'],
-                    $item['name'],
-                    $item['mobile'],
-                    $item['address_info'],
-                    implode(",",array_column($item['goodsInfo'],"goods_name")),
-                    implode(",",array_column($item['goodsInfo'],"zuqi_name")),
-                    implode(",",array_column($item['goodsInfo'],"specs")),
-                    $item['order_amount'],
-                    $item['order_yajin'],
-                    $item['order_insurance'],
-                ];
-            }
+        $total_export_count = $pageSize;
+        $pre_count = 500;
 
-            return Excel::csvWrite1($data, $headers,'后台订单列表数据导出'.$params['page']);
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+//                Log::info("进程执行start");
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
 
-//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-        } else {
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
 
-            return apiResponse([],ApiStatus::CODE_34007);
+        // 租期，成色，颜色，容量，网络制式
+        $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+            '订单实际总租金','订单总押金','意外险总金额'];
+
+        // 将中文标题转换编码，否则乱码
+        foreach ($headers as $i => $v) {
+            $column_name[$i] = iconv('utf-8', 'GB18030', $v);
         }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $column_name);
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $orderData = array();
+            $orderData = Service\OrderOperate::getOrderExportList($params);
+            if ($orderData) {
+                $data = array();
+                foreach ($orderData['data']['data'] as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_status_name'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
+//                        $item['visit_name'],
+                        $item['name'],
+                        $item['mobile'],
+                        $item['address_info'],
+                        implode(",",array_column($item['goodsInfo'],"goods_name")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                        implode(",",array_column($item['goodsInfo'],"specs")),
+                        $item['order_amount'],
+                        $item['order_yajin'],
+                        $item['order_insurance'],
+                    ];
+                }
+
+                $orderExcel =  Excel::csvOrderListWrite($data, $fp);
+
+            } else {
+                break;
+            }
+        }
+
+        return $orderExcel;
 
 
 
