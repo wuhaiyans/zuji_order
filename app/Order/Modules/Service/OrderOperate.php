@@ -1593,7 +1593,7 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','order_no'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
 
