@@ -326,8 +326,6 @@ class OrderController extends Controller
     public function orderListExport(Request $request) {
 
         set_time_limit(0);
-
-
         $params = $request->all();
         $pageSize = 2000;
         if (isset($params['size']) && $params['size']>=5000) {
@@ -339,29 +337,16 @@ class OrderController extends Controller
         $outPages       = $params['page']?? 1;
 
         $total_export_count = $pageSize;
-        $pre_count = 500;
+        $pre_count = $params['smallsize']?? 500;
 
         $smallPage = ceil($total_export_count/$pre_count);
         $abc = 1;
-//                Log::info("进程执行start");
-        header ( "Content-type:application/vnd.ms-excel" );
-        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台订单列表数据导出" ) . ".csv" );
-
-        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
-        $fp = fopen('php://output', 'a');
 
         // 租期，成色，颜色，容量，网络制式
         $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
             '订单实际总租金','订单总押金','意外险总金额'];
 
-        // 将中文标题转换编码，否则乱码
-        foreach ($headers as $i => $v) {
-            $column_name[$i] = iconv('utf-8', 'GB18030', $v);
-        }
-        // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, $column_name);
         $orderExcel = array();
-
         while(true) {
             if ($abc>$smallPage) {
                 break;
@@ -370,10 +355,10 @@ class OrderController extends Controller
             $params['page'] = intval(($offset / $pre_count)+ $abc) ;
             ++$abc;
             $orderData = array();
-            $orderData = Service\OrderOperate::getOrderExportList($params);
+            $orderData = Service\OrderOperate::getOrderExportList($params,$pre_count);
             if ($orderData) {
                 $data = array();
-                foreach ($orderData['data']['data'] as $item) {
+                foreach ($orderData as $item) {
                     $data[] = [
                         $item['order_no'],
                         date('Y-m-d H:i:s', $item['create_time']),
@@ -393,7 +378,7 @@ class OrderController extends Controller
                     ];
                 }
 
-                $orderExcel =  Excel::csvOrderListWrite($data, $fp);
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '订单列表导出',$abc);
 
             } else {
                 break;
@@ -401,6 +386,7 @@ class OrderController extends Controller
         }
 
         return $orderExcel;
+        exit;
 
 
 

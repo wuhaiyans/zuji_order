@@ -1328,11 +1328,11 @@ class OrderOperate
      * @param array $param
      * @return array
      */
-    public static function getOrderExportList($param = array())
+    public static function getOrderExportList($param = array(),$pagesize=5)
     {
         //根据用户id查找订单列表
 
-        $orderListArray = OrderRepository::getAdminExportOrderList($param);
+        $orderListArray = OrderRepository::getAdminExportOrderList($param, $pagesize);
 
         if (empty($orderListArray)) return false;
 

@@ -182,8 +182,6 @@ class OrderRepository
 
     public static function getGoodsListByOrderIdArray($orderIds,$coulumn='*'){
         if (empty($orderIds)) return false;
-
-//        sql_profiler();
         $orderGoodData =  OrderGoods::query()->whereIn('order_no', $orderIds)->select($coulumn)->get();
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
@@ -912,7 +910,6 @@ class OrderRepository
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
 
-        $pagesize = 500;
 
         if (isset($param['page'])) {
             $page = $param['page'];
