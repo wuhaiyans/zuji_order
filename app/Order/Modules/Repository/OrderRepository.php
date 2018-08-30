@@ -942,7 +942,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->orderBy('o.order_info.create_time', 'DESC')
+            ->orderBy('o.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
         $orderArrays = array_column(objectToArray($orderList),NULL,'order_no');
