@@ -1420,7 +1420,7 @@ class OrderOperate
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
 
-
+               $goodsList[$keys]['begin_time'] = date('Y-m-d H:i:s', $values['begin_time']);
                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
                $goodsList[$keys]['give_back_status'] = '';
                $goodsList[$keys]['evaluation_status'] = '';
@@ -1602,7 +1602,6 @@ class OrderOperate
             $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];
             $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
             $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
-            $goodsList[$keys]['begin_time'] = date('Y-m-d H:i:s', $values['begin_time']);
             $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
             if (empty($actArray)){
                 $goodsList[$keys]['act_goods_state']= [];
