@@ -329,19 +329,14 @@ class OrderController extends Controller
 
 
         $params = $request->all();
+        $pageSize = 2000;
         if (isset($params['size']) && $params['size']>=5000) {
             $pageSize = 2000;
         } else {
-
-            $pageSize = $params['size'] ?? 2000;
+            $pageSize = $params['size'];
         }
         $params['page'] = $params['page']?? 1;
         $outPages       = $params['page']?? 1;
-        $params['count'] = 1;
-
-        $orderData = Service\OrderOperate::getOrderExportList($params);
-
-        if (empty($orderData)) echo '数据为空！';exit;
 
         $total_export_count = $pageSize;
         $pre_count = 500;
@@ -365,6 +360,8 @@ class OrderController extends Controller
         }
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $column_name);
+        $orderExcel = array();
+
         while(true) {
             if ($abc>$smallPage) {
                 break;

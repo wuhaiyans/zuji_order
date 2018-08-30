@@ -912,10 +912,7 @@ class OrderRepository
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
 
-
-        if (isset($param['size'])) {
-            $pagesize = $param['size'];
-        }
+        $pagesize = 500;
 
         if (isset($param['page'])) {
             $page = $param['page'];
