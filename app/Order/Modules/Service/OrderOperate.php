@@ -1420,7 +1420,7 @@ class OrderOperate
                $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
                $goodsList[$keys]['left_zujin'] = '';
 
-               $goodsList[$keys]['begin_time'] = date('Y-m-d H:i:s', $values['begin_time']);
+
                $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
                $goodsList[$keys]['give_back_status'] = '';
                $goodsList[$keys]['evaluation_status'] = '';
@@ -1593,7 +1593,7 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','begin_time'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
 

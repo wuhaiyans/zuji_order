@@ -716,7 +716,10 @@ class OrderRepository
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
-
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
+        }
 
         if (isset($param['size'])) {
             $pagesize = $param['size'];
