@@ -137,7 +137,7 @@ class OrderRelet
             if( $goodsObj ){
                 $goods = $goodsObj->getData();
                 if( $goods['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
-                    if( $params['zuqi']<3 || $params['zuqi']>30 ){
+                    if( $params['zuqi']<1 || $params['zuqi']>30 ){
                         DB::rollBack();
                         set_msg('租期错误');
                         return false;
