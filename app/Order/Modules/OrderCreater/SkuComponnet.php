@@ -150,10 +150,10 @@ class SkuComponnet implements OrderCreater
                 $this->flag = false;
             }
             // 库存量
-//            if($skuInfo['number']<$skuInfo['sku_num']){
-//                $this->getOrderCreater()->setError('商品库存不足');
-//                $this->flag = false;
-//            }
+            if($skuInfo['number']<$skuInfo['sku_num']){
+                $this->getOrderCreater()->setError('商品库存不足');
+                $this->flag = false;
+            }
             // 商品上下架状态、
             if($skuInfo['status'] !=1){
                 $this->getOrderCreater()->setError('商品已下架');
@@ -166,7 +166,7 @@ class SkuComponnet implements OrderCreater
             }
             if( $this->zuqiType == 1 ){ // 天
                 // 租期[3,31]之间的正整数
-                if( $skuInfo['zuqi']<1){
+                if( $skuInfo['zuqi']<3 || $skuInfo['zuqi']>30){
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
