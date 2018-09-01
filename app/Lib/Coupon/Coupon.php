@@ -12,8 +12,10 @@ use App\Lib\ApiStatus;
 use App\Lib\Curl;
 
 class Coupon extends \App\Lib\BaseApi{
-
-    public static $coupon_only = '383c8e805a3410e9ee03481d29a7f76f';//小程序优惠券id
+    //第一次首月零租金活动
+//    public static $coupon_only = '383c8e805a3410e9ee03481d29a7f76f';//小程序优惠券id
+    //第二次首月零租金活动
+    public static $coupon_only = 'f9a8c733d5feb2c4a3f29419e4fef562';//小程序优惠券id
 
     /**
      * 获取优惠券信息
