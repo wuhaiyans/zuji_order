@@ -41,6 +41,9 @@ return [
 
 		// 提前还款业务回调
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI=> '\App\Order\Modules\Service\OrderWithhold::repaymentNotify',
+
+        //预定业务 支付回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE => '\App\Activity\Modules\Service\DestinePayNotify::callback',
 	],
 
 	'refund' => [
