@@ -732,19 +732,10 @@ class OrderRepository
             $page = 1;
         }
 
-//        sql_profiler();
-        if (empty($whereArray) && empty($orWhereArray)) {
 
             $whereArray[] = ['order_info.create_time', '>', 0];
             $count = DB::table('order_info')
-                ->where($whereArray)
-                ->count();
-
-
-        } else {
-
-            $whereArray[] = ['order_info.create_time', '>', 0];
-            $count = DB::table('order_info')
+                ->select(DB::raw('count(order_info.order_no) as order_count'))
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
@@ -756,13 +747,10 @@ class OrderRepository
                 }, null,null,'left')
                 ->where($whereArray)
                 ->where($orWhereArray)
-                ->count();
+                ->first();
 
 
-        }
-
-
-
+        $count = objectToArray($count)['order_count'];
         if (!isset($param['count'])) {
 
 //        sql_profiler();
