@@ -8,6 +8,7 @@
 namespace App\Lib\Order;
 use App\Lib\Curl;
 use App\Lib\ApiStatus;
+use Illuminate\Support\Facades\Redis;
 
 class OrderInfo {
 
@@ -81,6 +82,18 @@ class OrderInfo {
         {
 
             if (empty($appId)) return apiResponse([],ApiStatus::CODE_10104);
+            $appIdkeys = 'appid_name_'.$appId;
+            if ($channelId) {
+                $channelIdKeys = 'channelId_name_'.$channelId;
+                if (Redis::EXISTS($channelIdKeys))
+                {
+                    return Redis::get($channelIdKeys);
+                }
+            }
+            if (Redis::EXISTS($appIdkeys))
+            {
+                return Redis::get($appIdkeys);
+            }
                 $data = config('tripartite.Interior_Goods_Request_data');
                 $data['method'] ='zuji.channel.appid.get';
                 $data['params'] = [
@@ -93,11 +106,16 @@ class OrderInfo {
                     $appInfo = json_decode($info, true);
                     if ($channelId) {
 
-                        return isset($appInfo['data']['appid']['channel_id'])?$appInfo['data']['appid']['channel_id']:'';
+                        $channelIdName = isset($appInfo['data']['appid']['channel_id'])?$appInfo['data']['appid']['channel_id']:'';
+                        Redis::set($channelIdKeys, $channelIdName);
+                        return $channelIdName;
+
 
                     } else {
 
-                        return isset($appInfo['data']['appid']['name'])?$appInfo['data']['appid']['name']:'';
+                        $apiidName = isset($appInfo['data']['appid']['name'])?$appInfo['data']['appid']['name']:'';
+                        Redis::set($appIdkeys, $apiidName);
+                        return $apiidName;
                     }
 
 
