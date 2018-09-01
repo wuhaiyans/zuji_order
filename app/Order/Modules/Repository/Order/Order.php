@@ -18,7 +18,7 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
  *
  * @author Administrator
  */
-class Order {
+class ACT {
 	
 	
 	/**

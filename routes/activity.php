@@ -20,10 +20,9 @@ $api->version('v1', [
 ], function($api) {
 
     $apiMap = config('apimapactivity');
-
 	$method = request()->input('method');
 	if (isset($apiMap[$method])) {
-		$api->post('/',  $apiMap[$method]);
+		$api->any('/',  $apiMap[$method]);
 	}
 });
 
