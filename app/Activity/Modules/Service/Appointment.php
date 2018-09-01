@@ -1,51 +1,110 @@
 <?php
 /**
- * 预定支付回调方法
+ * 预约活动
  * @access public (访问修饰符)
- * @author wuhaiyan <wuhaiyan@huishoubao.com>
+ * @author qinliping <qinliping@huishoubao.com.cn>
  * @copyright (c) 2018, Huishoubao
  */
 
 namespace App\Activity\Modules\Service;
 
-
-use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Activity\Modules\Repository\ActivityAppointmentRepository;
+use App\Activity\Modules\Repository\ActivityGoodsAppointmentRepository;
 
-class DestinePayNotify
+class Appointment
 {
-// 支付阶段完成时业务的回调配置
-// 回调接收一个参数，关联数组类型：
-// [
-//		'business_type' => '',	// 业务类型
-//		'business_no'	=> '',	// 业务编码
-//		'status'		=> '',	// 支付状态  processing：处理中；success：支付完成
-// ]
-// 支付阶段分3个环节，一次是：直接支付 -> 代扣签约 -> 资金预授权
-// 所有业务回调有可能收到两种通知：
-//	1）status 为 processing
-//		这种情况时
-//		表示：直接支付环节已经完成，还有后续环节没有完成。
-//		要求：如果这时要取消支付后，必须进行退款处理，然后才可以关闭业务。
-//	2）status 为 success
-// 格式： 键：业务类型；值：可调用的函数，类静态方法
-    public static function callback($params)
+    /**
+     * 添加预约活动
+     * @param $params
+     * [
+     * 'title'             =>'',  标题           int    【必传】
+     * 'appointment_image' =>'',  活动图片       string 【必传】
+     * 'desc'              =>'',  活动描述       string 【必传】
+     * 'begin_time'        =>'',  活动开始时间   int    【必传】
+     * 'end_time'          =>''   活动结束时间   int 【必传】
+     * 'appointment_status' =>'', 活动状态      string 【必传】
+     * 'spu_id'            =>['',''] 商品id     int      【必传】
+     * ]
+     * return bool
+     */
+    public function appointmentAdd(array $params)
     {
-        $businessType = $params['business_type'];
-        $destineNo = $params['business_no']; // 业务类型编号
-        $status = $params['status'];
-
-        if($status == "success" && $businessType == OrderStatus::BUSINESS_DESTINE){
-
-            $destine = ActivityDestine::getByNo($destineNo);
-            $b =$destine->pay();
-            if(!$b){
-                LogApi::error(config('app.env')."[payment]DestinePayNotify error");
-                return false;
-            }
-            return true;
+        $data['title']               = $params['title'];               //活动标题
+        $data['appointment_image'] = $params['appointment_image']; //活动图片
+        $data['desc']                = $params['desc'];                //活动描述
+        $data['begin_time']         = $params['begin_time'];         //活动开始时间
+        $data['end_time']           = $params['end_time'];            //活动结束时间
+        $data['appointment_status']=$params['appointment_status'];//活动状态
+        $data['create_time']        = time();                          //创建时间
+        $appointment_id = ActivityAppointmentRepository::add($data);//添加预约活动信息，获取添加活动的id
+        if(!$appointment_id){
+            return false;
         }
-        return true;
+        //循环添加活动和商品的关联关系
+        foreach($params['spu_id'] as $spu_id){
+            $goodsParams['appointment_id'] = $appointment_id;
+            $goodsParams['spu_id'] = $spu_id;
+            $goodsParams['create_time'] = time();
+            $res = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
+        }
+        return $res;
+    }
+
+
+    /***
+     * 执行修改活动
+     * @param $data
+     * [
+     * 'id'                =>'',  活动id         int    【必传】
+     * 'title'             =>'',  标题           int    【必传】
+     * 'appointment_image' =>'',  活动图片       string 【必传】
+     * 'desc'              =>'',  活动描述       string 【必传】
+     * 'begin_time'        =>'',  活动开始时间   int    【必传】
+     * 'end_time'          =>''   活动结束时间   int    【必传】
+     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * 'spu_id'             =>['',''] 商品id     int     【必传】
+     * ]
+     * @return bool
+     */
+    public function appointmentUpdate(array $params){
+        $data['title']               = $params['title'];               //活动标题
+        $data['appointment_image'] = $params['appointment_image']; //活动图片
+        $data['desc']                = $params['desc'];                //活动描述
+        $data['begin_time']         = $params['begin_time'];         //活动开始时间
+        $data['end_time']           = $params['end_time'];            //活动结束时间
+        $data['appointment_status']=$params['appointment_status'];//活动状态
+        $data['update_time']        = time();                          //修改时间
+        //修改条件
+        $where[]=['id','=',$params['id']];
+        $appointment_update = ActivityAppointmentRepository::activityUpdate($data,$where);     //执行修改预约活动
+        if(!$appointment_update){
+            return false;
+        }
+        //获取活动和商品的关联关系数据
+        $activityInfo=ActivityGoodsAppointmentRepository::getByIdInfo($where);
+        if(!$activityInfo){
+            return false;
+        }
+        //如果没有修改活动和商品的关联数据，则不做任何修改
+        //如果修改活动和商品的关联关系，则删除活动和商品的关联数据，重新添加活动和商品的关联关系
+        //循环添加活动和商品的关联关系
+        foreach($params['spu_id'] as $spu_id){
+            $goodsParams['appointment_id'] = $params['id'];
+            $goodsParams['spu_id'] = $spu_id;
+            $goodsParams['create_time'] = time();
+            $res = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
+        }
+        return $res;
+
+    }
+
+    /***
+     * 获取活动信息
+     * @return array
+     */
+    public function appointmentList(){
+
     }
 }
