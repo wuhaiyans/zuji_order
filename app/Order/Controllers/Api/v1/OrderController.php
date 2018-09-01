@@ -327,9 +327,9 @@ class OrderController extends Controller
 
         set_time_limit(0);
         $params = $request->all();
-        $pageSize = 2000;
-        if (isset($params['size']) && $params['size']>=5000) {
-            $pageSize = 2000;
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
         } else {
             $pageSize = $params['size'];
         }
