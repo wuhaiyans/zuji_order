@@ -8,7 +8,6 @@
 
 namespace App\Activity\Controllers\Api\v1;
 
-use App\Http\Requests\Request;
 
 
 class AppointmentController extends Controller

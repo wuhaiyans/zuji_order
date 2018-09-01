@@ -9,6 +9,10 @@
 namespace App\Activity\Modules\Service;
 
 
+use App\Activity\Modules\Repository\Activity\ActivityDestine;
+use App\Common\LogApi;
+use App\Order\Modules\Inc\OrderStatus;
+
 class DestinePayNotify
 {
 // 支付阶段完成时业务的回调配置
@@ -29,12 +33,18 @@ class DestinePayNotify
     public static function callback($params)
     {
         $businessType = $params['business_type'];
-        $orderNo = $params['business_no']; // 业务类型编号
+        $destineNo = $params['business_no']; // 业务类型编号
         $status = $params['status'];
 
-        if($status =="success"){
+        if($status == "success" && $businessType == OrderStatus::BUSINESS_DESTINE){
 
-
+            $destine = ActivityDestine::getByNo($destineNo);
+            $b =$destine->pay();
+            if(!$b){
+                LogApi::error(config('app.env')."[payment]DestinePayNotify error");
+                return false;
+            }
+            return true;
         }
         return true;
     }
