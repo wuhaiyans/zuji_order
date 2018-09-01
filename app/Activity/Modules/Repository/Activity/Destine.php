@@ -6,24 +6,21 @@
  * and open the template in the editor.
  */
 
-namespace App\Order\Modules\Repository\Order;
+namespace App\Activity\Modules\Repository\Activity;
 
-use App\Order\Models\Order AS OrderModel;
-use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Activity\Models\ActivityDestine;
 
 /**
  * 
  *
- * @author Administrator
+ * @author wuhaiyan
  */
-class Order {
+class Destine {
 	
 	
 	/**
 	 *
-	 * @var OrderModel
+	 * @var \App\Activity\Models\ActivityDestine
 	 */
 	private $model = [];
 	
@@ -31,7 +28,7 @@ class Order {
 	 * 构造函数
 	 * @param array $data 订单原始数据
 	 */
-	public function __construct( OrderModel $data ) {
+	public function __construct(  $data ) {
 		$this->model = $data;
 	}
 	
@@ -58,6 +55,7 @@ class Order {
      */
     public function abnormalClose():bool{
         $this->model->order_status = OrderStatus::OrderAbnormal;
+        $this->model->update_time = time();
         return $this->model->save();
     }
 	/**
