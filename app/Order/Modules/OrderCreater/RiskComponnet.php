@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Risk\Risk;
+use App\Order\Models\OrderUserCertified;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\OrderYidunRepository;
@@ -39,9 +40,6 @@ class RiskComponnet implements OrderCreater
             LogApi::error(config('app.env')."[下单/确认订单] 获取风控接口失败",$data['user']['user_id']);
             $this->knight =[];
         }
-
-        //var_dump($knight['risk_detail']);die;
-
 
     }
     /**
@@ -118,6 +116,24 @@ class RiskComponnet implements OrderCreater
                     return false;
                 }
             }
+        }
+
+        //保存是否是学生  是否通过学信网认证
+        $chsi = $this->knight['risk_detail']['chsi']?? true;
+        if(is_array($chsi) && !empty($chsi)){
+            $isChsi = $chsi['decision']==Risk::DecisionAccept?1:0; //判断是否通过学信网认证
+            $isStudent = $this->knight['is_chsi']?1:0;  //判断是否是学生
+
+            $certified = OrderUserCertified::where('order_no','=',$orderNo)->first();
+            if (!$certified) return false;
+            $certified->is_student = $isStudent;
+            $certified->is_chsi = $isChsi;
+            if (!$certified->save()) {
+                LogApi::error(config('app.env')."[下单]保存是否是学生和认证信息失败",$riskData);
+                $this->getOrderCreater()->setError('保存是否是学生和认证信息失败');
+                return false;
+            }
+
         }
 
         return true;
