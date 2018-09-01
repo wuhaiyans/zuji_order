@@ -16,6 +16,14 @@ class ActivityDestineController extends Controller
      * 活动预定支付接口
      */
    public function destine(){
+
+       $data = [
+           'mobile'		=> "13654565804",
+           'goods_name'	=> "火箭",
+       ];
+       $a = \App\Activity\Modules\Service\SendMessage::AdvanceSuccess($data);
+       v($a);
+
        echo 'destine';die;
    }
 
