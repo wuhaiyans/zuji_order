@@ -9,6 +9,11 @@ return [
     'api.activity.appointmentUpdatePdo' => 'AppointmentController@appointmentUpdatePdo', //预约活动执行修改
 
 
+    //-+------------------------------------------------------------------------
+    // | 活动预定接口
+    //-+------------------------------------------------------------------------
+
+    'api.activity.destine'      => 'ActivityDestineController@destine', //预约活动列表
 
 
 
