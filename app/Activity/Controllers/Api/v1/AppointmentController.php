@@ -122,8 +122,12 @@ class AppointmentController extends Controller
     /***
      * 预约活动列表
      */
-    public function appointmentList(){
-        $res=$this->Appointment->appointmentList();
+    public function appointmentList(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $res=$this->Appointment->appointmentList($params['params']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_95002);//获取数据失败
         }
