@@ -15,7 +15,7 @@ use App\Http\Requests\Request;
 use App\Lib\ApiStatus;
 
 
-class AdvanceActivity extends Controller
+class AdvanceActivityController extends Controller
 {
     /*
      * 预约活动列表
@@ -49,7 +49,10 @@ class AdvanceActivity extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"id必须");
         }
         $where = [
-            ['id','=',$params['id']]
+            ['id','=',$params['id']],
+            ['begin_time',"<=",time()],
+            ['end_time',">=",time()],
+            ['appointment_status','=',0]
         ];
         //查询预约活动详情
         $data = ActivityAppointment::query()->where($where)->first();
