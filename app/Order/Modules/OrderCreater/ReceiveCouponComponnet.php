@@ -79,7 +79,7 @@ class ReceiveCouponComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
-        $coupon['receive_coupon'] = $this->coupon;
+        $coupon['receive_coupon'] = ['coupon'=>$this->coupon];
         return array_merge($schema,$coupon);
     }
 
