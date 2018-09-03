@@ -4,7 +4,7 @@ namespace App\Activity\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ActivityDestine extends Model
+class ActivityAppointment extends Model
 {
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
