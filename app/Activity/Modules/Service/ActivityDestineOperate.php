@@ -41,13 +41,23 @@ class ActivityDestineOperate
             DB::beginTransaction();
             //判断用户是否 已经参与活动
             $res = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
+            //获取活动信息
+            $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
+            if(!$activity){
+                DB::rollBack();
+                set_msg("获取活动信息失败");
+                return false;
+            }
+            $activityInfo =$activity->getData();
+            $activityName  =$activityInfo['title'];
+            $destineAmount =$activityInfo['appointment_price'];
             //如果有预订记录
             if($res){
                 $destine = objectToArray($res);
                 //判断如果存在预定记录 更新预定时间
                 if ($destine['destine_status'] == DestineStatus::DestineCreated) {
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
-                    $b = $activityDestine->upCreateTime();
+                    $b = $activityDestine->upCreateTime($activityName,$destineAmount);
                     if (!$b) {
                         DB::rollBack();
                         set_msg("更新预定时间错误");
@@ -72,16 +82,7 @@ class ActivityDestineOperate
                     return false;
                 }
                 $channelId = intval($ChannelInfo['_channel']['id']);
-                //获取活动信息
-                $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
-                if(!$activity){
-                    DB::rollBack();
-                    set_msg("获取活动信息失败");
-                    return false;
-                }
-                $activityInfo =$activity->getData();
-                $activityName  =$activityInfo['title'];
-                $destineAmount =$activityInfo['appointment_price'];
+
 
                 $destine = [
                     'destine_no' => $destineNo,              //【必须】 string 预定编号
@@ -104,6 +105,9 @@ class ActivityDestineOperate
                 }
             }
             if($destine['destine_amount'] <=0){
+                DB::rollBack();
+                set_msg("报名金额不能为0".json_encode($destine));
+                return false;
                 $destine['destine_amount'] =0.01;
             }
             //生成支付单
