@@ -114,7 +114,7 @@ class AppointmentController extends Controller
         }
         $res=$this->Appointment->appointmentUpdate($params['params']);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_95000);//添加失败
+            return apiResponse([],ApiStatus::CODE_95001);//修改失败
         }
         return apiResponse([],ApiStatus::CODE_0);
 
