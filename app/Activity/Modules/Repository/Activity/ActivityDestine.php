@@ -40,6 +40,16 @@ class ActivityDestine{
 	public function getData():array{
 		return $this->model->toArray();
 	}
+
+    /**
+     * 修改预定生成时间
+     * @return bool
+     */
+    public function upCreateTime():bool{
+        $this->model->create_time = time();
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
 	
 	/**
 	 * 支付
