@@ -28,7 +28,6 @@ class ActivityDestineOperate
      *      'mobile'=>'',               //【必须】 string 用户手机号
      *      'user_id'=>'',              //【必须】 int 用户ID
      *      'pay_channel_id'=>'',       //【必须】 int 支付渠道
-     *      'ip'=>'',                   //【必须】string ip地址
      *      'return_url'=>'',           //【必须】string 前端回跳地址
      * ]
      * @return bool
@@ -125,7 +124,6 @@ class ActivityDestineOperate
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
                 'front_url' => $data['return_url'], //回调URL
-                'ip' => $data['ip'], // 客户端IP
             ]);
             // 提交事务
             DB::commit();

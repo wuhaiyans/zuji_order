@@ -107,32 +107,47 @@ class Appointment
             if(!$activityGoodsInfo){
                 return false;
             }
+            $data['update_time']=time();
             foreach($activityGoodsInfo as $val){
+                if(!in_array($val['spu_id'],$params['spu_id'])){
+                    $data['goods_status'] = 1;
+                    //禁用活动和商品的关联数据，重新添加活动和商品的关联关系
+                    $closeActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id'],$val['spu_id'],$data);
+                    if(!$closeActivityGoods){
+                        DB::rollBack();
+                        return false;
+                    }
+                }else if(in_array($val['spu_id'],$params['spu_id']) && $val['goods_status'] == 1){
+                    //活动商品启用
+                    $data['goods_status'] = 0;
+                    $closeActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id'],$val['spu_id'],$data);
+                    if(!$closeActivityGoods){
+                        DB::rollBack();
+                        return false;
+                    }
+
+                }
                 $activityGoods[]=$val['spu_id'];
+
             }
-            //如果没有修改活动和商品的关联数据，则不做任何修改
-             $b = array_diff($activityGoods,$params['spu_id']);
-             if($b){
-                 //禁用活动和商品的关联数据，重新添加活动和商品的关联关系
-                 $closeActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id']);
-                 if(!$closeActivityGoods){
-                     LogApi::info("[appointmentUpdate]删除活动和商品的关联数据失败".$closeActivityGoods);
-                     DB::rollBack();
-                     return false;
-                 }
-                 //循环添加活动和商品的关联关系
-                 foreach($params['spu_id'] as $spu_id){
-                     $goodsParams['appointment_id'] = $params['id'];
-                     $goodsParams['spu_id'] = $spu_id;
-                     $goodsParams['create_time'] = time();
-                     $addActivityGoods = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
-                 }
-                 if(!$addActivityGoods){
-                     LogApi::info("[appointmentUpdate]循环添加活动和商品的关联关系失败".$addActivityGoods);
-                     DB::rollBack();
-                     return false;
-                 }
-             }
+
+
+            foreach($params['spu_id'] as $spu_id){
+                if(!in_array($spu_id,$activityGoods)){
+                    $goodsParams['appointment_id'] = $params['id'];
+                    $goodsParams['spu_id'] = $spu_id;
+                    $goodsParams['create_time'] = time();
+                    $addActivityGoods = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
+                    if(!$addActivityGoods){
+                        LogApi::info("[appointmentUpdate]循环添加活动和商品的关联关系失败".$addActivityGoods);
+                        DB::rollBack();
+                        return false;
+                    }
+                }
+            }
+
+
+
 
              DB::commit();
              return true;
