@@ -60,6 +60,9 @@ class AppointmentController extends Controller
        if($params['params']['begin_time']>$params['params']['begin_time']){
            return apiResponse([],ApiStatus::CODE_20001);
        }
+       if($params['params']['appointment_price'] <= 0){
+           return apiResponse([],ApiStatus::CODE_20001);
+       }
        $res=$this->Appointment->appointmentAdd($params['params']);
        if(!$res){
            return apiResponse([],ApiStatus::CODE_95000);//添加失败
@@ -110,6 +113,9 @@ class AppointmentController extends Controller
         }
         //开始时间必须小于结束时间
         if($params['params']['begin_time']>$params['params']['begin_time']){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        if($params['params']['appointment_price'] <= 0){
             return apiResponse([],ApiStatus::CODE_20001);
         }
         $res=$this->Appointment->appointmentUpdate($params['params']);
