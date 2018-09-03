@@ -8,7 +8,6 @@
 
 namespace App\Order\Modules\OrderCreater;
 
-use App\Lib\Common\LogApi;
 use Mockery\Exception;
 
 class ReceiveCouponComponnet implements OrderCreater
