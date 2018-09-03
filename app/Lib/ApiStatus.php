@@ -46,6 +46,8 @@ class ApiStatus {
     const CODE_50002 = '50002'; //订单商品获取失败
     const CODE_50003 = '50003'; //商品获取失败
     const CODE_50010 = '50010'; //优惠券错误
+
+    const CODE_51001 = '51001';//活动预定错误
     /**
      * @var string 状态码：支付错误
      */

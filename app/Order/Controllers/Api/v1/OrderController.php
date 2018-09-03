@@ -77,8 +77,8 @@ class OrderController extends Controller
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
+        if(empty($appid) && $appid <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
         }
 
         if($userType!=2 && empty($userInfo)){
@@ -158,8 +158,8 @@ class OrderController extends Controller
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
+        if(empty($appid) && $appid <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
         }
         if(empty($payType) || !isset($payType) || $payType <1){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式错误");
