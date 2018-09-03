@@ -27,9 +27,13 @@ class AdvanceActivityController extends Controller
         $params = $request['params'];
         if(!$params['page']){
             $page = 0;
+        }else{
+            $page = $params['page'];
         }
         if(!$params['limit']){
             $limit = 20;
+        }else{
+            $limit = $params['limit'];
         }
         //设置查询条件
         $where= [
@@ -91,9 +95,13 @@ class AdvanceActivityController extends Controller
         $params = $request['params'];
         if(!$params['page']){
             $page = 0;
+        }else{
+            $page = $params['page'];
         }
         if(!$params['limit']){
             $limit = 20;
+        }else{
+            $limit = $params['limit'];
         }
         $userInfo = $request['userinfo'];
         $where = [
