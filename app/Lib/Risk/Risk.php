@@ -25,6 +25,8 @@ class Risk extends \App\Lib\BaseApi{
     const RistZhimaScore='zhima_score';//芝麻分数
     const RistGrade='risk_grade';//风控整体策略
 
+    const RistChsi ='chsi';// 学信网 类型
+
 
     //风控值描述
 
@@ -49,6 +51,7 @@ class Risk extends \App\Lib\BaseApi{
             self::RistScore => '风控系统分',
             self::RistZhimaScore => '芝麻',
             self::RistGrade => '风控整体策略',
+            self::RistChsi => '学信网认证',
         ];
     }
     /**
