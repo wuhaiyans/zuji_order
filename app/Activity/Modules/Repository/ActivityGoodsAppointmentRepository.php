@@ -48,25 +48,5 @@ class ActivityGoodsAppointmentRepository
 
     }
 
-    /***
-     * 删除活动和商品的关系数据
-     * @param int $id  活动id
-     * @return bool|null
-     * @throws \Exception
-     */
-
-    public static function closeActivityGoods(int $id){
-        if(empty($id)){
-            return false;
-        }
-        $where[]=['appointment_id','=',$id];
-        $res=ActivityGoodsAppointment::where($where)->save(['goods_status','=',1]);
-        if( !$res ){
-            return false;
-        }
-        return $res;
-    }
-
-
 
 }

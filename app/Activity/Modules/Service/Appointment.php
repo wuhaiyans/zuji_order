@@ -9,6 +9,7 @@
 namespace App\Activity\Modules\Service;
 
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
+use App\Activity\Modules\Repository\Activity\ActivityGoodsAppointment;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Activity\Modules\Repository\ActivityAppointmentRepository;
@@ -113,8 +114,8 @@ class Appointment
             //如果没有修改活动和商品的关联数据，则不做任何修改
              $b = array_diff($activityGoods,$params['spu_id']);
              if($b){
-                 //删除活动和商品的关联数据，重新添加活动和商品的关联关系
-                 $delActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id']);
+                 //禁用活动和商品的关联数据，重新添加活动和商品的关联关系
+                 $delActivityGoods=ActivityGoodsAppointment::closeActivity($params['id']);
                  if(!$delActivityGoods){
                      LogApi::info("[appointmentUpdate]删除活动和商品的关联数据失败".$delActivityGoods);
                      DB::rollBack();
