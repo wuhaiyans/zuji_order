@@ -114,7 +114,7 @@ class Appointment
              $b = array_diff($activityGoods,$params['spu_id']);
              if($b){
                  //删除活动和商品的关联数据，重新添加活动和商品的关联关系
-                 $delActivityGoods=ActivityGoodsAppointmentRepository::delActivityGoods($params['id']);
+                 $delActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id']);
                  if(!$delActivityGoods){
                      LogApi::info("[appointmentUpdate]删除活动和商品的关联数据失败".$delActivityGoods);
                      DB::rollBack();
