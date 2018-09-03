@@ -21,6 +21,7 @@ class ReceiveCouponComponnet implements OrderCreater
     private $coupon;
     private $status;
     private $num;
+    private $recceive;
 
 
     public function __construct(OrderCreater $componnet, array $coupon=[],int $userId)
@@ -36,6 +37,7 @@ class ReceiveCouponComponnet implements OrderCreater
                 'only_id'=> $this->only_id,
                 'user_id'=>$userId,
             ];
+            $this->recceive = $drawCouponArr;
             $this->status = \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
             $queryCouponArr = [
                 'spu_id'=>$schema['sku'][0]['spu_id'],
@@ -85,6 +87,7 @@ class ReceiveCouponComponnet implements OrderCreater
         $schema =$this->componnet->getDataSchema();
         $coupon['receive_coupon'] = [
             'coupon'=>$this->coupon,
+            'receive'=>$this->recceive,
             'status'=>$this->status,
             'num'=>$this->num
         ];

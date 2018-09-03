@@ -98,6 +98,7 @@ class Appointment
             //修改活动信息
             $activityUpdate= $activityInfo->activityUpdate($params);
             if(!$activityUpdate){
+                LogApi::info("[appointmentUpdate]修改活动失败".$activityUpdate);
                 DB::rollBack();
                 return false;
             }
@@ -112,10 +113,10 @@ class Appointment
             //如果没有修改活动和商品的关联数据，则不做任何修改
              $b = array_diff($activityGoods,$params['spu_id']);
              if($b){
-
                  //删除活动和商品的关联数据，重新添加活动和商品的关联关系
-                 $delActivityGoods=ActivityGoodsAppointmentRepository::delActivityGoods($params['id']);
+                 $delActivityGoods=ActivityGoodsAppointmentRepository::closeActivityGoods($params['id']);
                  if(!$delActivityGoods){
+                     LogApi::info("[appointmentUpdate]删除活动和商品的关联数据失败".$delActivityGoods);
                      DB::rollBack();
                      return false;
                  }
@@ -127,6 +128,7 @@ class Appointment
                      $addActivityGoods = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
                  }
                  if(!$addActivityGoods){
+                     LogApi::info("[appointmentUpdate]循环添加活动和商品的关联关系失败".$addActivityGoods);
                      DB::rollBack();
                      return false;
                  }
