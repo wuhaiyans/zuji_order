@@ -73,9 +73,6 @@ class ActivityDestineController extends Controller
        if($activityId <1){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
        }
-       if(!isset($ip)){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[ip 未设置错误]");
-       }
       if(!isset($returnUrl)){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
        }
@@ -87,7 +84,6 @@ class ActivityDestineController extends Controller
            'mobile'=>$params['userinfo']['username'],
            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
            'pay_channel_id'=>$payChannelId,
-           'ip'=>$ip,                   //【必须】string ip地址
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
        ];
        $res = ActivityDestineOperate::create($data);
