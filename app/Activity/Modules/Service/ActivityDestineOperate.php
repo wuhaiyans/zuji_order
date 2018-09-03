@@ -40,12 +40,10 @@ class ActivityDestineOperate
         try {
             DB::beginTransaction();
             //判断用户是否 已经参与活动
-            $destine = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
-
+            $res = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
             //如果有预订记录
-            if($destine){
-
-                $destine = objectToArray($destine);
+            if($res){
+                $destine = objectToArray($res);
                 //判断如果存在预定记录 更新预定时间
                 if ($destine['destine_status'] == DestineStatus::DestineCreated) {
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
@@ -105,6 +103,7 @@ class ActivityDestineOperate
                     return false;
                 }
             }
+
 
             if($destine['destine_amount'] <0){
                 DB::rollBack();
