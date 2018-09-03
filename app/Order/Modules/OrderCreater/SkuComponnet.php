@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\Common\LogApi;
 use App\Lib\Goods\Goods;
 use App\Order\Modules\Inc\CouponStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\Specifications;
 use App\Order\Modules\Repository\Order\DeliveryDetail;
@@ -42,6 +43,7 @@ class SkuComponnet implements OrderCreater
 
     //规格
     private $specs;
+    private $kucun;
 
     private $orderYajin=0;   //订单押金
     private $orderZujin=0;  //订单租金+意外险
@@ -149,11 +151,12 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品金额错误');
                 $this->flag = false;
             }
+            $this->kucun =$skuInfo['number'];
             // 库存量
-            if($skuInfo['number']<$skuInfo['sku_num']){
-                $this->getOrderCreater()->setError('商品库存不足');
-                $this->flag = false;
-            }
+//            if($skuInfo['number']<$skuInfo['sku_num']){
+//                $this->getOrderCreater()->setError('商品库存不足');
+//                $this->flag = false;
+//            }
             // 商品上下架状态、
             if($skuInfo['status'] !=1){
                 $this->getOrderCreater()->setError('商品已下架');
@@ -164,9 +167,9 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品成色错误');
                 $this->flag = false;
             }
-            if( $this->zuqiType == 1 ){ // 天
+            if( $this->zuqiType == OrderStatus::ZUQI_TYPE_DAY ){ // 天
                 // 租期[3,31]之间的正整数
-                if( $skuInfo['zuqi']<3 || $skuInfo['zuqi']>30){
+                if( $skuInfo['zuqi']<1){
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
@@ -367,6 +370,7 @@ class SkuComponnet implements OrderCreater
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == 2) {
                         $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['youhui'] = $v['zujin'];
                     }
                     //现金券
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
@@ -383,6 +387,7 @@ class SkuComponnet implements OrderCreater
                             }
                         }
                         $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['youhui'] = $val['discount_amount'];
                     }
                 }
             }
@@ -472,13 +477,14 @@ class SkuComponnet implements OrderCreater
 
         /**
          * 在这里要调用减少库存方法
-         *
          */
-        $b =Goods::reduceStock($goodsArr);
-        if(!$b){
-            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
-            $this->getOrderCreater()->setError("减少库存失败");
-            return false;
+        if($this->kucun >0){
+            $b =Goods::reduceStock($goodsArr);
+            if(!$b){
+                LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
+                $this->getOrderCreater()->setError("减少库存失败");
+                return false;
+            }
         }
 
         return true;

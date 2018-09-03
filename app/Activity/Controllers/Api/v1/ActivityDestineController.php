@@ -36,13 +36,12 @@ class ActivityDestineController extends Controller
      *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
      *      'uid'=>1,   //【必须】string 用户ID
      *      'username'=>1, //【必须】string 用户名
-     *      'ip'=>'', //【必须】string 客户端IP地址
+     *      'ip'=>'',//【必须】string 客户端IP
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
    public function destine(Request $request){
        $params = $request->all();
-
        //获取appid
        $appid	   = $params['appid'];
 
@@ -54,7 +53,6 @@ class ActivityDestineController extends Controller
        $payChannelId =isset($params['params']['pay_channel_id'])?$params['params']['pay_channel_id']:0;
 
        $activityId  = isset($params['params']['activity_id'])?$params['params']['activity_id']:0;
-
        $returnUrl =$params['params']['return_url'];
 
        //判断参数是否设置
@@ -83,7 +81,7 @@ class ActivityDestineController extends Controller
            'activity_id'=>$activityId,
            'mobile'=>$params['userinfo']['username'],
            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
-           'ip'=>$params['userinfo']['ip'],
+           'ip'=>$params['userinfo']['ip'],  //增加用户ID
            'pay_channel_id'=>$payChannelId,
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
        ];
