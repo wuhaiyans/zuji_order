@@ -254,6 +254,7 @@ function createNo($noType=1){
         'AD' => 'AD',//预授权支付编号
         'AU' => 'AU',//预授权解除编号
         'RC' => 'RC',//退款清算编号
+        'YD' => 'YD',//预定活动接口
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {

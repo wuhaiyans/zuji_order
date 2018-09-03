@@ -46,11 +46,12 @@ class ActivityDestineRepository
             'trade_no'      => 'required',
             'destine_status'=> 'required',
         ]);
-        if(count($data)<9){
+        if(count($data)<10){
             return false;
         }
         $this->activityDestine->destine_no = $data['destine_no'];
         $this->activityDestine->activity_id = $data['activity_id'];
+        $this->activityDestine->user_id = $data['user_id'];
         $this->activityDestine->mobile = $data['mobile'];
         $this->activityDestine->destine_amount = $data['destine_amount'];
         $this->activityDestine->pay_type = $data['pay_type'];
@@ -62,6 +63,23 @@ class ActivityDestineRepository
         $this->activityDestine->update_time = time();
 
         return $this->activityDestine->save();
+    }
+
+    /**
+     * 查询当前用户是否已经预约活动
+     * @param $user_id   用户ID
+     * @param $activity_id 活动ID
+     * @return bool
+     */
+
+    public static function unActivityDestineByUser($userId,$activityId){
+        if (empty($userId)) return false;
+        if (empty($activityId)) return false;
+        $info = ActivityDestine::query()->where([
+            ['user_id', '=', $userId],
+            ['activity_id', '=', $activityId],
+        ])->get()->toArray();
+        return !empty($info) ?? false;
     }
 
 

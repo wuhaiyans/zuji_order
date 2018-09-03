@@ -62,7 +62,7 @@ class SendMessage{
         }
 
         $mobile = $params['mobile'];    // 手机号
-        $code   = 'SMS_113461179';      // 短信模板
+        $code   = 'SMS_113461180';      // 短信模板
 
         // 短信参数
         $dataSms = [
