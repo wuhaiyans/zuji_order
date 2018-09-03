@@ -104,14 +104,14 @@ class ActivityDestineOperate
                 }
             }
 
-
+            $destine['destine_amount'] =0.01;
             if($destine['destine_amount'] <0){
                 DB::rollBack();
                 set_msg("活动金额必须大于0");
                 return false;
             }
             //生成支付单
-            $businessNo =$destine['destine_no'];
+                $businessNo =$destine['destine_no'];
             $payData = [
                 'userId'            => $data['user_id'],//用户ID
                 'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE,	// 业务类型
