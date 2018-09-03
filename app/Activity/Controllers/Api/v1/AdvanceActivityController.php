@@ -106,7 +106,8 @@ class AdvanceActivityController extends Controller
         }
         $userInfo = $request['userinfo'];
         $where = [
-            ['user_id','=',$userInfo['uid']]
+            ['user_id','=',$userInfo['uid']],
+            ['destine_status','<>',DestineStatus::DestineCreated]
         ];
         //查询我的预约列表
         $count = ActivityDestine::query()->where($where)->count();
