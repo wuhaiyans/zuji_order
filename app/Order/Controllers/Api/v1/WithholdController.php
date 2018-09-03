@@ -307,11 +307,7 @@ class WithholdController extends Controller
                 LogApi::error('[createpay_withhold]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
-                LogApi::error('[createpay]分期代扣失败', $exc);
-                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
-
-            }catch(\Exception $exc){
-                LogApi::error('分期代扣错误', [$exc->getMessage()]);
+                LogApi::error('[createpay]分期代扣失败', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 //捕获异常 买家余额不足
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -520,7 +516,7 @@ class WithholdController extends Controller
                     }
 
                     \App\Lib\Common\LogApi::error('multiCreatepay分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
-                }catch(\Exception $exc){
+                }catch(\App\Lib\ApiException $exc){
 
                     \App\Lib\Common\LogApi::error('multiCreatepay分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
@@ -851,9 +847,8 @@ class WithholdController extends Controller
                                 OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                             }
 
-
                             LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
-                        } catch (\Exception $exc) {
+                        }catch(\App\Lib\ApiException $exc){
                             LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
                             OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                             //捕获异常 买家余额不足
