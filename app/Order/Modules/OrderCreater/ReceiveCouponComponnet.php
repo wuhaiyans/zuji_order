@@ -36,10 +36,10 @@ class ReceiveCouponComponnet implements OrderCreater
             ];
             \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
             $queryCouponArr = [
-                'spu_id'=>$schema['sku']['spu_id'],
-                'sku_id'=>$schema['sku']['sku_id'],
+                'spu_id'=>$schema['sku'][0]['spu_id'],
+                'sku_id'=>$schema['sku'][0]['sku_id'],
                 'user_id'=>$userId,
-                'payment'=>$schema['sku']['total_amount'],
+                'payment'=>$schema['sku'][0]['total_amount'],
             ];
             $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
             if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
