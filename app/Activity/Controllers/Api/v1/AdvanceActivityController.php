@@ -126,7 +126,7 @@ class AdvanceActivityController extends Controller
         $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
         $activityList = array_column($activityList,null,"id");
         //获取活动商品
-        $goodsList = ActivityGoodsAppointment::query()->where(['goods_status'=>0])->wherein("appointment_id",$advanceIds)->groupBy('appointment_id')->get();
+        $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->groupBy('appointment_id')->get();
         $goodsList = array_column($goodsList,null,"appointment_id");
         //拼装数据格式
         foreach($data as &$item){
