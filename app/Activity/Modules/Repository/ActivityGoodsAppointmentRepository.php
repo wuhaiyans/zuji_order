@@ -55,12 +55,12 @@ class ActivityGoodsAppointmentRepository
      * @throws \Exception
      */
 
-    public static function delActivityGoods(int $id){
+    public static function closeActivityGoods(int $id){
         if(empty($id)){
             return false;
         }
         $where[]=['appointment_id','=',$id];
-        $res=ActivityGoodsAppointment::where($where)->delete();
+        $res=ActivityGoodsAppointment::where($where)->save(['goods_status','=',1]);
         if( !$res ){
             return false;
         }
