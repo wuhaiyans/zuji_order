@@ -43,6 +43,7 @@ class SkuComponnet implements OrderCreater
 
     //规格
     private $specs;
+    private $kucun;
 
     private $orderYajin=0;   //订单押金
     private $orderZujin=0;  //订单租金+意外险
@@ -150,6 +151,7 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品金额错误');
                 $this->flag = false;
             }
+            $this->kucun =$skuInfo['number'];
             // 库存量
 //            if($skuInfo['number']<$skuInfo['sku_num']){
 //                $this->getOrderCreater()->setError('商品库存不足');
@@ -474,11 +476,13 @@ class SkuComponnet implements OrderCreater
         /**
          * 在这里要调用减少库存方法
          */
-        $b =Goods::reduceStock($goodsArr);
-        if(!$b){
-            LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
-            $this->getOrderCreater()->setError("减少库存失败");
-            return false;
+        if($this->kucun >0){
+            $b =Goods::reduceStock($goodsArr);
+            if(!$b){
+                LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
+                $this->getOrderCreater()->setError("减少库存失败");
+                return false;
+            }
         }
 
         return true;
