@@ -115,14 +115,12 @@ class ActivityDestineOperate
                 'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
             ];
             $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
-            var_dump($payResult);
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
                 'front_url' => $data['return_url'], //回调URL
                 'ip' => $data['ip'], // 客户端IP
             ]);
-            var_dump($url);die;
             // 提交事务
             DB::commit();
             return $url;
@@ -136,6 +134,40 @@ class ActivityDestineOperate
             set_msg($exc->getMessage());
             return false;
         }
+    }
+
+    /**
+     * 活动预定 查询接口
+     * @author wuhaiyan
+     * @param $data[
+     *
+     *      'activity_id'=>'',          //【必须】 int 活动ID
+     *      'user_id'=>'',              //【必须】 int 用户ID
+     * ]
+     * @return bool
+     */
+
+    public static function destineQuery($data)
+    {
+            $res =[];
+            //判断用户是否 已经参与活动
+            $destine = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
+
+            //如果有预订记录
+            if($destine){
+                $destine = objectToArray($destine);
+                //判断如果存在预定记录 更新预定时间
+                if ($destine['destine_status'] != DestineStatus::DestineCreated) {
+                    $res['status'] =1;
+                }else{
+                    $res['status'] =0;
+                }
+            }else{
+                $res['status'] =0;
+
+            }
+            return $res;
+
     }
 
 

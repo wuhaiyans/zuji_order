@@ -29,10 +29,8 @@ class ActivityGoodsAppointmentRepository
     }
     /***
      * 通过活动id获取活动信息
-     * @param $where
-     * [
-     * 'id' => '' //活动id  int 【必传】
-     * ]
+     * @param $id  //活动id  int 【必传】
+
      * @return array
      */
     public static function getByIdInfo(int $id){
@@ -40,7 +38,28 @@ class ActivityGoodsAppointmentRepository
             return false;
         }
         $where[]=['appointment_id','=',$id];
+        $where[]=['goods_status','=',0];
         $activityInfo=ActivityGoodsAppointment::where($where)->get()->toArray();
+        if( !$activityInfo ){
+            return false;
+        }
+        return $activityInfo;
+
+    }
+    /***
+     * 禁用活动的商品
+     * @param $id  //活动id  int 【必传】
+
+     * @return array
+     */
+    public static function closeActivityGoods(int $id){
+        if(empty($id)){
+            return false;
+        }
+        $where[]=['appointment_id','=',$id];
+        $data['goods_status']=1;
+        $data['update_time']=time();
+        $activityInfo=ActivityGoodsAppointment::where($where)->update($data);
         if( !$activityInfo ){
             return false;
         }
