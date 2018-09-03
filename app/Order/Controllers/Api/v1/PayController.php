@@ -982,14 +982,14 @@ class PayController extends Controller
 	 * 支付单状态查询
 	 * @requwet Array
 	 * [
-	 * 		'payment_no' => 1,	// 支付编号
+	 * 		'out_payment_no' => 1,	// 支付编号
 	 * ]
 	 * @return array
 	 */
 	public function paymentStatus(Request $request){
 		$all     	= $request->all();
 		$rules 		= [
-			'payment_no'     => 'required',
+			'out_payment_no'     => 'required',
 		];
 
 		// 参数过滤
@@ -1003,7 +1003,7 @@ class PayController extends Controller
 
 		try{
 
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo($params['payment_no']);
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo($params['out_payment_no']);
 			$paymentStatus = $payObj->getPaymentStatus();
 
 		} catch (\App\Lib\NotFoundException $exc) {
