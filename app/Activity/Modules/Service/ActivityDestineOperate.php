@@ -75,7 +75,7 @@ class ActivityDestineOperate
                 }
                 $channelId = intval($ChannelInfo['_channel']['id']);
                 //获取活动信息
-                $activity = ActivityAppointment::getByIdInfo(2);
+                $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
                 if(!$activity){
                     DB::rollBack();
                     set_msg("获取活动信息失败");
