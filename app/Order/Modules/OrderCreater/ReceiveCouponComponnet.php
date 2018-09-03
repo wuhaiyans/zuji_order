@@ -27,7 +27,7 @@ class ReceiveCouponComponnet implements OrderCreater
         $this->componnet = $componnet;
         $schema =$this->componnet->getDataSchema();
         //有优惠券则直接返回
-        if( $coupon ){
+        if( !empty($coupon) ){
             $this->coupon = $coupon;
         }else{
             //自动领取优惠券
