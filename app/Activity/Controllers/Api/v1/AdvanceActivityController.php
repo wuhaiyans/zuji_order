@@ -27,6 +27,13 @@ class AdvanceActivityController extends Controller
         $params = $request['params'];
         if(!$params['page']){
             $page = 0;
+        }else{
+            $page = $params['page'];
+        }
+        if(!$params['limit']){
+            $limit = 20;
+        }else{
+            $limit = $params['limit'];
         }
         //设置查询条件
         $where= [
@@ -35,9 +42,17 @@ class AdvanceActivityController extends Controller
             ['appointment_status','=',0]
         ];
         //查询预约活动列表
-        $limit = 20;
+        $count = ActivityAppointment::query()->where($where)->count();
+        $sum = ceil($count/$limit);
+        $page = $page>=$sum?$sum:$page;
+        $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
-        $data = ActivityAppointment::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
+
+        $list = ActivityAppointment::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
+        $data = [
+            'count' => $count,
+            'data' =>$list
+        ];
         return apiResponse($data,ApiStatus::CODE_0);
     }
     /*
@@ -75,13 +90,31 @@ class AdvanceActivityController extends Controller
      * @return json
      */
     public function myAdvance(Request $request){
+
         $request =$request->all();
+        $params = $request['params'];
+        if(!$params['page']){
+            $page = 0;
+        }else{
+            $page = $params['page'];
+        }
+        if(!$params['limit']){
+            $limit = 20;
+        }else{
+            $limit = $params['limit'];
+        }
         $userInfo = $request['userinfo'];
         $where = [
             ['user_id','=',$userInfo['uid']]
         ];
         //查询我的预约列表
-        $data = ActivityDestine::query()->where($where)->get()->toArray();
+        $count = ActivityDestine::query()->where($where)->count();
+        $sum = ceil($count/$limit);
+        $page = $page>=$sum?$sum:$page;
+        $limit = $limit<50?$limit:20;
+        $offset = $page*$limit;
+
+        $data = ActivityDestine::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
         if(!$data){
             return apiResponse($data,ApiStatus::CODE_0);
         }
