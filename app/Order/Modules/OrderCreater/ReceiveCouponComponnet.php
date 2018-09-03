@@ -43,10 +43,11 @@ class ReceiveCouponComponnet implements OrderCreater
             ];
             $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
             if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
-                $this->coupon = [
+                $coupon = [
                     $queryCoupon[0]['coupon_no']
                 ];
             }
+            $this->coupon = $coupon;
         }
 
     }
