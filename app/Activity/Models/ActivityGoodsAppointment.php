@@ -1,27 +1,32 @@
 <?php
 
-/**
- *
- *  下单地址用户相关信息
- */
-namespace App\Order\Models;
+namespace App\Activity\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderUserCertified extends Model
+class ActivityGoodsAppointment extends Model
 {
+    const CREATED_AT = 'create_time';
+    const UPDATED_AT = 'update_time';
 
-    protected $table = 'order_user_certified';
+    // Rest omitted for brevity
+
+    protected $table = 'activity_goods_appointment';
 
     protected $primaryKey='id';
-    const CREATED_AT = 'create_time';
-
     /**
      * 默认使用时间戳戳功能
      *
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * 可以被批量赋值的属性.
+     *
+     * @var array
+     */
+    protected $fillable = ['spu_id','appointment_id','goods_status','create_time','update_time'];
 
     /**
      * 获取当前时间
@@ -41,12 +46,5 @@ class OrderUserCertified extends Model
     public function fromDateTime($value) {
         return $value;
     }
-    /**
-     * 可以被批量赋值的属性.
-     *
-     * @var array
-     */
-    protected $fillable = ['order_no','certified','certified_platform','user_type','credit','realname','cret_no','card_img','deposit_msg','deposit_detail','matching','create_time'];
-
 
 }

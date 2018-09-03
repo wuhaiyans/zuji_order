@@ -77,8 +77,8 @@ class OrderController extends Controller
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
+        if(empty($appid) && $appid <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
         }
 
         if($userType!=2 && empty($userInfo)){
@@ -158,8 +158,8 @@ class OrderController extends Controller
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid)){
-            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
+        if(empty($appid) && $appid <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
         }
         if(empty($payType) || !isset($payType) || $payType <1){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式错误");
@@ -325,61 +325,68 @@ class OrderController extends Controller
      */
     public function orderListExport(Request $request) {
 
-        if (redisIncr("mannage_orderlist_export",65)>1){
-
-            echo "已经有数据正在导入，请稍后重试";
-            exit;
-        }
-
+        set_time_limit(0);
         $params = $request->all();
-        if (isset($params['size']) && $params['size']>=5000) {
-            $pageSize = 2000;
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
         } else {
-
-            $pageSize = $params['size'] ?? 2000;
+            $pageSize = $params['size'];
         }
-        $params['size'] =$pageSize;
         $params['page'] = $params['page']?? 1;
-        $orderData = Service\OrderOperate::getOrderExportList($params);
-//            dd($orderData);
-//            if ($params['page']>20) {
-//                return apiResponse([],ApiStatus::CODE_34007 ,'超出范围，只为你导出5000条数据');
-//                exit;
-//            }
+        $outPages       = $params['page']?? 1;
 
-        if ($orderData['code']===ApiStatus::CODE_0) {
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
 
-//                租期，成色，颜色，容量，网络制式
-            $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-                '订单实际总租金','订单总押金','意外险总金额'];
-            $data = array();
-            foreach ($orderData['data']['data'] as $item) {
-                $data[] = [
-                    $item['order_no'],
-                    date('Y-m-d H:i:s', $item['create_time']),
-                    $item['order_status_name'],
-                    $item['appid_name'],
-                    $item['pay_type_name'],
-//                        $item['visit_name'],
-                    $item['name'],
-                    $item['mobile'],
-                    $item['address_info'],
-                    implode(",",array_column($item['goodsInfo'],"goods_name")),
-                    implode(",",array_column($item['goodsInfo'],"zuqi_name")),
-                    implode(",",array_column($item['goodsInfo'],"specs")),
-                    $item['order_amount'],
-                    $item['order_yajin'],
-                    $item['order_insurance'],
-                ];
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
+        // 租期，成色，颜色，容量，网络制式
+        $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+            '订单实际总租金','订单总押金','意外险总金额'];
+
+        $orderExcel = array();
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
             }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $orderData = array();
+            $orderData = Service\OrderOperate::getOrderExportList($params,$pre_count);
+            if ($orderData) {
+                $data = array();
+                foreach ($orderData as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_status_name'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
+//                        $item['visit_name'],
+                        $item['name'],
+                        $item['mobile'],
+                        $item['address_info'],
+                        implode(",",array_column($item['goodsInfo'],"goods_name")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                        implode(",",array_column($item['goodsInfo'],"specs")),
+                        $item['order_amount'],
+                        $item['order_yajin'],
+                        $item['order_insurance'],
+                    ];
+                }
 
-            return Excel::csvWrite1($data, $headers,'后台订单列表数据导出'.$params['page']);
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '订单列表导出',$abc);
 
-//            return apiResponse($orderData['data'],ApiStatus::CODE_0);
-        } else {
-
-            return apiResponse([],ApiStatus::CODE_34007);
+            } else {
+                break;
+            }
         }
+
+        return $orderExcel;
+        exit;
 
 
 

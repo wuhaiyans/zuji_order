@@ -182,8 +182,6 @@ class OrderRepository
 
     public static function getGoodsListByOrderIdArray($orderIds,$coulumn='*'){
         if (empty($orderIds)) return false;
-
-//        sql_profiler();
         $orderGoodData =  OrderGoods::query()->whereIn('order_no', $orderIds)->select($coulumn)->get();
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
@@ -718,7 +716,10 @@ class OrderRepository
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
-
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
+        }
 
         if (isset($param['size'])) {
             $pagesize = $param['size'];
@@ -731,19 +732,10 @@ class OrderRepository
             $page = 1;
         }
 
-//        sql_profiler();
-        if (empty($whereArray) && empty($orWhereArray)) {
 
             $whereArray[] = ['order_info.create_time', '>', 0];
             $count = DB::table('order_info')
-                ->where($whereArray)
-                ->count();
-
-
-        } else {
-
-            $whereArray[] = ['order_info.create_time', '>', 0];
-            $count = DB::table('order_info')
+                ->select(DB::raw('count(order_info.order_no) as order_count'))
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
@@ -755,13 +747,10 @@ class OrderRepository
                 }, null,null,'left')
                 ->where($whereArray)
                 ->where($orWhereArray)
-                ->count();
+                ->first();
 
 
-        }
-
-
-
+        $count = objectToArray($count)['order_count'];
         if (!isset($param['count'])) {
 
 //        sql_profiler();
@@ -833,6 +822,123 @@ class OrderRepository
 //
 
     }
+
+
+
+
+
+
+
+    /**
+     *  获取后台导出订单列表接口
+     *  heaven
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+    columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+    pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+    page:表示查询第几页及查询页码
+     * @param array $param  获取订单列表参数
+     */
+    public static function getAdminExportOrderList($param = array(), $pagesize=5)
+    {
+        $whereArray = array();
+        $orWhereArray = array();
+//        $visitWhere = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['order_info.user_id', '=', $param['user_id']];
+        }
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+
+            $whereArray[] = ['order_info.order_no', '=', $param['order_no']];
+        }
+
+        //根据手机号
+        if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
+        {
+            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
+            $orWhereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords'],'or'];
+        }
+        //根据订单号
+        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
+        }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
+        }
+
+        //应用渠道
+        if (isset($param['order_appid']) && !empty($param['order_appid'])) {
+            $whereArray[] = ['order_info.channel_id', '=', $param['order_appid']];
+        }
+
+        //支付类型
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+            $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
+        }
+
+        //订单状态
+        if (isset($param['order_status']) && !empty($param['order_status'])) {
+            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //下单时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_info.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_info.create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+        if (isset($param['visit_id'])) {
+            $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
+        }
+
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
+        $orderArrays = array();
+
+        $orderList =  DB::table('order_info as o')
+            ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
+            ->join('order_user_address as d',function($join){
+                $join->on('o.order_no', '=', 'd.order_no');
+            }, null,null,'inner')
+            ->join('order_info_visit as v',function($join){
+                $join->on('o.order_no', '=', 'v.order_no');
+            }, null,null,'left')
+            ->join('order_delivery as l',function($join){
+                $join->on('o.order_no', '=', 'l.order_no');
+            }, null,null,'left')
+            ->join('order_user_certified as c',function($join){
+                $join->on('o.order_no', '=', 'c.order_no');
+            }, null,null,'left')
+            ->where($whereArray)
+            ->where($orWhereArray)
+            ->orderBy('o.create_time', 'DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
+        $orderArrays = array_column(objectToArray($orderList),NULL,'order_no');
+
+        return $orderArrays;
+
+    }
+
+
+
+
 
     //更新订单状态-订单完成
     public static function orderClose($order_no){

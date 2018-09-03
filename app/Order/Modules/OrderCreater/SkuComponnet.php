@@ -166,7 +166,7 @@ class SkuComponnet implements OrderCreater
             }
             if( $this->zuqiType == 1 ){ // 天
                 // 租期[3,31]之间的正整数
-                if( $skuInfo['zuqi']<3 || $skuInfo['zuqi']>31 ){
+                if( $skuInfo['zuqi']<3 || $skuInfo['zuqi']>30){
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
