@@ -22,7 +22,12 @@ class AdvanceActivityController extends Controller
      * @param null
      * @return json
      */
-    public function getList(){
+    public function getList(Request $request){
+        $request = $request->all();
+        $params = $request['params'];
+        if(!$params['page']){
+            $page = 0;
+        }
         //设置查询条件
         $where= [
             ['begin_time',"<=",time()],
@@ -30,7 +35,9 @@ class AdvanceActivityController extends Controller
             ['appointment_status','=',0]
         ];
         //查询预约活动列表
-        $data = ActivityAppointment::query()->where($where)->get()->toArray();
+        $limit = 20;
+        $offset = $page*$limit;
+        $data = ActivityAppointment::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
         return apiResponse($data,ApiStatus::CODE_0);
     }
     /*
@@ -85,7 +92,7 @@ class AdvanceActivityController extends Controller
         $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
         $activityList = array_column($activityList,null,"id");
         //获取活动商品
-        $goodsList = ActivityGoodsAppointment::query()->where(['status'=>0])->wherein("appointment_id",$advanceIds)->get();
+        $goodsList = ActivityGoodsAppointment::query()->where(['goods_status'=>0])->wherein("appointment_id",$advanceIds)->get();
         //拼装数据格式
         foreach($data as &$item){
             $item['title'] = $activityList[$item['activity_id']]['title'];
