@@ -13,6 +13,7 @@ use App\Lib\Curl;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
 
+
 class AuthRefferController extends Controller{
     /**
      * 校验token信息
@@ -88,7 +89,8 @@ class AuthRefferController extends Controller{
                     $params['userinfo']=[
                         'uid'      =>$checkInfo['data'][0]['id'],
                         'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
-                        'username' =>$checkInfo['data'][0]['mobile']
+                        'username' =>$checkInfo['data'][0]['mobile'],
+                        'ip'        =>getIp()
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
                     LogApi::debug("通过登录转发接口的url及参数".$params['method'],[
