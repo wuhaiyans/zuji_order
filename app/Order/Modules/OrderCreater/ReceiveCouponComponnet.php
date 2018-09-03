@@ -20,6 +20,8 @@ class ReceiveCouponComponnet implements OrderCreater
     private $only_id = "383c8e805a3410e9ee03481d29a7f76f";
 
     private $coupon;
+    private $status;
+    private $num;
 
 
     public function __construct(OrderCreater $componnet, array $coupon=[],int $userId)
@@ -35,14 +37,14 @@ class ReceiveCouponComponnet implements OrderCreater
                 'only_id'=> $this->only_id,
                 'user_id'=>$userId,
             ];
-            $ret = \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
+            $this->status = \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
             $queryCouponArr = [
                 'spu_id'=>$schema['sku'][0]['spu_id'],
                 'sku_id'=>$schema['sku'][0]['sku_id'],
                 'user_id'=>$userId,
                 'payment'=>$schema['sku'][0]['zujin']*$schema['sku'][0]['zuqi'],
             ];
-            LogApi::info("确认订单异常：".json_encode([$ret,$queryCouponArr]));
+            $this->num = $queryCouponArr;
             $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
             if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                 $coupon = [
@@ -82,7 +84,11 @@ class ReceiveCouponComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
-        $coupon['receive_coupon'] = ['coupon'=>$this->coupon];
+        $coupon['receive_coupon'] = [
+            'coupon'=>$this->coupon,
+            'status'=>$this->status,
+            'num'=>$this->num
+        ];
         return array_merge($schema,$coupon);
     }
 
