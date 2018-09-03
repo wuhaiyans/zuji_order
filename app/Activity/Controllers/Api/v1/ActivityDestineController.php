@@ -135,17 +135,17 @@ class ActivityDestineController extends Controller
         if(empty($appid) && $appid <1){
             return apiResponse([],ApiStatus::CODE_20001,"appid错误");
         }
-//        if($userType!=2 && empty($userInfo)){
-//            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-//        }
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+        }
 
         if($activityId <1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
         }
 
         $data =[
-            'activity_id'=>2,//$activityId,
-            'user_id'=>18,//$params['userinfo']['uid'],  //增加用户ID
+            'activity_id'=>$activityId,
+            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
         ];
         $res = ActivityDestineOperate::destineQuery($data);
         if(!$res){
