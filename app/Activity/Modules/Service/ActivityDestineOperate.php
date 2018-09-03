@@ -103,10 +103,7 @@ class ActivityDestineOperate
                     return false;
                 }
             }
-            var_dump($destine);die;
-
-            $destine['destine_amount'] =0.01;
-            if($destine['destine_amount'] <0){
+            if($destine['destine_amount'] <=0){
                 DB::rollBack();
                 set_msg("活动金额必须大于0");
                 return false;
