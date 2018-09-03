@@ -35,9 +35,8 @@ class ActivityDestineController extends Controller
      * $request['userinfo']     //【必须】array 用户信息  - 转发接口获取
      * $userinfo [
      *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,   //【必须】string 用户ID
-     *      'user_name'=>1, //【必须】string 用户名
-     *      'mobile'=>1,    //【必须】string手机号
+     *      'uid'=>1,   //【必须】string 用户ID
+     *      'username'=>1, //【必须】string 用户名
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
@@ -85,7 +84,7 @@ class ActivityDestineController extends Controller
            'appid'=>$appid,
            'pay_type'=>$payType,
            'activity_id'=>$activityId,
-           'mobile'=>$params['userinfo']['mobile'],
+           'mobile'=>$params['userinfo']['username'],
            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
            'pay_channel_id'=>$payChannelId,
            'ip'=>$ip,                   //【必须】string ip地址
@@ -114,9 +113,8 @@ class ActivityDestineController extends Controller
      * $request['userinfo']     //【必须】array 用户信息  - 转发接口获取
      * $userinfo [
      *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,   //【必须】string 用户ID
-     *      'user_name'=>1, //【必须】string 用户名
-     *      'mobile'=>1,    //【必须】string手机号
+     *      'uid'=>1,   //【必须】string 用户ID
+     *      'username'=>1, //【必须】string 用户名
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
