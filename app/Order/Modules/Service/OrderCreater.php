@@ -336,8 +336,9 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater);
 
             //自动领取优惠券
-            //$orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-            //$schema = $orderCreater->getDataSchema();
+            $orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            $schema = $orderCreater->getDataSchema();
+            LogApi::info("确认订单异常：".json_encode($schema));
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
