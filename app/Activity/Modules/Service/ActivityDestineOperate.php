@@ -104,9 +104,7 @@ class ActivityDestineOperate
                 }
             }
             if($destine['destine_amount'] <=0){
-                DB::rollBack();
-                set_msg("活动金额必须大于0".json_encode($destine));
-                return false;
+                $destine['destine_amount'] =0.01;
             }
             //生成支付单
                 $businessNo =$destine['destine_no'];
