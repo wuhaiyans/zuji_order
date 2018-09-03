@@ -8,6 +8,7 @@
 
 namespace App\Order\Modules\OrderCreater;
 
+use App\Lib\Common\LogApi;
 use Mockery\Exception;
 
 class ReceiveCouponComponnet implements OrderCreater
@@ -34,13 +35,14 @@ class ReceiveCouponComponnet implements OrderCreater
                 'only_id'=> $this->only_id,
                 'user_id'=>$userId,
             ];
-            \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
+            $ret = \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
             $queryCouponArr = [
                 'spu_id'=>$schema['sku'][0]['spu_id'],
                 'sku_id'=>$schema['sku'][0]['sku_id'],
                 'user_id'=>$userId,
                 'payment'=>$schema['sku'][0]['zujin']*$schema['sku'][0]['zuqi'],
             ];
+            LogApi::info("确认订单异常：".json_encode([$ret,$queryCouponArr]));
             $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
             if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
                 $coupon = [

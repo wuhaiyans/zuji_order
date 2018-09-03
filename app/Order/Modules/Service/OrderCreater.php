@@ -339,7 +339,6 @@ class OrderCreater
             $orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
             $schema = $orderCreater->getDataSchema();
 
-            LogApi::info("确认订单异常：".json_encode($schema['receive_coupon']));
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon']['coupon'],$data['user_id']);
 
