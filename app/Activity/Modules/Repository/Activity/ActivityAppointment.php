@@ -52,7 +52,7 @@ class ActivityAppointment{
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
      * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * 'appointment_status' =>'', 活动状态       int  【必传】
      * ]
      * @return bool
      */
@@ -71,12 +71,12 @@ class ActivityAppointment{
 	/**
 	 * 通过活动id获取活动信息
 	 * <p>当不存在时，返回false</p>
-	 * @param string   $id		活动id
+	 * @param int   $id		活动id
 	 * @param int		$lock	锁
 	 * @return \App\Activity\Modules\Repository\Activity\ActivityAppointment
 	 * @return  bool
 	 */
-	public static function getByIdInfo( string $id, int $lock=0 ) {
+	public static function getByIdInfo( int $id, int $lock=0 ) {
 	    $builder = ActivityAppointmentModel::where([
             ['id', '=', $id],
         ])->limit(1);

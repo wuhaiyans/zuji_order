@@ -9,7 +9,7 @@
 namespace App\Activity\Modules\Service;
 
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
-use App\Common\LogApi;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Activity\Modules\Repository\ActivityAppointmentRepository;
 use App\Activity\Modules\Repository\ActivityGoodsAppointmentRepository;
@@ -26,9 +26,9 @@ class Appointment
      * 'appointment_image' =>'',  活动图片       string 【必传】
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
-     * 'end_time'          =>''   活动结束时间   int 【必传】
-     * 'appointment_status' =>'', 活动状态      string 【必传】
-     * 'spu_id'            =>['',''] 商品id     int      【必传】
+     * 'end_time'          =>''   活动结束时间   int    【必传】
+     * 'appointment_status' =>'', 活动状态       int    【必传】
+     * 'spu_id'             =>['',''] 商品id     int    【必传】
      * ]
      * return bool
      */
@@ -51,9 +51,9 @@ class Appointment
             }
             //循环添加活动和商品的关联关系
             foreach ($params['spu_id'] as $spu_id) {
-                $goodsParams['appointment_id'] = $appointment_id;
-                $goodsParams['spu_id'] = $spu_id;
-                $goodsParams['create_time'] = time();
+                $goodsParams['appointment_id'] = $appointment_id;  //活动id
+                $goodsParams['spu_id'] = $spu_id;                   //商品id
+                $goodsParams['create_time'] = time();              //创建时间
                 $res = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
             }
             if(!$res){
@@ -82,7 +82,7 @@ class Appointment
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
      * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * 'appointment_status' =>'', 活动状态       int    【必传】
      * 'spu_id'             =>['',''] 商品id     int     【必传】
      * ]
      * @return bool
@@ -95,8 +95,10 @@ class Appointment
             if(!$activityInfo){
                 return false;
             }
+            //修改活动信息
             $activityUpdate= $activityInfo->activityUpdate($params);
             if(!$activityUpdate){
+                LogApi::info("[appointmentUpdate]修改活动失败".$activityUpdate);
                 DB::rollBack();
                 return false;
             }
@@ -115,6 +117,7 @@ class Appointment
                  //删除活动和商品的关联数据，重新添加活动和商品的关联关系
                  $delActivityGoods=ActivityGoodsAppointmentRepository::delActivityGoods($params['id']);
                  if(!$delActivityGoods){
+                     LogApi::info("[appointmentUpdate]删除活动和商品的关联数据失败".$delActivityGoods);
                      DB::rollBack();
                      return false;
                  }
@@ -126,6 +129,7 @@ class Appointment
                      $addActivityGoods = ActivityGoodsAppointmentRepository::add($goodsParams);//执行添加
                  }
                  if(!$addActivityGoods){
+                     LogApi::info("[appointmentUpdate]循环添加活动和商品的关联关系失败".$addActivityGoods);
                      DB::rollBack();
                      return false;
                  }
@@ -144,10 +148,16 @@ class Appointment
 
     /***
      * 获取活动信息
+     * [
+     *   'page'  =>'', //页数   int   【可选】
+     *   'size'  =>'', //条数   int   【可选】
+     * ]
      * @return array
      */
-    public function appointmentList(){
-        $activityInfo=ActivityAppointmentRepository::getActivityInfo();
+    public function appointmentList($params){
+        $page = empty($params['page']) ? 1 : $params['page'];  //页数
+        $size = !empty($params['size']) ? $params['size'] : config('web.pre_page_size'); //条数
+        $activityInfo=ActivityAppointmentRepository::getActivityInfo($page,$size);
         if(!$activityInfo){
             return false;
         }
