@@ -370,6 +370,7 @@ class SkuComponnet implements OrderCreater
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == 2) {
                         $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['youhui'] = $v['zujin'];
                     }
                     //现金券
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
@@ -386,6 +387,7 @@ class SkuComponnet implements OrderCreater
                             }
                         }
                         $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['youhui'] = $val['discount_amount'];
                     }
                 }
             }
