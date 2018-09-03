@@ -22,13 +22,14 @@ class AppointmentController extends Controller
      * 添加预约活动
      * @param Request $request
      * [
-     * 'title'             =>'',  标题           int    【必传】
+     * 'title'             =>'',  标题           string    【必传】
+     * 'appointment_price' =>'',  预定金额       string 【必传】
      * 'appointment_image' =>'',  活动图片       string 【必传】
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
      * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
-     * 'spu_id'            =>['',''] 商品id     int      【必传】
+     * 'appointment_status' =>'', 活动状态       string  【必传】
+     * 'spu_id'            =>['',''] 商品id      int      【必传】
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
@@ -40,6 +41,7 @@ class AppointmentController extends Controller
        $paramsArr = isset($params['params'])? $params['params'] :[];
        $rules = [
            'title'                   => 'required',//活动标题
+           'appointment_price'     => 'required',//预定金额
            'appointment_image'     => 'required',//活动图片
            'desc'                    => 'required',//活动介绍
            'begin_time'             => 'required',//预约开始时间
@@ -71,7 +73,8 @@ class AppointmentController extends Controller
      * @param Request $request
      * [
      * 'id'                =>'',  活动id         int    【必传】
-     * 'title'             =>'',  标题           int    【必传】
+     * 'appointment_price' =>'',  预定金额       string 【必传】
+     * 'title'             =>'',  标题           string    【必传】
      * 'appointment_image' =>'',  活动图片       string 【必传】
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
@@ -90,6 +93,7 @@ class AppointmentController extends Controller
         $rules = [
             'id'                      => 'required',//活动id
             'title'                   => 'required',//活动标题
+            'appointment_price'     => 'required',//预定金额
             'appointment_image'     => 'required',//活动图片
             'desc'                    => 'required',//活动介绍
             'begin_time'             => 'required',//预约开始时间
@@ -118,7 +122,16 @@ class AppointmentController extends Controller
     /***
      * 预约活动列表
      */
-    public function appointmentList(){
+    public function appointmentList(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $res=$this->Appointment->appointmentList($params['params']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_95002);//获取数据失败
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
 
     }
 

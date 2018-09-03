@@ -63,11 +63,6 @@ return [
     //银联短信验证码发送接口
     'api.union.sendsms'=>'UnionController@sendsms',
 
-    //支付单状态查询接口
-    'api.pay.paymentStatus'=>'PayController@paymentStatus',
-
-
-
     //订单列表接口
     'api.order.orderlist'=>'OrderController@orderList',
 

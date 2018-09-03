@@ -87,7 +87,6 @@ class OrderCreater
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
-
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
@@ -339,8 +338,14 @@ class OrderCreater
             $orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
             $schema = $orderCreater->getDataSchema();
 
+            LogApi::info("确认订单异常：".json_encode($schema['receive_coupon']));
+
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon'],$data['user_id']);
+            $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon']['coupon'],$data['user_id']);
+
+
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
@@ -427,7 +432,6 @@ class OrderCreater
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
 

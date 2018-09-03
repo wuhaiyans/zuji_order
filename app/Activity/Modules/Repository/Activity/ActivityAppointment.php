@@ -52,24 +52,31 @@ class ActivityAppointment{
      * 'desc'              =>'',  活动描述       string 【必传】
      * 'begin_time'        =>'',  活动开始时间   int    【必传】
      * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * 'appointment_status' =>'', 活动状态       int  【必传】
      * ]
      * @return bool
      */
     public  function activityUpdate(array $data){
-        //$this->model->
+        $this->model->title = $data['title'];
+        $this->model->appointment_price = $data['appointment_price'];
+        $this->model->appointment_image = $data['appointment_image'];
+        $this->model->desc = $data['desc'];
+        $this->model->begin_time = $data['begin_time'];
+        $this->model->end_time = $data['end_time'];
+        $this->model->appointment_status = $data['appointment_status'];
+        $this->model->update_time = time();
         return $this->model->save();
 
     }
 	/**
 	 * 通过活动id获取活动信息
 	 * <p>当不存在时，返回false</p>
-	 * @param string   $id		活动id
+	 * @param int   $id		活动id
 	 * @param int		$lock	锁
 	 * @return \App\Activity\Modules\Repository\Activity\ActivityAppointment
 	 * @return  bool
 	 */
-	public static function getByIdInfo( string $id, int $lock=0 ) {
+	public static function getByIdInfo( int $id, int $lock=0 ) {
 	    $builder = ActivityAppointmentModel::where([
             ['id', '=', $id],
         ])->limit(1);
@@ -82,5 +89,20 @@ class ActivityAppointment{
 		}
 		return new self( $activity_info );
 	}
+    /**
+     * 获取活动信息
+     * <p>当不存在时，返回false</p>
+     * @return \App\Activity\Modules\Repository\Activity\ActivityAppointment
+     * @return  bool
+     */
+    public static function getActivityInfo( ) {
+        $activityInfo = ActivityAppointmentModel::query()->get();
+        $list = [];
+        foreach( $activityInfo as $it ) {
+            $list[] = new self( $it );
+        }
+        return $list;
+    }
+
 
 }
