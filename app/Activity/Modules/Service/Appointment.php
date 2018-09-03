@@ -9,7 +9,7 @@
 namespace App\Activity\Modules\Service;
 
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
-use App\Common\LogApi;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Activity\Modules\Repository\ActivityAppointmentRepository;
 use App\Activity\Modules\Repository\ActivityGoodsAppointmentRepository;
