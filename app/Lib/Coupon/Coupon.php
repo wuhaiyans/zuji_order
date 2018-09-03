@@ -138,6 +138,7 @@ class Coupon extends \App\Lib\BaseApi{
             'only_id'=>$arr['only_id'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+
         $info =json_decode($info,true);
         \App\Lib\Common\LogApi::notify('用户领取优惠券接口zuji.mini.coupon.set',[
             'request'=>$data,
