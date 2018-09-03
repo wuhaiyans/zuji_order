@@ -57,7 +57,14 @@ class ActivityAppointment{
      * @return bool
      */
     public  function activityUpdate(array $data){
-        //$this->model->
+        $this->model->title = $data['title'];
+        $this->model->appointment_price = $data['appointment_price'];
+        $this->model->appointment_image = $data['appointment_image'];
+        $this->model->desc = $data['desc'];
+        $this->model->begin_time = $data['begin_time'];
+        $this->model->end_time = $data['end_time'];
+        $this->model->appointment_status = $data['appointment_status'];
+        $this->model->update_time = time();
         return $this->model->save();
 
     }
@@ -82,5 +89,20 @@ class ActivityAppointment{
 		}
 		return new self( $activity_info );
 	}
+    /**
+     * 获取活动信息
+     * <p>当不存在时，返回false</p>
+     * @return \App\Activity\Modules\Repository\Activity\ActivityAppointment
+     * @return  bool
+     */
+    public static function getActivityInfo( ) {
+        $activityInfo = ActivityAppointmentModel::query()->get();
+        $list = [];
+        foreach( $activityInfo as $it ) {
+            $list[] = new self( $it );
+        }
+        return $list;
+    }
+
 
 }

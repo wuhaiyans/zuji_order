@@ -33,23 +33,11 @@ class ActivityAppointmentRepository
      * @return array
      */
     public static  function getActivityInfo(){
-
-    }
-    /***
-     * 执行编辑活动
-     * @param $data
-     * [
-     * 'title'             =>'',  标题           int    【必传】
-     * 'appointment_image' =>'',  活动图片       string 【必传】
-     * 'desc'              =>'',  活动描述       string 【必传】
-     * 'begin_time'        =>'',  活动开始时间   int    【必传】
-     * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
-     * ]
-     * @return bool
-     */
-    public static function activityUpdate(array $data){
-
+        $activityInfo = ActivityAppointment::query()->get()->toArray();
+        if(!$activityInfo){
+            return false;
+        }
+        return $activityInfo;
     }
 
 }
