@@ -16,7 +16,7 @@ class ReceiveCouponComponnet implements OrderCreater
     private $componnet;
     private $flag = true;
 
-    private $only_id = "383c8e805a3410e9ee03481d29a7f76f";
+    private $only_id = "f9a8c733d5feb2c4a3f29419e4fef562";
 
     private $coupon;
     private $status;
