@@ -336,11 +336,11 @@ class OrderCreater
             $orderCreater = new RiskComponnet($orderCreater);
 
             //自动领取优惠券
-            $orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-            $schema = $orderCreater->getDataSchema();
+            //$orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //$schema = $orderCreater->getDataSchema();
 
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon'],$data['user_id']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
