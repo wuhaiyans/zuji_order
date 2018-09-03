@@ -104,6 +104,12 @@ class ActivityDestineOperate
                     return false;
                 }
             }
+
+            if($destine['destine_amount'] <0){
+                DB::rollBack();
+                set_msg("活动金额必须大于0");
+                return false;
+            }
             //生成支付单
             $businessNo =$destine['destine_no'];
             $payData = [

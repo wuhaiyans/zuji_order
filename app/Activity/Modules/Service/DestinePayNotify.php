@@ -39,11 +39,21 @@ class DestinePayNotify
         if($status == "success" && $businessType == OrderStatus::BUSINESS_DESTINE){
 
             $destine = ActivityDestine::getByNo($destineNo);
-            $b =$destine->pay();
+            $b =$destine->pay(); //更新状态
             if(!$b){
                 LogApi::error(config('app.env')."[payment]DestinePayNotify error");
                 return false;
             }
+
+            $destineInfo =$destine->getData();
+
+            //发送短信
+            SendMessage::ActivityDestineSuccess( [
+                'mobile'        => $destineInfo['mobile'],
+                'goods_name'    => $destineInfo['activity_name'],
+            ]);
+
+
             return true;
         }
         return true;
