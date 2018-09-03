@@ -12,7 +12,7 @@ return [
     //-+------------------------------------------------------------------------
     // | 活动预定接口
     //-+------------------------------------------------------------------------
-
+    'api.activity.destine'      => 'ActivityDestineController@destine', //预约活动确认预约
     'api.advance.activityList'      => 'AdvanceActivityController@getList', //预约活动列表
     'api.advance.activityGet'      => 'AdvanceActivityController@get', //预约活动详情
     'api.advance.myAdvance'     => 'AdvanceActivityController@myAdvance', //我的预约
