@@ -114,7 +114,6 @@ class AdvanceActivityController extends Controller
         $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
-
         $data = ActivityDestine::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
         if(!$data){
             return apiResponse($data,ApiStatus::CODE_0);
@@ -126,13 +125,13 @@ class AdvanceActivityController extends Controller
         $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
         $activityList = array_column($activityList,null,"id");
         //获取活动商品
-        $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->get();
-        $goodsList = array_column($goodsList,null,"appointment_id");
+        $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->get()->toArray();
+        $goodsList = array_keys_arrange($goodsList,"appointment_id");
         //拼装数据格式
         foreach($data as &$item){
             //下单按钮
             $order_btn = false;
-            if(isset($goodsList[$item['id']])){
+            if(!empty($goodsList[$item['activity_id']]['spu_id'])){
                 $order_btn = true;
             }
             $item['order_btn'] = $order_btn;
