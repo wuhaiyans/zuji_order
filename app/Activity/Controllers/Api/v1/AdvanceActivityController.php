@@ -11,7 +11,7 @@ namespace App\Activity\Controllers\Api\v1;
 use App\Activity\Models\ActivityAppointment;
 use App\Activity\Models\ActivityDestine;
 use App\Activity\Models\ActivityGoodsAppointment;
-use App\Http\Requests\Request;
+use Illuminate\Http\Request;
 use App\Lib\ApiStatus;
 
 
