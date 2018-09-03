@@ -103,6 +103,7 @@ class ActivityDestineOperate
                     return false;
                 }
             }
+            var_dump($destine);die;
 
             $destine['destine_amount'] =0.01;
             if($destine['destine_amount'] <0){
