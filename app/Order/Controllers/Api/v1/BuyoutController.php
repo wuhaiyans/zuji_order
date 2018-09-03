@@ -488,7 +488,7 @@ class BuyoutController extends Controller
 
     /*
      * 买断支付请求
-    * @param array $params 【必选】
+     * @param array $params 【必选】
      * [
      *      "user_id"=>"", 用户id
      *      "goods_no"=>"",商品编号

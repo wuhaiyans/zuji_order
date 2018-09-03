@@ -26,7 +26,7 @@ class ActivityAppointment extends Model
      *
      * @var array
      */
-    protected $fillable = ['title','appointment_image','desc','begin_time','end_time','appointment_status','create_time','update_time'];
+    protected $fillable = ['title','appointment_price','appointment_image','desc','begin_time','end_time','appointment_status','create_time','update_time'];
 
     /**
      * 获取当前时间

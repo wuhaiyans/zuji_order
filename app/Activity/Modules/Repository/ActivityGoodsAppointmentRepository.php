@@ -30,14 +30,23 @@ class ActivityGoodsAppointmentRepository
      * ]
      * @return array
      */
-    public static function getByIdInfo(array $where){
-
+    public static function getByIdInfo(int $id){
+        $where[]=['appointment_id','=',$id];
         $activityInfo=ActivityGoodsAppointment::where($where)->get()->toArray();
         if( !$activityInfo ){
             return false;
         }
         return $activityInfo;
 
+    }
+
+    public static function delActivityGoods(int $id){
+        $where[]=['appointment_id','=',$id];
+        $res=ActivityGoodsAppointment::where($where)->delete();
+        if( !$res ){
+            return false;
+        }
+        return $res;
     }
     /***
      * 获取活动信息
