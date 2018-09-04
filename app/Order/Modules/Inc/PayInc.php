@@ -3,6 +3,10 @@ namespace App\Order\Modules\Inc;
 
 class PayInc{
     /**
+     * @var int 微信支付
+     */
+    const  WeChatPay = 7;
+    /**
      * @var int 乐百分支付
      */
     const  LebaifenPay = 6;
@@ -40,6 +44,7 @@ class PayInc{
             self::UnionPay => '银联支付',
             self::MiniAlipay=>'支付宝小程序支付',
             self::LebaifenPay=>'乐百分支付',
+            self::WeChatPay=>'微信支付',
         ];
     }
 
