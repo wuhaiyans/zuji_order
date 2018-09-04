@@ -52,6 +52,7 @@ class AdvanceActivityController extends Controller
         $list = ActivityAppointment::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
         $data = [
             'count' => $count,
+            'total_page' =>$sum,
             'data' =>$list
         ];
         return apiResponse($data,ApiStatus::CODE_0);
@@ -93,7 +94,6 @@ class AdvanceActivityController extends Controller
     public function myAdvance(Request $request){
 
         $request =$request->all();
-        echo json_encode($request);die;
         $params = $request['params'];
         if(!$params['page']){
             $page = 0;
@@ -143,6 +143,7 @@ class AdvanceActivityController extends Controller
         }
         $data = [
             'count' => $count,
+            'total_page' =>$sum,
             'data' =>$data
         ];
         return apiResponse($data,ApiStatus::CODE_0);
