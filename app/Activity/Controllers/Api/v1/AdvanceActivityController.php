@@ -140,6 +140,10 @@ class AdvanceActivityController extends Controller
             $item['title'] = $activityList[$item['activity_id']]['title'];
             $item['appointment_image'] = $activityList[$item['activity_id']]['appointment_image'];
         }
+        $data = [
+            'count' => $count,
+            'data' =>$data
+        ];
         return apiResponse($data,ApiStatus::CODE_0);
     }
 }
