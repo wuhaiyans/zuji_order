@@ -131,7 +131,7 @@ class CouponComponnet implements OrderCreater
                     'order_no'=>$orderNo,
                     'coupon_no'=>$v['coupon_no'],
                     'coupon_id'=>$v['coupon_id'],
-                    'discount_amount'=>$v['youhui'],
+                    'discount_amount'=>$v['discount_amount'],
                     'coupon_type'=>$v['coupon_type'],
                     'coupon_name'=>$v['coupon_name'],
                 ];
