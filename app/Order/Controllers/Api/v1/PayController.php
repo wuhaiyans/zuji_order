@@ -979,5 +979,41 @@ class PayController extends Controller
 	}
 
 
+	/**
+	 * 支付单状态查询
+	 * @requwet Array
+	 * [
+	 * 		'out_payment_no' => 1,	// 支付编号
+	 * ]
+	 * @return array
+	 */
+	public function paymentStatus(Request $request){
+		$params     = $request->all();
+		// 参数过滤
+		$rules 		= [
+			'out_payment_no'     => 'required',
+		];
+
+		$validateParams = $this->validateParams($rules,$params);
+		if ($validateParams['code'] != 0) {
+			return apiResponse([],$validateParams['code']);
+		}
+
+		$params = $params['params'];
+
+		try{
+
+			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByPaymentNo($params['out_payment_no']);
+			$paymentStatus = $payObj->getPaymentStatus();
+
+		} catch (\App\Lib\NotFoundException $exc) {
+			LogApi::error('支付通知处理失败',$exc);
+			return apiResponse([],ApiStatus::CODE_20001, "参数错误");
+		}
+
+		return apiResponse(['status' => $paymentStatus],ApiStatus::CODE_0,"success");
+
+	}
+
 
 }

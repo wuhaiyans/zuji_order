@@ -336,4 +336,5 @@ return [
 
     'api.active.sendMessage' => 'ActiveController@sendMessage',
 
+    'api.pay.paymentStatus' => 'PayController@paymentStatus',
 ];
