@@ -309,12 +309,8 @@ class WithholdController extends Controller
             }catch(\App\Lib\ApiException $exc){
                 LogApi::error('[withhold_createpay]分期代扣失败', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
-                //捕获异常 买家余额不足
-                if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                    return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
-                } else {
-                    return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
-                }
+
+                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
             }
 
         }
