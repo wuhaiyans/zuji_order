@@ -11,7 +11,7 @@ class ActivityGoodsAppointment extends Model
 
     // Rest omitted for brevity
 
-    protected $table = 'order_activity_goods_appointment';
+    protected $table = 'activity_goods_appointment';
 
     protected $primaryKey='id';
     /**
