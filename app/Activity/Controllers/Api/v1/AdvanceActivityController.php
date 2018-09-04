@@ -140,6 +140,7 @@ class AdvanceActivityController extends Controller
             if(!empty($goodsList[$item['activity_id']]['spu_id'])){
                 $order_btn = true;
             }
+            $item['destine_amount'] = sprintf('%.2f',$item['destine_amount']);
             $item['order_btn'] = $order_btn;
             $item['destine_status'] = DestineStatus::getStatusName($item['destine_status']);
             $item['title'] = $activityList[$item['activity_id']]['title'];
