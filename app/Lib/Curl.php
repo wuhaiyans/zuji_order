@@ -34,7 +34,7 @@ class Curl {
 	 * 超时时间
 	 * @var int
 	 */
-	public static $timeout = 10;
+	public static $timeout = 30;
 	
 	/**
 	 *
