@@ -92,7 +92,7 @@ class AdvanceActivityController extends Controller
      * @return json
      */
     public function myAdvance(Request $request){
-
+        echo 1231;die;
         $request =$request->all();
         $params = $request['params'];
         if(!$params['page']){
@@ -111,6 +111,7 @@ class AdvanceActivityController extends Controller
             ['destine_status','<>',DestineStatus::DestineCreated]
         ];
         //查询我的预约列表
+
         $count = ActivityDestine::query()->where($where)->count();
 
         $sum = ceil($count/$limit);
