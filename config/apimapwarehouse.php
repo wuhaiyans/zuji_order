@@ -11,7 +11,8 @@ return [
     'warehouse.imei.downTpl' => 'ImeiController@downTpl', //列表
     'warehouse.imei.publics' => 'ImeiController@publics', //公用数据
     'warehouse.imei.getRow' => 'ImeiController@getRow', //根据IMEI查询返回一条记录
-    'warehouse.imei.setRow' => 'ImeiController@setRow', //根据IMEI修改一条记录
+    'warehouse.imei.setRow' => 'ImeiController@setRow', //根据IMEI ID修改一条记录
+    'warehouse.imei.getImeiLog' => 'ImeiController@getImeiLog', //查询IMEI日志
 
 
     //物流
@@ -58,12 +59,11 @@ return [
     'warehouse.receive.note'=> 'ReceiveController@note',//录入检测项，针对收货单
     'warehouse.receive.checkItemsFinish'=> 'ReceiveController@checkItemsFinish',//检测完成
     'warehouse.receive.logistics'=> 'ReceiveController@logistics',//修改物流
-
     'warehouse.receive.createDelivery'=> 'ReceiveController@createDelivery',//换货操作
-
     'warehouse.receiveGoods.list'=> 'ReceiveGoodsController@list',//设备列表
     'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics',//公用参数
-    'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems'//取检测项
+    'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems',//取检测项
+    'warehouse.receive.imeiIn'=> 'ReceiveController@imeiIn', //确认入库
 
 
 ];

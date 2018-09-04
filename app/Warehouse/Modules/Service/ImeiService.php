@@ -97,6 +97,13 @@ class ImeiService
                 'data'=>[], 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()
             ];
         }
+        foreach ($items as $key=>$item){
+            if($item['status']==Imei::STATUS_IN){
+                $items[$key]['xiugai'] = true;
+            }else{
+                $items[$key]['xiugai'] = false;
+            }
+        }
 
         return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()];
     }

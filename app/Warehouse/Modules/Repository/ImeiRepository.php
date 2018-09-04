@@ -7,6 +7,8 @@
 
 namespace App\Warehouse\Modules\Repository;
 
+use App\Warehouse\Models\ImeiLog;
+use App\Warehouse\Models\ImeiUpdateLog;
 use App\Warehouse\Models\Receive;
 use Illuminate\Support\Facades\DB;
 use App\Warehouse\Models\Imei;
@@ -135,28 +137,132 @@ class ImeiRepository
      * @param array $imei
      * @return boolean
      */
-    public static function setRow($params)
+    public static function setRow($id,$params)
     {
-        $row = Imei::where(['imei'=>$params['imei']])->first();
-
+        $row = Imei::where(['id'=>$id])->first();
         if(!$row){
-            throw new \Exception('设备表IMEI号:'.$params['imei'].'未找到');
+            throw new \Exception('设备表ID号:'.$id.'未找到');
         }
-        $row->brand=$params['brand'];
-        $row->name=$params['name'];
-        $row->price=$params['price'];
-        $row->apple_serial=$params['apple_serial'];
-        $row->quality=$params['quality'];
-        $row->color=$params['color'];
-        $row->business=$params['business'];
-        $row->storage=$params['storage'];
-        $row->status=$params['status'];
-        $row->update_time=time();
+        $log = [];
+        $t = time();
+        if(isset($params['brand'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'brand',
+                'before_value'=>$row->brand,
+                'after_value'=>$params['brand'],
+                'update_time'=>$t
+            ];
+            $row->brand=$params['brand'];
+
+        }
+        if(isset($params['name'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'name',
+                'before_value'=>$row->name,
+                'after_value'=>$params['name'],
+                'update_time'=>$t
+            ];
+            $row->name=$params['name'];
+
+        }
+        if(isset($params['color'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'color',
+                'before_value'=>$row->color,
+                'after_value'=>$params['color'],
+                'update_time'=>$t
+            ];
+            $row->color=$params['color'];
+
+        }
+        if(isset($params['business'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'business',
+                'before_value'=>$row->business,
+                'after_value'=>$params['business'],
+                'update_time'=>$t
+            ];
+            $row->business=$params['business'];
+
+        }
+        if(isset($params['storage'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'storage',
+                'before_value'=>$row->storage,
+                'after_value'=>$params['storage'],
+                'update_time'=>$t
+            ];
+            $row->storage=$params['storage'];
+
+        }
+        if(isset($params['quality'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'quality',
+                'before_value'=>$row->quality,
+                'after_value'=>$params['quality'],
+                'update_time'=>$t
+            ];
+            $row->quality=$params['quality'];
+
+        }
+        if(isset($params['imei'])){
+            $log[]=[
+                'imei_id'=>$id,
+                'table_name'=>'imei',
+                'before_value'=>$row->imei,
+                'after_value'=>$params['imei'],
+                'update_time'=>$t
+            ];
+            $row->imei=$params['imei'];
+
+        }
+        if(empty($log)){
+            throw new \Exception('没有要修改的数据');
+        }
+
+        $row->update_time=$t;
         if($row->update()){
-            return true;
+            if(ImeiUpdateLog::create($log)){
+                return true;
+            }else{
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
+
         }else{
-            throw new \Exception('设备表IMEI号:'.$params['imei'].'修改失败');
+            throw new \Exception('设备表ID号:'.$id.'修改失败');
         }
+
+    }
+
+    /**
+     * 根据IMEI修改一条记录
+     *
+     * @param array $imei
+     * @return boolean
+     */
+    public static function getImeiLog($id){
+        $data=[
+            'imeilog'=>[],
+            'imeiupdatelog'=>[],
+        ];
+
+        $imeilog_obj = ImeiLog::where(['imei_id'=>$id])->get();
+        if($imeilog_obj){
+            $data['imeilog'] = $imeilog_obj->toArray();
+        }
+
+        $imeiupdatelog_obj = ImeiUpdateLog::where(['imei_id'=>$id])->get();
+        if($imeiupdatelog_obj){
+            $data['imeiupdatelog'] = $imeiupdatelog_obj->toArray();
+        }
+
+        return $data;
 
     }
 
@@ -172,10 +278,11 @@ class ImeiRepository
             return false;
         }
         foreach($imei as $imeModel) {
-
+            if(!ImeiLog::in($imeModel->imei,$model->order_no)){
+                return false;
+            }
             $imeModel->status = Imei::STATUS_IN;
             if (!$imeModel->update()){
-
                 return false;
             }
 

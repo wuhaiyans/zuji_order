@@ -33,9 +33,9 @@ class DeliveryImeiService
      * @throws \Exception
      * 删除
      */
-    public function del($delivery_no, $imei)
+    public function del($delivery_no, $imei, $order_no=0)
     {
-        if (!DeliveryImeiRepository::del($delivery_no, $imei)) {
+        if (!DeliveryImeiRepository::del($delivery_no, $imei, $order_no)) {
             throw new \Exception('删除imei失败');
         }
     }

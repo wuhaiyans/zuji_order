@@ -412,10 +412,11 @@ class DeliveryController extends Controller
 
         /**
          * delivery_no 发货单号
-         * imei 设备imei
+         * imei 设备imei 帮助大家收集发票
          */
         $rules = [
             'delivery_no' => 'required',
+            'order_no' => 'required',
             'imei'  => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -425,7 +426,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $server->del($params['delivery_no'], $params['imei']);
+            $server->del($params['delivery_no'], $params['imei'], $params['order_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
@@ -446,6 +447,7 @@ class DeliveryController extends Controller
          */
         $rules = [
             'delivery_no' => 'required',
+            'order_no' => 'required',
             'imei'      => 'required',
             'goods_no' => 'required'
         ];
