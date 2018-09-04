@@ -45,7 +45,8 @@ class AdvanceActivityController extends Controller
         //查询预约活动列表
         $count = ActivityAppointment::query()->where($where)->count();
         $sum = ceil($count/$limit);
-        $page = $page>=$sum?$sum:$page;
+        $page = $page>0?$page-1:$page;
+        $page = $page>=$sum?$sum:$page-1;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
 
@@ -115,6 +116,7 @@ class AdvanceActivityController extends Controller
         $count = ActivityDestine::query()->where($where)->count();
 
         $sum = ceil($count/$limit);
+        $page = $page>0?$page-1:$page;
         $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
