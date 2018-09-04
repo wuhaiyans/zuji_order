@@ -19,6 +19,7 @@ use App\Order\Modules\Repository\Order\DeliveryDetail;
 use App\Order\Modules\Repository\Order\ServicePeriod;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
+use App\Order\Modules\Repository\OrderRepository;
 use Mockery\Exception;
 
 /**
@@ -43,7 +44,6 @@ class SkuComponnet implements OrderCreater
 
     //规格
     private $specs;
-    private $kucun;
 
     private $orderYajin=0;   //订单押金
     private $orderZujin=0;  //订单租金+意外险
@@ -87,11 +87,11 @@ class SkuComponnet implements OrderCreater
             $goodsArr[$skuId]['sku_info']['sku_num'] = $skuNum;
             $goodsArr[$skuId]['sku_info']['goods_no'] = createNo(6);
 
-            if ($this->zuqiType == 1) {
+            if ($this->zuqiType == OrderStatus::ZUQI_TYPE_DAY) {
                 $this->zuqiTypeName = "day";
                 //计算短租租期
                 $goodsArr[$skuId]['sku_info']['zuqi'] = ((strtotime($goodsArr[$skuId]['sku_info']['end_time']) -strtotime($goodsArr[$skuId]['sku_info']['begin_time']))/86400)+1;
-            } elseif ($this->zuqiType == 2) {
+            } elseif ($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH) {
                 $this->zuqiTypeName = "month";
             }
             $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
@@ -151,7 +151,6 @@ class SkuComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('商品金额错误');
                 $this->flag = false;
             }
-            $this->kucun =$skuInfo['number'];
             // 库存量
 //            if($skuInfo['number']<$skuInfo['sku_num']){
 //                $this->getOrderCreater()->setError('商品库存不足');
@@ -276,6 +275,7 @@ class SkuComponnet implements OrderCreater
                     'weight' => $skuInfo['weight'],
                     'edition' => $skuInfo['edition'],
                     'sku_num' => intval($skuInfo['sku_num']),
+                    'kucun' => intval($skuInfo['number']),
                     'brand_id' => intval($spuInfo['brand_id']),
                     'category_id' => intval($spuInfo['catid']),
                     'machine_id' => intval($spuInfo['machine_id']),//机型ID
@@ -367,7 +367,7 @@ class SkuComponnet implements OrderCreater
                 $youhui =0;
                 foreach ($coupon as $key=>$val) {
                     //首月0租金
-                    if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == 2) {
+                    if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                         $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
                         $coupon[$key]['discount_amount'] = $v['zujin'];
@@ -375,7 +375,7 @@ class SkuComponnet implements OrderCreater
                     //现金券
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
 
-                        if ($v['zuqi_type'] == 2) {
+                        if ($v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                             $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'];
                         } else {
                             $zongzujin = $v['zuqi'] * $v['zujin'];
@@ -405,12 +405,15 @@ class SkuComponnet implements OrderCreater
         $userId =$this->componnet->getOrderCreater()->getUserComponnet()->getUserId();
         $orderNo=$this->componnet->getOrderCreater()->getOrderNo();
         $goodsRepository = new OrderGoodsRepository();
+        $goodsArr=[];
         foreach ($data['sku'] as $k=>$v){
-            $goodsArr[] = [
-                'sku_id'=>$v['sku_id'],
-                'spu_id'=>$v['spu_id'],
-                'num'=>$v['sku_num']
-            ];
+            if($v['kucun']>=$v['sku_num']){
+                $goodsArr[] = [
+                    'sku_id'=>$v['sku_id'],
+                    'spu_id'=>$v['spu_id'],
+                    'num'=>$v['sku_num']
+                ];
+            }
             for($i=0;$i<$v['sku_num'];$i++){
                 $goodsData =[
                     'goods_name'=>$v['spu_name'],
@@ -472,13 +475,14 @@ class SkuComponnet implements OrderCreater
                     $this->getOrderCreater()->setError("保存商品信息失败");
                     return false;
                 }
+
             }
         }
 
         /**
          * 在这里要调用减少库存方法
          */
-        if($this->kucun >0){
+        if(!empty($goodsArr)){
             $b =Goods::reduceStock($goodsArr);
             if(!$b){
                 LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
