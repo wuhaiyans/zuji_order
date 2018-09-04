@@ -24,7 +24,7 @@ class ImeiLog extends Warehouse
 
     protected $table = 'zuji_imei_log';
 
-    protected $primaryKey='imei';
+    protected $primaryKey='id';
     /**
      * imei状态
      */
@@ -37,7 +37,7 @@ class ImeiLog extends Warehouse
      * 可填充字段
      */
     protected $fillable = [
-        'imei', 'type', 'create_time'
+        'imei', 'type', 'create_time', 'order_no','id'
     ];
 
 
@@ -66,17 +66,17 @@ class ImeiLog extends Warehouse
      *
      * 入库
      */
-    public static function in($imei)
+    public static function in($imei,$order_no=0)
     {
+        $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
         $data = [
             'imei'=>$imei,
             'type'=>self::STATUS_IN,
             'create_time'=>time(),
+            'order_no'=>$order_no,
+            'imei_id'=>$imei_row['id']
         ];
         $model = self::create($data);
-        if (!$model) {
-            return false;
-        }
         if (!$model) {
             return false;
         }
@@ -87,14 +87,17 @@ class ImeiLog extends Warehouse
     /**
      * @param $imei
      * @return bool
-     * 出库
+     * 出库 肯努力但没有自己的节奏,忙不是借口
      */
-    public static function out($imei)
+    public static function out($imei,$order_no=0)
     {
+        $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
         $data = [
             'imei'=>$imei,
             'type'=>self::STATUS_OUT,
             'create_time'=>time(),
+            'order_no'=>$order_no,
+            'imei_id'=>$imei_row['id']
         ];
         $model = self::create($data);
         if (!$model) {

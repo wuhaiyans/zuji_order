@@ -90,33 +90,53 @@ class ImeiController extends Controller
     }
 
     /**
-     * 根据IMEI修改一条记录
-     *     前段修改用
+     * 修改IMEI
+     *      1.出库不可修改
+     *      2.每次修改完批量记录修改日志
      *
-     * @param string $imei
-     * @return array 一维数组
+     * @param int id
+     * @param array data
+     * @return []
      */
     public function setRow(){
         $rules = [
-            'imei' => 'required',
-            'brand' => 'required',
-            'name' => 'required',
-            'price' => 'required',
-            'apple_serial' => 'required',
-            'quality' => 'required',
-            'color' => 'required',
-            'business' => 'required',
-            'storage' => 'required',
-            'status' => 'required'
+            'id' => 'required',
+            'data' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
+        if(empty($params['data']) || empty($params['id'])){
+            return apiResponse([], ApiStatus::CODE_20001, '参数错误');
+        }
         try{
-            ImeiRepository::setRow($params['imei']);
+            ImeiRepository::setRow($params['id'],$params['data']);
         } catch (\Exception $e){
             return apiResponse([], ApiStatus::CODE_42003, $e->getMessage());
         }
-        return \apiResponse([]);
+        return apiResponse([]);
+
+    }
+
+    /**
+     * 查询IMEI日志
+     *      1.出库入库日志
+     *      2.修改IMEI字段日志
+     */
+    public function getImeiLog(){
+        $rules = [
+            'id' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if(empty($params['id'])){
+            return apiResponse([], ApiStatus::CODE_20001, '参数错误');
+        }
+        try{
+            $data = ImeiRepository::getImeiLog($params['id']);
+        } catch (\Exception $e){
+            return apiResponse([], ApiStatus::CODE_42003, $e->getMessage());
+        }
+        return apiResponse($data);
 
     }
 
@@ -244,7 +264,6 @@ class ImeiController extends Controller
 
         return \apiResponse();
     }
-
 
     /**
      * 共共数据

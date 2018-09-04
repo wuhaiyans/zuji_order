@@ -35,6 +35,7 @@ class Receive extends Warehouse
     const STATUS_RECEIVED = 2;//已收货
     const STATUS_FINISH = 3;//检测完成
     const STATUS_CONFIRM_RECEIVE = 4;//确认换货
+    const STATUS_IN = 5;//确认入库
 
     /**
      * 设备检查状态
@@ -49,6 +50,7 @@ class Receive extends Warehouse
     const TYPE_BACK = 1;//还
     const TYPE_RETURN = 2;//退
     const TYPE_EXCHANGE = 3;//换
+    const TYPE_REJECTION = 4;//拒收
 
     protected $fillable = [
         'receive_no',
@@ -87,6 +89,7 @@ class Receive extends Warehouse
             self::STATUS_RECEIVED => '已收货',
             self::STATUS_FINISH => '检测完成',
             self::STATUS_CONFIRM_RECEIVE => '确认换货',
+            self::STATUS_IN => '确认收货',
         ];
 
         if ($status === null) return $st;
@@ -121,9 +124,10 @@ class Receive extends Warehouse
     public static function types($type=null)
     {
         $tp = [
-            self::TYPE_BACK     => '还机用户',
-            self::TYPE_RETURN   => '退货用户',
-            self::TYPE_EXCHANGE => '换货用户'
+            self::TYPE_BACK         => '还机用户',
+            self::TYPE_RETURN       => '退货用户',
+            self::TYPE_EXCHANGE     => '换货用户',
+            self::TYPE_REJECTION    => '拒收用户'
         ];
 
         if ($type === null) return $tp;

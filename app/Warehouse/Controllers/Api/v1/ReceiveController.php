@@ -6,6 +6,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Models\ReceiveGoods;
+use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ReceiveService;
 use Illuminate\Support\Facades\DB;
 
@@ -154,7 +155,30 @@ class ReceiveController extends Controller
         return apiResponse([]);
     }
 
+    /**
+     * 确认入库
+     */
+    public function imeiIn(){
+        $rules = [
+            'receive_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
 
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        DB::beginTransaction();
+        try {
+            $this->receive->imeiIn($params['receive_no']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+        DB::commit();
+
+        return apiResponse([]);
+
+    }
 
     /**
      * 修改物流
@@ -190,7 +214,7 @@ class ReceiveController extends Controller
 
 
     /**
-     * 收货单明细收货
+     * 收货单明细收货(暂时弃用)
      */
     public function receiveDetail()
     {

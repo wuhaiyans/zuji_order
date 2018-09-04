@@ -23,6 +23,7 @@ class ReceiveGoods extends Warehouse
     const STATUS_PART_CHECK = 4;//部分检测完成
     const STATUS_ALL_CHECK = 5;//全部检测完成
     const STATUS_CONFIRM_RECEIVE = 6;//确认换货
+    const STATUS_IN = 7;//确认入库
 
 
     /**
@@ -70,7 +71,8 @@ class ReceiveGoods extends Warehouse
             self::STATUS_ALL_RECEIVE    => '全部收货完成',
             self::STATUS_PART_CHECK     => '部分检测完成',
             self::STATUS_ALL_CHECK      => '全部检测完成',
-            self::STATUS_CONFIRM_RECEIVE      => '确认换货'
+            self::STATUS_CONFIRM_RECEIVE      => '确认换货',
+            self::STATUS_IN      => '确认入库'
         ];
 
         if ($status === null) return $st;
