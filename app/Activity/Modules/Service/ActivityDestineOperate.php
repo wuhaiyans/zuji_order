@@ -159,6 +159,14 @@ class ActivityDestineOperate
             //判断用户是否 已经参与活动
             $destine = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
 
+            //获取活动信息
+            $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
+            if(!$activity){
+                set_msg("获取活动信息失败");
+                return false;
+            }
+            $activityInfo =$activity->getData();
+            $res['destine_amount'] = $activityInfo['appointment_price'];
             //如果有预订记录
             if($destine){
                 $destine = objectToArray($destine);
