@@ -11,7 +11,7 @@ class ActivityDestine extends Model
 
     // Rest omitted for brevity
 
-    protected $table = 'activity_destine';
+    protected $table = 'order_activity_destine';
 
     protected $primaryKey='id';
     /**
