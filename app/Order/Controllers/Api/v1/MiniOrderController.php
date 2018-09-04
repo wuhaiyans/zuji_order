@@ -49,6 +49,8 @@ class MiniOrderController extends Controller
         $rules = [
             'sku_id' => 'required', //【必须】int；子商品ID
             'sku_num' => 'required', //【必须】int；子商品ID
+            'zuqi_type' => 'required', //【必须】int；租期类型
+            'zuqi' => 'required', //【必须】int；租期
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ( $validateParams['code']!=0 ) {
@@ -67,24 +69,24 @@ class MiniOrderController extends Controller
             //商品件数固定为1
             $count = 1;
             $name = $sku_info['sku_name'];
-            if( $sku_info['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
+            if( $params['zuqi_type'] == 2 ){//租期类型（1：天；2：月）
                 //长租
                 $new_data = date('Y-m-d H:i:s');
-                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($sku_info['zuqi'])+1).' month'));
+                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($params['zuqi'])+1).' month'));
                 //总租金
-                $total_amount = normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])+$spu_info['yiwaixian']);
+                $total_amount = normalizeNum($sku_info['shop_price']*intval($params['zuqi'])+$spu_info['yiwaixian']);
                 //单月租金
                 $single_amount = $sku_info['shop_price'];
                 //总押金
                 $deposit = $sku_info['yajin'];
                 //分期数 短租为1期
-                $installmentCount = intval($sku_info['zuqi']);
+                $installmentCount = intval($params['zuqi']);
             }else{
                 //短租
                 $new_data = date('Y-m-d H:i:s');
-                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($sku_info['zuqi'])+30).' day'));
+                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($params['zuqi'])+30).' day'));
                 //总租金
-                $total_amount = normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])+$spu_info['yiwaixian']);
+                $total_amount = normalizeNum($sku_info['shop_price']*intval($params['zuqi'])+$spu_info['yiwaixian']);
                 //单月租金
                 $single_amount = $sku_info['shop_price'];
                 //总押金
@@ -102,7 +104,7 @@ class MiniOrderController extends Controller
                 'goods_info' => [
                     'sku_id'=>$sku_info['sku_id'],
                     'spu_id'=>$sku_info['spu_id'],
-                    'total_amount'=> normalizeNum($sku_info['shop_price']*intval($sku_info['zuqi'])),
+                    'total_amount'=> normalizeNum($sku_info['shop_price']*intval($params['zuqi'])),
                 ],
                 'overdue_time' => $overdue_time,
                 'zhima_params'=>[
