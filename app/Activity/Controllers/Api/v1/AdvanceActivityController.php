@@ -45,13 +45,15 @@ class AdvanceActivityController extends Controller
         //查询预约活动列表
         $count = ActivityAppointment::query()->where($where)->count();
         $sum = ceil($count/$limit);
-        $page = $page>=$sum?$sum:$page;
+        $page = $page>0?$page-1:$page;
+        $page = $page>=$sum?$sum:$page-1;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
 
         $list = ActivityAppointment::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
         $data = [
             'count' => $count,
+            'total_page' =>$sum,
             'data' =>$list
         ];
         return apiResponse($data,ApiStatus::CODE_0);
@@ -110,17 +112,20 @@ class AdvanceActivityController extends Controller
             ['destine_status','<>',DestineStatus::DestineCreated]
         ];
         //查询我的预约列表
+
         $count = ActivityDestine::query()->where($where)->count();
+
         $sum = ceil($count/$limit);
+        $page = $page>0?$page-1:$page;
         $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
-        $data = ActivityDestine::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
-        if(!$data){
-            return apiResponse($data,ApiStatus::CODE_0);
+        $list = ActivityDestine::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
+        if(!$list){
+            return apiResponse($list,ApiStatus::CODE_0);
         }
         //拆分活动id
-        $advanceIds = array_column($data,"activity_id");
+        $advanceIds = array_column($list,"activity_id");
         array_unique($advanceIds);
         //获取预约活动
         $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
@@ -129,12 +134,13 @@ class AdvanceActivityController extends Controller
         $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->get()->toArray();
         $goodsList = array_keys_arrange($goodsList,"appointment_id");
         //拼装数据格式
-        foreach($data as &$item){
+        foreach($list as &$item){
             //下单按钮
             $order_btn = false;
             if(!empty($goodsList[$item['activity_id']]['spu_id'])){
                 $order_btn = true;
             }
+            $item['destine_amount'] = sprintf('%.2f',$item['destine_amount']);
             $item['order_btn'] = $order_btn;
             $item['destine_status'] = DestineStatus::getStatusName($item['destine_status']);
             $item['title'] = $activityList[$item['activity_id']]['title'];
@@ -142,7 +148,8 @@ class AdvanceActivityController extends Controller
         }
         $data = [
             'count' => $count,
-            'data' =>$data
+            'total_page' =>$sum,
+            'data' =>$list
         ];
         return apiResponse($data,ApiStatus::CODE_0);
     }

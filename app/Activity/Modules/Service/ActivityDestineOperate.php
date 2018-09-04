@@ -30,6 +30,17 @@ class ActivityDestineOperate
      *      'ip'=>'',                   //【必须】 int 客户端IP地址
      *      'pay_channel_id'=>'',       //【必须】 int 支付渠道
      *      'return_url'=>'',           //【必须】string 前端回跳地址
+     *      'auth_token'=>'',           //【小程序支付必选】auth_token
+     *      'extended_params'=>[        //【小程序支付必选】array 扩展参数
+     *          "alipay_params"=>[      //支付宝扩展参数
+     *                  "trade_type"=>"APP"
+     *          ],
+     *          "wechat_params"=>[      //微信扩展参数
+     *                  "openid"=>"oBjc20uu9n0R_uv2yAzRA0YHSVIs",
+     *                  "trade_type"=>"JSAPI"
+     *          ]
+     *
+     * ],
      * ]
      * @return bool
      */
@@ -110,6 +121,19 @@ class ActivityDestineOperate
                 return false;
                 $destine['destine_amount'] =0.01;
             }
+            // 微信支付，交易类型：JSAPI，redis读取openid
+            $extended_params= $data['extended_params'];
+            if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+                if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+                    $_key = 'wechat_openid_'.$data['auth_token'];
+                    $openid = \Illuminate\Support\Facades\Redis::get($_key);
+                    if( $openid ){
+                        $extended_params['wechat_params']['openid'] = $openid;
+                    }
+                }
+            }
+
+
             //生成支付单
                 $businessNo =$destine['destine_no'];
             $payData = [
@@ -126,6 +150,7 @@ class ActivityDestineOperate
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
                 'front_url' => $data['return_url'], //回调URL
                 'ip'=>$data['ip'],
+                'extended_params'=>$data['extended_params'],
             ]);
             // 提交事务
             DB::commit();
