@@ -111,9 +111,8 @@ class AdvanceActivityController extends Controller
             ['destine_status','<>',DestineStatus::DestineCreated]
         ];
         //查询我的预约列表
-        echo sql_profiler();
         $count = ActivityDestine::query()->where($where)->count();
-        echo $count;die;
+
         $sum = ceil($count/$limit);
         $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:20;
