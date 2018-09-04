@@ -92,7 +92,7 @@ class AdvanceActivityController extends Controller
      * @return json
      */
     public function myAdvance(Request $request){
-        echo 1231;die;
+
         $request =$request->all();
         $params = $request['params'];
         if(!$params['page']){
