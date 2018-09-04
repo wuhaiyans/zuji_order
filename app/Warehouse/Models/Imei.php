@@ -24,7 +24,7 @@ class Imei extends Warehouse
 
     protected $table = 'zuji_imei';
 
-    protected $primaryKey='imei';
+    protected $primaryKey='id';
     /**
      * imei状态
      */
@@ -38,7 +38,7 @@ class Imei extends Warehouse
      */
     protected $fillable = [
         'imei', 'price', 'status', 'brand', 'name', 'price', 'apple_serial',
-        'quality', 'color', 'business', 'storage', 'create_time', 'update_time'
+        'quality', 'color', 'business', 'storage', 'create_time', 'update_time','id'
     ];
 
 
@@ -66,14 +66,14 @@ class Imei extends Warehouse
      *
      * 库存中
      */
-    public static function in($imei)
+    public static function in($imei,$order_no=0)
     {
         $model = self::where(['imei'=>$imei])->first();
         if (!$model) {
             return false;
         }
         //设备出入库记录
-        if(!ImeiLog::in($imei)){
+        if(!ImeiLog::in($imei,$order_no)){
             return false;
         }
         $model->status = self::STATUS_IN;
@@ -87,14 +87,14 @@ class Imei extends Warehouse
      * @return bool
      * 出库
      */
-    public static function out($imei)
+    public static function out($imei,$order_no=0)
     {
         $model = self::where(['imei'=>$imei])->first();
         if (!$model) {
             return false;
         }
         //设备出入库记录
-        if(!ImeiLog::out($imei)){
+        if(!ImeiLog::out($imei,$order_no)){
             return false;
         }
         $model->status = self::STATUS_OUT;

@@ -830,6 +830,7 @@ class OrderController extends Controller
                 }
 
             }catch (\Exception $e) {
+                LogApi::info("订单详情异常",$e);
                 return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
             }

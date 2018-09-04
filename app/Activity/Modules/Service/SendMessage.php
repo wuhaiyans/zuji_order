@@ -14,7 +14,7 @@ class SendMessage{
      * ]
      * @return bool true/false
      */
-    public static function AdvanceSuccess($params){
+    public static function ActivityDestineSuccess($params){
 
         $params = filter_array($params, [
             'mobile'        => 'required',
@@ -22,7 +22,7 @@ class SendMessage{
         ]);
 
         if( count( $params ) < 2 ){
-            LogApi::error('[AdvanceSuccess]短信发送参数异常',$params);
+            LogApi::error('[ActivityDestine]短信发送参数异常',$params);
             return false;
         }
 

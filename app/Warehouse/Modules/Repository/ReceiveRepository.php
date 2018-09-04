@@ -234,6 +234,31 @@ class ReceiveRepository
         return $model->update();
     }
 
+    /**
+     * 确认入库 修改状态
+     */
+    public static function imeiIn($receive_no)
+    {
+        //收货单更新
+        $model = Receive::find($receive_no);
+        if (!$model) {
+            throw new NotFoundResourceException('收货单' . $receive_no . '未找到');
+        }
+
+        $goods = $model->goods;
+        $status = Receive::STATUS_IN;
+        $t = time();
+        foreach ($goods as $g) {
+            $g->status = ReceiveGoods::STATUS_IN;
+            $g->status_time = $t;
+            $g->update();
+        }
+
+        $model->status = $status;
+        $model->receive_time = $t;
+        return $model->update();
+    }
+
 
     /**
      * @param $params

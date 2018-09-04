@@ -181,17 +181,29 @@ class ReceiveService
     /**
      * @param $receive_no
      * @throws \Exception
+     * 收货单修改状态,商品入库
+     */
+    public function imeiIn($receive_no)
+    {
+        if (!ReceiveRepository::imeiIn($receive_no)) {
+            throw new \Exception($receive_no . '收货单入库状态修改失败');
+        }
+        //IMEI入库
+        if (!ImeiRepository::updateStatus($receive_no)) {
+            throw new \Exception($receive_no . 'IMEI入库状态修改失败');
+        }
+        return true;
+    }
+
+    /**
+     * @param $receive_no
+     * @throws \Exception
      * 收发货签收
      */
     public function received($receive_no)
     {
         if (!ReceiveRepository::received($receive_no)) {
             throw new \Exception($receive_no . '号收货单签收失败');
-        }
-
-        //IMEI入库
-        if (!ImeiRepository::updateStatus($receive_no)) {
-            throw new \Exception($receive_no . 'IMEI入库状态修改失败');
         }
         return true;
     }
@@ -205,10 +217,6 @@ class ReceiveService
     {
         if (!ReceiveRepository::receiveDetail($params)) {
             throw new \Exception($params['receive_no'] . '号收货单商品签收失败');
-        }
-        //IMEI入库
-        if (!ImeiRepository::updateStatus($params['receive_no'])) {
-            throw new \Exception($params['receive_no'] . 'IMEI入库状态修改失败');
         }
     }
 

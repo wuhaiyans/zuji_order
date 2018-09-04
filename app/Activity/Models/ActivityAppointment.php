@@ -4,14 +4,14 @@ namespace App\Activity\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ActivityDestine extends Model
+class ActivityAppointment extends Model
 {
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
     // Rest omitted for brevity
 
-    protected $table = 'activity_appointment';
+    protected $table = 'order_activity_appointment';
 
     protected $primaryKey='id';
     /**
@@ -26,7 +26,7 @@ class ActivityDestine extends Model
      *
      * @var array
      */
-    protected $fillable = ['title','appointment_image','desc','begin_time','end_time','appointment_status','create_time','update_time'];
+    protected $fillable = ['title','appointment_price','appointment_image','desc','begin_time','end_time','appointment_status','create_time','update_time'];
 
     /**
      * 获取当前时间

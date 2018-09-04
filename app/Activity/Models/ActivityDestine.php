@@ -11,7 +11,7 @@ class ActivityDestine extends Model
 
     // Rest omitted for brevity
 
-    protected $table = 'activity_destine';
+    protected $table = 'order_activity_destine';
 
     protected $primaryKey='id';
     /**
@@ -26,7 +26,7 @@ class ActivityDestine extends Model
      *
      * @var array
      */
-    protected $fillable = ['destine_no','activity_id','mobile','user_id','destine_status','destine_amount','pay_type','app_id','channel_id','trade_no','create_time','update_time'];
+    protected $fillable = ['destine_no','activity_id','mobile','user_id','destine_status','destine_amount','pay_type','app_id','channel_id','create_time','update_time'];
 
     /**
      * 获取当前时间

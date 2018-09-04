@@ -82,7 +82,7 @@ class DeliveryImeiRepository
         $model->apple_serial = isset($params['apple_serial']) ? $params['apple_serial'] : '';
         $model->status = DeliveryGoodsImei::STATUS_YES;
 
-        Imei::out($params['imei']);
+        Imei::out($params['imei'],$params['order_no']);
         return $model->save();
     }
 
@@ -94,14 +94,14 @@ class DeliveryImeiRepository
      * @throws \Exception
      * 删除
      */
-    public static function del($delivery_no, $imei)
+    public static function del($delivery_no, $imei, $order_no)
     {
         $model = DeliveryGoodsImei::where(['delivery_no'=>$delivery_no, 'imei'=>$imei])->first();
         if (!$model) {
             throw new NotFoundResourceException('对应imei未找到');
         }
 
-        Imei::in($imei);
+        Imei::in($imei, $order_no);
 
         $model->status = DeliveryGoodsImei::STATUS_NO;
         return $model->update();

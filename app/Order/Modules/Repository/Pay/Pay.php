@@ -735,7 +735,7 @@ class Pay extends \App\Lib\Configurable
             'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
             'name'			=> $params['name'],				//【必选】string 交易名称
             'front_url'		=> $params['front_url'],		//【必选】string 前端回跳地址
-			'ip'			=> $params['ip'],
+			'ip'			=> isset($params['ip'])?$params['ip']:'',
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];

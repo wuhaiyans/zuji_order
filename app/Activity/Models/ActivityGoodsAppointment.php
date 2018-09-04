@@ -4,14 +4,14 @@ namespace App\Activity\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ActivityDestine extends Model
+class ActivityGoodsAppointment extends Model
 {
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
     // Rest omitted for brevity
 
-    protected $table = 'activity_goods_appointment';
+    protected $table = 'order_activity_goods_appointment';
 
     protected $primaryKey='id';
     /**

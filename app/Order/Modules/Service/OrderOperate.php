@@ -1154,7 +1154,8 @@ class OrderOperate
         //设备扩展信息表
         $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
         if ($goodsExtendData) {
-            $goodsExtendData['logistics_name'] = config('web.logistics')[$goodsExtendData['logistics_id']];
+            $logisticsArray =   config('web.logistics');
+            $goodsExtendData['logistics_name'] = isset($logisticsArray[$goodsExtendData['logistics_id']])   ?  $logisticsArray[$goodsExtendData['logistics_id']]:   '';
         }
         $order['goods_extend_info'] = $goodsExtendData;
         //优惠券信息

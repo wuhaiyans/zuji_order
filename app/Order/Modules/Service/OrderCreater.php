@@ -18,6 +18,7 @@ use App\Order\Modules\OrderCreater\DepositComponnet;
 use App\Order\Modules\OrderCreater\InstalmentComponnet;
 use App\Order\Modules\OrderCreater\OrderComponnet;
 use App\Order\Modules\OrderCreater\OrderPayComponnet;
+use App\Order\Modules\OrderCreater\ReceiveCouponComponnet;
 use App\Order\Modules\OrderCreater\RiskComponnet;
 use App\Order\Modules\OrderCreater\SkuComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
@@ -332,6 +333,14 @@ class OrderCreater
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
+
+            //自动领取优惠券
+            $orderCreater = new ReceiveCouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            $schema = $orderCreater->getDataSchema();
+
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon']['coupon'],$data['user_id']);
+
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
