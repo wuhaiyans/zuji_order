@@ -71,7 +71,8 @@ class ImportHistoryInstalmentRepayment extends Command
                         ['term', '=', $item['term']],
                     ])->first();
                     $instalmentInfo = objectToArray($instalmentInfo);
-                    if(!$instalmentInfo || $instalmentInfo['status'] == 2){
+
+                    if(!$instalmentInfo){
                         continue;
                     }
 
@@ -90,8 +91,9 @@ class ImportHistoryInstalmentRepayment extends Command
                     if($ret){
                         ++$affect_num;
                     }
+
                     $bar->advance();
-                    
+
                 }
 
 
