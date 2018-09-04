@@ -313,7 +313,7 @@ class WithholdController extends Controller
                 if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
                     return apiResponse([], ApiStatus::CODE_71004, '买家余额不足');
                 } else {
-                    return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
+                    return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
                 }
             }
 
