@@ -323,6 +323,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
@@ -343,6 +345,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //已支付
                 Inc\OrderStatus::OrderPayed => [
@@ -364,6 +368,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
 
                 ],
                 //备货中
@@ -385,6 +391,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -405,6 +413,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
@@ -423,6 +433,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => true,
                 ],
                 //已取消（未支付）
                 Inc\OrderStatus::OrderCancel => [
@@ -443,6 +455,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //已关闭（已退款）
                 Inc\OrderStatus::OrderClosedRefunded => [
@@ -463,6 +477,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
                 //已完成
                 Inc\OrderStatus::OrderCompleted => [
@@ -483,7 +499,10 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
+                //逾期关闭
                 Inc\OrderStatus::OrderAbnormal => [
                     //回访按钮
                     'return_visit_btn'   => true,
@@ -503,6 +522,8 @@ class OrderOperateInc
                     'alreadyInsurance' => false,
                     //'保险详情'
                     'insuranceDetail' => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
                 ],
             )
 
