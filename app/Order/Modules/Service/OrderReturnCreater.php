@@ -784,8 +784,8 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;//商品状态修改为退款中失败
                 }
-
-
+                //通知收发货继续发货
+                /***********************************/
                 //插入操作日志
                 OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核拒绝");
 
@@ -2316,7 +2316,7 @@ class OrderReturnCreater
                         'spu_id'=>$orderGoodsValues['prod_id'],
                         'num'=>$orderGoodsValues['quantity']
                     ];
-                    LogApi::debug("释放库存的参数",$orderGoods);
+                    LogApi::debug("释放库存的参数",$goods_arr);
                     $success =Goods::addStock($goods_arr); //释放库存
                     LogApi::debug("释放库返回结果",$success);
                     if (!$success) {

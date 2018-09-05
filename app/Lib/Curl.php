@@ -212,7 +212,6 @@ class Curl {
 		}
 		self::$error = curl_error($ch);
 		self::$errno = curl_errno($ch);
-		--$i;
         return false;
     }
     

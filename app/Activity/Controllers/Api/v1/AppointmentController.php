@@ -160,10 +160,66 @@ class AppointmentController extends Controller
     }
 
     /**
-     * 预定退款
+     * 预定退款----15个自然日内
      * @param Request $request
+     * [
+     *    'id' => ''   //预定id  int  【必传】
+     * ]
      */
     public function appointmentRefund(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $paramsArr = isset($params['params'])? $params['params'] :[];
+        $rules = [
+            'id'   => 'required',//预定id
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->Appointment->appointmentRefund($params['params']['id']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_95003);//预定金退款失败
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+
+    }
+    /**
+     * 预定退款----15个自然日后
+     * @param Request $request
+     * [
+     *    'id'            => ''   //预定id   int  【必传】
+     *    'account_time'  =>''    //转账时间 int  【必传】
+     *    'account_number'=>''   //支付宝账号string【必传】
+     *    'refund_remark' =>''   //退款备注  string 【必传】
+     * ]
+     */
+    public function refund(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $paramsArr = isset($params['params'])? $params['params'] :[];
+        $rules = [
+            'id'                 => 'required',//预定id
+            'account_time'     => 'required',//转账时间
+            'account_number'   => 'required',//支付宝账号
+            'refund_remark'    => 'required',//账号备注
+
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->Appointment->refund($params['params']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_95003);//预定金退款失败
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
 
     }
 

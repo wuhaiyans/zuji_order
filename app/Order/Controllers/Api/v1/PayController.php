@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Order\Controllers\Api\v1;
+use App\Activity\Models\ActivityDestine;
+use App\Activity\Modules\Inc\DestineStatus;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -524,10 +527,7 @@ class PayController extends Controller
             if ($param['status']!='success'){
                 LogApi::error(__method__.'[cleanAccount回调退款]状态错误',$param);
             }
-			
-			// 开启事务
 
-			
             //更新查看清算表的状态
             $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['refund_clean_no'=>$param['out_refund_no']]);
             if ($orderCleanInfo['code']) {
@@ -1014,6 +1014,80 @@ class PayController extends Controller
 		return apiResponse(['status' => $paymentStatus],ApiStatus::CODE_0,"success");
 
 	}
+    /**
+     * 预定金退款回调地址
+     * Author: qinliping
+     * @param Request $request
+     */
+    public function appointmentRefund(Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $input = file_get_contents("php://input");
+            LogApi::info(__method__ . '[appointmentRefund回调退款]回调接收', $input);
+            $param = json_decode($input, true);
+            $rule = [
+                'out_refund_no' => 'required', //订单系统退款码
+                'refund_no'      => 'required', //支付系统退款码
+                'status'         => 'required', //状态类型
+                'reason'         => 'required', //错误原因
+            ];
+
+            $validateParams = $this->validateParams($rule, $param);
+            if ($validateParams['code'] != 0) {
+                LogApi::error(__method__ . '[appointmentRefund回调退款]参数校验错误', $validateParams);
+                $this->innerErrMsg($validateParams['msg']);
+            }
+            if ($param['status'] != 'success') {
+                LogApi::error(__method__ . '[appointmentRefund回调退款]状态错误', $param);
+            }
+            //查看预定单的支付状态
+            $activityDestineInfo=\App\Activity\Modules\Repository\Activity\ActivityDestine::getByNo($param['out_refund_no']);
+            if(!$activityDestineInfo){
+                DB::rollback();
+                LogApi::error(__method__.'[appointmentRefund回调退款][预定记录]不存在');
+                $this->innerErrMsg(__METHOD__."() ".microtime(true).' 预定记录不存在');
+                exit;
+            }
+            $destineInfo=$activityDestineInfo->getData();
+
+            //查看预定是否已退款
+            if ( $destineInfo['destine_status'] == DestineStatus::DestinePayed || $destineInfo['destine_status'] == DestineStatus::DestineOrderCreated){// 已支付，已下单
+
+                //更新业务系统的状态
+                $businessParam = [
+                    'business_type' => OrderStatus::BUSINESS_DESTINE,	// 业务类型
+                    'business_no'	=> $param['destine_status'],	// 业务编码
+                    'status'		=> $param['status'],	// 支付状态  processing：处理中；success：支付完成
+                ];
+                //操作用户
+                $userinfo=[
+                    'uid'      => 1,       //操作员id
+                    'username' =>'admin',//操作员名称
+                    'type'      =>'1'      //操作类型
+                ];
+                $b =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'],
+                    $businessParam['business_no'],
+                    $businessParam['status'],$userinfo);
+                if( !$b ){
+                    DB::rollBack();
+                    LogApi::error(__method__.'[appointmentRefund回调退款]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam,$userinfo,$b]);
+                    $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款回调业务接口失败');
+                }
+
+            } else { // 非待退款状态
+                DB::rollBack();
+                LogApi::error(__method__.'[appointmentRefund回调退款]预定状态无效');
+                $this->innerErrMsg(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}预定状态无效");
+            }
+            DB::commit();
+            $this->innerOkMsg();
+
+        }catch (\Exception $exc){
+
+        }
+    }
 
 
 }

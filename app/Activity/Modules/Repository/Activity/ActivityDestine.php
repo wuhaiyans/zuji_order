@@ -72,6 +72,9 @@ class ActivityDestine{
      * @return bool
      */
     public function refund():bool{
+        if($this->model->destine_status == DestineStatus::DestineRefunded){
+            return false;
+        }
         $this->model->destine_status = DestineStatus::DestineRefunded;
         $this->model->update_time = time();
         return $this->model->save();
@@ -88,6 +91,13 @@ class ActivityDestine{
         $this->model->update_time = time();
         return $this->model->save();
 	}
+	public function updateActivityDestine(array $data):bool{
+        $this->model->account_time = $data['account_time'];
+        $this->model->account_number = $data['account_number'];
+        $this->model->refund_remark = $data['refund_remark'];
+        $this->model->destine_status = DestineStatus::DestineRefunded;
+        return $this->model->save();
+    }
 
 	/**
 	 * 通过预定编号获取活动预定表
@@ -110,4 +120,25 @@ class ActivityDestine{
 		}
 		return new self( $destine_info );
 	}
+    /**
+     * 通过预定编号获取活动预定表
+     * <p>当不存在时，返回false</p>
+     * @param string   $id		预定id
+     * @param int		$lock			锁
+     * @return \App\Activity\Modules\Repository\Activity\ActivityDestine
+     * @return  bool
+     */
+    public static function getByIdNo( string $id, int $lock=0 ) {
+        $builder = ActivityDestineModel::where([
+            ['id', '=', $id],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $destine_info = $builder->first();
+        if( !$destine_info ){
+            return false;
+        }
+        return new self( $destine_info );
+    }
 }
