@@ -45,7 +45,8 @@ class AdvanceActivityController extends Controller
         //查询预约活动列表
         $count = ActivityAppointment::query()->where($where)->count();
         $sum = ceil($count/$limit);
-        $page = $page>=$sum?$sum:$page;
+        $page = $page>0?$page-1:$page;
+        $page = $page>=$sum?$sum:$page-1;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
 
@@ -111,10 +112,11 @@ class AdvanceActivityController extends Controller
             ['destine_status','<>',DestineStatus::DestineCreated]
         ];
         //查询我的预约列表
-        echo sql_profiler();
+
         $count = ActivityDestine::query()->where($where)->count();
-        echo $count;die;
+
         $sum = ceil($count/$limit);
+        $page = $page>0?$page-1:$page;
         $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
@@ -138,6 +140,7 @@ class AdvanceActivityController extends Controller
             if(!empty($goodsList[$item['activity_id']]['spu_id'])){
                 $order_btn = true;
             }
+            $item['destine_amount'] = sprintf('%.2f',$item['destine_amount']);
             $item['order_btn'] = $order_btn;
             $item['destine_status'] = DestineStatus::getStatusName($item['destine_status']);
             $item['title'] = $activityList[$item['activity_id']]['title'];

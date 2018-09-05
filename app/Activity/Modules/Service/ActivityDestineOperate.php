@@ -122,17 +122,15 @@ class ActivityDestineOperate
                 $destine['destine_amount'] =0.01;
             }
             // 微信支付，交易类型：JSAPI，redis读取openid
-            $extended_params= $data['extended_params'];
             if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
-                if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+                if( isset($data['extended_params']['wechat_params']['trade_type']) && $data['extended_params']['wechat_params']['trade_type']=='JSAPI' ){
                     $_key = 'wechat_openid_'.$data['auth_token'];
                     $openid = \Illuminate\Support\Facades\Redis::get($_key);
                     if( $openid ){
-                        $extended_params['wechat_params']['openid'] = $openid;
+                        $data['extended_params']['wechat_params']['openid'] = $openid;
                     }
                 }
             }
-
 
             //生成支付单
                 $businessNo =$destine['destine_no'];
