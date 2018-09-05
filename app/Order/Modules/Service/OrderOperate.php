@@ -1610,6 +1610,11 @@ class OrderOperate
 
                 $goodsList[$keys]['act_goods_state']= $actArray;
                 //是否处于售后之中
+                //是否处于还机之中
+                if (in_array($values['goods_status'],array(Inc\OrderGoodStatus::BACK_IN_THE_MACHINE, Inc\OrderGoodStatus::COMPLETE_THE_MACHINE, Inc\OrderGoodStatus::CLOSED_THE_MACHINE))) {
+
+                    $goodsList[$keys]['act_goods_state']['offline_giveback_btn'] = false;
+                }
 
                 $expire_process = intval($values['goods_status']) >= Inc\OrderGoodStatus::EXCHANGE_GOODS ?? false;
                 if ($expire_process) {

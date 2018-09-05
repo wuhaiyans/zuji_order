@@ -415,12 +415,7 @@ class BuyoutController extends Controller
         if($orderInfo['freeze_type']>0){
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
         }
-        //获取剩余未支付租金
-        $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
-        $where[] = ['goods_no','=',$goodsInfo['goods_no']];
-        $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
-        $fenqiPrice = $instaulment['amount']?$instaulment['amount']:0;
-        $fenqishu = $instaulment['fenqishu']?$instaulment['fenqishu']:0;
+
         $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
 
         DB::beginTransaction();
@@ -434,9 +429,7 @@ class BuyoutController extends Controller
             'plat_id'=>$params['user_id'],
             'goods_name'=>$goodsInfo['goods_name'],
             'buyout_price'=>$buyoutPrice,
-            'zujin_price'=>$fenqiPrice,
-            'zuqi_number'=>$fenqishu,
-            'amount'=>$buyoutPrice+$fenqiPrice,
+            'amount'=>$buyoutPrice,
             'create_time'=>time()
         ];
         $ret = OrderBuyout::create($data);

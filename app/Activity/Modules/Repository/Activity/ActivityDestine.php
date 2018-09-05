@@ -63,6 +63,7 @@ class ActivityDestine{
 	        return false;
         }
 		$this->model->destine_status = DestineStatus::DestinePayed;
+		$this->model->pay_time = time();
 		$this->model->update_time = time();
 		return $this->model->save();
 	}
