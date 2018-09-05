@@ -762,7 +762,7 @@ class Pay extends \App\Lib\Configurable
         }
 		
 		// 
-		if($channel == Channel::Wechat) {
+		if($channel == Channel::Wechat || $channel == Channel::Alipay) {
 			if( isset($params['extended_params']) ){
 				$data['extended_params'] = $params['extended_params'];
 			}

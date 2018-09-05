@@ -229,7 +229,6 @@ class OrderComponnet implements OrderCreater
     public function create(): bool
     {
         $data = $this->getOrderCreater()->getDataSchema();
-
         // 执行 User组件
         $b = $this->userComponnet->create();
         if (!$b) {
@@ -255,8 +254,26 @@ class OrderComponnet implements OrderCreater
                 $order_insurance += $v['insurance'];
                 $coupon_amount += ($v['first_coupon_amount']+$v['order_coupon_amount']);
                 $discount_amount += $v['discount_amount'];
+                $kucun = $v['kucun'];
+                $startTime = $v['begin_time'];
             }
         }
+
+        //判断库存 如果 无库存的预计发货时间：长租（下单时间+7天） 短租（起租时间 -3天） 有库存的预计发货时间为确认时间当天
+        if($kucun<= 0){
+            //预计发货时间：长租（下单时间+7天）
+            if($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH){
+                $PredictDeliveryTime = strtotime("+4 day");
+            }
+            //预计发货时间： 短租（起租时间 -3天）
+            if($this->zuqiType == OrderStatus::ZUQI_TYPE_DAY){
+                $PredictDeliveryTime = $startTime- 3*86400;
+            }
+        }else{
+            //如果有货 预定发货时间为第二天下午15点
+            $PredictDeliveryTime = strtotime(date("Y-m-d",strtotime("+1 day")))+3600*15;
+        }
+
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
             'order_no' => $this->orderNo,  // 编号
@@ -273,6 +290,7 @@ class OrderComponnet implements OrderCreater
             'create_time'=>time(),
             'order_type'=>$this->orderType,
             'mobile'=>$data['user']['user_mobile'],
+            'predict_delivery_time'=>$PredictDeliveryTime,
         ];
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);

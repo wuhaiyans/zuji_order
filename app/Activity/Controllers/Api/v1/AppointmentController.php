@@ -127,6 +127,24 @@ class AppointmentController extends Controller
     }
     /***
      * 预约活动列表
+     * @params
+     * [
+     * 'page' => ''   int  页数 【可选】
+     * 'size' => ''   int  条数 【可选】
+     *
+     * ]
+     *@return array
+     * [
+     * 'id'                =>'',  活动id         int    【必传】
+     * 'appointment_price' =>'',  预定金额       string 【必传】
+     * 'title'             =>'',  标题           string 【必传】
+     * 'appointment_image' =>'',  活动图片       string 【必传】
+     * 'desc'              =>'',  活动描述       string 【必传】
+     * 'begin_time'        =>'',  活动开始时间   int    【必传】
+     * 'end_time'          =>''   活动结束时间   int    【必传】
+     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * ]
+     *
      */
     public function appointmentList(Request $request){
         //-+--------------------------------------------------------------------
@@ -140,5 +158,70 @@ class AppointmentController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
+
+    /**
+     * 预定退款----15个自然日内
+     * @param Request $request
+     * [
+     *    'id' => ''   //预定id  int  【必传】
+     * ]
+     */
+    public function appointmentRefund(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $paramsArr = isset($params['params'])? $params['params'] :[];
+        $rules = [
+            'id'   => 'required',//预定id
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->Appointment->appointmentRefund($params['params']['id']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_95003);//预定金退款失败
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+
+    }
+    /**
+     * 预定退款----15个自然日后
+     * @param Request $request
+     * [
+     *    'id'            => ''   //预定id   int  【必传】
+     *    'account_time'  =>''    //转账时间 int  【必传】
+     *    'account_number'=>''   //支付宝账号string【必传】
+     *    'refund_remark' =>''   //退款备注  string 【必传】
+     * ]
+     */
+    public function refund(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $paramsArr = isset($params['params'])? $params['params'] :[];
+        $rules = [
+            'id'                 => 'required',//预定id
+            'account_time'     => 'required',//转账时间
+            'account_number'   => 'required',//支付宝账号
+            'refund_remark'    => 'required',//账号备注
+
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->Appointment->refund($params['params']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_95003);//预定金退款失败
+        }
+        return apiResponse([],ApiStatus::CODE_0);
+
+
+    }
+
 
 }

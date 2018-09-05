@@ -41,21 +41,21 @@ class ImportHistoryInstalmentRepayment extends Command
 
         $total = \DB::connection('mysql_01')->table('zuji_instalment_prepayment')
             ->where([
-                ['create_time', ">", '1530806400'],
                 ['prepayment_status', "=", 1],
             ])->count();
 
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit  = 300;
-            $page   = 1;
-            $affect_num = 0;
-            $totalpage = ceil($total/$limit);
-            $arr =[];
+            $limit          = 30;
+            $page           = 1;
+            $affect_num     = 0;
+            $totalpage      = ceil($total/$limit);
+
+
             do {
                 $result = \DB::connection('mysql_01')->table('zuji_instalment_prepayment')
+                    ->select('order_no','term','payment_amount','create_time')
                     ->where([
-                        ['create_time', ">", '1531584000'],
                         ['prepayment_status', "=", 1],
                     ])
                     ->forPage($page,$limit)
@@ -71,42 +71,38 @@ class ImportHistoryInstalmentRepayment extends Command
                         ['term', '=', $item['term']],
                     ])->first();
                     $instalmentInfo = objectToArray($instalmentInfo);
-                    if($instalmentInfo['status'] == 2){
+
+                    if(!$instalmentInfo){
                         continue;
                     }
 
                     $data = [
-                        'business_no'       => $item['trade_no'],
-                        'payment_amount'    => $item['payment_amount']/100,
-                        'status'            => 2,
-                        'payment_time'      => $item['create_time'],
-                        'remark'            => '旧系统提前还款数据导入',
+                        'payment_amount'    => !empty($item['payment_amount']) ? $item['payment_amount']/100 : "",
+                        'payment_time'      => !empty($item['create_time']) ? $item['create_time'] : "",
                         'pay_type'          => 1,
                     ];
 
                     $ret = \App\Order\Models\OrderGoodsInstalment::where([
                             ['order_no', '=', $item['order_no']],
-                            ['status', '!=', 2],
                             ['term', '=', $item['term']],
                         ])
                         ->update($data);
-                    if(!$ret){
-                        $arr[] = $item['instalment_id'];
+                    if($ret){
+                        ++$affect_num;
                     }
-                    ++$affect_num;
+
                     $bar->advance();
+
                 }
 
 
-
                 $page++;
-                sleep(2);
+
             } while ($page <= $totalpage);
-            if(count($arr)>0){
-                LogApi::notify("分期主动还款修改",$arr);
-            }
+
             $bar->finish();
             echo "导入成功:" . $affect_num . '个数据';die;
+
         }catch (\Exception $e){
             echo $e->getMessage();
             die;

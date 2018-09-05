@@ -634,4 +634,37 @@ class OrderCleaning
     }
 
 
+    /**
+     *
+     * 预定金退款回调业务接口
+     * Author: qinliping
+     * @return boolean  true：成功；false：失败
+     */
+    public static function getAppointmentCallback($businessType, $businessNo, $result, $userinfo=[])
+    {
+        $callbacks = config('pay_callback.refund');
+        if( !isset($callbacks[$businessType]) || !$callbacks[$businessType] ){
+            LogApi::error('[getAppointmentCallback预定退款]业务未设置回调通知');
+            return false;
+        }
+        if( !is_callable($callbacks[$businessType]) ){
+            LogApi::error('[getAppointmentCallback预定退款]业务回调通知不可调用');
+            return false;
+        }
+        $params = [
+            'business_type' => $businessType,
+            'business_no' => $businessNo,
+            'status' => $result
+        ];
+
+        LogApi::debug('[getAppointmentCallback预定退款]业务回调通知',[
+            'callback' => $callbacks[$businessType],
+            'params' => $params,
+        ]);
+
+        return call_user_func_array($callbacks[$businessType],[$params,$userinfo]);
+    }
+
+
+
 }

@@ -11,6 +11,10 @@ use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Activity\Modules\Repository\ActivityDestineRepository;
 use App\Common\LogApi;
 use App\Lib\Channel\Channel;
+use App\Order\Models\OrderPayModel;
+use App\Order\Modules\Repository\Pay\Pay;
+use App\Order\Modules\Repository\Pay\PaymentStatus;
+use App\Order\Modules\Repository\Pay\PayStatus;
 use Illuminate\Support\Facades\DB;
 use Mockery\Exception;
 
@@ -30,6 +34,17 @@ class ActivityDestineOperate
      *      'ip'=>'',                   //【必须】 int 客户端IP地址
      *      'pay_channel_id'=>'',       //【必须】 int 支付渠道
      *      'return_url'=>'',           //【必须】string 前端回跳地址
+     *      'auth_token'=>'',           //【小程序支付必选】auth_token
+     *      'extended_params'=>[        //【小程序支付必选】array 扩展参数
+     *          "alipay_params"=>[      //支付宝扩展参数
+     *                  "trade_type"=>"APP"
+     *          ],
+     *          "wechat_params"=>[      //微信扩展参数
+     *                  "openid"=>"oBjc20uu9n0R_uv2yAzRA0YHSVIs",
+     *                  "trade_type"=>"JSAPI"
+     *          ]
+     *
+     * ],
      * ]
      * @return bool
      */
@@ -110,22 +125,64 @@ class ActivityDestineOperate
                 return false;
                 $destine['destine_amount'] =0.01;
             }
+            // 微信支付，交易类型：JSAPI，redis读取openid
+            if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+                if( isset($data['extended_params']['wechat_params']['trade_type']) && $data['extended_params']['wechat_params']['trade_type']=='JSAPI' ){
+                    $_key = 'wechat_openid_'.$data['auth_token'];
+                    $openid = \Illuminate\Support\Facades\Redis::get($_key);
+                    if( $openid ){
+                        $data['extended_params']['wechat_params']['openid'] = $openid;
+                    }
+                }
+            }
+
             //生成支付单
                 $businessNo =$destine['destine_no'];
-            $payData = [
-                'userId'            => $data['user_id'],//用户ID
-                'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE,	// 业务类型
-                'businessNo'		=> $businessNo,	                // 业务编号
-                'orderNo'		    => '',	// 订单号
-                'paymentAmount'		=> $destine['destine_amount'],	                    // Price 支付金额，单位：元
-                'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
-            ];
-            $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payData);
+                $params = [
+                    'userId'            => $data['user_id'],//用户ID
+                    'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE,	// 业务类型
+                    'businessNo'		=> $businessNo,	                // 业务编号
+                    'orderNo'		    => '',	// 订单号
+                    'paymentAmount'		=> $destine['destine_amount'],	                    // Price 支付金额，单位：元
+                    'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
+                ];
+
+
+
+                $payModel = new OrderPayModel();
+
+
+                //查询支付单是否存在
+                $res = $payModel->where('business_no','=',$params['businessNo'])->count();
+                if(!$res){
+                    $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($params);
+                }else{
+                    $params['status'] = PayStatus::WAIT_PAYMENT;
+                    $params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
+                    $_data = [
+                        'user_id'		=> $params['userId'],
+                        'order_no'		=> $params['orderNo'],
+                        'business_type'	=> $params['businessType'],
+                        'business_no'	=> $params['businessNo'],
+                        'status'		=> $params['status'],
+                        'create_time'	=> time(),
+
+                        'payment_status'	=> $params['paymentStatus'],
+                        'payment_no'		=> \creage_payment_no(),
+                        'payment_amount'	=> $params['paymentAmount'],
+                        'payment_fenqi'		=> $params['paymentFenqi'],
+
+                    ];
+
+                    $payResult = new Pay($_data);
+                }
+            
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
                 'front_url' => $data['return_url'], //回调URL
                 'ip'=>$data['ip'],
+                'extended_params'=>$data['extended_params'],
             ]);
             // 提交事务
             DB::commit();

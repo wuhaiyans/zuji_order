@@ -34,7 +34,7 @@ class Curl {
 	 * 超时时间
 	 * @var int
 	 */
-	public static $timeout = 10;
+	public static $timeout = 60;
 	
 	/**
 	 *
@@ -203,19 +203,15 @@ class Curl {
      * @return mixed   string：成功，返回请求结果；false：失败
      */
     private static function _curl_exec( $ch){
-        $i = 3;
-        while( $i ){
-            curl_setopt($ch, CURLOPT_TIMEOUT, self::$timeout);// 设置超时
-            $output = curl_exec($ch);
-			self::$errno = curl_errno($ch);
-            if ( self::$errno == 0 ) {// 成功，直接返回
-				self::$error = '';
-                return $output;
-            }
-			self::$error = curl_error($ch);
-			self::$errno = curl_errno($ch);
-            --$i;
-        }
+		curl_setopt($ch, CURLOPT_TIMEOUT, self::$timeout);// 设置超时
+		$output = curl_exec($ch);
+		self::$errno = curl_errno($ch);
+		if ( self::$errno == 0 ) {// 成功，直接返回
+			self::$error = '';
+			return $output;
+		}
+		self::$error = curl_error($ch);
+		self::$errno = curl_errno($ch);
         return false;
     }
     
