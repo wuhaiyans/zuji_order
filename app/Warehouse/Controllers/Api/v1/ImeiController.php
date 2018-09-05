@@ -108,9 +108,12 @@ class ImeiController extends Controller
         if(empty($params['data']) || empty($params['id'])){
             return apiResponse([], ApiStatus::CODE_20001, '参数错误');
         }
+        DB::beginTransaction();
         try{
             ImeiRepository::setRow($params['id'],$params['data']);
+            DB::commit();
         } catch (\Exception $e){
+            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_42003, $e->getMessage());
         }
         return apiResponse([]);

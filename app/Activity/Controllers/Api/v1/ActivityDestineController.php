@@ -62,7 +62,7 @@ class ActivityDestineController extends Controller
 
        $activityId  = isset($params['params']['activity_id'])?$params['params']['activity_id']:0;
 
-       $extendedParams= isset($params['params']['extended_params'])?$params['params']['extended_params']:[];
+       $extendedParams= isset($params['extended_params'])?$params['extended_params']:[];
 
        $returnUrl =$params['params']['return_url'];
 
