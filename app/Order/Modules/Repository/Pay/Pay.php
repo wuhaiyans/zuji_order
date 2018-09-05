@@ -488,8 +488,6 @@ class Pay extends \App\Lib\Configurable
 		$payment_info = $paymentModel->limit(1)->where([
 			'payment_no' => $this->paymentNo,
 		])->first();
-        LogApi::debug('[支付阶段2222]查询支付pay_payment',$payment_info);
-
 		if( !$payment_info ){
 			$_data = [
 				'payment_no' => $this->paymentNo,
@@ -501,8 +499,6 @@ class Pay extends \App\Lib\Configurable
 				LogApi::error('[支付阶段]支付环节支付保存失败');
 				throw new \Exception( '支付失败' );
 			}
-            LogApi::debug('[支付阶段2222]]支付环节支付保存成功',$_data);
-
 		}
 		
 		// 收支明细
@@ -510,7 +506,6 @@ class Pay extends \App\Lib\Configurable
 			'business_type' => $this->businessType,
 			'business_no'   => $this->businessNo,
 		]);
-        LogApi::debug('[支付阶段2222]查询income_info',$income_info);
 		if( !$income_info ){
 		// 创建收支明细
 		$incomeData = [

@@ -67,32 +67,32 @@ class ActivityDestineController extends Controller
        $returnUrl =$params['params']['return_url'];
 
        //判断参数是否设置
-       if(empty($appid) && $appid <1){
-           return apiResponse([],ApiStatus::CODE_20001,"appid错误");
-       }
-       if($userType!=2 && empty($userInfo)){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-       }
-       if($payType <1){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式错误]");
-       }
-       if($payChannelId <1){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
-       }
-       if($activityId <1){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
-       }
-      if(!isset($returnUrl)){
-           return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
-       }
+//       if(empty($appid) && $appid <1){
+//           return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+//       }
+//       if($userType!=2 && empty($userInfo)){
+//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+//       }
+//       if($payType <1){
+//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式错误]");
+//       }
+//       if($payChannelId <1){
+//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
+//       }
+//       if($activityId <1){
+//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
+//       }
+//      if(!isset($returnUrl)){
+//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
+//       }
 
        $data =[
            'appid'=>$appid,
            'pay_type'=>$payType,
            'activity_id'=>$activityId,
-           'mobile'=>$params['userinfo']['username'],
-           'user_id'=>$params['userinfo']['uid'],  //增加用户ID
-           'ip'=>$params['userinfo']['ip'],  //增加用户ID
+           'mobile'=>'17600224881',//$params['userinfo']['username'],
+           'user_id'=>7994,//$params['userinfo']['uid'],  //增加用户ID
+           'ip'=>'',//$params['userinfo']['ip'],  //增加用户ID
            'pay_channel_id'=>$payChannelId,
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
