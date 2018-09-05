@@ -146,94 +146,110 @@ class ImeiRepository
         $log = [];
         $t = time();
         if(isset($params['brand'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'brand',
                 'before_value'=>$row->brand,
                 'after_value'=>$params['brand'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->brand=$params['brand'];
 
         }
         if(isset($params['name'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'name',
                 'before_value'=>$row->name,
                 'after_value'=>$params['name'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->name=$params['name'];
 
         }
         if(isset($params['color'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'color',
                 'before_value'=>$row->color,
                 'after_value'=>$params['color'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->color=$params['color'];
 
         }
         if(isset($params['business'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'business',
                 'before_value'=>$row->business,
                 'after_value'=>$params['business'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->business=$params['business'];
 
         }
         if(isset($params['storage'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'storage',
                 'before_value'=>$row->storage,
                 'after_value'=>$params['storage'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->storage=$params['storage'];
 
         }
         if(isset($params['quality'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'quality',
                 'before_value'=>$row->quality,
                 'after_value'=>$params['quality'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->quality=$params['quality'];
 
         }
         if(isset($params['imei'])){
-            $log[]=[
+            $log=[
                 'imei_id'=>$id,
                 'table_name'=>'imei',
                 'before_value'=>$row->imei,
                 'after_value'=>$params['imei'],
                 'update_time'=>$t
             ];
+            if(!ImeiUpdateLog::create($log)){
+                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
+            }
             $row->imei=$params['imei'];
 
         }
         if(empty($log)){
-            throw new \Exception('没有要修改的数据');
+            throw new \Exception('设备表ID号:'.$id.'没有要修改的数据');
         }
 
         $row->update_time=$t;
         if($row->update()){
-            if(ImeiUpdateLog::create($log)){
-                return true;
-            }else{
-                throw new \Exception('批量添加Imei修改日志表失败:'.json_encode($log));
-            }
-
+            return true;
         }else{
             throw new \Exception('设备表ID号:'.$id.'修改失败');
         }
