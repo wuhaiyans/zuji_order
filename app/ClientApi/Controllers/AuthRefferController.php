@@ -83,6 +83,13 @@ class AuthRefferController extends Controller{
                     || !isset($checkInfo['msg'])
                     || !isset($checkInfo['data'])
                     || $checkInfo['code']!=0){
+                    if($checkInfo['code'] == 40001){
+                        return response()->json([
+                            'code'  =>ApiStatus::CODE_20003,
+                            'msg'   => "未登录",
+                            'data'  =>[''=>'']
+                        ]);
+                    }
                     return response()->json($checkInfo);
                 }else{
 
