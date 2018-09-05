@@ -233,7 +233,7 @@ class Appointment
                 'out_refund_no' => $destineInfo['destine_no'], //业务平台退款码
                 'payment_no' => $payInfo['out_payment_no'], //支付平台支付码
                 'amount' => $destineInfo['destine_amount'] * 100, //支付金额
-                'refund_back_url' => config('ordersystem.ORDER_API') . '/appointmentRefund', //退款回调URL
+                'refund_back_url' => config('ordersystem.ORDER_API') . '/order/pay/appointmentRefund', //退款回调URL
             ];
             LogApi::info(__method__.'[appointmentRefund]财务发起退款请求前，请求的参数：', $params);
 
@@ -258,14 +258,25 @@ class Appointment
      *
      */
     public function refund(array $params){
-
         //获取预定信息
-        $activityDestine = ActivityDestine::getByIdNo($params['id']);
-        if(!$activityDestine){
+        $activityDestineInfo=ActivityDestine::getByIdNo($params['id']);
+        if(!$activityDestineInfo){
+            LogApi::debug("[appointmentRefund]获取预定信息失败");
+            set_msg("获取预定信息失败");
             return false;
         }
+        $destineInfo=$activityDestineInfo->getData();
+        //如果预定状态为  已支付，已下单时可以退款
+        if($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
+            //判断预定时间是否在15个自然日外
+            if (time() - $destineInfo['create_time'] < 15 * 24 * 3600) {
+                LogApi::debug("[appointmentRefund]预定时间必须在15个自然日外,预定创建时间" . $destineInfo['create_time']);
+                set_msg("预定时间必须在15个工作日外");
+                return false;
+            }
+        }
         //修改预定的信息
-        $updateActivityDestine=$activityDestine->updateActivityDestine($params);
+        $updateActivityDestine=$activityDestineInfo->updateActivityDestine($params);
         if(!$updateActivityDestine){
            return false;
         }

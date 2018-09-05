@@ -22,7 +22,8 @@ return [
     //-+------------------------------------------------------------------------
     // | 预约退款
     //-+------------------------------------------------------------------------
-    'api.activity.appointmentRefund'     => 'AppointmentController@appointmentRefund', //我的预约
+    'api.activity.appointmentRefund'     => 'AppointmentController@appointmentRefund', //预约退款（15个自然日内）
+    'api.activity.refund'     => 'AppointmentController@refund', //预约退款（15个自然日后）
 
 
 ];
