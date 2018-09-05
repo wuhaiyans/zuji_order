@@ -54,7 +54,7 @@ class ImportHistoryInstalmentRepayment extends Command
 
             do {
                 $result = \DB::connection('mysql_01')->table('zuji_instalment_prepayment')
-                    ->select('order_no','term','trade_no','payment_amount','create_time')
+                    ->select('order_no','term','payment_amount','create_time')
                     ->where([
                         ['prepayment_status', "=", 1],
                     ])
@@ -77,7 +77,6 @@ class ImportHistoryInstalmentRepayment extends Command
                     }
 
                     $data = [
-                        'business_no'       => !empty($item['trade_no']) ? $item['trade_no'] : "",
                         'payment_amount'    => !empty($item['payment_amount']) ? $item['payment_amount']/100 : "",
                         'payment_time'      => !empty($item['create_time']) ? $item['create_time'] : "",
                         'pay_type'          => 1,
