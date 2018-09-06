@@ -88,7 +88,7 @@ class ActivityDestineRepository
      *   'user_id'     => '',  //用户id   【可选】
      *   'destine_no'  =>'',   //预定编号  【可选】
      *   'mobile'      =>'',   //手机号    【可选】
-     *   'destine_name'=>'',   //预定名称   【可选】
+     *   'activity_name'=>'',   //预定名称   【可选】
      *   'destine_status' =>'' //定金状态   【可选】
      *   'app_id '      =>'' //应用渠道     【可选】
      *    'channel_id ' =>'' //渠道id       【可选】
@@ -118,9 +118,9 @@ class ActivityDestineRepository
             $whereArray[] = ['mobile', '=', $param['mobile']];
         }
         //根据活动名称
-        if (isset($param['destine_name']) && !empty($param['destine_name'])) {
+        if (isset($param['activity_name']) && !empty($param['activity_name'])) {
 
-            $whereArray[] = ['destine_name', '=', $param['destine_name']];
+            $whereArray[] = ['activity_name', '=', $param['activity_name']];
         }
 
         //根据定金状态
