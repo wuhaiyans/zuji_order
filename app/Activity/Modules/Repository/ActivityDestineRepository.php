@@ -95,16 +95,11 @@ class ActivityDestineRepository
      *   'pay_type '    =>'' //支付方式     【可选】
      *   'pay_time '    =>''  //支付时间     【可选】
      *   'account_number' =>'' // 支付宝账号  【可选】
-     *   'page'           =>''  //页数【可选】
      * ]
      *
-     * @params $pagesize
-     * perPage:表示每页显示的条目数量
-       columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
-       pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
-       page:表示查询第几页及查询页码
+
      */
-    public static function getDestineList($param=array(), $pagesize=5){
+    public static function getDestineList($param=array()){
 
         $whereArray = array();
         //根据用户id
@@ -164,12 +159,6 @@ class ActivityDestineRepository
         if (isset($param['acount_number']) && !empty($param['acount_number'])) {
             $whereArray[] = ['acount_number', '=', $param['acount_number']];
         }
-        if (isset($param['page'])) {
-            $page = $param['page'];
-        } else {
-
-            $page = 1;
-        }
 
         $destineArrays = array();
 
@@ -177,7 +166,6 @@ class ActivityDestineRepository
             ->select('order_activity_destine.*')
             ->where($whereArray)
             ->orderBy('create_time', 'DESC')
-            ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
         $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
 

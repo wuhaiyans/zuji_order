@@ -193,7 +193,7 @@ class ActivityDestineOperate
 
         } catch (\App\Lib\ApiException $ex) {
             DB::rollBack();
-            set_msg($ex->getOriginalValue());
+            set_msg("网络异常");
             return false;
         } catch (\Exception $exc) {
             DB::rollBack();
@@ -249,10 +249,10 @@ class ActivityDestineOperate
      * @param array $param
      * @param int $pagesize
      */
-    public static function getDestineExportList($param = array(),$pagesize=5){
+    public static function getDestineExportList($param = array()){
         //根据条件查找预定单列表
 
-        $destineListArray = ActivityDestineRepository::getDestineList($param, $pagesize);
+        $destineListArray = ActivityDestineRepository::getDestineList($param);
 
         if (empty($destineListArray)) return false;
 

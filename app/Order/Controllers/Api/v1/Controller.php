@@ -54,8 +54,8 @@ class Controller extends BaseController
      * @param int $type
      * @return string
      */
-    public function innerOkMsg(){
-        $returnData = array('status'=>'ok');
+    public function innerOkMsg($msg='成功'){
+        $returnData = array('status'=>'ok','msg'=>$msg);
         return response()->json($returnData)->send();
 
     }
