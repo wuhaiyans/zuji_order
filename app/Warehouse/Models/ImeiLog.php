@@ -87,7 +87,7 @@ class ImeiLog extends Warehouse
     /**
      * @param $imei
      * @return bool
-     * 出库 肯努力但没有自己的节奏,忙不是借口
+     * 出库
      */
     public static function out($imei,$order_no=0)
     {
