@@ -10,6 +10,7 @@ use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Common\LogApi;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 支付控制器
@@ -1021,7 +1022,7 @@ class PayController extends Controller
      */
     public function appointmentRefund(Request $request)
     {
-
+        LogApi::debug("回调接收");
         DB::beginTransaction();
         try {
             $input = file_get_contents("php://input");
