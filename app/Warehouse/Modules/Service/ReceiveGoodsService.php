@@ -98,7 +98,7 @@ class ReceiveGoodsService
             }
 
             //确认入库操作
-            if($it['status']!=ReceiveGoods::STATUS_ALL_CHECK){
+            if($it['status']==ReceiveGoods::STATUS_ALL_CHECK){
                 $it['querenruku']=true;
             }else{
                 $it['querenruku']=false;
