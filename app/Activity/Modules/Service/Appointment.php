@@ -233,7 +233,7 @@ class Appointment
                 'out_refund_no' => $destineInfo['destine_no'], //业务平台退款码
                 'payment_no' => $payInfo['out_payment_no'], //支付平台支付码
                 'amount' => $destineInfo['destine_amount'] * 100, //支付金额
-                'refund_back_url' => config('ordersystem.ORDER_DOMAIN').'/api/order/api/appointmentRefund', //退款回调URL
+                'refund_back_url' => config('ordersystem.ORDER_API').'/appointmentRefund', //退款回调URL
             ];
             LogApi::info(__method__.'[appointmentRefund]财务发起退款请求前，请求的参数：', $params);
 
