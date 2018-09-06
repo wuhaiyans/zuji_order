@@ -412,7 +412,7 @@ class DeliveryController extends Controller
 
         /**
          * delivery_no 发货单号
-         * imei 设备imei 帮助大家收集发票
+         * imei 设备imei
          */
         $rules = [
             'delivery_no' => 'required',
