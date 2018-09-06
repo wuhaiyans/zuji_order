@@ -104,9 +104,8 @@ $api->version('v1', [
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
 
 
-
         //预约退款回调接口
-        $api->post('appointmentRefund', 'PayController@appointmentRefund');
+        $api->any('appointmentRefund', 'PayController@appointmentRefund');
 
 
     /***********************************************************************************************
