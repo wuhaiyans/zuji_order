@@ -204,7 +204,7 @@ class ActivityDestineController extends Controller
                     ];
                 }
 
-                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表',$abc);
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表');
 
             } else {
                 break;
