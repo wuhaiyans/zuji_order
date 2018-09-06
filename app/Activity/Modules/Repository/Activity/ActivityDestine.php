@@ -121,7 +121,7 @@ class ActivityDestine{
 		return new self( $destine_info );
 	}
     /**
-     * 通过预定编号获取活动预定表
+     * 通过预定id获取活动预定表
      * <p>当不存在时，返回false</p>
      * @param string   $id		预定id
      * @param int		$lock			锁
