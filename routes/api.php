@@ -102,7 +102,11 @@ $api->version('v1', [
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
-        
+
+
+        //预约退款回调接口
+        $api->any('appointmentRefund', 'PayController@appointmentRefund');
+
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
