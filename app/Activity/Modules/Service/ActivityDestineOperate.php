@@ -11,7 +11,10 @@ use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Activity\Modules\Repository\ActivityDestineRepository;
 use App\Common\LogApi;
 use App\Lib\Channel\Channel;
+use App\Lib\Order\OrderInfo;
 use App\Order\Models\OrderPayModel;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Pay\Pay;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
 use App\Order\Modules\Repository\Pay\PayStatus;
@@ -238,6 +241,37 @@ class ActivityDestineOperate
 
             }
             return $res;
+
+    }
+
+    /***
+     * 获取预定单列表
+     * @param array $param
+     * @param int $pagesize
+     */
+    public static function getDestineExportList($param = array()){
+        //根据条件查找预定单列表
+
+        $destineListArray = ActivityDestineRepository::getDestineList($param);
+
+        if (empty($destineListArray)) return false;
+
+        if (!empty($destineListArray)) {
+
+            foreach ($destineListArray as $keys=>$values) {
+
+                //定金状态名称
+                $destineListArray[$keys]['destine_status_name'] = DestineStatus::getStatusName($values['destine_status']);
+                //支付方式名称
+                $destineListArray[$keys]['pay_type_name'] = PayInc::getPayName($values['pay_type']);
+                //应用来源名称
+                $destineListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
+
+            }
+
+        }
+
+        return $destineListArray;
 
     }
 

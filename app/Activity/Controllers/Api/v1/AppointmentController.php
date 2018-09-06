@@ -181,7 +181,7 @@ class AppointmentController extends Controller
         }
         $res=$this->Appointment->appointmentRefund($params['params']['id']);
         if(!$res){
-            return apiResponse([],ApiStatus::CODE_95003);//预定金退款失败
+            return apiResponse([],ApiStatus::CODE_95004);//创建清单失败
         }
         return apiResponse([],ApiStatus::CODE_0);
 
@@ -222,6 +222,26 @@ class AppointmentController extends Controller
 
 
     }
+    public function test(Request $request){
+        //-+--------------------------------------------------------------------
+        // | 获取参数并验证
+        //-+--------------------------------------------------------------------
+        $params = $request->input();
+        $paramsArr = isset($params['params'])? $params['params'] :[];
+        $rules = [
+            'business_no'      => 'required',//预定编号
+            'business_type'   => 'required',//业务类型
+            'status'            => 'required',//退款状态
+
+        ];
+        $validator = app('validator')->make($paramsArr, $rules);
+        if ($validator->fails()){
+            return apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res=$this->Appointment->callbackAppointment($params['params'],$params['userinfo']);
+        print_r($res);
+    }
+    
 
 
 }

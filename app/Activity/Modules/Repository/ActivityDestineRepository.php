@@ -3,6 +3,7 @@ namespace App\Activity\Modules\Repository;
 
 use App\Activity\Models\ActivityDestine;
 use App\Activity\Modules\Inc\DestineStatus;
+use Illuminate\Support\Facades\DB;
 
 class ActivityDestineRepository
 {
@@ -78,6 +79,97 @@ class ActivityDestineRepository
             ['activity_id', '=', $activityId],
         ])->first();
         return $info;
+    }
+
+    /**
+     * 获取预定信息列表
+     * @param $params
+     * [
+     *   'user_id'     => '',  //用户id   【可选】
+     *   'destine_no'  =>'',   //预定编号  【可选】
+     *   'mobile'      =>'',   //手机号    【可选】
+     *   'destine_name'=>'',   //预定名称   【可选】
+     *   'destine_status' =>'' //定金状态   【可选】
+     *   'app_id '      =>'' //应用渠道     【可选】
+     *    'channel_id ' =>'' //渠道id       【可选】
+     *   'pay_type '    =>'' //支付方式     【可选】
+     *   'pay_time '    =>''  //支付时间     【可选】
+     *   'account_number' =>'' // 支付宝账号  【可选】
+     * ]
+     *
+
+     */
+    public static function getDestineList($param=array()){
+
+        $whereArray = array();
+        //根据用户id
+        if (isset($param['user_id']) && !empty($param['user_id'])) {
+
+            $whereArray[] = ['user_id', '=', $param['user_id']];
+        }
+        //根据预订单编号
+        if (isset($param['destine_no']) && !empty($param['destine_no'])) {
+
+            $whereArray[] = ['destine_no', '=', $param['destine_no']];
+        }
+        //根据用户手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+
+            $whereArray[] = ['mobile', '=', $param['mobile']];
+        }
+        //根据活动名称
+        if (isset($param['destine_name']) && !empty($param['destine_name'])) {
+
+            $whereArray[] = ['destine_name', '=', $param['destine_name']];
+        }
+
+        //根据定金状态
+        if (isset($param['destine_status']) && !empty($param['destine_status'])) {
+
+            $whereArray[] = ['destine_status', '=', $param['destine_status']];
+        }
+        //根据支付方式
+        if (isset($param['pay_type']) && !empty($param['pay_type'])) {
+
+            $whereArray[] = ['pay_type', '=', $param['pay_type']];
+        }
+        //根据应用渠道
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+
+            $whereArray[] = ['app_id', '=', $param['app_id']];
+        }
+        //根据渠道id
+        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+            $whereArray[] = ['channel_id', '=', $param['channel_id']];
+        }
+
+
+        //根据定金支付时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //根据定金支付时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['pay_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+      //根据支付宝账号
+        if (isset($param['acount_number']) && !empty($param['acount_number'])) {
+            $whereArray[] = ['acount_number', '=', $param['acount_number']];
+        }
+
+        $destineArrays = array();
+
+        $destineList =  DB::table('order_activity_destine')
+            ->select('order_activity_destine.*')
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->get();
+        $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
+
+        return $destineArrays;
     }
 
 
