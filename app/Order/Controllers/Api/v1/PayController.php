@@ -601,7 +601,7 @@ class PayController extends Controller
             } else { // 非待退款状态
 				DB::rollBack();
                 LogApi::error(__method__.'[cleanAccount回调退款]订单清算退款状态无效');
-                $this->innerErrMsg(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
+                $this->innerOkMsg(__METHOD__ . "() " . microtime(true) . " {$param['out_refund_no']}订单清算退款状态无效");
             }
 			DB::commit();
             $this->innerOkMsg();
