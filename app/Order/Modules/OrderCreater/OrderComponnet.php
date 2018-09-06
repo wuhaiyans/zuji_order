@@ -267,13 +267,12 @@ class OrderComponnet implements OrderCreater
             }
             //预计发货时间： 短租（起租时间 -3天）
             if($this->zuqiType == OrderStatus::ZUQI_TYPE_DAY){
-                $PredictDeliveryTime = $startTime- 3*86400;
+                $PredictDeliveryTime = strtotime($startTime)- 3*86400;
             }
         }else{
             //如果有货 预定发货时间为第二天下午15点
             $PredictDeliveryTime = strtotime(date("Y-m-d",strtotime("+1 day")))+3600*15;
         }
-
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
             'order_no' => $this->orderNo,  // 编号

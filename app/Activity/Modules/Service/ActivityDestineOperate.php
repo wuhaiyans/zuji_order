@@ -193,7 +193,7 @@ class ActivityDestineOperate
 
         } catch (\App\Lib\ApiException $ex) {
             DB::rollBack();
-            set_msg($ex->getOriginalValue());
+            set_msg("网络异常");
             return false;
         } catch (\Exception $exc) {
             DB::rollBack();
