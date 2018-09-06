@@ -24,6 +24,8 @@ $api->version('v1', [
 	if (isset($apiMap[$method])) {
 		$api->any('/',  $apiMap[$method]);
 	}
+    //预订单列表导出
+    $api->any('destineExport', 'ActivityDestineController@destineExport');
 });
 
 

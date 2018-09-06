@@ -13,6 +13,10 @@ namespace App\Activity\Controllers\Api\v1;
 use App\Activity\Modules\Service\ActivityDestineOperate;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
+use App\Lib\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 
 class ActivityDestineController extends Controller
 {
@@ -159,6 +163,76 @@ class ActivityDestineController extends Controller
         }
 
         return apiResponse($res,ApiStatus::CODE_0);
+
+    }
+    /***
+     * 预定单导出
+     * @param Request $request
+     */
+    public function destineExport(Request $request){
+        set_time_limit(0);
+        $params = $request->all();
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
+        } else {
+            $pageSize = $params['size'];
+        }
+        $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
+
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
+
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
+        // 表头
+        $headers = ['预定编号','活动id','活动名称', '用户手机号','用户id','定金状态','预定金额','支付方式','渠道id','创建时间', '支付时间',
+            '更新时间','商品父id','子商品id'.'转账时间','支付宝账号','转账备注'];
+
+        $orderExcel = array();
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $destineData = array();
+            $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
+            if ($destineData) {
+                $data = array();
+                foreach ($destineData as $item) {
+                    $data[] = [
+                        $item['destine_no'],
+                        $item['activity_id'],
+                        $item['activity_name'],
+                        $item['mobile'],
+                        $item['user_id'],
+                        $item['destine_status_name'],
+                        $item['destine_amount'],
+                        $item['pay_type_name'],
+                        $item['appid_name'],
+                        $item['create_time'],
+                        $item['pay_time'],
+                        $item['update_time'],
+                        $item['spu_id'],
+                        $item['sku_id'],
+                        $item['account_time'],
+                        $item['account_number'],
+                        $item['refund_remark'],
+                    ];
+                }
+
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表',$abc);
+
+            } else {
+                break;
+            }
+        }
+
+        return $orderExcel;
 
     }
 
