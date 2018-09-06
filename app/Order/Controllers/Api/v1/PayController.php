@@ -1020,8 +1020,9 @@ class PayController extends Controller
      * Author: qinliping
      * @param Request $request
      */
-    public function appointmentRefund(Request $request)
+    public function appointmentRefund()
     {
+    echo "回调接收";die;
         LogApi::debug("回调接收");
         DB::beginTransaction();
         try {
