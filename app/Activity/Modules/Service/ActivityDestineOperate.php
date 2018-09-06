@@ -159,7 +159,7 @@ class ActivityDestineOperate
                 }else{
                     $params['status'] = PayStatus::WAIT_PAYMENT;
                     $params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
-                    $data = [
+                    $_data = [
                         'user_id'		=> $params['userId'],
                         'order_no'		=> $params['orderNo'],
                         'business_type'	=> $params['businessType'],
@@ -174,7 +174,7 @@ class ActivityDestineOperate
 
                     ];
 
-                    $payResult = new Pay($data);
+                    $payResult = new Pay($_data);
                 }
             
             //获取支付的url
