@@ -106,7 +106,7 @@ $api->version('v1', [
 
 
         //预约退款回调接口
-        $api->any('appointmentRefund', 'PayController@appointmentRefund');
+        $api->post('appointmentRefund', 'PayController@appointmentRefund');
 
 
     /***********************************************************************************************
