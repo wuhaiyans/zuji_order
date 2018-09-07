@@ -67,11 +67,13 @@ class OrderCleaning
         if ($orderCleanData['business_type']==OrderCleaningStatus::businessTypeDestine){
 
            $destineData  = ActivityDestine::getByNo($orderCleanData['business_no']);
+
+            $destineData = $destineData->getData();
            if ($destineData) {
 
                $orderCleanData['order_info']   = [
                    'order_no'=> 0,
-                   'consignee_mobile' => $destineData->mobile,
+                   'consignee_mobile' => $destineData['mobile'],
                    'name' => '',
 
                ];
