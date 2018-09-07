@@ -85,6 +85,7 @@ class SmsApi {
 	 * @return boolean
 	 */
 	public static function sendMessage(string $mobile, string $templateCode, array $templateParam=[] ) {
+        LogApi::debug("[create]发送短信参数",$templateParam);
 		$url = config('ordersystem.OLD_ORDER_API');
 		$data = [
 			'version'		=> '1.0',

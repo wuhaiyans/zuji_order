@@ -50,7 +50,7 @@ class DestineCreate implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
-
+        LogApi::debug("[create]短信内容",$destineInfo);
         // 发送短息
         $res=\App\Lib\Common\SmsApi::sendMessage($destineInfo['mobile'], $code, [
             'realName' => $destineInfo['mobile'],
