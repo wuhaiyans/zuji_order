@@ -62,7 +62,7 @@ class OrderNotice{
 	 * 构造函数
 	 * @access public
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
-	 * @param string	$order_no	订单编号
+	 * @param string	$order_no	订单编号   or  $destine_no  预订编号
 	 * @param string	$scene		场景
 	 */
 	public function __construct( string $business_type, string $business_no, string $scene, array $data = [] ) {

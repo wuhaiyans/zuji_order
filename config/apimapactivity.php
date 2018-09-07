@@ -13,10 +13,13 @@ return [
     //-+------------------------------------------------------------------------
     'api.activity.destine'             => 'ActivityDestineController@destine', //预约活动确认预约
     'api.activity.destineQuery'       => 'ActivityDestineController@destineQuery', //预约活动查询接口
+    'api.activity.destineList'        => 'ActivityDestineController@destineList',  //【后台】预订信息列表
+    'api.activity.destineDetailLog'        => 'ActivityDestineController@destineDetailLog',  //【后台】预订信息详情日志
 
     'api.advance.activityList'        => 'AdvanceActivityController@getList', //预约活动列表
     'api.advance.activityGet'         => 'AdvanceActivityController@get', //预约活动详情
     'api.advance.myAdvance'            => 'AdvanceActivityController@myAdvance', //我的预约
+
 
 
 
