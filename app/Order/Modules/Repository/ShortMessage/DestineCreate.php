@@ -56,7 +56,6 @@ class DestineCreate implements ShortMessage {
             'realName' => $destineInfo['mobile'],
             'orderNo' => $destineInfo['destine_no'],
             'goodsName' => $destineInfo['activity_name'],
-            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
         ],$destineInfo['destine_no']);
         return $res;
 	}

@@ -248,6 +248,13 @@ class Appointment
                     DB::rollBack();
                     return false;//创建退款清单失败
                 }
+                //更新预订状态为退款中
+                $updateDestineRefund = $activityDestineInfo->updateDestineRefund();
+                if(!$updateDestineRefund){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;//更新失败
+                }
                 DB::commit();
                 //订金退款申请成功发送短信
                 $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
