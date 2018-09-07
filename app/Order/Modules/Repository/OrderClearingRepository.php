@@ -25,14 +25,16 @@ class OrderClearingRepository
      * @return bool
      */
     public static function createOrderClean($param){
-        if (empty($param) || empty($param['order_no'])) {
+        if ( empty($param) ) {
             return false;
         }
 
-
         $orderClearData = new OrderClearing();
         //根据订单号查询订单信息
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+        if(isset($param['order_no'])){
+            $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+        }
+
         $authDeductionNo    =   0;
         $authUnfreezeNo     =   0;
         $refundCleanNo      =   0;
@@ -86,10 +88,13 @@ class OrderClearingRepository
             $status    =   OrderCleaningStatus::orderCleaningUnRefund;
         }
 
-        if (empty($orderInfo)) return false;
-        if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
+       // if (empty($orderInfo)) return false;
+        //if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
+       //     return false;
+      //  }
+        if(redisIncr('_orderCleaning_create',60)>1) {
             return false;
-        }
+         }
 
         //小程序如果是穿已经完成的状态，将其它状态也全部变为已完成的状态
         if (isset($param['status']) && $param['status']==OrderCleaningStatus::orderCleaningComplete) {
@@ -103,11 +108,10 @@ class OrderClearingRepository
             $authRefundStatus = OrderCleaningStatus::refundPayd;
 
         }
-
         // 创建结算清单
         $order_data = [
-            'order_no' => $param['order_no'],
-            'user_id' => $orderInfo['user_id'],
+            'order_no' => $param['order_no'] ?? '',
+            'user_id' => $param['user_id'] ?? $orderInfo['user_id'],
             'clean_no' => createNo(5),
             'business_type' => $param['business_type'],  // 编号
             'business_no'=> $param['business_no'],
@@ -126,9 +130,9 @@ class OrderClearingRepository
             'status'=>  $status  ??  0 ,
             'create_time'=>time(),
             'update_time'=>time(),
-            'app_id' => $orderInfo['appid'],
-            'channel_id' => $orderInfo['channel_id'],
-            'out_account'=> $orderInfo['pay_type'],
+            'app_id' =>  $param['app_id'] ?? $orderInfo['appid'],
+            'channel_id' =>  $param['channel_id'] ?? $orderInfo['channel_id'],
+            'out_account'=> $param['pay_type'] ?? $orderInfo['pay_type'],
             'out_refund_no'=>   $param['out_refund_no'] ??  '',
             'out_unfreeze_trade_no'=> $param['out_unfreeze_trade_no'] ??  '',
             'out_unfreeze_pay_trade_no'=> $param['out_unfreeze_pay_trade_no'] ??  '',
@@ -137,6 +141,7 @@ class OrderClearingRepository
             'refund_clean_no'=>    $refundCleanNo ?? 0 ,
 
         ];
+
       // sql_profiler();
         $success =$orderClearData->insert($order_data);
         if(!$success){

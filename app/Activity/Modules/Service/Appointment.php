@@ -234,6 +234,12 @@ class Appointment
                 $create_data['auth_unfreeze_status']  = OrderCleaningStatus::depositUnfreezeStatusNoPay;//退还押金状态
                 $create_data['refund_status']    = OrderCleaningStatus::refundUnpayed;//退款状态
                 $create_data['status']            = OrderCleaningStatus::orderCleaningUnRefund;//状态
+                $create_data['pay_type']          = $destineInfo['pay_type'];//支付类型
+                $create_data['app_id']            = $destineInfo['app_id'];//应用渠道
+                $create_data['channel_id']        = $destineInfo['channel_id'];//渠道id
+                $create_data['user_id']           = $destineInfo['user_id'];//用户id
+
+
                 $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
                     //事务回滚
