@@ -248,7 +248,7 @@ class DeliveryRepository
                     $model->create($imei_data);
                 }else{
                     //入库
-                    Imei::in($goods_imei_model->imei);
+                    Imei::in($goods_imei_model->imei,$delivery['order_no']);
                     //存在修改
                     $goods_imei_model->imei = $imei_data['imei'];
                     $goods_imei_model->status = $imei_data['status'];
@@ -258,7 +258,7 @@ class DeliveryRepository
                     $goods_imei_model->update();
                 }
 
-                Imei::out($params['imei']);
+                Imei::out($params['imei'],$delivery['order_no']);
 
 
 //                $imeis = $params['imeis'];

@@ -252,7 +252,7 @@ class Appointment
                 //订金退款申请成功发送短信
                 $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
                 $b=$orderNoticeObj->notify();
-                Log::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
+                LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                 return true;
 
             }else{
@@ -315,7 +315,7 @@ class Appointment
             //订金退款申请成功发送短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
             $b=$orderNoticeObj->notify();
-            Log::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
+            LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
             return true;
         }catch( \Exception $exc){
                 //事务回滚
@@ -341,7 +341,7 @@ class Appointment
     * ]
     * @return bool
     */
-    public  function callbackAppointment(array $params,array $userinfo){
+    public static  function callbackAppointment(array $params,array $userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
@@ -372,7 +372,7 @@ class Appointment
                //订金退款申请成功发送短信
                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
                $b=$orderNoticeObj->notify();
-               Log::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
+               LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                return true;
            }
         }catch (\Exception $exc) {
