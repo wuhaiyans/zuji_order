@@ -99,7 +99,7 @@ class ActivityDestineRepository
      *
 
      */
-    public static function getDestineList($param=array()){
+    public static function getDestineList($param=array(),$pagesize=5){
 
         $whereArray = array();
         //根据用户id
@@ -159,6 +159,12 @@ class ActivityDestineRepository
         if (isset($param['acount_number']) && !empty($param['acount_number'])) {
             $whereArray[] = ['acount_number', '=', $param['acount_number']];
         }
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
 
         $destineArrays = array();
 
@@ -166,6 +172,7 @@ class ActivityDestineRepository
             ->select('order_activity_destine.*')
             ->where($whereArray)
             ->orderBy('create_time', 'DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
         $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
 
