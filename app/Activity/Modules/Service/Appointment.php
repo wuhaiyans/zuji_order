@@ -341,7 +341,7 @@ class Appointment
     * ]
     * @return bool
     */
-    public  function callbackAppointment(array $params,array $userinfo){
+    public static  function callbackAppointment(array $params,array $userinfo){
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
