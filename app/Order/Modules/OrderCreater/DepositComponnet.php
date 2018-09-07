@@ -82,6 +82,7 @@ class DepositComponnet implements OrderCreater
                         'zujin'=>$v['amount_after_discount'] * 100, //优惠后总租金
                         'yajin'=>$v['yajin'] * 100,
                         'market_price'=>$v['market_price']*100,
+                        'yiwaixian'=>$v['insurance']*100,
                         'user_id'=>$this->schema['user']['user_id'],
                         'is_order'=>1,
                     ];

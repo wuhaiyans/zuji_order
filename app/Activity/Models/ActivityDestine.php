@@ -26,7 +26,7 @@ class ActivityDestine extends Model
      *
      * @var array
      */
-    protected $fillable = ['destine_no','activity_id','mobile','user_id','destine_status','destine_amount','pay_type','app_id','channel_id','create_time','update_time','pay_time'];
+    protected $fillable = ['destine_no','activity_id','activity_name','mobile','user_id','destine_status','destine_amount','pay_type','app_id','channel_id','create_time','update_time','pay_time','sku_id','spu_id','account_time','account_number','refund_remark'];
 
     /**
      * 获取当前时间

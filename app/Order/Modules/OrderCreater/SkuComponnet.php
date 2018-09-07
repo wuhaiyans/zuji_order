@@ -337,9 +337,6 @@ class SkuComponnet implements OrderCreater
             return [];
         }
         // 优惠金额 大于 总金额 时，总金额设置为0.01
-        if( $jianmian >= $yajin ){
-            $jianmian = $yajin;
-        }
         $arr[$sku_id]['deposit_yajin'] = $yajin;// 更新押金
         //$arr[$sku_id]['mianyajin'] = $mianyajin +$jianmian;// 更新免押金额
         $arr[$sku_id]['mianyajin'] = $jianmian;// 更新免押金额
