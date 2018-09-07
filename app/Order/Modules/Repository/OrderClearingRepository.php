@@ -33,6 +33,7 @@ class OrderClearingRepository
         //根据订单号查询订单信息
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+            if (empty($orderInfo)) return false;
         }
 
         $authDeductionNo    =   0;
