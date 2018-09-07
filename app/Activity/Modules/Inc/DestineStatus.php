@@ -32,6 +32,10 @@ class DestineStatus{
      * @var int 预定已退款
      */
     const DestineRefunded = 4;
+    /**
+     * @var int 预定退款中
+     */
+    const DestineRefund = 5;
 
     /**
      * 预定状态
@@ -43,6 +47,7 @@ class DestineStatus{
             self::DestinePayed => '已支付',
             self::DestineOrderCreated => '已下单',
             self::DestineRefunded => '已退款',
+            self::DestineRefund => '退款中',
         ];
     }
 

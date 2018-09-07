@@ -19,6 +19,8 @@ use App\Activity\Modules\Repository\ActivityAppointmentRepository;
 use App\Activity\Modules\Repository\ActivityGoodsAppointmentRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\Pay\PayQuery;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
+use App\Order\Modules\Service\OrderNotice;
 use Illuminate\Support\Facades\DB;
 
 class Appointment
@@ -212,7 +214,7 @@ class Appointment
             //如果预定状态为  已支付，已下单时可以退款
             if($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed){
                 //判断预定时间是否在15个自然日内
-                if(time() -$destineInfo['create_time'] > 15*24*3600)
+                if(time() -$destineInfo['pay_time'] > 15*24*3600)
                 {
                     LogApi::debug("[appointmentRefund]预定时间必须在15个自然日内,预定创建时间".$destineInfo['create_time']);
                     set_msg("预定时间必须在15个工作日内");
@@ -246,7 +248,18 @@ class Appointment
                     DB::rollBack();
                     return false;//创建退款清单失败
                 }
+                //更新预订状态为退款中
+                $updateDestineRefund = $activityDestineInfo->updateDestineRefund();
+                if(!$updateDestineRefund){
+                    //事务回滚
+                    DB::rollBack();
+                    return false;//更新失败
+                }
                 DB::commit();
+                //订金退款申请成功发送短信
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
+                $b=$orderNoticeObj->notify();
+                LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                 return true;
 
             }else{
@@ -291,7 +304,7 @@ class Appointment
             //如果预定状态为  已支付，已下单时可以退款
             if ($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
                 //判断预定时间是否在15个自然日外
-                if (time() - $destineInfo['create_time'] < 15 * 24 * 3600) {
+                if (time() - $destineInfo['pay_time'] < 15 * 24 * 3600) {
                     LogApi::debug("[appointmentRefund]预定时间必须在15个自然日外,预定创建时间" . $destineInfo['create_time']);
                     set_msg("预定时间必须在15个工作日外");
                     return false;
@@ -306,6 +319,10 @@ class Appointment
             }
             //事务提交
             DB::commit();
+            //订金退款申请成功发送短信
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
+            $b=$orderNoticeObj->notify();
+            LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
             return true;
         }catch( \Exception $exc){
                 //事务回滚
@@ -358,6 +375,11 @@ class Appointment
                if(!$updateRefund){
                    return false;
                }
+               $destineInfo=$activityDestine->getData();
+               //订金退款申请成功发送短信
+               $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
+               $b=$orderNoticeObj->notify();
+               LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                return true;
            }
         }catch (\Exception $exc) {

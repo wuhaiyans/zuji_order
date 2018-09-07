@@ -10,8 +10,10 @@ namespace App\Activity\Controllers\Api\v1;
 
 
 
+use App\Activity\Modules\Repository\ActivityDestineRepository;
 use App\Activity\Modules\Service\ActivityDestineOperate;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
 use App\Lib\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -191,8 +193,7 @@ class ActivityDestineController extends Controller
         $abc = 1;
 
         // 表头
-        $headers = ['预定编号','活动id','活动名称', '用户手机号','用户id','定金状态','预定金额','支付方式','渠道id','创建时间', '支付时间',
-            '更新时间','商品父id','子商品id'.'转账时间','支付宝账号','转账备注'];
+        $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
 
         $orderExcel = array();
         while(true) {
@@ -204,28 +205,17 @@ class ActivityDestineController extends Controller
             ++$abc;
             $destineData = array();
             $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
-
             if ($destineData) {
                 $data = array();
                 foreach ($destineData as $item) {
                     $data[] = [
                         $item['destine_no'],
-                        $item['activity_id'],
-                        $item['activity_name'],
-                        $item['mobile'],
-                        $item['user_id'],
-                        $item['destine_status_name'],
-                        $item['destine_amount'],
-                        $item['pay_type_name'],
-                        $item['appid_name'],
-                        $item['create_time'],
                         $item['pay_time'],
-                        $item['update_time'],
-                        $item['spu_id'],
-                        $item['sku_id'],
-                        $item['account_time'],
+                        $item['mobile'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
                         $item['account_number'],
-                        $item['refund_remark'],
+                        $item['destine_status_name'],
                     ];
                 }
 
@@ -239,5 +229,49 @@ class ActivityDestineController extends Controller
         return $orderExcel;
 
     }
+    /***
+     * 预定单列表
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function destineList(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $destineData = ActivityDestineOperate::getDestineList($params['params']);
+            if(!$destineData){
+                return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+            }
+
+            return apiResponse($destineData,ApiStatus::CODE_0);
+        }catch (\Exception $e) {
+            LogApi::error('预订单列表异常',$e);
+            return apiResponse([],ApiStatus::CODE_50000);
+
+        }
+
+    }
+
+    /**
+     * 获取详情日志
+     * @param Request $request
+     */
+    public function destineDetailLog(Request $request){
+        $params = $request->all();
+        if(empty($params['params']['destine_no'])){
+            return apiResponse([],ApiStatus::CODE_20001);  //参数不能为空
+        }
+        $destineData = ActivityDestineOperate::getDestineLogList($params['params']['destine_no']);
+        if(!$destineData){
+            return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+        }
+
+        return apiResponse($destineData,ApiStatus::CODE_0);
+
+    }
+
+
 
 }
