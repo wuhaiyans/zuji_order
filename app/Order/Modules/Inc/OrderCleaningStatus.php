@@ -9,7 +9,7 @@ namespace App\Order\Modules\Inc;
 
 class OrderCleaningStatus{
 
-    /******************* start  businessType 业务类型  2，退货 8 退款，4，还机 ，5，买断 ****************************************************/
+    /******************* start  businessType 业务类型  2，退货 8 退款，4，还机 ，5，买断 ,9,订金退款****************************************************/
 
     const businessTypeReturn = 2;
 
@@ -18,6 +18,8 @@ class OrderCleaningStatus{
     const businessTypeReturnGoods = 4;
 
     const businessTypeBuy  = 5;
+
+    const businessTypeDestine = 9;
 
 /**************************end ************************************************************************/
 
@@ -86,7 +88,7 @@ class OrderCleaningStatus{
      * Author: heaven
      * @return array
      */
-    /******************* start  businessType 业务类型  2，退货 3 退款，4，还机 ，5，买断 ****************************************************/
+    /******************* start  businessType 业务类型  2，退货 3 退款，4，还机 ，5，买断，9,订金退款* ****************************************************/
 
     public static function getBusinessTypeList(){
         return [
@@ -94,6 +96,7 @@ class OrderCleaningStatus{
             self::businessTypeRefund => '退款',
             self::businessTypeReturnGoods => '还机',
             self::businessTypeBuy => '买断',
+            self::businessTypeDestine=>'订金'
         ];
     }
 

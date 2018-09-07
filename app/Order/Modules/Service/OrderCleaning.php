@@ -5,6 +5,7 @@
  *    date : 2018-05-14
  */
 namespace App\Order\Modules\Service;
+use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
 use App\Lib\Payment\CommonFundAuthApi;
@@ -45,16 +46,43 @@ class OrderCleaning
         $orderCleanData['order_type_name'] = OrderStatus::getTypeName($orderCleanData['order_type']);
         $orderCleanData['out_account_name'] = PayInc::getPayName($orderCleanData['out_account']);
 
-        //根据订单号查询订单信息
+        if (!empty($orderCleanData['order_no']))    {
+            //根据订单号查询订单信息
+            $orderInfo = OrderUserAddressRepository::getUserAddressInfo(array('order_no'=>$orderCleanData['order_no']));
+            if (empty($orderInfo))  return apiResponseArray(ApiStatus::CODE_31205,$orderInfo);
+            $orderCleanData['order_info']   = [
+                'order_no'=> $orderInfo['order_no'],
+                'consignee_mobile' => $orderInfo['consignee_mobile'],
+                'name' => $orderInfo['name'],
 
-        $orderInfo = OrderUserAddressRepository::getUserAddressInfo(array('order_no'=>$orderCleanData['order_no']));
-        if (empty($orderInfo))  return apiResponseArray(ApiStatus::CODE_31205,$orderInfo);
-        $orderCleanData['order_info']   = [
-            'order_no'=> $orderInfo['order_no'],
-            'consignee_mobile' => $orderInfo['consignee_mobile'],
-            'name' => $orderInfo['name'],
+            ];
+        }
+
+        $orderCleanData['order_info'] = [
+            'order_no'=> 0,
+            'consignee_mobile' => 0,
+            'name' => '',
 
         ];
+        if ($orderCleanData['business_type']==OrderCleaningStatus::businessTypeDestine){
+
+           $destineData  = ActivityDestine::getByNo($orderCleanData['business_no']);
+
+            $destineData = $destineData->getData();
+           if ($destineData) {
+
+               $orderCleanData['order_info']   = [
+                   'order_no'=> 0,
+                   'consignee_mobile' => $destineData['mobile'],
+                   'name' => '',
+
+               ];
+           }
+
+        }
+
+
+
         return apiResponseArray(ApiStatus::CODE_0,$orderCleanData);
 
     }
