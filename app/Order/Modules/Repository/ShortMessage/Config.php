@@ -106,6 +106,8 @@ class Config {
 				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
+                SceneConfig::DESTINE_CREATE              => 'SMS_113461182',//订金退款申请短信
+                SceneConfig::DESTINE_REFUND              => 'SMS_113461184  ',//订金退款成功短信
 
 
 
