@@ -197,12 +197,17 @@ class Appointment
 
     /**
      * 预定金退款----15个自然日内
-     * @param int $id
+     * @param
+     * [
+     *     'id'            =>  '' ,//预订id   int     【必传】
+     *     'refund_remark' => '', //退款备注  string   【必传】
+     * ]
      */
-    public function appointmentRefund(int $id){
+    public function appointmentRefund(array $params){
         //开启事务
         DB::beginTransaction();
         try{
+            $id=$params['id'];
             //获取预定信息
             $activityDestineInfo = ActivityDestine::getByIdNo($id);
             if(!$activityDestineInfo){
@@ -249,7 +254,7 @@ class Appointment
                     return false;//创建退款清单失败
                 }
                 //更新预订状态为退款中
-                $updateDestineRefund = $activityDestineInfo->updateDestineRefund();
+                $updateDestineRefund = $activityDestineInfo->updateDestineRefund($params['refund_remark']);
                 if(!$updateDestineRefund){
                     //事务回滚
                     DB::rollBack();

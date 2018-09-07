@@ -106,14 +106,16 @@ class ActivityDestine{
     }
     /**
      * 15个自然日内创建退款申请的订金状态
-     * @param array $data
+     * @param array $refund_remark
+     *
      * @return bool
      */
-    public function updateDestineRefund():bool{
+    public function updateDestineRefund(string $refund_remark):bool{
        if($this->model->destine_status == DestineStatus::DestineRefund){
            return false;
        }
         $this->model->destine_status = DestineStatus::DestineRefund;
+        $this->model->refund_remark  = $refund_remark;
         return $this->model->save();
     }
 

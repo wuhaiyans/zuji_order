@@ -163,7 +163,8 @@ class AppointmentController extends Controller
      * 预定退款----15个自然日内
      * @param Request $request
      * [
-     *    'id' => ''   //预定id  int  【必传】
+     *    'id'            =>  '' ,//预订id   int     【必传】
+     *     'refund_remark' => '', //退款备注  string   【必传】
      * ]
      */
     public function appointmentRefund(Request $request){
@@ -173,13 +174,14 @@ class AppointmentController extends Controller
         $params = $request->input();
         $paramsArr = isset($params['params'])? $params['params'] :[];
         $rules = [
-            'id'   => 'required',//预定id
+            'id'                => 'required',//预定id
+            'refund_remark'   => 'required',//退款原因
         ];
         $validator = app('validator')->make($paramsArr, $rules);
         if ($validator->fails()){
             return apiResponse([],ApiStatus::CODE_20001);
         }
-        $res=$this->Appointment->appointmentRefund($params['params']['id']);
+        $res=$this->Appointment->appointmentRefund($params['params']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_95004);//创建清单失败
         }
