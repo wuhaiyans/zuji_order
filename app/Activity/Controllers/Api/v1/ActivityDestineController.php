@@ -72,6 +72,10 @@ class ActivityDestineController extends Controller
 
        $returnUrl =$params['params']['return_url'];
 
+       $userName =isset($params['userinfo']['username'])?$params['userinfo']['username']:'';
+       $userId =isset($params['userinfo']['uid'])?$params['userinfo']['uid']:0;
+       $userIp =isset($params['userinfo']['ip'])?$params['userinfo']['ip']:'';
+
        //判断参数是否设置
        if(empty($appid) && $appid <1){
            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
@@ -96,9 +100,9 @@ class ActivityDestineController extends Controller
            'appid'=>$appid,
            'pay_type'=>$payType,
            'activity_id'=>$activityId,
-           'mobile'=>$params['userinfo']['username'],
-           'user_id'=>$params['userinfo']['uid'],  //增加用户ID
-           'ip'=>$params['userinfo']['ip'],  //增加用户ID
+           'mobile'=>$userName,
+           'user_id'=>$userId,  //增加用户ID
+           'ip'=>$userIp,  //增加用户ID
            'pay_channel_id'=>$payChannelId,
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
