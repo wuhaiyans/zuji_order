@@ -621,7 +621,7 @@ class OrderOperate
                     'payment_no'		=> $paymentInfo['out_payment_no'],// 业务系统 支付交易码
                     'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
-                $orderInfo$res =LebaifenApi::getPaymentInfo($param);
+                $res =LebaifenApi::getPaymentInfo($param);
                 $instalmentInfo =[
 	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
 	 		        'out_payment_no'=> $res['out_payment_no'],	// 业务系统 支付交易码
