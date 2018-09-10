@@ -99,7 +99,7 @@ class OrderReturnRepository
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
             ->where($where)
-            ->select('order_return.create_time as c_time','order_return.*','order_info.*','order_goods.goods_name','order_goods.zuqi')
+            ->select('order_return.create_time as c_time','order_return.*','order_info.create_time','order_info.mobile','order_info.order_amount','order_info.order_status','order_goods.goods_name','order_goods.zuqi')
             ->orderBy('order_return.create_time', 'DESC')
             ->paginate($additional['size'],$columns = ['*'], $pageName = 'page', $additional['page']);
         if($parcels){
