@@ -50,6 +50,7 @@ class PayInc{
             self::MiniAlipay=>'支付宝小程序支付',
             self::LebaifenPay=>'乐百分支付',
             self::WeChatPay=>'微信支付',
+            self::PcreditPayInstallment=>'花呗分期+预授权',
         ];
     }
 
