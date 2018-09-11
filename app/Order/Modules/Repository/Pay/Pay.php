@@ -268,13 +268,13 @@ class Pay extends \App\Lib\Configurable
 		if( $this->isSuccess() ){
 			throw new \Exception('支付单已完成');
 		}
-		if( $this->needPayment() ){
-			return $this->getPaymentUrl($channel,$params);
-		}elseif( $this->needWithhold() ){
+		if( $this->needWithhold() ){
 			return $this->getWithholdSignUrl($channel,$params);
 		}elseif( $this->needFundauth() ){
 			return $this->getFundauthUrl($channel,$params);
-		}
+		}elseif( $this->needPayment() ){
+            return $this->getPaymentUrl($channel,$params);
+        }
 		throw new \Exception('支付单内部错误');
 	}
 	
