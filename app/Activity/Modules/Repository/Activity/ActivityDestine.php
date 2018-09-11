@@ -117,6 +117,7 @@ class ActivityDestine{
        }
         $this->model->destine_status = DestineStatus::DestineRefund;
         $this->model->refund_remark  = $refund_remark;
+        $this->model->update_time  = time();
         return $this->model->save();
     }
 
