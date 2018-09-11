@@ -179,7 +179,7 @@ class ActivityDestineOperate
                     ];
                     $payResult = new Pay($_data);
                 }
-            LogApi::info("yuyueParams",[
+            \App\Lib\Common\LogApi::info("yuyueParams",[
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
                 'front_url' => $data['return_url'], //回调URL
                 'ip'=>$data['ip'],
@@ -192,7 +192,7 @@ class ActivityDestineOperate
                 'ip'=>$data['ip'],
                 'extended_params'=>$data['extended_params'],
             ]);
-            LogApi::info("yuyueParamsFanhui",$url);
+            \App\Lib\Common\LogApi::info("yuyueParamsFanhui",$url);
             // 提交事务
             DB::commit();
             return $url;
@@ -308,14 +308,15 @@ class ActivityDestineOperate
                     if($destineListArray['data'][$keys]->pay_time < 15*24*3600){
                         $destineListArray['data'][$keys]->refundOperateAfter = true;
                     }
-                    //已下单 已退款
-                    if( $destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
-                        $destineListArray['data'][$keys]->selectOperate = true;
-                    }
+
+                }else if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
+                    $destineListArray['data'][$keys]->selectOperate = true;
+                    $destineListArray['data'][$keys]->refundOperateAfter = false;
+                    $destineListArray['data'][$keys]->refundOperateBefore = false;
 
                 }else{
-                    $destineListArray['data'][$keys]->refundOperateBefore = false;
                     $destineListArray['data'][$keys]->refundOperateAfter = false;
+                    $destineListArray['data'][$keys]->refundOperateBefore = false;
                     $destineListArray['data'][$keys]->selectOperate = false;
                 }
 
