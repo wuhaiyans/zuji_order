@@ -3,6 +3,7 @@ namespace App\Activity\Modules\Repository;
 
 use App\Activity\Models\ActivityDestine;
 use App\Activity\Modules\Inc\DestineStatus;
+use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\DB;
 
 class ActivityDestineRepository
@@ -103,7 +104,7 @@ class ActivityDestineRepository
 
         $page = empty($params['page']) ? 1 : $params['page'];
         $whereArray= self::get_where($param);  //获取搜索的条件
-
+        LogApi::debug("新机预约导出的条件",$whereArray);
         $destineArrays = array();
 
         $destineList =  DB::table('order_activity_destine')
@@ -112,6 +113,7 @@ class ActivityDestineRepository
             ->orderBy('create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
+        LogApi::debug("新机预约查询结果",$destineList);
         $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
 
         return $destineArrays;
