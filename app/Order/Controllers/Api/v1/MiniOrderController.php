@@ -68,20 +68,26 @@ class MiniOrderController extends Controller
             $spu_info = $goods_info[$params['sku_id']]['spu_info'];
             //判断租期与租期类型
             if(isset($params['zuqi_type'])){
-                $zuqi_type = $params['zuqi_type'];
+                if($params['zuqi_type'] == 'month'){
+                    $zuqi_type = 2;
+                }else if($params['zuqi_type'] == 'day'){
+                    $zuqi_type = 1;
+                }
+
             }else{
                 $zuqi_type = $sku_info['zuqi_type'];
             }
             //判断租期与租期类型
             if(isset($params['zuqi'])){
                 $zuqi = $params['zuqi'];
+
             }else{
                 $zuqi = $sku_info['zuqi'];
             }
             //商品件数固定为1
             $count = 1;
             $name = $sku_info['sku_name'];
-            if( $zuqi_type == 'month' ){//租期类型（day：天；2：月）
+            if( $zuqi_type == 2 ){//租期类型（1：天；2：月）
                 //长租
                 $new_data = date('Y-m-d H:i:s');
                 $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($zuqi)+1).' month'));
