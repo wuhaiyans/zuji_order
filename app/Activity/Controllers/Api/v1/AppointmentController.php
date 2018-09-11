@@ -243,7 +243,17 @@ class AppointmentController extends Controller
         $res=$this->Appointment->callbackAppointment($params['params'],$params['userinfo']);
         print_r($res);
     }
-    
+
+
+    /***
+     * 预约活动列表筛选接口
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function oppointmentListFilter(){
+
+        $res = \App\Activity\Modules\Inc\OppointmentListFiler::OppointmentInc();
+        return apiResponse($res,ApiStatus::CODE_0,"success");
+    }
 
 
 }
