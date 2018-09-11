@@ -205,10 +205,10 @@ class OrderPayComponnet implements OrderCreater
                 elseif(!$this->withholdStatus && $param['fundauthAmount']!=0){
                     \App\Order\Modules\Repository\Pay\PayCreater::createFundauth($param);
                 }
-                //不需要签约代扣【创建支付单】
-            }elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay ){
+                //花呗 , 银联支付 ，花呗分期+预授权
+            }elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::PcreditPayInstallment){
                 if($param['fundauthAmount'] == 0){
-                    //预授权金额为0  橙黄见普通支付
+                    //预授权金额为0  创建普通支付
                     \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
                 }else{
                     //预授权金额不为0 【创建预授权支付单】
@@ -219,6 +219,7 @@ class OrderPayComponnet implements OrderCreater
             elseif($this->payType == PayInc::LebaifenPay){
                 \App\Order\Modules\Repository\Pay\PayCreater::createLebaifenPayment($param);
             }
+
 
         }catch (Exception $e){
             $this->getOrderCreater()->setError($e->getMessage());

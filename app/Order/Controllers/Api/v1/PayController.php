@@ -45,10 +45,12 @@ class PayController extends Controller
         if (empty($validateParams) || $validateParams['code']!=0) {
             return apiResponse([],$validateParams['code']);
         }
-        $params =$params['params'];
+
+        $ip= isset($params['userinfo']['ip'])?$params['userinfo']['ip']:'';
         // 扩展参数
+        $params =$params['params'];
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
-		
+
 		LogApi::id($params['order_no']);
 		
 //			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
@@ -80,9 +82,10 @@ class PayController extends Controller
 			$paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
 					'name'=> $name,
 					'front_url' => $params['callback_url'],
+					'ip'=>$ip,
 					'extended_params' => $extended_params,// 扩展参数
 			]);
-			return apiResponse(['url'=>$paymentUrl['url']],ApiStatus::CODE_0);
+			return apiResponse($paymentUrl,ApiStatus::CODE_0);
 		} catch (\Exception $exs) {
 			LogApi::error('获取支付链接地址错误',$exs);
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
