@@ -6,6 +6,7 @@ return [
     'api.activity.appointmentList'       => 'AppointmentController@appointmentList', //预约活动列表
     'api.activity.appointmentAdd'        => 'AppointmentController@appointmentAdd', //预约活动添加
     'api.activity.appointmentUpdate'     => 'AppointmentController@appointmentUpdate', //预约活动执行修改
+    'api.activity.list.filter'            =>'AppointmentController@oppointmentListFilter', //预约活动列表筛选项接口
 
 
     //-+------------------------------------------------------------------------
