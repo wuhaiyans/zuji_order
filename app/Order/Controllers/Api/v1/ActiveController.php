@@ -18,7 +18,7 @@ class ActiveController extends Controller
             $limit  = 50;
             $page   = 1;
             $sleep  = 20;
-            $code   = "SMS_113461181";
+            $code   = "SMS_113461190";
 
 
             do {
@@ -50,11 +50,11 @@ class ActiveController extends Controller
             } while (true);
 
             if(count($arr) > 0){
-                \App\Lib\Common\LogApi::notify("活动运营短信", $arr);
+                \App\Lib\Common\LogApi::notify("[sendMessage]活动运营短信", $arr);
             }
 
         }catch(\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[活动运营短信]', ['msg'=>$exc->getMessage()]);
+            \App\Lib\Common\LogApi::debug('[sendMessage]活动运营短信', ['msg'=>$exc->getMessage()]);
         }
     }
 

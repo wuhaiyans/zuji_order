@@ -75,6 +75,7 @@ class AuthRefferController extends Controller{
             }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
                 $token     = $params['auth_token'];
                 $checkInfo = User::checkToken($token);//获取用户信息
+                 LogApi::debug("验证token调用第三方User::checkToken的值".$params['auth_token']);
                 LogApi::debug("验证token调用第三方User::checkToken返回的结果".$params['method'],$checkInfo);
                 //验证不通过
                 if (is_null($checkInfo)
@@ -97,7 +98,7 @@ class AuthRefferController extends Controller{
                         'uid'      =>$checkInfo['data'][0]['id'],
                         'type'     =>2,       //用户类型（固定值1）：1：管理员；2：前端用户
                         'username' =>$checkInfo['data'][0]['mobile'],
-                        'ip'        =>getIp()
+                        'ip'        =>$params['ip']
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
                     LogApi::debug("通过登录转发接口的url及参数".$params['method'],[

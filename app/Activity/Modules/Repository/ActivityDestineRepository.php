@@ -99,14 +99,62 @@ class ActivityDestineRepository
      *
 
      */
-    public static function getDestineList($param=array()){
+    public static function getDestineList($param=array(),$pagesize=5){
 
-        $whereArray = array();
-        //根据用户id
-        if (isset($param['user_id']) && !empty($param['user_id'])) {
+        $page = empty($params['page']) ? 1 : $params['page'];
+        $whereArray= self::get_where($param);  //获取搜索的条件
 
-            $whereArray[] = ['user_id', '=', $param['user_id']];
+        $destineArrays = array();
+
+        $destineList =  DB::table('order_activity_destine')
+            ->select('order_activity_destine.*')
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
+        $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
+
+        return $destineArrays;
+    }
+
+    /**
+     * 获取预定信息分页列表
+     * @param $params
+     * [
+     *   'user_id'     => '',  //用户id   【可选】
+     *   'destine_no'  =>'',   //预定编号  【可选】
+     *   'mobile'      =>'',   //手机号    【可选】
+     *   'activity_name'=>'',   //预定名称   【可选】
+     *   'destine_status' =>'' //定金状态   【可选】
+     *   'app_id '      =>'' //应用渠道     【可选】
+     *    'channel_id ' =>'' //渠道id       【可选】
+     *   'pay_type '    =>'' //支付方式     【可选】
+     *   'pay_time '    =>''  //支付时间     【可选】
+     *   'account_number' =>'' // 支付宝账号  【可选】
+     * ]
+     *
+
+     */
+    public static  function getDestinePageList($param=array()){
+        $page = empty($param['page']) ? 1 : $param['page'];
+        $size = !empty($param['size']) ? $param['size'] : config('web.pre_page_size');
+        $whereArray= self::get_where($param);  //获取搜索的条件
+        $destineList =  DB::table('order_activity_destine')
+            ->select('order_activity_destine.*')
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->paginate($size,$columns = ['*'], $pageName = 'page', $page);
+        if($destineList){
+            return $destineList->toArray();
         }
+        return [];
+    }
+
+    /**
+     * 列表条件
+     */
+    public static function get_where($param=array()){
+        $whereArray=[];
         //根据预订单编号
         if (isset($param['destine_no']) && !empty($param['destine_no'])) {
 
@@ -116,11 +164,6 @@ class ActivityDestineRepository
         if (isset($param['mobile']) && !empty($param['mobile'])) {
 
             $whereArray[] = ['mobile', '=', $param['mobile']];
-        }
-        //根据活动名称
-        if (isset($param['activity_name']) && !empty($param['activity_name'])) {
-
-            $whereArray[] = ['activity_name', '=', $param['activity_name']];
         }
 
         //根据定金状态
@@ -138,10 +181,6 @@ class ActivityDestineRepository
 
             $whereArray[] = ['app_id', '=', $param['app_id']];
         }
-        //根据渠道id
-        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
-            $whereArray[] = ['channel_id', '=', $param['channel_id']];
-        }
 
 
         //根据定金支付时间
@@ -154,23 +193,7 @@ class ActivityDestineRepository
             $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
             $whereArray[] = ['pay_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
-
-      //根据支付宝账号
-        if (isset($param['acount_number']) && !empty($param['acount_number'])) {
-            $whereArray[] = ['acount_number', '=', $param['acount_number']];
-        }
-
-        $destineArrays = array();
-
-        $destineList =  DB::table('order_activity_destine')
-            ->select('order_activity_destine.*')
-            ->where($whereArray)
-            ->orderBy('create_time', 'DESC')
-            ->get();
-        $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
-
-        return $destineArrays;
+        return $whereArray;
     }
-
 
 }

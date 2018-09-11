@@ -179,7 +179,12 @@ class ActivityDestineOperate
                     ];
                     $payResult = new Pay($_data);
                 }
-            
+            LogApi::info("yuyueParams",[
+                'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
+                'front_url' => $data['return_url'], //回调URL
+                'ip'=>$data['ip'],
+                'extended_params'=>$data['extended_params'],
+            ]);
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
@@ -187,6 +192,7 @@ class ActivityDestineOperate
                 'ip'=>$data['ip'],
                 'extended_params'=>$data['extended_params'],
             ]);
+            LogApi::info("yuyueParamsFanhui",$url);
             // 提交事务
             DB::commit();
             return $url;
@@ -249,11 +255,10 @@ class ActivityDestineOperate
      * @param array $param
      * @param int $pagesize
      */
-    public static function getDestineExportList($param = array()){
+    public static function getDestineExportList($param = array(),$pagesize=5){
         //根据条件查找预定单列表
 
-        $destineListArray = ActivityDestineRepository::getDestineList($param);
-
+        $destineListArray = ActivityDestineRepository::getDestineList($param,$pagesize=5);
         if (empty($destineListArray)) return false;
 
         if (!empty($destineListArray)) {
@@ -274,7 +279,69 @@ class ActivityDestineOperate
         return $destineListArray;
 
     }
+    /***
+     * 获取预定单列表
+     * @param array $param
+     * @param int $pagesize
+     */
+    public static function getDestineList($param = array()){
+        //根据条件查找预定单列表
 
+        $destineListArray = ActivityDestineRepository::getDestinePageList($param);
+        if (empty($destineListArray)) return false;
+
+        if (!empty($destineListArray)) {
+
+            foreach ($destineListArray['data'] as $keys=>$values) {
+                //定金状态名称
+                $destineListArray['data'][$keys]->destine_status_name = DestineStatus::getStatusName($destineListArray['data'][$keys]->destine_status);
+                //支付方式名称
+                $destineListArray['data'][$keys]->pay_type_name = PayInc::getPayName($destineListArray['data'][$keys]->pay_type);
+                //应用来源名称
+                $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
+                //15个自然日之内
+                if($destineListArray['data'][$keys]->pay_time > 15*24*3600){
+                    $destineListArray['data'][$keys]->refundOperateBefore = true;
+                }else{
+                    $destineListArray['data'][$keys]->refundOperateBefore = false;
+                }
+                //15个自然日后
+                if($destineListArray['data'][$keys]->pay_time < 15*24*3600){
+                    $destineListArray['data'][$keys]->refundOperateAfter = true;
+                }else{
+                    $destineListArray['data'][$keys]->refundOperateAfter = false;
+                }
+                //已下单 已退款
+                if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineOrderCreated || $destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
+                    $destineListArray['data'][$keys]->selectOperate = true;
+                }else{
+                    $destineListArray['data'][$keys]->selectOperate = false;
+                }
+
+
+            }
+
+        }
+
+        return $destineListArray;
+
+    }
+    /***
+     * 获取预定单列表
+     * @param array $param
+     * @param int $destine_no
+     * @return array
+     */
+    public static function getDestineLogList($destine_no){
+         $activityInfo=ActivityDestine::getByNo($destine_no);
+         if(!$activityInfo){
+             return false;
+         }
+        $activityDestineInfo = $activityInfo->getData();
+
+         return $activityDestineInfo;
+
+    }
 
 
 

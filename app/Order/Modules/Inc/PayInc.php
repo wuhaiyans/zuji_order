@@ -3,6 +3,11 @@ namespace App\Order\Modules\Inc;
 
 class PayInc{
     /**
+     * @var int 花呗分期+预授权
+     */
+    const  PcreditPayInstallment = 8;
+
+    /**
      * @var int 微信支付
      */
     const  WeChatPay = 7;

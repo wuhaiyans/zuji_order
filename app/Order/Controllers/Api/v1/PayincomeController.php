@@ -19,8 +19,8 @@ class PayincomeController extends Controller
      */
     public function payIncomeWhere(){
         $business_type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
-        unset($business_type[1]);
-        unset($business_type[8]);
+//        unset($business_type[1]);
+        unset($business_type[8]); // 退款业务  不属于入账范围
 
         $list = [
             'create_time'       => "",  //日期范围

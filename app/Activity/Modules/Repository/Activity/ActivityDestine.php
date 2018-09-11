@@ -77,6 +77,7 @@ class ActivityDestine{
         }
         $this->model->destine_status = DestineStatus::DestineRefunded;
         $this->model->update_time = time();
+        $this->model->account_time = time();
         return $this->model->save();
     }
 	/**
@@ -91,11 +92,31 @@ class ActivityDestine{
         $this->model->update_time = time();
         return $this->model->save();
 	}
+
+    /**
+     * 15个自然日之后的更新订金退款状态
+     * @param array $data
+     * @return bool
+     */
 	public function updateActivityDestine(array $data):bool{
         $this->model->account_time = $data['account_time'];
         $this->model->account_number = $data['account_number'];
         $this->model->refund_remark = $data['refund_remark'];
         $this->model->destine_status = DestineStatus::DestineRefunded;
+        return $this->model->save();
+    }
+    /**
+     * 15个自然日内创建退款申请的订金状态
+     * @param array $refund_remark
+     *
+     * @return bool
+     */
+    public function updateDestineRefund(string $refund_remark):bool{
+       if($this->model->destine_status == DestineStatus::DestineRefund){
+           return false;
+       }
+        $this->model->destine_status = DestineStatus::DestineRefund;
+        $this->model->refund_remark  = $refund_remark;
         return $this->model->save();
     }
 

@@ -598,11 +598,12 @@ class OrderOperate
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
             'rent_amount'	=> $rentAmount,	// 总租金；单位：分
-            'month_amount'	=> normalizeNum($rentAmount/$txnTerms),	// 每月租金；单位：分
+            'month_amount'	=> normalizeNum($orderInfo['order_amount']/$txnTerms),	// 每月租金；单位：分
             'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数
             'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
+            'first_other_amount'=>normalizeNum($orderInfo['order_insurance']),// 首期额外金额；单位：分 碎屏险
         ];
 
 
@@ -633,6 +634,7 @@ class OrderOperate
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
 	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
                     'remain_amount' => normalizeNum($res['remain_amount']/100 -$orderInfo['order_yajin'] ),	// 剩余还款总租金额；单位：分
+                    'first_other_amount'=>normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分 碎屏险
                 ];
                 return $instalmentInfo;
 

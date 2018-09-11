@@ -10,8 +10,10 @@ namespace App\Activity\Controllers\Api\v1;
 
 
 
+use App\Activity\Modules\Repository\ActivityDestineRepository;
 use App\Activity\Modules\Service\ActivityDestineOperate;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
 use App\Lib\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -70,6 +72,10 @@ class ActivityDestineController extends Controller
 
        $returnUrl =$params['params']['return_url'];
 
+       $userName =isset($params['userinfo']['username'])?$params['userinfo']['username']:'';
+       $userId =isset($params['userinfo']['uid'])?$params['userinfo']['uid']:0;
+       $userIp =isset($params['userinfo']['ip'])?$params['userinfo']['ip']:'';
+
        //判断参数是否设置
        if(empty($appid) && $appid <1){
            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
@@ -94,9 +100,9 @@ class ActivityDestineController extends Controller
            'appid'=>$appid,
            'pay_type'=>$payType,
            'activity_id'=>$activityId,
-           'mobile'=>$params['userinfo']['username'],
-           'user_id'=>$params['userinfo']['uid'],  //增加用户ID
-           'ip'=>$params['userinfo']['ip'],  //增加用户ID
+           'mobile'=>$userName,
+           'user_id'=>$userId,  //增加用户ID
+           'ip'=>$userIp,  //增加用户ID
            'pay_channel_id'=>$payChannelId,
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
@@ -168,43 +174,56 @@ class ActivityDestineController extends Controller
     /***
      * 预定单导出
      * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function destineExport(Request $request){
+        set_time_limit(0);
         $params = $request->all();
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
+        } else {
+            $pageSize = $params['size'];
+        }
+        $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
+
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
+
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
         // 表头
-        $headers = ['预定编号','活动id','活动名称', '用户手机号','用户id','定金状态','预定金额','支付方式','渠道id','创建时间', '支付时间',
-            '更新时间','商品父id','子商品id'.'转账时间','支付宝账号','转账备注'];
+        $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
 
         $orderExcel = array();
         while(true) {
-
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
             $destineData = array();
-            $destineData = ActivityDestineOperate::getDestineExportList($params);
+            $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
             if ($destineData) {
                 $data = array();
                 foreach ($destineData as $item) {
                     $data[] = [
                         $item['destine_no'],
-                        $item['activity_id'],
-                        $item['activity_name'],
-                        $item['mobile'],
-                        $item['user_id'],
-                        $item['destine_status_name'],
-                        $item['destine_amount'],
-                        $item['pay_type_name'],
-                        $item['appid_name'],
-                        $item['create_time'],
                         $item['pay_time'],
-                        $item['update_time'],
-                        $item['spu_id'],
-                        $item['sku_id'],
-                        $item['account_time'],
+                        $item['mobile'],
+                        $item['appid_name'],
+                        $item['pay_type_name'],
                         $item['account_number'],
-                        $item['refund_remark'],
+                        $item['destine_status_name'],
                     ];
                 }
 
-                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表');
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表',$abc);
 
             } else {
                 break;
@@ -214,5 +233,49 @@ class ActivityDestineController extends Controller
         return $orderExcel;
 
     }
+    /***
+     * 预定单列表
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function destineList(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $destineData = ActivityDestineOperate::getDestineList($params['params']);
+            if(!$destineData){
+                return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+            }
+
+            return apiResponse($destineData,ApiStatus::CODE_0);
+        }catch (\Exception $e) {
+            LogApi::error('预订单列表异常',$e);
+            return apiResponse([],ApiStatus::CODE_50000);
+
+        }
+
+    }
+
+    /**
+     * 获取详情日志
+     * @param Request $request
+     */
+    public function destineDetailLog(Request $request){
+        $params = $request->all();
+        if(empty($params['params']['destine_no'])){
+            return apiResponse([],ApiStatus::CODE_20001);  //参数不能为空
+        }
+        $destineData = ActivityDestineOperate::getDestineLogList($params['params']['destine_no']);
+        if(!$destineData){
+            return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+        }
+
+        return apiResponse($destineData,ApiStatus::CODE_0);
+
+    }
+
+
 
 }

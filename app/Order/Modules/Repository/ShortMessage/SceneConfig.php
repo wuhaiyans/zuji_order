@@ -179,4 +179,16 @@ class SceneConfig {
      */
     const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
 
+    /**
+     * 场景：<b>【订金申请退款】</b>
+     */
+    const DESTINE_CREATE = 'DestineCreate';
+
+    /**
+     * 场景：<b>【订金退款成功】</b>
+     */
+    const DESTINE_REFUND = 'DestineRefund';
+
+
+
 }
