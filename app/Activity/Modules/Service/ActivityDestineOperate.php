@@ -303,14 +303,20 @@ class ActivityDestineOperate
                     //15个自然日之内
                     if($destineListArray['data'][$keys]->pay_time > 15*24*3600){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
+                    }else{
+                        $destineListArray['data'][$keys]->refundOperateBefore = false;
                     }
                     //15个自然日后
                     if($destineListArray['data'][$keys]->pay_time < 15*24*3600){
                         $destineListArray['data'][$keys]->refundOperateAfter = true;
+                    }else{
+                        $destineListArray['data'][$keys]->refundOperateAfter = false;
                     }
                     //已下单 已退款
                     if( $destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
                         $destineListArray['data'][$keys]->selectOperate = true;
+                    }else{
+                        $destineListArray['data'][$keys]->selectOperate = false;
                     }
 
                 }else{
