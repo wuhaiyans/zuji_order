@@ -265,13 +265,38 @@ class OrderComponnet implements OrderCreater
             if($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH){
                 $PredictDeliveryTime = strtotime("+4 day");
             }
-            //预计发货时间： 短租（起租时间 -3天）
+            //
             if($this->zuqiType == OrderStatus::ZUQI_TYPE_DAY){
                 $PredictDeliveryTime = strtotime($startTime)- 3*86400;
             }
-        }else{
-            //如果有货 预定发货时间为第二天下午15点
-            $PredictDeliveryTime = strtotime(date("Y-m-d",strtotime("+1 day")))+3600*15;
+        }
+        //如果有货
+        else{
+            //长租 预定发货时间为第二天下午15点
+            if($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH){
+                // 如果小于等于 是否小于15点 15点之前为当天发货时间 如果 15点之后为第二天15点前发货
+                if(time() >=strtotime("Y-m-d")+3600*15){
+                    $PredictDeliveryTime = strtotime(date("Y-m-d",strtotime("+1 day")))+3600*15;
+                }else{
+                    $PredictDeliveryTime =strtotime("Y-m-d")+3600*15;
+                }
+            }
+            //判断 起租时间 和当前时间差 如果大于三天 预计发货时间： 短租（起租时间 -3天）
+            if($this->zuqiType == OrderStatus::ZUQI_TYPE_DAY){
+                if((strtotime($startTime)- 3*86400) > strtotime(date("Y-m-d"))){
+                    $PredictDeliveryTime = strtotime($startTime)- 3*86400;
+                }
+                // 如果小于等于 是否小于15点 15点之前为当天发货时间 如果 15点之后为第二天15点前发货
+                else{
+                    if(time() >=strtotime("Y-m-d")+3600*15){
+                        $PredictDeliveryTime = strtotime(date("Y-m-d",strtotime("+1 day")))+3600*15;
+                    }else{
+                        $PredictDeliveryTime =strtotime("Y-m-d")+3600*15;
+                    }
+
+                }
+            }
+
         }
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
