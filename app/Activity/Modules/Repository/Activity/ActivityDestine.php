@@ -77,6 +77,7 @@ class ActivityDestine{
         }
         $this->model->destine_status = DestineStatus::DestineRefunded;
         $this->model->update_time = time();
+        $this->model->account_time = time();
         return $this->model->save();
     }
 	/**
