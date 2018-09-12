@@ -194,19 +194,20 @@ class ActivityDestineController extends Controller
         $pre_count = $params['smallsize']?? 500;
 
         $smallPage = ceil($total_export_count/$pre_count);
-        $abc = 1;
+     //   $abc = 1;
 
         // 表头
         $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
 
         $orderExcel = array();
         while(true) {
-            if ($abc>$smallPage) {
-                break;
-            }
+            //if ($abc>$smallPage) {
+             //   break;
+          //  }
             $offset = ($outPages - 1) * $total_export_count;
-            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
-            ++$abc;
+           // $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            $params['page'] = intval(($offset / $pre_count)) ;
+          //  ++$abc;
             $destineData = array();
             $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
             if ($destineData) {
@@ -223,7 +224,7 @@ class ActivityDestineController extends Controller
                     ];
                 }
 
-                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表',$abc);
+                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表');
 
             } else {
                 break;
