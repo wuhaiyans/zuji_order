@@ -307,7 +307,7 @@ class DeliveryService
             $it['status_mark'] = $item->getStatus();
             $it['create_time'] = date('Y-m-d H:i', $it['create_time']);
             $it['delivery_time'] = date('Y-m-d H:i', $it['delivery_time']);
-            $it['predict_delivery_time'] = date('Y-m-d H:i:s', $it['predict_delivery_time']);
+            $it['predict_delivery_time'] = ($it['predict_delivery_time']) ? date('Y-m-d H:i:s', $it['predict_delivery_time']):'无';
 
             if ($show_detail) {
                 $goods_list = $item->goods->toArray();
