@@ -42,12 +42,28 @@ class ActivityDestine{
 	}
 
     /**
-     * 修改预定生成时间
+     * 修改预定生成时间,金额支付方式等数据
+     *  $destine = [
+            'activity_id' => $data['activity_id'],    //【必须】 int   活动ID
+            'user_id' => $data['user_id'],        //【必须】 int   用户ID
+            'mobile' => $data['mobile'],         //【必须】 string 用户手机号
+            'destine_amount' => $destineAmount,                     //【必须】 float  预定金额
+            'pay_type' => $data['pay_type'],       //【必须】 int  支付类型
+            'app_id' => $data['appid'],          //【必须】 int app_id
+            'channel_id' => $channelId,                     //【必须】 int 渠道Id
+            'activity_name' => $activityName,                     //【必须】 string 活动名称
+    ];
      * @return bool
      */
-    public function upCreateTime($activityName,$destineAmount):bool{
-        $this->model->activity_name = $activityName;
-        $this->model->destine_amount = $destineAmount;
+    public function upDate($destine):bool{
+        $this->model->activity_name = $destine['activity_name'];
+        $this->model->user_id = $destine['user_id'];
+        $this->model->mobile = $destine['mobile'];
+        $this->model->destine_amount = $destine['destine_amount'];
+        $this->model->pay_type = $destine['pay_type'];
+        $this->model->app_id = $destine['app_id'];
+        $this->model->channel_id = $destine['channel_id'];
+        $this->model->activity_name = $destine['activity_name'];
 
         $this->model->create_time = time();
         $this->model->update_time = time();
