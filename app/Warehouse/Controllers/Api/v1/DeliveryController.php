@@ -57,6 +57,7 @@ class DeliveryController extends Controller
             'customer_address'  => 'required', //地址
             'business_key'		=> 'required', //业务类型
             'business_no'		=> 'required', //业务编号
+            'predict_delivery_time'=>'required', //预计发货时间
         ];
 
         $params = $this->_dealParams($rules);
