@@ -201,13 +201,12 @@ class ActivityDestineController extends Controller
 
         $orderExcel = array();
         while(true) {
-            //if ($abc>$smallPage) {
-             //   break;
-          //  }
+            if ($abc>$smallPage) {
+                break;
+            }
             $offset = ($outPages - 1) * $total_export_count;
-           // $params['page'] = intval(($offset / $pre_count)+ $abc) ;
-            $params['page'] = intval(($offset / $pre_count)) ;
-          //  ++$abc;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
             $destineData = array();
             $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
             if ($destineData) {
