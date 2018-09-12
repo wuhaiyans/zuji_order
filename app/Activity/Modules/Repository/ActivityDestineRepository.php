@@ -27,7 +27,6 @@ class ActivityDestineRepository
      *      'mobile'        => ' ', //【必须】 string 用户手机号
      *      'destine_amount'=> ' ', //【必须】 float  预定金额
      *      'pay_type'      => ' ', //【必须】 int  支付类型
-     *      'pay_channel'   => ' ', //【必须】 int  支付渠道
      *      'app_id'        => ' ', //【必须】 int app_id
      *      'channel_id'    => ' ', //【必须】 int 渠道Id
      *      'activity_name' => ' ', //【必须】 string 活动名称
@@ -43,12 +42,11 @@ class ActivityDestineRepository
             'mobile'        => 'required',
             'destine_amount'=> 'required',
             'pay_type'      => 'required',
-            'pay_channel'   => 'required',
             'app_id'        => 'required',
             'channel_id'    => 'required',
             'activity_name' => 'required',
         ]);
-        if(count($data)<10){
+        if(count($data)<9){
             return false;
         }
         $this->activityDestine->destine_no = $data['destine_no'];
@@ -57,7 +55,6 @@ class ActivityDestineRepository
         $this->activityDestine->mobile = $data['mobile'];
         $this->activityDestine->destine_amount = $data['destine_amount'];
         $this->activityDestine->pay_type = $data['pay_type'];
-        $this->activityDestine->pay_channel = $data['pay_channel'];
         $this->activityDestine->app_id = $data['app_id'];
         $this->activityDestine->channel_id = $data['channel_id'];
         $this->activityDestine->activity_name = $data['activity_name'];
