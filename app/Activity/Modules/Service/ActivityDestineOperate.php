@@ -200,12 +200,7 @@ class ActivityDestineOperate
                     ];
                     $payResult = new Pay($_data);
                 }
-            \App\Lib\Common\LogApi::info("yuyueParams",[
-                'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
-                'front_url' => $data['return_url'], //回调URL
-                'ip'=>$data['ip'],
-                'extended_params'=>$data['extended_params'],
-            ]);
+
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
@@ -213,7 +208,6 @@ class ActivityDestineOperate
                 'ip'=>$data['ip'],
                 'extended_params'=>$data['extended_params'],
             ]);
-            \App\Lib\Common\LogApi::info("yuyueParamsFanhui",$url);
             // 提交事务
             DB::commit();
             return $url;
