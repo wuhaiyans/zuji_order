@@ -235,13 +235,13 @@ class Pay extends \App\Lib\Configurable
 		if( $this->isSuccess() ){
 			throw new \Exception('支付单已完成');
 		}
-		if( $this->needPayment() ){
-			return 'payment';
-		}elseif( $this->needWithhold() ){
+		if( $this->needWithhold() ){
 			return 'withhold_sign';
 		}elseif( $this->needFundauth() ){
 			return 'fundauth';
-		}
+		}elseif( $this->needPayment() ){
+            return 'payment';
+        }
 		throw new \Exception('支付单内部错误');
 	}
 	
@@ -395,14 +395,10 @@ class Pay extends \App\Lib\Configurable
 			LogApi::error('[支付阶段]状态错误');
 			throw new \Exception('恢复失败');
 		}
-		
-		// 支付判断
-		if( $this->needPayment() )
-		{ // 
-			$status = PayStatus::WAIT_PAYMENT;
-		}
+
+
 		// 代扣判断
-		elseif( $this->needWithhold() )
+		if( $this->needWithhold() )
 		{ // 
 			$status = PayStatus::WAIT_WHITHHOLD;
 		}
@@ -410,11 +406,17 @@ class Pay extends \App\Lib\Configurable
 		elseif( $this->needFundauth() )
 		{
 			$status = PayStatus::WAIT_FUNDAUTH;
-		}else{
-			LogApi::error('[支付阶段]状态错误');
-			throw new \Exception('恢复失败');
 		}
-		
+        // 支付判断
+        elseif( $this->needPayment() )
+        { //
+            $status = PayStatus::WAIT_PAYMENT;
+        }else{
+            LogApi::error('[支付阶段]状态错误');
+            throw new \Exception('恢复失败');
+        }
+
+
 		// 更新 支付阶段 表
 		$payModel = new OrderPayModel();
 		$b = $payModel->limit(1)->where([
@@ -923,8 +925,14 @@ class Pay extends \App\Lib\Configurable
 		// 当前环节 预授权
 		elseif( $this->status == PayStatus::WAIT_FUNDAUTH )
 		{
+		    //支付判断
+            if($this->needPayment()){
+                $status = PayStatus::WAIT_PAYMENT;
+            }
 			// 支付完成
-			$status = PayStatus::SUCCESS;
+            else{
+			    $status = PayStatus::SUCCESS;
+            }
 		}
 		// 未找到
 		if( $status == 0 ){
