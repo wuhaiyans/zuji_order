@@ -343,7 +343,7 @@ class OrderController extends Controller
         $abc = 1;
 
         // 租期，成色，颜色，容量，网络制式
-        $headers = ['订单编号','下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
+        $headers = ['订单编号','预计发货时间', '下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
             '订单实际总租金','订单总押金','意外险总金额'];
 
         $orderExcel = array();
@@ -361,6 +361,7 @@ class OrderController extends Controller
                 foreach ($orderData as $item) {
                     $data[] = [
                         $item['order_no'],
+                        $item['predict_delivery_time'],
                         date('Y-m-d H:i:s', $item['create_time']),
                         $item['order_status_name'],
                         $item['appid_name'],
