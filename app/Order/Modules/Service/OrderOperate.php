@@ -1356,6 +1356,8 @@ class OrderOperate
                 $orderListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
 
                 $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
+                //发货时间
+                $orderListArray[$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
 
             }
 
