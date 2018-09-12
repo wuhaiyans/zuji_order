@@ -74,8 +74,29 @@ class ActivityDestineOperate
                 $destine = objectToArray($res);
                 //判断如果存在预定记录 更新预定时间
                 if ($destine['destine_status'] == DestineStatus::DestineCreated) {
+                    //根据appid 获取所在渠道
+                    $ChannelInfo = Channel::getChannel($data['appid']);
+                    if (!is_array($ChannelInfo)) {
+                        DB::rollBack();
+                        set_msg("获取渠道接口数据失败");
+                        return false;
+                    }
+                    $channelId = intval($ChannelInfo['_channel']['id']);
+
+
+                    $destineData = [
+                        'activity_id' => $data['activity_id'],    //【必须】 int   活动ID
+                        'user_id' => $data['user_id'],        //【必须】 int   用户ID
+                        'mobile' => $data['mobile'],         //【必须】 string 用户手机号
+                        'destine_amount' => $destineAmount,                     //【必须】 float  预定金额
+                        'pay_type' => $data['pay_type'],       //【必须】 int  支付类型
+                        'app_id' => $data['appid'],          //【必须】 int app_id
+                        'channel_id' => $channelId,                     //【必须】 int 渠道Id
+                        'activity_name' => $activityName,                     //【必须】 string 活动名称
+                    ];
+
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
-                    $b = $activityDestine->upCreateTime($activityName,$destineAmount,$data['pay_type']);
+                    $b = $activityDestine->upDate($destineData);
                     if (!$b) {
                         DB::rollBack();
                         set_msg("更新预定时间错误");
