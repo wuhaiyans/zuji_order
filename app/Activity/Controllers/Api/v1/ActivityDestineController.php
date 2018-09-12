@@ -231,6 +231,7 @@ class ActivityDestineController extends Controller
         }
 
         return $orderExcel;
+        exit;
 
     }
     /***
