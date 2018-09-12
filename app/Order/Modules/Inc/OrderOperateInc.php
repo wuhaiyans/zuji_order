@@ -61,7 +61,7 @@ class OrderOperateInc
                     //取消
                     'cancel_btn'    => false,
                     //支付后的取消
-                    'cancel_pay_btn'    => true,
+                    'cancel_pay_btn'    => false,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
@@ -330,7 +330,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderPaying => [
                     'return_visit_btn'   => false,
                     //取消订单
-                    'refund_btn'   => false,
+                    'refund_btn'   => true,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息
