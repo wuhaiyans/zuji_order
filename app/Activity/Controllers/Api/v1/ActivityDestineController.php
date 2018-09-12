@@ -179,58 +179,76 @@ class ActivityDestineController extends Controller
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function destineExport(Request $request){
+
         set_time_limit(0);
-        $params = $request->all();
-        $pageSize = 50000;
-        if (isset($params['size']) && $params['size']>=50000) {
-            $pageSize = 50000;
-        } else {
-            $pageSize = $params['size'];
-        }
-        $params['page'] = $params['page']?? 1;
-        $outPages       = $params['page']?? 1;
+        try{
+            $params = $request->all();
+            $params['page']     = !empty($params['page']) ? $params['page'] : 1;
+            $outPages           = !empty($params['page']) ? $params['page'] : 1;
 
-        $total_export_count = $pageSize;
-        $pre_count = $params['smallsize']?? 500;
+            $total_export_count = 5000;
+            $pre_count = 500;
+            $smallPage = ceil($total_export_count/$pre_count);
+            $i = 1;
+            LogApi::debug("预约导出接收参数",$params);
+            header ( "Content-type:application/vnd.ms-excel" );
+            header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台分期列表数据导出" ) . ".csv" );
 
-        $smallPage = ceil($total_export_count/$pre_count);
-        $abc = 1;
+            // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+            $fp = fopen('php://output', 'a');
 
-        // 表头
-        $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
+            // 表头
+            $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
 
-        $orderExcel = array();
-        while(true) {
-            if ($abc>$smallPage) {
-                break;
+            // 将中文标题转换编码，否则乱码
+            foreach ($headers as $k => $v) {
+                $column_name[$k] = iconv('utf-8', 'GB18030', $v);
             }
-            $offset = ($outPages - 1) * $total_export_count;
-            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
-            ++$abc;
-            $destineData = array();
-            $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
-            if ($destineData) {
-                $data = array();
-                foreach ($destineData as $item) {
-                    $data[] = [
-                        $item['destine_no'],
-                        $item['pay_time'],
-                        $item['mobile'],
-                        $item['appid_name'],
-                        $item['pay_type_name'],
-                        $item['account_number'],
-                        $item['destine_status_name'],
-                    ];
+
+            // 将标题名称通过fputcsv写到文件句柄
+            fputcsv($fp, $column_name);
+
+            while(true){
+                if ($i > $smallPage) {
+                    exit;
+                }
+                $offset = ( $outPages - 1) * $total_export_count;
+                $params['page'] = intval(($offset / $pre_count) + $i) ;
+                LogApi::debug("预约导出页数的参数值".$params['page']);
+                ++$i;
+                $destineData = array();
+                $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
+                LogApi::debug("预约导出查询后导出的结果是",$destineData);
+                if ($destineData) {
+                    $data = array();
+                    foreach ($destineData as $item) {
+                        $data[] = [
+                            $item['destine_no'],
+                            $item['pay_time'],
+                            $item['mobile'],
+                            $item['appid_name'],
+                            $item['pay_type_name'],
+                            $item['account_number'],
+                            $item['destine_status_name'],
+                        ];
+                    }
+
+                }else{
+                    break;
                 }
 
-                $orderExcel =  Excel::csvWrite1($data,  $headers, '预订单列表',$abc);
-
-            } else {
-                break;
+                $Excel =  Excel::csvOppointmentListWrite($data, $fp);
             }
+
+            return $Excel;
+
+        } catch (\Exception $e) {
+
+            return apiResponse([],ApiStatus::CODE_95002,$e);
+
         }
 
-        return $orderExcel;
+
 
     }
     /***
