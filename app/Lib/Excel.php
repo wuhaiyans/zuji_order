@@ -239,4 +239,29 @@ class Excel
 
 
     }
+    public static function csvOppointmentListWrite($export_data, $fp , $title='预订单列表导出')
+    {
+
+//        $pre_count = 5000;
+//        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+//            $export_data = $db->getAll($sql." limit ".strval($i*$pre_count).",{$pre_count}");
+        foreach ( $export_data as $item ) {
+            $rows = array();
+            foreach ( $item as $export_obj){
+                $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+            }
+            fputcsv($fp, $rows);
+        }
+
+        // 将已经写到csv中的数据存储变量销毁，释放内存占用
+        unset($export_data);
+        if(ob_get_level()>0){
+
+            ob_flush();
+            flush();
+        }
+
+
+
+    }
 }
