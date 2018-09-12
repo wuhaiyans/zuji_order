@@ -61,7 +61,7 @@ class OrderOperateInc
                     //取消
                     'cancel_btn'    => false,
                     //支付后的取消
-                    'cancel_pay_btn'    => false,
+                    'cancel_pay_btn'    => true,
                     //确认收货
                     'confirm_btn'   => false,
                     //查看物流
