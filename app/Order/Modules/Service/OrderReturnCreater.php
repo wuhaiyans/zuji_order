@@ -8,6 +8,8 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\Pay\PaymentStatus;
+use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
@@ -268,21 +270,37 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
+
+            //获取支付信息
+            $payInfo = PayQuery::getPayByBusiness(1,$order_info['order_no']);
+            if(!$payInfo){
+                return false;//支付单不存在
+            }
             //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+
             }
             //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
-                || $order_info['pay_type'] == PayInc::PcreditPayInstallment
                 ){
                 $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
             }
+            //花呗分期+预授权
+            if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+               if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                   $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                   $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+               }
 
+                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                }
+            }
 
 
 

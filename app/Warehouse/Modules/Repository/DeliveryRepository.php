@@ -63,7 +63,8 @@ class DeliveryRepository
             'customer_mobile' => isset($data['customer_mobile']) ? $data['customer_mobile'] : '',
             'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : '',
             'business_key' => $data['business_key'],
-            'business_no' => $data['business_no']
+            'business_no' => $data['business_no'],
+            'predict_delivery_time' => $data['predict_delivery_time']
         ];
 
         try {
@@ -552,7 +553,7 @@ class DeliveryRepository
         return $query->paginate($limit,
             [
                 'delivery_no','order_no', 'logistics_id','logistics_no','customer','customer_mobile',
-                'customer_address','status', 'create_time', 'delivery_time', 'status_remark'
+                'customer_address','status', 'create_time', 'delivery_time', 'status_remark', 'predict_delivery_time'
             ],
             'page', $page);
     }
