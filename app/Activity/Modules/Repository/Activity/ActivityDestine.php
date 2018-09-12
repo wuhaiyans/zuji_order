@@ -42,12 +42,13 @@ class ActivityDestine{
 	}
 
     /**
-     * 修改预定生成时间
+     * 修改预定生成时间,金额支付方式
      * @return bool
      */
-    public function upCreateTime($activityName,$destineAmount):bool{
+    public function upCreateTime($activityName,$destineAmount,$payType):bool{
         $this->model->activity_name = $activityName;
         $this->model->destine_amount = $destineAmount;
+        $this->model->pay_type = $payType;
 
         $this->model->create_time = time();
         $this->model->update_time = time();

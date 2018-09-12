@@ -75,7 +75,7 @@ class ActivityDestineOperate
                 //判断如果存在预定记录 更新预定时间
                 if ($destine['destine_status'] == DestineStatus::DestineCreated) {
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
-                    $b = $activityDestine->upCreateTime($activityName,$destineAmount);
+                    $b = $activityDestine->upCreateTime($activityName,$destineAmount,$data['pay_type']);
                     if (!$b) {
                         DB::rollBack();
                         set_msg("更新预定时间错误");
