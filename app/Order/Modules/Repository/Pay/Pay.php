@@ -889,33 +889,19 @@ class Pay extends \App\Lib\Configurable
 	{
 		LogApi::debug('[支付阶段]查找下一个阶段状态');
 		$status = 0;
-		// 当前环节 支付 
-		if( $this->status == PayStatus::WAIT_PAYMENT )
-		{
-			// 代扣判断
-			if( $this->needWithhold() )
-			{ // 
-				$status = PayStatus::WAIT_WHITHHOLD;
-			}
-			
-			// 预授权判断
-			elseif( $this->needFundauth() )
-			{
-				$status = PayStatus::WAIT_FUNDAUTH;
-			}
-			// 支付完成
-			else{
-				$status = PayStatus::SUCCESS;
-			}
-		}
+
 		// 当前环节 代扣签约 
-		elseif( $this->status == PayStatus::WAIT_WHITHHOLD )
+		if( $this->status == PayStatus::WAIT_WHITHHOLD )
 		{
 			// 预授权判断
 			if( $this->needFundauth() )
 			{
 				$status = PayStatus::WAIT_FUNDAUTH;
 			}
+            //支付判断
+            elseif($this->needPayment()){
+                $status = PayStatus::WAIT_PAYMENT;
+            }
 			// 支付完成
 			else{
 				$status = PayStatus::SUCCESS;
@@ -934,6 +920,13 @@ class Pay extends \App\Lib\Configurable
 			    $status = PayStatus::SUCCESS;
             }
 		}
+
+
+        // 当前环节 支付
+        if( $this->status == PayStatus::WAIT_PAYMENT )
+        {
+            $status = PayStatus::SUCCESS;
+        }
 		// 未找到
 		if( $status == 0 ){
 			LogApi::error('[支付阶段]查询下一个阶段状态异常');
@@ -949,9 +942,9 @@ class Pay extends \App\Lib\Configurable
 	 */
 	private function _statusCallback( $step )
 	{
-		// 支付环节完成，但支付阶段还有后续操作时，也回调业务通知
+		// 判断支付环境是否未完成 但支付阶段还有后续操作时，也回调业务通知
 		if( $this->status != PayStatus::SUCCESS
-				&& $step == 'payment' )
+				&& $step != 'payment' )
 		{
 			$call = $this->_getBusinessCallback();
 			if( !is_callable( $call ) ){
