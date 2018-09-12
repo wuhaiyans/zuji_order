@@ -735,8 +735,13 @@ class OrderReturnCreater
                     if(!$pay_result){
                         return false;
                     }
-                    $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
-                    $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                    if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                    }
+                    if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                    }
+
                 }
 
                 //创建清单
