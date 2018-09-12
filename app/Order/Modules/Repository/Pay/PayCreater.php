@@ -273,7 +273,7 @@ class PayCreater {
 	public static function createPaymentWithholdFundauth( array $params ): Pay
 	{
 		// 状态
-		$params['status'] = PayStatus::WAIT_PAYMENT;	
+		$params['status'] = PayStatus::WAIT_WHITHHOLD;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 		$params['withholdStatus'] = WithholdStatus::WAIT_WITHHOLD;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
