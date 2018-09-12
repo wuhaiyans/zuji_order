@@ -49,6 +49,7 @@ class ActivityDestine{
             'mobile' => $data['mobile'],         //【必须】 string 用户手机号
             'destine_amount' => $destineAmount,                     //【必须】 float  预定金额
             'pay_type' => $data['pay_type'],       //【必须】 int  支付类型
+            'pay_channel' => $data['pay_channel_id'],       //【必须】 int  支付渠道
             'app_id' => $data['appid'],          //【必须】 int app_id
             'channel_id' => $channelId,                     //【必须】 int 渠道Id
             'activity_name' => $activityName,                     //【必须】 string 活动名称
@@ -61,6 +62,7 @@ class ActivityDestine{
         $this->model->mobile = $destine['mobile'];
         $this->model->destine_amount = $destine['destine_amount'];
         $this->model->pay_type = $destine['pay_type'];
+        $this->model->pay_channel= $destine['pay_channel'];
         $this->model->app_id = $destine['app_id'];
         $this->model->channel_id = $destine['channel_id'];
         $this->model->activity_name = $destine['activity_name'];
