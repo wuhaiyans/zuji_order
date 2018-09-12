@@ -200,7 +200,7 @@ class PayCreater {
 	}
 	
 	/**
-	 * 创建第5种支付方式
+	 * 创建第5种支付方式 先预授权 再支付
 	 * <p>普通支付+资金预授权</p>
 	 * @param	array	$params		参数
 	 * [
@@ -219,7 +219,7 @@ class PayCreater {
 	public static function createPaymentFundauth( array $params ): Pay
 	{
 		
-		$params['status'] = PayStatus::WAIT_PAYMENT;
+		$params['status'] = PayStatus::WAIT_FUNDAUTH;
 		$params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
 		$params['fundauthStatus'] = FundauthStatus::WAIT_FUNDAUTH;
 		
