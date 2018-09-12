@@ -8,6 +8,8 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\OrderPayPaymentRepository;
+use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
 use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
@@ -272,7 +274,7 @@ class OrderReturnCreater
             }
 
             //获取支付信息
-            $payInfo = PayQuery::getPayByBusiness(1,$order_info['order_no']);
+            $payInfo = OrderPayRepository::find($order_info['order_no']);
             if(!$payInfo){
                 return false;//支付单不存在
             }
