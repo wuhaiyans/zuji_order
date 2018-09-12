@@ -115,7 +115,7 @@ class ActivityDestineRepository
             ->get();
         LogApi::debug("新机预约查询结果",$destineList);
         $destineArrays = array_column(objectToArray($destineList),NULL,'destine_no');
-
+        LogApi::debug("新机预约查询最终结果",$destineArrays);
         return $destineArrays;
     }
 
