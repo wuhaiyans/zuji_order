@@ -191,7 +191,7 @@ class ActivityDestineController extends Controller
         $outPages       = $params['page']?? 1;
 
         $total_export_count = $pageSize;
-        $pre_count = $params['smallsize']?? 500;
+        $pre_count = $params['smallsize']?? 5000;
 
         $smallPage = ceil($total_export_count/$pre_count);
         $abc = 1;
