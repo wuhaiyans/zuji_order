@@ -255,10 +255,10 @@ class ActivityDestineOperate
      * @param array $param
      * @param int $pagesize
      */
-    public static function getDestineExportList($param = array(),$pagesize=5){
+    public static function getDestineExportList($param = array()){
         //根据条件查找预定单列表
 
-        $destineListArray = ActivityDestineRepository::getDestineList($param,$pagesize=5);
+        $destineListArray = ActivityDestineRepository::getDestineList($param);
         if (empty($destineListArray)) return false;
 
         if (!empty($destineListArray)) {
