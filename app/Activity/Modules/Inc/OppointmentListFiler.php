@@ -26,7 +26,7 @@ class OppointmentListFiler
         return array(
 
                     'order_state'=>OrderStatus::getStatusType(),
-                    'pay_type_list' =>PayInc::getPayList(),
+                    'pay_type_list' =>PayInc::getOppointmentPayList(),
                     'appid_list' => $channlistName,
                     'destine_list' =>DestineStatus::getStatusType()
                 );

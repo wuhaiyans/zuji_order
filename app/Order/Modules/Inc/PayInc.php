@@ -44,13 +44,23 @@ class PayInc{
     public static function getPayList(){
         return [
             self::WithhodingPay => '代扣+预授权',
-            self::FlowerStagePay => '花呗分期',
+            self::FlowerStagePay => '支付宝支付',
             self::FlowerDepositPay => '押金预授权/作废',
             self::UnionPay => '银联支付',
             self::MiniAlipay=>'支付宝小程序支付',
             self::LebaifenPay=>'乐百分支付',
             self::WeChatPay=>'微信支付',
             self::PcreditPayInstallment=>'花呗分期+预授权',
+        ];
+    }
+    /**
+     * 预约支付列表
+     * @return array
+     */
+    public static function getOppointmentPayList(){
+        return [
+            self::FlowerStagePay => '支付宝支付',
+            self::WeChatPay=>'微信支付',
         ];
     }
 
