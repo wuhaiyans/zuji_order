@@ -37,6 +37,7 @@ class InstalmentController extends Controller
         $params         = filter_array($request, [
             'begin_time'    => 'required',
             'end_time'      => 'required',
+            'order_no'      => 'required',
             'goods_no'      => 'required',
             'status'        => 'required',
             'kw_type'       => 'required',
@@ -58,7 +59,6 @@ class InstalmentController extends Controller
 
         $params['is_instalment_list'] = 1;
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
-
         foreach($list as &$item){
 
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";

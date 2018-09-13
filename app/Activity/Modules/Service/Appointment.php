@@ -262,7 +262,7 @@ class Appointment
                 }
                 DB::commit();
                 //订金退款申请成功发送短信
-                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $destineInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
                 $b=$orderNoticeObj->notify();
                 LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                 return true;
@@ -325,7 +325,7 @@ class Appointment
             //事务提交
             DB::commit();
             //订金退款申请成功发送短信
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
             $b=$orderNoticeObj->notify();
             LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
             return true;
@@ -382,7 +382,7 @@ class Appointment
                }
                $destineInfo=$activityDestine->getData();
                //订金退款申请成功发送短信
-               $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
+               $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $destineInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
                $b=$orderNoticeObj->notify();
                LogApi::debug($b?"destine_no :".$destineInfo['destine_no']." IS OK":"IS error");
                return true;
