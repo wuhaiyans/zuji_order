@@ -94,7 +94,7 @@ class WithholdAdvanceOne implements ShortMessage {
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($dataSms['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 
