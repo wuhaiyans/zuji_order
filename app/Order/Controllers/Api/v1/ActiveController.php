@@ -13,6 +13,7 @@ class ActiveController extends Controller
      * @return bool
      */
     public function sendMessage(){
+        ini_set('max_execution_time', '0');
         try{
             $arr =[];
             $limit  = 50;
@@ -35,35 +36,35 @@ class ActiveController extends Controller
                 }
 
                 foreach($result as $item){
-                        p($item['id'],1);
-//                    $url = 'https://h5.nqyong.com/myBillDetail?';
-//
-//                    $urlData = [
-//                        'orderNo'       => $item['order_no'],     //  订单号
-//                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
-//                        'id'            => $item['id'],           //  分期ID
-//                        'appid'         => $item['appid'],        //  商品编号
-//                        'goodsNo'       => $item['goods_no'],     //  商品编号
-//                    ];
-//
-//                    $zhifuLianjie   = $url . createLinkstringUrlencode($urlData);
-//                    $mobile         = trim($item['mobile']);
-//                    // 短信参数
-//                    $dataSms =[
-//                        'realName'      => trim($item['realname']),
-//                        'zuJin'         => trim($item['amount']),
-//                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-//                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
-//                    ];
-//					// 发送短信
-//					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
-//
-//                    \App\Order\Models\OrderActive::where(
-//                        ['id'=>$item['id']]
-//                    )->update(['status' => 1]);
+
+                    $url = 'https://h5.nqyong.com/myBillDetail?';
+
+                    $urlData = [
+                        'orderNo'       => $item['order_no'],     //  订单号
+                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
+                        'id'            => $item['id'],           //  分期ID
+                        'appid'         => $item['appid'],        //  商品编号
+                        'goodsNo'       => $item['goods_no'],     //  商品编号
+                    ];
+
+                    $zhifuLianjie   = $url . createLinkstringUrlencode($urlData);
+                    $mobile         = trim($item['mobile']);
+                    // 短信参数
+                    $dataSms =[
+                        'realName'      => trim($item['realname']),
+                        'zuJin'         => trim($item['amount']),
+                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
+                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
+                    ];
+					// 发送短信
+					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
+
+                    \App\Order\Models\OrderActive::where(
+                        ['id'=>$item['id']]
+                    )->update(['status' => 1]);
 
                 }
-                sleep($sleep);
+//                sleep($sleep);
             } while (true);
 
             if(count($arr) > 0){
