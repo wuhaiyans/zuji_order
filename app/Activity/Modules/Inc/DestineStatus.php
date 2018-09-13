@@ -85,6 +85,7 @@ class DestineStatus{
         ];
     }
 
+
     /**
      * 活动体验状态值 转换成 状态名称
      * @param int $status   活动体验状态值
