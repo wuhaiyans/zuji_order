@@ -23,11 +23,14 @@ class OrderCleaningListFiler
         return array(
                     //出账类型
                     'out_status'=>Inc\OrderCleaningStatus::getOrderCleaningList(),
-                    //出账类型
-//                    'out_type'=>array(
-//                            'zujin' => '租金',
-//                            'other' => '其它',
-//                        ),
+//                    出账类型
+                    'out_type'=>array(
+                        '2' => '退货',
+                        '3' => '退款',
+                        '4' => '还机',
+                        '5' => '买断',
+                        '9' => '定金退款',
+                        ),
                     //入账来源
                     'appid_list' => $channlistName,
                     //出账方式

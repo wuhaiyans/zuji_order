@@ -331,6 +331,7 @@ class ActivityDestineOperate
                         $destineListArray['data'][$keys]->refundOperateAfter = false;
                     }
 
+                    $destineListArray['data'][$keys]->selectOperate = false;
                 }else if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
                     $destineListArray['data'][$keys]->selectOperate = true;
                     $destineListArray['data'][$keys]->refundOperateAfter = false;
