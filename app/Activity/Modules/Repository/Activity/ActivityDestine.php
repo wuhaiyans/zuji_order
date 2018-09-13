@@ -117,7 +117,7 @@ class ActivityDestine{
      * @return bool
      */
 	public function updateActivityDestine(array $data):bool{
-        $this->model->account_time = $data['account_time'];
+        $this->model->account_time = strtotime($data['account_time']);
         $this->model->account_number = $data['account_number'];
         $this->model->refund_remark = $data['refund_remark'];
         $this->model->destine_status = DestineStatus::DestineRefunded;

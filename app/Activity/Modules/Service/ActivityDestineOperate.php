@@ -317,19 +317,25 @@ class ActivityDestineOperate
                 //应用来源名称
                 $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
                 if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
-                    //15个自然日之内
-                    if($destineListArray['data'][$keys]->pay_time + 15*24*3600 >time()){
+                    if($destineListArray['data'][$keys]->pay_type ==PayInc::WeChatPay){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
-                    }else{
-                        $destineListArray['data'][$keys]->refundOperateBefore = false;
-
-                    }
-                    //15个自然日后
-                    if($destineListArray['data'][$keys]->pay_time + 15*24*3600<time()){
-                        $destineListArray['data'][$keys]->refundOperateAfter = true;
-                    }else{
                         $destineListArray['data'][$keys]->refundOperateAfter = false;
+                    }else{
+                        //15个自然日之内
+                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600 >time()){
+                            $destineListArray['data'][$keys]->refundOperateBefore = true;
+                        }else{
+                            $destineListArray['data'][$keys]->refundOperateBefore = false;
+
+                        }
+                        //15个自然日后
+                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600<time()){
+                            $destineListArray['data'][$keys]->refundOperateAfter = true;
+                        }else{
+                            $destineListArray['data'][$keys]->refundOperateAfter = false;
+                        }
                     }
+
 
                     $destineListArray['data'][$keys]->selectOperate = false;
                 }else if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
