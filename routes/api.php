@@ -139,12 +139,9 @@ $api->version('v1', [
     // 定时任务 月初发送提前还款短信
     $api->get('cronPrepayment', 'CronController@cronPrepayment');
 
-    // 定时任务 提前三天 发送扣款短信
-    $api->get('cronWithholdThreeMessage', 'CronController@cronWithholdThreeMessage');
+    // 定时任务 月初发送提前还款短信
+    $api->get('cronWithholdMessage', 'CronController@cronWithholdMessage');
 
-    // 定时任务 提前一天 发送扣款短信
-    $api->get('cronWithholdOneMessage', 'CronController@cronWithholdOneMessage');
-    
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
      ************************************************************************************************/
