@@ -217,7 +217,7 @@ class Appointment
             }
             $destineInfo=$activityDestineInfo->getData();
             //如果预定状态为  已支付，已下单时可以退款
-            if($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed){
+            if( $destineInfo['destine_status'] == DestineStatus::DestinePayed){
                 //判断预定时间是否在15个自然日内
                 if(time() -$destineInfo['pay_time'] > 15*24*3600)
                 {
@@ -307,7 +307,7 @@ class Appointment
             }
             $destineInfo = $activityDestineInfo->getData();
             //如果预定状态为  已支付，已下单时可以退款
-            if ($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
+            if ( $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
                 //判断预定时间是否在15个自然日外
                 if (time() - $destineInfo['pay_time'] < 15 * 24 * 3600) {
                     LogApi::debug("[appointmentRefund]预定时间必须在15个自然日外,预定创建时间" . $destineInfo['create_time']);

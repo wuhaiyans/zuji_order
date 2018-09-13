@@ -316,7 +316,7 @@ class ActivityDestineOperate
                 $destineListArray['data'][$keys]->pay_type_name = PayInc::getPayName($destineListArray['data'][$keys]->pay_type);
                 //应用来源名称
                 $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
-                if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed || $destineListArray['data'][$keys]->destine_status == DestineStatus::DestineOrderCreated){
+                if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
                     //15个自然日之内
                     if($destineListArray['data'][$keys]->pay_time > 15*24*3600){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
