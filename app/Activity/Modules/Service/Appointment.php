@@ -276,6 +276,8 @@ class Appointment
                 return true;
 
             }else{
+                //事务回滚
+                DB::rollBack();
                 LogApi::debug("[appointmentRefund]预定状态必须是已支付，已下单,预定状态值".$destineInfo['destine_status']);
                 //不允许退预定金
                 return false;
