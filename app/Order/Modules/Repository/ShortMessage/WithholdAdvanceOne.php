@@ -84,17 +84,13 @@ class WithholdAdvanceOne implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $date  = date("Y-m-d",strtotime("+1 day"));
 
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
-            'orderNo'       => $orderInfo['order_no'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
-            'createTime'    => $date,
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
         // 发送短息

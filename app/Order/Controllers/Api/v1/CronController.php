@@ -4,9 +4,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use App\Order\Models\OrderGoodExtend;
-
-
-
+use Illuminate\Http\Request;
 
 class CronController extends Controller
 {
@@ -87,22 +85,14 @@ class CronController extends Controller
     }
 
     /**
-     * 定时任务  提前三天 一天 发送扣款短信
+     * 定时任务  提前一天 三天 七天 发送扣款短信
      */
-    public function cronWithholdThreeMessage(){
+    public function cronWithholdMessage(Request $request){
+        $day = $request->get('day', 1);
         // 超时时间
         ini_set('max_execution_time', '0');
-        Service\CronOperate::cronPrepaymentMessage(3);
+        Service\CronOperate::cronPrepaymentMessage($day);
         echo "complete";die;
     }
 
-    /**
-     * 定时任务  提前三天 一天 发送扣款短信
-     */
-    public function cronWithholdOneMessage(){
-        // 超时时间
-        ini_set('max_execution_time', '0');
-        Service\CronOperate::cronPrepaymentMessage(1);
-        echo "complete";die;
-    }
 }

@@ -36,6 +36,7 @@ class WithholdAdvanceThree implements ShortMessage {
     public function notify(){
 
 
+
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
@@ -85,17 +86,15 @@ class WithholdAdvanceThree implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $date  = date("Y-m-d",strtotime("+3 day"));
+        $day = $this->data;
 
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
-            'orderNo'       => $orderInfo['order_no'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
-            'createTime'    => $date,
+            'createTime'    => $day['day'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
         // 发送短息
