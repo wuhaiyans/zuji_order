@@ -253,6 +253,8 @@ class Appointment
 
                 $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
+                    LogApi::debug("[appointmentRefund]创建退款清单失败",$pay_result);
+                    set_msg("获取订单的支付信息失败");
                     //事务回滚
                     DB::rollBack();
                     return false;//创建退款清单失败
@@ -260,6 +262,8 @@ class Appointment
                 //更新预订状态为退款中
                 $updateDestineRefund = $activityDestineInfo->updateDestineRefund($params['refund_remark']);
                 if(!$updateDestineRefund){
+                    LogApi::debug("[appointmentRefund]更新预订状态为退款中失败",$pay_result);
+                    set_msg("获取订单的支付信息失败");
                     //事务回滚
                     DB::rollBack();
                     return false;//更新失败

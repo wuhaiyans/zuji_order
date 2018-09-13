@@ -46,6 +46,11 @@ class Config {
      * @var int 33
      */
     const CHANNELID_MICRO_RECOVERY  = '33';
+    /**
+     * 渠道配置<b>【花呗先享渠道】</b>
+     * @var int 35
+     */
+    const CHANNELID_FLOWER_ENJOY  = '35';
 
 	
 	/**
@@ -195,6 +200,10 @@ class Config {
                 SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
                 SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
 
+            ],
+            // 花呗先享
+            self::CHANNELID_FLOWER_ENJOY => [
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){

@@ -22,9 +22,13 @@ return [
     'api.advance.myAdvance'            => 'AdvanceActivityController@myAdvance', //我的预约
 
 
+    //-+------------------------------------------------------------------------
+    // | 活动体验预定接口
+    //-+------------------------------------------------------------------------
+    'api.experience.destine'             => 'ExperienceDestineController@experienceDestine', //活动体验支付接口
+    'api.experience.destineQuery'       => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
 
-
-
+    
     //-+------------------------------------------------------------------------
     // | 预约退款
     //-+------------------------------------------------------------------------
