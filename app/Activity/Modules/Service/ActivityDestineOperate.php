@@ -113,6 +113,10 @@ class ActivityDestineOperate
             //如果没有预订记录 则新增记录
             else{
                 $destineNo = createNo("YD");  //生成预订编号
+                if (redisIncr("destine_add_".$data['user_id'],60)>1) {
+                    return false;
+                }
+
                 //根据appid 获取所在渠道
                 $ChannelInfo = Channel::getChannel($data['appid']);
                 if (!is_array($ChannelInfo)) {
