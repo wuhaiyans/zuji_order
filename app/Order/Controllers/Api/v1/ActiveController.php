@@ -15,10 +15,10 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 50;
+            $limit  = 1;
             $page   = 1;
             $sleep  = 20;
-            $code   = "SMS_113461190";
+            $code   = "SMS_113461070";
 
 
             do {
@@ -36,8 +36,26 @@ class ActiveController extends Controller
 
                 foreach($result as $item){
 
-                    $dataSms = [
-                        'a'      => "",
+                    $webUrl = env('WEB_H5_URL');
+                    $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
+                    $url = $url  . 'myBillDetail?';
+
+                    $urlData = [
+                        'orderNo'       => $item['order_no'],     //  订单号
+                        'zuqi_type'     => $item['zuqi_type'],         //  租期类型
+                        'id'            => $item['id'],           //  分期ID
+                        'appid'         => $item['appid'],             //  商品编号
+                        'goodsNo'       => $item['goods_no'],     //  商品编号
+                    ];
+
+                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
+
+                    // 短信参数
+                    $dataSms =[
+                        'realName'      => $item['realname'],
+                        'zuJin'         => $item['amount'],
+                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
+                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
@@ -45,8 +63,10 @@ class ActiveController extends Controller
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
+                die;
                 }
-                sleep($sleep);
+                die;
+//                sleep($sleep);
             } while (true);
 
             if(count($arr) > 0){
