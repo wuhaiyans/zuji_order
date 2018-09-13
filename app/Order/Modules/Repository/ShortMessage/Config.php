@@ -204,7 +204,6 @@ class Config {
             // 花呗先享
             self::CHANNELID_FLOWER_ENJOY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
-
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){
