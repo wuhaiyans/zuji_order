@@ -46,8 +46,8 @@ class ActiveController extends Controller
                         'goodsNo'       => $item['goods_no'],     //  商品编号
                     ];
 
-                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
-
+                    $zhifuLianjie   = $url . createLinkstringUrlencode($urlData);
+                    $mobile         = trim($item['mobile']);
                     // 短信参数
                     $dataSms =[
                         'realName'      => trim($item['realname']),
@@ -56,12 +56,12 @@ class ActiveController extends Controller
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
 					// 发送短信
-					\App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
-                die;
+
                 }
                 die;
 //                sleep($sleep);
