@@ -192,12 +192,12 @@ class ActivityDestineRepository
 
         //根据定金支付时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) ) {
-            $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
         }
 
         //根据定金支付时间
         if ( isset($param['end_time']) && !empty($param['end_time'])) {
-            $whereArray[] = ['pay_time', '<', (strtotime($param['end_time'])+3600*24)];
+            $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
         return $whereArray;
     }

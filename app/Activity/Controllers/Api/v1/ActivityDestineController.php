@@ -263,6 +263,7 @@ class ActivityDestineController extends Controller
         try{
             $params = $request->all();
             $destineData = ActivityDestineOperate::getDestineList($params['params']);
+            p($destineData);
             if(!$destineData){
                 return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
             }

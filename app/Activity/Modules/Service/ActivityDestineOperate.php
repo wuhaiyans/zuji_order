@@ -305,6 +305,7 @@ class ActivityDestineOperate
         //根据条件查找预定单列表
 
         $destineListArray = ActivityDestineRepository::getDestinePageList($param);
+        p($destineListArray);
         if (empty($destineListArray)) return false;
 
         if (!empty($destineListArray)) {
