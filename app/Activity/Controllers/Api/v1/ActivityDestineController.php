@@ -217,7 +217,7 @@ class ActivityDestineController extends Controller
                 LogApi::debug("预约导出页数的参数值".$params['page']);
                 ++$i;
                 $destineData = array();
-                $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
+                $destineData = ActivityDestineOperate::getDestineExportList($params);
                 LogApi::debug("预约导出查询后导出的结果是",$destineData);
                 if ($destineData) {
                     $data = array();

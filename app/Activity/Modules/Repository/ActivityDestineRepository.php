@@ -104,7 +104,9 @@ class ActivityDestineRepository
 
      */
     public static function getDestineList($param=array()){
-
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $pageSize   = 500;
+        $offset     = ($page - 1) * $pageSize;
         $whereArray= self::get_where($param);  //获取搜索的条件
         LogApi::debug("新机预约导出的条件",$whereArray);
         $destineArrays = array();
@@ -112,6 +114,8 @@ class ActivityDestineRepository
         $destineList =  DB::table('order_activity_destine')
             ->select('order_activity_destine.*')
             ->where($whereArray)
+            ->offset($offset)
+            ->limit($pageSize)
             ->orderBy('create_time', 'DESC')
             ->get();
         LogApi::debug("新机预约查询结果",$destineList);
