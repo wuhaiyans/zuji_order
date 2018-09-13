@@ -25,10 +25,6 @@ class DestineStatus{
      */
     const DestinePayed = 2;
     /**
-     * @var int 预定已下单
-     */
-    const DestineOrderCreated  = 3;
-    /**
      * @var int 预定已退款
      */
     const DestineRefunded = 4;
@@ -45,7 +41,6 @@ class DestineStatus{
         return [
             self::DestineCreated => '未支付',
             self::DestinePayed => '已支付',
-            self::DestineOrderCreated => '已下单',
             self::DestineRefunded => '已退款',
             self::DestineRefund => '退款中',
         ];
