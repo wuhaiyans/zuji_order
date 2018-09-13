@@ -36,15 +36,13 @@ class ActiveController extends Controller
 
                 foreach($result as $item){
 
-                    $webUrl = env('WEB_H5_URL');
-                    $url = isset($webUrl) ? $webUrl : 'https://h5.nqyong.com/';
-                    $url = $url  . 'myBillDetail?';
+                    $url = 'https://h5.nqyong.com/myBillDetail?';
 
                     $urlData = [
                         'orderNo'       => $item['order_no'],     //  订单号
-                        'zuqi_type'     => $item['zuqi_type'],         //  租期类型
+                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
                         'id'            => $item['id'],           //  分期ID
-                        'appid'         => $item['appid'],             //  商品编号
+                        'appid'         => $item['appid'],        //  商品编号
                         'goodsNo'       => $item['goods_no'],     //  商品编号
                     ];
 
