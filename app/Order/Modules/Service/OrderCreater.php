@@ -264,28 +264,45 @@ class OrderCreater
         $total_amount =0;
         $payType =$schemaData['order']['pay_type'];
         foreach ($schemaData['sku'] as $key=>$value) {
+
+            $amount =  normalizeNum($schemaData['sku'][$key]['amount_after_discount']); //总租金
+            $zuqi =$schemaData['sku'][$key]['zuqi']; //租期
+            $insurance =normalizeNum($value['insurance']); //意外险
+
+            $totalAmount =normalizeNum($amount+$insurance);
+
+            $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
+            
             //代扣+预授权 ，小程序发的分期信息
             if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay) {
-                $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                $schemaData['sku'][$key]['first_amount'] = number_format($value['instalment'][0]['amount'], 2); //首期支付金额
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
+                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum($value['instalment'][0]['amount']); //首期支付金额
+
 
             } //乐百分支付的分期信息
             elseif ($payType == PayInc::LebaifenPay) {
-                $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] / $value['zuqi'] + $value['insurance'], 2); //首期支付金额
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
-            } //其他支付方式（花呗） 分期信息
+                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额（包含碎屏保）
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum($amount/$zuqi + $insurance); //首期支付金额
+            }
+            //（花呗） 分期信息
+            elseif ($payType == PayInc::PcreditPayInstallment){
+                if ($schemaData['order']['zuqi_type'] == 1) {
+                    $schemaData['sku'][$key]['month_amount'] = $totalAmount;
+                    $schemaData['sku'][$key]['first_amount'] = $totalAmount;
+                } else {
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
+                }
+            }
+            //其他支付方式
             else {
                 if ($schemaData['order']['zuqi_type'] == 1) {
-                    $schemaData['sku'][$key]['month_amount'] = number_format($value['month_amount'] + $value['insurance'], 2);
-                    $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
+                    $schemaData['sku'][$key]['month_amount'] = $totalAmount;
+                    $schemaData['sku'][$key]['first_amount'] = $totalAmount;
                 } else {
-                    $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                    $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] / $value['zuqi'] + $value['insurance'], 2); //首期支付金额
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
                 }
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
-
             }
         }
 
