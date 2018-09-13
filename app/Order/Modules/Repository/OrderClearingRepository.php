@@ -216,7 +216,7 @@ class OrderClearingRepository
 
         //出账类型
         if (isset($param['out_type']) && !empty($param['out_type'])) {
-            $whereArray[] = ['refund_amount', '>', 0];
+            $whereArray[] = ['business_type', '=', $param['out_type']];
         }
 
         //出账方式
