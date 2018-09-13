@@ -15,7 +15,7 @@ class ActiveController extends Controller
     public function sendMessage(){
         try{
             $arr =[];
-            $limit  = 1;
+            $limit  = 2;
             $page   = 1;
             $sleep  = 20;
             $code   = "SMS_113461070";
@@ -52,8 +52,8 @@ class ActiveController extends Controller
 
                     // 短信参数
                     $dataSms =[
-                        'realName'      => $item['realname'],
-                        'zuJin'         => $item['amount'],
+                        'realName'      => trim($item['realname']),
+                        'zuJin'         => trim($item['amount']),
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
