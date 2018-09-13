@@ -305,7 +305,6 @@ class ActivityDestineOperate
         //根据条件查找预定单列表
 
         $destineListArray = ActivityDestineRepository::getDestinePageList($param);
-        p($destineListArray);
         if (empty($destineListArray)) return false;
 
         if (!empty($destineListArray)) {
@@ -319,14 +318,14 @@ class ActivityDestineOperate
                 $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
                 if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
                     //15个自然日之内
-                    if($destineListArray['data'][$keys]->pay_time > 15*24*3600){
+                    if($destineListArray['data'][$keys]->create_time + 15*24*3600 >time()){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
                     }else{
                         $destineListArray['data'][$keys]->refundOperateBefore = false;
 
                     }
                     //15个自然日后
-                    if($destineListArray['data'][$keys]->pay_time < 15*24*3600){
+                    if($destineListArray['data'][$keys]->create_time + 15*24*3600<time()){
                         $destineListArray['data'][$keys]->refundOperateAfter = true;
                     }else{
                         $destineListArray['data'][$keys]->refundOperateAfter = false;
