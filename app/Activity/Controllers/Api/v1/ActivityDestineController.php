@@ -108,6 +108,9 @@ class ActivityDestineController extends Controller
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
            'auth_token'=>$params['auth_token'],
        ];
+       if (redisIncr("destine_add_".$userId,60)>1) {
+           return apiResponse([],ApiStatus::CODE_51001,'预定重复');
+       }
        $res = ActivityDestineOperate::create($data);
        if(!$res){
            return apiResponse([],ApiStatus::CODE_51001,get_msg());
