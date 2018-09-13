@@ -198,7 +198,7 @@ class ActivityDestineController extends Controller
             $fp = fopen('php://output', 'a');
 
             // 表头
-            $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
+            $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','订金状态'];
 
             // 将中文标题转换编码，否则乱码
             foreach ($headers as $k => $v) {
@@ -228,7 +228,6 @@ class ActivityDestineController extends Controller
                             $item['mobile'],
                             $item['appid_name'],
                             $item['pay_type_name'],
-                            $item['account_number'],
                             $item['destine_status_name'],
                         ];
                     }
