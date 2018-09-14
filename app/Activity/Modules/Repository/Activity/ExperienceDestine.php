@@ -45,22 +45,28 @@ class ExperienceDestine{
     /**
      * 重新选择 更新所有信息
      *  $params = [
+     *      'destine_no'    =>'',       //【必须】 string 活动编号
      *      'mobile'        =>'',       //【必须】 string 用户手机号
      *      'experience_id' =>'',       //【必须】 int    体验活动ID
      *      'zuqi'          =>'',       //【必须】 int    租期
      *      'destine_amount'=>'',       //【必须】 string 支付金额
      *      'pay_channel'   =>'',       //【必须】 int    支付渠道
      *      'app_id'        =>'',       //【必须】 int    appid
+     *      'pay_type'      =>'',       //【必须】 int    支付方式
+     *      'channel_id'    =>'',       //【必须】 int    渠道ID
      *   ];
      * @return bool
      */
     public function upDate($params):bool{
+        $this->model->destine_no = $params['destine_no'];
         $this->model->mobile = $params['mobile'];
         $this->model->experience_id = $params['experience_id'];
         $this->model->zuqi = $params['zuqi'];
         $this->model->destine_amount = $params['destine_amount'];
         $this->model->pay_channel = $params['pay_channel'];
         $this->model->app_id = $params['app_id'];
+        $this->model->pay_type = $params['pay_type'];
+        $this->model->channel_id = $params['channel_id'];
 
 
         $this->model->create_time = time();
@@ -117,6 +123,29 @@ class ExperienceDestine{
 		}
 		return new self( $destine_info );
 	}
+
+    /**
+     * 通过体验活动ID获取活动预定表
+     * <p>当不存在时，返回false</p>
+     * @param string $id		预定id
+     * @param int		$lock			锁
+     * @return \App\Activity\Modules\Repository\Activity\ExperienceDestine
+     * @return  bool
+     */
+    public static function getById( int $id, int $lock=0 ) {
+        $builder = ActivityExperienceDestine::where([
+            ['id', '=', $id],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $destine_info = $builder->first();
+        if( !$destine_info ){
+            return false;
+        }
+        return new self( $destine_info );
+    }
+
 
     /**
      * 通过体验活动ID 与用户获取活动预定表

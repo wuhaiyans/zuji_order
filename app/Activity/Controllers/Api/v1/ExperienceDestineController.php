@@ -28,6 +28,7 @@ class ExperienceDestineController extends Controller
      * [
      *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
      *		'experience_id'	=> '',	    //【必选】int 活动ID
+     *      'pay_type'	=> '',	        //【必选】int 支付方式
      *		'return_url'	=> '',	    //【必选】int 前端回跳地址
      *      'extended_params'=>[        //【小程序支付必选】array 扩展参数
      *          "alipay_params"=>[      //支付宝扩展参数
@@ -58,6 +59,7 @@ class ExperienceDestineController extends Controller
        $userIp     = isset($params['userinfo']['ip'])?$params['userinfo']['ip']:'';
 
        $payChannelId =isset($params['params']['pay_channel_id'])?$params['params']['pay_channel_id']:0;
+       $payType	   = isset($params['params']['pay_type'])?$params['params']['pay_type']:0;//支付方式ID
 
        $experienceId  = isset($params['params']['experience_id'])?$params['params']['experience_id']:0;
 
@@ -77,6 +79,9 @@ class ExperienceDestineController extends Controller
        if($payChannelId <1){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
        }
+       if($payType <1){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式错误]");
+       }
        if($experienceId <1){
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
        }
@@ -95,6 +100,7 @@ class ExperienceDestineController extends Controller
            'user_id'=>$userId,  //增加用户ID
            'ip'=>$userIp,  //增加用户ID
            'pay_channel_id'=>$payChannelId,
+           'pay_type'=>$payType,
            'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
            'auth_token'=>$params['auth_token'],
