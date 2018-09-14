@@ -204,8 +204,8 @@ class WithholdController extends Controller
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
         // 订单状态不在服务中 或 有冻结  不允许扣款
-        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
-            return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中");
+        if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
+            return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中 或 有订单冻结");
         }
 
         //判断是否允许扣款
@@ -426,7 +426,7 @@ class WithholdController extends Controller
                 continue;
             }
             // 订单状态不在服务中 或 有冻结  不允许扣款
-            if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
+            if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
                 LogApi::error("multiCreatepay订单状态不在服务中 或 有冻结");
                 continue;
             }
@@ -737,7 +737,7 @@ class WithholdController extends Controller
                 }
 
                 // 订单状态不在服务中 或 有冻结  不允许扣款
-                if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService|| $orderInfo['freeze_type'] != OrderFreezeStatus::Non) {
+                if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non) {
                     LogApi::error('[crontabCreatepay]订单状态不处于租用中 或 有冻结：'.$subject);
                     continue;
                 }
@@ -987,9 +987,9 @@ class WithholdController extends Controller
 			}
 
 			// 订单状态
-			if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['freeze_type'] != \App\Order\Modules\Inc\OrderFreezeStatus::Non){
+			if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
 				DB::rollBack();
-				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 不允许提前还款");
+				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 或 订单冻结 不允许提前还款");
 			}
 
 			$youhui = 0;
