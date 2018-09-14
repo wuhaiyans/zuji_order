@@ -27,6 +27,7 @@ class ActivityExperience
            $experienceList[$key]['group_type_name'] = DestineStatus::getActivityTypeName($item['group_type']);   //活动分组名称
            $experienceList[$key]['experience_status_name'] = DestineStatus::getExperienceStatusName($item['experience_status']);  //体验状态名称
            $experienceList[$key]['activity_name'] = DestineStatus::getExperienceActivityStatusName($item['activity_id']);   //活动类型
+           $experienceList[$key]['zuqi_name'] = DestineStatus::getZuqiTypeStatusTypeName($item['zuqi']);   //租期类型
            $new_arr[$item['group_type']][] = $item;
        }
        return $new_arr;
