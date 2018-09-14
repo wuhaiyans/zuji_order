@@ -20,7 +20,10 @@ class ActivityExperienceController extends Controller
      * @return array
      */
     public function experienceList(){
-        $experienceList=ActivityExperience::experienceList();
+        $experienceList = ActivityExperience::experienceList();
+        if( !$experienceList ){
+            return apiResponse([],ApiStatus::CODE_95005);
+        }
         return apiResponse($experienceList,ApiStatus::CODE_0);
     }
 
