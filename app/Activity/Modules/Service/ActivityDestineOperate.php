@@ -9,17 +9,13 @@ use App\Activity\Modules\Inc\DestineStatus;
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
 use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Activity\Modules\Repository\ActivityDestineRepository;
-use App\Common\LogApi;
 use App\Lib\Channel\Channel;
+use App\Lib\Common\LogApi;
 use App\Lib\Order\OrderInfo;
 use App\Order\Models\OrderPayModel;
-use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Pay\Pay;
-use App\Order\Modules\Repository\Pay\PaymentStatus;
-use App\Order\Modules\Repository\Pay\PayStatus;
 use Illuminate\Support\Facades\DB;
-use Mockery\Exception;
 
 class ActivityDestineOperate
 {
@@ -97,6 +93,7 @@ class ActivityDestineOperate
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
                     $b = $activityDestine->upDate($destineData);
                     if (!$b) {
+                        LogApi::error("ActivitDestine-upERRO",$destineData);
                         set_msg("更新预定时间错误");
                         return false;
                     }
@@ -139,6 +136,7 @@ class ActivityDestineOperate
                 $b = $activityDestine->add($destine);
                 if (!$b) {
                     DB::rollBack();
+                    LogApi::error("ActivitDestine-addERRO",$destine);
                     set_msg("活动添加失败");
                     return false;
                 }
