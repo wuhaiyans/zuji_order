@@ -1,14 +1,16 @@
 <?php
 /**
- *  活动预定操作类
+ *  活动体验预定操作类
  *  author: wuhaiyan
  */
 namespace App\Activity\Modules\Service;
 
+use App\Activity\Modules\Inc\DestineInc;
 use App\Activity\Modules\Inc\DestineStatus;
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
 use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Activity\Modules\Repository\ActivityDestineRepository;
+use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Common\LogApi;
 use App\Lib\Channel\Channel;
 use App\Lib\Order\OrderInfo;
@@ -21,7 +23,7 @@ use App\Order\Modules\Repository\Pay\PayStatus;
 use Illuminate\Support\Facades\DB;
 use Mockery\Exception;
 
-class ActivityDestineOperate
+class ExperienceDestineOperate
 {
 
     /**
@@ -30,8 +32,7 @@ class ActivityDestineOperate
      * @param $data[
      *
      *      'appid'=>'',                //【必须】 int appid
-     *      'pay_type'=>'',             //【必须】 int 支付方式
-     *      'activity_id'=>'',          //【必须】 int 活动ID
+     *      'experience_id'=>'',        //【必须】 int 活动ID
      *      'mobile'=>'',               //【必须】 string 用户手机号
      *      'user_id'=>'',              //【必须】 int 用户ID
      *      'ip'=>'',                   //【必须】 int 客户端IP地址
@@ -56,19 +57,19 @@ class ActivityDestineOperate
     {
 
         try {
-
+            DB::beginTransaction();
             //判断用户是否 已经参与活动
             $res = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
             //获取活动信息
             $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
             if(!$activity){
+                DB::rollBack();
                 set_msg("获取活动信息失败");
                 return false;
             }
             $activityInfo =$activity->getData();
             $activityName  =$activityInfo['title'];
             $destineAmount =$activityInfo['appointment_price'];
-
             //如果有预订记录
             if($res){
                 $destine = objectToArray($res);
@@ -77,6 +78,7 @@ class ActivityDestineOperate
                     //根据appid 获取所在渠道
                     $ChannelInfo = Channel::getChannel($data['appid']);
                     if (!is_array($ChannelInfo)) {
+                        DB::rollBack();
                         set_msg("获取渠道接口数据失败");
                         return false;
                     }
@@ -97,11 +99,13 @@ class ActivityDestineOperate
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
                     $b = $activityDestine->upDate($destineData);
                     if (!$b) {
+                        DB::rollBack();
                         set_msg("更新预定时间错误");
                         return false;
                     }
                     $destine = $activityDestine->getData();
                 } else {
+                    DB::rollBack();
                     set_msg("活动已预订");
                     return false;
                 }
@@ -109,10 +113,7 @@ class ActivityDestineOperate
             }
             //如果没有预订记录 则新增记录
             else{
-                DB::beginTransaction();
                 $destineNo = createNo("YD");  //生成预订编号
-
-
                 //根据appid 获取所在渠道
                 $ChannelInfo = Channel::getChannel($data['appid']);
                 if (!is_array($ChannelInfo)) {
@@ -182,15 +183,17 @@ class ActivityDestineOperate
                     $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($params);
                 }else{
                     $info = $payModel->where('business_no','=',$params['businessNo'])->first()->toArray();
+                    $params['status'] = PayStatus::WAIT_PAYMENT;
+                    $params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
                     $_data = [
                         'user_id'		=> $params['userId'],
                         'order_no'		=> $params['orderNo'],
                         'business_type'	=> $params['businessType'],
                         'business_no'	=> $params['businessNo'],
-                        'status'		=> $info['status'],
-                        'create_time'	=> $info['create_time'],
+                        'status'		=> $params['status'],
+                        'create_time'	=> time(),
 
-                        'payment_status'	=> $info['payment_status'],
+                        'payment_status'	=> $params['paymentStatus'],
                         'payment_no'		=> $info['payment_no'],
                         'payment_amount'	=> $params['paymentAmount'],
                         'payment_fenqi'		=> $params['paymentFenqi'],
@@ -225,32 +228,38 @@ class ActivityDestineOperate
      * @author wuhaiyan
      * @param $data[
      *
-     *      'activity_id'=>'',          //【必须】 int 活动ID
+     *      'experience_id'=>'',          //【必须】 int 活动体验ID
      *      'user_id'=>'',              //【必须】 int 用户ID
      * ]
      * @return bool
      */
 
-    public static function destineQuery($data)
+    public static function experienceDestineQuery($data)
     {
             $res =[];
-            //判断用户是否 已经参与活动
-            $destine = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
-
-            //获取活动信息
-            $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
+            //查询活动信息
+            $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByIdNo($data['experience_id']);
             if(!$activity){
                 set_msg("获取活动信息失败");
                 return false;
             }
-            $activityInfo =$activity->getData();
-            $res['destine_amount'] = $activityInfo['appointment_price'];
+
+            $activityInfo = $activity->getData();
+            $res['destine_amount'] = $activityInfo['destine_amount'];
+            $res['invitation_code'] ='';
+
+            //判断用户是否 已经参与活动
+            $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$activityInfo['activity_id']);
             //如果有预订记录
             if($destine){
                 $destine = objectToArray($destine);
-                //判断如果存在预定记录 更新预定时间
-                if ($destine['destine_status'] != DestineStatus::DestineCreated) {
+                //判断如果不等于已创建状态 则为 已预订
+                if ($destine['destine_status'] != DestineStatus::ExperienceDestineCreated) {
                     $res['status'] =1;
+                    $res['invitation_code'] =self::setInvitationCode([
+                        'experience_id' => $destine['experience_id'],
+                        'user_id'       => $destine['user_id'],
+                    ]);
                 }else{
                     $res['status'] =0;
                 }
@@ -262,113 +271,69 @@ class ActivityDestineOperate
 
     }
 
-    /***
-     * 获取预定单列表
-     * @param array $param
-     * @param int $pagesize
+    /**
+     * 设置 邀请码
+     * @author wuhaiyan
+     * @param $params
+     * [
+     *      'user_id'=>''   ,//【必须】int 用户ID
+     *      'experience_id' =>'',//【必须】int 活动ID
+     *]
+     * @return string
      */
-    public static function getDestineExportList($param = array()){
-        //根据条件查找预定单列表
 
-        $destineListArray = ActivityDestineRepository::getDestineList($param);
-        if (empty($destineListArray)) return false;
 
-        if (!empty($destineListArray)) {
+    public static function setInvitationCode($params){
 
-            foreach ($destineListArray as $keys=>$values) {
-
-                //定金状态名称
-                $destineListArray[$keys]['destine_status_name'] = DestineStatus::getStatusName($values['destine_status']);
-                //支付方式名称
-                $destineListArray[$keys]['pay_type_name'] = PayInc::getPayName($values['pay_type']);
-                //应用来源名称
-                $destineListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id'],$values['channel_id']);
-
-            }
-
+        $data = filter_array($params, [
+            'experience_id' => 'required',
+            'user_id'       => 'required',
+        ]);
+        if(count($data)!=2){
+            set_msg("参数错误");
+            return false;
         }
 
-        return $destineListArray;
+        $str =substr(md5(DestineInc::DestineKey),0,5);
+        $userStr =base64_encode("*".$data['user_id']."*".$data['experience_id']);
+
+        return $str.$userStr;
 
     }
-    /***
-     * 获取预定单列表
-     * @param array $param
-     * @param int $pagesize
-     */
-    public static function getDestineList($param = array()){
-        //根据条件查找预定单列表
-
-        $destineListArray = ActivityDestineRepository::getDestinePageList($param);
-        if (empty($destineListArray)) return false;
-
-        if (!empty($destineListArray)) {
-
-            foreach ($destineListArray['data'] as $keys=>$values) {
-                //定金状态名称
-                $destineListArray['data'][$keys]->destine_status_name = DestineStatus::getStatusName($destineListArray['data'][$keys]->destine_status);
-                //支付方式名称
-                $destineListArray['data'][$keys]->pay_type_name = PayInc::getPayName($destineListArray['data'][$keys]->pay_type);
-                //应用来源名称
-                $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id,$destineListArray['data'][$keys]->channel_id);
-                if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
-                    if($destineListArray['data'][$keys]->pay_type ==PayInc::WeChatPay){
-                        $destineListArray['data'][$keys]->refundOperateBefore = true;
-                        $destineListArray['data'][$keys]->refundOperateAfter = false;
-                    }else{
-                        //15个自然日之内
-                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600 >time()){
-                            $destineListArray['data'][$keys]->refundOperateBefore = true;
-                        }else{
-                            $destineListArray['data'][$keys]->refundOperateBefore = false;
-
-                        }
-                        //15个自然日后
-                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600<time()){
-                            $destineListArray['data'][$keys]->refundOperateAfter = true;
-                        }else{
-                            $destineListArray['data'][$keys]->refundOperateAfter = false;
-                        }
-                    }
-
-
-                    $destineListArray['data'][$keys]->selectOperate = false;
-                }else if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
-                    $destineListArray['data'][$keys]->selectOperate = true;
-                    $destineListArray['data'][$keys]->refundOperateAfter = false;
-                    $destineListArray['data'][$keys]->refundOperateBefore = false;
-
-                }else{
-                    $destineListArray['data'][$keys]->refundOperateAfter = false;
-                    $destineListArray['data'][$keys]->refundOperateBefore = false;
-                    $destineListArray['data'][$keys]->selectOperate = false;
-                }
-
-
-            }
-
-        }
-
-        return $destineListArray;
-
-    }
-    /***
-     * 获取预定单列表
-     * @param array $param
-     * @param int $destine_no
+    /**
+     * 通过邀请码 获取邀请信息
+     * @author wuhaiyan
+     * @param      $invitationCode【必须】string 邀请编码
      * @return array
+     * [
+     *      'user_id'=>''   ,//【必须】int 用户ID
+     *      'experience_id' =>'',//【必须】int 活动ID
+     * ]
      */
-    public static function getDestineLogList($destine_no){
-         $activityInfo=ActivityDestine::getByNo($destine_no);
-         if(!$activityInfo){
+
+
+    public static function getInvitationCode($invitationCode){
+
+        $ret =[];
+        if(!isset($invitationCode)){
+            set_msg("参数错误");
+            return false;
+        }
+         $str =substr(md5(DestineInc::DestineKey),0,5);
+         $key =substr($invitationCode,0,5);
+
+         if($key != $str){
+             set_msg("邀请码错误");
              return false;
          }
-        $activityDestineInfo = $activityInfo->getData();
+        $userstr =base64_decode(substr($invitationCode,5));
+        $arr =explode("*",$userstr);
+        $ret['user_id']=$arr[0];
+        $ret['experience_id'] =$arr[1];
 
-         return $activityDestineInfo;
+        return $ret;
 
     }
-
 
 
 

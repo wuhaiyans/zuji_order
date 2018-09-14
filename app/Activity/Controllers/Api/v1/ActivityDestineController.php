@@ -96,6 +96,10 @@ class ActivityDestineController extends Controller
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
        }
 
+       if (redisIncr("destine_add_".$userId.$activityId,5)>1) {
+           return apiResponse([],ApiStatus::CODE_51001,'操作太快，请稍等重试');
+       }
+
        $data =[
            'appid'=>$appid,
            'pay_type'=>$payType,
