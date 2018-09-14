@@ -16,7 +16,7 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
         try{
             $arr =[];
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 10;
             $code   = "SMS_113461197";
@@ -66,7 +66,7 @@ class ActiveController extends Controller
                     )->update(['status' => 1]);
 
                 }
-                die;
+
                 sleep($sleep);
             } while (true);
 
