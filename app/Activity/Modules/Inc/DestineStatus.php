@@ -75,6 +75,19 @@ class DestineStatus{
 
 
 
+    //--------------------------------------------------------------------------------------------
+    //--+ 活动状态--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------
+    /**
+     * @var int 已约满
+     */
+    const BeAlreadyFull =0;
+    /**
+     * @var int 预约体验
+     */
+    const ReservationExperience = 1;
+
+
 
 
     /**
@@ -177,6 +190,29 @@ class DestineStatus{
         }
         return '';
     }
+    /**
+     * 活动类型
+     * @return array
+     */
+    public static function getExperiencetatusType(){
+        return [
+            self::BeAlreadyFull => '已约满',
+            self::ReservationExperience => '预约体验',
+        ];
+    }
 
+
+    /**
+     * 活动体验状态值 转换成 状态名称
+     * @param int $status   活动类型
+     * @return string 活动类型名称
+     */
+    public static function getExperienceStatusName($status){
+        $list = self::getExperienceStatusType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
 }
 
