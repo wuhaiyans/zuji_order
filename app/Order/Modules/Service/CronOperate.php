@@ -398,22 +398,20 @@ class CronOperate
 
     /**
      * 定时任务 月初发送提前还款短信
-     * 每个十秒发送五条数据
+     * 每个10秒发送50条数据
      * $return bool
      */
     public static function cronPrepayment(){
 
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 50;
             $page   = 1;
-            $sleep  = 20;
+            $sleep  = 10;
 
             do {
-                $day =  1;
                 $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
                 $whereArray[] = ['term', '=', date('Ym')];
-                $whereArray[] = ['day', '=', $day];
 
                 // 查询总数
                 $total =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -443,10 +441,7 @@ class CronOperate
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                         $item['id'],
                         "CronRepayment");
-                    $sendMessage = $notice->notify();
-                    if(!$sendMessage){
-                        $arr[]  = $item['id'];
-                    }
+                    $notice->notify();
                 }
 
                 $page++;
@@ -463,26 +458,27 @@ class CronOperate
     }
 
     /**
-     * 定时任务 提前三天 一天 发送扣款短信
-     * 每个十秒发送五条数据
+     * 定时任务 提前一、三、七天发送扣款短信
+     * 每个10秒发送50条数据
      * $return bool
      */
     public static function cronPrepaymentMessage($type){
         try{
             $arr =[];
-            $limit  = 5;
+            $limit  = 50;
             $page   = 1;
-            $sleep  = 20;
-
+            $sleep  = 10;
+            $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceThree'];
 
             do {
-                if($type == 1){
-                    $today  = date("Ymd",strtotime("+1 day"));
-                    $model  = 'WithholdAdvanceOne';
-                }else if($type == 3){
-                    $today  = date("Ymd",strtotime("+3 day"));
-                    $model  = 'WithholdAdvanceThree';
+                if(!isset($dayArr[$type])){
+                    \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>'参数错误']);
+                    return false;
                 }
+
+                $today  = date("Ymd", strtotime("+" . $type . " day"));
+                $model  = $dayArr[$type];
+
                 $term   = substr($today,0,6);
                 $day    = substr($today,6,2);
 
@@ -496,7 +492,9 @@ class CronOperate
                     ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
                     ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->count();
+
                 $totalpage = ceil($total/$limit);
+
 
                 // 查询数据
                 $result =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -517,12 +515,10 @@ class CronOperate
                     $notice = new \App\Order\Modules\Service\OrderNotice(
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                         $item['id'],
-                        $model
+                        $model,
+                        ['day' => $type]
                     );
-                    $sendMessage = $notice->notify();
-                    if(!$sendMessage){
-                        $arr[]  = $item['id'];
-                    }
+                    $notice->notify();
                 }
 
                 $page++;

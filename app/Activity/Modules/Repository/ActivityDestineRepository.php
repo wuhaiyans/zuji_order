@@ -27,7 +27,6 @@ class ActivityDestineRepository
      *      'mobile'        => ' ', //【必须】 string 用户手机号
      *      'destine_amount'=> ' ', //【必须】 float  预定金额
      *      'pay_type'      => ' ', //【必须】 int  支付类型
-     *      'pay_channel'   => ' ', //【必须】 int  支付渠道
      *      'app_id'        => ' ', //【必须】 int app_id
      *      'channel_id'    => ' ', //【必须】 int 渠道Id
      *      'activity_name' => ' ', //【必须】 string 活动名称
@@ -43,12 +42,11 @@ class ActivityDestineRepository
             'mobile'        => 'required',
             'destine_amount'=> 'required',
             'pay_type'      => 'required',
-            'pay_channel'   => 'required',
             'app_id'        => 'required',
             'channel_id'    => 'required',
             'activity_name' => 'required',
         ]);
-        if(count($data)<10){
+        if(count($data)<9){
             return false;
         }
         $this->activityDestine->destine_no = $data['destine_no'];
@@ -57,7 +55,6 @@ class ActivityDestineRepository
         $this->activityDestine->mobile = $data['mobile'];
         $this->activityDestine->destine_amount = $data['destine_amount'];
         $this->activityDestine->pay_type = $data['pay_type'];
-        $this->activityDestine->pay_channel = $data['pay_channel'];
         $this->activityDestine->app_id = $data['app_id'];
         $this->activityDestine->channel_id = $data['channel_id'];
         $this->activityDestine->activity_name = $data['activity_name'];
@@ -104,7 +101,9 @@ class ActivityDestineRepository
 
      */
     public static function getDestineList($param=array()){
-
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $pageSize   = 500;
+        $offset     = ($page - 1) * $pageSize;
         $whereArray= self::get_where($param);  //获取搜索的条件
         LogApi::debug("新机预约导出的条件",$whereArray);
         $destineArrays = array();
@@ -112,6 +111,8 @@ class ActivityDestineRepository
         $destineList =  DB::table('order_activity_destine')
             ->select('order_activity_destine.*')
             ->where($whereArray)
+            ->offset($offset)
+            ->limit($pageSize)
             ->orderBy('create_time', 'DESC')
             ->get();
         LogApi::debug("新机预约查询结果",$destineList);
@@ -182,19 +183,18 @@ class ActivityDestineRepository
         //根据应用渠道
         if (isset($param['app_id']) && !empty($param['app_id'])) {
 
-            $whereArray[] = ['app_id', '=', $param['app_id']];
+            $whereArray[] = ['channelId_id', '=', $param['app_id']];
         }
 
 
         //根据定金支付时间
-        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
-            $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
+        if (isset($param['begin_time']) && !empty($param['begin_time']) ) {
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
         }
 
         //根据定金支付时间
-        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
-            $whereArray[] = ['pay_time', '>=', strtotime($param['begin_time'])];
-            $whereArray[] = ['pay_time', '<', (strtotime($param['end_time'])+3600*24)];
+        if ( isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
         return $whereArray;
     }

@@ -96,6 +96,10 @@ class ActivityDestineController extends Controller
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
        }
 
+       if (redisIncr("destine_add_".$userId.$activityId,5)>1) {
+           return apiResponse([],ApiStatus::CODE_51001,'操作太快，请稍等重试');
+       }
+
        $data =[
            'appid'=>$appid,
            'pay_type'=>$payType,
@@ -108,6 +112,7 @@ class ActivityDestineController extends Controller
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
            'auth_token'=>$params['auth_token'],
        ];
+
        $res = ActivityDestineOperate::create($data);
        if(!$res){
            return apiResponse([],ApiStatus::CODE_51001,get_msg());
@@ -198,7 +203,7 @@ class ActivityDestineController extends Controller
             $fp = fopen('php://output', 'a');
 
             // 表头
-            $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','交易流水号','订金状态'];
+            $headers = ['预订编号','预订时间','用户手机', '所属渠道','支付方式','订金状态'];
 
             // 将中文标题转换编码，否则乱码
             foreach ($headers as $k => $v) {
@@ -217,7 +222,7 @@ class ActivityDestineController extends Controller
                 LogApi::debug("预约导出页数的参数值".$params['page']);
                 ++$i;
                 $destineData = array();
-                $destineData = ActivityDestineOperate::getDestineExportList($params,$pre_count);
+                $destineData = ActivityDestineOperate::getDestineExportList($params);
                 LogApi::debug("预约导出查询后导出的结果是",$destineData);
                 if ($destineData) {
                     $data = array();
@@ -228,7 +233,6 @@ class ActivityDestineController extends Controller
                             $item['mobile'],
                             $item['appid_name'],
                             $item['pay_type_name'],
-                            $item['account_number'],
                             $item['destine_status_name'],
                         ];
                     }
