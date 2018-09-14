@@ -190,7 +190,7 @@ class ActivityDestineOperate
                         'status'		=> $info['status'],
                         'create_time'	=> $info['create_time'],
 
-                        'payment_status'	=> $info['paymentStatus'],
+                        'payment_status'	=> $info['payment_status'],
                         'payment_no'		=> $info['payment_no'],
                         'payment_amount'	=> $params['paymentAmount'],
                         'payment_fenqi'		=> $params['paymentFenqi'],
