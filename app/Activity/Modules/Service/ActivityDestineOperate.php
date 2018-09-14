@@ -310,7 +310,7 @@ class ActivityDestineOperate
                 //支付方式名称
                 $destineListArray['data'][$keys]->pay_type_name = PayInc::getPayName($destineListArray['data'][$keys]->pay_type);
                 //应用来源名称
-                $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id,$destineListArray['data'][$keys]->channel_id);
+                $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
                 if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
                     if($destineListArray['data'][$keys]->pay_type ==PayInc::WeChatPay){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
