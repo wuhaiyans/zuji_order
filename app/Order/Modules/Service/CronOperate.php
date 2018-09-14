@@ -463,9 +463,9 @@ class CronOperate
      * $return bool
      */
     public static function cronPrepaymentMessage($type){
-//        try{
+        try{
             $arr =[];
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 10;
             $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceThree'];
@@ -529,8 +529,8 @@ class CronOperate
                 LogApi::notify("提前还款短信", $arr);
             }
 
-//        }catch(\Exception $exc){
-//            \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>$exc->getMessage()]);
-//        }
+        }catch(\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>$exc->getMessage()]);
+        }
     }
 }
