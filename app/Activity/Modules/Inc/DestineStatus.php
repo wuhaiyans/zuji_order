@@ -208,7 +208,7 @@ class DestineStatus{
      * 活动类型
      * @return array
      */
-    public static function getExperiencetatusType(){
+    public static function getExperienceStatusType(){
         return [
             self::BeAlreadyFull => '已约满',
             self::ReservationExperience => '预约体验',
