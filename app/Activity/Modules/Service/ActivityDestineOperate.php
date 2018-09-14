@@ -97,6 +97,7 @@ class ActivityDestineOperate
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
                     $b = $activityDestine->upDate($destineData);
                     if (!$b) {
+                        LogApi::error("ActivitDestine-upERRO",$destineData);
                         set_msg("更新预定时间错误");
                         return false;
                     }
@@ -139,6 +140,7 @@ class ActivityDestineOperate
                 $b = $activityDestine->add($destine);
                 if (!$b) {
                     DB::rollBack();
+                    LogApi::error("ActivitDestine-addERRO",$destine);
                     set_msg("活动添加失败");
                     return false;
                 }
