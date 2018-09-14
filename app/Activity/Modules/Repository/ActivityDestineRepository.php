@@ -183,7 +183,7 @@ class ActivityDestineRepository
         //根据应用渠道
         if (isset($param['app_id']) && !empty($param['app_id'])) {
 
-            $whereArray[] = ['app_id', '=', $param['app_id']];
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
         }
 
 

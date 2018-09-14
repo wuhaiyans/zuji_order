@@ -19,5 +19,13 @@ class ActivityExperienceController extends Controller
         $this->ActivityExperience = $ActivityExperience;
     }
 
+    /***
+     * 1元体验列表
+     * @return array
+     */
+    public function experienceList(){
+        return true;
+    }
+
 
 }
