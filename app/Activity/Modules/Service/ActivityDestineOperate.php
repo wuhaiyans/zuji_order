@@ -56,19 +56,19 @@ class ActivityDestineOperate
     {
 
         try {
-            DB::beginTransaction();
+
             //判断用户是否 已经参与活动
             $res = ActivityDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
             //获取活动信息
             $activity = ActivityAppointment::getByIdInfo($data['activity_id']);
             if(!$activity){
-                DB::rollBack();
                 set_msg("获取活动信息失败");
                 return false;
             }
             $activityInfo =$activity->getData();
             $activityName  =$activityInfo['title'];
             $destineAmount =$activityInfo['appointment_price'];
+
             //如果有预订记录
             if($res){
                 $destine = objectToArray($res);
@@ -77,7 +77,6 @@ class ActivityDestineOperate
                     //根据appid 获取所在渠道
                     $ChannelInfo = Channel::getChannel($data['appid']);
                     if (!is_array($ChannelInfo)) {
-                        DB::rollBack();
                         set_msg("获取渠道接口数据失败");
                         return false;
                     }
@@ -98,13 +97,11 @@ class ActivityDestineOperate
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
                     $b = $activityDestine->upDate($destineData);
                     if (!$b) {
-                        DB::rollBack();
                         set_msg("更新预定时间错误");
                         return false;
                     }
                     $destine = $activityDestine->getData();
                 } else {
-                    DB::rollBack();
                     set_msg("活动已预订");
                     return false;
                 }
@@ -112,6 +109,7 @@ class ActivityDestineOperate
             }
             //如果没有预订记录 则新增记录
             else{
+                DB::beginTransaction();
                 $destineNo = createNo("YD");  //生成预订编号
 
 
@@ -184,17 +182,15 @@ class ActivityDestineOperate
                     $payResult = \App\Order\Modules\Repository\Pay\PayCreater::createPayment($params);
                 }else{
                     $info = $payModel->where('business_no','=',$params['businessNo'])->first()->toArray();
-                    $params['status'] = PayStatus::WAIT_PAYMENT;
-                    $params['paymentStatus'] = PaymentStatus::WAIT_PAYMENT;
                     $_data = [
                         'user_id'		=> $params['userId'],
                         'order_no'		=> $params['orderNo'],
                         'business_type'	=> $params['businessType'],
                         'business_no'	=> $params['businessNo'],
-                        'status'		=> $params['status'],
-                        'create_time'	=> time(),
+                        'status'		=> $info['status'],
+                        'create_time'	=> $info['create_time'],
 
-                        'payment_status'	=> $params['paymentStatus'],
+                        'payment_status'	=> $info['payment_status'],
                         'payment_no'		=> $info['payment_no'],
                         'payment_amount'	=> $params['paymentAmount'],
                         'payment_fenqi'		=> $params['paymentFenqi'],

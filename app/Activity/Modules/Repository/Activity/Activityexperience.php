@@ -15,12 +15,12 @@ use App\Activity\Models\ActivityExperience as ActivityExperienceModel;
  *
  * @author qinliping
  */
-class Activityexperience{
+class ActivityExperience{
 	
 	
 	/**
 	 *
-	 * @var \App\Activity\Models\Activityexperience
+	 * @var \App\Activity\Models\ActivityExperience
 	 */
 	private $model = [];
 	
