@@ -13,18 +13,15 @@ use App\Activity\Modules\Service\ActivityExperience;
 
 class ActivityExperienceController extends Controller
 {
-    protected $ActivityExperience;
-    public function __construct(ActivityExperience $ActivityExperience)
-    {
-        $this->ActivityExperience = $ActivityExperience;
-    }
+
 
     /***
      * 1元体验列表
      * @return array
      */
     public function experienceList(){
-        return true;
+        $experienceList=ActivityExperience::experienceList();
+        return apiResponse($experienceList,ApiStatus::CODE_0);
     }
 
 

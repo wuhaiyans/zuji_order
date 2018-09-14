@@ -12,7 +12,13 @@ namespace App\Activity\Modules\Service;
 
 class ActivityExperience
 {
+    /**
+     * 获取体验活动列表
+     */
+    public function experienceList(){
 
+
+    }
 
 
 }
