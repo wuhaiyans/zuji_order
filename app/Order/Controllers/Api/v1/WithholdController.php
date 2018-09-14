@@ -6,6 +6,7 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Lib\ApiStatus;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderGoodsInstalment;
@@ -202,7 +203,8 @@ class WithholdController extends Controller
         if( !$orderInfo ){
             return apiResponse([], ApiStatus::CODE_32002, "数据异常");
         }
-        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
+        // 订单状态不在服务中 或 有冻结  不允许扣款
+        if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
             return apiResponse([], ApiStatus::CODE_71000, "[代扣]订单状态不在服务中");
         }
 
@@ -423,7 +425,11 @@ class WithholdController extends Controller
                 LogApi::error("multiCreatepay数据异常");
                 continue;
             }
-
+            // 订单状态不在服务中 或 有冻结  不允许扣款
+            if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
+                LogApi::error("multiCreatepay订单状态不在服务中 或 有冻结");
+                continue;
+            }
 
             // 商品
             $subject = $instalmentInfo['order_no'].'-'.$instalmentInfo['times'].'-期扣款';
@@ -730,11 +736,11 @@ class WithholdController extends Controller
                     continue;
                 }
 
-                if ($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService) {
-                    LogApi::error('[crontabCreatepay]订单状态不处于租用中：'.$subject);
+                // 订单状态不在服务中 或 有冻结  不允许扣款
+                if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService|| $orderInfo['freeze_type'] != OrderFreezeStatus::Non) {
+                    LogApi::error('[crontabCreatepay]订单状态不处于租用中 或 有冻结：'.$subject);
                     continue;
                 }
-
 
                 if(!(in_array($item['status'],$needPayArray))){
                     LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
