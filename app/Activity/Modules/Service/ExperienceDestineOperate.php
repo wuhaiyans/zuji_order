@@ -326,7 +326,7 @@ class ExperienceDestineOperate
              set_msg("邀请码错误");
              return false;
          }
-        $userstr =base64_decode(substr($invitationCode,5,6));
+        $userstr =base64_decode(substr($invitationCode,5));
         $arr =explode("*",$userstr);
         $ret['user_id']=$arr[0];
         $ret['experience_id'] =$arr[1];
