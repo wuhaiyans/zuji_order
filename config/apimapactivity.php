@@ -37,4 +37,10 @@ return [
     'api.activity.test'                  => 'AppointmentController@test',
 
 
+
+
+
+    /********************************************1元体验活动接口***************************************************/
+    'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
+
 ];
