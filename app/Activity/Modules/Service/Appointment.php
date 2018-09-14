@@ -219,6 +219,7 @@ class Appointment
             $destineInfo=$activityDestineInfo->getData();
             //如果预定状态为  已支付时可以退款
             if( $destineInfo['destine_status'] == DestineStatus::DestinePayed){
+                //支付方式是支付宝
                 if($destineInfo['pay_type'] == PayInc::FlowerStagePay){
                     //判断预定时间是否在15个自然日内
                     if(time() -$destineInfo['pay_time'] > 15*24*3600)
@@ -249,7 +250,7 @@ class Appointment
                 $create_data['app_id']            = $destineInfo['app_id'];//应用渠道
                 $create_data['channel_id']        = $destineInfo['channel_id'];//渠道id
                 $create_data['user_id']           = $destineInfo['user_id'];//用户id
-
+                LogApi::debug("[appointmentRefund]创建清单参数",$create_data);
 
                 $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
@@ -301,7 +302,7 @@ class Appointment
      *    'account_number'=>''   //支付宝账号string【必传】
      *    'refund_remark' =>''   //退款备注  string 【必传】
      * ]
-     *
+     * @return bool
      */
     public function refund(array $params){
 
