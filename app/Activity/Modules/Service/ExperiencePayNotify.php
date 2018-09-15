@@ -50,10 +50,9 @@ class ExperiencePayNotify
             $destineInfo =$destine->getData();
 
             //发送短信
-//            SendMessage::ActivityDestineSuccess( [
-//                'mobile'        => $destineInfo['mobile'],
-//                'goods_name'    => $destineInfo['activity_name'],
-//            ]);
+            SendMessage::ExperienceDestineSuccess( [
+                'mobile'        => $destineInfo['mobile'],
+            ]);
 
 
             return true;

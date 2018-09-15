@@ -88,8 +88,8 @@ class ExperienceDestineController extends Controller
            return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
        }
 
-       if (redisIncr("destine_add_".$userId,5)>1) {
-           return apiResponse([],ApiStatus::CODE_51001,'操作太快，请稍等重试');
+       if (redisIncr("experience_destine_add_".$userId.$experienceId,5)>1) {
+           return apiResponse([],ApiStatus::CODE_51001,'操作过快，请稍等重试');
        }
 
        $data =[

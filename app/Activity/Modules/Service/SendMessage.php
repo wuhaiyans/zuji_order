@@ -6,6 +6,36 @@ use App\Lib\Common\LogApi;
 class SendMessage{
 
     /**
+     * 活动体验支付成功
+     * @param array $params
+     * [
+     *      'mobile'        => '1', // 手机号
+     * ]
+     * @return bool true/false
+     */
+    public static function ExperienceDestineSuccess($params){
+
+        $params = filter_array($params, [
+            'mobile'        => 'required',
+        ]);
+
+        if( count( $params ) < 1 ){
+            LogApi::error('[ExperienceDestine]短信发送参数异常',$params);
+            return false;
+        }
+
+        $mobile = $params['mobile'];    // 手机号
+        $code   = 'SMS_113461199';      // 短信模板
+
+        // 短信参数  无参数 给个默认的
+        $dataSms = [
+            'newPhoneName'      => 'ExperienceDestine'
+        ];
+        // 发送短息
+        return \App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
+    }
+
+    /**
      * 预约成功
      * @param array $params
      * [
