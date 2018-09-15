@@ -2,6 +2,7 @@
 namespace App\Activity\Modules\Repository;
 
 use App\Activity\Models\ActivityDestine;
+use App\Activity\Models\ActivityExperience;
 use App\Activity\Models\ActivityExperienceDestine;
 use App\Activity\Modules\Inc\DestineStatus;
 
@@ -113,16 +114,12 @@ class ExperienceDestineRepository
 
     public static function getUserExperience($userId,$experienceId){
         if (empty($userId)) return false;
-        if (empty($activityId)) return false;
-
-        $info = DB::table('order_activity_experience_destine')
-                ->leftJoin('order_activity_experience',function ($join){
-                    $join->on('order_activity_experience_destine.experience_id','=','order_activity_experience.id');
-                })->where([
-                ['user_id', '=', $userId],
-                ['experience_id', '=', $experienceId],
-                ])->select('order_activity_experience_destine.*','order_activity_experience.*')->first();
-
+        if (empty($experienceId)) return false;
+        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'experience_id'=>$experienceId])->first()->toArray();
+        if($info){
+            $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();
+            $info = array_merge($experience,$info);
+        }
         return !empty($info)?objectToArray($info):false;
 
     }

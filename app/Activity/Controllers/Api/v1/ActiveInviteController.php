@@ -10,6 +10,8 @@ namespace App\Activity\Controllers\Api\v1;
 
 
 use App\Activity\Modules\Repository\ActiveInviteRepository;
+use App\Activity\Modules\Repository\Activity\ExperienceDestine;
+use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
 use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
@@ -57,6 +59,7 @@ class ActiveInviteController extends Controller
         if(!$ret){
             LogApi::debug("预约邀请",$data);
         }
+        ExperienceDestine::upZuqi($uid,$activity_id);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
     }
     /*
@@ -100,7 +103,10 @@ class ActiveInviteController extends Controller
         $array['limit'] = $limit;
         //获取邀请人信息
         $list = ActiveInviteRepository::getList($array);
+        //获预约活动信息
+        $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
         $data = [
+            'activity' => $activityInfo,
             'count' => $count,
             'total_page' =>$sum,
             'data' =>$list
