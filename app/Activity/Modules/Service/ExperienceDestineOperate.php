@@ -298,14 +298,9 @@ class ExperienceDestineOperate
          }
         $userstr =base64_decode(substr($invitationCode,5));
         $arr =explode("*",$userstr);
-        $userId=$arr[0];
-        $experienceId =$arr[1];
-        $destine = ExperienceDestineRepository::unDestineByUserAndExperience($userId,$experienceId);
-        if(!$destine){
-            set_msg("预约信息错误");
-            return false;
-        }
-        $ret =objectToArray($destine);
+        $ret['user_id']=$arr[0];
+        $ret['experience_id'] =$arr[1];
+
         return $ret;
 
     }
