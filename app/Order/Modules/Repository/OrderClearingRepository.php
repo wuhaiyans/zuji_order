@@ -8,6 +8,7 @@
  */
 namespace App\Order\Modules\Repository;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Models\OrderClearing;
 use App\Order\Modules\Inc\OrderStatus;
@@ -142,8 +143,8 @@ class OrderClearingRepository
             'refund_clean_no'=>    $refundCleanNo ?? 0 ,
 
         ];
-
-      // sql_profiler();
+        LogApi::debug("[clear]创建结算清单参数",$order_data);
+        LogApi::debug("[clear]创建结算清单sql语句:".sql_profiler());
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
