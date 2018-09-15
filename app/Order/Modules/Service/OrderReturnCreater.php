@@ -8,6 +8,10 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\OrderPayPaymentRepository;
+use App\Order\Modules\Repository\OrderPayRepository;
+use App\Order\Modules\Repository\Pay\PaymentStatus;
+use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
@@ -91,6 +95,11 @@ class OrderReturnCreater
                 if( $order_info['user_id'] != $params['user_id'] ){
                     return false;
                 }
+                //获取支付信息
+                $payInfo = OrderPayRepository::find($order_info['order_no']);
+                if(!$payInfo){
+                    return false;//支付单不存在
+                }
                 //乐百分支付的用户在14天内可申请退货
                 if( $order_info['pay_type'] == PayInc::LebaifenPay){
                     if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time()) {
@@ -124,6 +133,17 @@ class OrderReturnCreater
                     $result['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                     //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                     $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                }
+                //花呗分期+预授权
+                if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
+                        $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
+                    }
+
+                    if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                    }
                 }
 
                 // 创建退换货单参数
@@ -268,9 +288,16 @@ class OrderReturnCreater
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
                 return false;//订单正在操作中
             }
+
+            //获取支付信息
+            $payInfo = OrderPayRepository::find($order_info['order_no']);
+            if(!$payInfo){
+                return false;//支付单不存在
+            }
             //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+
             }
             //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
@@ -281,6 +308,18 @@ class OrderReturnCreater
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
             }
+            //花呗分期+预授权
+            if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+               if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                   $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                   $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+               }
+
+                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                }
+            }
+
 
 
             //乐百分支付
@@ -712,8 +751,13 @@ class OrderReturnCreater
                     if(!$pay_result){
                         return false;
                     }
-                    $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
-                    $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                    if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                    }
+                    if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                    }
+
                 }
 
                 //创建清单
@@ -1681,8 +1725,14 @@ class OrderReturnCreater
                         }
                         $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
                         $create_data['business_no']=$return_info['refund_no'];//业务编号
-                        $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
-                        $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                        if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                        }
+                        if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                        }
+                        //$create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                      //  $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                         $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金金额
                         $create_data['auth_deduction_time']=0;//扣除押金时间
                         $create_data['auth_unfreeze_time']=0;//退还时间
@@ -1709,6 +1759,17 @@ class OrderReturnCreater
                             //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                             $create_data['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                         }
+                        //花呗分期+预授权
+                        if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+                            if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                                $create_data['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
+                            }
+
+                            if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                                $create_data['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                            }
+                        }
+
 
 
                         $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单

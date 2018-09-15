@@ -1057,7 +1057,7 @@ class PayController extends Controller
             $destineInfo=$activityDestineInfo->getData();
 
             //查看预定是否已退款
-            if ( $destineInfo['destine_status'] == DestineStatus::DestinePayed || $destineInfo['destine_status'] == DestineStatus::DestineOrderCreated){// 已支付，已下单
+            if ( $destineInfo['destine_status'] == DestineStatus::DestinePayed){// 已支付，已下单
 
                 //更新业务系统的状态
                 $businessParam = [

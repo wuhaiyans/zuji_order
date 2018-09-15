@@ -17,6 +17,7 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Activity\Modules\Repository\ActivityAppointmentRepository;
 use App\Activity\Modules\Repository\ActivityGoodsAppointmentRepository;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
@@ -216,15 +217,19 @@ class Appointment
                 return false;
             }
             $destineInfo=$activityDestineInfo->getData();
-            //如果预定状态为  已支付，已下单时可以退款
-            if($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed){
-                //判断预定时间是否在15个自然日内
-                if(time() -$destineInfo['pay_time'] > 15*24*3600)
-                {
-                    LogApi::debug("[appointmentRefund]预定时间必须在15个自然日内,预定创建时间".$destineInfo['create_time']);
-                    set_msg("预定时间必须在15个工作日内");
-                    return false;
+            //如果预定状态为  已支付时可以退款
+            if( $destineInfo['destine_status'] == DestineStatus::DestinePayed){
+                //支付方式是支付宝
+                if($destineInfo['pay_type'] == PayInc::FlowerStagePay){
+                    //判断预定时间是否在15个自然日内
+                    if(time() -$destineInfo['pay_time'] > 15*24*3600)
+                    {
+                        LogApi::debug("[appointmentRefund]预定时间必须在15个自然日内,预定创建时间".$destineInfo['create_time']);
+                        set_msg("预定时间必须在15个工作日内");
+                        return false;
+                    }
                 }
+
                 //获取支付信息
                 $pay_result =  OrderReturnRepository::getPayNo(OrderStatus::BUSINESS_DESTINE,$destineInfo['destine_no']);
                 if(!$pay_result){
@@ -245,10 +250,12 @@ class Appointment
                 $create_data['app_id']            = $destineInfo['app_id'];//应用渠道
                 $create_data['channel_id']        = $destineInfo['channel_id'];//渠道id
                 $create_data['user_id']           = $destineInfo['user_id'];//用户id
-
+                LogApi::debug("[appointmentRefund]创建清单参数",$create_data);
 
                 $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
                 if(!$create_clear){
+                    LogApi::debug("[appointmentRefund]创建退款清单失败",$pay_result);
+                    set_msg("获取订单的支付信息失败");
                     //事务回滚
                     DB::rollBack();
                     return false;//创建退款清单失败
@@ -256,6 +263,8 @@ class Appointment
                 //更新预订状态为退款中
                 $updateDestineRefund = $activityDestineInfo->updateDestineRefund($params['refund_remark']);
                 if(!$updateDestineRefund){
+                    LogApi::debug("[appointmentRefund]更新预订状态为退款中失败",$pay_result);
+                    set_msg("获取订单的支付信息失败");
                     //事务回滚
                     DB::rollBack();
                     return false;//更新失败
@@ -268,6 +277,8 @@ class Appointment
                 return true;
 
             }else{
+                //事务回滚
+                DB::rollBack();
                 LogApi::debug("[appointmentRefund]预定状态必须是已支付，已下单,预定状态值".$destineInfo['destine_status']);
                 //不允许退预定金
                 return false;
@@ -291,7 +302,7 @@ class Appointment
      *    'account_number'=>''   //支付宝账号string【必传】
      *    'refund_remark' =>''   //退款备注  string 【必传】
      * ]
-     *
+     * @return bool
      */
     public function refund(array $params){
 
@@ -307,7 +318,7 @@ class Appointment
             }
             $destineInfo = $activityDestineInfo->getData();
             //如果预定状态为  已支付，已下单时可以退款
-            if ($destineInfo['destine_status'] == DestineStatus::DestineOrderCreated || $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
+            if ( $destineInfo['destine_status'] == DestineStatus::DestinePayed) {
                 //判断预定时间是否在15个自然日外
                 if (time() - $destineInfo['pay_time'] < 15 * 24 * 3600) {
                     LogApi::debug("[appointmentRefund]预定时间必须在15个自然日外,预定创建时间" . $destineInfo['create_time']);

@@ -9,8 +9,8 @@ use App\Activity\Modules\Inc\DestineStatus;
 use App\Activity\Modules\Repository\Activity\ActivityAppointment;
 use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Activity\Modules\Repository\ActivityDestineRepository;
-use App\Common\LogApi;
 use App\Lib\Channel\Channel;
+use App\Lib\Common\LogApi;
 use App\Lib\Order\OrderInfo;
 use App\Order\Models\OrderPayModel;
 use App\Order\Modules\Inc\OrderStatus;
@@ -74,9 +74,31 @@ class ActivityDestineOperate
                 $destine = objectToArray($res);
                 //判断如果存在预定记录 更新预定时间
                 if ($destine['destine_status'] == DestineStatus::DestineCreated) {
+                    //根据appid 获取所在渠道
+                    $ChannelInfo = Channel::getChannel($data['appid']);
+                    if (!is_array($ChannelInfo)) {
+                        DB::rollBack();
+                        set_msg("获取渠道接口数据失败");
+                        return false;
+                    }
+                    $channelId = intval($ChannelInfo['_channel']['id']);
+
+
+                    $destineData = [
+                        'activity_id' => $data['activity_id'],    //【必须】 int   活动ID
+                        'user_id' => $data['user_id'],        //【必须】 int   用户ID
+                        'mobile' => $data['mobile'],         //【必须】 string 用户手机号
+                        'destine_amount' => $destineAmount,                     //【必须】 float  预定金额
+                        'pay_type' => $data['pay_type'],       //【必须】 int  支付类型
+                        'app_id' => $data['appid'],          //【必须】 int app_id
+                        'channel_id' => $channelId,                     //【必须】 int 渠道Id
+                        'activity_name' => $activityName,                     //【必须】 string 活动名称
+                    ];
+
                     $activityDestine = ActivityDestine::getByNo($destine['destine_no']);
-                    $b = $activityDestine->upCreateTime($activityName,$destineAmount);
+                    $b = $activityDestine->upDate($destineData);
                     if (!$b) {
+                        LogApi::error("ActivitDestine-upERRO",$destineData);
                         DB::rollBack();
                         set_msg("更新预定时间错误");
                         return false;
@@ -92,6 +114,8 @@ class ActivityDestineOperate
             //如果没有预订记录 则新增记录
             else{
                 $destineNo = createNo("YD");  //生成预订编号
+
+
                 //根据appid 获取所在渠道
                 $ChannelInfo = Channel::getChannel($data['appid']);
                 if (!is_array($ChannelInfo)) {
@@ -117,6 +141,7 @@ class ActivityDestineOperate
                 $activityDestine = new ActivityDestineRepository();
                 $b = $activityDestine->add($destine);
                 if (!$b) {
+                    LogApi::error("ActivitDestine-addERRO",$destine);
                     DB::rollBack();
                     set_msg("活动添加失败");
                     return false;
@@ -179,12 +204,6 @@ class ActivityDestineOperate
                     ];
                     $payResult = new Pay($_data);
                 }
-            \App\Lib\Common\LogApi::info("yuyueParams",[
-                'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
-                'front_url' => $data['return_url'], //回调URL
-                'ip'=>$data['ip'],
-                'extended_params'=>$data['extended_params'],
-            ]);
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
                 'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
@@ -192,7 +211,6 @@ class ActivityDestineOperate
                 'ip'=>$data['ip'],
                 'extended_params'=>$data['extended_params'],
             ]);
-            \App\Lib\Common\LogApi::info("yuyueParamsFanhui",$url);
             // 提交事务
             DB::commit();
             return $url;
@@ -299,16 +317,28 @@ class ActivityDestineOperate
                 $destineListArray['data'][$keys]->pay_type_name = PayInc::getPayName($destineListArray['data'][$keys]->pay_type);
                 //应用来源名称
                 $destineListArray['data'][$keys]->appid_name = OrderInfo::getAppidInfo($destineListArray['data'][$keys]->app_id);
-                if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed || $destineListArray['data'][$keys]->destine_status == DestineStatus::DestineOrderCreated){
-                    //15个自然日之内
-                    if($destineListArray['data'][$keys]->pay_time > 15*24*3600){
+                if( $destineListArray['data'][$keys]->destine_status == DestineStatus::DestinePayed ){
+                    if($destineListArray['data'][$keys]->pay_type ==PayInc::WeChatPay){
                         $destineListArray['data'][$keys]->refundOperateBefore = true;
-                    }
-                    //15个自然日后
-                    if($destineListArray['data'][$keys]->pay_time < 15*24*3600){
-                        $destineListArray['data'][$keys]->refundOperateAfter = true;
+                        $destineListArray['data'][$keys]->refundOperateAfter = false;
+                    }else{
+                        //15个自然日之内
+                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600 >time()){
+                            $destineListArray['data'][$keys]->refundOperateBefore = true;
+                        }else{
+                            $destineListArray['data'][$keys]->refundOperateBefore = false;
+
+                        }
+                        //15个自然日后
+                        if($destineListArray['data'][$keys]->pay_time + 15*24*3600<time()){
+                            $destineListArray['data'][$keys]->refundOperateAfter = true;
+                        }else{
+                            $destineListArray['data'][$keys]->refundOperateAfter = false;
+                        }
                     }
 
+
+                    $destineListArray['data'][$keys]->selectOperate = false;
                 }else if($destineListArray['data'][$keys]->destine_status ==DestineStatus::DestineRefunded){
                     $destineListArray['data'][$keys]->selectOperate = true;
                     $destineListArray['data'][$keys]->refundOperateAfter = false;
@@ -329,7 +359,7 @@ class ActivityDestineOperate
 
     }
     /***
-     * 获取预定单列表
+     * 获取预定单列表【获取详情信息】
      * @param array $param
      * @param int $destine_no
      * @return array

@@ -493,7 +493,7 @@ class BuyoutController extends Controller
         //接收请求参数
         $orders =$request->all();
         $params = $orders['params'];
-        $params['channel_id'] = 2;
+        $params['channel_id'] = isset($params['channel_id'])?$params['channel_id']:2;
         //过滤参数
         $rule= [
             'buyout_no'=>'required',

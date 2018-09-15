@@ -22,9 +22,13 @@ return [
     'api.advance.myAdvance'            => 'AdvanceActivityController@myAdvance', //我的预约
 
 
+    //-+------------------------------------------------------------------------
+    // | 活动体验预定接口
+    //-+------------------------------------------------------------------------
+    'api.experience.destine'             => 'ExperienceDestineController@experienceDestine', //活动体验支付接口
+    'api.experience.destineQuery'        => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
 
-
-
+    
     //-+------------------------------------------------------------------------
     // | 预约退款
     //-+------------------------------------------------------------------------
@@ -32,5 +36,13 @@ return [
     'api.activity.refund'                  => 'AppointmentController@refund', //预约退款（15个自然日后）
     'api.activity.test'                  => 'AppointmentController@test',
 
+
+
+
+
+    /********************************************1元体验活动接口***************************************************/
+    'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
+    'api.invite.numeration'       => 'ActiveInviteController@numeration', //注册邀请人数
+    'api.invite.myInvite'       => 'ActiveInviteController@myInvite', //我的邀请人数列表
 
 ];

@@ -44,6 +44,9 @@ return [
 
         //预定业务 支付回调通知
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE => '\App\Activity\Modules\Service\DestinePayNotify::callback',
+
+        //体验活动业务 支付回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE => '\App\Activity\Modules\Service\ExperiencePayNotify::callback',
 	],
 
 	'refund' => [

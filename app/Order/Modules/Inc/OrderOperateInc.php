@@ -330,7 +330,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderPaying => [
                     'return_visit_btn'   => false,
                     //取消订单
-                    'refund_btn'   => false,
+                    'refund_btn'   => true,
                     //确认订单
                     'confirm_btn'   => false,
                     //修改收货信息

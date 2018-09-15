@@ -25,10 +25,10 @@ class OppointmentListFiler
        $channlistName =  Channel::getChannelListName();
         return array(
 
-                    'order_state'=>OrderStatus::getStatusType(),
-                    'pay_type_list' =>PayInc::getPayList(),
-                    'appid_list' => $channlistName,
-                    'destine_list' =>DestineStatus::getStatusType()
+                    'order_state'=>OrderStatus::getStatusType(),    //订单状态
+                    'pay_type_list' =>PayInc::getOppointmentPayList(), //支付状态
+                    'appid_list' => $channlistName,                      //应用渠道
+                    'destine_list' =>DestineStatus::getStatusType()     //预约状态
                 );
     }
 
@@ -43,8 +43,6 @@ class OppointmentListFiler
      */
     public static function OppointmentInc($id='',$incName='') {
         //预约状态
-
-
         if (isset(self::getOppointmentState()[$incName])) {
             if ($id!=''){
                 if (isset(self::getOppointmentState()[$incName][$id])) {

@@ -46,6 +46,11 @@ class Config {
      * @var int 33
      */
     const CHANNELID_MICRO_RECOVERY  = '33';
+    /**
+     * 渠道配置<b>【花呗先享渠道】</b>
+     * @var int 35
+     */
+    const CHANNELID_FLOWER_ENJOY  = '35';
 
 	
 	/**
@@ -83,8 +88,8 @@ class Config {
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461053', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461067', //提前还款短信
 				SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_113461062', //扣款失败主动发送短信
-				SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_113461176', //扣款失败主动发送短信
-				SceneConfig::WITHHOLD_ADVANCE_ONE   	=> 'SMS_113461177', //扣款失败主动发送短信
+				SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_113461196', //提前三天/七天 还款短信
+				SceneConfig::WITHHOLD_ADVANCE_ONE   	=> 'SMS_113461197', //提前一天还款短信
 
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
@@ -195,6 +200,10 @@ class Config {
                 SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
                 SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
 
+            ],
+            // 花呗先享
+            self::CHANNELID_FLOWER_ENJOY => [
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){

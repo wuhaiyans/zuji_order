@@ -1148,7 +1148,7 @@ class OrderOperate
         //订单商品列表相关的数据
         $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
 
-        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsExtendArray);
+        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsExtendArray,$orderData['pay_type']);
 
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
 
@@ -1356,6 +1356,8 @@ class OrderOperate
                 $orderListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
 
                 $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
+                //发货时间
+                $orderListArray[$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
 
             }
 
@@ -1413,7 +1415,7 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-   public static function getGoodsListActState($orderNo, $actArray, $goodsExtendArray=array())
+   public static function getGoodsListActState($orderNo, $actArray, $goodsExtendArray=array(), $payType='')
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -1450,6 +1452,22 @@ class OrderOperate
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
                    $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
+
+               } else {
+
+                   if ($payType==Inc\PayInc::PcreditPayInstallment) {
+
+                       //如果是花呗先享月租金+碎屏保
+                       if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
+
+                           $goodsList[$keys]['firstAmount'] = normalizeNum($values['amount_after_discount']+$values['insurance']);
+                       } else {
+
+                           $goodsList[$keys]['firstAmount'] = normalizeNum(($values['amount_after_discount']+$values['insurance'])/$values['zuqi']);
+                       }
+
+
+                   }
 
                }
 
