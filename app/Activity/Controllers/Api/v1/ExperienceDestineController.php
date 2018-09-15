@@ -69,54 +69,54 @@ class ExperienceDestineController extends Controller
 
 
        //判断参数是否设置
-//       if(empty($appid) && $appid <1){
-//           return apiResponse([],ApiStatus::CODE_20001,"appid错误");
-//       }
-//       if($userType!=2){
-//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-//       }
-//       if($payChannelId <1){
-//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
-//       }
-//       if($payType <1){
-//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式错误]");
-//       }
-//       if($experienceId <1){
-//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
-//       }
-//      if(!isset($returnUrl)){
-//           return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
-//       }
-//
-//       if (redisIncr("destine_add_".$userId,5)>1) {
-//           return apiResponse([],ApiStatus::CODE_51001,'操作太快，请稍等重试');
-//       }
+       if(empty($appid) && $appid <1){
+           return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+       }
+       if($userType!=2){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+       }
+       if($payChannelId <1){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
+       }
+       if($payType <1){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付方式错误]");
+       }
+       if($experienceId <1){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
+       }
+      if(!isset($returnUrl)){
+           return apiResponse([],ApiStatus::CODE_20001,"参数错误[return_url 未设置错误]");
+       }
 
-//       $data =[
-//           'appid'=>$appid,
-//           'experience_id'=>$experienceId,
-//           'mobile'=>$userName,
-//           'user_id'=>$userId,  //增加用户ID
-//           'ip'=>$userIp,  //增加用户ID
-//           'pay_channel_id'=>$payChannelId,
-//           'pay_type'=>$payType,
-//           'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
-//           'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
-//           'auth_token'=>$params['auth_token'],
-//       ];
+       if (redisIncr("destine_add_".$userId,5)>1) {
+           return apiResponse([],ApiStatus::CODE_51001,'操作太快，请稍等重试');
+       }
 
        $data =[
            'appid'=>$appid,
-           'experience_id'=>1,//$experienceId,
-           'mobile'=>'17600224881',//$userName,
-           'user_id'=>7994,//$userId,  //增加用户ID
-           'ip'=>'127.0.0.1',//$userIp,  //增加用户ID
-           'pay_channel_id'=>2,//$payChannelId,
-           'pay_type'=>2,//$payType,
-           'return_url'=>'http://www.baidu.com',//$returnUrl,           //【必须】string 前端回跳地址
-           'extended_params'=> [ "alipay_params"=>["trade_type"=>"APP" ]],           //【必须】string 前端回跳地址
+           'experience_id'=>$experienceId,
+           'mobile'=>$userName,
+           'user_id'=>$userId,  //增加用户ID
+           'ip'=>$userIp,  //增加用户ID
+           'pay_channel_id'=>$payChannelId,
+           'pay_type'=>$payType,
+           'return_url'=>$returnUrl,           //【必须】string 前端回跳地址
+           'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
            'auth_token'=>$params['auth_token'],
        ];
+
+//       $data =[
+//           'appid'=>$appid,
+//           'experience_id'=>1,//$experienceId,
+//           'mobile'=>'17600224881',//$userName,
+//           'user_id'=>7994,//$userId,  //增加用户ID
+//           'ip'=>'127.0.0.1',//$userIp,  //增加用户ID
+//           'pay_channel_id'=>2,//$payChannelId,
+//           'pay_type'=>2,//$payType,
+//           'return_url'=>'http://www.baidu.com',//$returnUrl,           //【必须】string 前端回跳地址
+//           'extended_params'=> [ "alipay_params"=>["trade_type"=>"APP" ]],           //【必须】string 前端回跳地址
+//           'auth_token'=>$params['auth_token'],
+//       ];
        $res = ExperienceDestineOperate::create($data);
        if(!$res){
            return apiResponse([],ApiStatus::CODE_51001,get_msg());
