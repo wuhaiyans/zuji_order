@@ -21,14 +21,16 @@ class ExperienceDestineRepository
      * @param $data
      *  [
      *      'destine_no'    => ' ', //【必须】 string 预定编号
-     *      'activity_id'   => ' ', //【必须】 int   活动ID
+     *      'activity_id'   => ' ', //【必须】 int   总活动ID
+     *      'experience_id' => ' ', //【必须】 int   活动ID
      *      'user_id'       => ' ', //【必须】 int   用户ID
      *      'mobile'        => ' ', //【必须】 string 用户手机号
      *      'destine_amount'=> ' ', //【必须】 float  预定金额
      *      'pay_type'      => ' ', //【必须】 int  支付类型
      *      'app_id'        => ' ', //【必须】 int app_id
      *      'channel_id'    => ' ', //【必须】 int 渠道Id
-     *      'activity_name' => ' ', //【必须】 string 活动名称
+     *      'pay_channel'   => ' ', //【必须】 string 支付渠道
+     *      'zuqi'          => ' ', //【必须】 int 租期
     ]
      * @return bool
      */
@@ -43,9 +45,11 @@ class ExperienceDestineRepository
             'zuqi'          => 'required',
             'app_id'        => 'required',
             'pay_channel'   => 'required',
+            'channel_id'    => 'required',
+            'pay_type'      => 'required',
             'experience_id' => 'required',
         ]);
-        if(count($data)<9){
+        if(count($data)<11){
             return false;
         }
         $this->experienceDestine->destine_no = $data['destine_no'];
@@ -57,6 +61,8 @@ class ExperienceDestineRepository
         $this->experienceDestine->app_id = $data['app_id'];
         $this->experienceDestine->pay_channel = $data['pay_channel'];
         $this->experienceDestine->experience_id = $data['experience_id'];
+        $this->experienceDestine->pay_type = $data['pay_type'];
+        $this->experienceDestine->channel_id = $data['channel_id'];
 
         $this->experienceDestine->destine_status = DestineStatus::DestineCreated;
         $this->experienceDestine->create_time = time();
@@ -67,20 +73,60 @@ class ExperienceDestineRepository
 
     /**
      * 查询当前用户是否已经预约活动
-     * @param $user_id   用户ID
-     * @param $activity_id 总活动ID
+     * @param $userId   用户ID
+     * @param $activityId 总活动ID
      * @return array
      */
 
     public static function unActivityDestineByUser($userId,$activityId){
         if (empty($userId)) return false;
         if (empty($activityId)) return false;
-        $info = ActivityDestine::query()->where([
+        $info = ActivityExperienceDestine::query()->where([
             ['user_id', '=', $userId],
             ['activity_id', '=', $activityId],
         ])->first();
         return $info;
     }
+    /**
+     * 查询当前用户是否已经预约活动
+     * @param $userId   用户ID
+     * @param $experienceId 总活动ID
+     * @return array
+     */
+
+    public static function unDestineByUserAndExperience($userId,$experienceId){
+        if (empty($userId)) return false;
+        if (empty($activityId)) return false;
+        $info = ActivityExperienceDestine::query()->where([
+            ['user_id', '=', $userId],
+            ['experience_id', '=', $experienceId],
+        ])->first();
+        return $info;
+    }
+
+    /**
+     * 查询当前参加活动 和活动详情
+     * @param $userId   用户ID
+     * @param $experienceId 总活动ID
+     * @return array
+     */
+
+    public static function getUserExperience($userId,$experienceId){
+        if (empty($userId)) return false;
+        if (empty($activityId)) return false;
+
+        $info = DB::table('order_activity_experience_destine')
+                ->leftJoin('order_activity_experience',function ($join){
+                    $join->on('order_activity_experience_destine.experience_id','=','order_activity_experience.id');
+                })->where([
+                ['user_id', '=', $userId],
+                ['experience_id', '=', $experienceId],
+                ])->select('order_activity_experience_destine.*','order_activity_experience.*')->first();
+
+        return !empty($info)?objectToArray($info):false;
+
+    }
+
 
 
 
