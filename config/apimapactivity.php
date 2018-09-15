@@ -26,7 +26,7 @@ return [
     // | 活动体验预定接口
     //-+------------------------------------------------------------------------
     'api.experience.destine'             => 'ExperienceDestineController@experienceDestine', //活动体验支付接口
-    'api.experience.destineQuery'       => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
+    'api.experience.destineQuery'        => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
 
     
     //-+------------------------------------------------------------------------
@@ -42,5 +42,7 @@ return [
 
     /********************************************1元体验活动接口***************************************************/
     'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
+    'api.invite.numeration'       => 'ActiveInviteController@numeration', //注册邀请人数
+    'api.invite.myInvite'       => 'ActiveInviteController@myInvite', //我的邀请人数列表
 
 ];
