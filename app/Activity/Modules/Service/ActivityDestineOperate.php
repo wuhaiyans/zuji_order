@@ -359,7 +359,7 @@ class ActivityDestineOperate
 
     }
     /***
-     * 获取预定单列表
+     * 获取预定单列表【获取详情信息】
      * @param array $param
      * @param int $destine_no
      * @return array

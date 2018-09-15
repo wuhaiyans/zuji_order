@@ -297,8 +297,7 @@ class ImeiRepository
             if(!ImeiLog::in($imeModel->imei,$model->order_no)){
                 return false;
             }
-            $imeModel->status = Imei::STATUS_IN;
-            if (!$imeModel->update()){
+            if(!Imei::where(['imei'=>$imeModel->imei])->update(['status'=>Imei::STATUS_IN])){
                 return false;
             }
 

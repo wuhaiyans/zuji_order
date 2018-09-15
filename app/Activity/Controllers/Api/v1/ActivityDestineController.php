@@ -228,12 +228,12 @@ class ActivityDestineController extends Controller
                     $data = array();
                     foreach ($destineData as $item) {
                         $data[] = [
-                            $item['destine_no'],
-                            $item['pay_time'],
-                            $item['mobile'],
-                            $item['appid_name'],
-                            $item['pay_type_name'],
-                            $item['destine_status_name'],
+                            $item['destine_no'],    //预约编号
+                            $item['pay_time'],      //支付时间
+                            $item['mobile'],        //用户手机
+                            $item['appid_name'],    //应用渠道名称
+                            $item['pay_type_name'], //支付类型名称
+                            $item['destine_status_name'], //预定状态名称
                         ];
                     }
 
@@ -258,15 +258,42 @@ class ActivityDestineController extends Controller
     /***
      * 预定单列表
      * @param Request $request
-     * @return bool|\Illuminate\Http\JsonResponse
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @return array
+     * [
+     *   'id'               => '', //主键id
+     *   'destine_no'       => '',  //预约编号
+     *   'activity_id'      => '',  //活动id
+     *   'activity_name'    => '',  //活动名称
+     *   'mobile'           => '',  //用户手机
+     *   'user_id'          => '',  //用户id
+     *   'destine_status'   => '',  //预定状态
+     *   'destine_amount'   => '',  //预定金额
+     *   'pay_type'         => '',  // 支付类型
+     *   'app_id'           => '',  //渠道id
+     *   'channel_id'       => '',  //应用渠道
+     *   'create_time'     => '',   //创建时间
+     *   'update_time'     => '',    //更新时间
+     *   'pay_time'        => '',    //支付时间
+     *   'apu_id'          => '',    //商品id
+     *   'sku_id'          => '',    //子商品id
+     *   'account_time'    => '',    //退款时间
+     *   'account_number'  => '',    //转账账号
+     *   'refund_remark'   => '',    //退款备注
+     *   'pay_channel'     => '',    //支付渠道
+     *   'selectOperate'   => '',    //日志查按钮是否显示   true  显示   false  不显示
+     *   'refundOperateBefore' => '', //退款操作 支付方式“支付宝”15个自然日之内的走线上 ，”微信“的退款  true  是线上  false  不走线上
+     *   'refundOperateAfter'  => '',//退款操作 支付方式“支付宝”15个自然日之后的走线下退款  true  是走修改状态的操作  false  否
+     *
+     *
+     *
+     * ]
+
      */
     public function destineList(Request $request)
     {
         try{
             $params = $request->all();
-            $destineData = ActivityDestineOperate::getDestineList($params['params']);
+            $destineData = ActivityDestineOperate::getDestineList($params['params']);//获取预定单列表信息
             if(!$destineData){
                 return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
             }
@@ -283,6 +310,32 @@ class ActivityDestineController extends Controller
     /**
      * 获取详情日志
      * @param Request $request
+     * @return array
+     * [
+     *   'id'               => '', //主键id
+     *   'destine_no'       => '',  //预约编号
+     *   'activity_id'      => '',  //活动id
+     *   'activity_name'    => '',  //活动名称
+     *   'mobile'           => '',  //用户手机
+     *   'user_id'          => '',  //用户id
+     *   'destine_status'   => '',  //预定状态
+     *   'destine_amount'   => '',  //预定金额     【暂用】
+     *   'pay_type'         => '',  // 支付类型
+     *   'app_id'           => '',  //渠道id
+     *   'channel_id'       => '',  //应用渠道
+     *   'create_time'     => '',   //创建时间
+     *   'update_time'     => '',    //更新时间
+     *   'pay_time'        => '',    //支付时间
+     *   'apu_id'          => '',    //商品id
+     *   'sku_id'          => '',    //子商品id
+     *   'account_time'    => '',    //退款时间       【暂用】
+     *   'account_number'  => '',    //转账账号
+     *   'refund_remark'   => '',    //退款备注       【暂用】
+     *   'pay_channel'     => '',    //支付渠道
+     *
+     *
+     *
+     * ]
      */
     public function destineDetailLog(Request $request){
         $params = $request->all();
