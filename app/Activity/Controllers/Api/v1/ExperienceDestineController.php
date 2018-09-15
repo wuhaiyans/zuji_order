@@ -9,9 +9,8 @@
 namespace App\Activity\Controllers\Api\v1;
 
 
-
+use Illuminate\Http\Request;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
-use App\Http\Requests\Request;
 use App\Lib\ApiStatus;
 
 class ExperienceDestineController extends Controller
@@ -105,6 +104,19 @@ class ExperienceDestineController extends Controller
            'extended_params'=>$extendedParams,           //【必须】string 前端回跳地址
            'auth_token'=>$params['auth_token'],
        ];
+
+//       $data =[
+//           'appid'=>$appid,
+//           'experience_id'=>1,//$experienceId,
+//           'mobile'=>'17600224881',//$userName,
+//           'user_id'=>7994,//$userId,  //增加用户ID
+//           'ip'=>'127.0.0.1',//$userIp,  //增加用户ID
+//           'pay_channel_id'=>2,//$payChannelId,
+//           'pay_type'=>2,//$payType,
+//           'return_url'=>'http://www.baidu.com',//$returnUrl,           //【必须】string 前端回跳地址
+//           'extended_params'=> [ "alipay_params"=>["trade_type"=>"APP" ]],           //【必须】string 前端回跳地址
+//           'auth_token'=>$params['auth_token'],
+//       ];
        $res = ExperienceDestineOperate::create($data);
        if(!$res){
            return apiResponse([],ApiStatus::CODE_51001,get_msg());
@@ -114,7 +126,7 @@ class ExperienceDestineController extends Controller
 
    }
     /***
-     * 活动预定支付接口
+     * 活动预定查询接口
      * @author wuhaiyan
      * @param Request $request
      * $request['appid']

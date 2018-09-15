@@ -81,7 +81,7 @@ class ExperienceDestineRepository
     public static function unActivityDestineByUser($userId,$activityId){
         if (empty($userId)) return false;
         if (empty($activityId)) return false;
-        $info = ActivityDestine::query()->where([
+        $info = ActivityExperienceDestine::query()->where([
             ['user_id', '=', $userId],
             ['activity_id', '=', $activityId],
         ])->first();
@@ -97,11 +97,34 @@ class ExperienceDestineRepository
     public static function unDestineByUserAndExperience($userId,$experienceId){
         if (empty($userId)) return false;
         if (empty($activityId)) return false;
-        $info = ActivityDestine::query()->where([
+        $info = ActivityExperienceDestine::query()->where([
             ['user_id', '=', $userId],
             ['experience_id', '=', $experienceId],
         ])->first();
         return $info;
+    }
+
+    /**
+     * 查询当前参加活动 和活动详情
+     * @param $userId   用户ID
+     * @param $experienceId 总活动ID
+     * @return array
+     */
+
+    public static function getUserExperience($userId,$experienceId){
+        if (empty($userId)) return false;
+        if (empty($activityId)) return false;
+
+        $info = DB::table('order_activity_experience_destine')
+                ->leftJoin('order_activity_experience',function ($join){
+                    $join->on('order_activity_experience_destine.experience_id','=','order_activity_experience.id');
+                })->where([
+                ['user_id', '=', $userId],
+                ['experience_id', '=', $experienceId],
+                ])->select('order_activity_experience_destine.*','order_activity_experience.*')->first();
+
+        return !empty($info)?objectToArray($info):false;
+
     }
 
 
