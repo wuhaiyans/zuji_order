@@ -595,8 +595,8 @@ class OrderReturnCreater
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
                         'imei'     =>$goodsDeliveryInfo[$k]['imei1'],
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
-                      //  'imei2'     =>$goodsDeliveryInfo[$k]['imei2'],
-                       // 'imei3'     =>$goodsDeliveryInfo[$k]['imei3'],
+                        'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
+                        'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
                     ];
                 }
                 LogApi::debug("创建收货单参数",$user_data);
