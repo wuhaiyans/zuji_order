@@ -265,7 +265,7 @@ class ExperienceDestineOperate
         }
 
         $str =substr(md5(DestineInc::DestineKey),0,5);
-        $userStr =base64_encode("*".$data['user_id']."*".$data['experience_id']);
+        $userStr =base64_encode($data['user_id']."*".$data['experience_id']);
 
         return $str.$userStr;
 
