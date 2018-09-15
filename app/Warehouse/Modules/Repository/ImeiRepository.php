@@ -297,11 +297,16 @@ class ImeiRepository
             if(!ImeiLog::in($imeModel->imei,$model->order_no)){
                 return false;
             }
-            $imeModel->status = Imei::STATUS_IN;
-            if (!$imeModel->update()){
-                return false;
-            }
+//            $imeModel->status = Imei::STATUS_IN;
+//            if (!$imeModel->update()){
+//                return false;
+//            }
 
+        }
+
+        $model->status = Imei::STATUS_IN;
+        if (!$model->update()){
+            return false;
         }
 
         return true;
