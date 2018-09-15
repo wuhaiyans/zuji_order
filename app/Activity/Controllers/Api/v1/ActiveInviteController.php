@@ -38,7 +38,6 @@ class ActiveInviteController extends Controller
         $invite_uid = $userInfo['uid'];
         //解密邀请码获取用户id和活动id
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
-        var_dump($codeNum);die;
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['experience_id'];
         //验证是否已邀请
