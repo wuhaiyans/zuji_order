@@ -4,13 +4,13 @@ namespace App\Activity\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Invite extends Model
+class ActiveInvite extends Model
 {
     const CREATED_AT = 'create_time';
 
     // Rest omitted for brevity
 
-    protected $table = 'order_invite';
+    protected $table = 'order_active_invite';
 
     protected $primaryKey='id';
     /**
