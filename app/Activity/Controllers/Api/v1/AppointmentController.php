@@ -22,14 +22,14 @@ class AppointmentController extends Controller
      * 添加预约活动
      * @param Request $request
      * [
-     * 'title'             =>'',  标题           string    【必传】
-     * 'appointment_price' =>'',  预定金额       string 【必传】
-     * 'appointment_image' =>'',  活动图片       string 【必传】
-     * 'desc'              =>'',  活动描述       string 【必传】
-     * 'begin_time'        =>'',  活动开始时间   int    【必传】
-     * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态       string  【必传】
-     * 'spu_id'            =>['',''] 商品id      int      【必传】
+     * 'title'              =>'',  标题           string    【必传】
+     * 'appointment_price'  =>'',  预定金额       string    【必传】
+     * 'appointment_image'  =>'',  活动图片       string    【必传】
+     * 'desc'               =>'',  活动描述       string    【必传】
+     * 'begin_time'         =>'',  活动开始时间   int       【必传】
+     * 'end_time'           =>''   活动结束时间   int       【必传】
+     * 'appointment_status' =>'', 活动状态       string     【必传】
+     * 'spu_id'             =>['',''] 商品id      int       【必传】
      * ]
      * @return \Illuminate\Http\JsonResponse
      */
@@ -135,14 +135,14 @@ class AppointmentController extends Controller
      * ]
      *@return array
      * [
-     * 'id'                =>'',  活动id         int    【必传】
-     * 'appointment_price' =>'',  预定金额       string 【必传】
-     * 'title'             =>'',  标题           string 【必传】
-     * 'appointment_image' =>'',  活动图片       string 【必传】
-     * 'desc'              =>'',  活动描述       string 【必传】
-     * 'begin_time'        =>'',  活动开始时间   int    【必传】
-     * 'end_time'          =>''   活动结束时间   int    【必传】
-     * 'appointment_status' =>'', 活动状态      string  【必传】
+     * 'id'                =>'',  活动id         int
+     * 'appointment_price' =>'',  预定金额       string
+     * 'title'             =>'',  标题           string
+     * 'appointment_image' =>'',  活动图片       string
+     * 'desc'              =>'',  活动描述       string
+     * 'begin_time'        =>'',  活动开始时间   int
+     * 'end_time'          =>''   活动结束时间   int
+     * 'appointment_status' =>'', 活动状态      string
      * ]
      *
      */
@@ -166,6 +166,7 @@ class AppointmentController extends Controller
      *    'id'            =>  '' ,//预订id   int     【必传】
      *     'refund_remark' => '', //退款备注  string   【必传】
      * ]
+     * @return string
      */
     public function appointmentRefund(Request $request){
         //-+--------------------------------------------------------------------
@@ -198,6 +199,7 @@ class AppointmentController extends Controller
      *    'account_number'=>''   //支付宝账号string【必传】
      *    'refund_remark' =>''   //退款备注  string 【必传】
      * ]
+     * @return string
      */
     public function refund(Request $request){
         //-+--------------------------------------------------------------------

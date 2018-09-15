@@ -66,7 +66,7 @@ class ActiveInviteRepository
      */
     public static function checkInviteUser($uid,$activity_id){
         $where = [
-            ['uid','=',$uid],
+            ['invite_uid','=',$uid],
             ['activity_id','=',$activity_id]
         ];
         $data = ActiveInvite::query()->where($where)->first();
