@@ -49,7 +49,7 @@ class ExperienceDestineOperate
 
         try {
             DB::beginTransaction();
-            $destineNo = createNo("YD");  //生成体验预订编号
+            $destineNo = createNo("TY");  //生成体验预订编号
             //查询活动信息
             $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByIdNo($data['experience_id']);
             if(!$activity){
@@ -59,6 +59,19 @@ class ExperienceDestineOperate
             }
 
             $activityInfo = $activity->getData();
+
+            if(time()>=$activityInfo['end_time']){
+                DB::rollBack();
+                set_msg("活动已结束");
+                return false;
+            }
+
+            if($activityInfo['experience_status']== DestineStatus::BeAlreadyFull){
+                DB::rollBack();
+                set_msg("该活动已约满");
+                return false;
+            }
+
 
             //根据appid 获取所在渠道
             $ChannelInfo = Channel::getChannel($data['appid']);
@@ -147,7 +160,7 @@ class ExperienceDestineOperate
             //生成支付单
             $params = [
                 'userId'            => $data['user_id'],//用户ID
-                'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE,	// 业务类型
+                'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE,	// 业务类型
                 'businessNo'		=> $destineData['destine_no'],	                // 业务编号
                 'orderNo'		    => '',	// 订单号
                 'paymentAmount'		=> $destine['destine_amount'],	                    // Price 支付金额，单位：元
@@ -157,7 +170,7 @@ class ExperienceDestineOperate
             $payResult =\App\Order\Modules\Repository\Pay\PayCreater::createPayment($params);
             //获取支付的url
             $url = $payResult->getCurrentUrl($data['pay_channel_id'], [
-                'name'=>$destine['activity_name'].'活动的预定金额：'.$destine['destine_amount'],
+                'name'=>$destine['destine_amount'].'元 体验活动预定',
                 'front_url' => $data['return_url'], //回调URL
                 'ip'=>$data['ip'],
                 'extended_params'=>$data['extended_params'],
