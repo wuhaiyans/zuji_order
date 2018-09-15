@@ -87,19 +87,17 @@ class ActiveInviteController extends Controller
         }
         $uid = $userInfo['uid'];
         $activity_id = $params['activity_id'];
+        $array['uid'] = $uid;
+        $array['activity_id'] = $activity_id;
         //获取邀请总数
-        $count = ActiveInviteRepository::getCount();
+        $count = ActiveInviteRepository::getCount($array);
         $sum = ceil($count/$limit);
         $page = $page>0?$page-1:$page;
         $page = $page>=$sum?$sum:$page-1;
         $limit = $limit<50?$limit:10;
         $offset = $page*$limit;
-        $array = [
-            'uid'=>$uid,
-            'activity_id'=>$activity_id,
-            'offset'=>$offset,
-            'limit'=>$limit
-        ];
+        $array['offset'] = $offset;
+        $array['limit'] = $limit;
         //获取邀请人信息
         $list = ActiveInviteRepository::getList($array);
         $data = [
