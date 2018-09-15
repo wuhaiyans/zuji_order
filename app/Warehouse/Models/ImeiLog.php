@@ -37,7 +37,7 @@ class ImeiLog extends Warehouse
      * 可填充字段
      */
     protected $fillable = [
-        'imei', 'type', 'create_time', 'order_no','id'
+        'imei', 'type', 'create_time', 'order_no','id', 'imei_id'
     ];
 
 
