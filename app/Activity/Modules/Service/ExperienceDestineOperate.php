@@ -201,7 +201,10 @@ class ExperienceDestineOperate
             $activityInfo = $activity->getData();
             $res['destine_amount'] = $activityInfo['destine_amount'];
             $res['invitation_code'] ='';
-
+            $res['activity_status'] =0;
+            if(time()>=$activityInfo['end_time']){
+                $res['activity_status'] =1;
+            }
             //判断用户是否 已经参与活动
             $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$activityInfo['activity_id']);
             //如果有预订记录

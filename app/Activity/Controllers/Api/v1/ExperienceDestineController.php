@@ -9,9 +9,8 @@
 namespace App\Activity\Controllers\Api\v1;
 
 
-
+use Illuminate\Http\Request;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
-use App\Http\Requests\Request;
 use App\Lib\ApiStatus;
 
 class ExperienceDestineController extends Controller
@@ -114,7 +113,7 @@ class ExperienceDestineController extends Controller
 
    }
     /***
-     * 活动预定支付接口
+     * 活动预定查询接口
      * @author wuhaiyan
      * @param Request $request
      * $request['appid']
