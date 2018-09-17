@@ -33,7 +33,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => 'var_dump',
 		// 业务类型为【还机】4的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackPayment',
-		// 业务类型为1的支付回调通知
+		// 业务类型为【买断】的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackPaid',
 
         // 业务类型为【续租】6的支付回调通知
