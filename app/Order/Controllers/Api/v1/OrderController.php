@@ -376,7 +376,7 @@ class OrderController extends Controller
                         $item['order_amount'],
                         $item['order_yajin'],
                         $item['order_insurance'],
-                        "".$item['cret_no'],
+                        "'".$item['cret_no'],
 
                     ];
                 }
