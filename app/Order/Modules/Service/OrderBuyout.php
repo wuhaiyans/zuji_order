@@ -212,8 +212,8 @@ class OrderBuyout
 				'business_no' => $buyout['buyout_no']
 		];
 
-		if($goodsInfo['yajin']>0){
-			//获取支付单信息
+		if($goodsInfo['yajin']>0 && $orderInfo['order_type']!=OrderStatus::orderMiniService){
+
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
 			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
