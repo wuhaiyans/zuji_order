@@ -220,6 +220,11 @@ class OrderBuyout
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 		}
+		if($orderInfo['order_type']==OrderStatus::orderMiniService){
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+		}
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
