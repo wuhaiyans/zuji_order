@@ -102,7 +102,7 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay){
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay || $this->payType == PayInc::PcreditPayInstallment){
             $this->paymentStatus =true;
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;

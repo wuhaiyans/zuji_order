@@ -37,6 +37,8 @@ class Receive
      *      'quantity'   => '',    商品数量    int      【可传】
      *      'imei'       => ''     商品imei    string   【可传】
      *      'business_no'  => '',   退换货单号  string  【可传】
+     *      'zuqi'  => '',   租期  string  【必传】
+     *      'zuqi_type'  => '',   租期类型  string  【必传】
      * ]
      * @params  $data
      * [

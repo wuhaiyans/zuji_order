@@ -12,6 +12,7 @@ use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\DB;
+use App\Activity\Modules\Repository\Activity;
 
 class ExperienceDestineOperate
 {
@@ -163,7 +164,7 @@ class ExperienceDestineOperate
                 'businessType'		=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE,	// 业务类型
                 'businessNo'		=> $destineData['destine_no'],	                // 业务编号
                 'orderNo'		    => '',	// 订单号
-                'paymentAmount'		=> $destine['destine_amount'],	                    // Price 支付金额，单位：元
+                'paymentAmount'		=> $destineData['destine_amount'],	                    // Price 支付金额，单位：元
                 'paymentFenqi'		=> '0',	// int 分期数，取值范围[0,3,6,12]，0：不分期
             ];
 
@@ -205,6 +206,7 @@ class ExperienceDestineOperate
     {
             $res =[];
             //查询活动信息
+
             $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByIdNo($data['experience_id']);
             if(!$activity){
                 set_msg("获取活动信息失败");
