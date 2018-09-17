@@ -272,8 +272,10 @@ return [
     'api.buyout.getBuyout'       => 'BuyoutController@getBuyout',
     //取消买断
     'api.buyout.cancel'       => 'BuyoutController@cancel',
-    //买断支付
+    //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    //支付宝小程序h5买断支付
+    'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
 
 
     //-+------------------------------------------------------------------------
