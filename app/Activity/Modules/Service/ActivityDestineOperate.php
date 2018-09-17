@@ -288,7 +288,7 @@ class ActivityDestineOperate
                 //支付方式名称
                 $destineListArray[$keys]['pay_type_name'] = PayInc::getPayName($values['pay_type']);
                 //应用来源名称
-                $destineListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                $destineListArray[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id'],$values['channel_id']);
 
             }
 
