@@ -310,6 +310,10 @@ class ImeiRepository
             if(!Imei::where(['imei'=>$imei->imei])->update(['status'=>Imei::STATUS_IN])){
                 return false;
             }
+            $imei->status = ReceiveGoodsImei::STATUS_CHECK_OVER;
+            if(!$imei->update()){
+                return false;
+            }
         }
 //        foreach($imei as $k=>$imeModel) {
 //            if(!ImeiLog::in($imeModel->imei,$model->order_no,$goods->zuqi,$goods->zuqi_type)){
