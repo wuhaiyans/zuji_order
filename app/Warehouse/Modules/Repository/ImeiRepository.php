@@ -294,7 +294,7 @@ class ImeiRepository
         $imei = $model->imeis;
         $goods = $model->goods;
 
-        if(!$imei || $goods) {
+        if(!$imei || !$goods) {
             return false;
         }
         foreach($imei as $k=>$imeModel) {
