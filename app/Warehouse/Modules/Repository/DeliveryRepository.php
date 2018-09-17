@@ -105,7 +105,9 @@ class DeliveryRepository
                 'goods_no'      =>  $val['goods_no'],
                 'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
-                'status_time'   =>  $time
+                'status_time'   =>  $time,
+                'zuqi' => $val['zuqi'],
+                'zuqi_type' => $val['zuqi_type']
             ];
             $goodsModel = new DeliveryGoods();
             $goodsModel->create($row);
@@ -218,11 +220,17 @@ class DeliveryRepository
             $delivery_no = $params['delivery_no'];
             $goods_no   = $params['goods_no'];
 
-
             $delivery = Delivery::find($delivery_no);
-
             if (!$delivery) {
                 throw new NotFoundResourceException('发货单不存在');
+            }
+
+            $goods_model = DeliveryGoods::where([
+                'delivery_no'=>$params['delivery_no'],
+                'goods_no'=>$params['goods_no']
+            ])->first();
+            if (!$goods_model) {
+                throw new NotFoundResourceException('发货商品清单不存在');
             }
 
             $time = time();
@@ -249,7 +257,7 @@ class DeliveryRepository
                     $model->create($imei_data);
                 }else{
                     //入库
-                    Imei::in($goods_imei_model->imei,$delivery['order_no']);
+                    Imei::in($goods_imei_model->imei,$delivery['order_no'],$goods_model->zuqi,$goods_model->zuqi_type);
                     //存在修改
                     $goods_imei_model->imei = $imei_data['imei'];
                     $goods_imei_model->status = $imei_data['status'];
@@ -259,8 +267,7 @@ class DeliveryRepository
                     $goods_imei_model->update();
                 }
 
-                Imei::out($params['imei'],$delivery['order_no']);
-
+                Imei::out($params['imei'],$delivery['order_no'],$goods_model->zuqi,$goods_model->zuqi_type);
 
 //                $imeis = $params['imeis'];
 //                foreach ($imeis as $imei) {
@@ -283,17 +290,11 @@ class DeliveryRepository
 //                }
             }
 
-            #2修改 goods 状态
-            $goods_model = DeliveryGoods::where([
-                'delivery_no'=>$params['delivery_no'],
-                'goods_no'=>$params['goods_no']
-            ])->first();
-
+            //2修改 goods 状态
             $goods_status = DeliveryGoods::STATUS_ALL;
             if ($goods_model->quantity > $params['quantity']) {
                 $goods_status = DeliveryGoods::STATUS_PART;
             }
-
             $goods_data = [
                 'quantity_delivered' => isset($params['quantity']) ? $params['quantity'] : $goods_model->quantity,
                 'status'             => $goods_status,
@@ -301,6 +302,7 @@ class DeliveryRepository
             ];
             $goods_model->update($goods_data);
             DB::commit();
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw new \Exception($e->getMessage());

@@ -33,11 +33,17 @@ class ImeiLog extends Warehouse
     const STATUS_OUT    = 2;//出库
 
     /**
+     * 租期类型状态
+     */
+    const ZUQI_TYPE_MONTH = 2;//月
+    const ZUQI_TYPE_DAY   = 1;//日
+
+    /**
      *
      * 可填充字段
      */
     protected $fillable = [
-        'imei', 'type', 'create_time', 'order_no','id', 'imei_id'
+        'imei', 'type', 'create_time', 'order_no','id', 'imei_id', 'zuqi', 'zuqi_type'
     ];
 
 
@@ -61,12 +67,30 @@ class ImeiLog extends Warehouse
     }
 
     /**
+     * @param null $status 不传值或传null时，返回状态列表，否则返回对应状态值
+     * @return array|mixed|string
+     *
+     * 获取状态列表，或状态值
+     */
+    public static function zuqi_type($status=null)
+    {
+        $st = [
+            self::STATUS_CNACEN => '月',
+            self::STATUS_IN     => '日',
+        ];
+
+        if ($status === null) return $st;
+
+        return isset($st[$status]) ? $st[$status] : '';
+    }
+
+    /**
      * @param $imei
      * @return bool
      *
      * 入库
      */
-    public static function in($imei,$order_no=0)
+    public static function in($imei,$order_no=0,$zuqi=0,$zuqi_type=0)
     {
         $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
         $data = [
@@ -74,7 +98,9 @@ class ImeiLog extends Warehouse
             'type'=>self::STATUS_IN,
             'create_time'=>time(),
             'order_no'=>$order_no,
-            'imei_id'=>$imei_row['id']
+            'imei_id'=>$imei_row['id'],
+            'zuqi'=>$zuqi,
+            'zuqi_type'=>$zuqi_type,
         ];
         $model = self::create($data);
         if (!$model) {
@@ -89,7 +115,7 @@ class ImeiLog extends Warehouse
      * @return bool
      * 出库
      */
-    public static function out($imei,$order_no=0)
+    public static function out($imei,$order_no=0,$zuqi=0,$zuqi_type=0)
     {
         $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
         $data = [
@@ -97,7 +123,9 @@ class ImeiLog extends Warehouse
             'type'=>self::STATUS_OUT,
             'create_time'=>time(),
             'order_no'=>$order_no,
-            'imei_id'=>$imei_row['id']
+            'imei_id'=>$imei_row['id'],
+            'zuqi'=>$zuqi,
+            'zuqi_type'=>$zuqi_type,
         ];
         $model = self::create($data);
         if (!$model) {

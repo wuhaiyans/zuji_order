@@ -271,6 +271,9 @@ class ImeiRepository
         $imeilog_obj = ImeiLog::where(['imei_id'=>$id])->get();
         if($imeilog_obj){
             $data['imeilog'] = $imeilog_obj->toArray();
+            foreach ($data['imeilog'] as $k=>$item){
+                $data['imeilog'][$k]['zuqi_type'] = ImeiLog::zuqi_type($item['zuqi_type']);
+            }
         }
 
         $imeiupdatelog_obj = ImeiUpdateLog::where(['imei_id'=>$id])->get();
@@ -289,12 +292,13 @@ class ImeiRepository
         $model = Receive::find($receive_no);
         //目前是一个收货单对应一个商品一个IMEI
         $imei = $model->imeis;
+        $goods = $model->goods;
 
-        if(!$imei) {
+        if(!$imei || $goods) {
             return false;
         }
-        foreach($imei as $imeModel) {
-            if(!ImeiLog::in($imeModel->imei,$model->order_no)){
+        foreach($imei as $k=>$imeModel) {
+            if(!ImeiLog::in($imeModel->imei,$model->order_no,$goods[$k]->zuqi,$goods[$k]->zuqi_type)){
                 return false;
             }
             if(!Imei::where(['imei'=>$imeModel->imei])->update(['status'=>Imei::STATUS_IN])){

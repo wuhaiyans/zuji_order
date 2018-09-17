@@ -31,7 +31,9 @@ class DeliveryGoods extends Warehouse
         'goods_name',
         'quantity_delivered',
         'status',
-        'status_time'
+        'status_time',
+        'zuqi',
+        'zuqi_type'
     ];
 
     /**
