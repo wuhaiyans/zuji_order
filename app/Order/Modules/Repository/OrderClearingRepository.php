@@ -94,7 +94,8 @@ class OrderClearingRepository
         //if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
        //     return false;
       //  }
-        if(redisIncr('_orderCleaning_create',60)>1) {
+        
+        if(redisIncr($param['business_no'].'_orderCleaning_create',60)>1) {
             return false;
          }
 
@@ -144,7 +145,6 @@ class OrderClearingRepository
 
         ];
         LogApi::debug("[clear]创建结算清单参数",$order_data);
-        LogApi::debug("[clear]创建结算清单sql语句:".sql_profiler());
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;
