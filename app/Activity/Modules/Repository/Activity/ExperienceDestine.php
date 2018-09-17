@@ -92,13 +92,9 @@ class ExperienceDestine{
      * 增加租期
      * @return bool
      */
-    public function upZuqi():bool{
-        if($this->model->destine_status != DestineStatus::ExperienceDestinePayed){
-            return false;
-        }
-        $this->model->zuqi = $this->model->zuqi+1;
-        $this->model->update_time = time();
-        return $this->model->save();
+    public static function upZuqi($user_id,$experience_id){
+        $ret =ActivityExperienceDestine::where(['user_id'=>$user_id,'experience_id'=>$experience_id])->increment("zuqi",1);
+        return $ret;
     }
 
 

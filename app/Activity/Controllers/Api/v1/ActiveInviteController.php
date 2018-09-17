@@ -10,6 +10,8 @@ namespace App\Activity\Controllers\Api\v1;
 
 
 use App\Activity\Modules\Repository\ActiveInviteRepository;
+use App\Activity\Modules\Repository\Activity\ExperienceDestine;
+use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
 use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
@@ -38,7 +40,6 @@ class ActiveInviteController extends Controller
         $invite_uid = $userInfo['uid'];
         //解密邀请码获取用户id和活动id
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
-        var_dump($codeNum);die;
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['experience_id'];
         //验证是否已邀请
@@ -58,6 +59,7 @@ class ActiveInviteController extends Controller
         if(!$ret){
             LogApi::debug("预约邀请",$data);
         }
+        ExperienceDestine::upZuqi($uid,$activity_id);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
     }
     /*
@@ -88,22 +90,23 @@ class ActiveInviteController extends Controller
         }
         $uid = $userInfo['uid'];
         $activity_id = $params['activity_id'];
+        $array['uid'] = $uid;
+        $array['activity_id'] = $activity_id;
         //获取邀请总数
-        $count = ActiveInviteRepository::getCount();
+        $count = ActiveInviteRepository::getCount($array);
         $sum = ceil($count/$limit);
         $page = $page>0?$page-1:$page;
         $page = $page>=$sum?$sum:$page-1;
         $limit = $limit<50?$limit:10;
         $offset = $page*$limit;
-        $array = [
-            'uid'=>$uid,
-            'activity_id'=>$activity_id,
-            'offset'=>$offset,
-            'limit'=>$limit
-        ];
+        $array['offset'] = $offset;
+        $array['limit'] = $limit;
         //获取邀请人信息
         $list = ActiveInviteRepository::getList($array);
+        //获预约活动信息
+        $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
         $data = [
+            'activity' => $activityInfo,
             'count' => $count,
             'total_page' =>$sum,
             'data' =>$list
