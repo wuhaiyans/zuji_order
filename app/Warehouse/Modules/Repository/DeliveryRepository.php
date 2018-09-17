@@ -146,7 +146,7 @@ class DeliveryRepository
         //修改IMEI状态为库存中
         if($model->imeis){
             foreach ($model->imeis as $key=>$item){
-                Imei::in($item->imei);
+                Imei::in($item->imei,$order_no);
             }
         }
 
@@ -169,7 +169,7 @@ class DeliveryRepository
         //修改IMEI状态为库存中
         if($model->imeis){
             foreach ($model->imeis as $key=>$item){
-                Imei::in($item->imei);
+                Imei::in($item->imei,$model->order_no);
             }
         }
 
@@ -257,7 +257,7 @@ class DeliveryRepository
                     $model->create($imei_data);
                 }else{
                     //入库
-                    Imei::in($goods_imei_model->imei,$delivery['order_no'],$goods_model->zuqi,$goods_model->zuqi_type);
+                    Imei::in($goods_imei_model->imei,$delivery['order_no']);
                     //存在修改
                     $goods_imei_model->imei = $imei_data['imei'];
                     $goods_imei_model->status = $imei_data['status'];
@@ -421,6 +421,10 @@ class DeliveryRepository
 				\App\Lib\Common\LogApi::type('data-error')::error('商品配货取消失败', $where);
 				return false;
 			}
+            $deliveryModel = Delivery::where(['delivery_no'=>$params['delivery_no']])->first();
+            if(!$deliveryModel){
+                return false;
+            }
 			// 重复操作
 			if( $goodsModel->status == DeliveryGoods::STATUS_INIT ){
 				return true;
@@ -441,7 +445,7 @@ class DeliveryRepository
 				return false;
 			}
             // 还原 imei 状态
-            Imei::in( $goodsImeiModel->imei );
+            Imei::in( $goodsImeiModel->imei, $deliveryModel->order_no );
 
 			$goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
 			$goodsImeiModel->status_time = time();

@@ -293,37 +293,37 @@ class ImeiRepository
     public static function updateStatus($receive_no){
         $model = Receive::find($receive_no);
         //目前是一个收货单对应一个商品一个IMEI
-        //$imei = $model->imeis;
-        $goods = $model->goods;
+        $imei = $model->imeis;
+        //$goods = $model->goods;
 
-        if(!$goods) {
+        if(!$imei) {
             return false;
         }
-        foreach ($goods as $item){
-            $imei = ReceiveGoodsImei::where(['receive_no'=>$receive_no,'goods_no'=>$item->goods_no])->first();
-            if(!$imei){
-                return false;
-            }
-            if(!ImeiLog::in($imei->imei,$model->order_no,$item->zuqi,$item->zuqi_type)){
-                return false;
-            }
-            if(!Imei::where(['imei'=>$imei->imei])->update(['status'=>Imei::STATUS_IN])){
-                return false;
-            }
-            $imei->status = ReceiveGoodsImei::STATUS_CHECK_OVER;
-            if(!$imei->update()){
-                return false;
-            }
-        }
-//        foreach($imei as $k=>$imeModel) {
-//            if(!ImeiLog::in($imeModel->imei,$model->order_no,$goods->zuqi,$goods->zuqi_type)){
+//        foreach ($goods as $item){
+//            $imei = ReceiveGoodsImei::where(['receive_no'=>$receive_no,'goods_no'=>$item->goods_no])->first();
+//            if(!$imei){
 //                return false;
 //            }
-//            if(!Imei::where(['imei'=>$imeModel->imei])->update(['status'=>Imei::STATUS_IN])){
+//            if(!ImeiLog::in($imei->imei,$model->order_no,$item->zuqi,$item->zuqi_type)){
 //                return false;
 //            }
-//
+//            if(!Imei::where(['imei'=>$imei->imei])->update(['status'=>Imei::STATUS_IN])){
+//                return false;
+//            }
+//            $imei->status = ReceiveGoodsImei::STATUS_CHECK_OVER;
+//            if(!$imei->update()){
+//                return false;
+//            }
 //        }
+        foreach($imei as $k=>$imeModel) {
+            if(!ImeiLog::in($imeModel->imei,$model->order_no)){
+                return false;
+            }
+            if(!Imei::where(['imei'=>$imeModel->imei])->update(['status'=>Imei::STATUS_IN])){
+                return false;
+            }
+
+        }
 
         return true;
 
