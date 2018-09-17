@@ -458,6 +458,8 @@ class OrderReturnCreater
                     $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];//商品数量
                     $goodsDeliveryInfo[$k]['refund_no'] = $params['detail'][$k]['refund_no'];//退换货单号
                     $goodsDeliveryInfo[$k]['goods_name'] = $goods_info['goods_name'];//商品名称
+                    $goodsDeliveryInfo[$k]['zuqi'] = $goods_info['zuqi'];//商品租期
+                    $goodsDeliveryInfo[$k]['zuqi_type'] = $goods_info['zuqi_type'];//租期类型
 
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
