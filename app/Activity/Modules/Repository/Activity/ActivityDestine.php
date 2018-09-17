@@ -48,7 +48,7 @@ class ActivityDestine{
             'user_id' => $data['user_id'],        //【必须】 int   用户ID
             'mobile' => $data['mobile'],         //【必须】 string 用户手机号
             'destine_amount' => $destineAmount,                     //【必须】 float  预定金额
-            'pay_channel' => $data['pay_channel_id'],       //【必须】 int  支付渠道
+            'pay_type' => $data['pay_type'],       //【必须】 int  支付类型
             'app_id' => $data['appid'],          //【必须】 int app_id
             'channel_id' => $channelId,                     //【必须】 int 渠道Id
             'activity_name' => $activityName,                     //【必须】 string 活动名称
