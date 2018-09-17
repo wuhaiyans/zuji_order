@@ -805,6 +805,10 @@ class Pay extends \App\Lib\Configurable
 		if( !$b ){
 			throw new \Exception( '预授权环节支付渠道设置失败' );
 		}
+		$extended_params = [];
+		if( isset($params['extended_params']) ){
+			$extended_params = $params['extended_params'];
+		}
 		// 获取url
 		$url_info = \App\Lib\Payment\CommonFundAuthApi::fundAuthUrl([
 			'out_fundauth_no'	=> $this->getFundauthNo(),
@@ -815,6 +819,7 @@ class Pay extends \App\Lib\Configurable
 			'front_url'		=> $params['front_url'],			//【必选】string 前端回跳地址
 			//【必选】string 后台通知地址	
 			'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/fundauthNotify',
+			'extended_params' => $extended_params,// 支付系统扩展参数
 		]);
 		return $url_info;
 	}
