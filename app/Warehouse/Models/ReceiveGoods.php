@@ -54,7 +54,9 @@ class ReceiveGoods extends Warehouse
         'check_result',
         'check_result',
         'check_description',
-        'check_price'
+        'check_price',
+        'zuqi',
+        'zuqi_type'
     ];
 
     /**

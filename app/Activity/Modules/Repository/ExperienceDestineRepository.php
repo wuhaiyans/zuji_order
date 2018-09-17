@@ -115,8 +115,9 @@ class ExperienceDestineRepository
     public static function getUserExperience($userId,$experienceId){
         if (empty($userId)) return false;
         if (empty($experienceId)) return false;
-        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'experience_id'=>$experienceId])->first()->toArray();
+        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'experience_id'=>$experienceId])->first();
         if($info){
+            $info = $info->toArray();
             $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();
             $info = array_merge($experience,$info);
         }

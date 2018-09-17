@@ -145,7 +145,6 @@ class OrderClearingRepository
 
         ];
         LogApi::debug("[clear]创建结算清单参数",$order_data);
-        LogApi::debug("[clear]创建结算清单sql语句:".sql_profiler());
         $success =$orderClearData->insert($order_data);
         if(!$success){
             return false;

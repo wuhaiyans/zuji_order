@@ -87,6 +87,8 @@ class GoodsReturn {
      * @return bool
      */
     public function refundAgree(string $remark):bool{
+        LogApi::debug("[refundApply]更新退款单状态为同意的接受参数",$remark);
+        LogApi::debug("[refundApply]更新退款的状态".$this->model->status);
         //退换货单必须是待审核
         if( $this->model->status !=ReturnStatus::ReturnCreated ){
             return false;

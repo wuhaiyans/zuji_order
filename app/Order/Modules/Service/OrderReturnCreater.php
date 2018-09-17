@@ -668,7 +668,7 @@ class OrderReturnCreater
      * [
      *       'uid'        =>'',    用户id  int【必传】
      *       'type'       =>'',   请求类型（2前端，1后端） int 【必传】
-     *      ‘username’  =>‘’，用户名 string【必传】
+     *      'username'    =>'',   用户名 string【必传】
      * ]
      * @return  bool
      */
@@ -692,6 +692,7 @@ class OrderReturnCreater
             LogApi::info("[refundApply]获取退款单信息",$return_info);
             if($param['status'] == 0){
                 //更新退款单状态为同意
+                LogApi::debug("[refundApply]更新退款单状态为同意的参数",$param);
                 $returnApply = $return->refundAgree($param['remark']);
                 if(!$returnApply){
                     LogApi::info("[refundApply]更新退款单状态为同意失败信息",$returnApply);
