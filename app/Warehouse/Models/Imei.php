@@ -66,14 +66,14 @@ class Imei extends Warehouse
      *
      * 库存中
      */
-    public static function in($imei,$order_no=0,$zuqi=0,$zuqi_type=0)
+    public static function in($imei,$order_no=0)
     {
         $model = self::where(['imei'=>$imei])->first();
         if (!$model) {
             return false;
         }
         //设备出入库记录
-        if(!ImeiLog::in($imei,$order_no,$zuqi,$zuqi_type)){
+        if(!ImeiLog::in($imei,$order_no)){
             return false;
         }
         $model->status = self::STATUS_IN;
