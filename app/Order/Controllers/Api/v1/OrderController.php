@@ -105,7 +105,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],get_code()?get_code():ApiStatus::CODE_60000,get_msg());
         }
-        return apiResponse($res,ApiStatus::CODE_0);
+        return apiResponse($res,get_code()?get_code():ApiStatus::CODE_0);
 
     }
     /**
