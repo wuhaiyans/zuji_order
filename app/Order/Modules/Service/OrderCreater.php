@@ -402,6 +402,7 @@ class OrderCreater
                 'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
+                '_error_code' =>get_code(),
             ];
             return $result;
         } catch (\Exception $exc) {
@@ -469,6 +470,7 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 'pay_type'=>$data['pay_type'],
+                '_error_code' =>get_code(),
             ];
             return $result;
         } catch (\Exception $exc) {
