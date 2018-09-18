@@ -101,8 +101,9 @@ class OrderController extends Controller
             'pay_channel_id'=>$payChannelId,
         ];
         $res = $this->OrderCreate->confirmation( $data );
+
         if(!is_array($res)){
-            return apiResponse([],ApiStatus::CODE_60000,get_msg());
+            return apiResponse([],get_code()?get_code():ApiStatus::CODE_60000,get_msg());
         }
         return apiResponse($res,ApiStatus::CODE_0);
 
@@ -189,7 +190,7 @@ class OrderController extends Controller
         $res = $this->OrderCreate->create($data);
         if(!$res){
             LogApi::info("下单失败",get_msg());
-            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+            return apiResponse([],get_code()?get_code():ApiStatus::CODE_60000,get_msg());
 
         }
 
