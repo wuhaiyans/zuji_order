@@ -34,7 +34,7 @@ class ActiveInviteController extends Controller
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
         }
-        if(empty($params['images'])){
+        if(isset($params['images'])){
             return apiResponse([],ApiStatus::CODE_20001,"images必须");
         }
         $invite_uid = $userInfo['uid'];
