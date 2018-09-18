@@ -35,8 +35,9 @@ class ImeiLog extends Warehouse
     /**
      * 租期类型状态
      */
-    const ZUQI_TYPE_MONTH = 2;//月
-    const ZUQI_TYPE_DAY   = 1;//日
+    const ZUQI_TYPE_MONTH   = 2;//月
+    const ZUQI_TYPE_DAY     = 1;//日
+    const ZUQI_TYPE_0       = 0;//无
 
     /**
      *
@@ -75,8 +76,9 @@ class ImeiLog extends Warehouse
     public static function zuqi_type($status=null)
     {
         $st = [
-            self::STATUS_CNACEN => '月',
-            self::STATUS_IN     => '日',
+            self::ZUQI_TYPE_MONTH   => '月',
+            self::ZUQI_TYPE_DAY     => '日',
+            self::ZUQI_TYPE_0       => '无',
         ];
 
         if ($status === null) return $st;

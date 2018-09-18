@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
 use App\Order\Modules\Inc\OrderStatus;
@@ -185,6 +186,7 @@ class OrderComponnet implements OrderCreater
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
         $b =OrderRepository::unCompledOrder($this->userId);
         if($b) {
+            set_code(ApiStatus::CODE_30006);
             $this->getOrderCreater()->setError('有未完成订单');
             return false;
         }

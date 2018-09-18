@@ -34,10 +34,11 @@ class ActiveInviteController extends Controller
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
         }
-        if(empty($params['images'])){
+        if(isset($params['images'])){
             return apiResponse([],ApiStatus::CODE_20001,"images必须");
         }
         $invite_uid = $userInfo['uid'];
+        $invite_mobile = $userInfo['username'];
         //解密邀请码获取用户id和活动id
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
@@ -52,6 +53,7 @@ class ActiveInviteController extends Controller
             'activity_id'=>$activity_id,
             'uid'=>$uid,
             'invite_uid'=>$invite_uid,
+            'invite_mobile'=>$invite_mobile,
             'images'=>$params['images'],
             'create_time'=>time()
         ];

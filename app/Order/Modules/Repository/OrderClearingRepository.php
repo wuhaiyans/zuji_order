@@ -94,7 +94,8 @@ class OrderClearingRepository
         //if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
        //     return false;
       //  }
-        if(redisIncr('_orderCleaning_create',60)>1) {
+        
+        if(redisIncr($param['business_no'].'_orderCleaning_create',60)>1) {
             return false;
          }
 
