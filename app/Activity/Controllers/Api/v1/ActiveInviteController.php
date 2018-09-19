@@ -128,6 +128,12 @@ class ActiveInviteController extends Controller
         $list = ActiveInviteRepository::getList($array);
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
+        $activityInfo['head_images'] = "";
+        //获取微信授权登录信息
+        $userWechat = User::getUserWechat($uid);
+        if($userWechat){
+            $activityInfo['head_images'] = $userWechat['headimgurl'];
+        }
         $data = [
             'activity' => $activityInfo,
             'count' => $count,
