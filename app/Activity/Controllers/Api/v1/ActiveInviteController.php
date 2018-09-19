@@ -46,6 +46,7 @@ class ActiveInviteController extends Controller
         $activity_id = $codeNum['experience_id'];
         //获取邀请人信息
         $user = User::getUser($uid);
+        print_r($user);die;
         if(!$user){
             return apiResponse([],ApiStatus::CODE_50001,"邀请用户错误！");
         }
