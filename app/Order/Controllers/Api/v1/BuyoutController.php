@@ -262,7 +262,6 @@ class BuyoutController extends Controller
         //过滤参数
         $rule= [
             'goods_no'=>'required',
-            'user_id'=>'required',
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
@@ -271,9 +270,6 @@ class BuyoutController extends Controller
         $userInfo = $orders['userinfo'];
         if (empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
-        }
-        if (empty($params['user_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"user_id必须");
         }
         //获取订单商品信息
         $goodsObj = Goods::getByGoodsNo($params['goods_no']);
