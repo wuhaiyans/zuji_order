@@ -45,7 +45,7 @@ class User extends \App\Lib\BaseApi{
             'user_id'=>$user_id,
         ];
 
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.sum.query', '1.0', $params);
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.wechat.query', '1.0', $params);
     }
     /**
      * 获取用户是否在第三方平台下过单
