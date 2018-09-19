@@ -52,7 +52,7 @@ class ActiveInviteRepository
         if($data['offset']){
             $offset = $data['offset'];
         }
-        if(!$data['limit']){
+        if($data['limit']){
             $limit = $data['limit'];
         }
         $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
