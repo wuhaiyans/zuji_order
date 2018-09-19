@@ -333,13 +333,17 @@ class SkuComponnet implements OrderCreater
      *  计算押金
      * @param int $amount
      */
-    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
+    public function discrease_yajin($jianmian,$yajin,$yajinLimit,$sku_id): array{
         if( $jianmian<0 ){
             return [];
         }
+        //判断如果押金限额 大于 风控押金值 取押金限额
+        if($yajinLimit > $yajin){
+            $yajin =$yajinLimit;
+        }
+
         // 优惠金额 大于 总金额 时，总金额设置为0.01
         $arr[$sku_id]['deposit_yajin'] = $yajin;// 更新押金
-        //$arr[$sku_id]['mianyajin'] = $mianyajin +$jianmian;// 更新免押金额
         $arr[$sku_id]['mianyajin'] = $jianmian;// 更新免押金额
         $arr[$sku_id]['jianmian'] = $jianmian;
         $arr[$sku_id]['yajin'] = $yajin+$jianmian;
