@@ -52,7 +52,7 @@ class ReturnTokio{
             'realName' =>$data['realName'],
             'orderNo'  =>$data['orderNo'],
             'goodsName'=>$data['goodsName'],
-            'zuJin'     =>$data['zuJin']."元",
+            'zuJin'     =>$data['zuJin'],
             'serviceTel'=>config('tripartite.Customer_Service_Phone'),
 		]);
 	}

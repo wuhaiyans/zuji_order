@@ -46,7 +46,6 @@ class ActiveInviteController extends Controller
         $activity_id = $codeNum['experience_id'];
         //获取邀请人信息
         $user = User::getUser($uid);
-        print_r($user);die;
         if(!$user){
             return apiResponse([],ApiStatus::CODE_50001,"邀请用户错误！");
         }
@@ -59,6 +58,7 @@ class ActiveInviteController extends Controller
         if(date("Y-m-d") != date("Y-m-d",$userInfo['register_time'])){
             return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户");
         }
+
         //更新邀请信息
         $data = [
             'activity_id'=>$activity_id,
@@ -66,10 +66,18 @@ class ActiveInviteController extends Controller
             'mobile'=>$user['username'],
             'invite_uid'=>$invite_uid,
             'invite_mobile'=>$invite_mobile,
-            'openid'=>$params['openid']?$params['openid']:"",
             'images'=>$params['images'],
             'create_time'=>time()
         ];
+        $userWechat = User::getUserWechat($uid);
+        if($userWechat){
+            $data['openid'] = $userWechat['openid'];
+        }
+        $InviteWechat = User::getUserWechat($invite_uid);
+        if($InviteWechat){
+            $data['invite_openid'] = $InviteWechat['openid'];
+        }
+
         $ret = ActiveInviteRepository::insertInvite($data);
         if(!$ret){
             LogApi::debug("预约邀请",$data);
