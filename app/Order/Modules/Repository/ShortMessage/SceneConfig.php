@@ -189,6 +189,11 @@ class SceneConfig {
      */
     const DESTINE_REFUND = 'DestineRefund';
 
+    /**
+     * 场景：<b>【花呗分期退款】</b>
+     */
+    const RETURN_TOKIO = 'ReturnTokio';
+
 
 
 }

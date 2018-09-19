@@ -13,6 +13,7 @@ use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
 use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
+use App\Order\Modules\Repository\ShortMessage\ReturnTokio;
 use Illuminate\Support\Facades\DB;
 use \App\Order\Modules\Inc\ReturnStatus;
 use \App\Order\Modules\Inc\OrderCleaningStatus;
@@ -2452,14 +2453,7 @@ class OrderReturnCreater
                 return false;
             }
 
-            LogApi::debug("押金解冻短信发送",[
-                'mobile'=>$order_info['mobile'],
-                'realName'=>$userInfo['realname'],
-                'orderNo'=>$order_info['order_no'],
-                'goodsName'=>$goodsInfo['goods_name'],
-                'channel_id'=>$order_info['channel_id'],
-                'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
-            ]);
+
             LogApi::debug("退款成功获取渠道id",$order_info['channel_id']);
             //微回收退款成功发送短信
             if($order_info['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
@@ -2469,15 +2463,42 @@ class OrderReturnCreater
                 $returnSend=$orderNoticeObj->notify();
 
             }else{
-                //发送短信，押金解冻短信发送
-                $returnSend = ReturnDeposit::notify($order_info['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+
+                if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+                    if( $return_info['refund_amount'] > 0){
+                        //发送短信，花呗分期租金短信
+                        $returnSend = ReturnTokio::notify($order_info['channel_id'],SceneConfig::RETURN_TOKIO,[
+                                'mobile'=>$order_info['mobile'],
+                                'realName'=>$userInfo['realname'],
+                                'goodsName'=>$goodsInfo['goods_name'],
+                                'orderNo'=>$order_info['order_no'],
+                                'zuJin'  =>$return_info['refund_amount'],
+                            ]
+                        );
+                    }
+                }
+
+
+                if( $return_info['auth_unfreeze_amount'] > 0 ){
+                    LogApi::debug("押金解冻短信发送",[
                         'mobile'=>$order_info['mobile'],
                         'realName'=>$userInfo['realname'],
                         'orderNo'=>$order_info['order_no'],
                         'goodsName'=>$goodsInfo['goods_name'],
+                        'channel_id'=>$order_info['channel_id'],
                         'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
-                    ]
-                );
+                    ]);
+                    //发送短信，押金解冻短信发送
+                    $returnSend = ReturnDeposit::notify($order_info['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+                            'mobile'=>$order_info['mobile'],
+                            'realName'=>$userInfo['realname'],
+                            'orderNo'=>$order_info['order_no'],
+                            'goodsName'=>$goodsInfo['goods_name'],
+                            'tuihuanYajin'=>$return_info['auth_unfreeze_amount']
+                        ]
+                    );
+                }
+
             }
 
             Log::debug($returnSend?"Order :".  ['order_no']." IS OK":"IS error");
