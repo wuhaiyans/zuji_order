@@ -29,8 +29,10 @@ class ActiveInvite extends Model
         'id', //主键id
         'activity_id', //活动id
         'uid', //用户id
+        'mobile', //用户手机号
         'invite_uid', //受邀用户id
         'invite_mobile', //受邀用户手机号
+        'openid', //微信用户id
         'images', //受邀用户头像
         'create_time', //创建时间
     ];

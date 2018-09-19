@@ -14,6 +14,7 @@ use App\Activity\Modules\Repository\Activity\ExperienceDestine;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
 use App\Lib\Common\LogApi;
+use App\Lib\User\User;
 use Illuminate\Http\Request;
 use App\Lib\ApiStatus;
 
@@ -43,17 +44,28 @@ class ActiveInviteController extends Controller
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['experience_id'];
-        //验证是否已邀请
+        //获取邀请人信息
+        $user = User::getUser($uid);
+        if(!$user){
+            return apiResponse([],ApiStatus::CODE_50001,"邀请用户错误！");
+        }
+        //验证该用户是否已邀请
         $checkStatus = ActiveInviteRepository::checkInviteUser($invite_uid,$activity_id);
         if(!$checkStatus){
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
+        }
+        //验证是否新用户
+        if(date("Y-m-d") != date("Y-m-d",$userInfo['register_time'])){
+            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户");
         }
         //更新邀请信息
         $data = [
             'activity_id'=>$activity_id,
             'uid'=>$uid,
+            'mobile'=>$user['username'],
             'invite_uid'=>$invite_uid,
             'invite_mobile'=>$invite_mobile,
+            'openid'=>$params['openid'],
             'images'=>$params['images'],
             'create_time'=>time()
         ];
