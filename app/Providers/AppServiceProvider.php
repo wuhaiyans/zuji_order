@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Providers;
+use App\Http\Requests\Request;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,11 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        //
+        app('api.exception')->register(function (\Exception $exception) {
+            $request = Request()->capture();
+            return app('App\Exceptions\Handler')->render($request, $exception);
+        });
+
     }
 
     /**
