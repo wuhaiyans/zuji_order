@@ -33,6 +33,21 @@ class User extends \App\Lib\BaseApi{
         return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
     }
     /**
+     * 获取用户微信登录授权信息
+     * @author wuhaiyan
+     * @param $user_id //【必须】 用户id
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+
+    public static function getUserWechat($user_id){
+        $params= [
+            'user_id'=>$user_id,
+        ];
+
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.sum.query', '1.0', $params);
+    }
+    /**
      * 获取用户是否在第三方平台下过单
      * @author wuhaiyan
      * @param $arr //【必须】 array
