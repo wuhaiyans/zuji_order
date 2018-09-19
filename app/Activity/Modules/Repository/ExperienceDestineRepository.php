@@ -119,6 +119,7 @@ class ExperienceDestineRepository
         if($info){
             $info = $info->toArray();
             $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();
+            $experience['zuqi_day'] = $experience['zuqi'];
             $info = array_merge($experience,$info);
         }
         return !empty($info)?objectToArray($info):false;
