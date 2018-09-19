@@ -65,7 +65,7 @@ class ActiveInviteController extends Controller
             'mobile'=>$user['username'],
             'invite_uid'=>$invite_uid,
             'invite_mobile'=>$invite_mobile,
-            'openid'=>$params['openid'],
+            'openid'=>$params['openid']?$params['openid']:"",
             'images'=>$params['images'],
             'create_time'=>time()
         ];
