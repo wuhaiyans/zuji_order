@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Lib\Common\LogApi;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
@@ -48,6 +49,19 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof Exception){
+            $err = [
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'code' => $exception->getCode(),
+                'url' => Request()->url(),
+                'method'=>request()->input('method')
+            ];
+            LogApi::error("orderException异常",$err);
+            return apiResponse([],500,$exception->getMessage());
+        }
+
         return parent::render($request, $exception);
     }
 }
