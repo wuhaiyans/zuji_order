@@ -16,7 +16,7 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
         try{
             $arr =[];
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 10;
             $code   = "SMS_113461203";
@@ -48,7 +48,6 @@ class ActiveController extends Controller
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
-                die;
                 }
 
                 sleep($sleep);
