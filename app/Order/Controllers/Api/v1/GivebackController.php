@@ -11,6 +11,8 @@ use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 
 class GivebackController extends Controller
 {
@@ -170,6 +172,16 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
 		}
 		$goodsNoArr = is_array($paramsArr['goods_no']) ? $paramsArr['goods_no'] : [$paramsArr['goods_no']];
+		
+		
+		//判断订单是否冻结，冻结中不允许还机操作
+		$orderObj = new OrderRepository();
+		$orderInfo = $orderObj->get_order_info(['order_no'=>$paramsArr['order_no']]);
+		if( !$orderInfo || $orderInfo['freeze_type'] ){
+			$msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo['freeze_type']) . '中，禁止还机！';
+			return apiResponse([],ApiStatus::CODE_92500,$msg);
+		}
+		
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
@@ -249,6 +261,8 @@ class GivebackController extends Controller
 
 			$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($paramsArr['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Reback);
 			if( !$orderFreezeResult ){
+				//事务回滚
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'订单冻结失败！');
 			}
 			
@@ -265,6 +279,8 @@ class GivebackController extends Controller
 				'msg'=>'用户申请还机',
 			]);
 			if( !$goodsLog ){
+				//事务回滚
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 
