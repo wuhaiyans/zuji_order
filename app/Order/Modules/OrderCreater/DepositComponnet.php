@@ -114,12 +114,8 @@ class DepositComponnet implements OrderCreater
                         }
                     }
 
-                    if($v['yajin_limit'] > $yajin){
-                        $yajin =$v['yajin_limit'];
-                    }
-
                     $this->deposit_detail = json_encode($deposit['jianmian_detail']);
-                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $yajin, $v['mianyajin'], $v['sku_id']);
+                    $this->componnet->getOrderCreater()->getSkuComponnet()->discrease_yajin($jianmian, $yajin, $v['yajin_limit'], $v['sku_id']);
                 }
             }
         }
