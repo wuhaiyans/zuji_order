@@ -118,8 +118,7 @@ class ExperienceDestineRepository
         $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'experience_id'=>$experienceId])->first();
         if($info){
             $info = $info->toArray();
-            $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();
-            $experience['zuqi_day'] = $experience['zuqi'];
+            $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();;
             $info = array_merge($experience,$info);
         }
         return !empty($info)?objectToArray($info):false;
