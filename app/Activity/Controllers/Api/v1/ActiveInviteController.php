@@ -99,7 +99,7 @@ class ActiveInviteController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"activity_id必须");
         }
         if(!$params['page']){
-            $page = 0;
+            $page = 1;
         }else{
             $page = $params['page'];
         }
@@ -115,8 +115,8 @@ class ActiveInviteController extends Controller
         //获取邀请总数
         $count = ActiveInviteRepository::getCount($array);
         $sum = ceil($count/$limit);
-        $page = $page>0?$page-1:$page;
-        $page = $page>=$sum?$sum:$page-1;
+        $page = $page-1;
+        $page = $page>=$sum?$sum:$page;
         $limit = $limit<50?$limit:10;
         $offset = $page*$limit;
         $array['offset'] = $offset;
@@ -127,7 +127,7 @@ class ActiveInviteController extends Controller
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
         $activityInfo['head_images'] = "";
         //获取微信授权登录信息
-        $userWechat = User::getUserWechat($uid);
+        $userWechat = "";//User::getUserWechat($uid);
         if($userWechat){
             $activityInfo['head_images'] = $userWechat['headimgurl'];
         }

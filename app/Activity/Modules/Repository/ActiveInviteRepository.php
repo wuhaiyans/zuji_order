@@ -49,13 +49,13 @@ class ActiveInviteRepository
         $offset = "";
         $limit = "";
 
-        if($data['offset']){
+        if(isset($data['offset'])){
             $offset = $data['offset'];
         }
         if($data['limit']){
             $limit = $data['limit'];
         }
-        $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
+        $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->orderBy("id","desc")->get()->toArray();
         return $data;
     }
     /*
