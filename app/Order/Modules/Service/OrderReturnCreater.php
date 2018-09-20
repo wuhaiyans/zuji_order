@@ -1399,6 +1399,9 @@ class OrderReturnCreater
             $buss = new \App\Order\Modules\Service\BusinessInfo();
             //获取状态流
             $stateFlow = $buss->getStateFlow();
+
+            $return=GoodsReturn::getReturnGoodsInfo($params['goods_no']);
+
             //业务类型
             $buss->setBusinessType($params['business_key']);
             if($params['business_key']==OrderStatus::BUSINESS_RETURN){
@@ -1413,7 +1416,6 @@ class OrderReturnCreater
                 //换货状态流
                 $buss->setStateFlow($stateFlow['barterStateFlow']);
             }
-            $return=GoodsReturn::getReturnGoodsInfo($params['goods_no']);
             //$return值为空时，说明还没创建申请
             if(!$return){
                 $buss->setStatus("A");
@@ -1428,12 +1430,16 @@ class OrderReturnCreater
 				}
                 $buss->setReturnReason($_arr);//退换货问题
             }else{
+
                 //根据业务编号获取退货单信息
               //  $return=GoodsReturn::getReturnByRefundNo($params['business_no']);
               //  if(!$return){
               //     return false;
              //   }
                 $return_info=$return->getData();
+                if($params['business_key'] != $return_info['business_key']){
+                   return false;   //申请过的业务类型与当前进入的售后类型不一致
+                }
                 $buss->setRefundNo($return_info['refund_no']); //退换货单号
                 if($return_info['status']==ReturnStatus::ReturnCreated){   //待审核
                     $buss->setStatus("B"); //当前状态流

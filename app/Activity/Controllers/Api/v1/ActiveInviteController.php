@@ -35,9 +35,6 @@ class ActiveInviteController extends Controller
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
         }
-        if(!isset($params['images'])){
-            return apiResponse([],ApiStatus::CODE_20001,"images必须");
-        }
         $invite_uid = $userInfo['uid'];
         $invite_mobile = $userInfo['username'];
         //解密邀请码获取用户id和活动id
@@ -66,7 +63,6 @@ class ActiveInviteController extends Controller
             'mobile'=>$user['username'],
             'invite_uid'=>$invite_uid,
             'invite_mobile'=>$invite_mobile,
-            'images'=>$params['images'],
             'create_time'=>time()
         ];
         $userWechat = User::getUserWechat($uid);
@@ -76,6 +72,7 @@ class ActiveInviteController extends Controller
         $InviteWechat = User::getUserWechat($invite_uid);
         if($InviteWechat){
             $data['invite_openid'] = $InviteWechat['openid'];
+            $data['images'] = $InviteWechat['images'];
         }
 
         $ret = ActiveInviteRepository::insertInvite($data);
@@ -128,6 +125,12 @@ class ActiveInviteController extends Controller
         $list = ActiveInviteRepository::getList($array);
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
+        $activityInfo['head_images'] = "";
+        //获取微信授权登录信息
+        $userWechat = User::getUserWechat($uid);
+        if($userWechat){
+            $activityInfo['head_images'] = $userWechat['headimgurl'];
+        }
         $data = [
             'activity' => $activityInfo,
             'count' => $count,
