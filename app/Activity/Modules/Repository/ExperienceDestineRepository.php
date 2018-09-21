@@ -5,6 +5,7 @@ use App\Activity\Models\ActivityDestine;
 use App\Activity\Models\ActivityExperience;
 use App\Activity\Models\ActivityExperienceDestine;
 use App\Activity\Modules\Inc\DestineStatus;
+use Illuminate\Support\Facades\DB;
 
 class ExperienceDestineRepository
 {
@@ -49,8 +50,9 @@ class ExperienceDestineRepository
             'channel_id'    => 'required',
             'pay_type'      => 'required',
             'experience_id' => 'required',
+            'open_id'       => 'required',
         ]);
-        if(count($data)<11){
+        if(count($data)<12){
             return false;
         }
         $this->experienceDestine->destine_no = $data['destine_no'];
@@ -64,6 +66,7 @@ class ExperienceDestineRepository
         $this->experienceDestine->experience_id = $data['experience_id'];
         $this->experienceDestine->pay_type = $data['pay_type'];
         $this->experienceDestine->channel_id = $data['channel_id'];
+        $this->experienceDestine->open_id = $data['open_id'];
 
         $this->experienceDestine->destine_status = DestineStatus::DestineCreated;
         $this->experienceDestine->create_time = time();
@@ -124,8 +127,46 @@ class ExperienceDestineRepository
         return !empty($info)?objectToArray($info):false;
 
     }
+    /**
+     * 获取预定活动分页列表
+     * @param $params
+     * [
+     *   'mobile'       =>'',   //【可选】 string 手机号
+     *   'page'         =>'',   //【可选】 int 页数
+     *   'size'         =>''    //【可选】 int 每页数量
+     * ]
+     *
 
+     */
+    public static  function getDestinePageList($param=array()){
+        $page = empty($param['page']) || !isset($param['page']) ? 1 : $param['page'];
+        $size = !empty($param['size']) && isset($param['size']) ? $param['size'] : config('web.pre_page_size');
+        $whereArray= self::get_where($param);  //获取搜索的条件
+        $destineList =  DB::table('order_activity_experience_destine')
+            ->select('order_activity_experience_destine.*')
+            ->leftJoin()
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->paginate($size,$columns = ['*'], $pageName = 'page', $page);
+        if($destineList){
+            return $destineList->toArray();
+        }
+        return [];
+    }
+    /**
+     * 列表条件
+     */
+    public static function get_where($param=array()){
+        $whereArray=[];
 
+        //根据用户手机号
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+
+            $whereArray[] = ['mobile', '=', $param['mobile']];
+        }
+
+        return $whereArray;
+    }
 
 
 }

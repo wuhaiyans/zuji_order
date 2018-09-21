@@ -9,6 +9,7 @@
 namespace App\Activity\Controllers\Api\v1;
 
 
+use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
 use App\Lib\ApiStatus;
@@ -180,5 +181,36 @@ class ExperienceDestineController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
+
+    /***
+     * 活动体验预定单列表
+     * @author wuhaiyan
+     * @param Request $request
+     * @return array
+     * [
+     *   'mobile'           => '',  //用户手机
+     *   'page'             =>'' ,  //页数
+     *   'size'             =>'' ,  //每页数量
+     * ]
+
+     */
+    public function experienceDestineList(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $destineData = ExperienceDestineOperate::getDestineList($params['params']);//获取预定单列表信息
+            if(!$destineData){
+                return apiResponse([],ApiStatus::CODE_50001,"获取信息失败");  //获取预订信息失败
+            }
+
+            return apiResponse($destineData,ApiStatus::CODE_0);
+        }catch (\Exception $e) {
+            LogApi::error('预订单列表异常',$e);
+            return apiResponse([],ApiStatus::CODE_50000);
+
+        }
+
+    }
+
 
 }

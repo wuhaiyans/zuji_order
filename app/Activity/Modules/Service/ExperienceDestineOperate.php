@@ -11,6 +11,7 @@ use App\Activity\Modules\Repository\Activity\ExperienceDestine;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
+use App\Lib\User\User;
 use Illuminate\Support\Facades\DB;
 use App\Activity\Modules\Repository\Activity;
 
@@ -83,6 +84,26 @@ class ExperienceDestineOperate
             }
             $channelId = intval($ChannelInfo['_channel']['id']);
 
+            //根据user_id 获取 oppen_id
+//            $openid="";
+//            $userWechat = User::getUserWechat($data['user_id']);
+//            if($userWechat){
+//                $openid = $userWechat['openid'];
+//            }
+
+            // 微信支付，交易类型：JSAPI，redis读取openid
+            if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+                if( isset($data['extended_params']['wechat_params']['trade_type']) && $data['extended_params']['wechat_params']['trade_type']=='JSAPI' ){
+                    $_key = 'wechat_openid_'.$data['auth_token'];
+                    $openid = \Illuminate\Support\Facades\Redis::get($_key);
+                    if( $openid ){
+                        $data['extended_params']['wechat_params']['openid'] = $openid;
+                    }
+                }
+            }
+
+            $openid =$openid?$openid:"";
+
             //判断用户是否 已经参与活动
             $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$activityInfo['activity_id']);
             if($destine){
@@ -106,6 +127,7 @@ class ExperienceDestineOperate
                     'app_id'        =>$data['appid'],                   //【必须】 int    appid
                     'pay_type'      =>$data['pay_type'],                //【必须】 int    支付方式
                     'channel_id'    =>$channelId,                       //【必须】 int    渠道ID
+                    'open_id'       =>$openid                           //【必须】 int    oppen_id
                 ];
 
                 $activityDestine = ExperienceDestine::getByNo($destine['destine_no']);
@@ -133,6 +155,7 @@ class ExperienceDestineOperate
                     'channel_id'    => $channelId,                      //【必须】 int 渠道Id
                     'pay_channel'   => $data['pay_channel_id'],         //【必须】 string 支付渠道
                     'zuqi'          => $activityInfo['zuqi'],           //【必须】 int 租期
+                    'open_id'       =>$openid                           //【必须】 int    oppen_id
                 ];
 
                 $activityDestine = new ExperienceDestineRepository();
@@ -147,16 +170,7 @@ class ExperienceDestineOperate
             }
 
 
-            // 微信支付，交易类型：JSAPI，redis读取openid
-            if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
-                if( isset($data['extended_params']['wechat_params']['trade_type']) && $data['extended_params']['wechat_params']['trade_type']=='JSAPI' ){
-                    $_key = 'wechat_openid_'.$data['auth_token'];
-                    $openid = \Illuminate\Support\Facades\Redis::get($_key);
-                    if( $openid ){
-                        $data['extended_params']['wechat_params']['openid'] = $openid;
-                    }
-                }
-            }
+
 
             //生成支付单
             $params = [
@@ -306,6 +320,19 @@ class ExperienceDestineOperate
         return $ret;
 
     }
+    /***
+     * 获取预定活动列表
+     * @param array $param
+     * @param int $pagesize
+     */
+    public static function getDestineList($param = array()){
+        //根据条件查找预定单列表
+
+        $destineListArray = ExperienceDestineRepository::getDestinePageList($param);
+        return $destineListArray;
+
+    }
+
 
 
 
