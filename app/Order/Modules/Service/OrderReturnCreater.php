@@ -269,17 +269,21 @@ class OrderReturnCreater
             //获取订单信息
             $order = \App\Order\Modules\Repository\Order\Order::getByNo($params['order_no'], true);
             if ( !$order ){
+                LogApi::debug("[createRefund]获取订单信息失败".$order);
                 return false;
             }
             $order_info = $order->getData();
+
             //订单必须是已支付，未收货
             if( $order_info['order_status'] != OrderStatus::OrderPayed  && $order_info['order_status'] != OrderStatus::OrderPaying && $order_info['order_status'] != OrderStatus::OrderInStock){
+                LogApi::debug("[createRefund]订单必须状态不符合取消订单：".$order_info['order_status']);
                 return false;
             }
             //如果订单是备货中状态，通知收发货系统取消发货
             if( $order_info['order_status'] == OrderStatus::OrderInStock ){
                 $cancel = Delivery::cancel($params['order_no']);
                 if( !$cancel ){
+                    LogApi::debug("[createRefund]通知收发货系统取消发货失败");
                     //事务回滚
                     DB::rollBack();
                     return false;//取消发货失败
@@ -287,20 +291,16 @@ class OrderReturnCreater
             }
             //订单必须是不冻结状态
             if($order_info['freeze_type'] != OrderFreezeStatus::Non){
+                LogApi::debug("[createRefund]订单必须是不冻结状态");
                 return false;//订单正在操作中
             }
 
-            //获取支付信息
-            $payInfo = OrderPayRepository::find($order_info['order_no']);
-            if(!$payInfo){
-                return false;//支付单不存在
-            }
             //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
-            //直接支付
+        /*    //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
                 ){
@@ -308,9 +308,18 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
-            }
-            //花呗分期+预授权
-            if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+            }*/
+            //花呗分期+预授权 、 直接支付
+            if($order_info['pay_type'] == PayInc::PcreditPayInstallment
+                || $order_info['pay_type'] == PayInc::FlowerStagePay
+                || $order_info['pay_type'] == PayInc::UnionPay
+            ){
+                //获取支付信息
+                $payInfo = OrderPayRepository::find($order_info['order_no']);
+                if(!$payInfo){
+                    return false;
+                    LogApi::debug("[createRefund]未找到支付信息");
+                }
                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                    $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                    $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
@@ -319,8 +328,8 @@ class OrderReturnCreater
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 }
-            }
 
+            }
 
 
             //乐百分支付
@@ -333,6 +342,7 @@ class OrderReturnCreater
             //冻结订单
             $orderFreeze = $order->refundOpen();
             if( !$orderFreeze ){
+                LogApi::debug("[createRefund]冻结订单失败");
                 //事务回滚
                 DB::rollBack();
                 return false;//订单冻结失败
@@ -340,11 +350,13 @@ class OrderReturnCreater
             //获取商品信息
            $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no'],true);
             if( !$goods ){
+                LogApi::debug("[createRefund]获取商品信息失败");
                 return false;
             }
             //更新商品状态为退款中
             $goodsRefund = $goods->orderRefund();
             if( !$goodsRefund ){
+                LogApi::debug("[createRefund]更新商品状态为退款中失败");
                 //事务回滚
                 DB::rollBack();
                 return false;//商品状态修改为退款中失败
@@ -359,9 +371,11 @@ class OrderReturnCreater
             $data['status'] = ReturnStatus::ReturnCreated;
             $data['refund_no'] = create_return_no();
             $data['create_time'] = time();
+            LogApi::debug("[createRefund]创建退款单参数",$data);
             //创建申请退款记录
             $addresult = OrderReturnRepository::createRefund($data);
             if( !$addresult ){
+                LogApi::debug("[createRefund]创建申请退款记录失败",$data);
                 //事务回滚
                 DB::rollBack();
                 return false;//创建失败
@@ -2507,7 +2521,6 @@ class OrderReturnCreater
 
             }
 
-            Log::debug($returnSend?"Order :".  ['order_no']." IS OK":"IS error");
             //发送短信，通知用户押金已退还
            /* $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
             $b=$orderNoticeObj->notify();

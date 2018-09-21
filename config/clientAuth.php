@@ -16,6 +16,7 @@ return [
             'api.Instalment.queryInfo',
             'api.Instalment.info',
             'mini.order.confirmation',
+            'api.activity.experienceList',
             ]
     ];
 
