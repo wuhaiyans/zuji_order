@@ -177,8 +177,8 @@ class GivebackController extends Controller
 		//判断订单是否冻结，冻结中不允许还机操作
 		$orderObj = new OrderRepository();
 		$orderInfo = $orderObj->get_order_info(['order_no'=>$paramsArr['order_no']]);
-		if( !$orderInfo || $orderInfo['freeze_type'] ){
-			$msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo['freeze_type']) . '中，禁止还机！';
+		if( !$orderInfo || $orderInfo[0]['freeze_type'] ){
+			$msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo[0]['freeze_type']) . '中，禁止还机！';
 			return apiResponse([],ApiStatus::CODE_92500,$msg);
 		}
 		

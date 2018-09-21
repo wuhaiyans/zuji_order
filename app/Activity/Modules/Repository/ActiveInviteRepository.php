@@ -28,10 +28,10 @@ class ActiveInviteRepository
     /*
      * 邀请人数信息
      * @param $data array [
-     *      'uid'=>'' //用户id
-     *      'activity_id'=>'' //活动id
-     *      'offset'=>'' //偏移量
-     *      'limit'=>'' //显示条数
+     *      'uid'=>'' 【必须】用户id
+     *      'activity_id'=>'' 【必须】 活动id
+     *      'offset'=>'' 【可选】 偏移量
+     *      'limit'=>'' 【可选】 显示条数
      * ]
      * @return $data
      */
@@ -52,10 +52,16 @@ class ActiveInviteRepository
         if(isset($data['offset'])){
             $offset = $data['offset'];
         }
-        if($data['limit']){
+        if(isset($data['limit'])){
             $limit = $data['limit'];
         }
-        $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->orderBy("id","desc")->get()->toArray();
+        if($limit>0){
+            $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->orderBy("id","desc")->get()->toArray();
+        }
+        else{
+            $data = ActiveInvite::query()->where($where)->orderBy("id","desc")->get()->toArray();
+        }
+
         return $data;
     }
     /*
