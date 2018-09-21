@@ -51,8 +51,9 @@ class ExperienceDestineRepository
             'pay_type'      => 'required',
             'experience_id' => 'required',
             'open_id'       => 'required',
+            'goods_name'    => 'required',
         ]);
-        if(count($data)<12){
+        if(count($data)<13){
             return false;
         }
         $this->experienceDestine->destine_no = $data['destine_no'];
@@ -67,6 +68,7 @@ class ExperienceDestineRepository
         $this->experienceDestine->pay_type = $data['pay_type'];
         $this->experienceDestine->channel_id = $data['channel_id'];
         $this->experienceDestine->open_id = $data['open_id'];
+        $this->experienceDestine->goods_name = $data['goods_name'];
 
         $this->experienceDestine->destine_status = DestineStatus::DestineCreated;
         $this->experienceDestine->create_time = time();

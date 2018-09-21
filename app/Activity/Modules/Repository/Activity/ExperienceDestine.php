@@ -54,7 +54,8 @@ class ExperienceDestine{
      *      'app_id'        =>'',       //【必须】 int    appid
      *      'pay_type'      =>'',       //【必须】 int    支付方式
      *      'channel_id'    =>'',       //【必须】 int    渠道ID
-     *      'open_id'       =>'',   //【必须】 int    oppen_id
+     *      'open_id'       =>'',       //【必须】 int    oppen_id
+     *      'goods_name'   =>'',        //【必须】 int    商品名称
      *   ];
      * @return bool
      */
@@ -69,6 +70,7 @@ class ExperienceDestine{
         $this->model->pay_type = $params['pay_type'];
         $this->model->channel_id = $params['channel_id'];
         $this->model->open_id = $params['open_id'];
+        $this->model->goods_name = $params['goods_name'];
 
 
         $this->model->create_time = time();
