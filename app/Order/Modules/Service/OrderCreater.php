@@ -128,9 +128,22 @@ class OrderCreater
             }
 
             DB::commit();
+            //组合数据
+            $result = [
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['credit'],
+                'credit_status'		=> $b,
+                //支付方式
+                'pay_type'=>$data['pay_type'],
+                // 是否需要 签收代扣协议
+                // 是否需要 信用认证
+                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
+                'order_no'=>$orderNo,
 
-            unset($schemaData['user']);
-
+            ];
            // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
@@ -143,26 +156,7 @@ class OrderCreater
         ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-            $returnData['sku'] =$schemaData ['sku'];
-            $returnData['receive_coupon'] =$schemaData ['receive_coupon'];
-            $returnData['coupon'] =$schemaData ['coupon'];
-            $returnData['address'] =$schemaData ['address'];
-            $result = [
-                'coupon'         => $data['coupon'],
-                // 'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                // 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                //  'credit'			=> ''.$schemaData['user']['credit'],
-                //  'credit_status'		=> $b,
-                //支付方式
-                'pay_type'=>$schemaData['order']['pay_type'],
-                // 是否需要 信用认证
-                //'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $returnData,
-                //  'pay_info'=>$schemaData['pay_info'],
-                'b' => $b,
-                '_error' => $orderCreater->getOrderCreater()->getError(),
-                '_error_code' =>get_code(),
-            ];
+
             return $result;
 
             } catch (\Exception $exc) {
@@ -228,7 +222,14 @@ class OrderCreater
                 return false;
             }
             DB::commit();
-
+            $result = [
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['credit'],
+                '_order_info' => $schemaData,
+                'order_no'=>$data['order_no'],
+                'pay_type'=>$data['pay_type'],
+            ];
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
@@ -240,28 +241,7 @@ class OrderCreater
                 'time' => time(),
             ],time()+config('web.mini_order_cancel_hours'),"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
-            $returnData['sku'] =$schemaData ['sku'];
-            $returnData['receive_coupon'] =$schemaData ['receive_coupon'];
-            $returnData['coupon'] =$schemaData ['coupon'];
-            $returnData['address'] =$schemaData ['address'];
-            $result = [
-                'coupon'         => $data['coupon'],
-                // 'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                // 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                //  'credit'			=> ''.$schemaData['user']['credit'],
-                //  'credit_status'		=> $b,
-                //支付方式
-                'pay_type'=>$schemaData['order']['pay_type'],
-                // 是否需要 信用认证
-                //'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $returnData,
-                //  'pay_info'=>$schemaData['pay_info'],
-                'b' => $b,
-                '_error' => $orderCreater->getOrderCreater()->getError(),
-                '_error_code' =>get_code(),
-            ];
             return $result;
-
 
         } catch (\Exception $exc) {
             DB::rollBack();
@@ -407,22 +387,19 @@ class OrderCreater
             }
             //调用过滤的参数方法
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
-            $returnData['sku'] =$schemaData ['sku'];
-            $returnData['receive_coupon'] =$schemaData ['receive_coupon'];
-            $returnData['coupon'] =$schemaData ['coupon'];
-            $returnData['address'] =$schemaData ['address'];
+
             $result = [
                 'coupon'         => $data['coupon'],
-               // 'certified'			=> $schemaData['user']['certified']?'Y':'N',
-               // 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-              //  'credit'			=> ''.$schemaData['user']['credit'],
-              //  'credit_status'		=> $b,
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['credit'],
+                'credit_status'		=> $b,
                 //支付方式
                 'pay_type'=>$schemaData['order']['pay_type'],
                 // 是否需要 信用认证
-                //'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $returnData,
-              //  'pay_info'=>$schemaData['pay_info'],
+                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 '_error_code' =>get_code(),
@@ -484,24 +461,15 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
             }
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
-            $returnData['sku'] =$schemaData ['sku'];
-            $returnData['receive_coupon'] =$schemaData ['receive_coupon'];
-            $returnData['coupon'] =$schemaData ['coupon'];
-            $returnData['address'] =$schemaData ['address'];
             $result = [
                 'coupon'         => $data['coupon'],
-                // 'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                // 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                //  'credit'			=> ''.$schemaData['user']['credit'],
-                //  'credit_status'		=> $b,
-                //支付方式
-                'pay_type'=>$schemaData['order']['pay_type'],
-                // 是否需要 信用认证
-                //'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $returnData,
-                //  'pay_info'=>$schemaData['pay_info'],
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['credit'],
+                '_order_info' => $schemaData,
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
+                'pay_type'=>$data['pay_type'],
                 '_error_code' =>get_code(),
             ];
             return $result;
