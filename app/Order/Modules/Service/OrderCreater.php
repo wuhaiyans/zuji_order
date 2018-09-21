@@ -128,22 +128,9 @@ class OrderCreater
             }
 
             DB::commit();
-            //组合数据
-            $result = [
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['credit'],
-                'credit_status'		=> $b,
-                //支付方式
-                'pay_type'=>$data['pay_type'],
-                // 是否需要 签收代扣协议
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $schemaData,
-                'pay_info'=>$schemaData['pay_info'],
-                'order_no'=>$orderNo,
 
-            ];
+            unset($schemaData['user']);
+
            // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
@@ -156,7 +143,22 @@ class OrderCreater
         ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-			
+            //组合数据
+            $result = [
+                //  'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                //  'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                //    'credit'			=> ''.$schemaData['user']['credit'],
+                'credit_status'		=> $b,
+                //支付方式
+                'pay_type'=>$data['pay_type'],
+                // 是否需要 签收代扣协议
+                // 是否需要 信用认证
+                //    'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
+                'order_no'=>$orderNo,
+
+            ];
             return $result;
 
             } catch (\Exception $exc) {
@@ -387,17 +389,17 @@ class OrderCreater
             }
             //调用过滤的参数方法
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
-
+            unset($schemaData['user']);
             $result = [
                 'coupon'         => $data['coupon'],
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['credit'],
+               // 'certified'			=> $schemaData['user']['certified']?'Y':'N',
+               // 'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+              //  'credit'			=> ''.$schemaData['user']['credit'],
                 'credit_status'		=> $b,
                 //支付方式
                 'pay_type'=>$schemaData['order']['pay_type'],
                 // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                //'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
                 '_order_info' => $schemaData,
                 'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
