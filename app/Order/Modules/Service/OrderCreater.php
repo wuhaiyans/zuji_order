@@ -156,7 +156,7 @@ class OrderCreater
         ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-			
+
             return $result;
 
             } catch (\Exception $exc) {
