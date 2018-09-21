@@ -295,18 +295,12 @@ class OrderReturnCreater
                 return false;//订单正在操作中
             }
 
-            //获取支付信息
-            $payInfo = OrderPayRepository::find($order_info['order_no']);
-            if(!$payInfo){
-                LogApi::debug("[createRefund]获取支付信息失败");
-                return false;//支付单不存在
-            }
             //代扣+预授权   小程序
             if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
-            //直接支付
+        /*    //直接支付
             if($order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
                 ){
@@ -314,9 +308,18 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
-            }
-            //花呗分期+预授权
-            if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+            }*/
+            //花呗分期+预授权 、 直接支付
+            if($order_info['pay_type'] == PayInc::PcreditPayInstallment
+                || $order_info['pay_type'] == PayInc::FlowerStagePay
+                || $order_info['pay_type'] == PayInc::UnionPay
+            ){
+                //获取支付信息
+                $payInfo = OrderPayRepository::find($order_info['order_no']);
+                if(!$payInfo){
+                    return false;
+                    LogApi::debug("[createRefund]未找到支付信息");
+                }
                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                    $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
                    $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
@@ -325,8 +328,8 @@ class OrderReturnCreater
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
                 }
-            }
 
+            }
 
 
             //乐百分支付
