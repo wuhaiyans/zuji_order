@@ -15,7 +15,9 @@ class Coupon extends \App\Lib\BaseApi{
     //第一次首月零租金活动
 //    public static $coupon_only = '383c8e805a3410e9ee03481d29a7f76f';//小程序优惠券id
     //第二次首月零租金活动
-    public static $coupon_only = 'f9a8c733d5feb2c4a3f29419e4fef562';//小程序优惠券id
+//    public static $coupon_only = 'f9a8c733d5feb2c4a3f29419e4fef562';//小程序优惠券id
+    //国庆首月0租金活动
+    public static $coupon_only = 'f3eac8c72f693f962b1cdf5543d8e2fb';//小程序优惠券id
 
     /**
      * 获取优惠券信息
