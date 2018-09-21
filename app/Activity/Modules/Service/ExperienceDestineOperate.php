@@ -128,7 +128,7 @@ class ExperienceDestineOperate
                     'pay_type'      =>$data['pay_type'],                //【必须】 int    支付方式
                     'channel_id'    =>$channelId,                       //【必须】 int    渠道ID
                     'open_id'       =>$openid,                          //【必须】 int    oppen_id
-                    'goods_name'    =>$activity['goods_name']           //【必须】 int    商品名称
+                    'goods_name'    =>$activityInfo['goods_name']           //【必须】 int    商品名称
                 ];
 
                 $activityDestine = ExperienceDestine::getByNo($destine['destine_no']);
@@ -157,7 +157,7 @@ class ExperienceDestineOperate
                     'pay_channel'   => $data['pay_channel_id'],         //【必须】 string 支付渠道
                     'zuqi'          => $activityInfo['zuqi'],           //【必须】 int 租期
                     'open_id'       =>$openid,                          //【必须】 int    oppen_id
-                    'goods_name'    =>$activity['goods_name']           //【必须】 int    商品名称
+                    'goods_name'    =>$activityInfo['goods_name']           //【必须】 int    商品名称
                 ];
 
                 $activityDestine = new ExperienceDestineRepository();
