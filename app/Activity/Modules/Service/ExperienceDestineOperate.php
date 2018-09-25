@@ -7,11 +7,14 @@ namespace App\Activity\Modules\Service;
 
 use App\Activity\Modules\Inc\DestineInc;
 use App\Activity\Modules\Inc\DestineStatus;
+use App\Activity\Modules\Repository\ActiveInviteRepository;
 use App\Activity\Modules\Repository\Activity\ExperienceDestine;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
+use App\Lib\Order\OrderInfo;
 use App\Lib\User\User;
+use App\Order\Modules\Inc\PayInc;
 use Illuminate\Support\Facades\DB;
 use App\Activity\Modules\Repository\Activity;
 
@@ -331,10 +334,41 @@ class ExperienceDestineOperate
         //根据条件查找预定单列表
 
         $destineListArray = ExperienceDestineRepository::getDestinePageList($param);
+        $destineListArray['data']=objectToArray($destineListArray['data']);
+        foreach ($destineListArray['data'] as $k=>$v){
+            $invite_count = ActiveInviteRepository::getCount([
+                'uid'=>$v['user_id'],
+                'activity_id' =>$v['activity_id']
+            ]);
+            $destineListArray['data'][$k]['invite_count'] = $invite_count;
+
+            //定金状态名称
+            $destineListArray['data'][$k]['destine_status_name'] = DestineStatus::getStatusName($v['destine_status']);
+            //支付方式名称
+            $destineListArray['data'][$k]['pay_type_name'] = PayInc::getPayName($v['pay_type']);
+            //应用来源名称
+            $destineListArray['data'][$k]['app_id_name'] = OrderInfo::getAppidInfo($v['app_id']);
+
+        }
         return $destineListArray;
 
     }
+    /***
+     * 获取预定活动列表
+     * @param array $param
+     * [
+     *   'activity_id' => '',  // 【必选】 活动ID
+     *   'user_id'    =>'' , //【必选】 用户ID
+     *   'page'=>'' ,  //【可选】 string 页数
+     *   'size'  =>'' ,  //【可选】 string 每页数量
+     * ]
+     * @param int $pagesize
+     */
+    public static function getDestineDetail($param = array()){
 
+        $destineListArray = ActiveInviteRepository::getDestinePageList($param);
+        return $destineListArray;
+    }
 
 
 

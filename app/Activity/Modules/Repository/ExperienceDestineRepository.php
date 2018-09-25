@@ -146,10 +146,11 @@ class ExperienceDestineRepository
         $whereArray= self::get_where($param);  //获取搜索的条件
         $destineList =  DB::table('order_activity_experience_destine')
             ->select('order_activity_experience_destine.*')
-            ->leftJoin()
             ->where($whereArray)
-            ->orderBy('create_time', 'DESC')
+            ->orderBy('pay_time', 'DESC')
             ->paginate($size,$columns = ['*'], $pageName = 'page', $page);
+
+
         if($destineList){
             return $destineList->toArray();
         }
@@ -160,7 +161,7 @@ class ExperienceDestineRepository
      */
     public static function get_where($param=array()){
         $whereArray=[];
-
+        $whereArray[] = ['destine_status', '>=', DestineStatus::DestinePayed];
         //根据用户手机号
         if (isset($param['mobile']) && !empty($param['mobile'])) {
 

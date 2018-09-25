@@ -188,9 +188,9 @@ class ExperienceDestineController extends Controller
      * @param Request $request
      * @return array
      * [
-     *   'mobile'           => '',  //用户手机
-     *   'page'             =>'' ,  //页数
-     *   'size'             =>'' ,  //每页数量
+     *   'mobile'           => '',  //【可选】 string 用户手机
+     *   'page'             =>'' ,  //【可选】 string 页数
+     *   'size'             =>'' ,  //【可选】 string 每页数量
      * ]
 
      */
@@ -209,6 +209,37 @@ class ExperienceDestineController extends Controller
             return apiResponse([],ApiStatus::CODE_50000);
 
         }
+
+    }
+    /***
+     * 活动体验邀请详情
+     * @author wuhaiyan
+     * @param Request $request
+     * [
+     *   'activity_id' => '',  // 【必选】 活动ID
+     *   'user_id'    =>'' , //【必选】 用户ID
+     *   'page'=>'' ,  //【可选】 string 页数
+     *   'size'  =>'' ,  //【可选】 string 每页数量
+     * ]
+       @return array
+     */
+
+
+    public function experienceDetail(Request $request){
+        $params = $request->all();
+        if(empty($params['params']['activity_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"活动ID不能为空");  //参数不能为空
+        }
+        if(empty($params['params']['user_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"用户ID不能为空");  //参数不能为空
+        }
+
+        $destineData = ExperienceDestineOperate::getDestineDetail($params['params']);
+        if(!$destineData){
+            return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+        }
+
+        return apiResponse($destineData,ApiStatus::CODE_0);
 
     }
 

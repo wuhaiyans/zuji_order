@@ -83,10 +83,10 @@ class ExperienceDestine{
 	 * @return bool 
 	 */
 	public function pay():bool{
-	    if($this->model->destine_status != DestineStatus::ExperienceDestineCreated){
+	    if($this->model->destine_status != DestineStatus::DestineCreated){
 	        return false;
         }
-		$this->model->destine_status = DestineStatus::ExperienceDestinePayed;
+		$this->model->destine_status = DestineStatus::DestinePayed;
 		$this->model->pay_time = time();
 		$this->model->update_time = time();
 		return $this->model->save();
