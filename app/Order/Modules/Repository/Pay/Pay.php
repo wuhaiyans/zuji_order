@@ -20,15 +20,15 @@ use App\Order\Models\OrderPayFundauthModel;
  * <p>标准化支付整体流程，定义支付环节和接口</p>
  * <p>支付阶段分为3个环节，执行顺序依次是：</p>
  * <ul>
- * <li>直接支付</li>
  * <li>代扣签约</li>
  * <li>资金预授权</li>
+ * <li>直接支付</li>
  * </ul>
  * <p>注：每个环节都是可选的，但至少存在一个环节（支付阶段才有意义）</p>
  * <p>注：每个环节在处理完成后，禁止再做任何数据修改了</p>
- * paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
  * withholdSuccess(array $params) 用于代扣签约完成时调用，进入下一个状态
  * fundauthSuccess(array $params) 用于资金预授权完成时调用，进入下一个状态
+ * paymentSuccess(array $params) 用于支付完成时调用，进入下一个状态
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -947,9 +947,9 @@ class Pay extends \App\Lib\Configurable
 	 */
 	private function _statusCallback( $step )
 	{
-		// 判断支付环境是否未完成 但支付阶段还有后续操作时，也回调业务通知
+		// 判断支付环境是否未完成 但预授权完成，还有后续操作时，也回调业务通知
 		if( $this->status != PayStatus::SUCCESS
-				&& $step != 'payment' )
+				&& $step == 'fundauth' )
 		{
 			$call = $this->_getBusinessCallback();
 			if( !is_callable( $call ) ){
