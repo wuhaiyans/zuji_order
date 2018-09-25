@@ -186,7 +186,7 @@ class OrderClearingRepository
         if ($orderData) {
             return  $orderData->toArray();
         }
-            return false;
+        return false;
         }
 
 

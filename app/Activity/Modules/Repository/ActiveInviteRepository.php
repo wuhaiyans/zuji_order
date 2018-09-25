@@ -2,6 +2,7 @@
 namespace App\Activity\Modules\Repository;
 
 use App\Activity\Models\ActiveInvite;
+use Illuminate\Support\Facades\DB;
 
 class ActiveInviteRepository
 {
@@ -28,10 +29,10 @@ class ActiveInviteRepository
     /*
      * 邀请人数信息
      * @param $data array [
-     *      'uid'=>'' //用户id
-     *      'activity_id'=>'' //活动id
-     *      'offset'=>'' //偏移量
-     *      'limit'=>'' //显示条数
+     *      'uid'=>'' 【必须】用户id
+     *      'activity_id'=>'' 【必须】 活动id
+     *      'offset'=>'' 【可选】 偏移量
+     *      'limit'=>'' 【可选】 显示条数
      * ]
      * @return $data
      */
@@ -52,10 +53,16 @@ class ActiveInviteRepository
         if(isset($data['offset'])){
             $offset = $data['offset'];
         }
-        if($data['limit']){
+        if(isset($data['limit'])){
             $limit = $data['limit'];
         }
-        $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->orderBy("id","desc")->get()->toArray();
+        if($limit>0){
+            $data = ActiveInvite::query()->where($where)->offset($offset)->limit($limit)->orderBy("id","desc")->get()->toArray();
+        }
+        else{
+            $data = ActiveInvite::query()->where($where)->orderBy("id","desc")->get()->toArray();
+        }
+
         return $data;
     }
     /*
@@ -86,5 +93,35 @@ class ActiveInviteRepository
         }
         $ret = ActiveInvite::insert($data);
         return $ret;
+    }
+
+    /**
+     * 获取预定活动邀请人列表
+     * @param $params
+     * [
+     *   'activity_id'  =>'',   //【必选】 int 活动ID
+     *   'user_id'  =>'',   //【必选】 int 用户ID
+     *   'page'         =>'',   //【可选】 int 页数
+     *   'size'         =>''    //【可选】 int 每页数量
+     * ]
+     * @return array
+
+     */
+    public static  function getDestinePageList($param=array()){
+        $page = empty($param['page']) || !isset($param['page']) ? 1 : $param['page'];
+        $size = !empty($param['size']) && isset($param['size']) ? $param['size'] : config('web.pre_page_size');
+        $whereArray[] = ['activity_id', '=', $param['activity_id']];
+        $whereArray[] = ['uid', '=', $param['user_id']];
+
+        $destineList =  DB::table('order_active_invite')
+            ->select('order_active_invite.*')
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->paginate($size,$columns = ['*'], $pageName = 'page', $page);
+
+        if($destineList){
+            return $destineList->toArray();
+        }
+        return [];
     }
 }
