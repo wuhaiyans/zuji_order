@@ -93,7 +93,7 @@ class ExperienceDestineOperate
 //            if($userWechat){
 //                $openid = $userWechat['openid'];
 //            }
-
+            $openid ='';
             // 微信支付，交易类型：JSAPI，redis读取openid
             if( $data['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
                 if( isset($data['extended_params']['wechat_params']['trade_type']) && $data['extended_params']['wechat_params']['trade_type']=='JSAPI' ){
@@ -104,9 +104,7 @@ class ExperienceDestineOperate
                     }
                 }
             }
-
-            $openid =$openid?$openid:"";
-
+            
             //判断用户是否 已经参与活动
             $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$activityInfo['activity_id']);
             if($destine){
