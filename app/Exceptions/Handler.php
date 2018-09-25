@@ -56,10 +56,8 @@ class Handler extends ExceptionHandler
                 'line' => $exception->getLine(),
                 'code' => $exception->getCode(),
                 'url' => Request()->url(),
-                'method'=>request()->input('method')
             ];
             LogApi::error("orderException异常",$err);
-            return apiResponse([],500,$exception->getMessage());
         }
 
         return parent::render($request, $exception);
