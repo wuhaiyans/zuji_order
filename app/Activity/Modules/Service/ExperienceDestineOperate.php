@@ -245,7 +245,7 @@ class ExperienceDestineOperate
             if($destine){
                 $destine = objectToArray($destine);
                 //判断如果不等于已创建状态 则为 已预订
-                if ($destine['destine_status'] != DestineStatus::ExperienceDestineCreated) {
+                if ($destine['destine_status'] != DestineStatus::DestineCreated) {
                     $res['status'] =1;
                     $res['invitation_code'] =self::setInvitationCode([
                         'experience_id' => $destine['experience_id'],
