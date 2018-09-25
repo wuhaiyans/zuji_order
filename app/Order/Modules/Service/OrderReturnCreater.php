@@ -135,8 +135,8 @@ class OrderReturnCreater
                     //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                     $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                 }
-                //花呗分期+预授权
-                if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+                //花呗分期+预授权、微信支付
+                if($order_info['pay_type'] == PayInc::PcreditPayInstallment || $order_info['pay_type'] == PayInc::WeChatPay){
                     if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                         $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
                         $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
@@ -296,7 +296,7 @@ class OrderReturnCreater
             }
 
             //代扣+预授权   小程序
-            if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
+            if( $order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
@@ -309,10 +309,12 @@ class OrderReturnCreater
                 $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
 
             }*/
-            //花呗分期+预授权 、 直接支付
+            //花呗分期+预授权 、 直接支付 、代扣+预授权
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
+                || $order_info['pay_type'] == PayInc::WeChatPay
+                || $order_info['pay_type'] == PayInc::WithhodingPay
             ){
                 //获取支付信息
                 $payInfo = OrderPayRepository::find($order_info['order_no']);
@@ -1784,7 +1786,7 @@ class OrderReturnCreater
                             $create_data['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                         }
                         //花呗分期+预授权
-                        if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
+                        if($order_info['pay_type'] == PayInc::PcreditPayInstallment || $order_info['pay_type'] == PayInc::WeChatPay){
                             if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                                 $create_data['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
                             }
