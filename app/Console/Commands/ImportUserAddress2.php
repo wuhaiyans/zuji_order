@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderUserAddress;
 
-class ImportUserAddress extends Command
+class ImportUserAddress2 extends Command
 {
     /**
      * The name and signature of the console command.
@@ -49,7 +49,6 @@ class ImportUserAddress extends Command
             '20180725000360',
             '201807260002288',
             '201807260002344',
-
         ];
 
         $total = DB::connection('mysql_01')->table("zuji_order2")->whereIn("order_no",$orderNos)->count();
