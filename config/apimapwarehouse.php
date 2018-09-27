@@ -25,6 +25,7 @@ return [
     'warehouse.delivery.cancelMatchGoods' => 'DeliveryController@cancelMatchGoods', //取消单品配货
 
     'warehouse.delivery.cancel' => 'DeliveryController@cancel', //取消发货
+    'warehouse.delivery.auditFailed' => 'DeliveryController@auditFailed', //取消发货后,退货退款审核未通过,继续发货
     'warehouse.delivery.cancelDelivery' => 'DeliveryController@cancelDelivery', //取消发货
     'warehouse.delivery.receive' => 'DeliveryController@receive', //签收
     'warehouse.delivery.show' => 'DeliveryController@show', //发货清单列表

@@ -54,9 +54,6 @@ class DeliveryService
         return $ks;
     }
 
-
-
-
     /**
      * @param $order_no
      * @throws \Exception
@@ -66,6 +63,18 @@ class DeliveryService
     {
         if (!DeliveryRepository::cancel($order_no)) {
             throw new \Exception('取消发货失败');
+        }
+    }
+
+    /**
+     * @param $order_no
+     * @throws \Exception
+     * 继续发货
+     */
+    public function auditFailed($params)
+    {
+        if (!DeliveryRepository::auditFailed($params)) {
+            throw new \Exception('继续发货失败');
         }
     }
 
