@@ -2814,17 +2814,16 @@ class OrderReturnCreater
             }
             //查询分期信息
             $getInstalment=OrderGoodsInstalment::queryList(array('order_no'=>$order_no));
-            if(!$getInstalment){
-                LogApi::info("[refuseSign]查询分期信息失败");
-                return false;
+            if($getInstalment){
+                $data['order_no']=$order_no;
+                //关闭分期
+                $clodeInstalment = Instalment::close( $data );
+                if(!$clodeInstalment){
+                    LogApi::info("[refuseSign]关闭分期失败");
+                    return false;
+                }
             }
-            $data['order_no']=$order_no;
-            //关闭分期
-             $clodeInstalment = Instalment::close( $data );
-            if(!$clodeInstalment){
-                LogApi::info("[refuseSign]关闭分期失败");
-                return false;
-            }
+
             //插入操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
             //提交事务

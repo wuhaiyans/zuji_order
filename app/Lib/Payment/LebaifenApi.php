@@ -51,6 +51,22 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	public static function getPaymentInfo( array $params ){
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.info', '1.0', $params);
 	}
-	
+
+    /**
+     *
+     * 乐百分买断或者还机完成调用的接口
+     * Author: heaven
+     * @param array $params  二选一参数,优先使用payment_no
+     * [
+     *		 "payment_no":"10A92662696246007", //支付系统的支付单号
+     *      "amount":"123",                    //要扣的押金金额；单位：分
+     *      "back_url":"http://_._.com"        //异步通知的url地址
+     * ]
+     * @param array $params
+     * @return array
+     */
+    public static function backRefund( array $params ){
+        return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.backRefund', '1.0', $params);
+    }
 	
 }
