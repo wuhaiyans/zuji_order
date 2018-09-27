@@ -172,10 +172,10 @@ class DeliveryRepository
             }
         }
 
-        if($params['status']==3){
-            //已发货代签收
+        if($params['status']==5){
+            //已发货待签收
             $model->status = Delivery::STATUS_SEND;
-        }elseif($params['status']==2){
+        }elseif($params['status']==4){
             $dg_model = DeliveryGoods::where(['order_no'=>$model->delivery_no])->first();
             if($dg_model->status == DeliveryGoods::STATUS_ALL){
                 //配货完成

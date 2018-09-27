@@ -2688,6 +2688,79 @@ class OrderReturnCreater
         return true;
     }
 
+    /***
+     * 备货中状态的取消订单的审核拒绝
+     * @param string $order_no 用户信息参数
+     * order_no        =>  '' //订单编号  string 【必选】
+     *
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     */
+    public static function refundRefuse( $order_no , array $userinfo){
+        //开启事物
+        DB::beginTransaction();
+        try{
+            //获取订单信息
+            $order = \App\Order\Modules\Repository\Order\Order::getByNo($order_no, true);
+            if ( !$order ){
+                LogApi::debug("[refundRefuse]获取订单信息失败".$order);
+                return false;
+            }
+            $orderInfo = $order->getData();
+            //只允许备货中，已发货使用此接口
+            if( $orderInfo['order_status'] != OrderStatus::OrderInStock && $orderInfo['order_status'] != OrderStatus::OrderDeliveryed){
+                return false;
+            }
+            //查询存在此订单的退款记录，修改状态为已取消
+            //获取退货单的信息
+            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo( $order_no,true);
+            if( !$return ){
+                return false;
+            }
+            //更新退款单状态为已取消
+            $refundRefuse = $return->cancelRefund();
+            LogApi::info("[refundRefuse]更新退款单状态为已取消",$refundRefuse);
+            if(!$refundRefuse){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+
+            //更新订单状态为未冻结
+            $orderFreeze = $order->returnClose();
+            LogApi::info("[refundRefuse]更新订单状态结果",$orderFreeze);
+            if(!$orderFreeze){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //通知收发货继续发货
+            /***********************************/
+
+            $delivery = Delivery::auditFailed( $order_no,$orderInfo['order_status']);
+            LogApi::debug("[refundRefuse]通知收发货继续发货返回结果",$delivery);
+            if(!$delivery){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //插入操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
+            //提交事务
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            LogApi("退款审核拒绝");
+           return false;
+        }
+
+
+    }
 
 
 }
