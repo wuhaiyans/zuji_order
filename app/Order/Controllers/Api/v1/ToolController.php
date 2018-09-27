@@ -60,7 +60,19 @@ class ToolController extends Controller
      * @param Request $request
      */
     public function refuseSign(Request $request){
-
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',    //订单编号
+        ]);
+        if(count($param)<1){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res= OrderReturnCreater::refuseSign($param['order_no'] ,$orders['userinfo']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_33009,"修改失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
 
     /**
@@ -71,7 +83,20 @@ class ToolController extends Controller
      * @param Request $request
      */
     public function advanceReturn(Request $request){
-
+        $orders =$request->all();
+        $params = $orders['params'];
+        $param = filter_array($params,[
+            'order_no'=> 'required',    //订单编号
+            'compensate_amount'=> 'required',    //赔偿金额
+        ]);
+        if(count($param)<2){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+        $res= OrderReturnCreater::refuseSign($param ,$orders['userinfo']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_33009,"修改失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0);
     }
 
 
