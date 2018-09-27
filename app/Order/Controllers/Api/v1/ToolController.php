@@ -146,9 +146,20 @@ class ToolController extends Controller
     /**
      * 超过七天无理由退换货，没到租赁日期的退货订单
      * @params
-     * order_no           => ''  //订单编号  string 【必选】
-     * compensate_amount  => ''  //赔偿金额  string 【必选】
-     * @param Request $request
+     * [
+     *      'order_no'   =>  '', //订单编号  string 【必选】
+     *      'compensate_amount'=>'' //赔偿金额  string  【必选】
+     *      'reason_id'     => '',    退货原因id int     【必选】
+     *      'reason_text'   => '',   退货原因备注string  【必选】
+     *      'user_id'       => '',   用户id      int     【必选】
+     * ]
+     *
+     * @params array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
      */
     public function advanceReturn(Request $request){
         $orders =$request->all();
@@ -156,11 +167,12 @@ class ToolController extends Controller
         $param = filter_array($params,[
             'order_no'=> 'required',    //订单编号
             'compensate_amount'=> 'required',    //赔偿金额
+            'user_id'            =>'required',
         ]);
-        if(count($param)<2){
+        if(count($param)<5){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res= OrderReturnCreater::refuseSign($param ,$orders['userinfo']);
+        $res= OrderReturnCreater::advanceReturn($param ,$orders['userinfo']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33009,"修改失败");
         }

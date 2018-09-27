@@ -280,7 +280,7 @@ class OrderCleaning
                    {
 
                        $lebaiParam = array(
-                           'payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
+                           'out_payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
                            "amount" => $orderCleanData['auth_deduction_amount']*100,                    //要扣的押金金额；单位：分
                            'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean'        //异步通知的url地址
                        );
