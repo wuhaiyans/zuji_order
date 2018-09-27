@@ -220,9 +220,9 @@ class Delivery
      * 取消发货后,退货退款审核未通过,继续发货
      *
      * @param string $order_no 订单号
-     * @param int $status 2=待发货,3已发货待签收
+     * @param int $status 4=待发货,5已发货待签收
      */
-    public static function auditFailed($order_no,$status=2)
+    public static function auditFailed($order_no,$status=4)
     {
         $base_api = config('tripartite.warehouse_api_uri');
 

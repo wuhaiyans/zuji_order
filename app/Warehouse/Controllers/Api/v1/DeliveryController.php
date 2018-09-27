@@ -159,7 +159,7 @@ class DeliveryController extends Controller
      * 取消发货后,退货退款审核未通过,继续发货
      *
      * order_no 订单号
-     * status 2=待发货,3已发货待签收
+     * status 4=待发货,5已发货待签收
      */
     public function auditFailed()
     {
