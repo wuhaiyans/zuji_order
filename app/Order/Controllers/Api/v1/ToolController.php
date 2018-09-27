@@ -45,7 +45,7 @@ class ToolController extends Controller
         if(count($param)<1){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        $res= OrderReturnCreater::refundRefuse($param ,$orders['userinfo']);
+        $res= OrderReturnCreater::refundRefuse($param['order_no'] ,$orders['userinfo']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
