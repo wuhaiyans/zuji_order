@@ -155,6 +155,33 @@ class DeliveryController extends Controller
         return \apiResponse([]);
     }
 
+    /**
+     * 取消发货后,退货退款审核未通过,继续发货
+     *
+     * order_no 订单号
+     * status 2=待发货,3已发货待签收
+     */
+    public function auditFailed()
+    {
+        $rules = [
+            'order_no'  => 'required',
+            'status'    => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $this->delivery->auditFailed($params);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
 
     /**
      * @return \Illuminate\Http\JsonResponse

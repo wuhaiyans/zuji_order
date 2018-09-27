@@ -1,6 +1,6 @@
 <?php
 /**
- * User: wansq
+ * User: jinlin
  * Date: 2018/5/7
  * Time: 17:52
  */
@@ -215,6 +215,32 @@ class Delivery
 
         return true;
     }
+
+    /**
+     * 取消发货后,退货退款审核未通过,继续发货
+     *
+     * @param string $order_no 订单号
+     * @param int $status 2=待发货,3已发货待签收
+     */
+    public static function auditFailed($order_no,$status=2)
+    {
+        $base_api = config('tripartite.warehouse_api_uri');
+
+        $res = Curl::post($base_api, array_merge(self::getParams(), [
+            'method'=> 'warehouse.delivery.cancel',//模拟
+            'params' => json_encode(['order_no'=>$order_no,'status'=>$status])
+        ]));
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * 订单请求 确认收货
      * @author wuhaiyan
