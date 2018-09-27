@@ -8,6 +8,7 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderPayPaymentRepository;
 use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
@@ -2757,6 +2758,81 @@ class OrderReturnCreater
             DB::rollBack();
             LogApi("退款审核拒绝");
            return false;
+        }
+
+
+    }
+
+    /***
+     * 拒签
+     * @param $order_no   =>  '' //订单编号  string 【必选】
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     *
+     */
+    public static function refuseSign( $order_no,$userinfo){
+        //开启事物
+        DB::beginTransaction();
+        try{
+            //获取订单信息
+            $order = \App\Order\Modules\Repository\Order\Order::getByNo($order_no, true);
+            if ( !$order ){
+                LogApi::debug("[refuseSign]获取订单信息失败".$order);
+                return false;
+            }
+            $orderInfo = $order->getData();
+            //只允许已发货状态使用此接口
+            if( $orderInfo['order_status'] != OrderStatus::OrderDeliveryed ){
+                return false;
+            }
+
+            //关闭订单
+            $orderFreeze = $order->returnSign();
+            LogApi::info("[refuseSign]更新订单状态结果",$orderFreeze);
+            if(!$orderFreeze){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //查询商品信息
+            $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo( $order_no );
+            if(!$goods){
+                LogApi::info("[refuseSign]获取商品信息失败");
+                return false;
+            }
+            //修改商品状态
+            $updateGoods=$goods->returnSign();
+            if(!$updateGoods){
+                LogApi::info("[refuseSign]修改商品状态失败");
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //查询分期信息
+            $getInstalment=OrderGoodsInstalment::queryList(array('order_no'=>$order_no));
+            if($getInstalment){
+                $data['order_no']=$order_no;
+                //关闭分期
+                $clodeInstalment = Instalment::close( $data );
+                if(!$clodeInstalment){
+                    LogApi::info("[refuseSign]关闭分期失败");
+                    return false;
+                }
+            }
+
+            //插入操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
+            //提交事务
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            LogApi("退款审核拒绝");
+            return false;
         }
 
 
