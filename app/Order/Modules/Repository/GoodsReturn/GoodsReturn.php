@@ -396,6 +396,29 @@ class GoodsReturn {
         return new self( $order_info );
     }
 
+    /**
+     * 根据订单编号和退货状态获取退货单数据
+     *
+     * @param string $order_no	商品编号
+     * @param string $status	退货状态
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @return bool
+     */
+    public static function getReturnInfoByOrderNo(string $order_no,string $status,int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['order_no', '=', $order_no],['status','=',ReturnStatus::ReturnAgreed]
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
+        }
+        return new self( $order_info );
+    }
+
 
 
 
