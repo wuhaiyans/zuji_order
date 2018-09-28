@@ -2761,6 +2761,7 @@ class OrderReturnCreater
             $delivery = Delivery::auditFailed( $order_no,$orderInfo['order_status']);
             LogApi::debug("[refundRefuse]通知收发货继续发货返回结果",$delivery);
             if(!$delivery){
+                LogApi::debug("[refundRefuse]通知收发货继续发货返回结果失败",session()->get(Delivery::SESSION_ERR_KEY));
                 //事务回滚
                 DB::rollBack();
                 return false;
