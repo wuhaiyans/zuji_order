@@ -227,7 +227,7 @@ class Delivery
         $base_api = config('tripartite.warehouse_api_uri');
 
         $res = Curl::post($base_api, array_merge(self::getParams(), [
-            'method'=> 'warehouse.delivery.cancel',//模拟
+            'method'=> 'warehouse.delivery.auditFailed',//模拟
             'params' => json_encode(['order_no'=>$order_no,'status'=>$status])
         ]));
 
