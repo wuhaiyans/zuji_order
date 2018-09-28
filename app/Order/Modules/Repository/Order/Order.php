@@ -320,7 +320,18 @@ class Order {
         $this->model->freeze_type = OrderFreezeStatus::Non;
         return $this->model->save();
 	}
-	
+
+
+    /**
+     * 拒签，更新状态：订单关闭
+     * @return bool
+     */
+    public function returnSign( ):bool{
+        $this->model->order_status = OrderStatus::OrderClosedRefunded;
+        $this->model->freeze_type = OrderFreezeStatus::Non;
+        $this->model->complete_time = time();
+        return $this->model->save();
+    }
 	
     //-+------------------------------------------------------------------------
     // | 退货

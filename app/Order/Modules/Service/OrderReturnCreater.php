@@ -8,6 +8,7 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderPayPaymentRepository;
 use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\Pay\PaymentStatus;
@@ -2688,6 +2689,326 @@ class OrderReturnCreater
         return true;
     }
 
+    /***
+     * 备货中状态的取消订单的审核拒绝
+     * @param string $order_no 用户信息参数
+     * order_no        =>  '' //订单编号  string 【必选】
+     *
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     */
+    public static function refundRefuse( $order_no , array $userinfo){
+        //开启事物
+        DB::beginTransaction();
+        try{
+            //获取订单信息
+            $order = \App\Order\Modules\Repository\Order\Order::getByNo($order_no, true);
+            if ( !$order ){
+                LogApi::debug("[refundRefuse]获取订单信息失败".$order);
+                return false;
+            }
+            $orderInfo = $order->getData();
+            //只允许备货中，已发货使用此接口
+            if( $orderInfo['order_status'] != OrderStatus::OrderInStock && $orderInfo['order_status'] != OrderStatus::OrderDeliveryed){
+                return false;
+            }
+            //查询存在此订单的退款记录，修改状态为已取消
+            //获取退货单的信息
+            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo( $order_no,true);
+            if( !$return ){
+                return false;
+            }
+            //更新退款单状态为已取消
+            $refundCancel = $return->cancelRefund();
+            LogApi::info("[refundRefuse]更新退款单状态为已取消",$refundCancel);
+            if(!$refundCancel){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+
+            //更新订单状态为未冻结
+            $orderFreeze = $order->returnClose();
+            LogApi::info("[refundRefuse]更新订单状态结果",$orderFreeze);
+            if(!$orderFreeze){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+
+            //获取商品信息
+            $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo( $order_no );
+            if(!$goods){
+                LogApi::debug("[refundRefuse]获取商品信息失败");
+                return false;
+            }
+            //修改商品状态为未使用
+            $updateGoods = $goods->refundRefuse();
+            if(!$updateGoods){
+                LogApi::debug("[refundRefuse]修改商品状态为未使用失败");
+                //事务回滚
+                DB::rollBack();
+
+                return false;
+            }
+            //通知收发货继续发货
+            /***********************************/
+
+            $delivery = Delivery::auditFailed( $order_no,$orderInfo['order_status']);
+            LogApi::debug("[refundRefuse]通知收发货继续发货返回结果",$delivery);
+            if(!$delivery){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //插入操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
+            //提交事务
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            LogApi("退款审核拒绝");
+           return false;
+        }
+
+
+    }
+
+    /***
+     * 拒签
+     * @param $order_no   =>  '' //订单编号  string 【必选】
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     *
+     */
+    public static function refuseSign( $order_no,$userinfo){
+        //开启事物
+        DB::beginTransaction();
+        try{
+            //获取订单信息
+            $order = \App\Order\Modules\Repository\Order\Order::getByNo($order_no, true);
+            if ( !$order ){
+                LogApi::debug("[refuseSign]获取订单信息失败".$order);
+                return false;
+            }
+            $orderInfo = $order->getData();
+            //只允许已发货状态使用此接口
+            if( $orderInfo['order_status'] != OrderStatus::OrderDeliveryed ){
+                return false;
+            }
+
+            //关闭订单
+            $orderFreeze = $order->returnSign();
+            LogApi::info("[refuseSign]更新订单状态结果",$orderFreeze);
+            if(!$orderFreeze){
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //查询商品信息
+            $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo( $order_no );
+            if(!$goods){
+                LogApi::info("[refuseSign]获取商品信息失败");
+                return false;
+            }
+            //修改商品状态
+            $updateGoods=$goods->returnSign();
+            if(!$updateGoods){
+                LogApi::info("[refuseSign]修改商品状态失败");
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //查询分期信息
+            $getInstalment=OrderGoodsInstalment::queryList(array('order_no'=>$order_no));
+            if($getInstalment){
+                $data['order_no']=$order_no;
+                //关闭分期
+                $clodeInstalment = Instalment::close( $data );
+                if(!$clodeInstalment){
+                    LogApi::info("[refuseSign]关闭分期失败");
+                    return false;
+                }
+            }
+
+            //插入操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
+            //提交事务
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            LogApi("退款审核拒绝");
+            return false;
+        }
+
+
+    }
+    /***
+     * 中途退货
+     * @param
+     * [
+     *      'order_no'   =>  '', //订单编号  string 【必选】
+     *      'compensate_amount'=>'' //赔偿金额  string  【必选】
+     * ]
+     * @param array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     *
+     */
+    public static function advanceReturn(array $params,array $userinfo){
+        //开启事务
+        DB::beginTransaction();
+        try{
+            // 查商品
+            $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no'], true);
+            if(!$goods){
+                LogApi::debug("【advanceReturn】获取商品信息失败");
+                DB::rollBack();
+                return false;
+            }
+            // 订单
+            $order = $goods->getOrder();
+            if(!$order){
+                LogApi::debug("【advanceReturn】获取订单信息失败");
+                return false;
+            }
+            $order_info = $order->getData();
+            if($order_info['order_status'] != OrderStatus::OrderInService){
+                LogApi::debug("【advanceReturn】订单状态必须为租用中");
+                return false;
+            }
+            //获取支付信息
+            $payInfo = OrderPayRepository::find($order_info['order_no']);
+            if(!$payInfo){
+                LogApi::debug("【advanceReturn】获取支付信息失败");
+                return false;//支付单不存在
+            }
+            //获取商品数组
+            $goods_info = $goods->getData();
+
+            if($order_info['pay_type'] == PayInc::LebaifenPay){
+                if($params['compensate_amount']>0){
+                    //应付赔偿金额
+                    $result['evaluation_amount'] =$params['compensate_amount'];
+                }
+
+                //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
+                $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+            }
+            //花呗分期+预授权
+            if($order_info['pay_type'] != PayInc::LebaifenPay){
+                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
+                    $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
+                }
+
+                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    if($params['compensate_amount']>0) {
+                        //赔偿金额必须小于等于押金金额
+                        if($goods_info['yajin']<$params['compensate_amount']){
+                            LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
+                            return false;
+                        }
+                        $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
+                    }
+                    $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                }
+            }
+
+            // 创建退换货单参数
+            $data = [
+                'goods_no'      => $goods_info['goods_no'],
+                'order_no'      => $params['order_no'],
+                'business_key'  => OrderStatus::BUSINESS_RETURN,
+                'reason_id'     => ReturnStatus::ReturnUserQuestion,
+                'reason_text'   => "中途退机",
+                'user_id'       => $params['user_id'],
+                'status'        => ReturnStatus::ReturnAgreed,
+                'refund_no'     => create_return_no(),
+                'pay_amount'    =>isset($result['pay_amount']) ?$result['pay_amount']: 0.00 ,            //实付金额
+                'auth_unfreeze_amount'  => isset($result['auth_unfreeze_amount']) ?$result['auth_unfreeze_amount']: 0.00,   //应退押金
+                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
+                'refund_amount'  => isset($result['refund_amount']) ?$result['refund_amount']: 0.00 ,           //应退金额
+                'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
+                'evaluation_remark' =>'中途退机，与客户协商的异常订单',
+                'check_time' =>time(),
+                'create_time'   => time(),
+            ];
+            //创建退换货单
+            $create = OrderReturnRepository::createReturn($data);
+            if(!$create){
+                LogApi::debug("【advanceReturn】创建退换货单失败");
+                //事务回滚
+                DB::rollBack();
+                return false;//创建失败
+            }
+
+             //修改冻结状态为退货中
+             $orderStatus = $order->returnOpen();
+            if( !$orderStatus ){
+                LogApi::debug("【advanceReturn】修改冻结状态为退货中失败");
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+             //修改商品信息
+             $goodsStatus = $goods->returnOpen($data['refund_no']);
+            if( !$goodsStatus ){
+                LogApi::debug("【advanceReturn】修改商品信息失败");
+                //事务回滚
+                DB::rollBack();
+                return false;
+            }
+            //创建清单参数
+            $create_data['order_no']=$params['order_no']; //订单类型
+            if($order_info['pay_type'] == PayInc::LebaifenPay){
+                $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+            }else{
+                $create_data['order_type']=$order_info['order_type'];//订单类型
+            }
+            $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
+            $create_data['business_no']=$data['refund_no'];//业务编号
+
+            if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
+            }
+
+            $create_data['auth_deduction_amount']=$params['compensate_amount'];//应扣押金金额
+            $create_data['auth_deduction_time']=time();//扣除押金时间
+            $create_data['auth_unfreeze_time']=time();//退还时间
+            $create_data['refund_time']=time();//退款时间
+            $create_data['refund_amount']=0;//退款金额
+            LogApi::debug("【advanceReturn】创建清单参数",$create_data);
+            //创建清单
+            $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
+            if(!$create_clear){
+                LogApi::debug("【advanceReturn】创建清单失败");
+                //事务回滚
+                DB::rollBack();
+                return false;//创建退款清单失败
+            }
+            DB::commit();
+            return true;
+        }catch( \Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+        }
+
+    }
 
 
 }

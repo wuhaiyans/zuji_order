@@ -116,7 +116,7 @@ class GoodsReturn {
      */
     public function cancelRefund():bool{
         //退换货单必须未取消
-        if( $this->model->status =ReturnStatus::ReturnCanceled ){
+        if( $this->model->status ==ReturnStatus::ReturnCanceled ){
             return false;
         }
         $this->model->status = ReturnStatus::ReturnCanceled;  //已取消
