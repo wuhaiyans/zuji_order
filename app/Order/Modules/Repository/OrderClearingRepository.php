@@ -188,6 +188,9 @@ class OrderClearingRepository
         if (isset($param['refund_clean_no'])) {
             $whereArray[] = ['refund_clean_no', '=', $param['refund_clean_no']];
         }
+        if (isset($param['payment_no'])) {
+            $whereArray[] = ['payment_no', '=', $param['payment_no']];
+        }
         if (isset($param['order_type'])) {
             $whereArray[] = ['order_type', '=', $param['order_type']];
         }
@@ -310,6 +313,44 @@ class OrderClearingRepository
                 $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
                 $orderData->auth_deduction_time = time();
                 $orderData->out_unfreeze_pay_trade_no = $param['out_unfreeze_pay_trade_no'];
+            }
+
+        }
+        $orderData->status  = OrderCleaningStatus::orderCleaningComplete;
+        $orderData->update_time = time();
+        $success =$orderData->save();
+        if(!$success){
+            return false;
+        }
+        return true;
+    }
+
+
+
+
+    /**
+     * 更新乐百分结算完成状态
+     * Author: heaven
+     * @param $param
+     * @return bool
+     */
+    public static function upLebaiOrderCleanStatus($param){
+        if (empty($param)) {
+            return false;
+        }
+        echo 2344;exit;
+        $whereArray[] = ['payment_no', '=', $param['payment_no']];
+        dd($whereArray);
+        $orderData =  OrderClearing::where($whereArray)->first();
+
+        if (!$orderData) return false;
+        if ($orderData->auth_unfreeze_status    ==  OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
+            $orderData->auth_unfreeze_status  = OrderCleaningStatus::depositUnfreezeStatusPayd;
+            $orderData->auth_unfreeze_time  = time();
+            //判断预授权转支付是否为待支付状态，如果是，变更为已支付
+            if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusUnpayed) {
+                $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
+                $orderData->auth_deduction_time = time();
             }
 
         }

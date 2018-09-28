@@ -172,10 +172,12 @@ class DeliveryController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
-
+        DB::beginTransaction();
         try {
             $this->delivery->auditFailed($params);
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
