@@ -2724,7 +2724,7 @@ class OrderReturnCreater
                 return false;
             }
             $return_info = $return->getData();
-            LogApi::debug("获取退货单的信息",$return_info);
+            LogApi::debug("[refundRefuse]获取退货单的信息",$return_info);
             //更新退款单状态为已取消
             $refundCancel = $return->cancelRefund();
             LogApi::info("[refundRefuse]更新退款单状态为已取消",$refundCancel);

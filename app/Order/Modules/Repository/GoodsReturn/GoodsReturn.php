@@ -405,9 +405,9 @@ class GoodsReturn {
      * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
      * @return bool
      */
-    public static function getReturnInfoByOrderNo(string $order_no,string $status,int $lock=0 ) {
+    public static function getReturnInfoByOrderNo(string $order_no,int $lock=0 ) {
         $builder = \App\Order\Models\OrderReturn::where([
-            ['order_no', '=', $order_no],['status','=',ReturnStatus::ReturnAgreed]
+            ['order_no', '=', $order_no],['status','!=',ReturnStatus::ReturnCanceled]
         ])->limit(1);
         if( $lock ){
             $builder->lockForUpdate();
