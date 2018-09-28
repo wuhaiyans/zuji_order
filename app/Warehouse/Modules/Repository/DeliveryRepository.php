@@ -176,7 +176,7 @@ class DeliveryRepository
             //已发货待签收
             $model->status = Delivery::STATUS_SEND;
         }elseif($params['status']==4){
-            $dg_model = DeliveryGoods::where(['order_no'=>$model->delivery_no])->first();
+            $dg_model = DeliveryGoods::where('delivery_no',$model->delivery_no)->first();
             if($dg_model->status == DeliveryGoods::STATUS_ALL){
                 //配货完成
                 $model->status = Delivery::STATUS_WAIT_SEND;
