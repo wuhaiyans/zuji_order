@@ -2992,7 +2992,7 @@ class OrderReturnCreater
                     return false;
                 }
             }else{
-                if(!( $result['auth_deduction_amount']>0)){
+                if(!($params['compensate_amount']>0)){
                     // 不需要清算，直接调起退款成功
                     $b = self::refundUpdate([
                         'business_type' =>OrderStatus::BUSINESS_RETURN,
