@@ -2886,6 +2886,10 @@ class OrderReturnCreater
                 return false;
             }
             $order_info = $order->getData();
+            if($order_info['order_status'] != OrderStatus::OrderInService){
+                LogApi::debug("【advanceReturn】订单状态必须为租用中");
+                return false;
+            }
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
             if(!$payInfo){

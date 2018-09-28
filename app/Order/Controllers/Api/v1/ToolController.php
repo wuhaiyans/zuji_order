@@ -149,9 +149,6 @@ class ToolController extends Controller
      * [
      *      'order_no'   =>  '', //订单编号  string 【必选】
      *      'compensate_amount'=>'' //赔偿金额  string  【必选】
-     *      'reason_id'     => '',    退货原因id int     【必选】
-     *      'reason_text'   => '',   退货原因备注string  【必选】
-     *      'user_id'       => '',   用户id      int     【必选】
      * ]
      *
      * @params array $userinfo 用户信息参数
@@ -167,9 +164,8 @@ class ToolController extends Controller
         $param = filter_array($params,[
             'order_no'=> 'required',    //订单编号
             'compensate_amount'=> 'required',    //赔偿金额
-            'user_id'            =>'required',
         ]);
-        if(count($param)<5){
+        if(count($param)<2){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
         $res= OrderReturnCreater::advanceReturn($param ,$orders['userinfo']);
