@@ -2761,6 +2761,7 @@ class OrderReturnCreater
             $delivery = Delivery::auditFailed( $order_no,$orderInfo['order_status']);
             LogApi::debug("[refundRefuse]通知收发货继续发货返回结果",$delivery);
             if(!$delivery){
+                LogApi::debug("[refundRefuse]通知收发货继续发货返回结果失败",session()->get(Delivery::SESSION_ERR_KEY));
                 //事务回滚
                 DB::rollBack();
                 return false;
@@ -2935,7 +2936,7 @@ class OrderReturnCreater
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
                 'reason_text'   => "中途退机",
-                'user_id'       => $params['user_id'],
+                'user_id'       => $order_info['user_id'],
                 'status'        => ReturnStatus::ReturnAgreed,
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>isset($result['pay_amount']) ?$result['pay_amount']: 0.00 ,            //实付金额
@@ -2947,6 +2948,7 @@ class OrderReturnCreater
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
+
             //创建退换货单
             $create = OrderReturnRepository::createReturn($data);
             if(!$create){
@@ -2972,6 +2974,28 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;
             }
+            if($goods_info['yajin']<=0){
+                return false;
+            }
+            // 如果待退款金额为0，则直接调退款成功的回调
+
+            if(!( $result['auth_unfreeze_amount']>0)){
+                // 不需要清算，直接调起退款成功
+                $b = self::refundUpdate([
+                    'business_type' =>OrderStatus::BUSINESS_RETURN,
+                    'business_no'	=> $data['refund_no'],
+                    'status'		=> 'success',
+                ], $userinfo);
+                if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+                    //事务提交
+                    DB::commit();
+                    return true;
+                }
+                // 失败
+                DB::rollBack();
+                return false;
+            }
+
             //创建清单参数
             $create_data['order_no']=$params['order_no']; //订单类型
             if($order_info['pay_type'] == PayInc::LebaifenPay){
@@ -2985,7 +3009,7 @@ class OrderReturnCreater
             if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                 $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
             }
-
+            $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//预授权解冻金额
             $create_data['auth_deduction_amount']=$params['compensate_amount'];//应扣押金金额
             $create_data['auth_deduction_time']=time();//扣除押金时间
             $create_data['auth_unfreeze_time']=time();//退还时间
