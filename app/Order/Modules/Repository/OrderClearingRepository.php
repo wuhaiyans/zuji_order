@@ -188,6 +188,9 @@ class OrderClearingRepository
         if (isset($param['refund_clean_no'])) {
             $whereArray[] = ['refund_clean_no', '=', $param['refund_clean_no']];
         }
+        if (isset($param['payment_no'])) {
+            $whereArray[] = ['payment_no', '=', $param['payment_no']];
+        }
         if (isset($param['order_type'])) {
             $whereArray[] = ['order_type', '=', $param['order_type']];
         }
@@ -335,8 +338,11 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
+        echo 2344;exit;
         $whereArray[] = ['payment_no', '=', $param['payment_no']];
+        dd($whereArray);
         $orderData =  OrderClearing::where($whereArray)->first();
+
         if (!$orderData) return false;
         if ($orderData->auth_unfreeze_status    ==  OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
             $orderData->auth_unfreeze_status  = OrderCleaningStatus::depositUnfreezeStatusPayd;
