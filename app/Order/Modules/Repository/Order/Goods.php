@@ -167,6 +167,16 @@ class Goods {
         $this->model->goods_status=OrderGoodStatus::REFUNDED;  //退货完成
         return $this->model->save();
     }
+
+    /**
+     * 拒签，修改状态为退货完成
+     * @return bool
+     */
+    public function returnSign( ):bool{
+        $this->model->goods_status = OrderGoodStatus::REFUNDED;  //退货完成
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
 	
     //-+------------------------------------------------------------------------
     // | 换货

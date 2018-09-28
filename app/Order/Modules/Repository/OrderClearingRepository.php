@@ -12,6 +12,7 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Models\OrderClearing;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
 
 class OrderClearingRepository
@@ -34,7 +35,13 @@ class OrderClearingRepository
         //根据订单号查询订单信息
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
-            if (empty($orderInfo)) return false;
+            if (empty($orderInfo)) {
+                return false;
+            }
+            if ($orderInfo['pay_type'] == PayInc::LebaifenPay) {
+
+                $param['order_type'] = OrderStatus::miniRecover;
+            }
         }
 
         $authDeductionNo    =   0;
@@ -111,6 +118,8 @@ class OrderClearingRepository
             $authRefundStatus = OrderCleaningStatus::refundPayd;
 
         }
+
+
         // 创建结算清单
         $order_data = [
             'order_no' => $param['order_no'] ?? '0',
