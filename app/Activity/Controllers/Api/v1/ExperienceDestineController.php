@@ -155,7 +155,7 @@ class ExperienceDestineController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $experienceId  = isset($params['params']['experience_id'])?$params['params']['experience_id']:0;
+        $activityId  = isset($params['params']['activity_id'])?$params['params']['activity_id']:0;
 
         //判断参数是否设置
         if(empty($appid) && $appid <1){
@@ -165,12 +165,12 @@ class ExperienceDestineController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
 
-        if($experienceId <1){
+        if($activityId <1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
         }
 
         $data =[
-            'experience_id'=>$experienceId,
+            'activity_id'=>$activityId,
             'user_id'=>$params['userinfo']['uid'],  //增加用户ID
         ];
         $res = ExperienceDestineOperate::experienceDestineQuery($data);

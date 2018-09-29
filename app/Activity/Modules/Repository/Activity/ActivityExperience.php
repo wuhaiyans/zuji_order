@@ -60,6 +60,27 @@ class ActivityExperience{
         }
         return new self( $destine_info );
     }
+    /**
+     * 通过活动id获取活动体验表信息
+     * <p>当不存在时，返回false</p>
+     * @param string   $id		体验id
+     * @param int		$lock			锁
+     * @return \App\Activity\Modules\Repository\Activity\Activityexperience
+     * @return  bool
+     */
+    public static function getByActivityId( string $id, int $lock=0 ) {
+        $builder = ActivityExperienceModel::where([
+            ['activity_id', '=', $id],
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $destine_info = $builder->first();
+        if( !$destine_info ){
+            return false;
+        }
+        return new self( $destine_info );
+    }
 
 
 
