@@ -2891,16 +2891,16 @@ class OrderReturnCreater
              //判断退款是否为小程序订单
              if($order_info['pay_type'] != PayInc::MiniAlipay){
                  //获取支付信息
-                 $payInfo = OrderPayRepository::find($order_info['order_no']);
+                 $payInfo = OrderPayRepository::find($order_no);
                  if(!$payInfo){
                      return false;
                      LogApi::debug("[refuseSign]未找到支付信息");
                  }
                  if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                     $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                     $create_data['out_payment_no'] = $payInfo['payment_no'];//支付编号
                  }
                  if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                     $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
+                     $create_data['out_auth_no'] = $payInfo['fundauth_no'];//预授权编号
                  }
 
              }
