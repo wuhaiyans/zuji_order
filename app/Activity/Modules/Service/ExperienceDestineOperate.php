@@ -224,21 +224,20 @@ class ExperienceDestineOperate
             $res =[];
             //查询活动信息
 
-            $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByIdNo($data['experience_id']);
+            $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByActivityId($data['activity_id']);
             if(!$activity){
                 set_msg("获取活动信息失败");
                 return false;
             }
 
             $activityInfo = $activity->getData();
-            $res['destine_amount'] = $activityInfo['destine_amount'];
             $res['invitation_code'] ='';
             $res['activity_status'] =0;
             if(time()>=$activityInfo['end_time']){
                 $res['activity_status'] =1;
             }
             //判断用户是否 已经参与活动
-            $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$activityInfo['activity_id']);
+            $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
             //如果有预订记录
             if($destine){
                 $destine = objectToArray($destine);
@@ -246,7 +245,7 @@ class ExperienceDestineOperate
                 if ($destine['destine_status'] != DestineStatus::DestineCreated) {
                     $res['status'] =1;
                     $res['invitation_code'] =self::setInvitationCode([
-                        'activity_id'   => $activityInfo['activity_id'],
+                        'activity_id'   => $data['activity_id'],
                         'user_id'       => $destine['user_id'],
                     ]);
                 }else{
