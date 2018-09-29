@@ -277,8 +277,9 @@ class GivebackAddressStatus {
         $address = [];
         if(!$spu_id) return $address;
 
-        $type = self::SPU_ADDRDSS_TYPE[$spu_id];
-        if($type){
+        $all = self::SPU_ADDRDSS_TYPE;
+        if(isset($all[$spu_id])){
+            $type = $all[$spu_id];
             $address['giveback_address'] = self::ADDRESS_TYPE[$type]['address'];
             $address['giveback_username'] = self::ADDRESS_TYPE[$type]['addressee'];
             $address['giveback_tel'] = self::ADDRESS_TYPE[$type]['phone'];
@@ -288,6 +289,7 @@ class GivebackAddressStatus {
             $address['giveback_address'] = self::ADDRESS_TYPE[1]['address'];
             $address['giveback_username'] = self::ADDRESS_TYPE[1]['addressee'];
             $address['giveback_tel'] = self::ADDRESS_TYPE[1]['phone'];
+
         }
         return $address;
 
