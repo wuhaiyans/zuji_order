@@ -827,6 +827,8 @@ class GivebackController extends Controller
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单基本信息
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		//还机地址
+		$data['giveback_address'] = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
 			//组合最终返回商品基础数据
@@ -836,7 +838,6 @@ class GivebackController extends Controller
 			//$data['giveback_username'] = config('tripartite.Customer_Service_Name');;
 			//$data['giveback_tel'] = config('tripartite.Customer_Service_Phone');
 
-			$data['giveback_address'] = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
 			$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 			$data['status_text'] = '还机申请中';//后台状态
 
