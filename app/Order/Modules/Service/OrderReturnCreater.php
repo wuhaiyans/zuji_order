@@ -3026,8 +3026,8 @@ class OrderReturnCreater
                 $create_data['business_type'] = OrderCleaningStatus::businessTypeRefund;//业务类型
                 $create_data['business_no'] = $data['refund_no'];//业务编号
                 $create_data['refund_status'] = OrderCleaningStatus::refundUnpayed;//退款状态待退款
-                $create_data['refund_amount'] = $data['pay_amount']?? 0;//应退金额
-                $create_data['auth_unfreeze_amount'] = $data['auth_unfreeze_amount'] ?? 0;//应退押金
+                $create_data['refund_amount'] = isset($data['pay_amount']) ?$data['pay_amount']: 0.00  ;//应退金额
+                $create_data['auth_unfreeze_amount'] = isset($data['auth_unfreeze_amount'] )?$data['auth_unfreeze_amount']: 0;//应退押金
                 $create_data['auth_deduction_amount'] = 0;//应扣押金
 
                 LogApi::debug("[refuseSign]创建退款清单参数",$create_data);
