@@ -3046,7 +3046,7 @@ class OrderReturnCreater
                return true;
         }catch( \Exception $exc){
              DB::rollBack();
-             LogApi::debug("拒签异常");
+             LogApi::debug("拒签异常",$exc->getMessage());
              return false;
          }
 
