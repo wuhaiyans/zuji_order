@@ -278,18 +278,17 @@ class GivebackAddressStatus {
         $address = [];
         if(!$spu_id) return $address;
 
-
         $type = self::SPU_ADDRDSS_TYPE[$spu_id];
         if($type){
-            $address['giveback_address'] = self::ADDRESS_TYPE[$type]['addressee'];
-            $address['giveback_username'] = self::ADDRESS_TYPE[$type]['phone'];
-            $address['giveback_tel'] = self::ADDRESS_TYPE[$type]['address'];
+            $address['giveback_address'] = self::ADDRESS_TYPE[$type]['address'];
+            $address['giveback_username'] = self::ADDRESS_TYPE[$type]['addressee'];
+            $address['giveback_tel'] = self::ADDRESS_TYPE[$type]['phone'];
 
         }else{
             //默认地址
-            $address['giveback_address'] = self::ADDRESS_TYPE[1]['addressee'];
-            $address['giveback_username'] = self::ADDRESS_TYPE[1]['phone'];
-            $address['giveback_tel'] = self::ADDRESS_TYPE[1]['address'];
+            $address['giveback_address'] = self::ADDRESS_TYPE[1]['address'];
+            $address['giveback_username'] = self::ADDRESS_TYPE[1]['addressee'];
+            $address['giveback_tel'] = self::ADDRESS_TYPE[1]['phone'];
         }
         return $address;
 
