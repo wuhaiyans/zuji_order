@@ -246,7 +246,7 @@ class ExperienceDestineOperate
                 if ($destine['destine_status'] != DestineStatus::DestineCreated) {
                     $res['status'] =1;
                     $res['invitation_code'] =self::setInvitationCode([
-                        'experience_id' => $destine['experience_id'],
+                        'activity_id'   => $activityInfo['activity_id'],
                         'user_id'       => $destine['user_id'],
                     ]);
                 }else{
@@ -266,7 +266,7 @@ class ExperienceDestineOperate
      * @param $params
      * [
      *      'user_id'=>''   ,//【必须】int 用户ID
-     *      'experience_id' =>'',//【必须】int 活动ID
+     *      'activity_id' =>'',//【必须】int 活动ID
      *]
      * @return string
      */
@@ -275,7 +275,7 @@ class ExperienceDestineOperate
     public static function setInvitationCode($params){
 
         $data = filter_array($params, [
-            'experience_id' => 'required',
+            'activity_id' => 'required',
             'user_id'       => 'required',
         ]);
         if(count($data)!=2){
@@ -284,7 +284,7 @@ class ExperienceDestineOperate
         }
 
         $str =substr(md5(DestineInc::DestineKey),0,5);
-        $userStr =base64_encode($data['user_id']."*".$data['experience_id']);
+        $userStr =base64_encode($data['user_id']."*".$data['activity_id']);
 
         return $str.$userStr;
 
@@ -318,7 +318,7 @@ class ExperienceDestineOperate
         $userstr =base64_decode(substr($invitationCode,5));
         $arr =explode("*",$userstr);
         $ret['user_id']=$arr[0];
-        $ret['experience_id'] =$arr[1];
+        $ret['activity_id'] =$arr[1];
 
         return $ret;
 

@@ -2718,10 +2718,13 @@ class OrderReturnCreater
             }
             //查询存在此订单的退款记录，修改状态为已取消
             //获取退货单的信息
-            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByOrderNo( $order_no,true);
+            $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnInfoByOrderNo( $order_no,true);
+
             if( !$return ){
                 return false;
             }
+            $return_info = $return->getData();
+            LogApi::debug("[refundRefuse]获取退货单的信息",$return_info);
             //更新退款单状态为已取消
             $refundCancel = $return->cancelRefund();
             LogApi::info("[refundRefuse]更新退款单状态为已取消",$refundCancel);
