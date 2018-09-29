@@ -3212,7 +3212,7 @@ class OrderReturnCreater
             $create_data['auth_deduction_time']=time();//扣除押金时间
             $create_data['auth_unfreeze_time']=time();//退还时间
             $create_data['refund_time']=time();//退款时间
-            $create_data['refund_amount']=0;//退款金额
+            $create_data['refund_amount']=$result['auth_unfreeze_amount'] ?? 0;//退款金额
             LogApi::debug("【advanceReturn】创建清单参数",$create_data);
             //创建清单
             $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
