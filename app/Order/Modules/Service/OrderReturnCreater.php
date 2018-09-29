@@ -3075,6 +3075,10 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
+            
+            if(empty($params['compensate_amount'])){
+                $params['compensate_amount'] = 0.00;
+            }
             // 查商品
             $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($params['order_no'], true);
             if(!$goods){
@@ -3105,7 +3109,6 @@ class OrderReturnCreater
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
-            $params['compensate_amount'] = 0.00;
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 if($params['compensate_amount']>0){
                     //应付赔偿金额
