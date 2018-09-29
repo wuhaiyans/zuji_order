@@ -338,9 +338,7 @@ class OrderClearingRepository
         if (empty($param)) {
             return false;
         }
-        echo 2344;exit;
         $whereArray[] = ['payment_no', '=', $param['payment_no']];
-        dd($whereArray);
         $orderData =  OrderClearing::where($whereArray)->first();
 
         if (!$orderData) return false;

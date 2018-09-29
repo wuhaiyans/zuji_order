@@ -917,11 +917,9 @@ class PayController extends Controller
                     'payment_no' => $param['out_payment_no'],
                 ];
 
-
-
+                
                 $success = OrderClearingRepository::upLebaiOrderCleanStatus($orderParam);
 
-                dd($success);
                 if ($success) {
                     //更新业务系统的状态
                     $businessParam = [
@@ -946,7 +944,7 @@ class PayController extends Controller
                 }
             } else {
 
-                
+
                 LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算退款状态无效');
             }
             $this->innerOkMsg();

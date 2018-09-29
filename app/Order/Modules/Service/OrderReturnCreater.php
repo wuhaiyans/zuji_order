@@ -2983,7 +2983,7 @@ class OrderReturnCreater
                     if($order_info['order_type'] == OrderStatus::orderMiniService){
                         //查询芝麻订单
                         $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($order_no);
-                        LogApi::info("[refuseSign]查询芝麻订单",$miniOrderInfo);
+                        LogApi::debug("[refuseSign]查询芝麻订单",$miniOrderInfo);
                         $data = [
                             'out_order_no' => $order_no,//商户端订单号
                             'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
@@ -2994,7 +2994,7 @@ class OrderReturnCreater
                         //通知芝麻取消请求
                         $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
-                            LogApi::info("[refuseSign]通知芝麻取消请求失败",$canceRequest);
+                            LogApi::debug("[refuseSign]通知芝麻取消请求失败",$canceRequest);
                             return false;
                         }
                     }
@@ -3004,7 +3004,7 @@ class OrderReturnCreater
                         'business_no'	=> $data['refund_no'],
                         'status'		=> 'success',
                     ], $userinfo);
-                    LogApi::info("[refuseSign]不需要清算，直接调起退款成功结果",$b);
+                    LogApi::debug("[refuseSign]不需要清算，直接调起退款成功结果",$b);
                     if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
                         //事务提交
                         DB::commit();
@@ -3030,10 +3030,10 @@ class OrderReturnCreater
                 $create_data['auth_unfreeze_amount'] = $data['auth_unfreeze_amount'];//应退押金
                 $create_data['auth_deduction_amount'] = 0;//应扣押金
 
-                LogApi::info("[refuseSign]创建退款清单参数",$create_data);
+                LogApi::debug("[refuseSign]创建退款清单参数",$create_data);
                 if( $create_data['refund_amount']>0 || $create_data['auth_unfreeze_amount']>0){
                    $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
-                   LogApi::info("[refuseSign]创建退款清单执行结果",$create_clear);
+                   LogApi::debug("[refuseSign]创建退款清单执行结果",$create_clear);
                    if(!$create_clear){
                        //事务回滚
                        DB::rollBack();
@@ -3046,7 +3046,7 @@ class OrderReturnCreater
                return true;
         }catch( \Exception $exc){
              DB::rollBack();
-             LogApi("拒签异常");
+             LogApi::debug("拒签异常");
              return false;
          }
 
