@@ -18,7 +18,6 @@ class GivebackAddressStatus {
      * @var array spu 对应寄回地址类别
      */
     const SPU_ADDRDSS_TYPE = [
-        2=>2,
         211=>1,
         56=>1,
         47=>1,
