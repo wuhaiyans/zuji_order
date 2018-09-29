@@ -275,20 +275,21 @@ class GivebackAddressStatus {
      * @return array
      */
     public static function getGivebackAddress($spu_id){
-        if(!$spu_id) return 'spu参数错误';
+        $address = [];
+        if(!$spu_id) return $address;
 
-        $address = '';
+
         $type = self::SPU_ADDRDSS_TYPE[$spu_id];
         if($type){
-            $address = '收货人:'.self::ADDRESS_TYPE[$type]['addressee'];
-            $address .= ' 收货人电话:'.self::ADDRESS_TYPE[$type]['phone'];
-            $address .= ' 收货地址:'.self::ADDRESS_TYPE[$type]['address'];
+            $address['giveback_address'] = self::ADDRESS_TYPE[$type]['addressee'];
+            $address['giveback_username'] = self::ADDRESS_TYPE[$type]['phone'];
+            $address['giveback_tel'] = self::ADDRESS_TYPE[$type]['address'];
 
         }else{
             //默认地址
-            $address = '收货人:'.self::ADDRESS_TYPE[1]['addressee'];
-            $address .= ' 收货人电话:'.self::ADDRESS_TYPE[1]['phone'];
-            $address .= ' 收货地址:'.self::ADDRESS_TYPE[1]['address'];
+            $address['giveback_address'] = self::ADDRESS_TYPE[1]['addressee'];
+            $address['giveback_username'] = self::ADDRESS_TYPE[1]['phone'];
+            $address['giveback_tel'] = self::ADDRESS_TYPE[1]['address'];
         }
         return $address;
 
