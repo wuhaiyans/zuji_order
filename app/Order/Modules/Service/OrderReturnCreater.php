@@ -2969,6 +2969,7 @@ class OrderReturnCreater
              LogApi::debug("[refuseSign]创建退款单参数",$data);
              //创建申请退款记录
              $addresult = OrderReturnRepository::createRefund($data);
+             LogApi::debug("[refuseSign]创建申请退款结果".$addresult);
              if( !$addresult ){
                  LogApi::debug("[refuseSign]创建申请退款记录失败",$data);
                  //事务回滚
