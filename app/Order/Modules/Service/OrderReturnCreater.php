@@ -2976,12 +2976,10 @@ class OrderReturnCreater
                  DB::rollBack();
                  return false;//创建失败
              }
-             LogApi::debug("1111");
              if( !(
                  $data['pay_amount']>0
                  || $data['auth_unfreeze_amount']>0
                 ) ){
-                 LogApi::debug("222");
                     //如果是小程序的订单
                     if($order_info['order_type'] == OrderStatus::orderMiniService){
                         //查询芝麻订单
@@ -3017,7 +3015,6 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false;
                 }
-             LogApi::debug("333");
 
                 //创建清单
                 $create_data['order_no']=$order_no;//订单类型
