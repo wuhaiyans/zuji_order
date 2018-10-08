@@ -275,7 +275,7 @@ class OrderReturnRepository
 
 //        sql_profiler();
             $orderList = DB::table('order_info')
-                ->select('order_info.order_no','order_goods.end_time')
+                ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
