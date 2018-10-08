@@ -500,7 +500,11 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
+
         $userInfo = $orders['userinfo'];
+        //支付 扩展参数
+        $ip= isset($userInfo['ip'])?$userInfo['ip']:'';
+        $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
         if(!$buyout){
@@ -528,6 +532,8 @@ class BuyoutController extends Controller
         $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
+            'ip'=>$ip,
+            'extended_params' => $extended_params,// 扩展参数
         ]);
         //插入日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","创建支付成功");
