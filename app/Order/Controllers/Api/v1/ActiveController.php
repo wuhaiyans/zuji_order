@@ -16,10 +16,10 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
         try{
             $arr =[];
-            $limit  = 50;
+            $limit  = 1;
             $page   = 1;
             $sleep  = 10;
-            $code   = "SMS_113461203";
+            $code   = "SMS_113461177";
 
 
             do {
@@ -38,10 +38,32 @@ class ActiveController extends Controller
                 foreach($result as $item){
 
                     $mobile         = trim($item['mobile']);
+
+                    $url = 'https://h5.nqyong.com/myBillDetail?';
+
+                    $urlData = [
+                        'orderNo'       => $item['order_no'],     //  订单号
+                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
+                        'id'            => $item['id'],           //  分期ID
+                        'appid'         => $item['appid'],        //  商品编号
+                        'goodsNo'       => $item['goods_no'],     //  商品编号
+                    ];
+
+                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
+
+
                     // 短信参数
                     $dataSms =[
-                        'a'      => 'a',
+                        'realName'      => $item['realname'],
+                        'orderNo'       => $item['order_no'],
+                        'goodsName'     => $item['goods_name'],
+                        'zuJin'         => $item['amount'],
+                        'createTime'    => '2018年10月15日',
+                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
+                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
+
+
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
@@ -49,7 +71,7 @@ class ActiveController extends Controller
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
                 }
-
+                die;
                 sleep($sleep);
             } while (true);
 
