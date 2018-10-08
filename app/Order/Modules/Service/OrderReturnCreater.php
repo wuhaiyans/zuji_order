@@ -3247,14 +3247,8 @@ class OrderReturnCreater
     /**
      * 用户逾期
      *
-     * @params array $userinfo 用户信息参数
-     * [
-     *      'uid'      =>''     用户id      int      【必传】
-     *      'username' =>''    用户名      string   【必传】
-     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
-     * ]
      */
-    public static function overDue($params,array $userinfo){
+    public static function overDue($params){
         $orderListArray = OrderRepository::getAdminOrderList($params);
 //        dd($orderListArray);
 
