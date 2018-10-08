@@ -3269,7 +3269,8 @@ class OrderReturnCreater
                 $orderListArray['data'][$keys]['freeze_type_name'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
                 //发货时间
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
-
+                //支付方式名称
+                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600));;
 
                 //设备名称
 

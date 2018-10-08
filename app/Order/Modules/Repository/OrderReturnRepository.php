@@ -249,7 +249,7 @@ class OrderReturnRepository
         $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
-        $count = DB::table('order_info')
+        $orderList = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
@@ -265,39 +265,18 @@ class OrderReturnRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->first();
+            ->orderBy('order_goods.end_time', 'asc')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
 
 
-        $count = objectToArray($count)['order_count'];
-        if (!isset($param['count'])) {
 
-//        sql_profiler();
-            $orderList = DB::table('order_info')
-                ->select('order_info.order_no')
-                ->join('order_user_address',function($join){
-                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
-                }, null,null,'inner')
-                ->join('order_info_visit',function($join){
-                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
-                }, null,null,'left')
-                ->join('order_goods',function($join){
-                    $join->on('order_info.order_no', '=', 'order_goods.order_no');
-                }, null,null,'left')
-                ->join('order_delivery',function($join){
-                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
-                }, null,null,'left')
-                ->where($whereArray)
-                ->where($orWhereArray)
-                ->orderBy('order_goods.end_time', 'asc')
-                ->skip(($page - 1) * $pagesize)->take($pagesize)
-                ->get();
 
             $orderArray = objectToArray($orderList);
-
+            $count= count($orderArray);
             if ($orderArray) {
                 $orderIds = array_column($orderArray,"order_no");
-//           dd($orderIds);
-//            sql_profiler();
+
                 $orderList =  DB::table('order_info as o')
                     ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time')
                     ->whereIn('o.order_no', $orderIds)
@@ -330,17 +309,7 @@ class OrderReturnRepository
             }
 
 
-
-
-//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
-
-        }else {
-
-            $orderArrays['total'] = $count;
-
-        }
         return $orderArrays;
-//
 
     }
 
