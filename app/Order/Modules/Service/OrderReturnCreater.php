@@ -3184,7 +3184,7 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;
             }
-            if($goods_info['yajin']<=0){
+            if($goods_info['yajin']<0){
                 return false;
             }
             // 如果待退款金额为0，则直接调退款成功的回调
