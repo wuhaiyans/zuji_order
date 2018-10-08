@@ -16,7 +16,7 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
         try{
             $arr =[];
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 10;
             $code   = "SMS_113461177";
@@ -62,7 +62,7 @@ class ActiveController extends Controller
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
-                    
+
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
@@ -70,7 +70,7 @@ class ActiveController extends Controller
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
                 }
-                die;
+                
                 sleep($sleep);
             } while (true);
 
