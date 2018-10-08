@@ -1,5 +1,6 @@
 <?php
 namespace App\Order\Modules\Repository;
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Models\OrderGoods;
 use App\Order\Models\OrderGoodsExtend;
@@ -249,7 +250,7 @@ class OrderReturnRepository
         $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
-
+        LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
             ->join('order_user_address',function($join){
@@ -257,6 +258,9 @@ class OrderReturnRepository
             }, null,null,'inner')
             ->join('order_info_visit',function($join){
                 $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+            }, null,null,'left')
+            ->join('order_goods',function($join){
+                $join->on('order_info.order_no', '=', 'order_goods.order_no');
             }, null,null,'left')
             ->join('order_delivery',function($join){
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
@@ -267,6 +271,7 @@ class OrderReturnRepository
 
 
         $count = objectToArray($count)['order_count'];
+        LogApi::debug("【overDue】数据计数",$count);
         if (!isset($param['count'])) {
 
 //        sql_profiler();
@@ -294,7 +299,7 @@ class OrderReturnRepository
                 ->get();
 
             $orderArray = objectToArray($orderList);
-
+            LogApi::debug("【overDue】获取搜索后的数组",$orderArray);
             if ($orderArray) {
                 $orderIds = array_column($orderArray,"order_no");
 //           dd($orderIds);
