@@ -250,34 +250,96 @@ class OrderReturnRepository
         $whereArray[] = ['order_goods.end_time','<=',time()];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
-        $orderList =  DB::table('order_info as o')
-            ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time')
-            ->join('order_user_address as d',function($join){
-                $join->on('o.order_no', '=', 'd.order_no');
+        $count = DB::table('order_info')
+            ->select(DB::raw('count(order_info.order_no) as order_count'))
+            ->join('order_user_address',function($join){
+                $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
-            ->join('order_info_visit as v',function($join){
-                $join->on('o.order_no', '=', 'v.order_no');
+            ->join('order_info_visit',function($join){
+                $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
             }, null,null,'left')
-            ->join('order_delivery as l',function($join){
-                $join->on('o.order_no', '=', 'l.order_no');
-            }, null,null,'left')
-            ->join('order_goods as g',function($join){
-                $join->on('o.order_no', '=', 'g.order_no');
-            }, null,null,'left')
-            ->join('order_user_certified as c',function($join){
-                $join->on('o.order_no', '=', 'c.order_no');
+            ->join('order_delivery',function($join){
+                $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->orderBy('order_goods.end_time', 'asc')
-            ->get();
-            $count=count(objectToArray($orderList));
-            $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
+            ->first();
+
+
+        $count = objectToArray($count)['order_count'];
+        if (!isset($param['count'])) {
+
+//        sql_profiler();
+            $orderList = DB::table('order_info')
+                ->select('order_info.order_no,order_goods.end_time')
+                ->join('order_user_address',function($join){
+                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+                }, null,null,'inner')
+                ->join('order_info_visit',function($join){
+                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+                }, null,null,'left')
+                ->join('order_goods',function($join){
+                    $join->on('order_info.order_no', '=', 'order_goods.order_no');
+                }, null,null,'left')
+                ->join('order_delivery',function($join){
+                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+                }, null,null,'left')
+                ->where($whereArray)
+                ->where($orWhereArray)
+                ->orderBy('order_goods.end_time', 'ASC')
+//            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
+//            ->forPage($page, $pagesize)
+//
+                ->skip(($page - 1) * $pagesize)->take($pagesize)
+                ->get();
+
+            $orderArray = objectToArray($orderList);
+
+            if ($orderArray) {
+                $orderIds = array_column($orderArray,"order_no");
+//           dd($orderIds);
+//            sql_profiler();
+                $orderList =  DB::table('order_info as o')
+                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time')
+                    ->whereIn('o.order_no', $orderIds)
+                    ->join('order_user_address as d',function($join){
+                        $join->on('o.order_no', '=', 'd.order_no');
+                    }, null,null,'inner')
+                    ->join('order_info_visit as v',function($join){
+                        $join->on('o.order_no', '=', 'v.order_no');
+                    }, null,null,'left')
+                    ->join('order_delivery as l',function($join){
+                        $join->on('o.order_no', '=', 'l.order_no');
+                    }, null,null,'left')
+                    ->join('order_goods as g',function($join){
+                        $join->on('o.order_no', '=', 'g.order_no');
+                    }, null,null,'left')
+                    ->join('order_user_certified as c',function($join){
+                        $join->on('o.order_no', '=', 'c.order_no');
+                    }, null,null,'left')
+                    ->orderBy('g.end_time', 'ASC')
+                    ->get();
+
+                $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
+                $orderArrays['orderIds'] = $orderIds;
+                $orderArrays['total'] = $count;
+                $orderArrays['last_page'] = ceil($count/$pagesize);
+
+            } else {
+
+                return false;
+            }
+
+
+
+
+//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
+
+        }else {
+
             $orderArrays['total'] = $count;
-            $orderArrays['last_page'] = ceil($count/$pagesize);
 
-
-
+        }
         return $orderArrays;
 
     }
