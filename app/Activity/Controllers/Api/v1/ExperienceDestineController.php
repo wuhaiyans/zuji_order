@@ -9,6 +9,7 @@
 namespace App\Activity\Controllers\Api\v1;
 
 
+use App\Lib\Common\LogApi;
 use Illuminate\Http\Request;
 use App\Activity\Modules\Service\ExperienceDestineOperate;
 use App\Lib\ApiStatus;
@@ -154,7 +155,7 @@ class ExperienceDestineController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $experienceId  = isset($params['params']['experience_id'])?$params['params']['experience_id']:0;
+        $activityId  = isset($params['params']['activity_id'])?$params['params']['activity_id']:0;
 
         //判断参数是否设置
         if(empty($appid) && $appid <1){
@@ -164,12 +165,12 @@ class ExperienceDestineController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
         }
 
-        if($experienceId <1){
+        if($activityId <1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[活动ID错误]");
         }
 
         $data =[
-            'experience_id'=>$experienceId,
+            'activity_id'=>$activityId,
             'user_id'=>$params['userinfo']['uid'],  //增加用户ID
         ];
         $res = ExperienceDestineOperate::experienceDestineQuery($data);
@@ -180,5 +181,67 @@ class ExperienceDestineController extends Controller
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
+
+    /***
+     * 活动体验预定单列表
+     * @author wuhaiyan
+     * @param Request $request
+     * @return array
+     * [
+     *   'mobile'           => '',  //【可选】 string 用户手机
+     *   'page'             =>'' ,  //【可选】 string 页数
+     *   'size'             =>'' ,  //【可选】 string 每页数量
+     * ]
+
+     */
+    public function experienceDestineList(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $destineData = ExperienceDestineOperate::getDestineList($params['params']);//获取预定单列表信息
+            if(!$destineData){
+                return apiResponse([],ApiStatus::CODE_50001,"获取信息失败");  //获取预订信息失败
+            }
+
+            return apiResponse($destineData,ApiStatus::CODE_0);
+        }catch (\Exception $e) {
+            LogApi::error('预订单列表异常',$e);
+            return apiResponse([],ApiStatus::CODE_50000);
+
+        }
+
+    }
+    /***
+     * 活动体验邀请详情
+     * @author wuhaiyan
+     * @param Request $request
+     * [
+     *   'activity_id' => '',  // 【必选】 活动ID
+     *   'user_id'    =>'' , //【必选】 用户ID
+     *   'page'=>'' ,  //【可选】 string 页数
+     *   'size'  =>'' ,  //【可选】 string 每页数量
+     * ]
+       @return array
+     */
+
+
+    public function experienceDetail(Request $request){
+        $params = $request->all();
+        if(empty($params['params']['activity_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"活动ID不能为空");  //参数不能为空
+        }
+        if(empty($params['params']['user_id'])){
+            return apiResponse([],ApiStatus::CODE_20001,"用户ID不能为空");  //参数不能为空
+        }
+
+        $destineData = ExperienceDestineOperate::getDestineDetail($params['params']);
+        if(!$destineData){
+            return apiResponse([],ApiStatus::CODE_50001);  //获取预订信息失败
+        }
+
+        return apiResponse($destineData,ApiStatus::CODE_0);
+
+    }
+
 
 }

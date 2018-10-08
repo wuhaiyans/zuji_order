@@ -102,7 +102,7 @@ class MiniOrderController extends Controller
             }else{
                 //短租
                 $new_data = date('Y-m-d H:i:s');
-                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($zuqi)+30).' day'));
+                $overdue_time = date('Y-m-d H:i:s', strtotime($new_data.' +'.(intval($zuqi)+90).' day'));
                 //总租金
                 $total_amount = normalizeNum($sku_info['shop_price']*intval($zuqi)+$spu_info['yiwaixian']);
                 //单月租金

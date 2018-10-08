@@ -6,6 +6,7 @@ use App\Activity\Modules\Inc\DestineStatus;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -847,6 +848,111 @@ class PayController extends Controller
             DB::rollBack();
             LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调接口异常 ', [$e,$param]);
             $this->innerErrMsg(__METHOD__ . "()订单清算押金转支付回调接口异常 " .$e->getMessage());
+
+        }
+
+    }
+
+
+
+    /**
+     * 订单清算微回收回调接口
+     * Author: heaven
+     * @param Request $request
+     * $param = [
+     *
+     * {
+        "payment_no":"10A92747476192665",
+        "out_payment_no":"10A92747476192665",
+        "amount":1,
+        "status":"success"
+        }
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function lebaiUnfreezeClean()
+    {
+
+        DB::beginTransaction();
+        try{
+
+            $input = file_get_contents("php://input");
+            LogApi::info(__method__.'[lebaiCleanAccount微回收回调清算退押金回调接口回调参数:', $input);
+            $param = json_decode($input,true);
+            $rule = [
+                "out_payment_no"=>'required',           //类型：String  必有字段  备注：业务系统交易码
+                "amount"=>'required',                //类型：String  必有字段  备注：扣押金金额
+                "status"=>'required',               // //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+            ];
+
+            $validateParams = $this->validateParams($rule,$param);
+            if ($validateParams['code']!=0) $this->innerErrMsg($validateParams['msg']);
+
+            if ($param['status']!='success'){
+                LogApi::error(__METHOD__.'() '.microtime(true).'[cleanAccount微回收回调清算退押金回调返回结果:'.$input.'订单清算退款失败');
+            }
+
+            //更新查看清算表的状态
+            $orderCleanInfo = OrderCleaning::getOrderCleanInfo(['payment_no'=>$param['out_payment_no']]);
+            if ($orderCleanInfo['code']) {
+                LogApi::error(__method__.'[lebaiCleanAccount微回收回调预授权转支付]订单清算记录不存在');
+                $this->innerErrMsg('订单清算记录不存在');
+
+            }
+
+            $orderCleanInfo = $orderCleanInfo['data'];
+
+            // 操作员信息
+            $userinfo = [
+                'uid'		=> $orderCleanInfo['operator_uid'],
+                'username'	=> $orderCleanInfo['operator_username'],
+                'type'		=> $orderCleanInfo['operator_type'],
+            ];
+
+            //查看清算状态是否已解除
+            if ($orderCleanInfo['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+
+                //更新订单清算押金转支付状态
+                $orderParam = [
+                    'payment_no' => $param['out_payment_no'],
+                ];
+
+                
+                $success = OrderClearingRepository::upLebaiOrderCleanStatus($orderParam);
+
+                if ($success) {
+                    //更新业务系统的状态
+                    $businessParam = [
+                        'business_type' => $orderCleanInfo['business_type'],	// 业务类型
+                        'business_no'	=> $orderCleanInfo['business_no'],	// 业务编码
+                        'status'		=> 'success',	// 支付状态  processing：处理中；success：支付完成
+                    ];
+
+                    LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算回调业务接口回调参数:', [$businessParam,$userinfo]);
+                    $success =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'], $businessParam['business_no'], $businessParam['status'], $userinfo);
+                    LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$userinfo,$success]);
+                    if (!$success) {
+                        DB::rollBack();
+                        $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
+                    }
+                    DB::commit();
+                    $this->innerOkMsg();
+                } else {
+                    DB::rollBack();
+                    LogApi::error(__method__.'[lebaiCleanAccount微回收回调 更新订单清算状态失败');
+                    $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
+                }
+            } else {
+
+
+                LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算退款状态无效');
+            }
+            $this->innerOkMsg();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            LogApi::error(__method__.'[lebaiCleanAccount微回收回调订单清算押金转支付回调接口异常 ',$e);
+            $this->innerErrMsg('微回收回调订单清算押金转支付回调接口异常');
 
         }
 

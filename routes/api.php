@@ -68,6 +68,9 @@ $api->version('v1', [
         //订单清算退押金回调接口
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
+        //订单清算微回收押金解除接口
+        $api->post('lebaiUnfreezeClean', 'PayController@lebaiUnfreezeClean');
+
         //分期定时扣款统计数量接口
         $api->any('crontabCreatepayNum', 'WithholdController@crontabCreatepayNum');
 

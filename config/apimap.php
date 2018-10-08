@@ -339,4 +339,20 @@ return [
     'api.active.sendMessage' => 'ActiveController@sendMessage',
 
     'api.pay.paymentStatus' => 'PayController@paymentStatus',
+
+    /*************************************************************************************************
+     * ******************************异常订单处理工具*************************************
+     ************************************************************************************************/
+
+    'api.tool.Delay'          => 'ToolController@Delay',    //延期
+
+    'api.tool.refundRefuse'  => 'ToolController@refundRefuse',   //订单状态是备货中，用户取消订单，客服审核拒绝
+
+    'api.tool.refuseSign'    => 'ToolController@refuseSign',        //拒签
+
+    'api.tool.advanceReturn' => 'ToolController@advanceReturn',   //超过七天无理由退换货，没到租赁日期的退货订单
+
+    'api.tool.overDue'        => 'ToolController@overDue',          //用户逾期
+
+
 ];

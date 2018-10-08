@@ -154,6 +154,41 @@ class DeliveryRepository
         return $model->update();
     }
 
+    /**
+     * @param $order_no
+     * 继续发货
+     */
+    public static function auditFailed($params)
+    {
+        $model = Delivery::where(['order_no'=>$params['order_no'],'status'=>Delivery::STATUS_CANCEL])->first();
+        if (!$model) {
+            throw new NotFoundResourceException('订单号' . $params['order_no'] . '未找到取消的发货单');
+        }
+
+        //修改IMEI状态为库存中
+        if($model->imeis){
+            foreach ($model->imeis as $key=>$item){
+                Imei::out($item->imei,$params['order_no']);
+            }
+        }
+
+        if($params['status']==5){
+            //已发货待签收
+            $model->status = Delivery::STATUS_SEND;
+        }elseif($params['status']==4){
+            $dg_model = DeliveryGoods::where('delivery_no',$model->delivery_no)->first();
+            if($dg_model->status == DeliveryGoods::STATUS_ALL){
+                //配货完成
+                $model->status = Delivery::STATUS_WAIT_SEND;
+            }else{
+                //待配货
+                $model->status = Delivery::STATUS_INIT;
+            }
+        }
+
+        return $model->update();
+    }
+
 
     /**
      * @param $order_no
