@@ -276,7 +276,7 @@ class OrderCleaning
                      *      "back_url":"http://_._.com"        //异步通知的url地址
                      * ]
                      */
-                   if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed)
+                   if (($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) || ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed))
                    {
 
                        $lebaiParam = array(
