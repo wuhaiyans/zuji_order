@@ -42,11 +42,11 @@ class ActiveController extends Controller
                     $url = 'https://h5.nqyong.com/myBillDetail?';
 
                     $urlData = [
-                        'orderNo'       => $item['order_no'],     //  订单号
-                        'zuqi_type'     => $item['zuqi_type'],    //  租期类型
-                        'id'            => $item['id'],           //  分期ID
-                        'appid'         => $item['appid'],        //  商品编号
-                        'goodsNo'       => $item['goods_no'],     //  商品编号
+                        'orderNo'       => trim($item['order_no']),     //  订单号
+                        'zuqi_type'     => trim($item['zuqi_type']),    //  租期类型
+                        'id'            => trim($item['instalment_id']),//  分期ID
+                        'appid'         => trim($item['appid']),        //  商品编号
+                        'goodsNo'       => trim($item['goods_no']),     //  商品编号
                     ];
 
                     $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
@@ -54,10 +54,10 @@ class ActiveController extends Controller
 
                     // 短信参数
                     $dataSms =[
-                        'realName'      => $item['realname'],
-                        'orderNo'       => $item['order_no'],
-                        'goodsName'     => $item['goods_name'],
-                        'zuJin'         => $item['amount'],
+                        'realName'      => trim($item['realname']),
+                        'orderNo'       => trim($item['order_no']),
+                        'goodsName'     => trim($item['goods_name']),
+                        'zuJin'         => trim($item['amount']),
                         'createTime'    => '2018年10月15日',
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
