@@ -321,6 +321,8 @@ class OrderReturnRepository
                     ->join('order_user_certified as c',function($join){
                         $join->on('o.order_no', '=', 'c.order_no');
                     }, null,null,'left')
+                    ->where($whereArray)
+                    ->where($orWhereArray)
                     ->orderBy('g.end_time', 'ASC')
                     ->get();
 
