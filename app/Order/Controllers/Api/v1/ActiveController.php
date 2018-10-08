@@ -58,12 +58,11 @@ class ActiveController extends Controller
                         'orderNo'       => trim($item['order_no']),
                         'goodsName'     => trim($item['goods_name']),
                         'zuJin'         => trim($item['amount']),
-                        'createTime'    => '2018年10月15日',
+                        'createTime'    => '2018年10月' . $item['day'] . '日',
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
 
-                    
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
