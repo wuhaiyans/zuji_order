@@ -63,7 +63,7 @@ class ActiveController extends Controller
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
 
-
+                    
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
