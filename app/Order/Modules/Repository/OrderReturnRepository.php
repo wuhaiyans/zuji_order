@@ -249,6 +249,11 @@ class OrderReturnRepository
         $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
+
+        //固定条件
+        $where[] = ['o.create_time', '>', 0];
+        $where[] = ['g.end_time','<=',time()];
+        $where[] = ['g.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
@@ -304,7 +309,7 @@ class OrderReturnRepository
 //           dd($orderIds);
 //            sql_profiler();
                 $orderList =  DB::table('order_info as o')
-                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time')
+                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time','g.goods_status')
                     ->whereIn('o.order_no', $orderIds)
                     ->join('order_user_address as d',function($join){
                         $join->on('o.order_no', '=', 'd.order_no');
@@ -321,6 +326,7 @@ class OrderReturnRepository
                     ->join('order_user_certified as c',function($join){
                         $join->on('o.order_no', '=', 'c.order_no');
                     }, null,null,'left')
+                    ->where($where)
                     ->orderBy('g.end_time', 'ASC')
                     ->get();
                 LogApi::debug("【overDue】获取搜索后的数组",objectToArray($orderList));
