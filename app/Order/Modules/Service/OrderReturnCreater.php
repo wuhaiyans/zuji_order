@@ -3,10 +3,12 @@ namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\NotFoundException;
+use App\Lib\Order\OrderInfo;
 use App\Lib\Warehouse\Receive;
 use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
+use App\Order\Modules\Inc\OrderOperateInc;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderPayPaymentRepository;
@@ -3075,7 +3077,7 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-            
+
             if(empty($params['compensate_amount'])){
                 $params['compensate_amount'] = 0.00;
             }
@@ -3149,10 +3151,10 @@ class OrderReturnCreater
                 'user_id'       => $order_info['user_id'],
                 'status'        => ReturnStatus::ReturnAgreed,
                 'refund_no'     => create_return_no(),
-                'pay_amount'    =>isset($result['pay_amount']) ?$result['pay_amount']: 0.00 ,            //实付金额
-                'auth_unfreeze_amount'  => isset($result['auth_unfreeze_amount']) ?$result['auth_unfreeze_amount']: 0.00,   //应退押金
-                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
-                'refund_amount'  => isset($result['refund_amount']) ?$result['refund_amount']: 0.00 ,           //应退金额
+                'pay_amount'    =>$result['pay_amount'] ,            //实付金额
+                'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
+                'auth_deduction_amount' => $result['compensate_amount'],  //应扣押金
+                'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
                 'check_time' =>time(),
@@ -3219,8 +3221,8 @@ class OrderReturnCreater
             if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                 $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
             }
-            $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0;//预授权解冻金额
-            $create_data['auth_deduction_amount']=isset($params['compensate_amount'])?$params['compensate_amount']:0;//应扣押金金额
+            $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
+            $create_data['auth_deduction_amount']=isset($params['compensate_amount'])?$params['compensate_amount']:0.00;//应扣押金金额
             $create_data['auth_deduction_time']=time();//扣除押金时间
             $create_data['auth_unfreeze_time']=time();//退还时间
             $create_data['refund_time']=time();//退款时间
@@ -3243,6 +3245,58 @@ class OrderReturnCreater
         }
 
     }
+    /**
+     * 用户逾期
+     *
+     */
+    public static function overDue($params){
+        $orderListArray = OrderReturnRepository::getAdminOrderList($params);
+        LogApi::debug("[overDue]用户逾期获取数据",$orderListArray);
+        if (!empty($orderListArray['data'])) {
 
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+                $orderListArray['data'][$keys]['freeze_type_name'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
+                //发货时间
+                $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
+                //逾期天数
+                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)).'天';
+
+
+                //订单商品列表相关的数据
+                $actArray = OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+
+
+                // 有冻结状态时
+                if ($values['freeze_type']>0) {
+                    $actArray['refund_btn'] = false;
+                    $actArray['modify_address_btn'] = false;
+                    $actArray['confirm_btn'] = false;
+                    $actArray['confirm_receive'] = false;
+                    $actArray['buy_off'] = false;
+                    $actArray['Insurance'] = false;
+                }
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
+                //回访标识
+                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+
+                //$orderListArray['data'][$keys]['act_state'] = self::getOrderOprate($values['order_no']);
+
+            }
+
+        }
+
+        $orderListArray =  OrderOperate::getManageGoodsActAdminState($orderListArray);
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+    }
 
 }
