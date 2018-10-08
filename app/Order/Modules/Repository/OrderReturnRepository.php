@@ -222,8 +222,7 @@ class OrderReturnRepository
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
-            $orWhereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords'],'or'];
+            $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
         }
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))

@@ -3267,14 +3267,11 @@ class OrderReturnCreater
                 //发货时间
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
                 //支付方式名称
-                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600));;
+             //   $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600));;
 
-                //设备名称
 
                 //订单商品列表相关的数据
                 $actArray = OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
-
-
 
 
                 // 有冻结状态时
