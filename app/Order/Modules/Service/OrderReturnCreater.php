@@ -3250,7 +3250,7 @@ class OrderReturnCreater
      *
      */
     public static function overDue($params){
-        $orderListArray = OrderRepository::getAdminOrderList($params);
+        $orderListArray = OrderReturnRepository::getAdminOrderList($params);
         LogApi::debug("[overDue]用户逾期获取数据",$orderListArray);
         if (!empty($orderListArray['data'])) {
 
@@ -3266,8 +3266,8 @@ class OrderReturnCreater
                 $orderListArray['data'][$keys]['freeze_type_name'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
                 //发货时间
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
-                //支付方式名称
-             //   $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600));;
+                //逾期天数
+                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)).'天';
 
 
                 //订单商品列表相关的数据

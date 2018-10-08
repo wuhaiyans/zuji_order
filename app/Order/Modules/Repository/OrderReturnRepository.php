@@ -325,7 +325,7 @@ class OrderReturnRepository
                     ->where($orWhereArray)
                     ->orderBy('g.end_time', 'ASC')
                     ->get();
-
+                LogApi::debug("【overDue】获取搜索后的数组",objectToArray($orderList));
                 $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
                 $orderArrays['orderIds'] = $orderIds;
                 $orderArrays['total'] = $count;
