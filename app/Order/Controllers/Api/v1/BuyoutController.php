@@ -529,7 +529,7 @@ class BuyoutController extends Controller
 
         $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
 
-        $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
+        $paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
             'ip'=>$ip,
