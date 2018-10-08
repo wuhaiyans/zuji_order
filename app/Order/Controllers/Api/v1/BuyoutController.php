@@ -505,6 +505,17 @@ class BuyoutController extends Controller
         //支付 扩展参数
         $ip= isset($userInfo['ip'])?$userInfo['ip']:'';
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
+
+        // 微信支付，交易类型：JSAPI，redis读取openid
+        if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+            if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+                $_key = 'wechat_openid_'.$orders['auth_token'];
+                $openid = \Illuminate\Support\Facades\Redis::get($_key);
+                if( $openid ){
+                    $extended_params['wechat_params']['openid'] = $openid;
+                }
+            }
+        }
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
         if(!$buyout){
@@ -529,7 +540,7 @@ class BuyoutController extends Controller
 
         $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
 
-        $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
+        $paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
             'ip'=>$ip,
