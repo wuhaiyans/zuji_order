@@ -177,6 +177,38 @@ class ToolController extends Controller
         return apiResponse([],ApiStatus::CODE_0);
     }
 
+    /**
+     *
+     * 用户逾期列表
+     *
+     * @params array $userinfo 用户信息参数
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     * ]
+     */
+    public function overDue(Request $request){
+        try{
+
+            $orders =$request->all();
+            $params = $orders['params'];
+
+            $orderData = OrderReturnCreater::overDue($params,$orders['userinfo']);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_34007);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+    }
 
 
 
