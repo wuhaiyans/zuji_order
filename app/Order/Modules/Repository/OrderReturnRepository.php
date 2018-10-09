@@ -217,7 +217,6 @@ class OrderReturnRepository
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $orWhereArray = array();
 
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
@@ -272,7 +271,6 @@ class OrderReturnRepository
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
-            ->where($orWhereArray)
             ->first();
 
 
@@ -296,11 +294,7 @@ class OrderReturnRepository
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
                 ->where($whereArray)
-                ->where($orWhereArray)
                 ->orderBy('order_goods.end_time', 'ASC')
-//            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
-//            ->forPage($page, $pagesize)
-//
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
 
@@ -308,8 +302,7 @@ class OrderReturnRepository
             LogApi::debug("【overDue】获取搜索后的数组",$orderArray);
             if ($orderArray) {
                 $orderIds = array_column($orderArray,"order_no");
-//           dd($orderIds);
-//            sql_profiler();
+
                 $orderList =  DB::table('order_info as o')
                     ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','g.end_time','g.goods_status')
                     ->whereIn('o.order_no', $orderIds)
