@@ -6,11 +6,11 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * WithholdAdvanceOne
+ * WithholdAdvanceSeven
  *
  * @author maxiaoyu
  */
-class WithholdAdvanceOne implements ShortMessage {
+class WithholdAdvanceSeven implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -36,12 +36,14 @@ class WithholdAdvanceOne implements ShortMessage {
     public function notify(){
 
 
+
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
             LogApi::debug("扣款成功短信-分期详情错误",[$this->business_no]);
             return false;
         }
+
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
@@ -84,12 +86,14 @@ class WithholdAdvanceOne implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
+        $day = $this->data;
 
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
+            'createTime'    => $day['day'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];

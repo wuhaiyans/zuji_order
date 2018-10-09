@@ -3077,7 +3077,6 @@ class OrderReturnCreater
         //开启事务
         DB::beginTransaction();
         try{
-
             if(empty($params['compensate_amount'])){
                 $params['compensate_amount'] = 0.00;
             }
