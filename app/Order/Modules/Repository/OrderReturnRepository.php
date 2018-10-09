@@ -246,12 +246,12 @@ class OrderReturnRepository
         }
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $whereArray[] = [ FROM_UNIXTIME('order_goods.end_time','%Y-%m-%d %H:%i:%s'),'<',date("%Y-%m-%d %H:%i:%s")];
+        $whereArray[] = [ 'order_goods.overDueTime','<',date("%Y-%m-%d %H:%i:%s")];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         //固定条件
         $where[] = ['g.end_time', '>', 0];
-        $where[] = ['g.end_time','<',date("%Y-%m-%d %H:%i:%s")];
+        $where[] = ['g.overDueTime','<',date("%Y-%m-%d %H:%i:%s")];
         $where[] = ['g.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
@@ -278,7 +278,7 @@ class OrderReturnRepository
 
         sql_profiler();
             $orderList = DB::table('order_info')
-                ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
+                ->select('order_info.order_no','order_goods.end_time','order_info.create_time',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as overDueTime")
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
@@ -292,7 +292,7 @@ class OrderReturnRepository
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
                 ->where($whereArray)
-                ->orderBy('order_goods.end_time', 'ASC')
+                ->orderBy('order_goods.overDueTime', 'ASC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
 
