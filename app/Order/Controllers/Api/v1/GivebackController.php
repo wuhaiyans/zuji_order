@@ -613,6 +613,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
 		$paramsArr = isset($params['params'])? $params['params'] :[];
+		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		$rules = [
 			'goods_no'     => 'required',//还机单编号
 			'callback_url'     => 'required',//回调地址
@@ -634,11 +635,27 @@ class GivebackController extends Controller
 			return apiResponse([], get_code(), get_msg());
 		}
 		try{
+			//支付 扩展参数
+			$ip= isset($userInfo['ip'])?$userInfo['ip']:'';
+			$extended_params= isset($paramsArr['extended_params'])?$paramsArr['extended_params']:[];
+			// 微信支付，交易类型：JSAPI，redis读取openid
+			if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+					$_key = 'wechat_openid_'.$orders['auth_token'];
+					$openid = \Illuminate\Support\Facades\Redis::get($_key);
+					if( $openid ){
+						$extended_params['wechat_params']['openid'] = $openid;
+					}
+				}
+			}
+			
 			//获取支付的url
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
 			$paymentUrl = $payObj->getCurrentUrl($paramsArr['pay_channel_id'], [
 				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
 				'front_url' => $paramsArr['callback_url'],
+				'ip'=>$ip,
+				'extended_params' => $extended_params,// 扩展参数
 			]);
 		} catch (\Exception $ex) {
 			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());

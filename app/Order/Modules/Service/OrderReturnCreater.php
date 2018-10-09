@@ -3113,6 +3113,7 @@ class OrderReturnCreater
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
+            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 if($params['compensate_amount']>0){
                     //应付赔偿金额
@@ -3124,6 +3125,9 @@ class OrderReturnCreater
             }
             //花呗分期+预授权
             if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
+                if(!$payInfo){
+                    return false;
+                }
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
