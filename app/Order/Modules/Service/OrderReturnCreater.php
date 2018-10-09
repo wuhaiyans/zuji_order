@@ -3294,7 +3294,7 @@ class OrderReturnCreater
 
         }
 
-      //  $orderListArray =  OrderOperate::getManageGoodsActAdminState($orderListArray);
+        $orderListArray =  OrderOperate::getManageGoodsActAdminState($orderListArray);
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
