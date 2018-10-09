@@ -211,7 +211,7 @@ class OrderBuyout
 				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
-
+		$payObj = null;
 		if($goodsInfo['yajin']>0 && $orderInfo['order_type']!=OrderStatus::orderMiniService){
 
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
@@ -219,6 +219,12 @@ class OrderBuyout
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+		}
+		if($orderInfo['order_type']==OrderStatus::miniRecover){
+			if(!$payObj){
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+			}
+			$clearData['payment_no'] = $payObj->getPaymentNo();
 		}
 		if($orderInfo['order_type']==OrderStatus::orderMiniService){
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];

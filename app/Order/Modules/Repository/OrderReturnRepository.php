@@ -247,14 +247,14 @@ class OrderReturnRepository
 
         $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $time=time();
+        $time = time();
         $whereArray[] = ['order_goods.end_time','<=',$time];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         //固定条件
         $where[] = ['o.create_time', '>', 0];
         $where[] = ['g.end_time', '>', 0];
-        $where[] = ['g.end_time','<=',time()];
+        $where[] = ['g.end_time','<=',$time];
         $where[] = ['g.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
@@ -322,7 +322,6 @@ class OrderReturnRepository
                     ->join('order_user_certified as c',function($join){
                         $join->on('o.order_no', '=', 'c.order_no');
                     }, null,null,'left')
-                    ->where($where)
                     ->orderBy('g.end_time', 'ASC')
                     ->get();
                 LogApi::debug("【overDue】获取搜索后的数组",objectToArray($orderList));
