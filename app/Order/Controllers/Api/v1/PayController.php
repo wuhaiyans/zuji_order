@@ -940,7 +940,7 @@ class PayController extends Controller
                 } else {
                     DB::rollBack();
                     LogApi::error(__method__.'[lebaiCleanAccount微回收回调 更新订单清算状态失败');
-                    $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
+                    $this->innerErrMsg('微回收回调更新订单清算状态失败');
                 }
             } else {
 
