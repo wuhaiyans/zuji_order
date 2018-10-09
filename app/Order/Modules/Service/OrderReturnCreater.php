@@ -3129,9 +3129,9 @@ class OrderReturnCreater
 
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    if($params['compensate_amount']>0) {
+                    if( $params['compensate_amount'] > 0 ) {
                         //赔偿金额必须小于等于押金金额
-                        if($goods_info['yajin']<$params['compensate_amount']){
+                        if( $goods_info['yajin'] < $params['compensate_amount'] ){
                             LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
                             return false;
                         }

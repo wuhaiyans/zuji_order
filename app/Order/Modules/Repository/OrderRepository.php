@@ -892,6 +892,10 @@ class OrderRepository
             $whereArray[] = ['o.pay_type', '=', $param['pay_type']];
         }
 
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['o.zuqi_type', '=', $param['zuqi_type']];
+        }
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
             if ($param['order_status'] == OrderStatus::validOrder) {
@@ -899,7 +903,7 @@ class OrderRepository
 
             } else {
 
-                $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+                $whereArray[] = ['o.order_status', '=', $param['order_status']];
             }
         }
 
@@ -944,7 +948,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->whereIn('order_info.order_status',$whereInArray)
+            ->whereIn('o.order_status',$whereInArray)
             ->orderBy('o.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
