@@ -345,12 +345,11 @@ class OrderClearingRepository
         if ($orderData->auth_unfreeze_status    ==  OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
             $orderData->auth_unfreeze_status  = OrderCleaningStatus::depositUnfreezeStatusPayd;
             $orderData->auth_unfreeze_time  = time();
-            //判断预授权转支付是否为待支付状态，如果是，变更为已支付
-            if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusUnpayed) {
-                $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
-                $orderData->auth_deduction_time = time();
-            }
-
+        }
+        //判断预授权转支付是否为待支付状态，如果是，变更为已支付
+        if ($orderData->auth_deduction_status == OrderCleaningStatus::depositDeductionStatusUnpayed) {
+            $orderData->auth_deduction_status = OrderCleaningStatus::depositDeductionStatusPayd;
+            $orderData->auth_deduction_time = time();
         }
         $orderData->status  = OrderCleaningStatus::orderCleaningComplete;
         $orderData->update_time = time();
