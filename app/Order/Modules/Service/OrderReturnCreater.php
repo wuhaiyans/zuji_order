@@ -3121,7 +3121,7 @@ class OrderReturnCreater
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
             }
             //花呗分期+预授权
-            if($order_info['pay_type'] != PayInc::LebaifenPay){
+            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
@@ -3139,6 +3139,9 @@ class OrderReturnCreater
                     }
 
                 }
+            }
+            if($order_info['pay_type'] == PayInc::MiniAlipay){
+                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
             }
 
             // 创建退换货单参数
@@ -3192,6 +3195,25 @@ class OrderReturnCreater
             // 如果待退款金额为0，则直接调退款成功的回调
 
             if(!( $result['auth_unfreeze_amount']>0)){
+                //如果是小程序的订单
+                if($order_info['order_type'] == OrderStatus::orderMiniService){
+                    //查询芝麻订单
+                    $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
+                    LogApi::info("[refundApply]查询芝麻订单",$miniOrderInfo);
+                    $data1 = [
+                        'out_order_no' => $params['order_no'],//商户端订单号
+                        'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                        'remark' => "中途退机操作",//订单操作说明
+                        'app_id' => $miniOrderInfo['app_id'],//小程序appid
+                    ];
+                    LogApi::info("[refundApply]通知芝麻取消请求参数",$data1);
+                    //通知芝麻取消请求
+                    $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
+                    if( !$canceRequest){
+                        LogApi::info("[refundApply]通知芝麻取消请求失败",$canceRequest);
+                        return false;
+                    }
+                }
                 // 不需要清算，直接调起退款成功
                 $b = self::refundUpdate([
                     'business_type' =>OrderStatus::BUSINESS_RETURN,
