@@ -899,7 +899,7 @@ class OrderRepository
 
             } else {
 
-                $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+                $whereArray[] = ['o.order_status', '=', $param['order_status']];
             }
         }
 
@@ -944,7 +944,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
-            ->whereIn('order_info.order_status',$whereInArray)
+            ->whereIn('o.order_status',$whereInArray)
             ->orderBy('o.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
