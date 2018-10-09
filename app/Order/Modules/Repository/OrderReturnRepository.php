@@ -255,11 +255,8 @@ class OrderReturnRepository
 
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RELET,'or']; //续租
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENEWAL_OF_RENT,'or'];//续租完成
-        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::REFUNDS,'or']; //退货中
-        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::EXCHANGE_GOODS,'or']; //换货中
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::BACK_IN_THE_MACHINE,'or']; //还机中
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::BUY_OFF,'or']; //买断中
-        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::REFUND,'or']; //退款中
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
