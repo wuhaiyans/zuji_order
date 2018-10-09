@@ -217,6 +217,7 @@ class OrderReturnRepository
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
+        $orWhereArray = array();
 
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
@@ -247,8 +248,10 @@ class OrderReturnRepository
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
-        $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
+        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE ,'or']; //租用中
 
+        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RELET,'or']; //续租
+        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENEWAL_OF_RENT,'or'];//续租完成
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
@@ -265,6 +268,7 @@ class OrderReturnRepository
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
+            ->where($orWhereArray)
             ->first();
 
 
@@ -288,6 +292,7 @@ class OrderReturnRepository
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
                 ->where($whereArray)
+                ->where($orWhereArray)
                 ->orderBy('order_goods.end_time', 'ASC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();

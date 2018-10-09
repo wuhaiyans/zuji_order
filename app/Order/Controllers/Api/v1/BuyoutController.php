@@ -412,7 +412,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
         }
 
-        $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
+        $buyoutPrice = $params['buyout_price']>0?$params['buyout_price']:$goodsInfo['buyout_price'];
 
         DB::beginTransaction();
         //创建买断单

@@ -330,8 +330,9 @@ class OrderBuyout
 		if(!$buyout){
 			return false;
 		}
+		//订单已完成直接返回成功
 		if($buyout['status']==OrderBuyoutStatus::OrderRelease){
-			return false;
+			return true;
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
