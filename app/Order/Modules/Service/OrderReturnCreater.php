@@ -3095,12 +3095,14 @@ class OrderReturnCreater
                 return false;
             }
             $order_info = $order->getData();
+            LogApi::debug("【advanceReturn】获取订单信息",$order_info);
             if($order_info['order_status'] != OrderStatus::OrderInService){
                 LogApi::debug("【advanceReturn】订单状态必须为租用中");
                 return false;
             }
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
+
 //            if(!$payInfo){
 //                LogApi::debug("【advanceReturn】获取支付信息失败");
 //                return false;//支付单不存在
@@ -3163,7 +3165,7 @@ class OrderReturnCreater
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
-
+            LogApi::debug("【advanceReturn】创建退货单参数",$data);
             //创建退换货单
             $create = OrderReturnRepository::createReturn($data);
             if(!$create){
@@ -3199,18 +3201,18 @@ class OrderReturnCreater
                 if($order_info['order_type'] == OrderStatus::orderMiniService){
                     //查询芝麻订单
                     $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
-                    LogApi::info("[refundApply]查询芝麻订单",$miniOrderInfo);
+                    LogApi::info("[advanceReturn]查询芝麻订单",$miniOrderInfo);
                     $data1 = [
                         'out_order_no' => $params['order_no'],//商户端订单号
                         'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                         'remark' => "中途退机操作",//订单操作说明
                         'app_id' => $miniOrderInfo['app_id'],//小程序appid
                     ];
-                    LogApi::info("[refundApply]通知芝麻取消请求参数",$data1);
+                    LogApi::info("[advanceReturn]通知芝麻取消请求参数",$data1);
                     //通知芝麻取消请求
                     $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
                     if( !$canceRequest){
-                        LogApi::info("[refundApply]通知芝麻取消请求失败",$canceRequest);
+                        LogApi::info("[advanceReturn]通知芝麻取消请求失败",$canceRequest);
                         return false;
                     }
                 }
