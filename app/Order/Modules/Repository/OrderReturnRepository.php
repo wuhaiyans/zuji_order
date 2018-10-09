@@ -246,7 +246,7 @@ class OrderReturnRepository
         }
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $whereArray[] = [ 'order_goods.overDueTime','<',date("%Y-%m-%d %H:%i:%s")];
+        $whereArray[] = [ 'order_goods.overDueTime','<',date("Y-m-d H:i:s")];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         //固定条件
@@ -278,7 +278,7 @@ class OrderReturnRepository
 
         sql_profiler();
             $orderList = DB::table('order_info')
-                ->select('order_info.order_no','order_goods.end_time','order_info.create_time',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as overDueTime")
+                ->select('order_info.order_no','order_goods.end_time','order_info.create_time',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as order_goods.overDueTime")
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
