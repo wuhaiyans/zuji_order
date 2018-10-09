@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
@@ -228,6 +229,7 @@ class OrderBuyout
 			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
 				$clearData['payment_no'] = $payObj->getPaymentNo();
 			}
+			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
 		}
 
 

@@ -246,7 +246,7 @@ class OrderReturnRepository
         }
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $whereArray[] = ['order_goods.end_time','<',time()];
+        $whereArray[] = ['order_goods.end_time','<=',time()];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         LogApi::debug("【overDue】搜索条件",$whereArray);
