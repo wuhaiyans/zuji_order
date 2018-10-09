@@ -659,6 +659,7 @@ class OrderRepository
     {
         $whereArray = array();
         $orWhereArray = array();
+        $whereInArray = array();
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -699,7 +700,14 @@ class OrderRepository
 
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
-            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+            if ($param['order_status'] == OrderStatus::validOrder) {
+                $whereInArray = [OrderStatus::OrderInService, OrderStatus::OrderDeliveryed,OrderStatus::OrderInStock, OrderStatus::OrderPayed, OrderStatus::OrderCompleted];
+
+            } else {
+
+                $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+            }
+
         }
 
         //下单时间
@@ -747,6 +755,7 @@ class OrderRepository
                 }, null,null,'left')
                 ->where($whereArray)
                 ->where($orWhereArray)
+                ->whereIn('order_info.order_status',$whereInArray)
                 ->first();
 
 
@@ -767,6 +776,7 @@ class OrderRepository
                 }, null,null,'left')
                 ->where($whereArray)
                 ->where($orWhereArray)
+                ->whereIn('order_info.order_status',$whereInArray)
                 ->orderBy('order_info.create_time', 'DESC')
 //            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
 //            ->forPage($page, $pagesize)
@@ -843,6 +853,7 @@ class OrderRepository
     {
         $whereArray = array();
         $orWhereArray = array();
+        $whereInArray = array();
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -883,7 +894,13 @@ class OrderRepository
 
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
-            $whereArray[] = ['o.order_status', '=', $param['order_status']];
+            if ($param['order_status'] == OrderStatus::validOrder) {
+                $whereInArray = [OrderStatus::OrderInService, OrderStatus::OrderDeliveryed,OrderStatus::OrderInStock, OrderStatus::OrderPayed, OrderStatus::OrderCompleted];
+
+            } else {
+
+                $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+            }
         }
 
         //下单时间
@@ -927,6 +944,7 @@ class OrderRepository
             }, null,null,'left')
             ->where($whereArray)
             ->where($orWhereArray)
+            ->whereIn('order_info.order_status',$whereInArray)
             ->orderBy('o.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();

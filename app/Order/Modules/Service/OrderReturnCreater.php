@@ -3074,6 +3074,7 @@ class OrderReturnCreater
      *
      */
     public static function advanceReturn(array $params,array $userinfo){
+        LogApi::debug("【advanceReturn】接收参数",$params);
         //开启事务
         DB::beginTransaction();
         try{
