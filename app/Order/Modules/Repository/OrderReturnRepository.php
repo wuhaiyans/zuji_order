@@ -245,16 +245,13 @@ class OrderReturnRepository
             $page = 1;
         }
 
-        $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $time = time();
-        $whereArray[] = ['order_goods.end_time','<=',$time];
+        $whereArray[] = [ FROM_UNIXTIME('order_goods.end_time','%Y-%m-%d %H:%i:%s'),'<',date("%Y-%m-%d %H:%i:%s")];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         //固定条件
-        $where[] = ['o.create_time', '>', 0];
         $where[] = ['g.end_time', '>', 0];
-        $where[] = ['g.end_time','<=',$time];
+        $where[] = ['g.end_time','<',date("%Y-%m-%d %H:%i:%s")];
         $where[] = ['g.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
@@ -279,7 +276,7 @@ class OrderReturnRepository
         LogApi::debug("【overDue】数据计数",$count);
         if (!isset($param['count'])) {
 
-//        sql_profiler();
+        sql_profiler();
             $orderList = DB::table('order_info')
                 ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
                 ->join('order_user_address',function($join){
