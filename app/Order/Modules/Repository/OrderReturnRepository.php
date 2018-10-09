@@ -234,7 +234,10 @@ class OrderReturnRepository
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
         }
-
+        //租期类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
+        }
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
@@ -252,6 +255,8 @@ class OrderReturnRepository
 
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RELET,'or']; //续租
         $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENEWAL_OF_RENT,'or'];//续租完成
+        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::BACK_IN_THE_MACHINE,'or']; //还机中
+        $orWhereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::BUY_OFF,'or']; //买断中
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
