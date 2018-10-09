@@ -776,6 +776,7 @@ class OrderRepository
                 }, null,null,'left')
                 ->where($whereArray)
                 ->where($orWhereArray)
+                ->whereIn('order_info.order_status',$whereInArray)
                 ->orderBy('order_info.create_time', 'DESC')
 //            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
 //            ->forPage($page, $pagesize)
