@@ -892,6 +892,10 @@ class OrderRepository
             $whereArray[] = ['o.pay_type', '=', $param['pay_type']];
         }
 
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
+        }
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
             if ($param['order_status'] == OrderStatus::validOrder) {
