@@ -249,13 +249,8 @@ class OrderReturnRepository
         $whereArray[] = [ 'order_goods.overDueTime','<',date("Y-m-d H:i:s")];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
-        //固定条件
-        $where[] = ['g.end_time', '>', 0];
-        $where[] = ['g.overDueTime','<',date("%Y-%m-%d %H:%i:%s")];
-        $where[] = ['g.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
-        LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
-            ->select(DB::raw('count(order_info.order_no) as order_count'))
+            ->select(DB::raw('count(order_info.order_no) as order_count',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as order_goods.overDueTime"))
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
