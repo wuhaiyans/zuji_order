@@ -910,14 +910,14 @@ class PayController extends Controller
             ];
 
             //查看清算状态是否已解除
-            if ($orderCleanInfo['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+            if (($orderCleanInfo['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) || ($orderCleanInfo['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed)){
 
                 //更新订单清算押金转支付状态
                 $orderParam = [
                     'payment_no' => $param['out_payment_no'],
                 ];
 
-                
+
                 $success = OrderClearingRepository::upLebaiOrderCleanStatus($orderParam);
 
                 if ($success) {
@@ -940,7 +940,7 @@ class PayController extends Controller
                 } else {
                     DB::rollBack();
                     LogApi::error(__method__.'[lebaiCleanAccount微回收回调 更新订单清算状态失败');
-                    $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
+                    $this->innerErrMsg('微回收回调更新订单清算状态失败');
                 }
             } else {
 

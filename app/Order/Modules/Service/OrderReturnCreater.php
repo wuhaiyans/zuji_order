@@ -3195,6 +3195,25 @@ class OrderReturnCreater
             // 如果待退款金额为0，则直接调退款成功的回调
 
             if(!( $result['auth_unfreeze_amount']>0)){
+                //如果是小程序的订单
+                if($order_info['order_type'] == OrderStatus::orderMiniService){
+                    //查询芝麻订单
+                    $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
+                    LogApi::info("[refundApply]查询芝麻订单",$miniOrderInfo);
+                    $data1 = [
+                        'out_order_no' => $params['order_no'],//商户端订单号
+                        'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                        'remark' => "中途退机操作",//订单操作说明
+                        'app_id' => $miniOrderInfo['app_id'],//小程序appid
+                    ];
+                    LogApi::info("[refundApply]通知芝麻取消请求参数",$data1);
+                    //通知芝麻取消请求
+                    $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
+                    if( !$canceRequest){
+                        LogApi::info("[refundApply]通知芝麻取消请求失败",$canceRequest);
+                        return false;
+                    }
+                }
                 // 不需要清算，直接调起退款成功
                 $b = self::refundUpdate([
                     'business_type' =>OrderStatus::BUSINESS_RETURN,
