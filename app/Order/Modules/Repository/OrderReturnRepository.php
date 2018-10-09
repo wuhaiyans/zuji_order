@@ -250,7 +250,7 @@ class OrderReturnRepository
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         $count = DB::table('order_info')
-            ->select(DB::raw('count(order_info.order_no) as order_count',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as overDueTime"))
+            ->select(DB::raw('count(order_info.order_no) as order_count','FROM_UNIXTIME(order_goods.end_time,"%Y-%m-%d %H:%i:%s") as overDueTime'))
             ->join('order_user_address',function($join){
                 $join->on('order_info.order_no', '=', 'order_user_address.order_no');
             }, null,null,'inner')
@@ -273,7 +273,7 @@ class OrderReturnRepository
 
         sql_profiler();
             $orderList = DB::table('order_info')
-                ->select('order_info.order_no','order_goods.end_time','order_info.create_time',"FROM_UNIXTIME(order_goods.end_time,'%Y-%m-%d %H:%i:%s') as order_goods.overDueTime")
+                ->select('order_info.order_no','order_goods.end_time','order_info.create_time','FROM_UNIXTIME(order_goods.end_time,"%Y-%m-%d %H:%i:%s") as overDueTime')
                 ->join('order_user_address',function($join){
                     $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                 }, null,null,'inner')
