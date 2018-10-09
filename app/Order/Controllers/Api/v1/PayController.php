@@ -910,14 +910,14 @@ class PayController extends Controller
             ];
 
             //查看清算状态是否已解除
-            if ($orderCleanInfo['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed){
+            if (($orderCleanInfo['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) || ($orderCleanInfo['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed)){
 
                 //更新订单清算押金转支付状态
                 $orderParam = [
                     'payment_no' => $param['out_payment_no'],
                 ];
 
-                
+
                 $success = OrderClearingRepository::upLebaiOrderCleanStatus($orderParam);
 
                 if ($success) {
