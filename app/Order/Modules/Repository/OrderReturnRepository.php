@@ -247,8 +247,10 @@ class OrderReturnRepository
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
-        $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
+        $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE ,'or']; //租用中
 
+        $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RELET,'or']; //续租
+        $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENEWAL_OF_RENT,'or'];//续租完成
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
