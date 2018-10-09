@@ -279,7 +279,7 @@ class OrderReturnRepository
         LogApi::debug("【overDue】数据计数",$count);
         if (!isset($param['count'])) {
 
-        sql_profiler();
+//        sql_profiler();
             $orderList = DB::table('order_info')
                 ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
                 ->join('order_user_address',function($join){
