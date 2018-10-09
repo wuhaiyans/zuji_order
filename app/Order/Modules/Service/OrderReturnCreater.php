@@ -3121,7 +3121,7 @@ class OrderReturnCreater
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
             }
             //花呗分期+预授权
-            if($order_info['pay_type'] != PayInc::LebaifenPay){
+            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
@@ -3139,6 +3139,9 @@ class OrderReturnCreater
                     }
 
                 }
+            }
+            if($order_info['pay_type'] == PayInc::MiniAlipay){
+                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
             }
 
             // 创建退换货单参数
