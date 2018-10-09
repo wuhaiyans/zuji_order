@@ -227,9 +227,8 @@ class OrderBuyout
 				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 			}
 			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
-				$clearData['payment_no'] = $payObj->getPaymentNo();
+				$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			}
-			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
 		}
 
 
