@@ -70,7 +70,13 @@ class OrderCreater
 
     public function create($data){
         $orderNo = OrderOperate::createOrderNo(1);
-        $orderType =OrderStatus::orderOnlineService;
+        if($data['pay_type'] == PayInc::LebaifenPay){
+            //如果支付方式为乐百分 订单类型为 微回收
+            $orderType =OrderStatus::miniRecover;
+        }else{
+            $orderType =OrderStatus::orderOnlineService;
+        }
+
         try{
             DB::beginTransaction();
             $order_no = OrderOperate::createOrderNo(1);
