@@ -219,13 +219,11 @@ class OrderBuyout
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-		}
-		if($orderInfo['order_type']==OrderStatus::miniRecover){
-			if(!$payObj){
-				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+			if($orderInfo['order_type']==OrderStatus::miniRecover){
+				$clearData['payment_no'] = $payObj->getPaymentNo();
 			}
-			$clearData['payment_no'] = $payObj->getPaymentNo();
 		}
+
 		if($orderInfo['order_type']==OrderStatus::orderMiniService){
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
