@@ -247,7 +247,8 @@ class OrderReturnRepository
 
         $whereArray[] = ['order_info.create_time', '>', 0];
         $whereArray[] = ['order_goods.end_time', '>', 0];
-        $whereArray[] = ['order_goods.end_time','<=',time()];
+        $time=time();
+        $whereArray[] = ['order_goods.end_time','<=',$time];
         $whereArray[] = ['order_goods.goods_status','=',OrderGoodStatus::RENTING_MACHINE];
 
         //固定条件

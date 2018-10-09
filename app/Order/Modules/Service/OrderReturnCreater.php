@@ -3101,10 +3101,10 @@ class OrderReturnCreater
             }
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
-            if(!$payInfo){
-                LogApi::debug("【advanceReturn】获取支付信息失败");
-                return false;//支付单不存在
-            }
+//            if(!$payInfo){
+//                LogApi::debug("【advanceReturn】获取支付信息失败");
+//                return false;//支付单不存在
+//            }
             //获取商品数组
             $goods_info = $goods->getData();
             $result['pay_amount'] =0.00;
