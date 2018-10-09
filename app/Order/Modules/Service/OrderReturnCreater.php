@@ -3147,6 +3147,7 @@ class OrderReturnCreater
                 }
             }
             if($order_info['pay_type'] == PayInc::MiniAlipay){
+                LogApi::debug("【advanceReturn】此订单是小程序订单");
                 $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
             }
 
@@ -3162,7 +3163,7 @@ class OrderReturnCreater
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>$result['pay_amount'] ,            //实付金额
                 'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
-                'auth_deduction_amount' => $result['compensate_amount'],  //应扣押金
+                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
