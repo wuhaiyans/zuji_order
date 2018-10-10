@@ -3211,7 +3211,7 @@ class OrderReturnCreater
                         'out_order_no' => $params['order_no'],//商户端订单号
                         'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                         'out_trans_no'=>'123456',//商户端交易号
-                        'pay_amount'=>'0.00',//支付金额
+                        'pay_amount'=>0.00,//支付金额
                         'remark' => "中途退机操作",//订单操作说明
                         'app_id' => $miniOrderInfo['app_id'],//小程序appid
                     ];
