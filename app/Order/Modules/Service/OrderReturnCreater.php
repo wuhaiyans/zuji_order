@@ -3210,14 +3210,16 @@ class OrderReturnCreater
                     $data1 = [
                         'out_order_no' => $params['order_no'],//商户端订单号
                         'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                        'out_trans_no'=>'123456',//商户端交易号
+                        'pay_amount'=>'0.00',//支付金额
                         'remark' => "中途退机操作",//订单操作说明
                         'app_id' => $miniOrderInfo['app_id'],//小程序appid
                     ];
                     LogApi::info("[advanceReturn]通知芝麻取消请求参数",$data1);
-                    //通知芝麻取消请求
-                    $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
+                    //通知芝麻订单关闭
+                    $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderClose($data1);
                     if( !$canceRequest){
-                        LogApi::info("[advanceReturn]通知芝麻取消请求失败",$canceRequest);
+                        LogApi::info("[advanceReturn]通知芝麻订单关闭失败",$canceRequest);
                         return false;
                     }
                 }
