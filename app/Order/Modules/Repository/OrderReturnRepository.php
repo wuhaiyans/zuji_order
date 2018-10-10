@@ -265,7 +265,7 @@ class OrderReturnRepository
                 $start = time()-180*3600*24;
                 $end = time()-150*3600*24;
             }
-            $whereArray[] = ['order_goods.end_time', 'between', [$start,$end]];
+            $whereArray['order_goods.end_time'] =[ 'BETWEEN', array($start ,$end)];
         }
 
         if (isset($param['size'])) {
