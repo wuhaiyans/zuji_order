@@ -91,7 +91,7 @@ class Config {
 
 				SceneConfig::WITHHOLD_ADVANCE_ONE   	=> 'SMS_113461197', //提前一天还款短信
 				SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_113461196', //提前三天 还款短信
-				SceneConfig::WITHHOLD_ADVANCE_SEVEN   	=> 'SMS_113461196', //提前七天 还款短信
+				SceneConfig::WITHHOLD_ADVANCE_SEVEN   	=> 'SMS_113461177', //提前七天 还款短信
 
 
 				//还机
