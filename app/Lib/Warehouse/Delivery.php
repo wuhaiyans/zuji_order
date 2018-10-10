@@ -347,6 +347,14 @@ class Delivery
       return true;
     }
 
+    /**
+     * 获取订单发货状态
+     * @params $order_no
+     * @return string
+     */
+    public static function getDeliveryInfo(){
+        return 1;
+    }
 
     public static function getParams()
     {
