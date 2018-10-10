@@ -223,7 +223,7 @@ class OrderReturnRepository
             $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
         }
         //根据订单号
-        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        if (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
             $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
         }
