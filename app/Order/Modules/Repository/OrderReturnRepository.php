@@ -220,21 +220,21 @@ class OrderReturnRepository
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
+            $whereArray['order_info.mobile'] = [ '=', $param['keywords']];
         }
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
+            $whereArray['order_info.order_no'] = [ '=', $param['keywords']];
         }
 
         //回访标识
         if (isset($param['visit_id'])) {
-            $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
+            $whereArray['order_info_visit.visit_id'] = [ '=', $param['visit_id']];
         }
         //租期类型
         if (isset($param['zuqi_type'])) {
-            $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
+            $whereArray['order_info.zuqi_type'] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
         }
         //逾期时间段
         if(isset($param['overDue_period'])){
@@ -279,9 +279,9 @@ class OrderReturnRepository
             $page = 1;
         }
 
-        $whereArray[] = ['order_goods.end_time', '>', 0];
-        $whereArray[] = ['order_goods.end_time','<=',time()];
-        $whereArray[] = ['order_info.order_status','=',OrderStatus::OrderInService];  //租用中
+        $whereArray['order_goods.end_time'] = [ '>', 0];
+        $whereArray['order_goods.end_time'] = ['<=',time()];
+        $whereArray['order_info.order_status'] = ['=',OrderStatus::OrderInService];  //租用中
 
         LogApi::debug("【overDue】搜索条件",$whereArray);
         $count = DB::table('order_info')
