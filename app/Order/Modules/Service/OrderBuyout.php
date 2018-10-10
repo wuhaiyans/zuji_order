@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
@@ -212,25 +213,26 @@ class OrderBuyout
 				'business_no' => $buyout['buyout_no']
 		];
 		$payObj = null;
-		if($goodsInfo['yajin']>0 && $orderInfo['order_type']!=OrderStatus::orderMiniService){
+		if($goodsInfo['yajin']>0 ){
 
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
 			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-		}
-		if($orderInfo['order_type']==OrderStatus::miniRecover){
-			if(!$payObj){
-				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+
+			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 			}
-			$clearData['payment_no'] = $payObj->getPaymentNo();
+			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
+				$clearData['out_payment_no'] = $payObj->getPaymentNo();
+			}
+			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
 		}
-		if($orderInfo['order_type']==OrderStatus::orderMiniService){
-			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-		}
+
+
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
@@ -328,8 +330,9 @@ class OrderBuyout
 		if(!$buyout){
 			return false;
 		}
+		//订单已完成直接返回成功
 		if($buyout['status']==OrderBuyoutStatus::OrderRelease){
-			return false;
+			return true;
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;

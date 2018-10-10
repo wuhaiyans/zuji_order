@@ -468,7 +468,7 @@ class CronOperate
             $limit  = 50;
             $page   = 1;
             $sleep  = 10;
-            $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceThree'];
+            $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceSeven'];
 
             do {
                 if(!isset($dayArr[$type])){
@@ -477,14 +477,20 @@ class CronOperate
                 }
 
                 $today  = date("Ymd", strtotime("+" . $type . " day"));
-                $model  = $dayArr[$type];
 
                 $term   = substr($today,0,6);
+                $year   = substr($today,0,4);
+                $mouth  = substr($today,4,2);
                 $day    = substr($today,6,2);
 
+                $model  = $dayArr[$type];
+                $createTime = $year . '年' . $mouth . '月' . $day . '日';
+
+                // 订单在服务中 长租的订单分期
                 $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
                 $whereArray[] = ['term', '=', $term];
-                $whereArray[] = ['day', '=', $day];
+                $whereArray[] = ['day', '=', intval($day)];
 
                 // 查询总数
                 $total =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -495,7 +501,6 @@ class CronOperate
 
                 $totalpage = ceil($total/$limit);
 
-
                 // 查询数据
                 $result =  \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('order_goods_instalment.id')
@@ -505,7 +510,6 @@ class CronOperate
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
-
                 if (!$result) {
                     continue;
                 }
@@ -516,7 +520,7 @@ class CronOperate
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                         $item['id'],
                         $model,
-                        ['day' => $type]
+                        ['createTime' => $createTime]
                     );
                     $notice->notify();
                 }

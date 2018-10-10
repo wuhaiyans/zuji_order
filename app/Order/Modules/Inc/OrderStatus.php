@@ -65,6 +65,8 @@ class OrderStatus{
     const visitContacted = 2;
     //已回访
     const visited = 3;
+    //有效订单
+    const validOrder=20;
 
 
     //--------------------------------------------------------------------------------------------
@@ -221,6 +223,7 @@ class OrderStatus{
             self::OrderClosedRefunded => '已关闭（已退款）',
             self::OrderCompleted => '已完成',
             self::OrderAbnormal => '异常关闭',
+            self::validOrder => '有效订单',
 
         ];
     }

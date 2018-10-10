@@ -6,7 +6,7 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * InstalmentWithhold
+ * WithholdAdvanceOne
  *
  * @author maxiaoyu
  */
@@ -82,8 +82,7 @@ class WithholdAdvanceOne implements ShortMessage {
             'goodsNo'       => $instalmentInfo['goods_no'],     //  商品编号
         ];
 
-        $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
-
+        $zhifuLianjie   = $url . createLinkstringUrlencode($urlData);
 
         // 短信参数
         $dataSms =[

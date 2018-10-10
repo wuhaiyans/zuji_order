@@ -3074,10 +3074,10 @@ class OrderReturnCreater
      *
      */
     public static function advanceReturn(array $params,array $userinfo){
+        LogApi::debug("【advanceReturn】接收参数",$params);
         //开启事务
         DB::beginTransaction();
         try{
-
             if(empty($params['compensate_amount'])){
                 $params['compensate_amount'] = 0.00;
             }
@@ -3095,12 +3095,14 @@ class OrderReturnCreater
                 return false;
             }
             $order_info = $order->getData();
+            LogApi::debug("【advanceReturn】获取订单信息",$order_info);
             if($order_info['order_status'] != OrderStatus::OrderInService){
                 LogApi::debug("【advanceReturn】订单状态必须为租用中");
                 return false;
             }
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
+
 //            if(!$payInfo){
 //                LogApi::debug("【advanceReturn】获取支付信息失败");
 //                return false;//支付单不存在
@@ -3111,6 +3113,7 @@ class OrderReturnCreater
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
+            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 if($params['compensate_amount']>0){
                     //应付赔偿金额
@@ -3121,7 +3124,10 @@ class OrderReturnCreater
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
             }
             //花呗分期+预授权
-            if($order_info['pay_type'] != PayInc::LebaifenPay){
+            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
+                if(!$payInfo){
+                    return false;
+                }
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
@@ -3129,9 +3135,9 @@ class OrderReturnCreater
 
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    if($params['compensate_amount']>0) {
+                    if( $params['compensate_amount'] > 0 ) {
                         //赔偿金额必须小于等于押金金额
-                        if($goods_info['yajin']<$params['compensate_amount']){
+                        if( $goods_info['yajin'] < $params['compensate_amount'] ){
                             LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
                             return false;
                         }
@@ -3139,6 +3145,10 @@ class OrderReturnCreater
                     }
 
                 }
+            }
+            if($order_info['pay_type'] == PayInc::MiniAlipay){
+                LogApi::debug("【advanceReturn】此订单是小程序订单");
+                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
             }
 
             // 创建退换货单参数
@@ -3153,14 +3163,14 @@ class OrderReturnCreater
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>$result['pay_amount'] ,            //实付金额
                 'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
-                'auth_deduction_amount' => $result['compensate_amount'],  //应扣押金
+                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
-
+            LogApi::debug("【advanceReturn】创建退货单参数",$data);
             //创建退换货单
             $create = OrderReturnRepository::createReturn($data);
             if(!$create){
@@ -3192,6 +3202,25 @@ class OrderReturnCreater
             // 如果待退款金额为0，则直接调退款成功的回调
 
             if(!( $result['auth_unfreeze_amount']>0)){
+                //如果是小程序的订单
+                if($order_info['order_type'] == OrderStatus::orderMiniService){
+                    //查询芝麻订单
+                    $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
+                    LogApi::info("[advanceReturn]查询芝麻订单",$miniOrderInfo);
+                    $data1 = [
+                        'out_order_no' => $params['order_no'],//商户端订单号
+                        'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                        'remark' => "中途退机操作",//订单操作说明
+                        'app_id' => $miniOrderInfo['app_id'],//小程序appid
+                    ];
+                    LogApi::info("[advanceReturn]通知芝麻取消请求参数",$data1);
+                    //通知芝麻取消请求
+                    $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
+                    if( !$canceRequest){
+                        LogApi::info("[advanceReturn]通知芝麻取消请求失败",$canceRequest);
+                        return false;
+                    }
+                }
                 // 不需要清算，直接调起退款成功
                 $b = self::refundUpdate([
                     'business_type' =>OrderStatus::BUSINESS_RETURN,
@@ -3267,7 +3296,7 @@ class OrderReturnCreater
                 //发货时间
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
                 //逾期天数
-                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)).'天';
+                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)+1).'天';
 
 
                 //订单商品列表相关的数据

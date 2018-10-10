@@ -6,11 +6,11 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * WithholdAdvanceThree
+ * WithholdAdvanceSeven
  *
  * @author maxiaoyu
  */
-class WithholdAdvanceThree implements ShortMessage {
+class WithholdAdvanceSeven implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -86,14 +86,18 @@ class WithholdAdvanceThree implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
+        $createTime = $this->data;
+
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
+            'createTime'    => $createTime['createTime'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
@@ -102,7 +106,7 @@ class WithholdAdvanceThree implements ShortMessage {
 
     // 支付宝内部消息通知
     public function alipay_notify(){
-            return true;
+        return true;
     }
 
 }

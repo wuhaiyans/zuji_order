@@ -281,7 +281,7 @@ class OrderCleaning
 
                        $lebaiParam = array(
                            'out_payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
-                           "amount" => $orderCleanData['auth_deduction_amount']*100,                    //要扣的押金金额；单位：分
+                           "amount" => intval($orderCleanData['auth_deduction_amount']*100),                    //要扣的押金金额；单位：分
                            'back_url' => config('ordersystem.ORDER_API').'/lebaiUnfreezeClean'        //异步通知的url地址
                        );
                        $succss = LebaifenApi::backRefund($lebaiParam);
@@ -326,7 +326,7 @@ class OrderCleaning
                             'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
                             'out_trade_no' => $orderCleanData['auth_deduction_no'], //业务系统授权码
                             'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
-                            'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
+                            'amount' => intval($orderCleanData['auth_deduction_amount']*100), //交易金额；单位：分
                             'back_url' => config('ordersystem.ORDER_API').'/unfreezeAndPayClean', //押金转支付回调URL
                             'user_id' => $orderCleanData['user_id'], //用户id
 
