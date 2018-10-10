@@ -217,8 +217,6 @@ class OrderReturnRepository
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $orWhereArray = array();
-
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
@@ -241,6 +239,7 @@ class OrderReturnRepository
         //逾期时间段
         if(isset($param['overDue_period'])){
             if($param['overDue_period'] == "m1"){
+                LogApi::debug("[overDue]选择逾期时间段".$param['overDue_period']);
                 $start = time()-30*3600*24;
                 $end = time();
             }
@@ -268,6 +267,7 @@ class OrderReturnRepository
             }
             $whereArray['order_goods.end_time'] = [ 'between', [$start,$end]];
         }
+
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
