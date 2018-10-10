@@ -238,6 +238,36 @@ class OrderReturnRepository
         if (isset($param['zuqi_type'])) {
             $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
         }
+        //逾期时间段
+        if(isset($param['overDue_period'])){
+            if($param['overDue_period'] == "m1"){
+                $start = time()-30*3600*24;
+                $end = time();
+            }
+            if($param['overDue_period'] == "m2"){
+                $start = time()-60*3600*24;
+                $end = time()-30*3600*24;
+            }
+            if($param['overDue_period'] == "m3"){
+                $start = time()-90*3600*24;
+                $end = time()-60*3600*24;
+
+            }
+            if($param['overDue_period'] == "m4"){
+                $start = time()-120*3600*24;
+                $end = time()-90*3600*24;
+            }
+            if($param['overDue_period'] == "m5"){
+                $start = time()-150*3600*24;
+                $end = time()-120*3600*24;
+
+            }
+            if($param['overDue_period'] == "m6"){
+                $start = time()-180*3600*24;
+                $end = time()-150*3600*24;
+            }
+            $whereArray['order_goods.end_time'] = [ 'between', [$start,$end]];
+        }
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
