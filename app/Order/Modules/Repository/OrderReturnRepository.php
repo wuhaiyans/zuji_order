@@ -268,7 +268,6 @@ class OrderReturnRepository
             }
             $whereArray[] =[ 'order_goods.end_time', '<=',$end];
             $whereArray[] =[ 'order_goods.end_time', '>=',$start];
-          //  $whereArray[] =[ 'BETWEEN', array($start ,$end)];
         }
 
         if (isset($param['size'])) {
@@ -287,6 +286,7 @@ class OrderReturnRepository
         $whereArray[] = ['order_info.order_status','=',OrderStatus::OrderInService];  //租用中
 
         LogApi::debug("【overDue】搜索条件",$whereArray);
+
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
             ->join('order_user_address',function($join){
@@ -303,10 +303,12 @@ class OrderReturnRepository
             }, null,null,'left')
             ->where($whereArray)
             ->first();
-        
+
 
         $count = objectToArray($count)['order_count'];
         LogApi::debug("【overDue】数据计数",$count);
+        if (!isset($param['count'])) {
+
 //        sql_profiler();
             $orderList = DB::table('order_info')
                 ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
