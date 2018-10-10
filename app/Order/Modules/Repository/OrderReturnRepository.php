@@ -236,6 +236,7 @@ class OrderReturnRepository
         if (isset($param['zuqi_type'])) {
             $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
         }
+
         //逾期时间段
         if(isset($param['overDue_period'])){
             if($param['overDue_period'] == "m1"){
@@ -265,7 +266,9 @@ class OrderReturnRepository
                 $start = time()-180*3600*24;
                 $end = time()-150*3600*24;
             }
-            //$whereArray[] =[ 'order_goods.end_time','BETWEEN', array($start ,$end)];
+            $whereArray[] =[ 'order_goods.end_time', '<=',$end];
+            $whereArray[] =[ 'order_goods.end_time', '>=',$start];
+          //  $whereArray[] =[ 'BETWEEN', array($start ,$end)];
         }
 
         if (isset($param['size'])) {
@@ -299,14 +302,11 @@ class OrderReturnRepository
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
             ->where($whereArray)
-            ->whereBetween('order_goods.end_time',[$start,$end])
             ->first();
-
+        
 
         $count = objectToArray($count)['order_count'];
         LogApi::debug("【overDue】数据计数",$count);
-        if (!isset($param['count'])) {
-
 //        sql_profiler();
             $orderList = DB::table('order_info')
                 ->select('order_info.order_no','order_goods.end_time','order_info.create_time')
@@ -323,7 +323,6 @@ class OrderReturnRepository
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
                 ->where($whereArray)
-                ->whereBetween('order_goods.end_time',[$start,$end])
                 ->orderBy('order_goods.end_time', 'ASC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
