@@ -86,17 +86,18 @@ class WithholdAdvanceSeven implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $day = $this->data;
+        $createTime = $this->data;
 
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
-            'createTime'    => $day['day'],
+            'createTime'    => $createTime['createTime'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 

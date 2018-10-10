@@ -71,7 +71,7 @@ class ActiveController extends Controller
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
                 }
-                
+
                 sleep($sleep);
             } while (true);
 
