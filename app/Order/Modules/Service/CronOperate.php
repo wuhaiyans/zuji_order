@@ -539,4 +539,87 @@ class CronOperate
             \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
         }
     }
+
+    /**
+     * 定时任务 提前一、三、七天发送扣款短信
+     * 每个10秒发送50条数据
+     * $return bool
+     */
+    public static function cronOverdueMessage($type){
+        try{
+            $arr =[];
+            $limit  = 50;
+            $page   = 1;
+            $sleep  = 10;
+            $dayArr = [ 1 => 'WithholdOverduOne', 3 => 'WithholdOverduThree'];
+
+            do {
+                if(!isset($dayArr[$type])){
+                    \App\Lib\Common\LogApi::debug('[cronOverdueMessage逾期短信]', ['msg'=>'参数错误']);
+                    return false;
+                }
+
+                $today  = date("Ymd", strtotime("-" . $type . " day"));
+
+                $term   = substr($today,0,6);
+                $year   = substr($today,0,4);
+                $mouth  = substr($today,4,2);
+                $day    = substr($today,6,2);
+
+                $model  = $dayArr[$type];
+                $createTime = $year . '年' . $mouth . '月' . $day . '日';
+
+                // 订单在服务中 长租的订单分期
+                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
+                $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
+                $whereArray[] = ['term', '=', $term];
+                $whereArray[] = ['day', '=', intval($day)];
+
+                // 查询总数
+                $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where($whereArray)
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->count();
+                \App\Lib\Common\LogApi::info('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信总数：' . $total . ']');
+
+                $totalpage = ceil($total/$limit);
+
+                // 查询数据
+                $result =  \App\Order\Models\OrderGoodsInstalment::query()
+                    ->select('order_goods_instalment.id')
+                    ->where($whereArray)
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                    ->forPage($page,$limit)
+                    ->get()
+                    ->toArray();
+                if (!$result) {
+                    continue;
+                }
+
+                foreach($result as $item){
+                    //发送短信
+                    $notice = new \App\Order\Modules\Service\OrderNotice(
+                        \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                        $item['id'],
+                        $model,
+                        ['createTime' => $createTime]
+                    );
+                    $notice->notify();
+                }
+
+                $page++;
+                sleep($sleep);
+            } while ($page <= $totalpage);
+
+            if(count($arr) > 0){
+                LogApi::notify("cronPrepaymentMessage提前还款短信", $arr);
+            }
+
+        }catch(\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
+        }
+    }
+
+
 }
