@@ -1699,7 +1699,7 @@ class OrderOperate
     public static function getExportActAdminState($orderIds, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
+        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no','insurance_cost'));
 
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
