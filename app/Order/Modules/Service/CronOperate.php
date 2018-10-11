@@ -468,23 +468,29 @@ class CronOperate
             $limit  = 50;
             $page   = 1;
             $sleep  = 10;
-            $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceThree'];
+            $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceSeven'];
 
             do {
                 if(!isset($dayArr[$type])){
-                    \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>'参数错误']);
+                    \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>'参数错误']);
                     return false;
                 }
 
                 $today  = date("Ymd", strtotime("+" . $type . " day"));
-                $model  = $dayArr[$type];
 
                 $term   = substr($today,0,6);
+                $year   = substr($today,0,4);
+                $mouth  = substr($today,4,2);
                 $day    = substr($today,6,2);
 
+                $model  = $dayArr[$type];
+                $createTime = $year . '年' . $mouth . '月' . $day . '日';
+
+                // 订单在服务中 长租的订单分期
                 $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+                $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
                 $whereArray[] = ['term', '=', $term];
-                $whereArray[] = ['day', '=', $day];
+                $whereArray[] = ['day', '=', intval($day)];
 
                 // 查询总数
                 $total =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -493,8 +499,9 @@ class CronOperate
                     ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->count();
 
-                $totalpage = ceil($total/$limit);
+                \App\Lib\Common\LogApi::info('[cronPrepaymentMessage:提前 ' . $type . '天还款 发送短信总数：' . $total . ']');
 
+                $totalpage = ceil($total/$limit);
 
                 // 查询数据
                 $result =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -505,7 +512,6 @@ class CronOperate
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
-
                 if (!$result) {
                     continue;
                 }
@@ -516,7 +522,7 @@ class CronOperate
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
                         $item['id'],
                         $model,
-                        ['day' => $type]
+                        ['createTime' => $createTime]
                     );
                     $notice->notify();
                 }
@@ -526,11 +532,11 @@ class CronOperate
             } while ($page <= $totalpage);
 
             if(count($arr) > 0){
-                LogApi::notify("提前还款短信", $arr);
+                LogApi::notify("cronPrepaymentMessage提前还款短信", $arr);
             }
 
         }catch(\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[提前还款短信]', ['msg'=>$exc->getMessage()]);
+            \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
         }
     }
 }

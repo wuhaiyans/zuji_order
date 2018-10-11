@@ -86,14 +86,12 @@ class WithholdAdvanceThree implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
-        $day = $this->data;
-
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
-            'createTime'    => $day['day'],
+            'createTime'    => 3,
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
