@@ -464,7 +464,6 @@ class CronOperate
      */
     public static function cronPrepaymentMessage($type){
         try{
-            $arr =[];
             $limit  = 50;
             $page   = 1;
             $sleep  = 10;
@@ -472,7 +471,7 @@ class CronOperate
 
             do {
                 if(!isset($dayArr[$type])){
-                    \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>'参数错误']);
+                    \App\Lib\Common\LogApi::debug('[cronWithholdMessage提前还款短信]', ['msg'=>'参数错误']);
                     return false;
                 }
 
@@ -499,7 +498,7 @@ class CronOperate
                     ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
                     ->count();
 
-                \App\Lib\Common\LogApi::info('[cronPrepaymentMessage:提前 ' . $type . '天还款 发送短信总数：' . $total . ']');
+                \App\Lib\Common\LogApi::info('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信总数：' . $total . ']');
 
                 $totalpage = ceil($total/$limit);
 
@@ -531,9 +530,7 @@ class CronOperate
                 sleep($sleep);
             } while ($page <= $totalpage);
 
-            if(count($arr) > 0){
-                LogApi::notify("cronPrepaymentMessage提前还款短信", $arr);
-            }
+            \App\Lib\Common\LogApi::info('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信成功]');
 
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
@@ -547,7 +544,6 @@ class CronOperate
      */
     public static function cronOverdueMessage($type){
         try{
-            $arr =[];
             $limit  = 50;
             $page   = 1;
             $sleep  = 10;
@@ -612,9 +608,7 @@ class CronOperate
                 sleep($sleep);
             } while ($page <= $totalpage);
 
-            if(count($arr) > 0){
-                LogApi::notify("cronPrepaymentMessage提前还款短信", $arr);
-            }
+            \App\Lib\Common\LogApi::info('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信成功]');
 
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);

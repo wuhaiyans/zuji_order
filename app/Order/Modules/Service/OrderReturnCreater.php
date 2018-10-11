@@ -433,11 +433,11 @@ class OrderReturnCreater
                             'remark' => $params['reason_text'],//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
-                        LogApi::info("[refundApply]通知芝麻取消请求参数",$data);
+                        LogApi::info("[createRefund]通知芝麻取消请求参数",$data);
                         //通知芝麻取消请求
                         $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
-                            LogApi::info("[refundApply]通知芝麻取消请求失败",$canceRequest);
+                            LogApi::info("[createRefund]通知芝麻取消请求失败",$canceRequest);
                             return false;
                         }
                     }
@@ -447,7 +447,7 @@ class OrderReturnCreater
                         'business_no'	=>  $data['refund_no'],
                         'status'		=> 'success',
                     ], $userinfo);
-                    LogApi::info("[refundApply]不需要清算，直接调起退款成功结果",$b);
+                    LogApi::info("[createRefund]不需要清算，直接调起退款成功结果",$b);
                     if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
                         //事务提交
                         DB::commit();
@@ -471,10 +471,10 @@ class OrderReturnCreater
                 $create_data['auth_unfreeze_amount']=$data['auth_unfreeze_amount'];//应退押金
                 $create_data['auth_deduction_amount']=$data['auth_deduction_amount'];//应扣押金
 
-                LogApi::info("[refundApply]创建退款清单参数",$create_data);
+                LogApi::info("[createRefund]创建退款清单参数",$create_data);
 
                 $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
-                LogApi::info("[refundApply]创建退款清单执行结果",$create_clear);
+                LogApi::info("[createRefund]创建退款清单执行结果",$create_clear);
                 if(!$create_clear){
                     //事务回滚
                     DB::rollBack();
@@ -715,7 +715,7 @@ class OrderReturnCreater
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
                     ];
                 }
-                LogApi::debug("创建收货单参数",$user_data);
+                LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);
                 $create_receive = Receive::create($order,$type,$receive_data,$user_data);//创建待收货单
                 if(!$create_receive){
                     //事务回滚
@@ -760,7 +760,7 @@ class OrderReturnCreater
             return true;
 
         }catch( \Exception $exc){
-            LogApi::debug("请求异常",$exc->getMessage());
+            LogApi::debug("[returnOfGoods]请求异常",$exc->getMessage());
             DB::rollBack();
             echo $exc->getMessage();
             die;
@@ -981,7 +981,7 @@ class OrderReturnCreater
      * @return bool
      */
     public function cancelApply(array $params,array $userinfo){
-        LogApi::debug("获取取消申请的参数",$params);
+        LogApi::debug("[cancelApply]获取取消申请的参数",$params);
         //开启事务
         DB::beginTransaction();
         try{
@@ -992,13 +992,13 @@ class OrderReturnCreater
                    return false;
                 }
                 $return_info[$refund_no] = $return->getData();
-                LogApi::debug("查询退货单信息",$return_info);
+                LogApi::debug("[cancelApply]查询退货单信息",$return_info);
                 if($return_info[$refund_no]['user_id']!=$params['user_id']){
                     return false;
                 }
                 //收货之后不允许取消
                 if($return_info[$refund_no]['status']>ReturnStatus::ReturnAgreed){
-                    LogApi::debug("收货之后不允许取消,获取退换单数据",$return_info[$refund_no]);
+                    LogApi::debug("[cancelApply]收货之后不允许取消,获取退换单数据",$return_info[$refund_no]);
                     return false;
                 }
                 //如果审核通过通知收发货取消收货
@@ -1773,26 +1773,26 @@ class OrderReturnCreater
                 //获取退货单信息
                 $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($v['business_no']);
                 if(!$return){
-                    LogApi::debug("退货单查询失败");
+                    LogApi::debug("[isQualified]退货单查询失败");
                     return false;
                 }
                 $return_info = $return->getData();
                 //必须是已收货状态
                 if($return_info['status']!=ReturnStatus::ReturnReceive){
-                    LogApi::debug("必须是已收货状态才可以检测");
+                    LogApi::debug("[isQualified]必须是已收货状态才可以检测");
                     return false;
                 }
                 //获取订单信息
                 $order = \App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
                 if(!$order){
-                    LogApi::debug('获取订单查询失败');
+                    LogApi::debug('[isQualified]获取订单查询失败');
                     return false;
                 }
                 $order_info = $order->getData();
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
                 if(!$goods){
-                    LogApi::debug('商品信息查询失败');
+                    LogApi::debug('[isQualified]商品信息查询失败');
                     return false;
                 }
                 $goods_info = $goods->getData();
@@ -1808,7 +1808,7 @@ class OrderReturnCreater
                     $updateReturn = $return->returnCheckOut($params);
                     if(!$updateReturn){
                         DB::rollBack();
-                        LogApi::debug('退换货单检测结果更新失败');
+                        LogApi::debug('[isQualified]退换货单检测结果更新失败');
                         return false;
                     }
 					
@@ -2158,7 +2158,7 @@ class OrderReturnCreater
             $data['logistics_id']=$params['logistics_id'];  //物流id
             $data['logistics_no']=$params['logistics_no'];   //物流编号
             $data['receive_no']= $receive_no;  //收货单编号
-            LogApi::debug("通知收发货系统的参数信息",$data);
+            LogApi::debug("[uploadWuliu]通知收发货系统的参数信息",$data);
             //上传物流单号到收货系统
             $create_receive = Receive::updateLogistics($data);
             if(!$create_receive){
@@ -2249,7 +2249,7 @@ class OrderReturnCreater
             $confirm_data['receive_type'] = $userinfo['type'];     //渠道类型  1  管理员，2 用户，3 系统自动化
             $confirm_data['user_id'] = $userinfo['uid'];           //操作者id
             $confirm_data['user_name'] = $userinfo['username'];    //用户名
-            LogApi::debug("换货通知收发货确认收货的参数",$confirm_data);
+            LogApi::debug("[updateorder]换货通知收发货确认收货的参数",$confirm_data);
             $returnConfirm = Delivery::orderReceive($confirm_data);   //通知收货，确认收货
             if(!$returnConfirm){
                 DB::rollBack();
@@ -2299,22 +2299,22 @@ class OrderReturnCreater
      * @return boolean
      */
     public static function createchange($detail,$goods_info,$userinfo){
-        LogApi::debug("发货接受参数物流信息参数",$detail);
-        LogApi::debug("发货接收商品信息参数",$goods_info);
-        LogApi::debug("发货接收用户信息参数",$userinfo);
+        LogApi::debug("[createchange]发货接受参数物流信息参数",$detail);
+        LogApi::debug("[createchange]发货接收商品信息参数",$goods_info);
+        LogApi::debug("[createchange]发货接收用户信息参数",$userinfo);
         //开启事物
         try{
             foreach ($goods_info as $k=>$v) {
                 //获取设备信息
                 $delivery = \App\Order\Modules\Repository\Order\DeliveryDetail::getGoodsDeliveryInfo($detail['order_no'],$goods_info[$k]['goods_no']);
                 if(!$delivery){
-                    LogApi::debug("获取设备信息失败");
+                    LogApi::debug("[createchange]获取设备信息失败");
                     return false;
                 }
                 //更新原设备为无效
                 $updateDelivery = $delivery->barterDelivery();
                 if(!$updateDelivery){
-                    LogApi::debug("更新原设备为无效失败");
+                    LogApi::debug("[createchange]更新原设备为无效失败");
                     return false;
                 }
                 //换货信息
@@ -2324,11 +2324,11 @@ class OrderReturnCreater
                 }
                 $updateReturn = $return->barterDelivery($detail);//更新换货物流信息
                 if(!$updateReturn){
-                    LogApi::debug("更新换货物流信息失败");
+                    LogApi::debug("[createchange]更新换货物流信息失败");
                    return false;
                 }
                 $return_info = $return->getData();
-                LogApi::debug("换货信息",$return_info);
+                LogApi::debug("[createchange]换货信息",$return_info);
                 //插入操作日志
                 $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
                     'order_no'     =>$detail['order_no'],
@@ -2382,7 +2382,7 @@ class OrderReturnCreater
         ];
         $validator = app('validator')->make($params, $rules);
         if ($validator->fails()) {
-            LogApi::debug("参数错误",$params);
+            LogApi::debug("[refundUpdate]参数错误",$params);
             return false;
         }
         //必须是退货业务或者退款业务
@@ -2395,14 +2395,14 @@ class OrderReturnCreater
             //获取退货、退款单信息
             $return = \App\Order\Modules\Repository\GoodsReturn\GoodsReturn::getReturnByRefundNo($params['business_no']);
             if(!$return){
-                LogApi::debug("未找到此退货、退款记录");
+                LogApi::debug("[refundUpdate]未找到此退货、退款记录");
                 return false;
             }
             $return_info = $return->getData();
             //获取订单信息
             $order=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
             if(!$order){
-                LogApi::debug("未找到订单记录");
+                LogApi::debug("[refundUpdate]未找到订单记录");
                 return false;
             }
             $order_info = $order->getData();
@@ -2423,19 +2423,19 @@ class OrderReturnCreater
                 //修改退货单状态为已退货
                 $updateReturn = $return->returnFinish($params);
                 if(!$updateReturn){
-                    LogApi::debug("修改退款、退货状态失败");
+                    LogApi::debug("[refundUpdate]修改退款、退货状态失败");
                     return false;
                 }
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($return_info['goods_no']);
                 if(!$goods){
-                    LogApi::debug("获取商品信息失败");
+                    LogApi::debug("[refundUpdate]获取商品信息失败");
                     return false;
                 }
                 //修改商品状态
                $updateGoods = $goods->returnFinish();
                 if(!$updateGoods){
-                    LogApi::debug("修改商品状态失败");
+                    LogApi::debug("[refundUpdate]修改商品状态失败");
                     return false;
                 }
                 $returnData['goods_no']=$return_info['goods_no'];
@@ -2448,19 +2448,19 @@ class OrderReturnCreater
                 //获取商品信息
                 $goods = \App\Order\Modules\Repository\Order\Goods::getOrderNo($return_info['order_no']);
                 if(!$goods){
-                    LogApi::debug("获取商品信息失败");
+                    LogApi::debug("[refundUpdate]获取商品信息失败");
                     return false;
                 }
                 //修改退货单状态为已退款
                 $updateReturn = $return->refundFinish($params);
                 if(!$updateReturn){
-                    LogApi::debug("修改退款单状态失败");
+                    LogApi::debug("[refundUpdate]修改退款单状态失败");
                     return false;
                 }
                 //修改商品状态为已退款
                 $setGoodsRefund = OrderGoodsRepository::setGoodsRefund($return_info['order_no']);
                 if(!$setGoodsRefund){
-                    LogApi::debug("修改商品状态为已退款失败");
+                    LogApi::debug("[refundUpdate]修改商品状态为已退款失败");
                     return false;
                 }
                 $returnData['order_no']=$return_info['order_no'];
@@ -2474,23 +2474,23 @@ class OrderReturnCreater
             //查询商品的信息
             $orderGoods = OrderRepository::getGoodsListByGoodsId($returnData);
             if (!$orderGoods) {
-                LogApi::debug("未获取到商品信息");
+                LogApi::debug("[refundUpdate]未获取到商品信息");
                 return false;
             }
-            LogApi::debug("查询订单商品的信息",$orderGoods);
+            LogApi::debug("[refundUpdate]查询订单商品的信息",$orderGoods);
             //操作订单是未冻结状态
             $setFreeze = $order->returnClose();
             if (!$setFreeze) {
-                LogApi::debug("操作订单是未冻结状态失败");
+                LogApi::debug("[refundUpdate]操作订单是未冻结状态失败");
                 return false;
             }
             //操作关闭订单
             $closeOrder = OrderOperate::isOrderComplete($return_info['order_no']);
             if (!$closeOrder) {
-                LogApi::debug("操作关闭订单失败");
+                LogApi::debug("[refundUpdate]操作关闭订单失败");
                 return false;
             }
-            LogApi::debug("获取订单对应的商品信息,释放库存",$orderGoods);
+            LogApi::debug("[refundUpdate]获取订单对应的商品信息,释放库存",$orderGoods);
             //释放库存
             if ($orderGoods){
                 foreach ($orderGoods as $orderGoodsValues){
@@ -2500,11 +2500,11 @@ class OrderReturnCreater
                         'spu_id'=>$orderGoodsValues['prod_id'],
                         'num'=>$orderGoodsValues['quantity']
                     ];
-                    LogApi::debug("释放库存的参数",$goods_arr);
+                    LogApi::debug("[refundUpdate]释放库存的参数",$goods_arr);
                     $success =Goods::addStock($goods_arr); //释放库存
-                    LogApi::debug("释放库返回结果",$success);
+                    LogApi::debug("[refundUpdate]释放库返回结果",$success);
                     if (!$success) {
-                        LogApi::debug("释放库存失败");
+                        LogApi::debug("[refundUpdate]释放库存失败");
                         return false;
                     }
                 }
@@ -2522,11 +2522,11 @@ class OrderReturnCreater
                             'params'=>$where,
                             'info'  =>$orderGoodsInstalment
                         ]);*/
-                        LogApi::debug("退款成功回调，关闭分期的条件参数",$returnData);
+                        LogApi::debug("[refundUpdate]退款成功回调，关闭分期的条件参数",$returnData);
                         $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭用户的商品分期
-                        LogApi::debug("关闭分期返回信息",$success);
+                        LogApi::debug("[refundUpdate]关闭分期返回信息",$success);
                         if (!$success) {
-                            LogApi::debug("关闭商品分期失败");
+                            LogApi::debug("[refundUpdate]关闭商品分期失败");
                             return false;
                         }
 
@@ -2555,9 +2555,9 @@ class OrderReturnCreater
                     /*$orderParams['order_no']=$return_info['order_no'];
                     $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);*/
                     $success = \App\Order\Modules\Repository\Order\Instalment::close($returnData);//关闭订单分期
-                    LogApi::debug("关闭分期返回信息", $success);
+                    LogApi::debug("[refundUpdate]关闭分期返回信息", $success);
                     if (!$success) {
-                        LogApi::debug("关闭订单分期失败");
+                        LogApi::debug("[refundUpdate]关闭订单分期失败");
                         return false;
                     }
 
@@ -2567,13 +2567,13 @@ class OrderReturnCreater
 
             //获取订单用户认证信息
             $userInfo = OrderRepository::getUserCertified($order_info['order_no']);
-            LogApi::debug("获取订单用户认证信息",$userInfo);
+            LogApi::debug("[refundUpdate]获取订单用户认证信息",$userInfo);
             if(!$userInfo){
                 return false;
             }
 
 
-            LogApi::debug("退款成功获取渠道id",$order_info['channel_id']);
+            LogApi::debug("[refundUpdate]退款成功获取渠道id",$order_info['channel_id']);
             //微回收退款成功发送短信
             if($order_info['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
                 LogApi::debug("发送微回收短信，渠道模板参数",Config::CHANNELID_MICRO_RECOVERY);
@@ -2599,7 +2599,7 @@ class OrderReturnCreater
 
 
                 if( $return_info['auth_unfreeze_amount'] > 0 ){
-                    LogApi::debug("押金解冻短信发送",[
+                    LogApi::debug("[refundUpdate]押金解冻短信发送",[
                         'mobile'=>$order_info['mobile'],
                         'realName'=>$userInfo['realname'],
                         'orderNo'=>$order_info['order_no'],
@@ -2625,10 +2625,10 @@ class OrderReturnCreater
            /* $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI, $return_info['refund_no'] ,SceneConfig::REFUND_SUCCESS);
             $b=$orderNoticeObj->notify();
             Log::debug($b?"Order :".$return_info['order_no']." IS OK":"IS error");*/
-            LogApi::debug("退款执行成功");
+            LogApi::debug("[refundUpdate]退款执行成功");
             return true;
         }catch (\Exception $exc) {
-            LogApi::debug("程序异常",$exc);
+            LogApi::debug("[refundUpdate]程序异常",$exc);
             return false;
 
         }
