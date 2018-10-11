@@ -91,6 +91,7 @@ class WithholdAdvanceThree implements ShortMessage {
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
+            'createTime'    => 3,
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
