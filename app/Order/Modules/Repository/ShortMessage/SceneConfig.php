@@ -170,6 +170,11 @@ class SceneConfig {
     const CRONREPAYMENT = 'CronRepayment';
 
     /**
+     * 场景：<b>【提前一天 还款短信】</b>
+     */
+    const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
+
+    /**
      * 场景：<b>【提前三天 还款短信】</b>
      */
     const WITHHOLD_ADVANCE_THREE = 'WithholdAdvanceThree';
@@ -180,9 +185,16 @@ class SceneConfig {
     const WITHHOLD_ADVANCE_SEVEN = 'WithholdAdvanceSeven';
 
     /**
-     * 场景：<b>【押金退还】</b>
+     * 场景：<b>【扣款失败生成逾期 一天】</b>
      */
-    const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
+    const WITHHOLD_OVERDUEONE = 'WithholdOverduOne';
+
+    /**
+     * 场景：<b>【扣款失败生成逾期 三天】</b>
+     */
+    const WITHHOLD_OVERDUETHREE = 'WithholdOverduThree';
+
+
 
     /**
      * 场景：<b>【订金申请退款】</b>

@@ -6,11 +6,11 @@ use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 
 /**
- * WithholdAdvanceThree
+ * WithholdOverduOne
  *
  * @author maxiaoyu
  */
-class WithholdAdvanceThree implements ShortMessage {
+class WithholdOverduOne implements ShortMessage {
 
     private $business_type;
     private $business_no;
@@ -35,26 +35,24 @@ class WithholdAdvanceThree implements ShortMessage {
 
     public function notify(){
 
-
-
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
         if( !is_array($instalmentInfo)){
-            LogApi::debug("扣款成功短信-分期详情错误",[$this->business_no]);
+            LogApi::debug("cronOverdueMessage-分期详情错误",[$this->business_no]);
             return false;
         }
 
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
-            LogApi::debug("扣款成功短信-订单详情错误",$instalmentInfo);
+            LogApi::debug("cronOverdueMessage-订单详情错误",$instalmentInfo);
             return false;
         }
 
         // 用户信息
         $userInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);
         if( !is_array($userInfo )){
-            LogApi::debug("扣款成功短信-用户详情错误",$instalmentInfo);
+            LogApi::debug("cronOverdueMessage-用户详情错误",$instalmentInfo);
             return false;
         }
 
@@ -62,7 +60,7 @@ class WithholdAdvanceThree implements ShortMessage {
         $orderGoods = New \App\Order\Modules\Service\OrderGoods();
         $goodsInfo  = $orderGoods->getGoodsInfo($instalmentInfo['goods_no']);
         if(!$goodsInfo){
-            LogApi::debug("扣款成功短信-商品详情错误",$instalmentInfo);
+            LogApi::debug("cronOverdueMessage-商品详情错误",$instalmentInfo);
             return false;
         }
 
@@ -86,15 +84,17 @@ class WithholdAdvanceThree implements ShortMessage {
 
         $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
 
+        $createTime = $this->data;
+
         // 短信参数
         $dataSms =[
             'realName'      => $userInfo['realname'],
             'goodsName'     => $goodsInfo['goods_name'],
             'zuJin'         => $instalmentInfo['amount'],
-            'createTime'    => 3,
+            'createTime'    => $createTime['createTime'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-            'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
@@ -103,7 +103,7 @@ class WithholdAdvanceThree implements ShortMessage {
 
     // 支付宝内部消息通知
     public function alipay_notify(){
-            return true;
+        return true;
     }
 
 }

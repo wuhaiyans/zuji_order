@@ -298,7 +298,7 @@ class OrderReturnCreater
             //退货单状态默认值为审核同意
             $returnStatus = ReturnStatus::ReturnAgreed;
             //代扣+预授权   小程序
-            if($order_info['pay_type'] == PayInc::WithhodingPay || $order_info['pay_type'] == PayInc::MiniAlipay){
+            if($order_info['pay_type'] == PayInc::MiniAlipay){
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
@@ -306,6 +306,7 @@ class OrderReturnCreater
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
+                || $order_info['pay_type'] == PayInc::WithhodingPay
             ){
                 //获取支付信息
                 $payInfo = OrderPayRepository::find($order_info['order_no']);
