@@ -699,7 +699,7 @@ class PayController extends Controller
 
                                 DB::rollBack();
                                 LogApi::error(__method__.'[cleanAccount回调解除预授权]回调业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$success]);
-                                $this->innerErrMsg('押金解押业务回调更新整体清算的状态失败');
+                                $this->innerErrMsg('回调业务接口失败');
                             }
 
                             LogApi::debug(__method__.'[cleanAccount回调解除预授权]回调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam, $success]);
