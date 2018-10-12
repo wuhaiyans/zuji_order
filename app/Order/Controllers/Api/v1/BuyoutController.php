@@ -487,12 +487,24 @@ class BuyoutController extends Controller
         //接收请求参数
         $requests = $request->all();
         $params = $requests['params'];
-        $userInfo = $requests['params'];
-        $array = [
-            'buyout_no'=>,
-            'user_id'=>,
+        $userInfo = $requests['userinfo'];
+        $rule= [
+            'buyout_no'=>'required',
         ];
-        OrderBuyout::cancel($array);
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+        }
+        $array = [
+            'buyout_no'=>$params['buyout_no'],
+            'user_id'=>$userInfo['uid'],
+        ];
+        //取消买断单
+        $ret = OrderBuyout::cancel($array);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_50001,"取消买断失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0,"取消成功");
     }
     /*
      * 支付宝H5买断支付请求
