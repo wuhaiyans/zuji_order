@@ -387,6 +387,7 @@ class OrderReturnCreater
 
                 //获取收发货状态
                 $deliveryStatus = Delivery::getDeliveryInfo($params['order_no']);
+                print_r($deliveryStatus);
                 if(!$deliveryStatus){
                     LogApi::debug('[createRefund]获取收发货状态失败');
                     return false;

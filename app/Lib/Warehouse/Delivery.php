@@ -352,8 +352,19 @@ class Delivery
      * @params $order_no
      * @return string
      */
-    public static function getDeliveryInfo(){
-        return 1;
+    public static function getDeliveryInfo($order_no){
+        $base_api = env('WAREHOUSE_API');
+        $params['order_no'] =$order_no;
+        LogApi::info("getDeliveryInfo url:".$base_api,$params);
+        $response = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.getStatus',//模拟
+            'params' => $params
+        ]);
+        LogApi::info("getDeliveryInfo 请求返回",$response);
+
+        return $response;
     }
 
     public static function getParams()
