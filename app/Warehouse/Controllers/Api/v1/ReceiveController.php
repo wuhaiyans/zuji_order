@@ -308,6 +308,8 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
+            LogApi::info('checkItemsFinish_info_Receive',$items);
+
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
             $this->receive->checkItem($params);
             DB::commit();

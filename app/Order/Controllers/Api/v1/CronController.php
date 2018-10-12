@@ -95,4 +95,15 @@ class CronController extends Controller
         echo "complete";die;
     }
 
+    /**
+     * 定时任务 用户扣款逾期 一天、三天
+     */
+    public function cronOverdueMessage(Request $request){
+        $day = $request->get('day', 1);
+        // 超时时间
+        ini_set('max_execution_time', '0');
+        Service\CronOperate::cronOverdueMessage($day);
+        echo "complete";die;
+    }
+
 }
