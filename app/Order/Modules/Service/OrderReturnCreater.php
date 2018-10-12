@@ -387,10 +387,11 @@ class OrderReturnCreater
                 }
                 LogApi::debug('[createRefund]获取收发货状态'.$response['data']['status']);
                 //待配货
-                if( !$response['data']['status']){
+                if( $response['data']['status'] == false){
                    $returnStatus = ReturnStatus::ReturnAgreed; //退款单状态为  审核同意
 
-                }else{
+                }
+                if( $response['data']['status'] == true){
                     //已配货
                     $returnStatus = ReturnStatus::ReturnCreated;  //退款单状态为 待审核
                 }
