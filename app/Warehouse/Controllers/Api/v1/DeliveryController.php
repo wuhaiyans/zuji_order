@@ -589,11 +589,7 @@ class DeliveryController extends Controller
 
         $status = DeliveryRepository::getStatus($params['order_no']);
         if($status){
-            if($status>Delivery::STATUS_WAIT_SEND){
-                return \apiResponse(['status'=>true]);
-            }else{
-                return \apiResponse(['status'=>false]);
-            }
+            return \apiResponse(['status'=>$status]);
         } else{
             return \apiResponse([], ApiStatus::CODE_10104, 'order_no未查到');
         }
