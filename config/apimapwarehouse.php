@@ -23,6 +23,7 @@ return [
     'warehouse.delivery.deliveryCreate' => 'DeliveryController@deliveryCreate', //发货单 -- 创建
     'warehouse.delivery.matchGoods' => 'DeliveryController@matchGoods', //发货清单 -- 配货
     'warehouse.delivery.cancelMatchGoods' => 'DeliveryController@cancelMatchGoods', //取消单品配货
+    'warehouse.delivery.getStatus' => 'DeliveryController@getStatus', //根据订单获取发货单状态是否属于已配货
 
     'warehouse.delivery.cancel' => 'DeliveryController@cancel', //取消发货
     'warehouse.delivery.auditFailed' => 'DeliveryController@auditFailed', //取消发货后,退货退款审核未通过,继续发货

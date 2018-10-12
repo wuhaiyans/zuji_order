@@ -469,39 +469,39 @@ class CronOperate
             $sleep  = 10;
             $dayArr = [ 1 => 'WithholdAdvanceOne', 3 => 'WithholdAdvanceThree', 7 => 'WithholdAdvanceSeven'];
 
+            if(!isset($dayArr[$type])){
+                \App\Lib\Common\LogApi::debug('[cronWithholdMessage提前还款短信]', ['msg'=>'参数错误']);
+                return false;
+            }
+
+            $today  = date("Ymd", strtotime("+" . $type . " day"));
+
+            $term   = substr($today,0,6);
+            $year   = substr($today,0,4);
+            $mouth  = substr($today,4,2);
+            $day    = substr($today,6,2);
+
+            $model  = $dayArr[$type];
+            $createTime = $year . '年' . $mouth . '月' . $day . '日';
+
+            // 订单在服务中 长租的订单分期
+            $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+            $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
+            $whereArray[] = ['term', '=', $term];
+            $whereArray[] = ['day', '=', intval($day)];
+
+            // 查询总数
+            $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                ->where($whereArray)
+                ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
+                ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                ->count();
+
+            \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信总数：' . $total . ']');
+
+            $totalpage = ceil($total/$limit);
+
             do {
-                if(!isset($dayArr[$type])){
-                    \App\Lib\Common\LogApi::debug('[cronWithholdMessage提前还款短信]', ['msg'=>'参数错误']);
-                    return false;
-                }
-
-                $today  = date("Ymd", strtotime("+" . $type . " day"));
-
-                $term   = substr($today,0,6);
-                $year   = substr($today,0,4);
-                $mouth  = substr($today,4,2);
-                $day    = substr($today,6,2);
-
-                $model  = $dayArr[$type];
-                $createTime = $year . '年' . $mouth . '月' . $day . '日';
-
-                // 订单在服务中 长租的订单分期
-                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
-                $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
-                $whereArray[] = ['term', '=', $term];
-                $whereArray[] = ['day', '=', intval($day)];
-
-                // 查询总数
-                $total =  \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where($whereArray)
-                    ->whereIn('status',[Inc\OrderInstalmentStatus::UNPAID,Inc\OrderInstalmentStatus::FAIL])
-                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-                    ->count();
-
-                \App\Lib\Common\LogApi::info('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信总数：' . $total . ']');
-
-                $totalpage = ceil($total/$limit);
-
                 // 查询数据
                 $result =  \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('order_goods_instalment.id')
@@ -512,7 +512,7 @@ class CronOperate
                     ->get()
                     ->toArray();
                 if (!$result) {
-                    continue;
+                    break;
                 }
 
                 foreach($result as $item){
@@ -530,7 +530,7 @@ class CronOperate
                 sleep($sleep);
             } while ($page <= $totalpage);
 
-            \App\Lib\Common\LogApi::info('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信成功]');
+            \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前 ' . $type . '天还款 发送短信成功]');
 
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
@@ -548,39 +548,38 @@ class CronOperate
             $page   = 1;
             $sleep  = 10;
             $dayArr = [ 1 => 'WithholdOverduOne', 3 => 'WithholdOverduThree'];
+            if(!isset($dayArr[$type])){
+                \App\Lib\Common\LogApi::debug('[cronOverdueMessage逾期短信]', ['msg'=>'参数错误']);
+                return false;
+            }
+
+            $today  = date("Ymd", strtotime("-" . $type . " day"));
+
+            $term   = substr($today,0,6);
+            $year   = substr($today,0,4);
+            $mouth  = substr($today,4,2);
+            $day    = substr($today,6,2);
+
+            $model  = $dayArr[$type];
+            $createTime = $year . '年' . $mouth . '月' . $day . '日';
+
+            // 订单在服务中 长租的订单分期
+            $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
+            $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
+            $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
+            $whereArray[] = ['term', '=', $term];
+            $whereArray[] = ['day', '=', intval($day)];
+
+            // 查询总数
+            $total =  \App\Order\Models\OrderGoodsInstalment::query()
+                ->where($whereArray)
+                ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+                ->count();
+            \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信总数：' . $total . ']');
+
+            $totalpage = ceil($total/$limit);
 
             do {
-                if(!isset($dayArr[$type])){
-                    \App\Lib\Common\LogApi::debug('[cronOverdueMessage逾期短信]', ['msg'=>'参数错误']);
-                    return false;
-                }
-
-                $today  = date("Ymd", strtotime("-" . $type . " day"));
-
-                $term   = substr($today,0,6);
-                $year   = substr($today,0,4);
-                $mouth  = substr($today,4,2);
-                $day    = substr($today,6,2);
-
-                $model  = $dayArr[$type];
-                $createTime = $year . '年' . $mouth . '月' . $day . '日';
-
-                // 订单在服务中 长租的订单分期
-                $whereArray[] = ['order_info.order_status', '=', Inc\OrderStatus::OrderInService];
-                $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
-                $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
-                $whereArray[] = ['term', '=', $term];
-                $whereArray[] = ['day', '=', intval($day)];
-
-                // 查询总数
-                $total =  \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where($whereArray)
-                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-                    ->count();
-                \App\Lib\Common\LogApi::info('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信总数：' . $total . ']');
-
-                $totalpage = ceil($total/$limit);
-
                 // 查询数据
                 $result =  \App\Order\Models\OrderGoodsInstalment::query()
                     ->select('order_goods_instalment.id')
@@ -590,7 +589,7 @@ class CronOperate
                     ->get()
                     ->toArray();
                 if (!$result) {
-                    continue;
+                    break;
                 }
 
                 foreach($result as $item){
@@ -608,7 +607,7 @@ class CronOperate
                 sleep($sleep);
             } while ($page <= $totalpage);
 
-            \App\Lib\Common\LogApi::info('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信成功]');
+            \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信成功]');
 
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);

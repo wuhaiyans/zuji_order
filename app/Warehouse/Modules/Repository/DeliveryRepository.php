@@ -617,6 +617,21 @@ class DeliveryRepository
         return $model->order_no;
     }
 
+    /**
+     * 根据order_no查询status
+     *
+     * @param $order_no
+     */
+    public static function getStatus($order_no)
+    {
+        $model = Delivery::where(['order_no'=>$order_no])->first();
+
+        if (!$model) {
+            return false;
+        }
+
+        return $model->status;
+    }
 
 
 }
