@@ -217,15 +217,13 @@ class OrderReturnRepository
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $orWhereArray = array();
-
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
             $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
         }
         //根据订单号
-        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        if (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
             $whereArray[] = ['order_info.order_no', '=', $param['keywords']];
         }
@@ -238,6 +236,40 @@ class OrderReturnRepository
         if (isset($param['zuqi_type'])) {
             $whereArray[] = ['order_info.zuqi_type', '=', $param['zuqi_type']];
         }
+
+        //逾期时间段
+        if(isset($param['overDue_period'])){
+            if($param['overDue_period'] == "m1"){
+                LogApi::debug("[overDue]选择逾期时间段".$param['overDue_period']);
+                $start = time()-30*3600*24;
+                $end = time();
+            }
+            if($param['overDue_period'] == "m2"){
+                $start = time()-60*3600*24;
+                $end = time()-30*3600*24;
+            }
+            if($param['overDue_period'] == "m3"){
+                $start = time()-90*3600*24;
+                $end = time()-60*3600*24;
+
+            }
+            if($param['overDue_period'] == "m4"){
+                $start = time()-120*3600*24;
+                $end = time()-90*3600*24;
+            }
+            if($param['overDue_period'] == "m5"){
+                $start = time()-150*3600*24;
+                $end = time()-120*3600*24;
+
+            }
+            if($param['overDue_period'] == "m6"){
+                $start = time()-180*3600*24;
+                $end = time()-150*3600*24;
+            }
+            $whereArray[] =[ 'order_goods.end_time', '<=',$end];
+            $whereArray[] =[ 'order_goods.end_time', '>=',$start];
+        }
+
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
@@ -254,6 +286,7 @@ class OrderReturnRepository
         $whereArray[] = ['order_info.order_status','=',OrderStatus::OrderInService];  //租用中
 
         LogApi::debug("【overDue】搜索条件",$whereArray);
+
         $count = DB::table('order_info')
             ->select(DB::raw('count(order_info.order_no) as order_count'))
             ->join('order_user_address',function($join){

@@ -628,12 +628,12 @@ class OrderOperate
 	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
 	 		        'txn_amount'	=> normalizeNum($res['txn_amount']/100),	// 总金额；单位：分
 	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
-	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100+$orderInfo['order_insurance'] -$orderInfo['order_yajin']),	// 总租金；单位：分
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
 	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
 	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
-                    'remain_amount' => normalizeNum($res['remain_amount']/100 -$orderInfo['order_yajin'] ),	// 剩余还款总租金额；单位：分
+                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余还款总租金额；单位：分
                     'first_other_amount'=>normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分 碎屏险
                 ];
                 return $instalmentInfo;
@@ -1699,7 +1699,7 @@ class OrderOperate
     public static function getExportActAdminState($orderIds, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
+        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no','insurance_cost'));
 
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');

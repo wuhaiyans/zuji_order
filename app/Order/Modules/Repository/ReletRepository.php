@@ -9,6 +9,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderRelet;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Inc\ReletStatus;
 use Illuminate\Support\Facades\DB;
 
@@ -61,6 +62,14 @@ class ReletRepository
         if (isset($params['status']) && !empty($params['status'])) {
             $whereArray[] = ['order_relet.status', '=', $params['status']];
         }
+        //订单号 or 用户名
+        if (isset($params['kw_type']) && !empty($params['kw_type'])) {
+            if($params['kw_type']=='order_no'){
+                $whereArray[] = ['order_relet.order_no', '=', $params['keywords']];
+            }elseif ($params['kw_type']=='mobile'){
+                $whereArray[] = ['order_relet.user_name', '=', $params['keywords']];
+            }
+        }
         // 页数
         if (isset($params['page']) && $params['page']>0) {
             $page = $params['page'];
@@ -86,6 +95,12 @@ class ReletRepository
 
         //dd(DB::getQueryLog());
         if (!$result) return false;
+        $result = $result->toArray();
+        foreach ($result as $key=>$item){
+            $result[$key]['status'] = OrderRelet::statusName($item['status']);
+            $result[$key]['pay_type'] = PayInc::getPayName($item['pay_type']);
+
+        }
         $count = OrderRelet::query()
             ->where($whereArray)
             ->count();
@@ -93,7 +108,7 @@ class ReletRepository
             'page'=>$page,
             'pagesize'=>$pagesize,
             'total'=>$count,
-            'data'=>$result->toArray()
+            'data'=>$result
         ];
 
         return $data;
