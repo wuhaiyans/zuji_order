@@ -377,22 +377,16 @@ class OrderReturnCreater
 
             //如果订单是备货中状态，获取发货状态，如果是已配货，则需要审核，如果是待配货，则不需要审核直接走清算，通知收发货系统取消发货
             if( $order_info['order_status'] == OrderStatus::OrderInStock ){
-                $cancel = Delivery::cancel($params['order_no']);
-                if( !$cancel ){
-                    LogApi::debug("[createRefund]通知收发货系统取消发货失败");
-                    //事务回滚
-                    DB::rollBack();
-                    return false;//取消发货失败
-                }
 
                 //获取收发货状态
                 $deliveryStatus = Delivery::getDeliveryInfo($params['order_no']);
-                if($deliveryStatus['code'] != 0){
+                $response =json_decode($deliveryStatus,true);
+                if($response['code']!=ApiStatus::CODE_0){
                     LogApi::debug('[createRefund]获取收发货状态失败');
                     return false;
                 }
                 //待配货
-                if( !$deliveryStatus['data']['status']){
+                if( !$response['data']['status']){
                    $returnStatus = ReturnStatus::ReturnAgreed; //退款单状态为  审核同意
 
                 }else{
@@ -410,6 +404,8 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;//创建失败
             }
+
+
             $no_list['refund_no'] = $data['refund_no'];
             //操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
@@ -481,6 +477,16 @@ class OrderReturnCreater
                     return false;//创建退款清单失败
                 }
 
+            }
+            //通知收发货取消发货
+            if($order_info['order_status'] == OrderStatus::OrderInStock ){
+                $cancel = Delivery::cancel($params['order_no']);
+                if( !$cancel ){
+                    LogApi::debug("[createRefund]通知收发货系统取消发货失败");
+                    //事务回滚
+                    DB::rollBack();
+                    return false;//取消发货失败
+                }
             }
             //事务提交
             DB::commit();
