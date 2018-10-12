@@ -160,7 +160,7 @@ class ExperienceDestineOperate
                     'open_id'       =>$openid,                          //【必须】 int    oppen_id
                     'goods_name'    =>$activityInfo['goods_name']           //【必须】 int    商品名称
                 ];
-                LogApi::error("ActivitDestine-addERRO",$destineData);
+
                 $activityDestine = new ExperienceDestineRepository();
                 $b = $activityDestine->add($destineData);
                 if (!$b) {

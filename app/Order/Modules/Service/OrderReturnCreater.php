@@ -385,6 +385,7 @@ class OrderReturnCreater
                     LogApi::debug('[createRefund]获取收发货状态失败');
                     return false;
                 }
+                LogApi::debug('[createRefund]获取收发货状态',$response['data']['status']);
                 //待配货
                 if( !$response['data']['status']){
                    $returnStatus = ReturnStatus::ReturnAgreed; //退款单状态为  审核同意
