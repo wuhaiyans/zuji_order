@@ -5,6 +5,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Delivery;
+use App\Warehouse\Modules\Repository\DeliveryRepository;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
@@ -571,6 +572,32 @@ class DeliveryController extends Controller
         $list = $this->delivery->getLogistics();
         //return apiResponse(['list'=>$list]);
         return apiResponse($list);
+    }
+
+    /**
+     * 根据订单获取发货单状态是否属于已配货
+     */
+    public function getStatus(){
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params['order_no']) {
+            return \apiResponse([], ApiStatus::CODE_10104, 'order_no必须');
+        }
+
+        $status = DeliveryRepository::getStatus($params['order_no']);
+        if($status){
+            if($status>Delivery::STATUS_WAIT_SEND){
+                return \apiResponse(['status'=>true]);
+            }else{
+                return \apiResponse(['status'=>false]);
+            }
+        } else{
+            return \apiResponse([], ApiStatus::CODE_10104, 'order_no未查到');
+        }
+
     }
 
 
