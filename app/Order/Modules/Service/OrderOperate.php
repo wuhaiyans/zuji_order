@@ -593,7 +593,6 @@ class OrderOperate
         $rentAmount =normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']);
         $totalAmount =normalizeNum($rentAmount+$orderInfo['order_yajin']);
         $txnTerms =15;
-
         $instalmentInfo =[
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
@@ -604,9 +603,8 @@ class OrderOperate
             'sum_terms'		=> 0,	// 已还总期数
             'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
             'first_other_amount'=>normalizeNum($orderInfo['order_insurance']),// 首期额外金额；单位：分 碎屏险
+            'no_return_zujin' =>$rentAmount,//未还租金
         ];
-
-
         if($payType == PayInc::LebaifenPay){
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
@@ -622,6 +620,19 @@ class OrderOperate
                     'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::getPaymentInfo($param);
+                $sum_amount = normalizeNum($res['sum_amount']/100);
+                if( $sum_amount >= $rentAmount ){
+                    //已还租金
+                    $sum_amount = $rentAmount;
+                    //已还期数
+                    $sum_terms = 15;
+                    //未还租金
+                    $no_return_zujin = 0.00;
+                }else{
+                    $sum_terms = $res['sum_terms'];
+                    //未还租金
+                    $no_return_zujin = normalizeNum($orderInfo['order_amount'] - $res['sum_amount']);
+                }
                 $instalmentInfo =[
 	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
 	 		        'out_payment_no'=> $res['out_payment_no'],	// 业务系统 支付交易码
@@ -631,10 +642,11 @@ class OrderOperate
 	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
-	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
-	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
-                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余还款总租金额；单位：分
+	 		        'sum_amount'	=> $sum_amount,	// 已还总金额；单位：分
+	 		        'sum_terms'		=> $sum_terms,	// 已还总期数；
+                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余还款总金额（包含租金押金）；单位：分
                     'first_other_amount'=>normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分 碎屏险
+                    'no_return_zujin' =>$no_return_zujin,//未还租金
                 ];
                 return $instalmentInfo;
 
