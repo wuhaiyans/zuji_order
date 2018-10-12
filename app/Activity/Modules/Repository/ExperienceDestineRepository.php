@@ -74,7 +74,7 @@ class ExperienceDestineRepository
         $this->experienceDestine->create_time = time();
         $this->experienceDestine->update_time = time();
 
-        return $this->experienceDestine->save();
+        return $this->experienceDestine->insert();
     }
 
     /**
