@@ -103,7 +103,6 @@ class AuthRefferController extends Controller{
                     ];
 
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
-print_r($params);
                     LogApi::debug("【header】通过登录转发接口的url及参数".$params['method'],[
                         'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
