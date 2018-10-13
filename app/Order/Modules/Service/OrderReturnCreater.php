@@ -413,7 +413,6 @@ class OrderReturnCreater
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
             if($data['status'] == ReturnStatus::ReturnAgreed){
                 //-+------------------------------------------------------------
-                // 2018-07-28 liuhongxing
                 // 如果待退款金额为0，则直接调退款成功的回调
                 if( !(
                     $data['pay_amount']>0
