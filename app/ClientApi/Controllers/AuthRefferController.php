@@ -95,11 +95,11 @@ class AuthRefferController extends Controller{
                 }else{
 
                     $params['userinfo']=[
-                        'uid'      => 111,
+                        'uid'      => $checkInfo['data'][0]['id'],
                         'type'     => 2,       //用户类型（固定值1）：1：管理员；2：前端用户
                         'username' => $checkInfo['data'][0]['mobile'],
                         'ip'        => $params['ip'],
-                        'register_time'=>$checkInfo['data'][0]['register_time'],
+                        'register_time'=> isset($checkInfo['data'][0]['register_time'])?$checkInfo['data'][0]['register_time']:'',
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
 
