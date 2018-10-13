@@ -309,7 +309,7 @@ class OrderReturnCreater
                 || $order_info['pay_type'] == PayInc::WithhodingPay
             ){
                 //获取支付信息
-                $payInfo = OrderPayRepository::find($order_info['order_no']);
+                $payInfo = OrderPayRepository::find($params['order_no']);
                 if(!$payInfo){
                     return false;
                     LogApi::debug("[createRefund]未找到支付信息");
