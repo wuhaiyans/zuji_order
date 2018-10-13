@@ -68,6 +68,7 @@ class ActiveInviteController extends Controller
             'invite_mobile'=>$invite_mobile,
             'create_time'=>time()
         ];
+        LogApi::debug("oneyuan1",$data);
         $userWechat = User::getUserWechat($uid);
         if($userWechat){
             $data['openid'] = $userWechat['openid'];
@@ -75,7 +76,7 @@ class ActiveInviteController extends Controller
         $InviteWechat = User::getUserWechat($invite_uid);
         if($InviteWechat){
             $data['invite_openid'] = $InviteWechat['openid'];
-            $data['images'] = $InviteWechat['images'];
+            $data['images'] = $InviteWechat['headimgurl'];
         }
 
         $ret = ActiveInviteRepository::insertInvite($data);
