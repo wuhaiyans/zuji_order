@@ -14,13 +14,22 @@ class ActiveController extends Controller
      */
     public function sendMessage(){
         ini_set('max_execution_time', '0');
+
         try{
-            $arr =[];
             $limit  = 1;
             $page   = 1;
             $sleep  = 10;
-            $code   = "SMS_113461177";
+            $code   = "SMS_113461197";
 
+
+            // 查询总数
+            $total = OrderActive::query()
+                ->where([
+                    ['status', '=', 0]
+                ])
+                ->count();
+            $total = 1;
+            $totalpage = ceil($total/$limit);
 
             do {
                 $result = OrderActive::query()
@@ -55,15 +64,14 @@ class ActiveController extends Controller
                     // 短信参数
                     $dataSms =[
                         'realName'      => trim($item['realname']),
-                        'orderNo'       => trim($item['order_no']),
                         'goodsName'     => trim($item['goods_name']),
                         'zuJin'         => trim($item['amount']),
-                        'createTime'    => '2018年10月15日',
                         'zhifuLianjie'  => createShortUrl($zhifuLianjie),
                         'serviceTel'    => config('tripartite.Customer_Service_Phone'),
                     ];
 
-                    
+
+
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
@@ -72,12 +80,11 @@ class ActiveController extends Controller
                     )->update(['status' => 1]);
                 }
 
+                $page++;
                 sleep($sleep);
-            } while (true);
+            } while ($page <= $totalpage);
 
-            if(count($arr) > 0){
-                \App\Lib\Common\LogApi::notify("[sendMessage]活动运营短信", $arr);
-            }
+            \App\Lib\Common\LogApi::debug('[sendMessage发送短信总数为:' . $total);
 
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[sendMessage]活动运营短信', ['msg'=>$exc->getMessage()]);
