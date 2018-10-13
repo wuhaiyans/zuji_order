@@ -53,6 +53,10 @@ class ActiveInviteController extends Controller
         if(!$checkStatus){
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
         }
+
+        LogApi::debug("oneyuan",$userInfo);
+        return apiResponse($user,ApiStatus::CODE_50000,"已邀请");
+        
         //验证是否新用户
         if(date("Y-m-d") != date("Y-m-d",$userInfo['register_time'])){
             return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户".$userInfo['register_time']);
