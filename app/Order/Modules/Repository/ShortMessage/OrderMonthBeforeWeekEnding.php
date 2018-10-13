@@ -62,11 +62,16 @@ class OrderMonthBeforeWeekEnding implements ShortMessage {
             $endTime =$v['end_time'];
         }
 
-	// 发送短息
+		$lianjie = "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+
+		/** 短信参数
+		 * 尊敬的用户{realName}，您租赁的{goodsName}将在（{endTime}）到期，请您提前做好归还准备。您可以登录 {lianjie} 选择买断设备或归还设备。
+		 */
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName'=>$orderInfo['realname'],
             'goodsName'=>$goodsName,
             'endTime'=>date("Y-m-d H:i:s",$endTime),
+			'lianjie'       => createShortUrl($lianjie),
 		]);
 	}
 
