@@ -28,9 +28,9 @@ class ActiveInviteController extends Controller
      */
     public function numeration(Request $request){
         //echo ExperienceDestineOperate::setInvitationCode(['experience_id'=>1,'user_id'=>1]);die;
-        $requests = $request->all();
-        $params = $requests['params'];
-        $userInfo = $requests['userinfo'];
+        $request = $request->all();
+        $params = $request['params'];
+        $userInfo = $request['userinfo'];
 
         // 验证参数
         if(empty($params['code'])){
@@ -38,9 +38,11 @@ class ActiveInviteController extends Controller
         }
         $invite_uid = $userInfo['uid'];
         $invite_mobile = $userInfo['username'];
-        $registerTime = $userInfo['register_time'];
+        $registerTime = date("Y-m-d",$userInfo['register_time']);
+
         //解密邀请码获取用户id和活动id
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
+
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['activity_id'];
         //获取邀请人信息
@@ -55,8 +57,8 @@ class ActiveInviteController extends Controller
         }
 
         //验证是否新用户
-        if(date("Y-m-d") != date("Y-m-d",$registerTime)){
-            return apiResponse($registerTime,ApiStatus::CODE_50001,"该用户不是新注册用户");
+        if(date("Y-m-d") != $registerTime){
+            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户".$registerTime);
         }
 
         //更新邀请信息
