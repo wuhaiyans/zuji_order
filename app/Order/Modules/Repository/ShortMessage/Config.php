@@ -206,6 +206,9 @@ class Config {
                 SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
                 SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
 
+                SceneConfig::ORDER_PAY 				 	=> 'SMS_113461206', //用户支付或授权 成功
+                SceneConfig::ORDER_DELIVERY         	=> 'SMS_113461207', //订单发货短信
+
             ],
             // 花呗先享
             self::CHANNELID_FLOWER_ENJOY => [
