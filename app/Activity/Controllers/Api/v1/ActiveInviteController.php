@@ -29,9 +29,9 @@ class ActiveInviteController extends Controller
     public function numeration(Request $request){
         //echo ExperienceDestineOperate::setInvitationCode(['experience_id'=>1,'user_id'=>1]);die;
         $request = $request->all();
+        var_dump($request);die;
         $params = $request['params'];
         $userInfo = $request['userinfo'];
-        LogApi::debug("oneyuan",$request);
         // 验证参数
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
