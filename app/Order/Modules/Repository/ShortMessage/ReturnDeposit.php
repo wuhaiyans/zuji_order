@@ -36,6 +36,7 @@ class ReturnDeposit{
 				'orderNo'=>'required',
 				'goodsName'=>'required',
 				'tuihuanYajin'=>'required',
+                'lianjie'       =>'required',
 		];
 		$validator = app('validator')->make($data, $rule);
 		if ($validator->fails()) {
@@ -53,6 +54,7 @@ class ReturnDeposit{
             'orderNo'=>$data['orderNo'],
             'goodsName'=>$data['goodsName'],
             'tuihuanYajin'=>$data['tuihuanYajin']."元",
+            'lianjie'      =>$data['lianjie'],
 		]);
 	}
 	
