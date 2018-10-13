@@ -909,9 +909,12 @@ class OrderOperate
         $riskScore = '';
         //获取风控系统信息
         $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo, $type);
+
         if($orderRisk){
-            $orderRisk = json_decode($orderRisk[0]['data']);
+            $orderRisk = json_decode($orderRisk[0]['data'],true);
+
             $riskScore =  $orderRisk['score'] ?? '';
+
         }
         Redis::set($zhimaScoreKeys, $riskScore);
         return $riskScore;
@@ -1386,6 +1389,7 @@ class OrderOperate
 
         $goodsData =  self::getExportActAdminState(array_keys($orderListArray), $actArray=array());
 
+
         if (!empty($orderListArray)) {
 
             foreach ($orderListArray as $keys=>$values) {
@@ -1401,6 +1405,7 @@ class OrderOperate
                 //发货时间
                 $orderListArray[$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
                 //芝麻分
+
                $zhimaScore =  OrderOperate::getOrderRiskScore($keys);
 
                $orderListArray[$keys]['zhima_score'] = $zhimaScore;

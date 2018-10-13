@@ -374,9 +374,9 @@ class OrderController extends Controller
                         implode(",",array_column($item['goodsInfo'],"zuqi_name")),
                         implode(",",array_column($item['goodsInfo'],"specs")),
                         $item['order_amount'],
+                        $item['order_yajin'],
                         $item['visit_name'],
                         $item['visit_text'],
-                        $item['order_yajin'],
                         $item['order_insurance'],
                         implode(",",array_column($item['goodsInfo'],"insurance_cost")),
                         "'".$item['cret_no'],
@@ -386,6 +386,7 @@ class OrderController extends Controller
 
 
                     ];
+
                 }
 
                 $orderExcel =  Excel::csvWrite1($data,  $headers, '订单列表导出',$abc);
