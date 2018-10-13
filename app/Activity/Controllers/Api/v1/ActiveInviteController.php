@@ -58,7 +58,8 @@ class ActiveInviteController extends Controller
 
         //验证是否新用户
         if(date("Y-m-d") != $registerTime){
-            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户".$registerTime);
+            LogApi::debug("oneyuan",$request);
+            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户");
         }
 
         //更新邀请信息
