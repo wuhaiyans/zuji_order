@@ -31,6 +31,7 @@ class ActiveInviteController extends Controller
         $request = $request->all();
         $params = $request['params'];
         $userInfo = $request['userinfo'];
+        LogApi::debug("1元预约",$request);
         // 验证参数
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
