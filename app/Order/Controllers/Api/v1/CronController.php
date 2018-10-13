@@ -3,10 +3,10 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
-use App\Order\Models\OrderGoodExt-end-;
+use App\Order\Models\OrderGoodExtend;
 use Illuminate\Http\Request;
 
-class CronController ext-end-s Controller
+class CronController extends Controller
 {
 
     /**
