@@ -47,8 +47,6 @@ class ActiveInviteController extends Controller
         $activity_id = $codeNum['activity_id'];
         //获取邀请人信息
         $user = User::getUser($uid);
-        LogApi::debug("oneyuan",$userInfo);
-        return apiResponse($user,ApiStatus::CODE_50000,"已邀请");
         if(!$user){
             return apiResponse([],ApiStatus::CODE_50001,"邀请用户错误！");
         }
@@ -57,7 +55,8 @@ class ActiveInviteController extends Controller
         if(!$checkStatus){
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
         }
-
+        LogApi::debug("oneyuan",$userInfo);
+        return apiResponse($user,ApiStatus::CODE_50000,"已邀请");
         //验证是否新用户
         if(date("Y-m-d") != $registerTime){
             return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户");
