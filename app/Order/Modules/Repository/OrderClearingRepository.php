@@ -27,6 +27,7 @@ class OrderClearingRepository
      * @return bool
      */
     public static function createOrderClean($param){
+        LogApi::debug("[clear]接收参数",$param);
         if ( empty($param) ) {
             return false;
         }
@@ -36,6 +37,7 @@ class OrderClearingRepository
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
             if (empty($orderInfo)) {
+                LogApi::debug("[clear]获取订单信息失败",$orderInfo);
                 return false;
             }
             if ($orderInfo['pay_type'] == PayInc::LebaifenPay) {
@@ -103,6 +105,7 @@ class OrderClearingRepository
       //  }
         
         if(redisIncr($param['business_no'].'_orderCleaning_create',60)>1) {
+            LogApi::debug("[clear]redisIncr");
             return false;
          }
 
