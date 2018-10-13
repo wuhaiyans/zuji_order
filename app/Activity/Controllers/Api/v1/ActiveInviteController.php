@@ -29,7 +29,6 @@ class ActiveInviteController extends Controller
     public function numeration(Request $request){
         //echo ExperienceDestineOperate::setInvitationCode(['experience_id'=>1,'user_id'=>1]);die;
         $requests = $request->all();
-        json_encode($requests);return;
         $params = $requests['params'];
         $userInfo = $requests['userinfo'];
 
