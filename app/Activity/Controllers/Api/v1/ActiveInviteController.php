@@ -42,7 +42,7 @@ class ActiveInviteController extends Controller
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['activity_id'];
-        $registerTime = $userInfo['register_time'];
+        $registerTime =date("Y-m-d",$userInfo['register_time']);
         //获取邀请人信息
         $user = User::getUser($uid);
         if(!$user){
