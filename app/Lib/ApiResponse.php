@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Lib;
+use App\Lib\Common\LogApi;
 
 /**
  * API 响应对象
@@ -49,7 +50,7 @@ class ApiResponse {
 		}
 		$data = json_decode($jsonStr, true);
 		if (!is_array($data)) {
-			var_dump($data);die;
+			LogApi::debug("oneyuan",$jsonStr);
 			$status->setCode(ApiStatus::CODE_10101)->setMsg('非json格式');
 			return;
 		}
