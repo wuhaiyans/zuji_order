@@ -101,9 +101,9 @@ class AuthRefferController extends Controller{
                         'ip'        => $params['ip'],
                         'register_time'=> isset($checkInfo['data'][0]['register_time'])?$checkInfo['data'][0]['register_time']:'',
                     ];
-                    
-                    $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
 
+                    $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
+print_r($params);
                     LogApi::debug("【header】通过登录转发接口的url及参数".$params['method'],[
                         'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
