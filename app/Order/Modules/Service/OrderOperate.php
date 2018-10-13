@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use zuji\order\OrderStatus;
 
 
@@ -891,6 +892,38 @@ class OrderOperate
 
     }
 
+
+    /**
+     * 获取风控芝麻信息
+     * @author heaven
+     * @param $orderNo
+     * @return array
+     */
+    public static function getOrderRiskScore($orderNo, $type='zhima'){
+
+        $zhimaScoreKeys = 'zhima_score_'.$orderNo;
+        if (Redis::EXISTS($zhimaScoreKeys))
+        {
+            return Redis::get($zhimaScoreKeys);
+        }
+        $riskScore = '';
+        //获取风控系统信息
+        $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo, $type);
+
+        if($orderRisk){
+            $orderRisk = json_decode($orderRisk[0]['data'],true);
+
+            $riskScore =  $orderRisk['score'] ?? '';
+
+        }
+        Redis::set($zhimaScoreKeys, $riskScore);
+        return $riskScore;
+
+    }
+
+
+
+
     /**
      * 获取风控和认证信息
      * @author wuhaiyan
@@ -1356,6 +1389,7 @@ class OrderOperate
 
         $goodsData =  self::getExportActAdminState(array_keys($orderListArray), $actArray=array());
 
+
         if (!empty($orderListArray)) {
 
             foreach ($orderListArray as $keys=>$values) {
@@ -1370,8 +1404,17 @@ class OrderOperate
                 $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
                 //发货时间
                 $orderListArray[$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
+                //芝麻分
+
+               $zhimaScore =  OrderOperate::getOrderRiskScore($keys);
+
+               $orderListArray[$keys]['zhima_score'] = $zhimaScore;
+
+                //回访标识
+                $orderListArray[$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
             }
+
 
         }
 

@@ -54,7 +54,7 @@ class AuthRefferController extends Controller{
             //是否需要验证
             if(in_array($params['method'], config('clientAuth.exceptAuth'))){
                 $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
-                LogApi::debug("无需登录直接转发接口信息及结果".$params['method'],[
+                LogApi::debug("【header】无需登录直接转发接口信息及结果".$params['method'],[
                     'url' => config('ordersystem.ORDER_API'),
                     'request' => $params,
                     'response' => $info,
@@ -75,8 +75,8 @@ class AuthRefferController extends Controller{
             }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
                 $token     = $params['auth_token'];
                 $checkInfo = User::checkToken($token);//获取用户信息
-                 LogApi::debug("验证token调用第三方User::checkToken的值".$params['auth_token']);
-                LogApi::debug("验证token调用第三方User::checkToken返回的结果".$params['method'],$checkInfo);
+                 LogApi::debug("【header】验证token调用第三方User::checkToken的值".$params['auth_token']);
+                LogApi::debug("【header】验证token调用第三方User::checkToken返回的结果".$params['method'],$checkInfo);
                 //验证不通过
                 if (is_null($checkInfo)
                     || !is_array($checkInfo)
@@ -99,16 +99,17 @@ class AuthRefferController extends Controller{
                         'type'     => 2,       //用户类型（固定值1）：1：管理员；2：前端用户
                         'username' => $checkInfo['data'][0]['mobile'],
                         'ip'        => $params['ip'],
-                        'register_time'=> isset($checkInfo['data'][0]['register_time']) ?? '',
+                        'register_time'=> isset($checkInfo['data'][0]['register_time'])?$checkInfo['data'][0]['register_time']:'',
                     ];
+
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
-                    LogApi::debug("通过登录转发接口的url及参数".$params['method'],[
+                    LogApi::debug("【header】通过登录转发接口的url及参数".$params['method'],[
                         'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
                     ]);
                     $info = Curl::post(config('ordersystem.ORDER_API'), json_encode($params),$header);
                     $info =json_decode($info,true);
-                    LogApi::debug("登录转发接口结果".$params['method'],$info);
+                    LogApi::debug("【header】登录转发接口结果".$params['method'],$info);
                     if( is_null($info)
                         || !is_array($info)
                         || !isset($info['code'])
