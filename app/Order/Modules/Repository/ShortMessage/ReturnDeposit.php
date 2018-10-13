@@ -50,6 +50,7 @@ class ReturnDeposit{
 			return false;
 		}
         LogApi::debug("[returnDeposit]获取短信参数",$data);
+        LogApi::debug("[returnDeposit]获取模板id".$channel_id);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
             'realName'    =>$data['realName'],
