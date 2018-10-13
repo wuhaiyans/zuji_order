@@ -42,7 +42,7 @@ class ActiveInviteController extends Controller
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['activity_id'];
-        $registerTime =date("Y-m-d",$userInfo['register_time']);
+        $registerTime = date("Y-m-d",$userInfo['register_time']);
         //获取邀请人信息
         $user = User::getUser($uid);
         if(!$user){
@@ -53,9 +53,8 @@ class ActiveInviteController extends Controller
         if(!$checkStatus){
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
         }
-
+        //对比注册时间
         $nowTime = date("Y-m-d");
-        LogApi::debug("oneyuan",['nowtime'=>$nowTime,'regtime'=>$registerTime]);
         if($nowTime != $registerTime){
             return apiResponse([],ApiStatus::CODE_50000,"该用户不是新注册用户");
         }
@@ -81,7 +80,7 @@ class ActiveInviteController extends Controller
 
         $ret = ActiveInviteRepository::insertInvite($data);
         if(!$ret){
-            LogApi::debug("预约邀请",$data);
+            return apiResponse($data,ApiStatus::CODE_5000,"失败");
         }
         ExperienceDestine::upZuqi($uid,$activity_id);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
