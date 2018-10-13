@@ -95,8 +95,9 @@ class WithholdOverduOne implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
         ];
 
+        \App\Lib\Common\LogApi::debug('[cronWithholdMessage:逾期1天]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

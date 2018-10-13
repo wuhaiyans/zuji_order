@@ -98,8 +98,10 @@ class WithholdAdvanceSeven implements ShortMessage {
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
 
+        \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前7天扣款]',$dataSms);
+
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 
