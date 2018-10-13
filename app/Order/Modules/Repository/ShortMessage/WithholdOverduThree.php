@@ -96,9 +96,9 @@ class WithholdOverduThree implements ShortMessage {
             'createTime'    => $createTime['createTime'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
         ];
-
+        \App\Lib\Common\LogApi::debug('[cronWithholdMessage:逾期3天]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

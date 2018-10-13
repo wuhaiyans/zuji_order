@@ -212,5 +212,20 @@ class SceneConfig {
     const RETURN_TOKIO = 'ReturnTokio';
 
 
+    /**
+     * 场景：<b>【微回收订单将在1个月租期到期】</b>
+     */
+    const MICRO_ORDER_EXPIRE_MONTH = 'MicroOrderExpireMonth';
+
+    /**
+     * 场景：<b>【微回收订单将在1周之后到期】</b>
+     */
+    const MICRO_ORDER_EXPIRE_WEEK = 'MicroOrderExpireWeek';
+
+    /**
+     * 场景：<b>【微回收退还押金成功】</b>
+     */
+    const MICRO_RETURN_DEPOSIT = 'MicroReturnDeposit';
+
 
 }

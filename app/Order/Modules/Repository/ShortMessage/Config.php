@@ -209,6 +209,10 @@ class Config {
                 SceneConfig::ORDER_PAY 				 	=> 'SMS_113461206', //用户支付或授权 成功
                 SceneConfig::ORDER_DELIVERY         	=> 'SMS_113461207', //订单发货短信
 
+				SceneConfig::MICRO_ORDER_EXPIRE_MONTH	=> 'SMS_113461208', // 微回收订单将在1个月租期到期
+				SceneConfig::MICRO_ORDER_EXPIRE_WEEK	=> 'SMS_113461209', // 微回收订单将在1周之后到期
+				SceneConfig::MICRO_RETURN_DEPOSIT 		=> 'SMS_113461211', // 微回收退还押金成功
+
             ],
             // 花呗先享
             self::CHANNELID_FLOWER_ENJOY => [
