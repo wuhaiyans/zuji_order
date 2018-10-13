@@ -31,6 +31,7 @@ class ActiveInviteController extends Controller
         $request = $request->all();
         $params = $request['params'];
         $userInfo = $request['userinfo'];
+        LogApi::debug("oneyuan",$request);
         // 验证参数
         if(empty($params['code'])){
             return apiResponse([],ApiStatus::CODE_20001,"code必须");
@@ -53,8 +54,7 @@ class ActiveInviteController extends Controller
         }
         //验证是否新用户
         if(date("Y-m-d") != date("Y-m-d",$userInfo['register_time'])){
-            $userInfo['register_time'] = date("Y-m-d",$userInfo['register_time']);
-            return apiResponse($userInfo,ApiStatus::CODE_50001,"该用户不是新注册用户");
+            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户".$userInfo['register_time']);
         }
 
         //更新邀请信息
