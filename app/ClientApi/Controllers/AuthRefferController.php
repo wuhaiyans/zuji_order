@@ -99,10 +99,10 @@ class AuthRefferController extends Controller{
                         'type'     => 2,       //用户类型（固定值1）：1：管理员；2：前端用户
                         'username' => $checkInfo['data'][0]['mobile'],
                         'ip'        => $params['ip'],
-                        'register_time'=> isset($checkInfo['data'][0]['register_time']) ?? '',
+                        'register_time'=> isset($checkInfo['data'][0]['register_time']) ?$checkInfo['data'][0]['register_time']:'',
                     ];
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
-                    
+
                     LogApi::debug("【header】通过登录转发接口的url及参数".$params['method'],[
                         'url'=>config('ordersystem.ORDER_API'),
                         'request' => $params,
