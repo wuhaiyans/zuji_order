@@ -66,12 +66,17 @@ class GivebackReturnDeposit implements ShortMessage {
             return false;
         }
 
-        // 短信参数
+        $lianjie = "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+
+        /** 短信参数
+         * 尊敬的{realName}您好，您租赁的{goodsName}，订单号：{orderNo}，押金{tuihuanYajin}已退还！您可以登录 {lianjie} 继续租用其他好物。感谢您对拿趣用的支持！
+         */
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
             'tuihuanYajin'      => $goodsInfo['yajin'],
+            'lianjie'           => createShortUrl($lianjie),
         ];
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
