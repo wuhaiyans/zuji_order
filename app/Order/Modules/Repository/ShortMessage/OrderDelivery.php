@@ -57,6 +57,7 @@ class OrderDelivery implements ShortMessage {
             'realName'=>$orderInfo['realname'],
             'orderNo'=>$orderInfo['order_no'],
             'logisticsNo'=>$orderDelivery['logistics_no'],
+            'lianjie'=>createShortUrl('https://h5.nqyong.com/index?appid='.$orderInfo['appid']),
 		]);
 	}
 
