@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
+use App\Lib\Common\LogApi;
+
 
 /**
  * OrderCancel
@@ -47,12 +49,12 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
-
+        LogApi::debug("[returnDeposit]获取短信参数",$data);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realName'],
-            'orderNo'=>$data['orderNo'],
-            'goodsName'=>$data['goodsName'],
+            'realName'    =>$data['realName'],
+            'orderNo'     =>$data['orderNo'],
+            'goodsName'   =>$data['goodsName'],
             'tuihuanYajin'=>$data['tuihuanYajin']."元",
             'lianjie'      =>$data['lianjie'],
 		]);

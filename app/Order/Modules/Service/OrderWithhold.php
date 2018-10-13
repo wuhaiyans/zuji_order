@@ -6,6 +6,7 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class OrderWithhold
 {
@@ -25,6 +26,8 @@ class OrderWithhold
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
+            DB::rollBack();
+            // 提交事务
             return false;
         }
 
@@ -41,13 +44,18 @@ class OrderWithhold
         }
         $business_no = $instalmentInfo['business_no'];
 
+        //开启事务
+        DB::beginTransaction();
+
         // 订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
+            DB::rollBack();
             LogApi::error("[giveBackWihthold]订单不存在");
             return false;
         }
         if($orderInfo['order_status'] != \App\Order\Modules\Inc\OrderStatus::OrderInService){
+            DB::rollBack();
             LogApi::error("[giveBackWihthold]订单不在服务中");
             return false;
         }
@@ -58,6 +66,7 @@ class OrderWithhold
         // 价格
         $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
+            DB::rollBack();
             LogApi::error("[giveBackWihthold]扣款金额不能小于1分");
             return false;
         }
@@ -85,6 +94,7 @@ class OrderWithhold
             ];
             $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
             if(!$result){
+                DB::rollBack();
                 LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
@@ -92,18 +102,22 @@ class OrderWithhold
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 // 提交事务
+                DB::commit();
                 return true;
             }elseif($pay_status =='PAY_FAILED'){
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
+                DB::commit();
                 Log::error("[giveBackWihthold]小程序扣款请求失败（用户余额不足）");
                 return false;
             }elseif($pay_status == 'PAY_INPROGRESS'){
                 // 提交事务
+                DB::commit();
                 Log::error("[giveBackWihthold]小程序扣款处理中请等待");
                 return false;
             }else{
                 // 事物回滚
+                DB::rollBack();
                 Log::error("[giveBackWihthold]小程序扣款处理失败（内部失败）");
                 return false;
             }
@@ -115,6 +129,7 @@ class OrderWithhold
             ];
             $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
             if(!$result){
+                DB::rollBack();
                 LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
@@ -128,6 +143,7 @@ class OrderWithhold
 
             $agreementNo = $withholdInfo['out_withhold_no'];
             if (!$agreementNo) {
+                DB::rollBack();
                 LogApi::error("[giveBackWihthold]用户代扣协议编号错误");
                 return false;
             }
@@ -155,6 +171,7 @@ class OrderWithhold
                 }
 
             }catch(\Exception $exc){
+                DB::rollBack();
 
                 LogApi::error('[giveBackWihthold]分期代扣错误异常：'.$subject, $exc);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentInfo['id']);
@@ -166,6 +183,8 @@ class OrderWithhold
 
             }
         }
+        // 提交事务
+        DB::commit();
         return true;
     }
 

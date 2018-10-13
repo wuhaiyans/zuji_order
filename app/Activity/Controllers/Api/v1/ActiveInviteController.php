@@ -38,11 +38,11 @@ class ActiveInviteController extends Controller
         }
         $invite_uid = $userInfo['uid'];
         $invite_mobile = $userInfo['username'];
-        $registerTime = date("Y-m-d",$userInfo['register_time']);
         //解密邀请码获取用户id和活动id
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['activity_id'];
+        $registerTime = $userInfo['register_time'];
         //获取邀请人信息
         $user = User::getUser($uid);
         if(!$user){
@@ -54,7 +54,6 @@ class ActiveInviteController extends Controller
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
         }
 
-        //验证是否新用户
         $nowTime = date("Y-m-d");
         LogApi::debug("oneyuan",['nowtime'=>$nowTime,'regtime'=>$registerTime]);
         if($nowTime != $registerTime){
