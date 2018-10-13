@@ -95,7 +95,7 @@ class AuthRefferController extends Controller{
                 }else{
 
                     $params['userinfo']=[
-                        'uid'      => $checkInfo['data'][0]['id'],
+                        'uid'      => 111,
                         'type'     => 2,       //用户类型（固定值1）：1：管理员；2：前端用户
                         'username' => $checkInfo['data'][0]['mobile'],
                         'ip'        => $params['ip'],
