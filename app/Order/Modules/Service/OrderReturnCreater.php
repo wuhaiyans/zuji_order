@@ -331,6 +331,7 @@ class OrderReturnCreater
 
             //乐百分支付
             if($order_info['pay_type'] == PayInc::LebaifenPay){
+                LogApi::debug("[createRefund]乐百分支付");
                 if(!$payInfo){
                     return false;
                     LogApi::debug("[createRefund]未找到支付信息");
@@ -341,6 +342,7 @@ class OrderReturnCreater
                     //应退金额=实付租金+意外险+实付押金
                     $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
                     $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                    LogApi::debug("[createRefund]获取应退金额",$data);
                 }
 
             }

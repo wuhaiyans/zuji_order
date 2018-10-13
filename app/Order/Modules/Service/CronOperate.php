@@ -379,6 +379,7 @@ class CronOperate
 
         $returnData = OrderReturn::query()->where($whereLong)->get()->toArray();
         if (!$returnData) {
+            LogApi::error("[cronBarterDelivey]获取换货信息失败:".$returnData);
             return false;
         }
         //var_dump($orderData);die;
@@ -388,7 +389,7 @@ class CronOperate
             $userinfo['type']=\App\Lib\PublicInc::Type_System;
             $b =OrderReturnCreater::updateorder($v['refund_no'],$userinfo);
             if(!$b){
-                LogApi::debug("换货确认收货失败:" . $v['order_no']);
+                LogApi::error("[cronBarterDelivey]换货确认收货失败:".$v['order_no']);
             }
 
         }
