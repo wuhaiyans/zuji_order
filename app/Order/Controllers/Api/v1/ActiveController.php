@@ -16,7 +16,7 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
 
         try{
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
             $sleep  = 10;
             $code   = "SMS_113461197";
@@ -28,9 +28,9 @@ class ActiveController extends Controller
                     ['status', '=', 0]
                 ])
                 ->count();
-            $total = 1;
             $totalpage = ceil($total/$limit);
 
+            \App\Lib\Common\LogApi::debug('[sendMessage:发送短信总数为:' . $total);
             do {
                 $result = OrderActive::query()
                     ->where([
@@ -79,7 +79,7 @@ class ActiveController extends Controller
                         ['id'=>$item['id']]
                     )->update(['status' => 1]);
                 }
-
+                \App\Lib\Common\LogApi::debug('[sendMessage:发送短信页数为:' . $page);
                 $page++;
                 sleep($sleep);
             } while ($page <= $totalpage);
