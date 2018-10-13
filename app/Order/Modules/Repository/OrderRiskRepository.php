@@ -26,11 +26,15 @@ class OrderRiskRepository
      * @param $orderNo
      * @return array|bool
      */
-    public static function getRisknfoByOrderNo($orderNo)
+    public static function getRisknfoByOrderNo($orderNo,$type='')
     {
         if (empty($orderNo)) return false;
         $whereArray = array();
         $whereArray[] = ['order_no', '=', $orderNo];
+        if (!empty($type)) {
+
+            $whereArray[] = ['type', '=', $type];
+        }
         $order =  OrderRisk::query()->where($whereArray)->get();
         if (!$order) return false;
 
