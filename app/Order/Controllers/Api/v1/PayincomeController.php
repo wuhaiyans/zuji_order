@@ -114,28 +114,32 @@ class PayincomeController extends Controller
 
 
         if($info['business_type'] == \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE){
-
             // 预订业务
             $ActivityDestine =  \App\Activity\Modules\Repository\Activity\ActivityDestine::getByNo($info['business_no']);
             if(!$ActivityDestine){
-                return apiResponse([], ApiStatus::CODE_50000, "程序异常");
+                $info['mobile']     = "--";
+                $user_id            = "";
+                //return apiResponse([], ApiStatus::CODE_50000, "程序异常");
+            }else{
+                $ActivityDestineInfo = $ActivityDestine->getData();
+
+                $user_id = $ActivityDestineInfo['user_id'];
+                $info['mobile']     =   isset($ActivityDestineInfo['mobile']) ? $ActivityDestineInfo['mobile'] : "";
             }
-            $ActivityDestineInfo = $ActivityDestine->getData();
-
-            $user_id = $ActivityDestineInfo['user_id'];
-            $info['mobile']     =   isset($ActivityDestineInfo['mobile']) ? $ActivityDestineInfo['mobile'] : "";
-
         }elseif($info['business_type'] == \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE){
 
             // 体验活动业务
             $activityDestine = \App\Activity\Modules\Repository\Activity\ExperienceDestine::getByNo($info['business_no']);
             if(!$activityDestine){
-                return apiResponse([], ApiStatus::CODE_50000, "程序异常");
-            }
-            $ExperienceDestineInfo = $activityDestine->getData();
+                $info['mobile']     =   "--";
+                $user_id            = "";
+                //return apiResponse([], ApiStatus::CODE_50000, "程序异常");
+            }else{
+                $ExperienceDestineInfo = $activityDestine->getData();
 
-            $user_id = $ExperienceDestineInfo['user_id'];
-            $info['mobile']     =   isset($ExperienceDestineInfo['mobile']) ? $ExperienceDestineInfo['mobile'] : "";
+                $user_id = $ExperienceDestineInfo['user_id'];
+                $info['mobile']     =   isset($ExperienceDestineInfo['mobile']) ? $ExperienceDestineInfo['mobile'] : "";
+            }
         }else{
             //获取订单信息
             $OrderRepository= new \App\Order\Modules\Repository\OrderRepository();
@@ -147,9 +151,12 @@ class PayincomeController extends Controller
             $info['mobile']     =   isset($orderInfo['mobile']) ? $orderInfo['mobile'] : "";
 
         }
-
-        $memberInfo = \App\Lib\User\User::getUser($user_id);
-        $info['realname']   =   isset($memberInfo['realname']) ? $memberInfo['realname'] : "";
+        if(!empty($user_id)){
+            $memberInfo = \App\Lib\User\User::getUser($user_id);
+            $info['realname']   = isset($memberInfo['realname']) ? $memberInfo['realname'] : "";
+        }else{
+            $info['realname']   = "--";
+        }
 
         // 入账订单
         if($info['business_type'] == 1){
