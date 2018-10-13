@@ -133,7 +133,7 @@ $api->version('v1', [
     // 定时任务 每日执行定时任务-扣款
     $api->get('crontabCreatepay', 'WithholdController@crontabCreatepay');
     // 定时任务 取消买断
-    $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
+    //$api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
     // 定时任务 还机逾期违约-修改状态
     $api->get('cronGivebackAgedFail', 'CronController@cronGivebackAgedFail');
     // 定时任务 换货确认收货

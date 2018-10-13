@@ -64,6 +64,7 @@ class OrderPay implements ShortMessage {
             'realName'=>$orderInfo['realname'],
             'orderNo'=>$orderInfo['order_no'],
             'goodsName'=>$goodsName,
+            'lianjie'=>createShortUrl('https://h5.nqyong.com/index?appid='.$orderInfo['appid']),
 		]);
 	}
 

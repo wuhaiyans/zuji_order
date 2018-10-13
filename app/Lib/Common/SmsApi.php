@@ -102,6 +102,14 @@ class SmsApi {
 		];
 		$info = Curl::post($url, json_encode($data));
 		$info = json_decode($info,true);
+		
+		\App\Order\Modules\Service\OrderSmsLog::create([
+			'mobile' => $mobile,//手机号
+			'template' => $templateCode,//短信模板
+			'success' => $info['code'] != 0 ? 1 : 0,//短信发送结果（0：成功，1：失败）
+			'params' => json_encode($templateParam),//短信发送的参数json串
+			'result' => json_encode($info),//短信返回的结果json串
+		]);
 		if ($info['code'] != 0) {
 			// 发短信失败
 			return false;
