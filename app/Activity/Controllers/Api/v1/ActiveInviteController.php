@@ -29,6 +29,7 @@ class ActiveInviteController extends Controller
     public function numeration(Request $request){
         //echo ExperienceDestineOperate::setInvitationCode(['experience_id'=>1,'user_id'=>1]);die;
         $requests = $request->all();
+        json_encode($requests);return;
         $params = $requests['params'];
         $userInfo = $requests['userinfo'];
 
@@ -42,7 +43,6 @@ class ActiveInviteController extends Controller
         $codeNum = ExperienceDestineOperate::getInvitationCode($params['code']);
         $uid = $codeNum['user_id'];
         $activity_id = $codeNum['activity_id'];
-        $registerTime = date("Y-m-d",$userInfo['register_time']);
         //获取邀请人信息
         $user = User::getUser($uid);
         if(!$user){
@@ -53,10 +53,9 @@ class ActiveInviteController extends Controller
         if(!$checkStatus){
             return apiResponse([],ApiStatus::CODE_50000,"已邀请");
         }
-        //对比注册时间
-        $nowTime = date("Y-m-d");
-        if($nowTime != $registerTime){
-            return apiResponse([],ApiStatus::CODE_50000,"该用户不是新注册用户");
+        //验证是否新用户
+        if(date("Y-m-d") != date("Y-m-d",$userInfo['register_time'])){
+            return apiResponse([],ApiStatus::CODE_50001,"该用户不是新注册用户".$userInfo['register_time']);
         }
 
         //更新邀请信息
@@ -81,7 +80,7 @@ class ActiveInviteController extends Controller
 
         $ret = ActiveInviteRepository::insertInvite($data);
         if(!$ret){
-            return apiResponse($data,ApiStatus::CODE_5000,"失败");
+            LogApi::debug("预约邀请",$data);
         }
         ExperienceDestine::upZuqi($uid,$activity_id);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
