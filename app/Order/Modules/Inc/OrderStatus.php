@@ -154,15 +154,16 @@ class OrderStatus{
      */
     public static function getBusinessType(){
         return [
-            self::BUSINESS_ZUJI => '租机业务',
-            self::BUSINESS_RETURN => '退货业务',
-            self::BUSINESS_BARTER => '换货业务',
-            self::BUSINESS_REFUND => '退款业务',
-            self::BUSINESS_GIVEBACK => '还机业务',
-            self::BUSINESS_BUYOUT => '买断业务',
-            self::BUSINESS_RELET => '续租业务',
-            self::BUSINESS_FENQI => '分期业务',
-            self::BUSINESS_DESTINE => "预定业务",
+            self::BUSINESS_ZUJI         => '租机业务',
+            self::BUSINESS_RETURN       => '退货业务',
+            self::BUSINESS_BARTER       => '换货业务',
+            self::BUSINESS_REFUND       => '退款业务',
+            self::BUSINESS_GIVEBACK     => '还机业务',
+            self::BUSINESS_BUYOUT       => '买断业务',
+            self::BUSINESS_RELET        => '续租业务',
+            self::BUSINESS_FENQI        => '分期业务',
+            self::BUSINESS_DESTINE      => "预定业务",
+            self::BUSINESS_EXPERIENCE   => "体验活动业务",
         ];
     }
 
