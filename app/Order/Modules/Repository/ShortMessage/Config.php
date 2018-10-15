@@ -110,11 +110,13 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_113461138', //财务系统完成押金退还时发送
 				//买断
-				SceneConfig::BUYOUT_CONFIRM				=> 'SMS_113461144', //买断确认短信
-				SceneConfig::BUYOUT_PAYMENT				=> 'SMS_113461145', //买断支付短信
-				SceneConfig::BUYOUT_PAYMENT_END			=> 'SMS_113461161', //买断支付完成短信
-				//退押金
-				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
+				SceneConfig::BUYOUT_CONFIRM					=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT					=> 'SMS_113461145', //微回收买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_WECHAT			=> 'SMS_113461212', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_113461161', //买断完成短信
+				SceneConfig::BUYOUT_PAYMENT_END_WECHAT	=> 'SMS_113461210', //微回收买断完成短信
+                //退押金
+                SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
                 SceneConfig::DESTINE_CREATE              => 'SMS_113461183', //订金退款申请短信
@@ -204,7 +206,7 @@ class Config {
             self::CHANNELID_MICRO_RECOVERY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461173', //用户下单
                 SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
-                SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
+                SceneConfig::REFUND_SUCCESS 			    => 'SMS_113461211', //退款成功
 
                 SceneConfig::ORDER_PAY 				 	=> 'SMS_113461206', //用户支付或授权 成功
                 SceneConfig::ORDER_DELIVERY         	=> 'SMS_113461207', //订单发货短信

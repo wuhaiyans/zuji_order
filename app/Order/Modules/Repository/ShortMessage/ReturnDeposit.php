@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
+use App\Lib\Common\LogApi;
+
 
 /**
  * OrderCancel
@@ -46,14 +48,18 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
-
+		$smsContent = [
+				'realName'    =>$data['realName'],
+				'orderNo'     =>$data['orderNo'],
+				'goodsName'   =>$data['goodsName'],
+				'tuihuanYajin'=>$data['tuihuanYajin']."元",
+		];
+		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = $data['lianjie'];
+		}
+		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realName'],
-            'orderNo'=>$data['orderNo'],
-            'goodsName'=>$data['goodsName'],
-            'tuihuanYajin'=>$data['tuihuanYajin']."元",
-		]);
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
 	
 }
