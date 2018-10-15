@@ -437,6 +437,16 @@ class OrderReturnCreater
                             return false;
                         }
                     }
+                    //通知收发货取消发货
+                    if($order_info['order_status'] == OrderStatus::OrderInStock ){
+                        $cancel = Delivery::cancel($params['order_no']);
+                        if( !$cancel ){
+                            LogApi::debug("[createRefund]通知收发货系统取消发货失败");
+                            //事务回滚
+                            DB::rollBack();
+                            return false;//取消发货失败
+                        }
+                    }
                     // 不需要清算，直接调起退款成功
                     $b = self::refundUpdate([
                         'business_type' => $data['business_key'],
@@ -2575,7 +2585,7 @@ class OrderReturnCreater
                             'zuJin' => $return_info['refund_amount'],
                         ]
                     );
-                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }else{
                 if ($return_info['refund_amount'] > 0 || $return_info['auth_unfreeze_amount'] > 0) {
@@ -2590,7 +2600,7 @@ class OrderReturnCreater
                             'lianjie' => createShortUrl('https://h5.nqyong.com/index?appid=' . $order_info['appid']),
                         ]
                     );
-                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }
 
