@@ -114,10 +114,8 @@ class Config {
 				SceneConfig::BUYOUT_PAYMENT					=> 'SMS_113461145', //买断支付短信
 				SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_113461161', //买断支付完成短信
 				SceneConfig::BUYOUT_PAYMENT_END_WECHAT	=> 'SMS_113461210', //微回收买断支付完成短信
-				//退押金
-				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461211', //财务系统完成押金退还时发送
                 //退押金
-              //  SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
+                SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
                 SceneConfig::DESTINE_CREATE              => 'SMS_113461183', //订金退款申请短信
