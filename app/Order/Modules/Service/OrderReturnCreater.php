@@ -302,8 +302,10 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
+            $payInfo=[];
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
+            LogApi::debug("[createRefund]获取支付信息".$payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
