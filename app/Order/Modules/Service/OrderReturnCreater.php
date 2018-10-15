@@ -302,8 +302,10 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
+            $payInfo=[];
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
+            LogApi::debug("[createRefund]获取支付信息".$payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
@@ -2585,7 +2587,7 @@ class OrderReturnCreater
                             'zuJin' => $return_info['refund_amount'],
                         ]
                     );
-                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }else{
                 if ($return_info['refund_amount'] > 0 || $return_info['auth_unfreeze_amount'] > 0) {
@@ -2600,7 +2602,7 @@ class OrderReturnCreater
                             'lianjie' => createShortUrl('https://h5.nqyong.com/index?appid=' . $order_info['appid']),
                         ]
                     );
-                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }
 
