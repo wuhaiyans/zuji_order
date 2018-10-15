@@ -57,6 +57,7 @@ class ReturnDeposit{
 		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
 			$smsContent['lianjie'] = $data['lianjie'];
 		}
+		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
