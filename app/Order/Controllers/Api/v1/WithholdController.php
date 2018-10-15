@@ -997,7 +997,7 @@ class WithholdController extends Controller
 			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
 
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
-				$youhui = $couponInfo['youhui'];
+				$youhui = $couponInfo['youhui'] / 100;
 			}
 			// 最小支付一分钱
 			$amount = $instalmentInfo['amount'] - $youhui;
@@ -1009,7 +1009,7 @@ class WithholdController extends Controller
 				// 创建优惠券使用记录
 				$couponData = [
 					'coupon_id'         => $couponInfo['coupon_id'],
-					'discount_amount'   => $couponInfo['youhui'],
+					'discount_amount'   => $youhui,
 					'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
 					'business_no'       => $business_no,
 				];
