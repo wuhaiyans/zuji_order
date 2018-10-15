@@ -431,11 +431,11 @@ class OrderReturnCreater
                         ];
                         LogApi::info("[createRefund]通知芝麻取消请求参数",$data);
                         //通知芝麻取消请求
-                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                       /* $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
                             LogApi::info("[createRefund]通知芝麻取消请求失败",$canceRequest);
                             return false;
-                        }
+                        }*/
                     }
                     //通知收发货取消发货
                     if($order_info['order_status'] == OrderStatus::OrderInStock ){
@@ -2390,6 +2390,7 @@ class OrderReturnCreater
      * @return bool
      */
     public static function refundUpdate(array $params,array $userinfo){
+
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
