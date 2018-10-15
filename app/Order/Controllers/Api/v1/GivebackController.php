@@ -518,7 +518,7 @@ class GivebackController extends Controller
 
 		$paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
-		$paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
+		$paramsArr['yajin'] = intval($orderGoodsInfo['yajin']);//押金金额
 
 		//开启事务
 		DB::beginTransaction();
