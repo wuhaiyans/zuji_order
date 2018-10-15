@@ -402,14 +402,25 @@ class OrderBuyout
 				'msg'=>'买断完成',
 		];
 		self::log($orderLog,$goodsLog);
-		//押金解冻短信发送
-		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
 				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['pay_type'] == PayInc::WeChatPay){
+			$smsCode = SceneConfig::RETURN_DEPOSIT;
+			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		}
+		else{
+			$smsCode = SceneConfig::RETURN_DEPOSIT;
+		}
+		//押金解冻短信发送
+		ReturnDeposit::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		return true;
 	}
 	static function log($orderLog,$goodsLog){
