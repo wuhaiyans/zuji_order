@@ -130,7 +130,7 @@ class ActiveInviteController extends Controller
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
         $activityInfo['head_images'] = "";
         //获取微信授权登录信息
-        $userWechat = "";//User::getUserWechat($uid);
+        $userWechat = User::getUserWechat($uid);
         if($userWechat){
             $activityInfo['head_images'] = $userWechat['headimgurl'];
         }
@@ -141,6 +141,7 @@ class ActiveInviteController extends Controller
             'total_page' =>$sum,
             'data' =>$list
         ];
+        if(empty($activityInfo['head_images'])){}
         return apiResponse($data,ApiStatus::CODE_0);
     }
 
