@@ -302,10 +302,9 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
-            $payInfo=[];
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
-            LogApi::debug("[createRefund]获取支付信息".$payInfo);
+            p($payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
@@ -315,11 +314,11 @@ class OrderReturnCreater
 
                 if($payInfo){
 
-                   if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                       $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                       $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
-                       $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
-                   }
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                        $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                        $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                    }
 
                     if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                         $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
