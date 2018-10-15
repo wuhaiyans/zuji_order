@@ -286,12 +286,22 @@ class OrderBuyout
 			self::log($orderLog,$goodsLog);
 			return true;
 		}
-		//发送短信
-		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['pay_type'] == PayInc::WeChatPay){
+			$smsCode = SceneConfig::BUYOUT_PAYMENT_WECHAT;
+			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		}
+		else{
+			$smsCode = SceneConfig::BUYOUT_PAYMENT;
+		}
+		//发送短信
+		BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		//日志记录
 		$orderLog = [
 				'uid'=>0,

@@ -54,7 +54,7 @@ class ReturnDeposit{
 				'goodsName'   =>$data['goodsName'],
 				'tuihuanYajin'=>$data['tuihuanYajin']."元",
 		];
-		if($class == SceneConfig::RETURN_DEPOSIT){
+		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
 			$smsContent['lianjie'] = $data['lianjie'];
 		}
 		// 发送短息
