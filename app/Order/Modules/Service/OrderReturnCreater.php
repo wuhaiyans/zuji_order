@@ -437,6 +437,16 @@ class OrderReturnCreater
                             return false;
                         }
                     }
+                    //通知收发货取消发货
+                    if($order_info['order_status'] == OrderStatus::OrderInStock ){
+                        $cancel = Delivery::cancel($params['order_no']);
+                        if( !$cancel ){
+                            LogApi::debug("[createRefund]通知收发货系统取消发货失败");
+                            //事务回滚
+                            DB::rollBack();
+                            return false;//取消发货失败
+                        }
+                    }
                     // 不需要清算，直接调起退款成功
                     $b = self::refundUpdate([
                         'business_type' => $data['business_key'],
