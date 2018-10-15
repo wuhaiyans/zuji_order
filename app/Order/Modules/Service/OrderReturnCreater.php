@@ -302,8 +302,10 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
+            $payInfo=[];
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
+            LogApi::debug("[createRefund]获取支付信息".$payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
@@ -311,20 +313,18 @@ class OrderReturnCreater
                 || $order_info['pay_type'] == PayInc::WithhodingPay
             ){
 
-                if(!$payInfo){
-                    return false;
-                    LogApi::debug("[createRefund]未找到支付信息");
-                }
+                if($payInfo){
 
-               if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                   $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                   $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
-                   $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
-               }
+                   if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                       $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                       $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                       $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                   }
 
-                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
-                    $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
+                    if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                        $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
+                    }
                 }
 
             }
@@ -333,17 +333,15 @@ class OrderReturnCreater
             //乐百分支付
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 LogApi::debug("[createRefund]乐百分支付");
-                if(!$payInfo){
-                    return false;
-                    LogApi::debug("[createRefund]未找到支付信息");
-                }
-                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    //实际支付金额=实付租金+意外险+实付押金
-                    $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
-                    //应退金额=实付租金+意外险+实付押金
-                    $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
-                    $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
-                    LogApi::debug("[createRefund]获取应退金额",$data);
+                if($payInfo){
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        //实际支付金额=实付租金+意外险+实付押金
+                        $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
+                        //应退金额=实付租金+意外险+实付押金
+                        $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
+                        $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                        LogApi::debug("[createRefund]获取应退金额",$data);
+                    }
                 }
 
             }
@@ -439,6 +437,16 @@ class OrderReturnCreater
                         if( !$canceRequest){
                             LogApi::info("[createRefund]通知芝麻取消请求失败",$canceRequest);
                             return false;
+                        }
+                    }
+                    //通知收发货取消发货
+                    if($order_info['order_status'] == OrderStatus::OrderInStock ){
+                        $cancel = Delivery::cancel($params['order_no']);
+                        if( !$cancel ){
+                            LogApi::debug("[createRefund]通知收发货系统取消发货失败");
+                            //事务回滚
+                            DB::rollBack();
+                            return false;//取消发货失败
                         }
                     }
                     // 不需要清算，直接调起退款成功
@@ -2579,6 +2587,7 @@ class OrderReturnCreater
                             'zuJin' => $return_info['refund_amount'],
                         ]
                     );
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }else{
                 if ($return_info['refund_amount'] > 0 || $return_info['auth_unfreeze_amount'] > 0) {
@@ -2593,10 +2602,11 @@ class OrderReturnCreater
                             'lianjie' => createShortUrl('https://h5.nqyong.com/index?appid=' . $order_info['appid']),
                         ]
                     );
+                    LogApi::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }
 
-            Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+
             LogApi::debug("[refundUpdate]退款执行成功");
             return true;
 

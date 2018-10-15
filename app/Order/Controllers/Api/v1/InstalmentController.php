@@ -234,7 +234,7 @@ class InstalmentController extends Controller
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
-            $discount_amount = $couponInfo['youhui'];
+            $discount_amount = $couponInfo['youhui'] / 100;
 
             if($discount_amount >= $instalmentInfo['amount']){
                 $instalmentInfo['discount_amount']     = $instalmentInfo['amount'];
@@ -242,7 +242,7 @@ class InstalmentController extends Controller
             }else{
                 $amount = $instalmentInfo['amount'] - $couponInfo['youhui'];
 
-                $instalmentInfo['discount_amount']     = $discount_amount/100;
+                $instalmentInfo['discount_amount']     = $discount_amount;
                 $instalmentInfo['amount']              = $amount;
             }
         }

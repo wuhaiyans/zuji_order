@@ -38,7 +38,6 @@ class ReturnDeposit{
 				'orderNo'=>'required',
 				'goodsName'=>'required',
 				'tuihuanYajin'=>'required',
-                'lianjie'       =>'required',
 		];
 		$validator = app('validator')->make($data, $rule);
 		if ($validator->fails()) {
@@ -49,15 +48,18 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
-        LogApi::debug("[returnDeposit]获取短信参数",$data);
+		$smsContent = [
+				'realName'    =>$data['realName'],
+				'orderNo'     =>$data['orderNo'],
+				'goodsName'   =>$data['goodsName'],
+				'tuihuanYajin'=>$data['tuihuanYajin']."元",
+		];
+		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = $data['lianjie'];
+		}
+		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'    =>$data['realName'],
-            'orderNo'     =>$data['orderNo'],
-            'goodsName'   =>$data['goodsName'],
-            'tuihuanYajin'=>$data['tuihuanYajin']."元",
-            'lianjie'      =>$data['lianjie'],
-		]);
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
 	
 }

@@ -6,6 +6,7 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -249,12 +250,22 @@ class OrderBuyout
 			if(!$result){
 				return false;
 			}
-			//发送短信
-			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
+			//设置短信发送内容
+			$smsContent = [
 					'mobile'=>$orderInfo['mobile'],
 					'realName'=>$orderInfo['realname'],
 					'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
-			]);
+			];
+			//相应支付渠道使用相应短信模板
+			if($orderInfo['pay_type'] == PayInc::WeChatPay){
+				$smsCode = SceneConfig::BUYOUT_PAYMENT_END_WECHAT;
+				$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+			}
+			else{
+				$smsCode = SceneConfig::BUYOUT_PAYMENT_END;
+			}
+			//发送短信
+			BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 			//日志记录
 			$orderLog = [
 					'uid'=>0,
@@ -275,12 +286,22 @@ class OrderBuyout
 			self::log($orderLog,$goodsLog);
 			return true;
 		}
-		//发送短信
-		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['pay_type'] == PayInc::WeChatPay){
+			$smsCode = SceneConfig::BUYOUT_PAYMENT_WECHAT;
+			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		}
+		else{
+			$smsCode = SceneConfig::BUYOUT_PAYMENT;
+		}
+		//发送短信
+		BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		//日志记录
 		$orderLog = [
 				'uid'=>0,
@@ -391,14 +412,25 @@ class OrderBuyout
 				'msg'=>'买断完成',
 		];
 		self::log($orderLog,$goodsLog);
-		//押金解冻短信发送
-		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
 				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['pay_type'] == PayInc::WeChatPay){
+			$smsCode = SceneConfig::RETURN_DEPOSIT;
+			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		}
+		else{
+			$smsCode = SceneConfig::RETURN_DEPOSIT;
+		}
+		//押金解冻短信发送
+		ReturnDeposit::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		return true;
 	}
 	static function log($orderLog,$goodsLog){
