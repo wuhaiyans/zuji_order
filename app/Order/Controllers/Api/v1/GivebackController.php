@@ -639,7 +639,7 @@ class GivebackController extends Controller
 			$ip= isset($userInfo['ip'])?$userInfo['ip']:'';
 			$extended_params= isset($paramsArr['extended_params'])?$paramsArr['extended_params']:[];
 			// 微信支付，交易类型：JSAPI，redis读取openid
-			if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+			if( $paramsArr['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
 				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
 					$_key = 'wechat_openid_'.$orders['auth_token'];
 					$openid = \Illuminate\Support\Facades\Redis::get($_key);
