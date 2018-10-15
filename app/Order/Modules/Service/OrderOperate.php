@@ -632,7 +632,7 @@ class OrderOperate
                 }else{
                     $sum_terms = $res['sum_terms'];
                     //未还租金
-                    $no_return_zujin = normalizeNum($orderInfo['order_amount'] - $res['sum_amount']);
+                    $no_return_zujin = normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']-$res['sum_amount']);
                 }
                 $instalmentInfo =[
 	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
