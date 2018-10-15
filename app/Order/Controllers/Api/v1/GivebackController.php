@@ -518,7 +518,7 @@ class GivebackController extends Controller
 
 		$paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
-		$paramsArr['yajin'] = intval($orderGoodsInfo['yajin']);//押金金额
+		$paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
 
 		//开启事务
 		DB::beginTransaction();
@@ -992,7 +992,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		// | 有押金->退押金处理（执行清算处理）
 		//-+--------------------------------------------------------------------
-		if( $paramsArr['yajin'] ){
+		if( $paramsArr['yajin'] != 0 ){
 			//还机单清算
 			$orderCleanResult = $this->__orderClean( $paramsArr );
 			if( !$orderCleanResult ){
@@ -1244,7 +1244,7 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
-		if( $paramsArr['yajin'] ){
+		if( $paramsArr['yajin'] != 0 ){
 			//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
 			$paymentNo = $payObj->getPaymentNo();
