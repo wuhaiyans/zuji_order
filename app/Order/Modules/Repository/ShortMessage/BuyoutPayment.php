@@ -47,7 +47,7 @@ class BuyoutPayment{
 				'realName'=>$data['realName'],
 				'buyoutPrice'=>$data['buyoutPrice'],
 		];
-		if($code == SceneConfig::BUYOUT_PAYMENT_END_WECHAT){
+		if($class == SceneConfig::BUYOUT_PAYMENT_END_WECHAT){
 			$array['lianjie'] = createShortUrl($data['url']);
 		}
 		// 发送短息
