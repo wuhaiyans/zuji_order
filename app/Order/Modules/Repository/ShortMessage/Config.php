@@ -112,7 +112,7 @@ class Config {
 				//买断
 				SceneConfig::BUYOUT_CONFIRM					=> 'SMS_113461144', //买断确认短信
 				SceneConfig::BUYOUT_PAYMENT					=> 'SMS_113461145', //微回收买断支付短信
-				SceneConfig::BUYOUT_PAYMENT_WECHAT			=> 'SMS_113461210', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_WECHAT			=> 'SMS_113461212', //买断支付短信
 				SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_113461161', //买断完成短信
 				SceneConfig::BUYOUT_PAYMENT_END_WECHAT	=> 'SMS_113461210', //微回收买断完成短信
                 //退押金

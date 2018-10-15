@@ -47,8 +47,8 @@ class BuyoutPayment{
 				'realName'=>$data['realName'],
 				'buyoutPrice'=>$data['buyoutPrice'],
 		];
-		if($class == SceneConfig::BUYOUT_PAYMENT_END_WECHAT){
-			$array['lianjie'] = createShortUrl($data['url']);
+		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = $data['lianjie'];
 		}
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, $array);
