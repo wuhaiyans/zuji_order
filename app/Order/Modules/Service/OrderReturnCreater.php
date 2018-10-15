@@ -2575,6 +2575,7 @@ class OrderReturnCreater
                             'zuJin' => $return_info['refund_amount'],
                         ]
                     );
+                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }else{
                 if ($return_info['refund_amount'] > 0 || $return_info['auth_unfreeze_amount'] > 0) {
@@ -2589,10 +2590,11 @@ class OrderReturnCreater
                             'lianjie' => createShortUrl('https://h5.nqyong.com/index?appid=' . $order_info['appid']),
                         ]
                     );
+                    Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
                 }
             }
 
-            Log::debug($returnSend?"Order :".$return_info['order_no']." IS OK":"IS error");
+
             LogApi::debug("[refundUpdate]退款执行成功");
             return true;
 
