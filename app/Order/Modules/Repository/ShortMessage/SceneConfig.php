@@ -160,6 +160,10 @@ class SceneConfig {
      */
     const BUYOUT_PAYMENT_END = 'BuyoutPaymentEnd';
     /**
+     * 场景：<b>【微信买断支付完成】</b>
+     */
+    const BUYOUT_PAYMENT_END_WECHAT = 'BuyoutPaymentEndWechat';
+    /**
      * 场景：<b>【押金退还】</b>
      */
     const RETURN_DEPOSIT = 'ReturnDeposit';

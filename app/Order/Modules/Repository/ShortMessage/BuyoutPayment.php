@@ -43,11 +43,14 @@ class BuyoutPayment{
 		if( !$code ){
 			return false;
 		}
-
+		$array = [
+				'realName'=>$data['realName'],
+				'buyoutPrice'=>$data['buyoutPrice'],
+		];
+		if($code == SceneConfig::BUYOUT_PAYMENT_END_WECHAT){
+			$array['lianjie'] = createShortUrl($data['url']);
+		}
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realName'],
-            'buyoutPrice'=>$data['buyoutPrice'],
-		]);
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, $array);
 	}
 }
