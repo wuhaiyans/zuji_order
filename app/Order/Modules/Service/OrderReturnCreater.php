@@ -304,7 +304,6 @@ class OrderReturnCreater
             }
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
-            p($payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay

@@ -344,6 +344,10 @@ class OrderCreater
      */
     public function confirmation($data)
     {
+        // 订单发货成功后 发送短信
+        $orderNoticeObj = new OrderNotice(1,'AA15172529780560',SceneConfig::ORDER_DELIVERY);
+        $orderNoticeObj->notify();
+
         try {
             //var_dump($data);die;
             $order_no = OrderOperate::createOrderNo(1);
