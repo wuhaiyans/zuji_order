@@ -30,7 +30,9 @@ class User extends \App\Lib\BaseApi{
             'address_id'=>$address_id,
         ];
 
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
+        $userInfo = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
+		$userInfo['realname'] = $userInfo['realname']?$userInfo['realname']: substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11);
+		return $userInfo;
     }
     /**
      * 获取用户微信登录授权信息

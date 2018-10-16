@@ -423,19 +423,19 @@ class OrderReturnCreater
                         //查询芝麻订单
                         $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
                         LogApi::info("[refundApply]查询芝麻订单",$miniOrderInfo);
-                        $data = [
+                        $data1 = [
                             'out_order_no' => $params['order_no'],//商户端订单号
                             'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                             'remark' => $params['reason_text'],//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
-                        LogApi::info("[createRefund]通知芝麻取消请求参数",$data);
+                        LogApi::info("[createRefund]通知芝麻取消请求参数",$data1);
                         //通知芝麻取消请求
-                       /* $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
                         if( !$canceRequest){
                             LogApi::info("[createRefund]通知芝麻取消请求失败",$canceRequest);
                             return false;
-                        }*/
+                        }
                     }
                     //通知收发货取消发货
                     if($order_info['order_status'] == OrderStatus::OrderInStock ){
@@ -447,15 +447,15 @@ class OrderReturnCreater
                             return false;//取消发货失败
                         }
                     }
-                    LogApi::debug("[createRefund]发起退款参数",$data);
+                    LogApi::debug("[createRefund]不需清算，发起退款参数",$data);
                     // 不需要清算，直接调起退款成功
                     $b = self::refundUpdate([
-                        'business_type' => $data['business_key'],
+                        'business_type' => OrderStatus::BUSINESS_REFUND,
                         'business_no'	=>  $data['refund_no'],
                         'status'		=> 'success',
                     ], $userinfo);
                     LogApi::info("[createRefund]不需要清算，直接调起退款成功结果",$b);
-                    if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+                    if( $b == true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
                         //事务提交
                         DB::commit();
                         return true;

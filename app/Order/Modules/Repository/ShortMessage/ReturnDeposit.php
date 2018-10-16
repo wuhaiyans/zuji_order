@@ -54,10 +54,10 @@ class ReturnDeposit{
 				'goodsName'   =>$data['goodsName'],
 				'tuihuanYajin'=>$data['tuihuanYajin']."元",
 		];
-		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+        if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
 			$smsContent['lianjie'] = $data['lianjie'];
-		}
-		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
+        }
+		LogApi::debug("returnDepositSms",['smsContent'=>$smsContent,'chanelId'=>$channel_id,'code'=>$code]);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
