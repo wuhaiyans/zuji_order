@@ -48,27 +48,16 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
+		$smsContent = [
+				'realName'    =>$data['realName'],
+				'orderNo'     =>$data['orderNo'],
+				'goodsName'   =>$data['goodsName'],
+				'tuihuanYajin'=>$data['tuihuanYajin']."元",
+		];
         if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
-            $smsContent = [
-                'realName'    =>$data['realName'],
-                'orderNo'     =>$data['orderNo'],
-                'goodsName'   =>$data['goodsName'],
-                'tuihuanYajin'=>$data['tuihuanYajin']."元",
-                'lianjie'      => $data['lianjie']
-            ];
-
-        }else{
-            $smsContent = [
-                'realName'    =>$data['realName'],
-                'orderNo'     =>$data['orderNo'],
-                'goodsName'   =>$data['goodsName'],
-                'tuihuanYajin'=>$data['tuihuanYajin']."元",
-            ];
+			$smsContent['lianjie'] = $data['lianjie'];
         }
-
-		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
-        LogApi::debug("[returnDeposit]发送短信渠道id".$channel_id);
-        LogApi::debug("[returnDeposit]发送短信模板".$code);
+		LogApi::debug("returnDepositSms",['smsContent'=>$smsContent,'chanelId'=>$channel_id,'code'=>$code]);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
