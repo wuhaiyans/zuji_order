@@ -7,13 +7,17 @@ use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 class TestController extends Controller
 {
 	public function sendSms() {
-		$mobile = '13654565804';
+
+
+
+
+
+		
 		//发送短信
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'765070',
-			'WithholdFailInitiative',
-			['mobile' => $mobile]);
+			'GAA0946374666450',
+			"GivebackReturnDeposit");
 		$notice->notify();
 	
 //		//发送短信
