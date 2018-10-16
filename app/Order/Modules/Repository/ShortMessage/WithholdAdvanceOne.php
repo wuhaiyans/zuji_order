@@ -94,7 +94,7 @@ class WithholdAdvanceOne implements ShortMessage {
         ];
         \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前1天扣款]',$dataSms);
         // 发送短息
-        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

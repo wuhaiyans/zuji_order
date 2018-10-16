@@ -98,7 +98,7 @@ class WithholdOverduThree implements ShortMessage {
         ];
         \App\Lib\Common\LogApi::debug('[WithholdOverduThree:逾期3天]',$dataSms);
         // 发送短息
-        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 
