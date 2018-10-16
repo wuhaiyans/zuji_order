@@ -352,6 +352,7 @@ class ReceiveService
      *      1.换货类型
      *      2.检测完成
      *      3.全部合格
+     *      4.入库
      */
     public function createDelivery($params){
         $model = Receive::find($params['receive_no']);
