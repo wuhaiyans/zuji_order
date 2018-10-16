@@ -3415,6 +3415,57 @@ class OrderReturnCreater
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
+    /**
+     * 用户逾期列表导出
+     *
+     */
+    public static function overDueExport($param = array(),$pagesize=5){
+        $orderListArray = OrderReturnRepository::getAdminOrderList($param, $pagesize);
+        LogApi::debug("[overDueExport]用户逾期获取数据",$orderListArray);
+        if (!empty($orderListArray['data'])) {
+
+            foreach ($orderListArray['data'] as $keys=>$values) {
+
+                //订单状态名称
+                $orderListArray['data'][$keys]['order_status_name'] = OrderStatus::getStatusName($values['order_status']);
+                //支付方式名称
+                $orderListArray['data'][$keys]['pay_type_name'] = PayInc::getPayName($values['pay_type']);
+                //应用来源
+                $orderListArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['appid']);
+                //订单冻结名称
+                $orderListArray['data'][$keys]['freeze_type_name'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
+                //发货时间
+                $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
+                //逾期天数
+                $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)+1).'天';
+
+
+                //订单商品列表相关的数据
+                $actArray = OrderOperateInc::orderInc($values['order_status'], 'adminActBtn');
+
+
+                // 有冻结状态时
+                if ($values['freeze_type']>0) {
+                    $actArray['refund_btn'] = false;
+                    $actArray['modify_address_btn'] = false;
+                    $actArray['confirm_btn'] = false;
+                    $actArray['confirm_receive'] = false;
+                    $actArray['buy_off'] = false;
+                    $actArray['Insurance'] = false;
+                }
+
+                $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
+                //回访标识
+                $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+
+            }
+
+        }
+
+        $orderListArray =  OrderOperate::getManageGoodsActAdminState($orderListArray);
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+    }
 
 
 
