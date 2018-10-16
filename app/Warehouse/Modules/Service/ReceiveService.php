@@ -366,6 +366,7 @@ class ReceiveService
                 'customer_address'=>$model->customer_address,
                 'business_key'=>$model->business_key,
                 'business_no'=>$model->business_no,
+                'predict_delivery_time'=>0,
             ];
             foreach ($goods as $k=>$item){
                 $data['delivery_detail'][]=[
