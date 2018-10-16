@@ -76,9 +76,9 @@ class GivebackReturnDeposit implements ShortMessage {
             'tuihuanYajin'      => $goodsInfo['yajin'],
             'lianjie'           => createShortUrl($lianjie),
         ];
-        
+
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 
