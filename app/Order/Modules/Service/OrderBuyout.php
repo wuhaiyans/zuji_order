@@ -15,6 +15,7 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\ShortMessage\BuyoutPayment;
+use App\Order\Modules\Repository\ShortMessage\Config;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
@@ -257,13 +258,10 @@ class OrderBuyout
 					'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
 			];
 			//相应支付渠道使用相应短信模板
-			if($orderInfo['pay_type'] == PayInc::WeChatPay){
-				$smsCode = SceneConfig::BUYOUT_PAYMENT_END_WECHAT;
-				$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+			if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+				$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
 			}
-			else{
-				$smsCode = SceneConfig::BUYOUT_PAYMENT_END;
-			}
+			$smsCode = SceneConfig::BUYOUT_PAYMENT_END;
 			//发送短信
 			BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 			//日志记录
@@ -293,13 +291,10 @@ class OrderBuyout
 				'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
 		];
 		//相应支付渠道使用相应短信模板
-		if($orderInfo['pay_type'] == PayInc::WeChatPay){
-			$smsCode = SceneConfig::BUYOUT_PAYMENT_WECHAT;
-			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
 		}
-		else{
-			$smsCode = SceneConfig::BUYOUT_PAYMENT;
-		}
+		$smsCode = SceneConfig::BUYOUT_PAYMENT;
 		//发送短信
 		BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		//日志记录
@@ -422,13 +417,10 @@ class OrderBuyout
 				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
 		];
 		//相应支付渠道使用相应短信模板
-		if($orderInfo['pay_type'] == PayInc::WeChatPay){
-			$smsCode = SceneConfig::RETURN_DEPOSIT;
-			$smsContent['url'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
 		}
-		else{
-			$smsCode = SceneConfig::RETURN_DEPOSIT;
-		}
+		$smsCode = SceneConfig::RETURN_DEPOSIT;
 		//押金解冻短信发送
 		ReturnDeposit::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		return true;
