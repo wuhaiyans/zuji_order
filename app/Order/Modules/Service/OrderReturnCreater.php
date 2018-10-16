@@ -2591,7 +2591,14 @@ class OrderReturnCreater
                 }
             }else{
                 if ($return_info['refund_amount'] > 0 || $return_info['auth_unfreeze_amount'] > 0) {
-
+                    LogApi::debug("[refundUpdate]发送短信参数",[
+                        'mobile' => $order_info['mobile'],
+                        'realName' => $userInfo['realname'],
+                        'orderNo' => $order_info['order_no'],
+                        'goodsName' => $goodsInfo['goods_name'],
+                        'tuihuanYajin' => $return_info['auth_unfreeze_amount']+$return_info['refund_amount'],
+                        'lianjie' => createShortUrl('https://h5.nqyong.com/index?appid=' . $order_info['appid'])
+                    ]);
                     //发送短信，押金解冻短信发送
                     $returnSend = ReturnDeposit::notify($order_info['channel_id'], SceneConfig::RETURN_DEPOSIT, [
                             'mobile' => $order_info['mobile'],
@@ -3408,5 +3415,7 @@ class OrderReturnCreater
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
+
+
 
 }
