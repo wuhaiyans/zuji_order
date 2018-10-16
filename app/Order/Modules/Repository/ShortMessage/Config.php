@@ -213,6 +213,7 @@ class Config {
 				SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING	=> 'SMS_113461208', // 微回收订单将在1个月租期到期
 				SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING	=> 'SMS_113461209', // 微回收订单将在1周之后到期
 				SceneConfig::RETURN_DEPOSIT 			=> 'SMS_113461211', // 微回收退还押金成功
+				SceneConfig::GIVEBACK_RETURNDEPOSIT 	=> 'SMS_113461211', // 微回收退还押金成功
 
 				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
 				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461210', //微回收买断支付短信
