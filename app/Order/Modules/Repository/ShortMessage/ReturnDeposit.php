@@ -48,15 +48,24 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
-		$smsContent = [
-				'realName'    =>$data['realName'],
-				'orderNo'     =>$data['orderNo'],
-				'goodsName'   =>$data['goodsName'],
-				'tuihuanYajin'=>$data['tuihuanYajin']."元",
-		];
-		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
-			$smsContent['lianjie'] = $data['lianjie'];
-		}
+        if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+            $smsContent = [
+                'realName'    =>$data['realName'],
+                'orderNo'     =>$data['orderNo'],
+                'goodsName'   =>$data['goodsName'],
+                'tuihuanYajin'=>$data['tuihuanYajin']."元",
+                'lianjie'      => $data['lianjie']
+            ];
+
+        }else{
+            $smsContent = [
+                'realName'    =>$data['realName'],
+                'orderNo'     =>$data['orderNo'],
+                'goodsName'   =>$data['goodsName'],
+                'tuihuanYajin'=>$data['tuihuanYajin']."元",
+            ];
+        }
+
 		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
         LogApi::debug("[returnDeposit]发送短信渠道id".$channel_id);
         LogApi::debug("[returnDeposit]发送短信模板".$code);
