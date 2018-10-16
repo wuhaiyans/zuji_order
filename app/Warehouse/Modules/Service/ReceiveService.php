@@ -356,7 +356,7 @@ class ReceiveService
     public function createDelivery($params){
         $model = Receive::find($params['receive_no']);
         $goods = $model->goods;
-        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
+        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_IN && $model->check_result==Receive::CHECK_RESULT_OK ){
             $data = [
                 'order_no'=>$model->order_no,
                 'app_id'=>$model->app_id,
