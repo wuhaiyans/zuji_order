@@ -58,6 +58,8 @@ class ReturnDeposit{
 			$smsContent['lianjie'] = $data['lianjie'];
 		}
 		LogApi::debug("[returnDeposit]发送短信参数",$smsContent);
+        LogApi::debug("[returnDeposit]发送短信渠道id".$channel_id);
+        LogApi::debug("[returnDeposit]发送短信模板".$code);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
