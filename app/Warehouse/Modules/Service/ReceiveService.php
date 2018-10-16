@@ -352,11 +352,12 @@ class ReceiveService
      *      1.换货类型
      *      2.检测完成
      *      3.全部合格
+     *      4.入库
      */
     public function createDelivery($params){
         $model = Receive::find($params['receive_no']);
         $goods = $model->goods;
-        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
+        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_IN && $model->check_result==Receive::CHECK_RESULT_OK ){
             $data = [
                 'order_no'=>$model->order_no,
                 'app_id'=>$model->app_id,
