@@ -259,7 +259,7 @@ class OrderBuyout
 			];
 			//相应支付渠道使用相应短信模板
 			if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
-				$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+				$smsContent['lianjie'] =  createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
 			}
 			$smsCode = SceneConfig::BUYOUT_PAYMENT_END;
 			//发送短信
@@ -292,7 +292,7 @@ class OrderBuyout
 		];
 		//相应支付渠道使用相应短信模板
 		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
-			$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+			$smsContent['lianjie'] = createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
 		}
 		$smsCode = SceneConfig::BUYOUT_PAYMENT;
 		//发送短信
@@ -418,7 +418,7 @@ class OrderBuyout
 		];
 		//相应支付渠道使用相应短信模板
 		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
-			$smsContent['lianjie'] =  "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+			$smsContent['lianjie'] = createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
 		}
 		$smsCode = SceneConfig::RETURN_DEPOSIT;
 		//押金解冻短信发送
