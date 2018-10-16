@@ -80,8 +80,6 @@ class DeliveryRepository
             DB::rollBack();
 
             throw new \Exception($e->getMessage());
-
-            return false;
         }
 
         return true;
@@ -106,8 +104,8 @@ class DeliveryRepository
                 'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
                 'status_time'   =>  $time,
-                'zuqi' => $val['zuqi'],
-                'zuqi_type' => $val['zuqi_type']
+                'zuqi' => isset($val['zuqi']) ? $val['zuqi'] : 0,
+                'zuqi_type' => isset($val['zuqi_type']) ? $val['zuqi_type'] : 0
             ];
             $goodsModel = new DeliveryGoods();
             $goodsModel->create($row);
