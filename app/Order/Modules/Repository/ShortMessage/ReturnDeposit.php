@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
-use App\Lib\Common\LogApi;
-
 
 /**
  * OrderCancel
@@ -57,7 +55,6 @@ class ReturnDeposit{
         if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
 			$smsContent['lianjie'] = $data['lianjie'];
         }
-		LogApi::debug("returnDepositSms",['smsContent'=>$smsContent,'chanelId'=>$channel_id,'code'=>$code]);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}

@@ -491,6 +491,9 @@ class CronOperate
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
 
+            // 梁总电话号测试
+            $whereArray[] = ['order_info.mobile', '=', '13426301916'];
+
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
@@ -570,6 +573,8 @@ class CronOperate
             $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
+            // 梁总电话号测试
+            $whereArray[] = ['order_info.mobile', '=', '13426301916'];
 
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()

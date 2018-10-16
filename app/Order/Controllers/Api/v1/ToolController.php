@@ -240,7 +240,11 @@ class ToolController extends Controller
             $params['page'] = intval(($offset / $pre_count)+ $abc) ;
             ++$abc;
             $orderData = array();
+            LogApi::debug("[overDueExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
+
             $orderData = OrderReturnCreater::overDueExport($params,$pre_count);
+            LogApi::debug("[overDueExport]查询结果",$orderData);
+            print_r($orderData);
             if ($orderData) {
                 $data = array();
                 foreach ($orderData as $item) {
