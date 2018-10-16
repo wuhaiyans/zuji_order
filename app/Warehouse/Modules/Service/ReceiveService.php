@@ -373,20 +373,23 @@ class ReceiveService
                     'goods_name'=>$item->goods_name,
                     'goods_no'=>$item->goods_no,
                     'quantity'=>$item->quantity,
+                    'zuqi'=>0,
+                    'zuqi_type'=>0
                 ];
                 $item->status=ReceiveGoods::STATUS_CONFIRM_RECEIVE;
                 $item->status_time=time();
                 $item->update();
+            }
+
+            //创建发货单
+            if (!DeliveryRepository::create($data)) {
+                throw new \Exception('创建发货单失败');
             }
             $model->status=Receive::STATUS_CONFIRM_RECEIVE;
             $model->exchange_description=$params['exchange_description']?$params['exchange_description']:'无';
             $model->status_time=time();
             $model->update();
 
-            //创建发货单
-            if (!DeliveryRepository::create($data)) {
-                throw new \Exception('创建发货单失败');
-            }
         }else{
             throw new \Exception('当前状态无法确认同意换货');
         }
