@@ -302,10 +302,8 @@ class OrderReturnCreater
                 $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
 
             }
-            $payInfo=[];
             //获取支付信息
             $payInfo = OrderPayRepository::find($params['order_no']);
-            LogApi::debug("[createRefund]获取支付信息".$payInfo);
             //花呗分期+预授权 、 直接支付
             if($order_info['pay_type'] == PayInc::PcreditPayInstallment
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
@@ -315,11 +313,11 @@ class OrderReturnCreater
 
                 if($payInfo){
 
-                   if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                       $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                       $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
-                       $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
-                   }
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                        $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                        $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                    }
 
                     if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                         $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
@@ -433,11 +431,11 @@ class OrderReturnCreater
                         ];
                         LogApi::info("[createRefund]通知芝麻取消请求参数",$data);
                         //通知芝麻取消请求
-                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                       /* $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
                         if( !$canceRequest){
                             LogApi::info("[createRefund]通知芝麻取消请求失败",$canceRequest);
                             return false;
-                        }
+                        }*/
                     }
                     //通知收发货取消发货
                     if($order_info['order_status'] == OrderStatus::OrderInStock ){
@@ -2392,6 +2390,7 @@ class OrderReturnCreater
      * @return bool
      */
     public static function refundUpdate(array $params,array $userinfo){
+
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型

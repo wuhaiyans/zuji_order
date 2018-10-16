@@ -59,6 +59,7 @@ class OrderCreate implements ShortMessage {
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'goodsName'=>$goodsName,
+            'lianjie'=>createShortUrl('https://h5.nqyong.com/index?appid='.$orderInfo['appid']),
 		]);
 	}
 

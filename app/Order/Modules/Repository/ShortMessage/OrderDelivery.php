@@ -50,12 +50,22 @@ class OrderDelivery implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
+        $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+        if(!$goods){
+            return false;
+        }
+        $goodsName ="";
+        foreach ($goods as $k=>$v){
+            $goodsName.=$v['goods_name']." ";
+        }
+
 		$orderDelivery = OrderDeliveryRepository::getOrderDelivery($this->business_no);
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName'=>$orderInfo['realname'],
             'orderNo'=>$orderInfo['order_no'],
+            'goodsName'=>$goodsName,
             'logisticsNo'=>$orderDelivery['logistics_no'],
             'lianjie'=>createShortUrl('https://h5.nqyong.com/index?appid='.$orderInfo['appid']),
 		]);
