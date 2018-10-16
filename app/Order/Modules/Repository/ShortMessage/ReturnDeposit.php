@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
-use App\Lib\Common\LogApi;
-
 
 /**
  * OrderCancel
@@ -32,7 +30,7 @@ class ReturnDeposit{
 		if(!$class){
 			return false;
 		}
-		/*$rule= [
+		$rule= [
 				'mobile'=>'required',
 				'realName'=>'required',
 				'orderNo'=>'required',
@@ -42,7 +40,7 @@ class ReturnDeposit{
 		$validator = app('validator')->make($data, $rule);
 		if ($validator->fails()) {
 			return false;
-		}*/
+		}
 		// 短息模板
 		$code = Config::getCode($channel_id, $class);
 		if( !$code ){
@@ -52,13 +50,11 @@ class ReturnDeposit{
 				'realName'    =>$data['realName'],
 				'orderNo'     =>$data['orderNo'],
 				'goodsName'   =>$data['goodsName'],
-				'tuihuanYajin'=>$data['tuihuanYajin']."美元",
+				'tuihuanYajin'=>$data['tuihuanYajin']."元",
 		];
         if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
-
+			$smsContent['lianjie'] = $data['lianjie'];
         }
-		$smsContent['lianjie'] = "wwww.baidu.com";
-		LogApi::debug("returnDepositSms",['smsContent'=>$smsContent,'chanelId'=>$channel_id,'code'=>$code]);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
