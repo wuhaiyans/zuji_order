@@ -401,6 +401,7 @@ class OrderGiveback
 				'status'     => 'required',//支付状态
 			];
 			$validator = app('validator')->make($params, $rules);
+			$order_type = isset($params['order_type'])?$params['order_type']:'';
 			if ($validator->fails()) {
 				set_apistatus(ApiStatus::CODE_91000, $validator->errors()->first());
 				\App\Lib\Common\LogApi::debug('[还机支付回调]参数错误', ['$params'=>$params]);
@@ -488,7 +489,7 @@ class OrderGiveback
 					'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 					'payment_time'=> time(),
 				]);
-				if( $params['order_type'] != \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
+				if( $order_type != \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
 				//获取当时订单支付时的相关pay的对象信息[查询payment_no和funath_no]
 				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$orderGoodsInfo['order_no'] );
 				$paymentNo = $payObj->getPaymentNo();
@@ -532,8 +533,8 @@ class OrderGiveback
 				'out_auth_no' => $fundauthNo,//和funath_no
 			];
 			//判断是否为小程序（小程序清算数据为已完成）
-			if(isset($params['order_type'])){
-				if($params['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
+			if($order_type){
+				if($order_type == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
 					$clearData['status'] = OrderCleaningStatus::orderCleaningComplete;//清算单状态为已完成
 				}
 			}
