@@ -44,6 +44,8 @@ class WithholdAdvanceThree implements ShortMessage {
             return false;
         }
 
+        \App\Lib\Common\LogApi::debug('[cronWithholdMessage:'.$instalmentInfo['order_no'].'提前3天扣款短信]');
+
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
@@ -97,7 +99,7 @@ class WithholdAdvanceThree implements ShortMessage {
         ];
         \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前3天扣款]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

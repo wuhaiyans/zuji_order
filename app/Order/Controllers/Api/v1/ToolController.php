@@ -184,7 +184,13 @@ class ToolController extends Controller
     /**
      *
      * 用户逾期列表
-     *
+     *[
+     * 'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * ]
      */
     public function overDue(Request $request){
         try{
@@ -214,6 +220,7 @@ class ToolController extends Controller
      *
      */
     public function overDueExport(Request $request){
+        echo 111;die;
         set_time_limit(0);
         $params = $request->all();
         $pageSize = 50000;
@@ -247,7 +254,6 @@ class ToolController extends Controller
 
             $orderData = OrderReturnCreater::overDueExport($params,$pre_count);
             LogApi::debug("[overDueExport]查询结果",$orderData);
-            print_r($orderData);
             if ($orderData) {
                 $data = array();
                 foreach ($orderData as $item) {
