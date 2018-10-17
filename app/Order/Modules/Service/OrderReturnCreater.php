@@ -3446,7 +3446,7 @@ class OrderReturnCreater
                 }else{
                     $orderListArray['data'][$keys]['matching_name'] = "否";
                 }
-                $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
                 $orderListArray['data'][$keys]['matching'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
 
 
