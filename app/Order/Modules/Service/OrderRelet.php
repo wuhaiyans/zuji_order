@@ -366,6 +366,15 @@ class OrderRelet
                 $goodsObj = Goods::getByGoodsId($relet['goods_id']);
                 $goods_arr = $goodsObj->getData();
 
+                //修改小程序续租剩余时间
+                if($relet['zuqi_type']==ReletStatus::STATUS1){
+                    if(!$goodsObj->setReletTime($relet['zuqi'])){
+                        DB::rollBack();
+                        LogApi::info("[OrderRelet]修改小程序短租商品续租剩余天数失败", $reletNo);
+                        return false;
+                    }
+                }
+
                 // 获取周期最新一条对象
                 $goodsUnitObj = ServicePeriod::getByGoodsUnitNo($goods_arr['order_no'],$goods_arr['goods_no']);
                 if($goodsUnitObj){
@@ -402,7 +411,7 @@ class OrderRelet
                     LogApi::info("[OrderRelet]续租添加设备周期表失败", $reletNo);
                     return false;
                 }
-                //修改订单商品服务结束时间
+                //修改订单商品服务结束时间和租期
                 if( !ServicePeriod::updateGoods($data) ){
                     DB::rollBack();
                     LogApi::info("[OrderRelet]续租修改订单商品服务结束时间失败", $reletNo);
@@ -452,21 +461,29 @@ class OrderRelet
         ];
         $row = OrderGoodsRepository::getGoodsRow($where);
         if($row){
-            if($row['zuqi_type']==OrderStatus::ZUQI_TYPE1){
-                $list = publicInc::getDuanzuList();
-                foreach ($list as $item){
-                    $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
-                }
-                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
+            //暂时只支持短租续租
+            if($row['zuqi_type']==OrderStatus::ZUQI_TYPE1) {
+                $row['pay'][] = ['pay_type' => PayInc::FlowerStagePay, 'pay_name' => PayInc::getPayName(PayInc::FlowerStagePay)];
             }else{
-                $list = publicInc::getCangzulist();
-                foreach ($list as $item){
-                    $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
-                }
-                $row['pay'][] = ['pay_type'=>PayInc::WithhodingPay,'pay_name'=>PayInc::getPayName(PayInc::WithhodingPay)];
-                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
+                set_msg('暂时只支持短租续租');
+                return false;
             }
-            $row['list'] = $list;
+
+//            if($row['zuqi_type']==OrderStatus::ZUQI_TYPE1){
+//                $list = publicInc::getDuanzuList();
+//                foreach ($list as $item){
+//                    $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
+//                }
+//                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
+//            }else{
+//                $list = publicInc::getCangzulist();
+//                foreach ($list as $item){
+//                    $list[$item] = ['zuqi'=>$item,'zujin'=>$item*$row['zujin']];
+//                }
+//                $row['pay'][] = ['pay_type'=>PayInc::WithhodingPay,'pay_name'=>PayInc::getPayName(PayInc::WithhodingPay)];
+//                $row['pay'][] = ['pay_type'=>PayInc::FlowerStagePay,'pay_name'=>PayInc::getPayName(PayInc::FlowerStagePay)];
+//            }
+
             $orderInfo = OrderRepository::getInfoById($params['order_no']);
             $row['pay_type'] = $orderInfo['pay_type'];
             $row['pay_name'] = PayInc::getPayName($orderInfo['pay_type']);
