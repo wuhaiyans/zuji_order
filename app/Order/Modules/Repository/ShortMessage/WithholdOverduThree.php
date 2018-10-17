@@ -44,6 +44,8 @@ class WithholdOverduThree implements ShortMessage {
             return false;
         }
 
+        \App\Lib\Common\LogApi::debug('[cronOverdueMessage:'.$instalmentInfo['order_no'].'逾期3天短信]');
+
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
@@ -96,9 +98,9 @@ class WithholdOverduThree implements ShortMessage {
             'createTime'    => $createTime['createTime'],
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
         ];
-        \App\Lib\Common\LogApi::debug('[WithholdOverduThree:逾期3天]',$dataSms);
+        \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期3天]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

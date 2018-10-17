@@ -41,6 +41,7 @@ class WithholdOverduOne implements ShortMessage {
             LogApi::debug("cronOverdueMessage-分期详情错误",[$this->business_no]);
             return false;
         }
+        \App\Lib\Common\LogApi::debug('[cronOverdueMessage:'.$instalmentInfo['order_no'].'逾期1天短信]');
 
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
@@ -95,9 +96,9 @@ class WithholdOverduOne implements ShortMessage {
             'zhifuLianjie'  => createShortUrl($zhifuLianjie),
         ];
 
-        \App\Lib\Common\LogApi::debug('[WithholdOverduOne:逾期1天]',$dataSms);
+        \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期1天]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

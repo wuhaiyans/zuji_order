@@ -184,7 +184,13 @@ class ToolController extends Controller
     /**
      *
      * 用户逾期列表
-     *
+     *[
+     * 'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * ]
      */
     public function overDue(Request $request){
         try{
@@ -247,10 +253,9 @@ class ToolController extends Controller
 
             $orderData = OrderReturnCreater::overDueExport($params,$pre_count);
             LogApi::debug("[overDueExport]查询结果",$orderData);
-            print_r($orderData);
             if ($orderData) {
                 $data = array();
-                foreach ($orderData as $item) {
+                foreach ($orderData['data']['data'] as $item) {
                     $data[] = [
                         $item['order_no'],
                         date('Y-m-d H:i:s', $item['create_time']),
@@ -260,11 +265,11 @@ class ToolController extends Controller
                         $item['freeze_type_name'],
                         $item['appid_name'],
 
-                        $item['credit'],
+                        $item['matching_name'],
                         $item['pay_type_name'],
                         $item['visit_name'],
                         $item['visit_text'],
-                        $item['realname'],
+                        $item['name'],
                         $item['mobile'],
                         $item['address_info'],
                         implode(",",array_column($item['goodsInfo'],"goods_name")),
@@ -274,7 +279,7 @@ class ToolController extends Controller
                     ];
 
                 }
-
+                LogApi::debug("【overDueExport】导出数据列表",$data);
                 $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '逾期列表导出',$abc);
 
             } else {

@@ -42,6 +42,9 @@ class WithholdAdvanceOne implements ShortMessage {
             LogApi::debug("扣款成功短信-分期详情错误",[$this->business_no]);
             return false;
         }
+
+        \App\Lib\Common\LogApi::debug('[cronWithholdMessage:'.$instalmentInfo['order_no'].'提前1天扣款短信]');
+
         // 查询订单
         $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
         if( !$orderInfo ){
@@ -94,7 +97,7 @@ class WithholdAdvanceOne implements ShortMessage {
         ];
         \App\Lib\Common\LogApi::debug('[cronWithholdMessage:提前1天扣款]',$dataSms);
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
+        return true;//\App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 
