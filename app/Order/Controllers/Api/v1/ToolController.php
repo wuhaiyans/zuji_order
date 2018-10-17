@@ -255,7 +255,7 @@ class ToolController extends Controller
             LogApi::debug("[overDueExport]查询结果",$orderData);
             if ($orderData) {
                 $data = array();
-                foreach ($orderData as $item) {
+                foreach ($orderData['data'] as $item) {
                     $data[] = [
                         $item['order_no'],
                         date('Y-m-d H:i:s', $item['create_time']),

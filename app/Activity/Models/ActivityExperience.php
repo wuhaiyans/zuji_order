@@ -26,7 +26,7 @@ class ActivityExperience extends Model
      *
      * @var array
      */
-    protected $fillable = ['group_type','sku_id','goods_name','experience_status','price','destine_amount','old_price','zuqi','activity_id','goods_images','begin_time','end_time','update_time','create_time'];
+    protected $fillable = ['group_type','spu_id','goods_name','experience_status','price','destine_amount','old_price','zuqi','activity_id','goods_images','begin_time','end_time','update_time','create_time'];
 
     /**
      * 获取当前时间
