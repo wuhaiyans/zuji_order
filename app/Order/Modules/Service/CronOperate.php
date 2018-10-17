@@ -491,9 +491,6 @@ class CronOperate
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
 
-            // 梁总电话号测试
-            $whereArray[] = ['order_info.mobile', '=', '13426301916'];
-
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
@@ -573,8 +570,6 @@ class CronOperate
             $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
-            // 梁总电话号测试
-            $whereArray[] = ['order_info.mobile', '=', '13426301916'];
 
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
@@ -599,6 +594,7 @@ class CronOperate
                 }
 
                 foreach($result as $item){
+
                     //发送短信
                     $notice = new \App\Order\Modules\Service\OrderNotice(
                         \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
@@ -616,7 +612,7 @@ class CronOperate
             \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信成功]');
 
         }catch(\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[cronPrepaymentMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
+            \App\Lib\Common\LogApi::debug('[cronOverdueMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
         }
     }
 
