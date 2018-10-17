@@ -1,11 +1,11 @@
 <?php
-namespace app\Lib\Certificate\rsa;
+namespace App\Lib\Certificate\rsa;
 /**
  * RSADecrypter
  * RSA 算法解密
  * @author liuhongxing
  */
-class RSADecrypter implements \app\Lib\Certificate\Decrypter {
+class RSADecrypter implements \App\Lib\Certificate\Decrypter {
     
     private $privateKey = '';
     private $publicKey = '';
