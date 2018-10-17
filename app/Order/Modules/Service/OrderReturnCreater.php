@@ -3424,6 +3424,7 @@ class OrderReturnCreater
         LogApi::debug("[overDueExport]用户逾期获取数据",$orderListArray);
         if (empty($orderListArray)) return false;
         $goodsData =  OrderOperate::getExportActAdminState(array_keys($orderListArray), $actArray=array());
+        LogApi::debug("[overDueExport]获取商品信息",$goodsData);
         if (!empty($orderListArray['data'])) {
 
             foreach ($orderListArray['data'] as $keys=>$values) {
@@ -3446,7 +3447,7 @@ class OrderReturnCreater
                 }else{
                     $orderListArray['data'][$keys]['matching_name'] = "否";
                 }
-                $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
+                $orderListArray['data'][$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
                 $orderListArray['data'][$keys]['matching'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
 
 
