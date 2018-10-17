@@ -274,7 +274,7 @@ class ToolController extends Controller
                         $item['address_info'],
                         implode(",",array_column($item['goodsInfo'],"goods_name")),
                         implode(",",array_column($item['goodsInfo'],"specs")),
-                        implode(",",array_column($item['goodsInfo'],"zuqi"."zuqi_type_name")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
                         $item['order_amount'],
                     ];
 
