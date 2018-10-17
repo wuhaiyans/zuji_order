@@ -112,10 +112,20 @@ class PayController extends Controller
 		LogApi::setSource('payment_notify');
 		
 		$params = json_decode($input,true);
-		
+
 		LogApi::id($params['out_payment_no']??'');
 		LogApi::info('支付异步通知', $input);
-		
+
+		//数据签名验证
+        $sign = $params['sign'];
+        unset($params['sign']);
+        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+        if(!$b){
+            echo json_encode([
+                'status' => 'error',
+                'msg' => 'Signature error ',
+            ]);exit;
+        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',

@@ -195,7 +195,7 @@ class OrderCreater
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type'],$orderType);
             $orderCreater->setSkuComponnet($skuComponnet);
             //风控(小程序风控信息接口不处理)
             $orderCreater = new RiskComponnet($orderCreater);

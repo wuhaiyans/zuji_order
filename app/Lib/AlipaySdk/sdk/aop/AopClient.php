@@ -1149,4 +1149,16 @@ class AopClient {
 		}
 	}
 
+    /**RSAServerProtocol
+     * 验签
+     * @param string $data 待验证字符串
+     * @param string $sign 字符串签名
+     * @return bool true：成功；false：失败
+     */
+    static public function verifySign($data, $sign){
+        $rsa_decrypt = new \app\Lib\Certificate\rsa\RSADecrypter(1024, config('rsa'.'platform_private_key'), config('rsa'.'platform_public_key'));
+        $result = $rsa_decrypt->verify($data, $sign);
+        return $result;
+    }
+
 }
