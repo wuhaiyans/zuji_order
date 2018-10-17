@@ -219,8 +219,76 @@ class ToolController extends Controller
      * 用户逾期列表导出
      *
      */
-    public function overDueExport(){
-       echo 111;die;
+    public function overDueExport(Request $request){
+        set_time_limit(0);
+        $params = $request->all();
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
+        } else {
+            $pageSize = $params['size'];
+        }
+        $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
+
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
+
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
+        $headers = ['订单编号', '下单时间','租期结束时间', '逾期天数','订单状态','冻结状态','订单来源','第三方平台下单','支付方式及通道','回访标识','回访备注', '用户名',
+            '手机号','详细地址','设备名称','规格','租期','总租金'];
+
+        $orderExcel = array();
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $orderData = array();
+            LogApi::debug("[overDueExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
+
+            $orderData = OrderReturnCreater::overDueExport($params,$pre_count);
+            LogApi::debug("[overDueExport]查询结果",$orderData);
+            if ($orderData) {
+                $data = array();
+                foreach ($orderData as $item) {
+                    $data[] = [
+                        $item['order_no'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        date('Y-m-d H:i:s', $item['end_time']),
+                        $item['overDue_time'],
+                        $item['order_status_name'],
+                        $item['freeze_type_name'],
+                        $item['appid_name'],
+
+                        $item['credit'],
+                        $item['pay_type_name'],
+                        $item['visit_name'],
+                        $item['visit_text'],
+                        $item['realname'],
+                        $item['mobile'],
+                        $item['address_info'],
+                        implode(",",array_column($item['goodsInfo'],"goods_name")),
+                        implode(",",array_column($item['goodsInfo'],"specs")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                        $item['order_amount'],
+                    ];
+
+                }
+
+                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '逾期列表导出',$abc);
+
+            } else {
+                break;
+            }
+        }
+
+        return $orderExcel;
+        exit;
     }
 
 
