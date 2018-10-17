@@ -3422,6 +3422,8 @@ class OrderReturnCreater
     public static function overDueExport($param = array(),$pagesize=5){
         $orderListArray = OrderReturnRepository::getAdminOrderList($param, $pagesize);
         LogApi::debug("[overDueExport]用户逾期获取数据",$orderListArray);
+        if (empty($orderListArray)) return false;
+        $goodsData =  OrderOperate::getExportActAdminState(array_keys($orderListArray), $actArray=array());
         if (!empty($orderListArray['data'])) {
 
             foreach ($orderListArray['data'] as $keys=>$values) {
@@ -3444,6 +3446,7 @@ class OrderReturnCreater
                 }else{
                     $orderListArray['data'][$keys]['matching_name'] = "否";
                 }
+                $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
                 $orderListArray['data'][$keys]['matching'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
 
 
