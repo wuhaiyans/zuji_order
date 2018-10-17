@@ -274,12 +274,12 @@ class ToolController extends Controller
                         $item['address_info'],
                         implode(",",array_column($item['goodsInfo'],"goods_name")),
                         implode(",",array_column($item['goodsInfo'],"specs")),
-                        implode(",",array_column($item['goodsInfo'],"zuqi_type")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi"."zuqi_type_name")),
                         $item['order_amount'],
                     ];
 
                 }
-
+                LogApi::debug("【overDueExport】导出数据列表",$data);
                 $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '逾期列表导出',$abc);
 
             } else {

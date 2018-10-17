@@ -3444,6 +3444,12 @@ class OrderReturnCreater
                 }else{
                     $orderListArray['data'][$keys]['matching_name'] = "否";
                 }
+                //租期类型
+                if($orderListArray['data'][$keys]['goodsInfo'][0]['zuqi_type'] == 1){
+                    $orderListArray['data'][$keys]['goodsInfo'][0]['zuqi_type_name'] = "天";
+                }else{
+                    $orderListArray['data'][$keys]['goodsInfo'][0]['zuqi_type_name'] = "月";
+                }
                 $orderListArray['data'][$keys]['matching'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
 
 
