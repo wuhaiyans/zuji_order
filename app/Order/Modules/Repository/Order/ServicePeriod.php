@@ -114,11 +114,12 @@ class ServicePeriod {
     }
 
     /**
-     * 生成商品服务周期表
+     * 修改订单商品服务结束时间和租期
      * @param array $unitData
      * [
      *   'order_no'=>'',//订单编号
      *   'goods_no'=>'',//商品编号
+     *   'unit_value'=>'',//续租期数(天)
      *   'end_time'=>'',//服务结束时间
      * ]
      * @return bool
@@ -138,6 +139,7 @@ class ServicePeriod {
             'order_no'=>$unitData['order_no'],
             'goods_no'=>$unitData['goods_no']
         ])->first();
+        $res->zuqi = $res->zuqi+$unitData['unit_value'];
         $res->end_time = $unitData['end_time'];
 
         return $res->update();
