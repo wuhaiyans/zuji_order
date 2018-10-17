@@ -274,11 +274,7 @@ class ToolController extends Controller
                         $item['address_info'],
                         implode(",",array_column($item['goodsInfo'],"goods_name")),
                         implode(",",array_column($item['goodsInfo'],"specs")),
-<<<<<<< HEAD
-                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
-=======
                         implode(",",array_column($item['goodsInfo'],"zuqi"."zuqi_type_name")),
->>>>>>> 054a97af2ecc2fe4cda2bceed62c76a35cd48b00
                         $item['order_amount'],
                     ];
 
