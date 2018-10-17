@@ -219,7 +219,7 @@ class ToolController extends Controller
      * 用户逾期列表导出
      *
      */
-    public function overDueExport(Request $request){
+    public function overDueExport(){
      echo 111;die;
     }
 
