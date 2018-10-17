@@ -1156,7 +1156,7 @@ class AopClient {
      * @return bool true：成功；false：失败
      */
     static public function verifySign($data, $sign){
-        $rsa_decrypt = new \App\Lib\Certificate\rsa\RSADecrypter(1024, config('rsa'.'platform_private_key'), config('rsa'.'platform_public_key'));
+        $rsa_decrypt = new \App\Lib\Certificate\rsa\RSADecrypter(1024, config('rsa.platform_private_key'), config('rsa'.'platform_public_key'));
         $result = $rsa_decrypt->verify($data, $sign);
         return $result;
     }

@@ -68,7 +68,6 @@ class RSADecrypter implements \App\Lib\Certificate\Decrypter {
         }
 
         if(!$res){
-            set_error('RSA公钥错误。请检查公钥文件格式是否正确');
             return false;
         }
 
