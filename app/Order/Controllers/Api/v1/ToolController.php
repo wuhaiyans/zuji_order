@@ -265,16 +265,16 @@ class ToolController extends Controller
                         $item['freeze_type_name'],
                         $item['appid_name'],
 
-                        $item['credit'],
+                        $item['matching_name'],
                         $item['pay_type_name'],
                         $item['visit_name'],
                         $item['visit_text'],
-                        $item['realname'],
+                        $item['name'],
                         $item['mobile'],
                         $item['address_info'],
                         implode(",",array_column($item['goodsInfo'],"goods_name")),
                         implode(",",array_column($item['goodsInfo'],"specs")),
-                        implode(",",array_column($item['goodsInfo'],"zuqi_name")),
+                        implode(",",array_column($item['goodsInfo'],"zuqi_type")),
                         $item['order_amount'],
                     ];
 

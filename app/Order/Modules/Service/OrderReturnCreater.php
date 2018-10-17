@@ -3438,6 +3438,13 @@ class OrderReturnCreater
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
                 //逾期天数
                 $orderListArray['data'][$keys]['overDue_time'] =  (int)((time()-$orderListArray['data'][$keys]['end_time'])/(24*3600)+1).'天';
+                //是否是第三方平台下单
+                if($orderListArray['data'][$keys]['matching'] == 1){
+                    $orderListArray['data'][$keys]['matching_name'] = "是";
+                }else{
+                    $orderListArray['data'][$keys]['matching_name'] = "否";
+                }
+                $orderListArray['data'][$keys]['matching'] = OrderFreezeStatus::getStatusName($values['freeze_type']);
 
 
                 //订单商品列表相关的数据
