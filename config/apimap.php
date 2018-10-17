@@ -353,7 +353,7 @@ return [
     'api.tool.advanceReturn' => 'ToolController@advanceReturn',   //超过七天无理由退换货，没到租赁日期的退货订单
 
     'api.tool.overDue'        => 'ToolController@overDue',          //用户逾期
-    'api.tool.overDueExport'        => 'ToolController@overDueExport',          //用户逾期列表导出
+    'api.tool.overDueExport' => 'ToolController@overDueExport',          //用户逾期列表导出
 
 
 
