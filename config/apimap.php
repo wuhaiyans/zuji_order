@@ -356,5 +356,5 @@ return [
     'api.tool.overDueExport' => 'ToolController@overDueExport',          //用户逾期列表导出
 
 
-
+    'test'=>'PayController@paymentNotify',
 ];

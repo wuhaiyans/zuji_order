@@ -1,12 +1,12 @@
 <?php
-namespace app\Lib\Certificate\rsa;
+namespace App\Lib\Certificate\rsa;
 
 /**
  * RSAEncrypter
  * RSA 算法加密
  * @author liuhongxing
  */
-class RSAEncrypter implements \app\Lib\Certificate\Encrypter {
+class RSAEncrypter implements \App\Lib\Certificate\Encrypter {
     
     private $publicKey = '';
     private $privateKey = '';

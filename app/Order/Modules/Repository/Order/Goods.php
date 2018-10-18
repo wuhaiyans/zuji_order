@@ -298,6 +298,22 @@ class Goods {
         $this->model->update_time = time();
         return $this->model->save();
     }
+
+    /**
+     * 修改小程序商品剩余续租天数
+     *
+     * @return bool
+     */
+    public function setReletTime($zuqi){
+        $relet_day = $this->model->relet_day;
+        if($relet_day>=$zuqi){
+            $this->model->relet_day = $relet_day-$zuqi;
+            $this->model->update_time = time();
+            return $this->model->save();
+        }else{
+            return false;
+        }
+    }
 	
 	//-+------------------------------------------------------------------------
 	// | 静态方法
