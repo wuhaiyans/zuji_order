@@ -108,38 +108,25 @@ class PayController extends Controller
 	 */
 	public function paymentNotify()
 	{
-//		$input = file_get_contents("php://input");
-//		LogApi::setSource('payment_notify');
-//
-//		$params = json_decode($input,true);
-//
-//		LogApi::id($params['out_payment_no']??'');
-//		LogApi::info('支付异步通知', $input);
+		$input = file_get_contents("php://input");
+		LogApi::setSource('payment_notify');
+
+		$params = json_decode($input,true);
+
+		LogApi::id($params['out_payment_no']??'');
+		LogApi::info('支付异步通知', $input);
 
 		//数据签名验证
-        $params = [
-            'channel'=>1,
-            'payment_no'=>2,
-            'out_no'=>3,
-            'amount'=>3,
-            'status'=>3,
-            'reason'=>3,
-            'back_url'=>4,
-            'out_payment_no'=>5,
-            'sign' => 'McgqWuOXPVXmpi7hGWRTopD/GWddxO3hzOiwg1a6MdeU607NnYV8RYHogn6VunRu/kEFTXsFrPqihY75M53oNJIyheBzXvsq2uA7gnEJjUPeEiY9TXNrcKEXXcZxcyAChpAfujrpLy9OudArXAHv5QQLzBarEMsGbI1Vq6cRSQI='
-        ];
         $sign = $params['sign'];
         unset($params['sign']);
         ksort($params);
         $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        var_dump($b);
         if(!$b){
             echo json_encode([
                 'status' => 'error',
                 'msg' => 'Signature error ',
             ]);exit;
         }
-        echo 'sign接口测试OK';die;
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
