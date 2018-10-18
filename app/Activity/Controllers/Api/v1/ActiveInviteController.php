@@ -135,6 +135,7 @@ class ActiveInviteController extends Controller
             $activityInfo['head_images'] = $userWechat['headimgurl'];
         }
         $activityInfo['zuqi_day'] = $count;
+        $activityInfo['zuqi'] -= $count;
         $data = [
             'activity' => $activityInfo,
             'count' => $count,
