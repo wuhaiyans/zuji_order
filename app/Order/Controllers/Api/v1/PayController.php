@@ -131,7 +131,7 @@ class PayController extends Controller
 
         $sign = $params['sign'];
         unset($params['sign']);
-        print_r($params);
+        ksort($params);
         $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
         var_dump($b);
         if(!$b){
