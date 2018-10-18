@@ -117,18 +117,17 @@ class PayController extends Controller
 //		LogApi::info('支付异步通知', $input);
 
 		//数据签名验证
-        $params = Array
-        (
-            'amount' => 3,
-            'channel' => 1,
-            'out_no' => 3,
-            'out_payment_no' => 3,
-            'payment_no' => 2,
-            'reason' => 3,
-            'status' => 3,
+        $params = [
+            'channel'=>1,
+            'payment_no'=>2,
+            'out_no'=>3,
+            'amount'=>3,
+            'status'=>3,
+            'reason'=>3,
+            'back_url'=>4,
+            'out_payment_no'=>5,
             'sign' => 'McgqWuOXPVXmpi7hGWRTopD/GWddxO3hzOiwg1a6MdeU607NnYV8RYHogn6VunRu/kEFTXsFrPqihY75M53oNJIyheBzXvsq2uA7gnEJjUPeEiY9TXNrcKEXXcZxcyAChpAfujrpLy9OudArXAHv5QQLzBarEMsGbI1Vq6cRSQI='
-        );
-
+        ];
         $sign = $params['sign'];
         unset($params['sign']);
         ksort($params);
