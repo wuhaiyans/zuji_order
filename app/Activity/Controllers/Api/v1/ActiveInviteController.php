@@ -58,7 +58,12 @@ class ActiveInviteController extends Controller
         if($nowTime != $registerTime){
             return apiResponse([],ApiStatus::CODE_50000,"该用户不是新注册用户");
         }
-
+        //获预约活动信息
+        $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
+        //检测邀请上限
+        if($activityInfo['zuqi']>=3){
+            return apiResponse([],ApiStatus::CODE_50000,"已超过最大邀请人数");
+        }
         //更新邀请信息
         $data = [
             'activity_id'=>$activity_id,
@@ -68,6 +73,7 @@ class ActiveInviteController extends Controller
             'invite_mobile'=>$invite_mobile,
             'create_time'=>time()
         ];
+        //获取微信授权信息
         $userWechat = User::getUserWechat($uid);
         if($userWechat){
             $data['openid'] = $userWechat['openid'];
@@ -77,11 +83,12 @@ class ActiveInviteController extends Controller
             $data['invite_openid'] = $InviteWechat['openid'];
             $data['images'] = $InviteWechat['headimgurl'];
         }
-
+        //插入邀请信息
         $ret = ActiveInviteRepository::insertInvite($data);
         if(!$ret){
             return apiResponse($data,ApiStatus::CODE_5000,"失败");
         }
+        //更新租期天数
         ExperienceDestine::upZuqi($uid,$activity_id);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
     }
@@ -135,6 +142,7 @@ class ActiveInviteController extends Controller
             $activityInfo['head_images'] = $userWechat['headimgurl'];
         }
         $activityInfo['zuqi_day'] = $count;
+        $activityInfo['zuqi'] -= $count;
         $data = [
             'activity' => $activityInfo,
             'count' => $count,
