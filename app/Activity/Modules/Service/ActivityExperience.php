@@ -74,7 +74,7 @@ class ActivityExperience
                     }
                 }
                 //获取支付信息
-                $pay_result =  OrderReturnRepository::getPayNo(OrderStatus::BUSINESS_DESTINE,$experienceInfo['destine_no']);
+                $pay_result =  OrderReturnRepository::getPayNo(OrderStatus::BUSINESS_EXPERIENCE,$experienceInfo['destine_no']);
                 if(!$pay_result){
                     LogApi::debug("[experienceRefund]获取订单的支付信息失败",$pay_result);
                     set_msg("获取订单的支付信息失败");
@@ -113,7 +113,7 @@ class ActivityExperience
                 }
                 DB::commit();
                 //订金退款申请成功发送短信
-                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $experienceInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
+                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_EXPERIENCE, $experienceInfo['destine_no'] ,SceneConfig::DESTINE_CREATE);
                    $b=$orderNoticeObj->notify();
                      LogApi::debug($b?"destine_no :".$experienceInfo['destine_no']." IS OK":"IS error");
                 return true;
@@ -158,6 +158,13 @@ class ActivityExperience
                 return false;
             }
             $experienceInfo=$experienceDestineInfo->getData();
+            //获取支付信息
+            $pay_result =  OrderReturnRepository::getPayNo(OrderStatus::BUSINESS_EXPERIENCE,$experienceInfo['destine_no']);
+            if(!$pay_result){
+                LogApi::debug("[refund]获取订单的支付信息失败",$pay_result);
+                set_msg("获取订单的支付信息失败");
+                return false;
+            }
             //如果预定状态为  已支付，已下单时可以退款
             if ( $experienceInfo['destine_status'] == DestineStatus::DestinePayed) {
                 //判断预定时间是否在15个自然日外
@@ -177,7 +184,7 @@ class ActivityExperience
             //事务提交
             DB::commit();
             //订金退款申请成功发送短信
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_DESTINE, $experienceInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_EXPERIENCE, $experienceInfo['destine_no'] ,SceneConfig::DESTINE_REFUND);
             $b=$orderNoticeObj->notify();
             LogApi::debug($b?"destine_no :".$experienceInfo['destine_no']." IS OK":"IS error");
             return true;
