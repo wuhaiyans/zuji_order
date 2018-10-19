@@ -364,18 +364,13 @@ class ExperienceDestineOperate
                         $destineListArray['data'][$k]['refundOperateAfter'] = false;
                     }
                 }
-
-
-                $destineListArray['data'][$k]['selectOperate'] = false;
             }else if($destineListArray['data'][$k]['destine_status'] ==DestineStatus::DestineRefunded){
-                $destineListArray['data'][$k]['selectOperate'] = true;
                 $destineListArray['data'][$k]['refundOperateAfter'] = false;
                 $destineListArray['data'][$k]['refundOperateBefore'] = false;
 
             }else{
                 $destineListArray['data'][$k]['refundOperateAfter'] = false;
                 $destineListArray['data'][$k]['refundOperateBefore'] = false;
-                $destineListArray['data'][$k]['selectOperate'] = false;
             }
 
         }
