@@ -345,6 +345,38 @@ class ExperienceDestineOperate
             $destineListArray['data'][$k]['pay_type_name'] = PayInc::getPayName($v['pay_type']);
             //应用来源名称
             $destineListArray['data'][$k]['app_id_name'] = OrderInfo::getAppidInfo($v['app_id']);
+            if( $destineListArray['data'][$k]['destine_status'] == DestineStatus::DestinePayed ){
+                if($destineListArray['data'][$k]['pay_type'] ==PayInc::WeChatPay){
+                    $destineListArray['data'][$k]['refundOperateBefore'] = true;
+                    $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                }else{
+                    //15个自然日之内
+                    if($destineListArray['data'][$k]['pay_time'] + 15*24*3600 >time()){
+                        $destineListArray['data'][$k]['refundOperateBefore'] = true;
+                    }else{
+                        $destineListArray['data'][$k]['refundOperateBefore'] = false;
+
+                    }
+                    //15个自然日后
+                    if($destineListArray['data'][$k]['pay_time'] + 15*24*3600<time()){
+                        $destineListArray['data'][$k]['refundOperateAfter'] = true;
+                    }else{
+                        $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                    }
+                }
+
+
+                $destineListArray['data'][$k]['selectOperate'] = false;
+            }else if($destineListArray['data'][$k]['destine_status'] ==DestineStatus::DestineRefunded){
+                $destineListArray['data'][$k]['selectOperate'] = true;
+                $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                $destineListArray['data'][$k]['refundOperateBefore'] = false;
+
+            }else{
+                $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                $destineListArray['data'][$k]['refundOperateBefore'] = false;
+                $destineListArray['data'][$k]['selectOperate'] = false;
+            }
 
         }
         return $destineListArray;
