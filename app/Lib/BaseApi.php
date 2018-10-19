@@ -34,10 +34,10 @@ class BaseApi {
 		$request->setMethod( $method );	// 接口名称
 		$request->setVersion( $version );
 		//请求验签
-        $AopClient  = new AopClient();
-        $sign = $AopClient->generateSign($params);
-        $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+//        $AopClient  = new AopClient();
+//        $sign = $AopClient->generateSign($params);
+//        $params['sign'] = $sign;
+//        $params['sign_type'] = 'rsa';
 		$request->setParams( $params );	// 业务参数
 		$request->setUserInfo( $userInfo );	// 业务参数
 		//-+--------------------------------------------------------------------
