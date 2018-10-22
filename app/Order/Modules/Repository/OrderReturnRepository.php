@@ -395,7 +395,7 @@ class OrderReturnRepository
      *@return array
      *
      */
-    public function underLineReturn($param = array(), $pagesize=5){
+    public static function underLineReturn($param = array(), $pagesize=5){
         $whereArray = array();
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
@@ -491,7 +491,7 @@ class OrderReturnRepository
                     ->get();
                 LogApi::debug("【underLineReturn】获取搜索后的数组",objectToArray($orderList));
                 $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
-                $orderArrays['orderIds'] = $orderIds;
+             //   $orderArrays['orderIds'] = $orderIds;
                 $orderArrays['total'] = $count;
                 $orderArrays['last_page'] = ceil($count/$pagesize);
 
