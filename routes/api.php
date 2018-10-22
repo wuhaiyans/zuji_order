@@ -97,8 +97,7 @@ $api->version('v1', [
         $api->any('barterListExport', 'ReturnController@barterListExport');
         //换货列表导出
         $api->any('instalmentListExport', 'InstalmentController@instalmentListExport');
-        //线下退货退款列表导出
-        $api->any('underlineReturnExport', 'ReturnController@underlineReturnExport');
+       
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
