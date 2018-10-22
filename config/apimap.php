@@ -330,6 +330,9 @@ return [
     'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
+    'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+
+
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
      ************************************************************************************************/
