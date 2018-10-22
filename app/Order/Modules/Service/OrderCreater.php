@@ -565,14 +565,14 @@ class OrderCreater
                 'instalment'=>isset($schemaData['sku'][0]['instalment'])?$schemaData['sku'][0]['instalment']:[],
                 'specs'=>$schemaData['sku'][0]['specs'],
                 'sku_id'=>$schemaData['sku'][0]['sku_id'],
-            //    'sku_num'=>$schemaData['sku'][0]['sku_num'],
-            //    'goods_no'=>$schemaData['sku'][0]['goods_no'],
-            //    'spu_no'=>$schemaData['sku'][0]['spu_no'],
-             //   'channel_id'=>$schemaData['sku'][0]['channel_id'],
                 'spu_name'=>$schemaData['sku'][0]['spu_name'],
                 'thumb'=>$schemaData['sku'][0]['thumb'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
+                'begin_time'=>$schemaData['sku'][0]['zuqi_type'],
+                'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
+                'month_amount'=>$schemaData['sku'][0]['month_amount'],
+
             ];
             return $result;
         } catch (\Exception $exc) {
