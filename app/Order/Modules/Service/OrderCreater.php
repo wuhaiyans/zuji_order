@@ -488,7 +488,7 @@ class OrderCreater
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
-
+          
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
@@ -505,6 +505,7 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
 
             }
+
             //调用过滤的参数方法
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
 
@@ -518,7 +519,7 @@ class OrderCreater
                 'pay_type'=>$schemaData['order']['pay_type'],
                 // 是否需要 信用认证
                // 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-               // 'pay_info'=>$schemaData['pay_info'],
+              //  'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 '_error_code' =>get_code(),
@@ -527,6 +528,7 @@ class OrderCreater
                 'pay_type'=>$schemaData['order']['pay_type'],
                 'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
             ];
+            $result['_order_info']['coupon']=$schemaData['order']['coupon'];
             $result['_order_info']['instalment'][0]=[
                 'pay_type'=>$schemaData['order']['pay_type'],
                 'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
@@ -560,7 +562,8 @@ class OrderCreater
                 'thumb'=>$schemaData['sku'][0]['thumb'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
-                'begin_time'=>isset($data['sku'][0]['begin_time'])?$data['sku'][0]['begin_time']:'',
+                'pay_type'=>$schemaData['sku'][0]['pay_type'],
+                'begin_time'=>isset($data['sku'][0]['begin_time'])?$data['sku'][0]['begin_time']:"",
                 'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
