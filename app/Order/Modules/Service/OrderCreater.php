@@ -488,7 +488,7 @@ class OrderCreater
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
-          
+
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
@@ -528,7 +528,7 @@ class OrderCreater
                 'pay_type'=>$schemaData['order']['pay_type'],
                 'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
             ];
-            $result['_order_info']['coupon']=$schemaData['order']['coupon'];
+            $result['_order_info']['coupon']=$schemaData['coupon'];
             $result['_order_info']['instalment'][0]=[
                 'pay_type'=>$schemaData['order']['pay_type'],
                 'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
