@@ -3224,10 +3224,11 @@ class OrderReturnCreater
                     if( $params['compensate_amount'] > 0 ) {
                         //赔偿金额必须小于等于押金金额
                         if( $goods_info['yajin'] < $params['compensate_amount'] ){
-                            LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
-                            return false;
+                            $result['auth_unfreeze_amount'] = 0;
+                        }else{
+                            $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
                         }
-                        $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
+
                     }
 
                 }
