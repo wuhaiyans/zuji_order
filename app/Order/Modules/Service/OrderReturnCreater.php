@@ -3240,6 +3240,7 @@ class OrderReturnCreater
             $data = [
                 'goods_no'      => $goods_info['goods_no'],
                 'order_no'      => $params['order_no'],
+                'business_type'  => ReturnStatus::UnderLineBusiness,
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
                 'reason_text'   => "中途退机",
@@ -3476,7 +3477,33 @@ class OrderReturnCreater
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
+    /*线下退货退款列表
+     *@params
+     * [
+     *   'begin_time' => '', //开始时间  int     【可选】
+     *   'end_time'   =>'',  //结束时间  int     【可选】
+     *   'kw_type'   =>'',   //搜索条件  string  【可选】
+     *   'keyword'   =>'',   //关键词    string  【可选】
+     *   'page'      =>'',   //页数       int    【可选】
+     *   'size'      =>'',   //条数       int    【必选】
+     * ]
+     *@return array
+     *
+     */
+    public function underLineReturn(array $params){
+        $orderListArray = OrderReturnRepository::underLineReturn($params);
+        LogApi::debug("[underLineReturn]获取线下退货退款数据",$orderListArray);
+        if (!empty($orderListArray['data'])) {
+            foreach ($orderListArray['data'] as $keys=>$values) {
+                //订单状态名称
+                $orderListArray['data'][$keys]['return_status_name'] = ReturnStatus::getStatusName($values['status']);
 
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+    }
 
 
 }
