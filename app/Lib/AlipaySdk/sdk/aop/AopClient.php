@@ -1160,6 +1160,16 @@ class AopClient {
         $result = $rsa_decrypt->verify($data, $sign);
         return $result;
     }
+    /**
+     * 生成签名签名
+     * @param string $value
+     * @return string
+     */
+    static public function generateSignVal( string $value ):string{
+        $rsa_encrypt = new \App\Lib\Certificate\rsa\RSAEncrypter(1024, self::getPublicKeyFromX509(config('rsa.platform_public_key')), self::getPrivateKeyFromX509(config('rsa.platform_private_key')));
+        $sign = $rsa_encrypt->sign( $value );
+        return $sign;
+    }
 
     /**
      * 转换公钥格式
