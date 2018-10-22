@@ -559,7 +559,7 @@ class OrderCreater
                 'thumb'=>$schemaData['sku'][0]['thumb'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
-                'begin_time'=>$data['sku_info']['begin_time'],
+                'begin_time'=>$data['sku'][0]['begin_time'],
                 'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
