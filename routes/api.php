@@ -97,7 +97,7 @@ $api->version('v1', [
         $api->any('barterListExport', 'ReturnController@barterListExport');
         //换货列表导出
         $api->any('instalmentListExport', 'InstalmentController@instalmentListExport');
-       
+
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
@@ -112,6 +112,8 @@ $api->version('v1', [
         //用户逾期列表导出
         $api->any('overDueExport', 'ToolController@overDueExport');
 
+        //缴款记录导出
+        $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/
