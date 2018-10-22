@@ -213,6 +213,15 @@ class OrderReturnRepository
        pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
        page:表示查询第几页及查询页码
      * @param array $param  获取订单列表参数
+     * [
+     * 'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * ]
      */
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
@@ -391,6 +400,8 @@ class OrderReturnRepository
      *   'end_time'   =>'',  //结束时间  int     【可选】
      *   'kw_type'   =>'',   //搜索条件  string  【可选】
      *   'keyword'   =>'',   //关键词    string  【可选】
+     *   'page'      =>'',   //页数       int    【可选】
+     *   'size'      =>'',   //条数       int    【可选】
      * ]
      *@return array
      *

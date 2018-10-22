@@ -671,6 +671,8 @@ class ReturnController extends Controller
      *   'end_time'   =>'',  //结束时间  int     【可选】
      *   'kw_type'   =>'',   //搜索条件  string  【可选】
      *   'keyword'   =>'',   //关键词    string  【可选】
+     *   'page'      =>'',   //页数      int    【可选】
+     *  'size'       =>'',   //条数      int    【可选】
      * ]
      *@return array
      *
