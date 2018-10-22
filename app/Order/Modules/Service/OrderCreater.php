@@ -541,6 +541,11 @@ class OrderCreater
                 'pay_type'=>$schemaData['order']['pay_type'],
                 'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
             ];
+            $result['_order_info']['user']=[
+                'cert_no'=>$schemaData['user']['cert_no'],
+                'realname'=>$schemaData['user']['realname'],
+                'user_mobile'=>$schemaData['user']['user_mobile'],
+            ];
             $result['_order_info']['sku'][0]=[
                 'all_amount'=>$schemaData['sku'][0]['all_amount'],
                 'amount'=>$schemaData['sku'][0]['amount'],
