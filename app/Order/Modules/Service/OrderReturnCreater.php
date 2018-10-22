@@ -3189,23 +3189,15 @@ class OrderReturnCreater
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
 
-//            if(!$payInfo){
-//                LogApi::debug("【advanceReturn】获取支付信息失败");
-//                return false;//支付单不存在
-//            }
             //获取商品数组
             $goods_info = $goods->getData();
             $result['pay_amount'] =0.00;
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
-            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
+            $result['auth_deduction_amount'] = 0.00;
+                LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
             if($order_info['pay_type'] == PayInc::LebaifenPay){
-                if($params['compensate_amount']>0){
-                    //应付赔偿金额
-                    $result['evaluation_amount'] = $params['compensate_amount'];
-                }
-
                 //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
             }
@@ -3221,21 +3213,27 @@ class OrderReturnCreater
 
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    if( $params['compensate_amount'] > 0 ) {
-                        //赔偿金额必须小于等于押金金额
-                        if( $goods_info['yajin'] < $params['compensate_amount'] ){
-                            $result['auth_unfreeze_amount'] = 0;
-                        }else{
-                            $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
-                        }
 
+                    if( $goods_info['yajin'] >= $params['compensate_amount']){
+                        $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                        $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                    }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                        $result['auth_unfreeze_amount'] = 0;
+                        $result['auth_deduction_amount'] =  $goods_info['yajin'];
                     }
 
                 }
             }
             if($order_info['pay_type'] == PayInc::MiniAlipay){
                 LogApi::debug("【advanceReturn】此订单是小程序订单");
-                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                if( $goods_info['yajin'] >= $params['compensate_amount']){
+                    $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                    $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                    $result['auth_unfreeze_amount'] = 0.00;
+                    $result['auth_deduction_amount'] =  $goods_info['yajin'];
+                }
+
             }
 
             // 创建退换货单参数
@@ -3250,7 +3248,7 @@ class OrderReturnCreater
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>$result['pay_amount'] ,            //实付金额
                 'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
-                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
+                'auth_deduction_amount' =>  $result['auth_deduction_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
