@@ -110,13 +110,6 @@ class PayController extends Controller
 	 */
 	public function paymentNotify()
 	{
-         $res = \App\Lib\Payment\CommonPaymentApi::pageUrl([
-            '123'=>'1',
-            '12'=>'2',
-            '1'=>'3',
-            '0'=>'4',
-        ]);
-        var_dump($res);die;
 		$input = file_get_contents("php://input");
 		LogApi::setSource('payment_notify');
 
