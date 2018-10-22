@@ -514,7 +514,7 @@ class OrderCreater
                 //'coupon'         => $data['coupon'],
                 //'certified'			=> $schemaData['user']['certified']?'Y':'N',
                 //'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-               // 'credit'			=> ''.$schemaData['user']['credit'],
+                'credit'			=> ''.$schemaData['user']['credit'],
                // 'credit_status'		=> $b,
                 //支付方式
                 'pay_type'=>$schemaData['order']['pay_type'],
