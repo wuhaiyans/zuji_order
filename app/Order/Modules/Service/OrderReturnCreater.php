@@ -73,7 +73,7 @@ class OrderReturnCreater
      * @return array
      * [
      *   'refund_no'   =>''  业务编号
-     *   'goods_no’   =>''  商品编号
+     *   'goods_no'   =>''  商品编号
      * ]
      */
     public function add(array $params,array $userinfo){
@@ -3366,7 +3366,17 @@ class OrderReturnCreater
     }
     /**
      * 用户逾期
-     *
+     * @params
+     *[
+     *'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * ]
+     * @return array
      */
     public static function overDue($params){
         $orderListArray = OrderReturnRepository::getAdminOrderList($params);
@@ -3487,7 +3497,7 @@ class OrderReturnCreater
      *   'kw_type'   =>'',   //搜索条件  string  【可选】
      *   'keyword'   =>'',   //关键词    string  【可选】
      *   'page'      =>'',   //页数       int    【可选】
-     *   'size'      =>'',   //条数       int    【必选】
+     *   'size'      =>'',   //条数       int    【可选】
      * ]
      *@return array
      *
