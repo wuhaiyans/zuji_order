@@ -3200,6 +3200,7 @@ class OrderReturnCreater
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                $result['refund_amount'] = $result['pay_amount'];
             }
             //花呗分期+预授权
             if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
@@ -3207,7 +3208,7 @@ class OrderReturnCreater
                     return false;
                 }
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
+                    $result['refund_amount'] = 0.00;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                 }
 
@@ -3218,7 +3219,7 @@ class OrderReturnCreater
                         $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
                         $result['auth_deduction_amount'] =  $params['compensate_amount'];
                     }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
-                        $result['auth_unfreeze_amount'] = 0;
+                        $result['auth_unfreeze_amount'] = 0.00;
                         $result['auth_deduction_amount'] =  $goods_info['yajin'];
                     }
 
@@ -3253,6 +3254,7 @@ class OrderReturnCreater
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
+                'remark'              => '异常订单',
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
