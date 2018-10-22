@@ -138,6 +138,7 @@ class OrderCreater
             $result = [
                 'pay_type'=>$data['pay_type'],
                 'order_no'=>$orderNo,
+                'pay_info'=>$schemaData['pay_info'],
 
             ];
            // 创建订单后 发送支付短信。;
