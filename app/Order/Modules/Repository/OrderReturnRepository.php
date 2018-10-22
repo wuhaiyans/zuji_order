@@ -476,7 +476,7 @@ class OrderReturnRepository
                 $orderIds = array_column($orderArray,"order_no");
 
                 $orderList =  DB::table('order_return as r')
-                    ->select('r.order_no','r.auth_deduction_amount','r.remark','r.status','r.create_time','g.goods_name','g.zuji_goods_id','o.mobile')
+                    ->select('r.order_no','r.auth_deduction_amount','r.remark','r.status','r.create_time','g.goods_name','g.zuji_goods_id','o.mobile','d.name')
                     ->whereIn('r.order_no', $orderIds)
                     ->join('order_info as o',function($join){
                         $join->on('r.order_no', '=', 'o.order_no');
