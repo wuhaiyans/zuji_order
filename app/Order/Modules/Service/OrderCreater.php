@@ -146,7 +146,7 @@ class OrderCreater
             $orderNoticeObj->notify();
 
             //发送订单风控信息保存队列
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API"), [
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
                 'method' => 'api.inner.orderRisk',
                 'order_no'=>$orderNo,
                 'user_id'=>$data['user_id'],
