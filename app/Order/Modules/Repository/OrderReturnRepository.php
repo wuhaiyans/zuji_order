@@ -395,7 +395,7 @@ class OrderReturnRepository
      *@return array
      *
      */
-    public function underLineReturn($param = array(), $pagesize=5){
+    public static function underLineReturn($param = array(), $pagesize=5){
         $whereArray = array();
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
