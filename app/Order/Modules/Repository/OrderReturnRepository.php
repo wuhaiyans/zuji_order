@@ -379,6 +379,141 @@ class OrderReturnRepository
 
     }
 
+    /*线下退货退款列表
+     * ->paginate: 参数
+     *  perPage:表示每页显示的条目数量
+       columns:接收数组，可以向数组里传输字段，可以添加多个字段用来查询显示每一个条目的结果
+       pageName:表示在返回链接的时候的参数的前缀名称，在使用控制器模式接收参数的时候会用到
+       page:表示查询第几页及查询页码
+     *@params
+     * [
+     *   'begin_time' => '', //开始时间  int     【可选】
+     *   'end_time'   =>'',  //结束时间  int     【可选】
+     *   'kw_type'   =>'',   //搜索条件  string  【可选】
+     *   'keyword'   =>'',   //关键词    string  【可选】
+     * ]
+     *@return array
+     *
+     */
+    public static function underLineReturn($param = array(), $pagesize=5){
+        $whereArray = array();
+        //根据手机号
+        if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
+        }
+        //根据订单号
+        if (isset($param['kw_type']) && $param['kw_type']=='name' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_user_address.name', '=', $param['keywords']];
+        }
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['order_return.create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_return.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_return.create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
+        $whereArray[] = ['order_return.business_type','=',ReturnStatus::UnderLineBusiness];  //线下业务
+        $whereArray[] = ['order_return.business_key','=',OrderStatus::BUSINESS_RETURN];      //退货业务
+
+        LogApi::debug("【underLineReturn】搜索条件",$whereArray);
+
+        $count = DB::table('order_return')
+            ->select(DB::raw('count(order_return.order_no) as order_count'))
+            ->join('order_info',function($join){
+                $join->on('order_return.order_no', '=', 'order_info.order_no');
+            }, null,null,'inner')
+            ->join('order_user_address',function($join){
+                $join->on('order_return.order_no', '=', 'order_user_address.order_no');
+            }, null,null,'inner')
+            ->join('order_goods',function($join){
+                $join->on('order_return.order_no', '=', 'order_goods.order_no');
+            }, null,null,'left')
+            ->where($whereArray)
+            ->first();
+
+
+        $count = objectToArray($count)['order_count'];
+        LogApi::debug("【underLineReturn】数据计数",$count);
+        if (!isset($param['count'])) {
+
+//        sql_profiler();
+            $orderList = DB::table('order_return')
+                ->select('order_return.create_time','order_return.order_no')
+                ->join('order_info',function($join){
+                    $join->on('order_return.order_no', '=', 'order_info.order_no');
+                }, null,null,'left')
+                ->join('order_user_address',function($join){
+                    $join->on('order_return.order_no', '=', 'order_user_address.order_no');
+                }, null,null,'inner')
+                ->join('order_goods',function($join){
+                    $join->on('order_return.order_no', '=', 'order_goods.order_no');
+                }, null,null,'left')
+                ->where($whereArray)
+                ->orderBy('order_return.create_time', 'DESC')
+                ->skip(($page - 1) * $pagesize)->take($pagesize)
+                ->get();
+
+            $orderArray = objectToArray($orderList);
+            LogApi::debug("【underLineReturn】获取搜索后的数组",$orderArray);
+            if ($orderArray) {
+                $orderIds = array_column($orderArray,"order_no");
+
+                $orderList =  DB::table('order_return as r')
+                    ->select('r.order_no','r.auth_deduction_amount','r.remark','r.status','r.create_time','g.goods_name','g.zuji_goods_id','o.mobile','d.name')
+                    ->whereIn('r.order_no', $orderIds)
+                    ->join('order_info as o',function($join){
+                        $join->on('r.order_no', '=', 'o.order_no');
+                    }, null,null,'inner')
+                    ->join('order_user_address as d',function($join){
+                        $join->on('r.order_no', '=', 'd.order_no');
+                    }, null,null,'inner')
+                    ->join('order_goods as g',function($join){
+                        $join->on('r.order_no', '=', 'g.order_no');
+                    }, null,null,'left')
+                    ->orderBy('r.create_time', 'DESC')
+                    ->get();
+                LogApi::debug("【underLineReturn】获取搜索后的数组",objectToArray($orderList));
+                $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
+             //   $orderArrays['orderIds'] = $orderIds;
+                $orderArrays['total'] = $count;
+                $orderArrays['last_page'] = ceil($count/$pagesize);
+
+            } else {
+
+                return false;
+            }
+
+
+
+
+//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
+
+        }else {
+
+            $orderArrays['total'] = $count;
+
+        }
+        return $orderArrays;
+
+    }
+
 
 
 }

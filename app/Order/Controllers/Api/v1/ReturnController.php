@@ -664,6 +664,43 @@ class ReturnController extends Controller
         return apiResponse([],ApiStatus::CODE_34008);//不允许进入退换货
 
     }
+    /*线下退货退款列表
+     *@params
+     * [
+     *   'begin_time' => '', //开始时间  int     【可选】
+     *   'end_time'   =>'',  //结束时间  int     【可选】
+     *   'kw_type'   =>'',   //搜索条件  string  【可选】
+     *   'keyword'   =>'',   //关键词    string  【可选】
+     * ]
+     *@return array
+     *
+     */
+
+    public function underLineReturn(Request $request){
+
+        try{
+
+            $orders =$request->all();
+            $params = $orders['params'];
+
+            $orderData =$this->OrderReturnCreater->underLineReturn($params);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_34007);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+
+    }
+
+
     //test
     public function refundUpdate(Request $request){
         $orders = $request->all();
