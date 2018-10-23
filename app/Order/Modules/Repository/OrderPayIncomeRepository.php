@@ -177,7 +177,7 @@ class OrderPayIncomeRepository
         }
 
         // 结束时间（可选），默认为为当前时间
-        if( !isset($param['end_time']) || $param['end_time'] == ""){
+        if( !isset($param['end_time']) || $param['end_time'] == "" ){
             $param['end_time'] = date("Y-m-d 23:59:59");
         }else{
             $param['end_time'] = $param['end_time'] . " 23:59:59";
@@ -215,9 +215,7 @@ class OrderPayIncomeRepository
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
-        if (empty($orderListArray)) return false;
-        $orderArray = objectToArray($result);
-        return $orderArray;
+        return $result->toArray();
     }
     /*
      * 修改方法
