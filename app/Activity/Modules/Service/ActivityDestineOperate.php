@@ -251,9 +251,9 @@ class ActivityDestineOperate
             }
             $activityInfo =$activity->getData();
             $res['destine_amount'] = $activityInfo['appointment_price'];
-            $res['activity_status'] = 1;
+            $res['activity_status'] = 0;
             if(time()>=$activityInfo['end_time']){
-                $res['activity_status'] = 0;
+                $res['activity_status'] = 1;
             }
             //如果有预订记录
             if($destine){
