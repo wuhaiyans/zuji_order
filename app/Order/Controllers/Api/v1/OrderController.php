@@ -75,7 +75,7 @@ class OrderController extends Controller
         }else{
             //自动调用接口查询优惠券
             $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
-                'sku_id' => $params['params']['sku_id'],
+                'sku_id' => $sku[0]['sku_id'],
                 'auth_token' => $params['auth_token'],
             ]);
         }
