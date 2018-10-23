@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayIncome;
 use Illuminate\Support\Facades\DB;
 
@@ -152,7 +153,7 @@ class OrderPayIncomeRepository
      */
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
-        if (isset($param['name']) && !empty($param['name'])) {
+        if (isset($param['name']) && !empty($param['name'])){
             $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
 
@@ -202,7 +203,7 @@ class OrderPayIncomeRepository
 
             $page = 1;
         }
-
+        LogApi::debug("[queryListExport]查询条件",$whereArray );
         $result = DB::table('order_pay_income')
                 ->select('order_pay_income.*','order_user_certified.realname','order_info.mobile')
                 ->join('order_info',function($join){
