@@ -289,6 +289,8 @@ return [
     'api.pay.payIncomeInfo'       => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
     'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
+    // 入账明细筛选条件
+    'api.pay.underLineAdd'         => 'PayincomeController@underLineAdd',
 
     // test
     'api.Test.test'       => 'TestController@test',
