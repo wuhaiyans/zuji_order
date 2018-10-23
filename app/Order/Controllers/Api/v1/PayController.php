@@ -22,6 +22,8 @@ class PayController extends Controller
     public function __construct()
     {
     }
+
+
     /**
      * 代扣+预授权。。支付单跳转url
      * @param Request $request
@@ -115,16 +117,22 @@ class PayController extends Controller
 
 		LogApi::id($params['out_payment_no']??'');
 		LogApi::info('支付异步通知', $input);
-
-		//数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
+        if(isset($params['sign'])){
+            //数据签名验证
+            $sign = $params['sign'];
+            unset($params['sign']);
+            ksort($params);
+            $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+            if(!$b){
+                echo json_encode([
+                    'status' => 'error',
+                    'msg' => 'Signature error ',
+                ]);exit;
+            }
+        }else{
             echo json_encode([
                 'status' => 'error',
-                'msg' => 'Signature error ',
+                'msg' => 'notice Sign is null',
             ]);exit;
         }
 		if( is_null($params) ){

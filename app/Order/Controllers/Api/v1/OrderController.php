@@ -71,7 +71,7 @@ class OrderController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
+//        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
 
 
         $payChannelId =$params['params']['pay_channel_id'];
@@ -90,8 +90,14 @@ class OrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         }
-
-
+        //自动调用接口查询优惠券
+        $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+             'sku_id' => $sku[0]['sku_id'],
+        ]);
+        //查询地址信息接口
+        $address_list = \App\Lib\Address\Address::addressQuery([
+            'auth_token'=>$params['auth_token'],
+        ]);
 
         $data =[
             'appid'		=> $appid,
@@ -104,6 +110,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
+        $res['address_list']=$address_list;
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
