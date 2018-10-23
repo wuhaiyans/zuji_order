@@ -202,6 +202,7 @@ class Coupon extends \App\Lib\BaseApi{
     public static function checkedCoupon($arr){
         $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
         $data['method'] ='zuji.coupon.checked';
+        $data['auth_token'] = $arr['auth_token'];
         $data['params'] = [
             'sku_id'=>$arr['sku_id'],
         ];
