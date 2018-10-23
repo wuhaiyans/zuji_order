@@ -29,6 +29,10 @@ class Channel {
      * 乐百分支付
      */
     const Lebaifen = 5;
+	/**
+	 * 线下支付
+	 */
+	const UnderLine = 6;
 
 
 	/**
@@ -42,6 +46,7 @@ class Channel {
 			self::Jdpay 	=> '京东支付',
 			self::Wechat 	=> '微信支付',
 			self::Lebaifen 	=> '乐百分支付',
+			self::UnderLine 	=> '线下支付',
 		];
 	}
 
