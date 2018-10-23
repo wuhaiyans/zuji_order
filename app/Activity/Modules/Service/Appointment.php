@@ -30,12 +30,12 @@ class Appointment
      * 添加预约活动
      * @param $params
      * [
-     * 'title'             =>'',  标题           string    【必传】
-     * 'appointment_price' =>'',  预定金额       string 【必传】
-     * 'appointment_image' =>'',  活动图片       string 【必传】
-     * 'desc'              =>'',  活动描述       string 【必传】
-     * 'begin_time'        =>'',  活动开始时间   int    【必传】
-     * 'end_time'          =>''   活动结束时间   int    【必传】
+     * 'title'              =>'',  标题           string 【必传】
+     * 'appointment_price'  =>'',  预定金额       string 【必传】
+     * 'appointment_image'  =>'',  活动图片       string 【必传】
+     * 'desc'               =>'',  活动描述       string 【必传】
+     * 'begin_time'         =>'',  活动开始时间   int    【必传】
+     * 'end_time'           =>''   活动结束时间   int    【必传】
      * 'appointment_status' =>'', 活动状态       int    【必传】
      * 'spu_id'             =>['',''] 商品id     int    【必传】
      * ]
