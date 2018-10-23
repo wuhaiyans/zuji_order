@@ -112,7 +112,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
-        $res['address_list']=$address_list;
+        $res[]=$address_list;
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
