@@ -64,11 +64,6 @@ class OrderController extends Controller
 	 */
     public function confirmation(Request $request){
         $params = $request->all();
-
-        //查询地址信息接口
-        $address_list = \App\Lib\Address\Address::addressQuery([
-            'auth_token'=>$params['auth_token'],
-        ]);
         //获取appid
         $appid		= $params['appid'];
         $sku		= $params['params']['sku_info'];
@@ -117,7 +112,11 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
-        $res = array_merge($res,$address_list);
+        if(empty($address_list)){
+            $res['address_list'] = [];
+        }else{
+            $res = array_merge($res,$address_list);
+        }
 
         return apiResponse($res,ApiStatus::CODE_0);
 
