@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderPayIncome;
+use Illuminate\Support\Facades\DB;
 
 class OrderPayIncomeRepository
 {
