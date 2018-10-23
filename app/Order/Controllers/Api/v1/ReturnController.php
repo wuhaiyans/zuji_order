@@ -542,7 +542,7 @@ class ReturnController extends Controller
     /**
      * 换货用户收货通知
      * @param Request $request  $params['refund_no']  业务参数
-     * ‘refund_no ’    =>'', //业务编号
+     * 'refund_no '   => '', //业务编号
      * @param array $orders['userinfo'] 用户信息参数
      * [
      *      'uid'      =>''     用户id      int      【必传】
@@ -687,11 +687,10 @@ class ReturnController extends Controller
 
             $orderData =$this->OrderReturnCreater->underLineReturn($params);
 
-            if ($orderData['code']===ApiStatus::CODE_0) {
+            if ($orderData['code']===ApiStatus::CODE_0){
 
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);
             } else {
-
                 return apiResponse([],ApiStatus::CODE_34007);
             }
 
