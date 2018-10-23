@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Order\Models\OrderPayIncome;
+use Illuminate\Support\Facades\DB;
 
 class OrderPayIncomeRepository
 {
@@ -152,27 +153,27 @@ class OrderPayIncomeRepository
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
         if (isset($param['name']) && !empty($param['name'])) {
-            $whereArray[] = ['name', '=', $param['name']];
+            $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
         }
 
         if (isset($param['appid']) && !empty($param['appid'])) {
-            $whereArray[] = ['appid', '=', $param['appid']];
+            $whereArray[] = ['order_pay_income.appid', '=', $param['appid']];
         }
 
         if (isset($param['channel']) && !empty($param['channel'])) {
-            $whereArray[] = ['channel', '=', $param['channel']];
+            $whereArray[] = ['order_pay_income.channel', '=', $param['channel']];
         }
 
         if (isset($param['business_type']) && !empty($param['business_type'])) {
-            $whereArray[] = ['business_type', '=', $param['business_type']];
+            $whereArray[] = ['order_pay_income.business_type', '=', $param['business_type']];
         }
 
         if (isset($param['amount']) && !empty($param['amount'])) {
-            $whereArray[] = ['amount', '=', $param['amount']];
+            $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
         }
 
         // 结束时间（可选），默认为为当前时间
@@ -186,10 +187,10 @@ class OrderPayIncomeRepository
             if( $param['begin_time'] > $param['end_time'] ){
                 return false;
             }
-            $whereArray[] =  ['create_time', '>', strtotime($param['begin_time'])];
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '>', strtotime($param['begin_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }else{
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }
         if (isset($param['size'])) {
             $pagesize = $param['size'];
@@ -202,7 +203,14 @@ class OrderPayIncomeRepository
             $page = 1;
         }
 
-        $result =  OrderPayIncome::query()
+        $result = DB::table('order_pay_income')
+                ->select('order_pay_income.*','order_user_certified.realname','order_info.mobile')
+                ->join('order_info',function($join){
+                $join->on('order_pay_income.order_no', '=', 'order_info.order_no');
+            }, null,null,'inner')
+            ->join('order_user_certified',function($join){
+                $join->on('order_pay_income.order_no', '=', 'order_user_certified.order_no');
+            }, null,null,'inner')
             ->where($whereArray)
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)

@@ -1615,12 +1615,14 @@ class OrderOperate
                     *   到期处理：当天到期申请，有售后的
                     *
                     */
+                  $isCustomer = ($values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_REFUND) ?? false;
                    if ($values['zuqi_type']== Inc\OrderStatus::ZUQI_TYPE1) {
 
                        //申请售后没有
                        $goodsList[$keys]['act_goods_state']['service_btn'] = false;
                        //到期处理
-                       if ($values['end_time']>time()+config('web.day_expiry_process_days')) {
+
+                       if (($values['end_time']>time()+config('web.day_expiry_process_days')) || $isCustomer) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
 
@@ -1637,7 +1639,7 @@ class OrderOperate
                        }
 
                        //不在一个月内不出现到期处理
-                       if ($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
+                       if (($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) || $isCustomer) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
                    }
