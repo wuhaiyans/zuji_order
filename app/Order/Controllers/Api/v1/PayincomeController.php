@@ -317,8 +317,6 @@ class PayincomeController extends Controller
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
         }
 
-
-        $orderInfo = "";
         $data = [
             'name'          => "业务类型" . $params['business_type'] . "线下缴款",
             'order_no'      => $params['order_no'],
