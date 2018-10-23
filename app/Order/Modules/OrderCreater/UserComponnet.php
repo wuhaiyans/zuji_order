@@ -40,6 +40,8 @@ class UserComponnet implements OrderCreater
     private $realname;
     private $certNo;
     private $credit;
+    private $age;
+    private $risk;
 
 
 
@@ -72,6 +74,10 @@ class UserComponnet implements OrderCreater
         $this->realname = $userInfo['realname'];
         $this->certNo = $userInfo['cert_no'];
         $this->credit = intval($userInfo['credit']);
+        $age =substr($this->certNo,6,8);
+        $now = date("Ymd");
+        $this->age = intval(($now-$age)/10000);
+        $this->risk = $userInfo['risk']?1:0;
     }
 
     /**
@@ -124,6 +130,8 @@ class UserComponnet implements OrderCreater
                 'realname'=>$this->realname,
                 'cert_no'=>$this->certNo,
                 'credit'=>$this->credit,
+                'age'=>$this->age,
+                'risk'=>$this->risk,
             ],
             'address'=>$this->address,
         ];

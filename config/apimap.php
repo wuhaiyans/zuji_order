@@ -284,15 +284,17 @@ return [
     // | 收支明细
     //-+------------------------------------------------------------------------
     // 入账明细列表
-    'api.pay.payIncomeQuery'       => 'PayincomeController@payIncomeQuery',
+    'api.pay.payIncomeQuery'        => 'PayincomeController@payIncomeQuery',
     // 入账明细详情
-    'api.pay.payIncomeInfo'        => 'PayincomeController@payIncomeInfo',
+    'api.pay.payIncomeInfo'         => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
-    'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
+    'api.pay.payIncomeWhere'        => 'PayincomeController@payIncomeWhere',
     // 线下还款场景
-    'api.pay.underLineScene'       => 'PayincomeController@underLineScene',
+    'api.pay.underLineScene'        => 'PayincomeController@underLineScene',
+    // 线下支付 获取所需要支付金额
+    'api.pay.underLineGetPayAmount' => 'PayincomeController@underLineGetPayAmount',
     // 增加线下还款记录
-    'api.pay.underLineAdd'         => 'PayincomeController@underLineAdd',
+    'api.pay.underLineAdd'          => 'PayincomeController@underLineAdd',
 
     // test
     'api.Test.test'       => 'TestController@test',

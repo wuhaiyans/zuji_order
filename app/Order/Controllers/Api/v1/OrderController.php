@@ -64,16 +64,21 @@ class OrderController extends Controller
 	 */
     public function confirmation(Request $request){
         $params = $request->all();
-
         //获取appid
         $appid		= $params['appid'];
         $sku		= $params['params']['sku_info'];
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-//        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-
-
+        if( isset($params['params']['coupon']) ){
+            $coupon = $params['params']['coupon'];
+        }else{
+            //自动调用接口查询优惠券
+            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $sku[0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+            ]);
+        }
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
@@ -90,10 +95,7 @@ class OrderController extends Controller
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         }
-        //自动调用接口查询优惠券
-        $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
-             'sku_id' => $sku[0]['sku_id'],
-        ]);
+
         //查询地址信息接口
         $address_list = \App\Lib\Address\Address::addressQuery([
             'auth_token'=>$params['auth_token'],
@@ -110,7 +112,7 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
-        $res['address_list']=$address_list;
+        $res[]=$address_list;
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
