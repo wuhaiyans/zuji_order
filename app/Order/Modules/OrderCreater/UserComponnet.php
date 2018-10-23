@@ -29,8 +29,6 @@ class UserComponnet implements OrderCreater
     private $userId;
     //手机号
     private $mobile;
-    //代扣协议号
-    private $withholdingNo;
     //地址
     private $address=[];
 
@@ -42,9 +40,6 @@ class UserComponnet implements OrderCreater
     private $realname;
     private $certNo;
     private $credit;
-    private $face;
-    private $age;
-    private $risk;
 
 
 
@@ -69,7 +64,6 @@ class UserComponnet implements OrderCreater
             $this->address['name'] = $userInfo['realname'];
         }
         $this->mobile = $userInfo['username'];
-        $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;
         $this->block = intval($userInfo['block'])?1:0;
         $this->creditTime = intval( $userInfo['credit_time'] );
@@ -78,11 +72,6 @@ class UserComponnet implements OrderCreater
         $this->realname = $userInfo['realname'];
         $this->certNo = $userInfo['cert_no'];
         $this->credit = intval($userInfo['credit']);
-        $this->face = $userInfo['face']?1:0;
-        $age =substr($this->certNo,6,8);
-        $now = date("Ymd");
-        $this->age = intval(($now-$age)/10000);
-        $this->risk = $userInfo['risk']?1:0;
     }
 
     /**
@@ -127,7 +116,6 @@ class UserComponnet implements OrderCreater
             'user' => [
                 'user_id' => $this->userId,
                 'user_mobile' => $this->mobile,
-                'withholding_no'=> $this->withholdingNo,
                 'is_lock'=>$this->islock,
                 'block'=>$this->block,
                 'credit_time'=>$this->creditTime,
@@ -136,9 +124,6 @@ class UserComponnet implements OrderCreater
                 'realname'=>$this->realname,
                 'cert_no'=>$this->certNo,
                 'credit'=>$this->credit,
-                'face'=>$this->face,
-                'age'=>$this->age,
-                'risk'=>$this->risk,
             ],
             'address'=>$this->address,
         ];

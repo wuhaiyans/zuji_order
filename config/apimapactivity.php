@@ -45,7 +45,10 @@ return [
 
     /********************************************1元体验活动接口***************************************************/
     'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
-    'api.invite.numeration'       => 'ActiveInviteController@numeration', //注册邀请人数
-    'api.invite.myInvite'       => 'ActiveInviteController@myInvite', //我的邀请人数列表
+    'api.invite.numeration'              => 'ActiveInviteController@numeration', //注册邀请人数
+    'api.invite.myInvite'                 => 'ActiveInviteController@myInvite', //我的邀请人数列表
+    'api.activity.experienceRefund'     => 'ActivityExperienceController@experienceRefund', //预约退款（15个自然日内）
+    'api.activity.refund'                 => 'ActivityExperienceController@refund', //预约退款（15个自然日后）
+
 
 ];

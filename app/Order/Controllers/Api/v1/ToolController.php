@@ -188,6 +188,8 @@ class ToolController extends Controller
      * 'visit_id'    => '',  【可选】  回访id    int
      * 'keywords'    =>'',   【可选】  关键字    string
      * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
      * ]

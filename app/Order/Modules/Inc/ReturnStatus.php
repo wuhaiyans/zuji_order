@@ -84,6 +84,17 @@ class ReturnStatus {
      */
     const ReturnEvaluationFalse= 2;
 
+
+    /***********业务类型******************/
+    /**
+     * @var int 线上业务
+     */
+    const  OnLineBusiness = 0;
+    /**
+     * @var int 线下业务
+     */
+    const UnderLineBusiness = 1;
+
     public static function getStatusList(){
         return [
             self::ReturnInvalid => '无效状态',

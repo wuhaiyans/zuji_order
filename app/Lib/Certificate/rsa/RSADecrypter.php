@@ -1,11 +1,11 @@
 <?php
-namespace app\Lib\Certificate\rsa;
+namespace App\Lib\Certificate\rsa;
 /**
  * RSADecrypter
  * RSA 算法解密
  * @author liuhongxing
  */
-class RSADecrypter implements \app\Lib\Certificate\Decrypter {
+class RSADecrypter implements \App\Lib\Certificate\Decrypter {
     
     private $privateKey = '';
     private $publicKey = '';
@@ -68,7 +68,6 @@ class RSADecrypter implements \app\Lib\Certificate\Decrypter {
         }
 
         if(!$res){
-            set_error('RSA公钥错误。请检查公钥文件格式是否正确');
             return false;
         }
 

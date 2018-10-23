@@ -101,6 +101,9 @@ $api->version('v1', [
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
+
+        //隊列取消订单
+        $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
@@ -112,6 +115,8 @@ $api->version('v1', [
         //用户逾期列表导出
         $api->any('overDueExport', 'ToolController@overDueExport');
 
+        //缴款记录导出
+        $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/

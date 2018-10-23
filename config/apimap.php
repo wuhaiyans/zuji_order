@@ -215,6 +215,8 @@ return [
     'api.Return.allowReturn'       =>'ReturnController@allowReturn',
     //退换货--确认收货
     'api.Return.returnReceive'       =>'ReturnController@returnReceive',
+    //线下退货退款列表
+    'api.Return.underLineReturn'       =>'ReturnController@underLineReturn',
 
 
 
@@ -284,9 +286,13 @@ return [
     // 入账明细列表
     'api.pay.payIncomeQuery'       => 'PayincomeController@payIncomeQuery',
     // 入账明细详情
-    'api.pay.payIncomeInfo'       => 'PayincomeController@payIncomeInfo',
+    'api.pay.payIncomeInfo'        => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
     'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
+    // 线下还款场景
+    'api.pay.underLineScene'       => 'PayincomeController@underLineScene',
+    // 增加线下还款记录
+    'api.pay.underLineAdd'         => 'PayincomeController@underLineAdd',
 
     // test
     'api.Test.test'       => 'TestController@test',
@@ -328,6 +334,9 @@ return [
     'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
+    'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+
+
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
      ************************************************************************************************/
@@ -356,5 +365,5 @@ return [
     'api.tool.overDueExport' => 'ToolController@overDueExport',          //用户逾期列表导出
 
 
-
+    'test'=>'PayController@paymentNotify',
 ];

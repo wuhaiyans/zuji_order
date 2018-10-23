@@ -73,7 +73,7 @@ class OrderReturnCreater
      * @return array
      * [
      *   'refund_no'   =>''  业务编号
-     *   'goods_no’   =>''  商品编号
+     *   'goods_no'   =>''  商品编号
      * ]
      */
     public function add(array $params,array $userinfo){
@@ -3189,25 +3189,18 @@ class OrderReturnCreater
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
 
-//            if(!$payInfo){
-//                LogApi::debug("【advanceReturn】获取支付信息失败");
-//                return false;//支付单不存在
-//            }
             //获取商品数组
             $goods_info = $goods->getData();
             $result['pay_amount'] =0.00;
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
-            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
+            $result['auth_deduction_amount'] = 0.00;
+                LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
             if($order_info['pay_type'] == PayInc::LebaifenPay){
-                if($params['compensate_amount']>0){
-                    //应付赔偿金额
-                    $result['evaluation_amount'] = $params['compensate_amount'];
-                }
-
                 //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                $result['refund_amount'] = $result['pay_amount'];
             }
             //花呗分期+预授权
             if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
@@ -3215,32 +3208,40 @@ class OrderReturnCreater
                     return false;
                 }
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
+                    $result['refund_amount'] = 0.00;//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                 }
 
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    if( $params['compensate_amount'] > 0 ) {
-                        //赔偿金额必须小于等于押金金额
-                        if( $goods_info['yajin'] < $params['compensate_amount'] ){
-                            LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
-                            return false;
-                        }
-                        $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
+
+                    if( $goods_info['yajin'] >= $params['compensate_amount']){
+                        $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                        $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                    }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                        $result['auth_unfreeze_amount'] = 0.00;
+                        $result['auth_deduction_amount'] =  $goods_info['yajin'];
                     }
 
                 }
             }
             if($order_info['pay_type'] == PayInc::MiniAlipay){
                 LogApi::debug("【advanceReturn】此订单是小程序订单");
-                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                if( $goods_info['yajin'] >= $params['compensate_amount']){
+                    $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                    $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                    $result['auth_unfreeze_amount'] = 0.00;
+                    $result['auth_deduction_amount'] =  $goods_info['yajin'];
+                }
+
             }
 
             // 创建退换货单参数
             $data = [
                 'goods_no'      => $goods_info['goods_no'],
                 'order_no'      => $params['order_no'],
+                'business_type'  => ReturnStatus::UnderLineBusiness,
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
                 'reason_text'   => "中途退机",
@@ -3249,10 +3250,11 @@ class OrderReturnCreater
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>$result['pay_amount'] ,            //实付金额
                 'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
-                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
+                'auth_deduction_amount' =>  $result['auth_deduction_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
+                'remark'              => '异常订单',
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
@@ -3364,7 +3366,17 @@ class OrderReturnCreater
     }
     /**
      * 用户逾期
-     *
+     * @params
+     *[
+     *'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * ]
+     * @return array
      */
     public static function overDue($params){
         $orderListArray = OrderReturnRepository::getAdminOrderList($params);
@@ -3477,7 +3489,33 @@ class OrderReturnCreater
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
+    /*线下退货退款列表
+     *@params
+     * [
+     *   'begin_time' => '', //开始时间  int     【可选】
+     *   'end_time'   =>'',  //结束时间  int     【可选】
+     *   'kw_type'   =>'',   //搜索条件  string  【可选】
+     *   'keyword'   =>'',   //关键词    string  【可选】
+     *   'page'      =>'',   //页数       int    【可选】
+     *   'size'      =>'',   //条数       int    【可选】
+     * ]
+     *@return array
+     *
+     */
+    public function underLineReturn(array $params){
+        $orderListArray = OrderReturnRepository::underLineReturn($params);
+        LogApi::debug("[underLineReturn]获取线下退货退款数据",$orderListArray);
+        if (!empty($orderListArray['data'])) {
+            foreach ($orderListArray['data'] as $keys=>$values) {
+                //订单状态名称
+                $orderListArray['data'][$keys]['return_status_name'] = ReturnStatus::getStatusName($values['status']);
 
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+    }
 
 
 }

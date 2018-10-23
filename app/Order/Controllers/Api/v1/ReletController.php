@@ -78,6 +78,7 @@ class ReletController extends Controller
      *  'user_name'     => 'required',//用户名(手机号)
      *  'goods_id'      => 'required', //设备ID
      *  'relet_amount'  => 'required',//续租金额
+     *  'extended_params'=> 'required',//支付扩展参数(不是必须)
      *  'return_url'    => 'required'//前端回调地址
      *
      * @return \Illuminate\Http\JsonResponse
@@ -102,7 +103,9 @@ class ReletController extends Controller
             'pay_type'      => 'required', //支付方式
             'relet_amount'  => 'required',//续租金额
             'user_name'     => 'required',//用户名(手机号)
+            'extended_params'=> 'required',//支付扩展参数
             'return_url'    => 'required'//前端回调地址
+
         ]);
         if(count($params) < 7){
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");

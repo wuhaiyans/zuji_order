@@ -158,7 +158,7 @@ class OrderRelet
                     $data = [
                         'user_id'=>$params['user_id'],
                         'zuqi_type'=>$goods['zuqi_type'],
-                        'zuqi'=>$goods['zuqi'],
+                        'zuqi'=>$params['zuqi'],
                         'order_no'=>$params['order_no'],
                         'relet_no'=>createNo(9),
                         'create_time'=>time(),
@@ -201,6 +201,9 @@ class OrderRelet
                                 'name'      => '订单:'.$params['order_no'].'设备续租',//【必选】string 交易名称
                                 'front_url' => $params['return_url'],               //【必选】string 前端回跳地址
                             ];
+                            if(isset($params['extended_params'])){
+                                $_params['extended_params']=$params['extended_params'];
+                            }
                             $urlInfo = $pay->getCurrentUrl(\App\Order\Modules\Repository\Pay\Channel::Alipay, $_params );
                             DB::commit();
                             return $urlInfo;

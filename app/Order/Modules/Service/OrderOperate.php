@@ -738,6 +738,46 @@ class OrderOperate
 
     }
     /**
+     * 保存订单风控信息
+     * @author wuhaiyan
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
+     */
+    public static function orderRiskSave($orderNo,$userId)
+    {
+
+        //获取风控信息信息
+        try{
+            $knight =Risk::getAllKnight(['user_id'=>$userId]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[队列] 获取风控接口失败",$userId);
+            return  ApiStatus::CODE_31006;
+        }
+
+        //获取风控信息详情 保存到数据表
+
+        $riskDetail =$knight['risk_detail']?? true;
+        if (is_array($riskDetail) && !empty($riskDetail)) {
+            foreach ($riskDetail as $k=>$v){
+                $riskData =[
+                    'order_no'=>$orderNo,  // 订单编号
+                    'data' => json_encode($riskDetail[$k]),
+                    'type'=>$k,
+                ];
+                $id =OrderRiskRepository::add($riskData);
+                if(!$id){
+                    LogApi::error(config('app.env')."[队列]保存风控数据失败",$riskData);
+                    return  ApiStatus::CODE_31006;
+                }
+            }
+            LogApi::info(config('app.env')."[队列]订单风控信息保存成功：".$orderNo,$riskData);
+            return  ApiStatus::CODE_0;
+        }
+
+
+    }
+    /**
      * 取消订单
      * Author: heaven
      * @param $orderNo 订单编号
@@ -846,7 +886,7 @@ class OrderOperate
 
             if ($reasonId) {
 
-                    $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+                $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
             }
 
             if ($resonText) {
@@ -865,7 +905,6 @@ class OrderOperate
         }
 
     }
-
     /**
      * 获取风控和认证信息
      * @author wuhaiyan

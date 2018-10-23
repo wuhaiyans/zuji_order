@@ -60,5 +60,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackOver',
         // 业务类型为【预约】的回调通知
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE => '\App\Activity\Modules\Service\Appointment::callbackAppointment',
+        // 业务类型为【1元活动】的回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE => '\App\Activity\Modules\Service\ActivityExperience::callbackExperience',
 	],
 ];

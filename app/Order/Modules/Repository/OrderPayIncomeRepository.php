@@ -146,7 +146,71 @@ class OrderPayIncomeRepository
         if (!$result) return false;
         return $result->toArray();
     }
+    /**
+     * 查询列表导出
+     */
+    public static function queryListExport($param = array(),$pagesize=5){
+        $whereArray = [];
+        if (isset($param['name']) && !empty($param['name'])) {
+            $whereArray[] = ['name', '=', $param['name']];
+        }
 
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+        if (isset($param['appid']) && !empty($param['appid'])) {
+            $whereArray[] = ['appid', '=', $param['appid']];
+        }
+
+        if (isset($param['channel']) && !empty($param['channel'])) {
+            $whereArray[] = ['channel', '=', $param['channel']];
+        }
+
+        if (isset($param['business_type']) && !empty($param['business_type'])) {
+            $whereArray[] = ['business_type', '=', $param['business_type']];
+        }
+
+        if (isset($param['amount']) && !empty($param['amount'])) {
+            $whereArray[] = ['amount', '=', $param['amount']];
+        }
+
+        // 结束时间（可选），默认为为当前时间
+        if( !isset($param['end_time']) || $param['end_time'] == ""){
+            $param['end_time'] = date("Y-m-d 23:59:59");
+        }else{
+            $param['end_time'] = $param['end_time'] . " 23:59:59";
+        }
+        // 开始时间（可选）
+        if( isset($param['begin_time']) && $param['begin_time'] != ""){
+            if( $param['begin_time'] > $param['end_time'] ){
+                return false;
+            }
+            $whereArray[] =  ['create_time', '>', strtotime($param['begin_time'])];
+            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+        }else{
+            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+        }
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
+        $result =  OrderPayIncome::query()
+            ->where($whereArray)
+            ->orderBy('create_time','DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
+        if (empty($orderListArray)) return false;
+        $orderArray = objectToArray($result);
+        return $orderArray;
+    }
     /*
      * 修改方法
      * array    $where

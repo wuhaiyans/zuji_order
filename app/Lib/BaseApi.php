@@ -1,5 +1,7 @@
 <?php
 namespace App\Lib;
+
+use \App\Lib\AlipaySdk\sdk\aop\AopClient;
 /**
  * 接口基类
  * 定义了 系统之间交互接口基本方式
@@ -31,6 +33,11 @@ class BaseApi {
 		$request->setUrl( $url );	// 接口地址
 		$request->setMethod( $method );	// 接口名称
 		$request->setVersion( $version );
+		//请求验签
+//        $AopClient  = new AopClient();
+//        $sign = $AopClient->generateSign($params);
+//        $params['sign'] = $sign;
+//        $params['sign_type'] = 'rsa';
 		$request->setParams( $params );	// 业务参数
 		$request->setUserInfo( $userInfo );	// 业务参数
 		//-+--------------------------------------------------------------------
