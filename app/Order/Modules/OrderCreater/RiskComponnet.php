@@ -96,7 +96,7 @@ class RiskComponnet implements OrderCreater
         $certified = OrderUserCertified::where('order_no','=',$orderNo)->first();
         if (!$certified) return false;
         $certified->user_type = $isStudent;
-        $certified->card_img = $this->knight['card_img'];
+        $certified->card_img = isset($this->knight['card_img']) && !empty($this->knight['card_img'])?$this->knight['card_img']:"";
         if (!$certified->save()) {
             LogApi::error(config('app.env')."[下单]保存用户身份类型失败",$this->knight);
             $this->getOrderCreater()->setError('保存用户身份类型失败');
