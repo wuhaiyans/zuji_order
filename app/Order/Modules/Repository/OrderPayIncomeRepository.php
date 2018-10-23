@@ -202,7 +202,11 @@ class OrderPayIncomeRepository
             $page = 1;
         }
 
-        $result =  OrderPayIncome::query()
+        $result = DB::table('order_pay_income')
+                ->select('order_pay_income.*','order_user_certified.realname','order_user_certified.mobile')
+                ->join('order_user_certified',function($join){
+                    $join->on('order_pay_income.order_no', '=', 'order_user_certified.order_no');
+                }, null,null,'inner')
             ->where($whereArray)
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)

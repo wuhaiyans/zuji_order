@@ -335,7 +335,7 @@ class OrderCreater
      *              'end_time'=>'',     //【短租必须】string 租用结束时间
      *			]
      *		]',
-     *		'coupon'	=> [1,1],	//【可选】array 优惠券
+     *		//'coupon'	=> [1,1],	//【可选】array 优惠券
      *      $userinfo [
      *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
      *          'user_id'=>1,   //【必须】int用户ID
@@ -369,7 +369,7 @@ class OrderCreater
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
             //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            //$orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //押金
             // $orderCreater = new DepositComponnet($orderCreater);
@@ -382,7 +382,6 @@ class OrderCreater
 
             //分期
             //$orderCreater = new InstalmentComponnet($orderCreater);
-
             //支付
             $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
