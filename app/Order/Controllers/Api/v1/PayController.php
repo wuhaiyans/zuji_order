@@ -1210,6 +1210,7 @@ class PayController extends Controller
             LogApi::debug("[payIncomeQueryExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
 
             $orderData = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryListExport($params,$pre_count);
+            print_R($orderData);
             LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
             if ($orderData) {
                 $data = [];
