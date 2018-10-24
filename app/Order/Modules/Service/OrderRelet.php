@@ -402,12 +402,12 @@ class OrderRelet
                     'begin_time'=>$goodsUnit['begin_time'],
                     'end_time'=>$t,
                 ];
-                //修改设备状态 续租完成
-                if( !$goodsObj->setGoodsStatusReletOff() ){
-                    DB::rollBack();
-                    LogApi::info("[OrderRelet]修改设备状态续租完成失败", $reletNo);
-                    return false;
-                }
+//                //修改设备状态 续租完成
+//                if( !$goodsObj->setGoodsStatusReletOff() ){
+//                    DB::rollBack();
+//                    LogApi::info("[OrderRelet]修改设备状态续租完成失败", $reletNo);
+//                    return false;
+//                }
                 //添加设备周期表
                 if( !ServicePeriod::createService($data) ){
                     DB::rollBack();
