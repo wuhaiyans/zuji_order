@@ -8,7 +8,7 @@ use App\Order\Modules\Repository\Instalment\Discounter\Discounter;
  * 分期计算（日租，n天作为一期）
  *
  */
-class OrderWithhold implements UnderLine {
+class OrderGiveback implements UnderLine {
 
 
     /**

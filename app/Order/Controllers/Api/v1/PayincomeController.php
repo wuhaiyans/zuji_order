@@ -229,26 +229,8 @@ class PayincomeController extends Controller
         $params = $params['params'];
 
         // 实现业务
-        $business_type = $params['business_type'];
-        switch ($business_type) {
-            case UnderPayStatus::OrderWithhold:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderWithhold($params);
-                break;
-            case UnderPayStatus::OrderGiveback:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderGiveback($params);
-                break;
-            case UnderPayStatus::OrderRefund:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRefund($params);
-                break;
-            case UnderPayStatus::OrderBuyout:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout($params);
-                break;
-            case UnderPayStatus::OrderRelet:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRelet($params);
-                break;
-        }
+        $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $amount = $orderService->getPayAmount();
-
 
         return $amount;
     }
@@ -292,26 +274,9 @@ class PayincomeController extends Controller
         $params = $params['params'];
 
         // 实现业务
-        $business_type = $params['business_type'];
-        switch ($business_type) {
-            case UnderPayStatus::OrderWithhold:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderWithhold($params);
-                break;
-            case UnderPayStatus::OrderGiveback:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderGiveback($params);
-                break;
-            case UnderPayStatus::OrderRefund:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRefund($params);
-                break;
-            case UnderPayStatus::OrderBuyout:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout($params);
-                break;
-            case UnderPayStatus::OrderRelet:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRelet($params);
-                break;
-        }
-
+        $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $result = $orderService->execute();
+
         if(!$result){
             DB::rollBack();
             \App\Lib\Common\LogApi::error('[underLineAdd]业务实现失败',$params);
