@@ -1213,7 +1213,7 @@ class PayController extends Controller
             LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
             if ($orderData) {
                 $data = array();
-                foreach ($orderData['data'] as $item) {
+                foreach ($orderData as $item) {
                     $data[] = [
                         $item['name'],
                         $item['realname'],

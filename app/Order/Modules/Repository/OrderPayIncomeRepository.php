@@ -177,7 +177,7 @@ class OrderPayIncomeRepository
             $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
         }
 
-     
+
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
