@@ -153,17 +153,13 @@ class OrderPayIncomeRepository
      */
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
-        if (isset($param['name']) && !empty($param['name'])){
-            $whereArray[] = ['order_pay_income.name', '=', $param['name']];
-        }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
         }
-
-      //  if (isset($param['appid']) && !empty($param['appid'])) {
-       //     $whereArray[] = ['order_pay_income.appid', '=', $param['appid']];
-      //  }
+        if (isset($param['appid']) && !empty($param['appid'])) {
+            $whereArray[] = ['appid', '=', $param['appid']];
+        }
 
         if (isset($param['channel']) && !empty($param['channel'])) {
             $whereArray[] = ['order_pay_income.channel', '=', $param['channel']];
@@ -177,7 +173,16 @@ class OrderPayIncomeRepository
             $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
         }
 
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['order_pay_income.create_time', '>=', strtotime($param['begin_time'])];
+        }
 
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_pay_income.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_pay_income.create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
