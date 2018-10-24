@@ -45,7 +45,88 @@ class OrderCleaningController extends Controller
         return apiResponse($res,ApiStatus::CODE_0,"success");
 
     }
+    /**
+     *
+     * 订单清算列表查询
+     * Author: qinliping
+     * @param Request $request
+     *  params": - {
+    "page":"1",                //类型：String  必有字段  备注：页码
+    "status":"mock",                //类型：String    备注：出账状态
+    "begin_time":1,                //类型：Number   备注：开始时间
+    "end_time":1,                //类型：Number    备注：结束时间
+    "app_id":1,                //类型：Number    备注：入账来源
+    "out_account":"mock",                //类型：String    备注：出账方式
+    "order_no":"mock"                //类型：String    备注：订单号
+    }
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cleanListExport(Request $request){
+        set_time_limit(0);
+        $params = $request->all();
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
+        } else {
+            $pageSize = $params['size'];
+        }
+        $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
 
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
+
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
+        $headers = ['出账申请时间', '出账类型','出账状态', '入账来源','订单编号','出账方式','出账金额','租金退款时间','预授权扣除金额','预授权扣除时间','预授权解冻金额','预授权解除时间','租金退款金额'];
+
+        $orderExcel = array();
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $orderData = array();
+            LogApi::debug("[cleanListExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
+
+            $orderData = OrderCleaning::getOrderCleaningListExport($params,$pre_count);
+            $orderDataArray=objectToArray($orderData);
+            LogApi::debug("[cleanListExport]查询结果",$orderData);
+            if ($orderDataArray) {
+                $data = array();
+                foreach ($orderDataArray as $item) {
+                    $data[] = [
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['order_type_name'],
+                        $item['status_name'],
+                        $item['app_id_name'],
+                        $item['order_no'],
+                        $item['out_account_name'],
+                        $item['refund_amount']+$item['auth_unfreeze_amount'],
+                        date('Y-m-d H:i:s', $item['refund_time']),
+                        $item['auth_deduction_amount'],
+                        date('Y-m-d H:i:s', $item['auth_deduction_time']),
+                        $item['auth_unfreeze_amount'],
+                        date('Y-m-d H:i:s', $item['auth_unfreeze_time']),
+                        $item['refund_amount'],
+
+                    ];
+
+                }
+                LogApi::debug("【cleanListExport】导出数据列表",$data);
+                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '入账列表导出',$abc);
+
+            }else{
+                break;
+            }
+        }
+
+        return $orderExcel;
+        exit;
+    }
 
     /**
      *
