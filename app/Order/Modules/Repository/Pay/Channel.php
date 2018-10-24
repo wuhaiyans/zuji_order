@@ -49,6 +49,21 @@ class Channel {
 			self::UnderLine 	=> '线下支付',
 		];
 	}
+    /**
+     *
+     * 订单入账方式 转换成 订单入账方式名称
+     * @param int $status   订单入账方式
+     * @return string 订单入账方式名称
+     */
+    public static function getBusinessName($status){
+        $list = self::getBusinessType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
+
+
 
 
 }
