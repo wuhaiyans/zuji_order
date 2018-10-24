@@ -504,70 +504,42 @@ class Instalment {
 	public static function underLinePaySuccess( int $instalment_id){
 
 
-		LogApi::info("[underLinePaySuccess]线下分期还款", $instalment_id);
+		LogApi::debug("[underLinePaySuccess]线下分期还款", $instalment_id);
 
 		$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfoById($instalment_id);
 		if( !is_array($instalmentInfo)){
-			\App\Lib\Common\LogApi::error('[underLinePaySuccess]线下分期还款分期查询错误_'.$instalment_id);
+			LogApi::error('[underLinePaySuccess]线下分期还款分期查询错误_'.$instalment_id);
 			return false;
 		}
 
 		// 查询订单
 		$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
 		if( !$orderInfo ){
-			\App\Lib\Common\LogApi::error('[underLinePaySuccess]线下分期还款-订单信息错误');
+			LogApi::error('[underLinePaySuccess]线下分期还款-订单信息错误');
 			return false;
 		}
-
+		$business_no = createNo();
 		$data = [
-			'business_no'		=> createNo(),	//设置交易号 为发送短信根据 business_no  查询分期
+			'business_no'		=> $business_no,	//设置交易号 为发送短信根据 business_no  查询分期
 			'status'        	=> OrderInstalmentStatus::SUCCESS,
 			'payment_time'      => time(),
 			'update_time'   	=> time(),
 			'payment_amount'   	=> $instalmentInfo['amount'],
-			'pay_type'   		=> 0,
+			'pay_type'   		=> OrderInstalmentStatus::UNDERLINE,
 
 		];
 		// 修改分期状态
 		$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['id' => $instalment_id], $data);
 		if(!$b){
-			\App\Lib\Common\LogApi::error('[underLinePaySuccess]线下分期还款-修改分期状态失败');
+			LogApi::error('[underLinePaySuccess]线下分期还款-修改分期状态失败');
 			return false;
 		}
 
-		// 创建扣款记录数据
-		$recordData = [
-			'instalment_id'             => $instalment_id,   	// 分期ID
-			'status'        			=> OrderInstalmentStatus::SUCCESS,
-			'create_time'               => time(),          			// 创建时间
-			'update_time'   			=> time(),
-		];
-		$record = \App\Order\Modules\Repository\OrderGoodsInstalmentRecordRepository::create($recordData);
-		if(!$record){
-			\App\Lib\Common\LogApi::error('[underLinePaySuccess]线下分期还款-创建扣款记录失败');
-			return false;
-		}
-
-		// 创建收支明细
-		$incomeData = [
-			'name'           => "商品-" . $instalmentInfo['goods_no'] . "分期" . $instalmentInfo['term'] . "线下还款",
-			'order_no'       => $instalmentInfo['order_no'],
-			'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-			'appid'          => \App\Order\Modules\Inc\OrderPayIncomeStatus::UNDERLINE,
-			'channel'        => \App\Order\Modules\Repository\Pay\Channel::Underline,
-			'amount'         => $instalmentInfo['amount'],
-			'create_time'    => time(),
-		];
-		$incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
-		if(!$incomeB){
-			\App\Lib\Common\LogApi::error('[crontabCreatepay]创建收支明细失败');
-			return false;
-		}
 
 		//发送短信通知 支付宝内部通知
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-			$instalmentInfo['business_no'],
+			$business_no,
 			"InstalmentWithhold");
 		$notice->notify();
 
