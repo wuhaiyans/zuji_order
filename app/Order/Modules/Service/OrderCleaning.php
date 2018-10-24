@@ -147,16 +147,16 @@ class OrderCleaning
                 $orderCleanList[$keys]['app_id_name'] = $channelData['appid']['name'];
                 //退款时间
                 if($orderCleanList[$keys]['refund_time']>0){
-                    $orderCleanList[$keys]['refund_time'] = date('Y-m-d H:i:s');
+                    $orderCleanList[$keys]['refund_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['refund_time']);
                 }else{
                     $orderCleanList[$keys]['refund_time'] = 0;
                 }
                 //扣除预授权时间
 
-                 if($orderCleanList[$keys]['auth_deduction_amount']>0){
-                     $orderCleanList[$keys]['auth_deduction_amount'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_deduction_amount']);
+                 if($orderCleanList[$keys]['auth_deduction_time']>0){
+                     $orderCleanList[$keys]['auth_deduction_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_deduction_time']);
                  }else{
-                     $orderCleanList[$keys]['auth_deduction_amount'] = 0;
+                     $orderCleanList[$keys]['auth_deduction_time'] = 0;
                  }
                 //解冻时间
 
