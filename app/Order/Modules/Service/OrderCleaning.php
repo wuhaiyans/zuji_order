@@ -131,7 +131,7 @@ class OrderCleaning
      */
     public static function getOrderCleaningListExport($param = array(),$pagesize = 5 )
     {
-        $orderCleanList = OrderClearingRepository::getOrderCleanList($param,$pagesize);
+        $orderCleanList = OrderClearingRepository::getOrderCleanListExport($param,$pagesize);
         if (!empty($orderCleanList['data'])) {
 
             foreach($orderCleanList['data'] as $keys=>$values){

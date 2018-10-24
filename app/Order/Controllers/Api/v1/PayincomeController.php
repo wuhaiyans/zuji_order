@@ -169,18 +169,19 @@ class PayincomeController extends Controller
             $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
         }
 
-        // 入账类型
-        $type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
-
-        // 入账方式
-        $channel = \App\Order\Modules\Repository\Pay\Channel::getBusinessType();
-
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
         // 入账类型
-        $info['business_type']  = $type[$info['business_type']];
+        $info['business_type']  = \App\Order\Modules\Inc\OrderStatus::getBusinessName($info['business_type']);
+
         // 入账方式
-        $info['channel']        = $channel[$info['channel']];
+        $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
+        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+
+            $channel       = $channel . "-" . \App\Order\Modules\Repository\Pay\Channel::getUnderLineBusinessTypeName($info['under_channel']);;
+        }
+
+        $info['channel'] = $channel;
 
         return apiResponse($info,ApiStatus::CODE_0,"success");
     }
@@ -325,6 +326,7 @@ class PayincomeController extends Controller
             'channel'       => \App\Order\Modules\Repository\Pay\Channel::UnderLine,
             'amount'        => $params['amount'],
             'create_time'   => strtotime($params['create_time']),
+            'under_channel' => $params['under_channel'],
             'remark'        => $params['remark'],
         ];
 
