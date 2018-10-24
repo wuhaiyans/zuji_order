@@ -133,17 +133,17 @@ class OrderCleaning
     {
         $orderCleanList = OrderClearingRepository::getOrderCleanListExport($param,$pagesize);
         LogApi::debug("[getOrderCleaningListExport]订单清算列表",$orderCleanList);
-        if (!empty($orderCleanList['data'])) {
+        if (!empty($orderCleanList)) {
 
-            foreach($orderCleanList['data'] as $keys=>$values){
-                $orderCleanList['data'][$keys]['is_add_recover_remark'] = ($values['order_type']==OrderStatus::miniRecover && empty(floatval($values['mini_recover_transfer_num'])) && $values['status']==OrderCleaningStatus::orderCleaning) ?? false;
-                $orderCleanList['data'][$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
-                $orderCleanList['data'][$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
-                $orderCleanList['data'][$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
-                $orderCleanList['data'][$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
+            foreach($orderCleanList as $keys=>$values){
+                $orderCleanList[$keys]['is_add_recover_remark'] = ($values['order_type']==OrderStatus::miniRecover && empty(floatval($values['mini_recover_transfer_num'])) && $values['status']==OrderCleaningStatus::orderCleaning) ?? false;
+                $orderCleanList[$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
+                $orderCleanList[$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
+                $orderCleanList[$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
+                $orderCleanList[$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
-                $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
+                $orderCleanList[$keys]['app_id_name'] = $channelData['appid']['name'];
 
             }
 
