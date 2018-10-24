@@ -200,8 +200,8 @@ class OrderPayIncomeRepository
             ->where($whereArray)
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
-            ->get();
-        return $result->toArray();
+            ->get()->toArray();
+        return $result;
     }
     /*
      * 修改方法
