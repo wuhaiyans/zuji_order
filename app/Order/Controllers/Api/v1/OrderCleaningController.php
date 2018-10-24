@@ -97,6 +97,7 @@ class OrderCleaningController extends Controller
             if ($orderData) {
                 $data = array();
                 foreach ($orderData['data'] as $item) {
+
                     $data[] = [
                         date('Y-m-d H:i:s', $item['create_time']),
                         $item['order_type_name'],
@@ -104,7 +105,7 @@ class OrderCleaningController extends Controller
                         $item['app_id_name'],
                         $item['order_no'],
                         $item['out_account_name'],
-                        $item['refund_amount']+$item['auth_unfreeze_amount'],
+                        $item['refund_amount'],
                         $item['refund_time'],
                         $item['auth_deduction_amount'],
                         $item['auth_deduction_time'],
