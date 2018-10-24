@@ -15,6 +15,10 @@ class OrderPayIncomeStatus{
      * @var int 主动还款
      */
     const REPAYMENT = 3;
+    /**
+     * @var int 线下还款
+     */
+    const UNDERLINE = 4;
 
 
     /**
@@ -26,6 +30,7 @@ class OrderPayIncomeStatus{
             self::ORDERPAY 	    => '下单支付',
             self::WITHHOLD 	    => '分期代扣',
             self::REPAYMENT 	=> '主动还款',
+            self::UNDERLINE 	=> '线下还款',
         ];
     }
 }

@@ -96,7 +96,18 @@ class Risk extends \App\Lib\BaseApi{
 
 
     /**
-     * 获取风控白骑士信息
+     * 获取风控信息
+     * @param $arr
+     * [
+     *      'user_id'=>'',//用户ID
+     * ]
+     * @return array
+     */
+    public static function getAllKnight($arr){
+        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'system.risk.info', '1.0', ['user_id'=>$arr['user_id']]);
+    }
+    /**
+     * 获取风控用户信息
      * @param $arr
      * [
      *      'user_id'=>'',//用户ID
@@ -104,9 +115,8 @@ class Risk extends \App\Lib\BaseApi{
      * @return array
      */
     public static function getKnight($arr){
-        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'system.risk.info', '1.0', ['user_id'=>$arr['user_id']]);
+        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'system.risk.chsiInfo', '1.0', ['user_id'=>$arr['user_id']]);
     }
-
 
     /**
      * 获取蚁盾信息

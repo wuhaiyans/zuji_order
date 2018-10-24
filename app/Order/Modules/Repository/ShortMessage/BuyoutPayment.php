@@ -43,11 +43,14 @@ class BuyoutPayment{
 		if( !$code ){
 			return false;
 		}
-
+		$array = [
+				'realName'=>$data['realName'],
+				'buyoutPrice'=>$data['buyoutPrice'],
+		];
+		if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = $data['lianjie'];
+		}
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realName'],
-            'buyoutPrice'=>$data['buyoutPrice'],
-		]);
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, $array);
 	}
 }

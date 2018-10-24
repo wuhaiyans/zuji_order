@@ -103,6 +103,7 @@ class OrderGoodsRepository
 	 *		'weight' => '',//商品重量，计算物流价格用<br/>
 	 *		'goods_status' => '',//1提交申请，2同意，3审核拒绝<br/>
 	 *		'create_time' => '',//创建时间<br/>
+	 *		'relet_day' => '',//小程序短租商品续租时间<br/>
 	 *		'update_time' => '',//更新时间<br/>
 	 * ]
 	 */

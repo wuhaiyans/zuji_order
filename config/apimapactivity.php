@@ -26,14 +26,29 @@ return [
     // | 活动体验预定接口
     //-+------------------------------------------------------------------------
     'api.experience.destine'             => 'ExperienceDestineController@experienceDestine', //活动体验支付接口
-    'api.experience.destineQuery'       => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
+    'api.experience.destineQuery'        => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
 
+    'api.experience.experienceDestineList' => 'ExperienceDestineController@experienceDestineList', //体验活动列表
+    'api.experience.experienceDetail'      => 'ExperienceDestineController@experienceDetail', //体验活动列表 邀请详情
+
+    
     //-+------------------------------------------------------------------------
     // | 预约退款
     //-+------------------------------------------------------------------------
     'api.activity.appointmentRefund'     => 'AppointmentController@appointmentRefund', //预约退款（15个自然日内）
     'api.activity.refund'                  => 'AppointmentController@refund', //预约退款（15个自然日后）
     'api.activity.test'                  => 'AppointmentController@test',
+
+
+
+
+
+    /********************************************1元体验活动接口***************************************************/
+    'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
+    'api.invite.numeration'              => 'ActiveInviteController@numeration', //注册邀请人数
+    'api.invite.myInvite'                 => 'ActiveInviteController@myInvite', //我的邀请人数列表
+    'api.activity.experienceRefund'     => 'ActivityExperienceController@experienceRefund', //预约退款（15个自然日内）
+    'api.activity.refund'                 => 'ActivityExperienceController@refund', //预约退款（15个自然日后）
 
 
 ];

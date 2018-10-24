@@ -102,6 +102,7 @@ class OrderMiniRepository
      *		'channel_id' => '',//渠道来源<br/>
      *		'app_id' => '',//app_id<br/>
      *		'create_time' => '',//创建时间<br/>
+     *		'overdue_time' => '',//逾期时间<br/>
      * ]
      */
     public static function getMiniOrderInfo( $orderNo ) {

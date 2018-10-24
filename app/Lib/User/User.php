@@ -30,7 +30,24 @@ class User extends \App\Lib\BaseApi{
             'address_id'=>$address_id,
         ];
 
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
+        $userInfo = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
+		$userInfo['realname'] = $userInfo['realname']?$userInfo['realname']: substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11);
+		return $userInfo;
+    }
+    /**
+     * 获取用户微信登录授权信息
+     * @author wuhaiyan
+     * @param $user_id //【必须】 用户id
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+
+    public static function getUserWechat($user_id){
+        $params= [
+            'user_id'=>$user_id,
+        ];
+
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.wechat.query', '1.0', $params);
     }
     /**
      * 获取用户是否在第三方平台下过单

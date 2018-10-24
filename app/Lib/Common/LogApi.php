@@ -171,7 +171,7 @@ class LogApi {
 		
 		$job = new \App\Jobs\LogJob($str);
 		//$job->delay(5);
-		dispatch( $job );
+//		dispatch( $job );
 		
 		$_data = [
 			'service' => gethostname(),					// 服务器名称

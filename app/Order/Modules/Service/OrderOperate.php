@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\DB;
 use App\Lib\Order\OrderInfo;
 use App\Lib\ApiStatus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use zuji\order\OrderStatus;
 
 
@@ -593,7 +594,6 @@ class OrderOperate
         $rentAmount =normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']);
         $totalAmount =normalizeNum($rentAmount+$orderInfo['order_yajin']);
         $txnTerms =15;
-
         $instalmentInfo =[
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
@@ -604,9 +604,8 @@ class OrderOperate
             'sum_terms'		=> 0,	// 已还总期数
             'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
             'first_other_amount'=>normalizeNum($orderInfo['order_insurance']),// 首期额外金额；单位：分 碎屏险
+            'no_return_zujin' =>$rentAmount,//未还租金
         ];
-
-
         if($payType == PayInc::LebaifenPay){
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
@@ -622,19 +621,33 @@ class OrderOperate
                     'out_payment_no'	=> $payInfo['payment_no'],// 支付系统 支付交易码
                 ];
                 $res =LebaifenApi::getPaymentInfo($param);
+                $sum_amount = normalizeNum($res['sum_amount']/100);
+                if( $sum_amount >= $rentAmount ){
+                    //已还租金
+                    $sum_amount = $rentAmount;
+                    //已还期数
+                    $sum_terms = 15;
+                    //未还租金
+                    $no_return_zujin = 0.00;
+                }else{
+                    $sum_terms = $res['sum_terms'];
+                    //未还租金
+                    $no_return_zujin = normalizeNum($orderInfo['order_amount']+$orderInfo['order_insurance']-$res['sum_amount']);
+                }
                 $instalmentInfo =[
 	 		        'payment_no'	=> $res['payment_no'],	// 支付系统 支付交易码
 	 		        'out_payment_no'=> $res['out_payment_no'],	// 业务系统 支付交易码
 	 		        'status'		=> $res['status'],	// 状态；0：未支付；1：已支付；2：已结束
 	 		        'txn_amount'	=> normalizeNum($res['txn_amount']/100),	// 总金额；单位：分
 	 		        'txn_terms'		=> $res['txn_terms'],	// 总分期数
-	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100+$orderInfo['order_insurance'] -$orderInfo['order_yajin']),	// 总租金；单位：分
+	 		        'rent_amount'	=> normalizeNum($res['rent_amount']/100),	// 总租金；单位：分
 	 		        'month_amount'	=> normalizeNum($res['month_amount']/100),	// 每月租金；单位：分
 	 		        'remainder_amount' => normalizeNum($res['remainder_amount']/100),	// 每月租金取整后,总租金余数；单位：分
-	 		        'sum_amount'	=> normalizeNum($res['sum_amount']/100),	// 已还总金额；单位：分
-	 		        'sum_terms'		=> $res['sum_terms'],	// 已还总期数；
-                    'remain_amount' => normalizeNum($res['remain_amount']/100 -$orderInfo['order_yajin'] ),	// 剩余还款总租金额；单位：分
+	 		        'sum_amount'	=> $sum_amount,	// 已还总金额；单位：分
+	 		        'sum_terms'		=> $sum_terms,	// 已还总期数；
+                    'remain_amount' => normalizeNum($res['remain_amount']/100),	// 剩余还款总金额（包含租金押金）；单位：分
                     'first_other_amount'=>normalizeNum($res['first_other_amount']/100),// 首期额外金额；单位：分 碎屏险
+                    'no_return_zujin' =>$no_return_zujin,//未还租金
                 ];
                 return $instalmentInfo;
 
@@ -722,6 +735,46 @@ class OrderOperate
             die;
 
         }
+
+    }
+    /**
+     * 保存订单风控信息
+     * @author wuhaiyan
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
+     */
+    public static function orderRiskSave($orderNo,$userId)
+    {
+
+        //获取风控信息信息
+        try{
+            $knight =Risk::getAllKnight(['user_id'=>$userId]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[队列] 获取风控接口失败",$userId);
+            return  ApiStatus::CODE_31006;
+        }
+
+        //获取风控信息详情 保存到数据表
+
+        $riskDetail =$knight['risk_detail']?? true;
+        if (is_array($riskDetail) && !empty($riskDetail)) {
+            foreach ($riskDetail as $k=>$v){
+                $riskData =[
+                    'order_no'=>$orderNo,  // 订单编号
+                    'data' => json_encode($riskDetail[$k]),
+                    'type'=>$k,
+                ];
+                $id =OrderRiskRepository::add($riskData);
+                if(!$id){
+                    LogApi::error(config('app.env')."[队列]保存风控数据失败",$riskData);
+                    return  ApiStatus::CODE_31006;
+                }
+            }
+            LogApi::info(config('app.env')."[队列]订单风控信息保存成功：".$orderNo,$riskData);
+            return  ApiStatus::CODE_0;
+        }
+
 
     }
     /**
@@ -833,7 +886,7 @@ class OrderOperate
 
             if ($reasonId) {
 
-                    $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+                $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
             }
 
             if ($resonText) {
@@ -852,7 +905,6 @@ class OrderOperate
         }
 
     }
-
     /**
      * 获取风控和认证信息
      * @author wuhaiyan
@@ -878,6 +930,38 @@ class OrderOperate
         return self::getOrderRiskV1($orderNo);
 
     }
+
+
+    /**
+     * 获取风控芝麻信息
+     * @author heaven
+     * @param $orderNo
+     * @return array
+     */
+    public static function getOrderRiskScore($orderNo, $type='zhima'){
+
+        $zhimaScoreKeys = 'zhima_score_'.$orderNo;
+        if (Redis::EXISTS($zhimaScoreKeys))
+        {
+            return Redis::get($zhimaScoreKeys);
+        }
+        $riskScore = '';
+        //获取风控系统信息
+        $orderRisk =OrderRiskRepository::getRisknfoByOrderNo($orderNo, $type);
+
+        if($orderRisk){
+            $orderRisk = json_decode($orderRisk[0]['data'],true);
+
+            $riskScore =  $orderRisk['score'] ?? '';
+
+        }
+        Redis::set($zhimaScoreKeys, $riskScore);
+        return $riskScore;
+
+    }
+
+
+
 
     /**
      * 获取风控和认证信息
@@ -1148,7 +1232,7 @@ class OrderOperate
         //订单商品列表相关的数据
         $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'actState');
 
-        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsExtendArray);
+        $goodsData =  self::getGoodsListActState($orderNo, $actArray, $goodsExtendArray,$orderData['pay_type']);
 
         if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
 
@@ -1344,6 +1428,7 @@ class OrderOperate
 
         $goodsData =  self::getExportActAdminState(array_keys($orderListArray), $actArray=array());
 
+
         if (!empty($orderListArray)) {
 
             foreach ($orderListArray as $keys=>$values) {
@@ -1358,8 +1443,17 @@ class OrderOperate
                 $orderListArray[$keys]['goodsInfo'] = $goodsData[$keys]['goodsInfo'];
                 //发货时间
                 $orderListArray[$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
+                //芝麻分
+
+               $zhimaScore =  OrderOperate::getOrderRiskScore($keys);
+
+               $orderListArray[$keys]['zhima_score'] = $zhimaScore;
+
+                //回访标识
+                $orderListArray[$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
 
             }
+
 
         }
 
@@ -1415,7 +1509,7 @@ class OrderOperate
      * @param $actArray
      * @return array|bool
      */
-   public static function getGoodsListActState($orderNo, $actArray, $goodsExtendArray=array())
+   public static function getGoodsListActState($orderNo, $actArray, $goodsExtendArray=array(), $payType='')
    {
 
        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
@@ -1452,6 +1546,22 @@ class OrderOperate
 
                    $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
                    $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
+
+               } else {
+
+                   if ($payType==Inc\PayInc::PcreditPayInstallment) {
+
+                       //如果是花呗先享月租金+碎屏保
+                       if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
+
+                           $goodsList[$keys]['firstAmount'] = normalizeNum($values['amount_after_discount']+$values['insurance']);
+                       } else {
+
+                           $goodsList[$keys]['firstAmount'] = normalizeNum(($values['amount_after_discount']+$values['insurance'])/$values['zuqi']);
+                       }
+
+
+                   }
 
                }
 
@@ -1505,12 +1615,14 @@ class OrderOperate
                     *   到期处理：当天到期申请，有售后的
                     *
                     */
+                  $isCustomer = ($values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_REFUND) ?? false;
                    if ($values['zuqi_type']== Inc\OrderStatus::ZUQI_TYPE1) {
 
                        //申请售后没有
                        $goodsList[$keys]['act_goods_state']['service_btn'] = false;
                        //到期处理
-                       if ($values['end_time']>time()+config('web.day_expiry_process_days')) {
+
+                       if (($values['end_time']>time()+config('web.day_expiry_process_days')) || $isCustomer) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
 
@@ -1527,7 +1639,7 @@ class OrderOperate
                        }
 
                        //不在一个月内不出现到期处理
-                       if ($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) {
+                       if (($values['end_time'] > 0 && ($values['end_time'] - config('web.month_expiry_process_days')) > time()) || $isCustomer) {
                            $goodsList[$keys]['act_goods_state']['expiry_process'] = false;
                        }
                    }
@@ -1683,7 +1795,7 @@ class OrderOperate
     public static function getExportActAdminState($orderIds, $actArray)
     {
 
-        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no'));
+        $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderIds,array('goods_name','zuqi','zuqi_type','specs','order_no','insurance_cost'));
 
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');

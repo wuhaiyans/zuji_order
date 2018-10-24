@@ -110,6 +110,8 @@ class CronRisk
                     $item['zujin'] = "";
                     $item['specs'] = "";
                     $item['market_price'] = "";
+                    $item['begin_time'] = "";
+                    $item['end_time'] = "";
                 }else{
                     $item['zuqi'] = $goodsList[$item['order_no']]['zuqi'].Inc\OrderStatus::getZuqiTypeName($goodsList[$item['order_no']]['zuqi_type']);
                     $item['mianyajin'] = $goodsList[$item['order_no']]['goods_yajin']-$goodsList[$item['order_no']]['yajin'];
@@ -118,6 +120,8 @@ class CronRisk
                     $item['zujin'] = $goodsList[$item['order_no']]['zujin'];
                     $item['specs'] = $goodsList[$item['order_no']]['specs'];
                     $item['market_price'] = $goodsList[$item['order_no']]['market_price'];
+                    $item['begin_time'] = date("Y-m-d H:i:s",$goodsList[$item['order_no']]['begin_time']);
+                    $item['end_time'] = date("Y-m-d H:i:s",$goodsList[$item['order_no']]['end_time']);
                 }
                 //订单收货地址
                 if(isset($userAddressList[$item['order_no']])){
@@ -175,7 +179,7 @@ class CronRisk
                         elseif($after['status'] == Inc\OrderInstalmentStatus::FAIL){
                             $item['term_'.$after['times']] = "扣款失败";
                         }
-                        if(date("Ym") == $after['term'] && $after['withhold_day']<=time()){
+                        if(date("Ym",strtotime("last month")) == $after['term'] && $after['withhold_day']<=time()){
                             $item['is_pay'] = $after['status']==Inc\OrderInstalmentStatus::SUCCESS?"是":"否";
                         }
                     }
@@ -218,6 +222,8 @@ class CronRisk
                     $item['pay_type'],
                     $item['is_pay'],
                     $item['order_status'],
+                    $item['begin_time'],
+                    $item['end_time'],
                     $item['term_1'],
                     $item['term_2'],
                     $item['term_3'],
@@ -261,6 +267,8 @@ class CronRisk
             '支付方式',
             '最近是否还款',
             '订单状态',
+            '起租时间',
+            '结束时间',
             '第1期',
             '第2期',
             '第3期',

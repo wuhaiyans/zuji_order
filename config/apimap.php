@@ -215,6 +215,8 @@ return [
     'api.Return.allowReturn'       =>'ReturnController@allowReturn',
     //退换货--确认收货
     'api.Return.returnReceive'       =>'ReturnController@returnReceive',
+    //线下退货退款列表
+    'api.Return.underLineReturn'       =>'ReturnController@underLineReturn',
 
 
 
@@ -272,19 +274,27 @@ return [
     'api.buyout.getBuyout'       => 'BuyoutController@getBuyout',
     //取消买断
     'api.buyout.cancel'       => 'BuyoutController@cancel',
-    //买断支付
+    //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    //支付宝小程序h5买断支付
+    'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
 
 
     //-+------------------------------------------------------------------------
     // | 收支明细
     //-+------------------------------------------------------------------------
     // 入账明细列表
-    'api.pay.payIncomeQuery'       => 'PayincomeController@payIncomeQuery',
+    'api.pay.payIncomeQuery'        => 'PayincomeController@payIncomeQuery',
     // 入账明细详情
-    'api.pay.payIncomeInfo'       => 'PayincomeController@payIncomeInfo',
+    'api.pay.payIncomeInfo'         => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
-    'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
+    'api.pay.payIncomeWhere'        => 'PayincomeController@payIncomeWhere',
+    // 线下还款场景
+    'api.pay.underLineScene'        => 'PayincomeController@underLineScene',
+    // 线下支付 获取所需要支付金额
+    'api.pay.underLineGetPayAmount' => 'PayincomeController@underLineGetPayAmount',
+    // 增加线下还款记录
+    'api.pay.underLineAdd'          => 'PayincomeController@underLineAdd',
 
     // test
     'api.Test.test'       => 'TestController@test',
@@ -326,6 +336,9 @@ return [
     'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
+    'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+
+
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
      ************************************************************************************************/
@@ -337,4 +350,22 @@ return [
     'api.active.sendMessage' => 'ActiveController@sendMessage',
 
     'api.pay.paymentStatus' => 'PayController@paymentStatus',
+
+    /*************************************************************************************************
+     * ******************************异常订单处理工具*************************************
+     ************************************************************************************************/
+
+    'api.tool.Delay'          => 'ToolController@Delay',    //延期
+
+    'api.tool.refundRefuse'  => 'ToolController@refundRefuse',   //订单状态是备货中，用户取消订单，客服审核拒绝
+
+    'api.tool.refuseSign'    => 'ToolController@refuseSign',        //拒签
+
+    'api.tool.advanceReturn' => 'ToolController@advanceReturn',   //超过七天无理由退换货，没到租赁日期的退货订单
+
+    'api.tool.overDue'        => 'ToolController@overDue',          //用户逾期
+    'api.tool.overDueExport' => 'ToolController@overDueExport',          //用户逾期列表导出
+
+
+    'test'=>'PayController@paymentNotify',
 ];

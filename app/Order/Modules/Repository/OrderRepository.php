@@ -699,7 +699,19 @@ class OrderRepository
 
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
-            $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+            if ($param['order_status'] == OrderStatus::validOrder) {
+
+//                $whereArray[]  = [OrderStatus::OrderInService, OrderStatus::OrderDeliveryed,OrderStatus::OrderInStock, OrderStatus::OrderPayed, OrderStatus::OrderCompleted];
+
+                $whereArray[] = ['order_info.order_status', '>=', OrderStatus::OrderPayed];
+                $whereArray[] = ['order_info.order_status', '<=', OrderStatus::OrderCompleted];
+                $whereArray[] = ['order_info.order_status', '!=', OrderStatus::OrderCancel];
+                $whereArray[] = ['order_info.order_status', '!=', OrderStatus::OrderClosedRefunded];
+            } else {
+
+                $whereArray[] = ['order_info.order_status', '=', $param['order_status']];
+            }
+
         }
 
         //下单时间
@@ -732,7 +744,6 @@ class OrderRepository
             $page = 1;
         }
 
-
             $whereArray[] = ['order_info.create_time', '>', 0];
             $count = DB::table('order_info')
                 ->select(DB::raw('count(order_info.order_no) as order_count'))
@@ -748,6 +759,7 @@ class OrderRepository
                 ->where($whereArray)
                 ->where($orWhereArray)
                 ->first();
+
 
 
         $count = objectToArray($count)['order_count'];
@@ -881,9 +893,24 @@ class OrderRepository
             $whereArray[] = ['o.pay_type', '=', $param['pay_type']];
         }
 
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['o.zuqi_type', '=', $param['zuqi_type']];
+        }
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
-            $whereArray[] = ['o.order_status', '=', $param['order_status']];
+            if ($param['order_status'] == OrderStatus::validOrder) {
+//                $whereInArray = [OrderStatus::OrderInService, OrderStatus::OrderDeliveryed,OrderStatus::OrderInStock, OrderStatus::OrderPayed, OrderStatus::OrderCompleted];
+
+                $whereArray[] = ['o.order_status', '>=', OrderStatus::OrderPayed];
+                $whereArray[] = ['o.order_status', '<=', OrderStatus::OrderCompleted];
+                $whereArray[] = ['o.order_status', '!=', OrderStatus::OrderCancel];
+                $whereArray[] = ['o.order_status', '!=', OrderStatus::OrderClosedRefunded];
+
+            } else {
+
+                $whereArray[] = ['o.order_status', '=', $param['order_status']];
+            }
         }
 
         //下单时间
@@ -912,7 +939,7 @@ class OrderRepository
         $orderArrays = array();
 
         $orderList =  DB::table('order_info as o')
-            ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
+            ->select('o.order_no','o.order_amount','o.order_amount','o.goods_yajin','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','c.cret_no')
             ->join('order_user_address as d',function($join){
                 $join->on('o.order_no', '=', 'd.order_no');
             }, null,null,'inner')

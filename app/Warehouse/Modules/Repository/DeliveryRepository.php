@@ -80,8 +80,6 @@ class DeliveryRepository
             DB::rollBack();
 
             throw new \Exception($e->getMessage());
-
-            return false;
         }
 
         return true;
@@ -105,7 +103,9 @@ class DeliveryRepository
                 'goods_no'      =>  $val['goods_no'],
                 'quantity'      =>  isset($val['quantity']) ? $val['quantity'] : 1,
                 'status'        =>  DeliveryGoods::STATUS_INIT,
-                'status_time'   =>  $time
+                'status_time'   =>  $time,
+                'zuqi' => isset($val['zuqi']) ? $val['zuqi'] : 0,
+                'zuqi_type' => isset($val['zuqi_type']) ? $val['zuqi_type'] : 0
             ];
             $goodsModel = new DeliveryGoods();
             $goodsModel->create($row);
@@ -144,11 +144,46 @@ class DeliveryRepository
         //修改IMEI状态为库存中
         if($model->imeis){
             foreach ($model->imeis as $key=>$item){
-                Imei::in($item->imei);
+                Imei::in($item->imei,$order_no);
             }
         }
 
         $model->status = Delivery::STATUS_CANCEL;
+        return $model->update();
+    }
+
+    /**
+     * @param $order_no
+     * 继续发货
+     */
+    public static function auditFailed($params)
+    {
+        $model = Delivery::where(['order_no'=>$params['order_no'],'status'=>Delivery::STATUS_CANCEL])->first();
+        if (!$model) {
+            throw new NotFoundResourceException('订单号' . $params['order_no'] . '未找到取消的发货单');
+        }
+
+        //修改IMEI状态为库存中
+        if($model->imeis){
+            foreach ($model->imeis as $key=>$item){
+                Imei::out($item->imei,$params['order_no']);
+            }
+        }
+
+        if($params['status']==5){
+            //已发货待签收
+            $model->status = Delivery::STATUS_SEND;
+        }elseif($params['status']==4){
+            $dg_model = DeliveryGoods::where('delivery_no',$model->delivery_no)->first();
+            if($dg_model->status == DeliveryGoods::STATUS_ALL){
+                //配货完成
+                $model->status = Delivery::STATUS_WAIT_SEND;
+            }else{
+                //待配货
+                $model->status = Delivery::STATUS_INIT;
+            }
+        }
+
         return $model->update();
     }
 
@@ -167,7 +202,7 @@ class DeliveryRepository
         //修改IMEI状态为库存中
         if($model->imeis){
             foreach ($model->imeis as $key=>$item){
-                Imei::in($item->imei);
+                Imei::in($item->imei,$model->order_no);
             }
         }
 
@@ -218,11 +253,17 @@ class DeliveryRepository
             $delivery_no = $params['delivery_no'];
             $goods_no   = $params['goods_no'];
 
-
             $delivery = Delivery::find($delivery_no);
-
             if (!$delivery) {
                 throw new NotFoundResourceException('发货单不存在');
+            }
+
+            $goods_model = DeliveryGoods::where([
+                'delivery_no'=>$params['delivery_no'],
+                'goods_no'=>$params['goods_no']
+            ])->first();
+            if (!$goods_model) {
+                throw new NotFoundResourceException('发货商品清单不存在');
             }
 
             $time = time();
@@ -259,8 +300,7 @@ class DeliveryRepository
                     $goods_imei_model->update();
                 }
 
-                Imei::out($params['imei'],$delivery['order_no']);
-
+                Imei::out($params['imei'],$delivery['order_no'],$goods_model->zuqi,$goods_model->zuqi_type);
 
 //                $imeis = $params['imeis'];
 //                foreach ($imeis as $imei) {
@@ -283,17 +323,11 @@ class DeliveryRepository
 //                }
             }
 
-            #2修改 goods 状态
-            $goods_model = DeliveryGoods::where([
-                'delivery_no'=>$params['delivery_no'],
-                'goods_no'=>$params['goods_no']
-            ])->first();
-
+            //2修改 goods 状态
             $goods_status = DeliveryGoods::STATUS_ALL;
             if ($goods_model->quantity > $params['quantity']) {
                 $goods_status = DeliveryGoods::STATUS_PART;
             }
-
             $goods_data = [
                 'quantity_delivered' => isset($params['quantity']) ? $params['quantity'] : $goods_model->quantity,
                 'status'             => $goods_status,
@@ -301,6 +335,7 @@ class DeliveryRepository
             ];
             $goods_model->update($goods_data);
             DB::commit();
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw new \Exception($e->getMessage());
@@ -419,6 +454,10 @@ class DeliveryRepository
 				\App\Lib\Common\LogApi::type('data-error')::error('商品配货取消失败', $where);
 				return false;
 			}
+            $deliveryModel = Delivery::where(['delivery_no'=>$params['delivery_no']])->first();
+            if(!$deliveryModel){
+                return false;
+            }
 			// 重复操作
 			if( $goodsModel->status == DeliveryGoods::STATUS_INIT ){
 				return true;
@@ -439,7 +478,7 @@ class DeliveryRepository
 				return false;
 			}
             // 还原 imei 状态
-            Imei::in( $goodsImeiModel->imei );
+            Imei::in( $goodsImeiModel->imei, $deliveryModel->order_no );
 
 			$goodsImeiModel->status = DeliveryGoodsImei::STATUS_NO;
 			$goodsImeiModel->status_time = time();
@@ -576,6 +615,21 @@ class DeliveryRepository
         return $model->order_no;
     }
 
+    /**
+     * 根据order_no查询status
+     *
+     * @param $order_no
+     */
+    public static function getStatus($order_no)
+    {
+        $model = Delivery::where(['order_no'=>$order_no])->first();
+
+        if (!$model) {
+            return false;
+        }
+
+        return $model->status;
+    }
 
 
 }

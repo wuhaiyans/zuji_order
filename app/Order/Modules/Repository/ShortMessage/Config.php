@@ -88,8 +88,14 @@ class Config {
 				SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_113461053', //扣款失败生成逾期
 				SceneConfig::REPAYMENT 				 	=> 'SMS_113461067', //提前还款短信
 				SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_113461062', //扣款失败主动发送短信
-				SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_113461176', //扣款失败主动发送短信
-				SceneConfig::WITHHOLD_ADVANCE_ONE   	=> 'SMS_113461177', //扣款失败主动发送短信
+
+				SceneConfig::WITHHOLD_ADVANCE_ONE   	=> 'SMS_113461197', //提前一天还款短信
+				SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_113461196', //提前三天 还款短信
+				SceneConfig::WITHHOLD_ADVANCE_SEVEN   	=> 'SMS_113461177', //提前七天 还款短信
+
+				SceneConfig::WITHHOLD_OVERDUEONE   		=> 'SMS_113461204', //扣款失败生成逾期 一天
+				SceneConfig::WITHHOLD_OVERDUETHREE   	=> 'SMS_113461205', //扣款失败生成逾期 三天
+
 
 				//还机
 				SceneConfig::GIVEBACK_CREATE 			=> 'SMS_113461131', //还机申请
@@ -104,11 +110,12 @@ class Config {
 				SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_113461142', //库管点击检测不合格、输入赔偿金额时发送
 				SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_113461138', //财务系统完成押金退还时发送
 				//买断
-				SceneConfig::BUYOUT_CONFIRM				=> 'SMS_113461144', //买断确认短信
-				SceneConfig::BUYOUT_PAYMENT				=> 'SMS_113461145', //买断支付短信
-				SceneConfig::BUYOUT_PAYMENT_END			=> 'SMS_113461161', //买断支付完成短信
-				//退押金
-				SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
+				SceneConfig::BUYOUT_CONFIRM					=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT					=> 'SMS_113461145', //买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_113461161', //买断完成短信
+
+                //退押金
+                SceneConfig::RETURN_DEPOSIT				=> 'SMS_113461138', //财务系统完成押金退还时发送
 
 				SceneConfig::CRONREPAYMENT				=> 'SMS_113461070', //月初发送提前还款短信
                 SceneConfig::DESTINE_CREATE              => 'SMS_113461183', //订金退款申请短信
@@ -198,13 +205,25 @@ class Config {
             self::CHANNELID_MICRO_RECOVERY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461173', //用户下单
                 SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461175', //退货检测合格
-                SceneConfig::REFUND_SUCCESS 			=> 'SMS_113461174', //退款成功
+                SceneConfig::REFUND_SUCCESS 			    => 'SMS_113461211', //退款成功
+
+                SceneConfig::ORDER_PAY 				 	=> 'SMS_113461206', //用户支付或授权 成功
+                SceneConfig::ORDER_DELIVERY            	=> 'SMS_113461207', //订单发货短信
+
+				SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING	=> 'SMS_113461208', // 微回收订单将在1个月租期到期
+				SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING	=> 'SMS_113461209', // 微回收订单将在1周之后到期
+				SceneConfig::RETURN_DEPOSIT 			=> 'SMS_113461211', // 微回收退还押金成功
+				SceneConfig::GIVEBACK_RETURNDEPOSIT 	=> 'SMS_113461211', // 微回收退还押金成功
+
+				SceneConfig::BUYOUT_CONFIRM			=> 'SMS_113461144', //买断确认短信
+				SceneConfig::BUYOUT_PAYMENT			=> 'SMS_113461210', //微回收买断支付短信
+				SceneConfig::BUYOUT_PAYMENT_END		=> 'SMS_113461210', //微回收买断完成短信
 
             ],
             // 花呗先享
             self::CHANNELID_FLOWER_ENJOY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
-
+                SceneConfig::RETURN_TOKIO 			 	=> 'SMS_113461198', //花呗分期退款
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){

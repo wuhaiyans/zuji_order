@@ -46,14 +46,17 @@ class ReturnDeposit{
 		if( !$code ){
 			return false;
 		}
-
+		$smsContent = [
+				'realName'    =>$data['realName'],
+				'orderNo'     =>$data['orderNo'],
+				'goodsName'   =>$data['goodsName'],
+				'tuihuanYajin'=>$data['tuihuanYajin']."元",
+		];
+        if($channel_id == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = $data['lianjie'];
+        }
 		// 发送短息
-		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
-            'realName'=>$data['realName'],
-            'orderNo'=>$data['orderNo'],
-            'goodsName'=>$data['goodsName'],
-            'tuihuanYajin'=>$data['tuihuanYajin']."元",
-		]);
+		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code,$smsContent);
 	}
 	
 }

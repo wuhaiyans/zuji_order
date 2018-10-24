@@ -1,6 +1,6 @@
 <?php
 /**
- * User: wansq
+ * User: jinlin
  * Date: 2018/5/7
  * Time: 17:52
  */
@@ -215,6 +215,32 @@ class Delivery
 
         return true;
     }
+
+    /**
+     * 取消发货后,退货退款审核未通过,继续发货
+     *
+     * @param string $order_no 订单号
+     * @param int $status 4=待发货,5已发货待签收
+     */
+    public static function auditFailed($order_no,$status=4)
+    {
+        $base_api = config('tripartite.warehouse_api_uri');
+
+        $res = Curl::post($base_api, array_merge(self::getParams(), [
+            'method'=> 'warehouse.delivery.auditFailed',//模拟
+            'params' => json_encode(['order_no'=>$order_no,'status'=>$status])
+        ]));
+
+        $res = json_decode($res, true);
+
+        if (!$res || !isset($res['code']) || $res['code'] != 0) {
+            session()->flash(self::SESSION_ERR_KEY, $res['msg']);
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * 订单请求 确认收货
      * @author wuhaiyan
@@ -321,6 +347,25 @@ class Delivery
       return true;
     }
 
+    /**
+     * 获取订单发货状态
+     * @params $order_no
+     * @return string
+     */
+    public static function getDeliveryInfo($order_no){
+        $base_api = env('WAREHOUSE_API');
+        $params['order_no'] =$order_no;
+        LogApi::info("getDeliveryInfo url:".$base_api,$params);
+        $response = Curl::post($base_api, [
+            'appid'=> 1,
+            'version' => 1.0,
+            'method'=> 'warehouse.delivery.getStatus',//模拟
+            'params' => $params
+        ]);
+        LogApi::info("getDeliveryInfo 请求返回",$response);
+
+        return $response;
+    }
 
     public static function getParams()
     {

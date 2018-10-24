@@ -68,6 +68,9 @@ $api->version('v1', [
         //订单清算退押金回调接口
         $api->post('unFreezeClean', 'PayController@unFreezeClean');
 
+        //订单清算微回收押金解除接口
+        $api->post('lebaiUnfreezeClean', 'PayController@lebaiUnfreezeClean');
+
         //分期定时扣款统计数量接口
         $api->any('crontabCreatepayNum', 'WithholdController@crontabCreatepayNum');
 
@@ -98,6 +101,9 @@ $api->version('v1', [
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
+
+        //隊列取消订单
+        $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
@@ -106,8 +112,11 @@ $api->version('v1', [
 
         //预约退款回调接口
         $api->any('appointmentRefund', 'PayController@appointmentRefund');
+        //用户逾期列表导出
+        $api->any('overDueExport', 'ToolController@overDueExport');
 
-
+        //缴款记录导出
+        $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/
@@ -129,8 +138,8 @@ $api->version('v1', [
 
     // 定时任务 每日执行定时任务-扣款
     $api->get('crontabCreatepay', 'WithholdController@crontabCreatepay');
-    // 定时任务 每日执行定时任务-扣款
-    $api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
+    // 定时任务 取消买断
+    //$api->get('cronCancelOrderBuyout', 'CronController@cronCancelOrderBuyout');
     // 定时任务 还机逾期违约-修改状态
     $api->get('cronGivebackAgedFail', 'CronController@cronGivebackAgedFail');
     // 定时任务 换货确认收货
@@ -139,12 +148,16 @@ $api->version('v1', [
     // 定时任务 月初发送提前还款短信
     $api->get('cronPrepayment', 'CronController@cronPrepayment');
 
-    // 定时任务 提前三天 发送扣款短信
-    $api->get('cronWithholdThreeMessage', 'CronController@cronWithholdThreeMessage');
+    // 定时任务 月初发送提前还款短信
+    $api->get('cronWithholdMessage', 'CronController@cronWithholdMessage');
 
-    // 定时任务 提前一天 发送扣款短信
-    $api->get('cronWithholdOneMessage', 'CronController@cronWithholdOneMessage');
-    
+    // 定时任务 扣款逾期短信
+    $api->get('cronOverdueMessage', 'CronController@cronOverdueMessage');
+
+
+    // 定时任务 扣款逾期短信
+    $api->get('sendMessage', 'ActiveController@sendMessage');
+
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************
      ************************************************************************************************/

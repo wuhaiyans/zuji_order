@@ -1,10 +1,12 @@
 <?php
 namespace App\Order\Modules\Service;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -13,6 +15,7 @@ use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\ShortMessage\BuyoutPayment;
+use App\Order\Modules\Repository\ShortMessage\Config;
 use App\Order\Modules\Repository\ShortMessage\ReturnDeposit;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Support\Facades\DB;
@@ -211,15 +214,27 @@ class OrderBuyout
 				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
+		$payObj = null;
+		if($goodsInfo['yajin']>0 ){
 
-		if($goodsInfo['yajin']>0){
-			//获取支付单信息
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
 			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+
+			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+			}
+			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
+				$clearData['out_payment_no'] = $payObj->getPaymentNo();
+			}
+			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
 		}
+
+
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 		if(!$orderCleanResult){
@@ -236,12 +251,19 @@ class OrderBuyout
 			if(!$result){
 				return false;
 			}
-			//发送短信
-			BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT_END,[
+			//设置短信发送内容
+			$smsContent = [
 					'mobile'=>$orderInfo['mobile'],
 					'realName'=>$orderInfo['realname'],
 					'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
-			]);
+			];
+			//相应支付渠道使用相应短信模板
+			if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+				$smsContent['lianjie'] =  createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
+			}
+			$smsCode = SceneConfig::BUYOUT_PAYMENT_END;
+			//发送短信
+			BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 			//日志记录
 			$orderLog = [
 					'uid'=>0,
@@ -262,12 +284,19 @@ class OrderBuyout
 			self::log($orderLog,$goodsLog);
 			return true;
 		}
-		//发送短信
-		BuyoutPayment::notify($orderInfo['channel_id'],SceneConfig::BUYOUT_PAYMENT,[
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'buyoutPrice'=>normalizeNum($buyout['amount'])."元",
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
+		}
+		$smsCode = SceneConfig::BUYOUT_PAYMENT;
+		//发送短信
+		BuyoutPayment::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		//日志记录
 		$orderLog = [
 				'uid'=>0,
@@ -317,8 +346,9 @@ class OrderBuyout
 		if(!$buyout){
 			return false;
 		}
+		//订单已完成直接返回成功
 		if($buyout['status']==OrderBuyoutStatus::OrderRelease){
-			return false;
+			return true;
 		}
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
@@ -377,14 +407,22 @@ class OrderBuyout
 				'msg'=>'买断完成',
 		];
 		self::log($orderLog,$goodsLog);
-		//押金解冻短信发送
-		ReturnDeposit::notify($orderInfo['channel_id'],SceneConfig::RETURN_DEPOSIT,[
+
+		//设置短信发送内容
+		$smsContent = [
 				'mobile'=>$orderInfo['mobile'],
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
 				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
-		]);
+		];
+		//相应支付渠道使用相应短信模板
+		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
+			$smsContent['lianjie'] = createShortUrl('https://h5.nqyong.com/index?appid=' . $orderInfo['appid']);
+		}
+		$smsCode = SceneConfig::RETURN_DEPOSIT;
+		//押金解冻短信发送
+		ReturnDeposit::notify($orderInfo['channel_id'],$smsCode,$smsContent);
 		return true;
 	}
 	static function log($orderLog,$goodsLog){

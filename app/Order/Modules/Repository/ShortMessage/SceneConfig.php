@@ -156,9 +156,17 @@ class SceneConfig {
      */
     const BUYOUT_PAYMENT = 'BuyoutPayment';
     /**
-     * 场景：<b>【买断支付完成】</b>
+     * 场景：<b>【微信买断支付】</b>
+     */
+    const BUYOUT_PAYMENT_WECHAT = 'BuyoutPaymentWechat';
+    /**
+     * 场景：<b>【买断完成】</b>
      */
     const BUYOUT_PAYMENT_END = 'BuyoutPaymentEnd';
+    /**
+     * 场景：<b>【微信买断完成】</b>
+     */
+    const BUYOUT_PAYMENT_END_WECHAT = 'BuyoutPaymentEndWechat';
     /**
      * 场景：<b>【押金退还】</b>
      */
@@ -170,14 +178,31 @@ class SceneConfig {
     const CRONREPAYMENT = 'CronRepayment';
 
     /**
-     * 场景：<b>【押金退还】</b>
+     * 场景：<b>【提前一天 还款短信】</b>
+     */
+    const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
+
+    /**
+     * 场景：<b>【提前三天 还款短信】</b>
      */
     const WITHHOLD_ADVANCE_THREE = 'WithholdAdvanceThree';
 
     /**
-     * 场景：<b>【押金退还】</b>
+     * 场景：<b>【提前七天 还款短信】</b>
      */
-    const WITHHOLD_ADVANCE_ONE = 'WithholdAdvanceOne';
+    const WITHHOLD_ADVANCE_SEVEN = 'WithholdAdvanceSeven';
+
+    /**
+     * 场景：<b>【扣款失败生成逾期 一天】</b>
+     */
+    const WITHHOLD_OVERDUEONE = 'WithholdOverduOne';
+
+    /**
+     * 场景：<b>【扣款失败生成逾期 三天】</b>
+     */
+    const WITHHOLD_OVERDUETHREE = 'WithholdOverduThree';
+
+
 
     /**
      * 场景：<b>【订金申请退款】</b>
@@ -188,6 +213,11 @@ class SceneConfig {
      * 场景：<b>【订金退款成功】</b>
      */
     const DESTINE_REFUND = 'DestineRefund';
+
+    /**
+     * 场景：<b>【花呗分期退款】</b>
+     */
+    const RETURN_TOKIO = 'ReturnTokio';
 
 
 

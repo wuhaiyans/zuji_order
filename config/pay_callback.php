@@ -33,7 +33,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER => 'var_dump',
 		// 业务类型为【还机】4的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK => '\App\Order\Modules\Service\OrderGiveback::callbackPayment',
-		// 业务类型为1的支付回调通知
+		// 业务类型为【买断】的支付回调通知
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackPaid',
 
         // 业务类型为【续租】6的支付回调通知
@@ -44,6 +44,9 @@ return [
 
         //预定业务 支付回调通知
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE => '\App\Activity\Modules\Service\DestinePayNotify::callback',
+
+        //体验活动业务 支付回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE => '\App\Activity\Modules\Service\ExperiencePayNotify::callback',
 	],
 
 	'refund' => [
@@ -57,5 +60,7 @@ return [
 		\App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT => '\App\Order\Modules\Service\OrderBuyout::callbackOver',
         // 业务类型为【预约】的回调通知
         \App\Order\Modules\Inc\OrderStatus::BUSINESS_DESTINE => '\App\Activity\Modules\Service\Appointment::callbackAppointment',
+        // 业务类型为【1元活动】的回调通知
+        \App\Order\Modules\Inc\OrderStatus::BUSINESS_EXPERIENCE => '\App\Activity\Modules\Service\ActivityExperience::callbackExperience',
 	],
 ];

@@ -5,6 +5,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Delivery;
+use App\Warehouse\Modules\Repository\DeliveryRepository;
 use App\Warehouse\Modules\Service\DeliveryImeiService;
 use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
@@ -149,6 +150,35 @@ class DeliveryController extends Controller
         try {
             $this->delivery->cancel($params['order_no']);
         } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
+    /**
+     * 取消发货后,退货退款审核未通过,继续发货
+     *
+     * order_no 订单号
+     * status 4=待发货,5已发货待签收
+     */
+    public function auditFailed()
+    {
+        $rules = [
+            'order_no'  => 'required',
+            'status'    => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        DB::beginTransaction();
+        try {
+            $this->delivery->auditFailed($params);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -542,6 +572,28 @@ class DeliveryController extends Controller
         $list = $this->delivery->getLogistics();
         //return apiResponse(['list'=>$list]);
         return apiResponse($list);
+    }
+
+    /**
+     * 根据订单获取发货单状态是否属于已配货
+     */
+    public function getStatus(){
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (!$params['order_no']) {
+            return \apiResponse([], ApiStatus::CODE_10104, 'order_no必须');
+        }
+
+        $status = DeliveryRepository::getStatus($params['order_no']);
+        if($status){
+            return \apiResponse(['status'=>$status]);
+        } else{
+            return \apiResponse([], ApiStatus::CODE_10104, 'order_no未查到');
+        }
+
     }
 
 

@@ -262,7 +262,6 @@ class BuyoutController extends Controller
         //过滤参数
         $rule= [
             'goods_no'=>'required',
-            'user_id'=>'required',
         ];
         $validator = app('validator')->make($params, $rule);
         if ($validator->fails()) {
@@ -271,9 +270,6 @@ class BuyoutController extends Controller
         $userInfo = $orders['userinfo'];
         if (empty($params['goods_no'])){
             return apiResponse([],ApiStatus::CODE_20001,"goods_no必须");
-        }
-        if (empty($params['user_id'])){
-            return apiResponse([],ApiStatus::CODE_20001,"user_id必须");
         }
         //获取订单商品信息
         $goodsObj = Goods::getByGoodsNo($params['goods_no']);
@@ -416,7 +412,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"该订单当前状态不能买断");
         }
 
-        $buyoutPrice = $params['buyout_price']?$params['buyout_price']:$goodsInfo['buyout_price'];
+        $buyoutPrice = $params['buyout_price']>0?$params['buyout_price']:$goodsInfo['buyout_price'];
 
         DB::beginTransaction();
         //创建买断单
@@ -478,9 +474,40 @@ class BuyoutController extends Controller
         $goodsInfo['business_no'] = $data['buyout_no'];
         return apiResponse(array_merge($goodsInfo,$data),ApiStatus::CODE_0);
     }
-
     /*
-     * 买断支付请求
+     * 用户取消买断
+     * @param array $params 【必选】
+     * [
+     *      "goods_no"=>"",商品编号
+     *      "user_id"=>"", 用户id
+     * ]
+     * @return json
+     */
+    public function cancel(Request $request){
+        //接收请求参数
+        $requests = $request->all();
+        $params = $requests['params'];
+        $userInfo = $requests['userinfo'];
+        $rule= [
+            'buyout_no'=>'required',
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+        }
+        $array = [
+            'buyout_no'=>$params['buyout_no'],
+            'user_id'=>$userInfo['uid'],
+        ];
+        //取消买断单
+        $ret = OrderBuyout::cancel($array);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_50001,"取消买断失败");
+        }
+        return apiResponse([],ApiStatus::CODE_0,"取消成功");
+    }
+    /*
+     * 支付宝H5买断支付请求
      * @param array $params 【必选】
      * [
      *      "user_id"=>"", 用户id
@@ -493,7 +520,7 @@ class BuyoutController extends Controller
         //接收请求参数
         $orders =$request->all();
         $params = $orders['params'];
-        $params['channel_id'] = 2;
+        $params['channel_id'] = isset($params['channel_id'])?$params['channel_id']:2;
         //过滤参数
         $rule= [
             'buyout_no'=>'required',
@@ -504,9 +531,98 @@ class BuyoutController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
+
         $userInfo = $orders['userinfo'];
+        //支付 扩展参数
+        $ip= isset($userInfo['ip'])?$userInfo['ip']:'';
+        $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
+
+        // 微信支付，交易类型：JSAPI，redis读取openid
+        if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+            if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+                $_key = 'wechat_openid_'.$orders['auth_token'];
+                $openid = \Illuminate\Support\Facades\Redis::get($_key);
+                if( $openid ){
+                    $extended_params['wechat_params']['openid'] = $openid;
+                }
+            }
+        }
         //获取买断单
         $buyout = OrderBuyout::getInfo($params['buyout_no'],$params['user_id']);
+        if(!$buyout){
+            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+        }
+        if($buyout['status']==OrderBuyoutStatus::OrderPaid){
+            return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
+        }
+        if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
+            return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
+        }
+
+        $payInfo = [
+            'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
+            'userId' => $buyout['user_id'],
+            'orderNo' => $buyout['order_no'],
+            'businessNo' => $buyout['buyout_no'],
+            'paymentAmount' => $buyout['amount'],
+            'paymentFenqi' => 0,
+        ];
+        \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
+
+        $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
+
+        $paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
+            'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
+            'front_url' => $params['callback_url'],
+            'ip'=>$ip,
+            'extended_params' => $extended_params,// 扩展参数
+        ]);
+        //插入日志
+        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","创建支付成功");
+        //插入订单设备日志
+        $log = [
+            'order_no'=>$buyout['order_no'],
+            'action'=>'用户买断支付',
+            'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_BUYOUT,//此处用常量
+            'business_no'=>$buyout['buyout_no'],
+            'goods_no'=>$buyout['goods_no'],
+            'operator_id'=>$userInfo['uid'],
+            'operator_name'=>$userInfo['username'],
+            'operator_type'=>$userInfo['type'],
+            'msg'=>'用户发起支付',
+        ];
+        GoodsLogRepository::add($log);
+
+        return apiResponse($paymentUrl,ApiStatus::CODE_0);
+    }
+    /*
+         * 支付宝小程序买断支付请求
+         * @param array $params 【必选】
+         * [
+         *      "user_id"=>"", 用户id
+         *      "goods_no"=>"",商品编号
+         *      "callback_url"=>"",前端回跳地址
+         * ]
+         * @return json
+         */
+    public function mini_pay(Request $request){
+        //接收请求参数
+        $orders =$request->all();
+        $params = $orders['params'];
+        $params['channel_id'] = isset($params['channel_id'])?$params['channel_id']:2;
+        //过滤参数
+        $rule= [
+            'extended_params'=>'required',
+            'buyout_no'=>'required',
+            'callback_url'=>'required',
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+        }
+        $userInfo = $orders['userinfo'];
+        //获取买断单
+        $buyout = OrderBuyout::getInfo($params['buyout_no'],$userInfo['uid']);
         if(!$buyout){
             return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
         }
@@ -532,6 +648,8 @@ class BuyoutController extends Controller
         $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
+            'ip'=>$userInfo['ip'],
+            'extended_params'=>$params['extended_params'],
         ]);
         //插入日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","创建支付成功");
@@ -551,6 +669,5 @@ class BuyoutController extends Controller
 
         return apiResponse($paymentUrl,ApiStatus::CODE_0);
     }
-
     
 }

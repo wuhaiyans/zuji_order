@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Models\OrderGoodsInstalment;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Profiler;
@@ -44,6 +45,7 @@ class OrderGoodsInstalmentRepository
      */
     public static function queryCount($param = []){
         $whereArray = [];
+        $statusArr = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::SUCCESS, OrderInstalmentStatus::FAIL, OrderInstalmentStatus::CANCEL, OrderInstalmentStatus::PAYING];
 
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
@@ -67,7 +69,11 @@ class OrderGoodsInstalmentRepository
 
         //根据分期状态
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+            if( is_array($param['status']) ){
+                $statusArr = $param['status'];
+            }else{
+                $statusArr = [$param['status']];
+            }
         }
 
         // 根据还款类型
@@ -94,7 +100,9 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
         }
 
-        $result = OrderGoodsInstalment::query()->where($whereArray)
+        $result = OrderGoodsInstalment::query()
+            ->where($whereArray)
+            ->whereIn('order_goods_instalment.status',$statusArr)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->count();
         return $result;//count($result);
@@ -108,6 +116,7 @@ class OrderGoodsInstalmentRepository
         $offset     = ($page - 1) * $pageSize;
 
         $whereArray = [];
+        $statusArr = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::SUCCESS, OrderInstalmentStatus::FAIL, OrderInstalmentStatus::CANCEL, OrderInstalmentStatus::PAYING];
 
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
@@ -130,9 +139,15 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
         }
 
-        //根据分期状态
+        /**
+         * 根据分期状态 string 或 array 2018/09/15
+         */
         if (isset($param['status']) && !empty($param['status'])) {
-            $whereArray[] = ['order_goods_instalment.status', '=', $param['status']];
+            if( is_array($param['status']) ){
+                $statusArr = $param['status'];
+            }else{
+                $statusArr = [$param['status']];
+            }
         }
 
         //根据分期日期
@@ -156,6 +171,7 @@ class OrderGoodsInstalmentRepository
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
+            ->whereIn('order_goods_instalment.status',$statusArr)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
             ->offset($offset)
             ->limit($pageSize)

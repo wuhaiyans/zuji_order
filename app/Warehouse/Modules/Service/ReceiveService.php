@@ -352,11 +352,12 @@ class ReceiveService
      *      1.换货类型
      *      2.检测完成
      *      3.全部合格
+     *      4.入库
      */
     public function createDelivery($params){
         $model = Receive::find($params['receive_no']);
         $goods = $model->goods;
-        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_FINISH && $model->check_result==Receive::CHECK_RESULT_OK ){
+        if ($model->type==Receive::TYPE_EXCHANGE && $model->status==Receive::STATUS_IN && $model->check_result==Receive::CHECK_RESULT_OK ){
             $data = [
                 'order_no'=>$model->order_no,
                 'app_id'=>$model->app_id,
@@ -365,26 +366,30 @@ class ReceiveService
                 'customer_address'=>$model->customer_address,
                 'business_key'=>$model->business_key,
                 'business_no'=>$model->business_no,
+                'predict_delivery_time'=>0,
             ];
             foreach ($goods as $k=>$item){
                 $data['delivery_detail'][]=[
                     'goods_name'=>$item->goods_name,
                     'goods_no'=>$item->goods_no,
                     'quantity'=>$item->quantity,
+                    'zuqi'=>0,
+                    'zuqi_type'=>0
                 ];
                 $item->status=ReceiveGoods::STATUS_CONFIRM_RECEIVE;
                 $item->status_time=time();
                 $item->update();
+            }
+
+            //创建发货单
+            if (!DeliveryRepository::create($data)) {
+                throw new \Exception('创建发货单失败');
             }
             $model->status=Receive::STATUS_CONFIRM_RECEIVE;
             $model->exchange_description=$params['exchange_description']?$params['exchange_description']:'无';
             $model->status_time=time();
             $model->update();
 
-            //创建发货单
-            if (!DeliveryRepository::create($data)) {
-                throw new \Exception('创建发货单失败');
-            }
         }else{
             throw new \Exception('当前状态无法确认同意换货');
         }

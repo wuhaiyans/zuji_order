@@ -15,7 +15,9 @@ class Coupon extends \App\Lib\BaseApi{
     //第一次首月零租金活动
 //    public static $coupon_only = '383c8e805a3410e9ee03481d29a7f76f';//小程序优惠券id
     //第二次首月零租金活动
-    public static $coupon_only = 'f9a8c733d5feb2c4a3f29419e4fef562';//小程序优惠券id
+//    public static $coupon_only = 'f9a8c733d5feb2c4a3f29419e4fef562';//小程序优惠券id
+    //国庆首月0租金活动
+    public static $coupon_only = 'f3eac8c72f693f962b1cdf5543d8e2fb';//小程序优惠券id
 
     /**
      * 获取优惠券信息
@@ -188,6 +190,36 @@ class Coupon extends \App\Lib\BaseApi{
         return $info['data'];
     }
 
+
+    /**
+     * 查询优惠券
+     * @author zhangjinhui
+     * @param  $arr[
+     *      sku_id =>2//【必须】 string skuid
+     * ]
+     * @return string or array
+     */
+    public static function checkedCoupon($arr){
+        $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
+        $data['method'] ='zuji.coupon.checked';
+        $data['auth_token'] = $arr['auth_token'];
+        $data['params'] = [
+            'sku_id'=>$arr['sku_id'],
+        ];
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info =json_decode($info,true);
+        \App\Lib\Common\LogApi::notify('优惠券商品可用列表查询接口zuji.coupon.checked',[
+            'request'=>$data,
+            'response'=>$info
+        ]);
+        if(!is_array($info)){
+            return ApiStatus::CODE_60000;
+        }
+        if($info['code']!=0){
+            return $info['code'];
+        }
+        return $info['data'];
+    }
 }
 
 

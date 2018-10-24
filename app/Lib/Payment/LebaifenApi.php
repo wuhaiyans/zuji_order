@@ -19,6 +19,12 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function confirmReceipt( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'rsa';
 		self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.confirmReceipt', '1.0', $params);
 		return true;
 	}
@@ -49,8 +55,36 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function getPaymentInfo( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'rsa';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.info', '1.0', $params);
 	}
-	
+
+    /**
+     *
+     * 乐百分买断或者还机完成调用的接口
+     * Author: heaven
+     * @param array $params  二选一参数,优先使用payment_no
+     * [
+     *		 "payment_no":"10A92662696246007", //支付系统的支付单号
+     *      "amount":"123",                    //要扣的押金金额；单位：分
+     *      "back_url":"http://_._.com"        //异步通知的url地址
+     * ]
+     * @param array $params
+     * @return array
+     */
+    public static function backRefund( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'rsa';
+        return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.backRefund', '1.0', $params);
+    }
 	
 }

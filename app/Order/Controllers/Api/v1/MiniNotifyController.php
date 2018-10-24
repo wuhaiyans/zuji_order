@@ -440,11 +440,11 @@ class MiniNotifyController extends Controller
         ]);
 
 //        $b = \App\Lib\Payment\mini\MiniApi::withhold([
-//            'out_order_no'=>'20180713000802',//商户端订单号
-//            'zm_order_no'=>'2018071300001001092136454718',//芝麻订单号
-//            'out_trans_no'=>'20180713000802',//商户端交易号
-//            'remark'=>'20180713000802-1-期扣款',//订单操作说明
-//            'pay_amount'=>'554.00',//关闭金额
+//            'out_order_no'=>'A819151642261238',//商户端订单号
+//            'zm_order_no'=>'2018081900001001097647879104',//芝麻订单号
+//            'out_trans_no'=>'FA91922513919860',//商户端交易号
+//            'remark'=>'A819151642261238-1-期扣款',//订单操作说明
+//            'pay_amount'=>'298.00',//关闭金额
 //            'app_id'=>'2018032002411058',//小程序appid
 //        ]);
         if($b == false){

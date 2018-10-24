@@ -102,10 +102,16 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay){
-            $this->paymentStatus =true;
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay || $this->payType == PayInc::PcreditPayInstallment || $this->payType == PayInc::WeChatPay){
+            if($this->orderZujin>0){
+                $this->paymentStatus =true;
+            }
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
+            }
+            // 租金押金 都为0 不需要支付
+            if($this->orderZujin ==0 && $this->orderYajin==0){
+                $this->isPay =false;
             }
 
         }
@@ -218,6 +224,12 @@ class OrderPayComponnet implements OrderCreater
             // 乐百分支付方式 一次性普通支付单
             elseif($this->payType == PayInc::LebaifenPay){
                 \App\Order\Modules\Repository\Pay\PayCreater::createLebaifenPayment($param);
+            }
+            //微信支付 为 一次性支付
+            elseif ($this->payType == PayInc::WeChatPay){
+                $param['paymentAmount'] = $this->orderZujin + $this->orderYajin;
+                //创建普通支付
+                \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
             }
 
 

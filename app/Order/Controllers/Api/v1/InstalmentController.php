@@ -37,6 +37,7 @@ class InstalmentController extends Controller
         $params         = filter_array($request, [
             'begin_time'    => 'required',
             'end_time'      => 'required',
+            'order_no'      => 'required',
             'goods_no'      => 'required',
             'status'        => 'required',
             'kw_type'       => 'required',
@@ -58,7 +59,6 @@ class InstalmentController extends Controller
 
         $params['is_instalment_list'] = 1;
         $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
-
         foreach($list as &$item){
 
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
@@ -234,7 +234,7 @@ class InstalmentController extends Controller
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
-            $discount_amount = $couponInfo['youhui'];
+            $discount_amount = $couponInfo['youhui'] / 100;
 
             if($discount_amount >= $instalmentInfo['amount']){
                 $instalmentInfo['discount_amount']     = $instalmentInfo['amount'];
@@ -242,7 +242,7 @@ class InstalmentController extends Controller
             }else{
                 $amount = $instalmentInfo['amount'] - $couponInfo['youhui'];
 
-                $instalmentInfo['discount_amount']     = $discount_amount/100;
+                $instalmentInfo['discount_amount']     = $discount_amount;
                 $instalmentInfo['amount']              = $amount;
             }
         }

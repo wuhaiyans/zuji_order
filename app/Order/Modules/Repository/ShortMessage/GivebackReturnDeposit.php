@@ -35,30 +35,28 @@ class GivebackReturnDeposit implements ShortMessage {
 
     public function notify(){
 
-        $orderGivebackService = new \App\Order\Modules\Service\OrderGiveback();
-        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->business_no);
-
+        // 查询商品
+        $orderGoods = New \App\Order\Modules\Service\OrderGoods();
+        $goodsInfo  = $orderGoods->getGoodsInfo($this->business_no);
+        if(!$goodsInfo){
+            LogApi::debug("退还押金-商品详情错误",$goodsInfo);
+            return false;
+        }
 
         // 查询订单
-        $orderInfo = OrderRepository::getInfoById($orderGivebackInfo['order_no']);
+        $orderInfo = OrderRepository::getInfoById($goodsInfo['order_no']);
         if( !$orderInfo ){
-            LogApi::debug("创建还机单-订单详情错误",$orderGivebackInfo);
+            LogApi::debug("退还押金-订单详情错误",$goodsInfo);
             return false;
         }
 
         // 用户信息
-        $userInfo = \App\Lib\User\User::getUser($orderGivebackInfo['user_id']);
+        $userInfo = \App\Lib\User\User::getUser($goodsInfo['user_id']);
         if( !is_array($userInfo )){
             return false;
         }
 
-        // 查询商品
-        $orderGoods = New \App\Order\Modules\Service\OrderGoods();
-        $goodsInfo  = $orderGoods->getGoodsInfo($orderGivebackInfo['goods_no']);
-        if(!$goodsInfo){
-            LogApi::debug("扣款成功短信-商品详情错误",$orderGivebackInfo);
-            return false;
-        }
+
 
         // 短息模板
         $code = $this->getCode($orderInfo['channel_id']);
@@ -66,15 +64,21 @@ class GivebackReturnDeposit implements ShortMessage {
             return false;
         }
 
-        // 短信参数
+        $lianjie = "https://h5.nqyong.com/index?appid=" . $orderInfo['appid'];
+
+        /** 短信参数
+         * 尊敬的{realName}您好，您租赁的{goodsName}，订单号：{orderNo}，押金{tuihuanYajin}已退还！您可以登录 {lianjie} 继续租用其他好物。感谢您对拿趣用的支持！
+         */
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
             'tuihuanYajin'      => $goodsInfo['yajin'],
+            'lianjie'           => createShortUrl($lianjie),
         ];
+
         // 发送短息
-        return \App\Lib\Common\SmsApi::sendMessage($userInfo['mobile'], $code, $dataSms);
+        return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
 
     }
 

@@ -254,7 +254,10 @@ class Instalment {
 		}
 
 		$where = [];
-		$whereIn = [];
+
+		// 可操作的分期状态
+		$statusArr = [OrderInstalmentStatus::UNPAID,  OrderInstalmentStatus::FAIL,  OrderInstalmentStatus::PAYING];
+
 		if(isset($data['id'])){
 			$where[] = ['id', '=', $data['id']];
 		}
@@ -262,29 +265,37 @@ class Instalment {
 		if(isset($data['order_no'])){
 			$where[] = ['order_no', '=', $data['order_no']];
 		}
+
 		if(isset($data['goods_no'])){
 			$where[] = ['goods_no', '=', $data['goods_no']];
 		}
-		if(isset($data['status']) && is_array($data['status'])){
-			$whereIn['status'] = $data['status'];
+
+		/**
+		 * 根据分期状态 string 或 array 2018/09/15
+		 */
+		if (isset($data['status']) && !empty($data['status'])) {
+			if( is_array($data['status']) ){
+				$statusArr = $data['status'];
+			}else{
+				$statusArr = [$data['status']];
+			}
 		}
 
 		$status = ['status'=>OrderInstalmentStatus::CANCEL];
 
-		$where[] = ['status', '<>', OrderInstalmentStatus::SUCCESS];
-
-		//qinliping 2018/08/14  修改
-        /**************************/
-        $orderGoodsInstalment=OrderGoodsInstalmentRepository::getInfo($where);
-        if(!$orderGoodsInstalment){
+        // 查询是否有需要修改的数据
+		$orderGoodsInstalment =  OrderGoodsInstalment::query()
+			->where($where)
+			->whereIn('status',$statusArr)
+			->get()->toArray();
+		if(!$orderGoodsInstalment){
             return true;
         }
-        /************************/
-		if( $whereIn ){
-			$result =  OrderGoodsInstalment::where($where)->whereIn('status',$whereIn['status'])->update($status);
-		}else{
-			$result =  OrderGoodsInstalment::where($where)->update($status);
-		}
+
+		$result	 =  OrderGoodsInstalment::query()
+			->where($where)
+			->whereIn('status',$statusArr)
+			->update($status);
 
 		if (!$result) return false;
 
@@ -481,6 +492,61 @@ class Instalment {
 
 	}
 
+
+	/**
+	 * 线下还款成功
+	 * @param data  array
+	 * [
+	 *      'instalment_id'       			=> '', //分期id
+	 * ]
+	 * @return String	SUCCESS成功、FAIL失败
+	 */
+	public static function underLinePaySuccess( int $instalment_id){
+
+
+		LogApi::debug("[underLinePaySuccess]线下分期还款", $instalment_id);
+
+		$instalmentInfo = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::getInfoById($instalment_id);
+		if( !is_array($instalmentInfo)){
+			LogApi::error('[underLinePaySuccess]线下分期还款分期查询错误_'.$instalment_id);
+			return false;
+		}
+
+		// 查询订单
+		$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
+		if( !$orderInfo ){
+			LogApi::error('[underLinePaySuccess]线下分期还款-订单信息错误');
+			return false;
+		}
+		$business_no = createNo();
+		$data = [
+			'business_no'		=> $business_no,	//设置交易号 为发送短信根据 business_no  查询分期
+			'status'        	=> OrderInstalmentStatus::SUCCESS,
+			'payment_time'      => time(),
+			'update_time'   	=> time(),
+			'payment_amount'   	=> $instalmentInfo['amount'],
+			'pay_type'   		=> OrderInstalmentStatus::UNDERLINE,
+
+		];
+		// 修改分期状态
+		$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['id' => $instalment_id], $data);
+		if(!$b){
+			LogApi::error('[underLinePaySuccess]线下分期还款-修改分期状态失败');
+			return false;
+		}
+
+
+		//发送短信通知 支付宝内部通知
+		$notice = new \App\Order\Modules\Service\OrderNotice(
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+			$business_no,
+			"InstalmentWithhold");
+		$notice->notify();
+
+		return true;
+
+
+	}
 	
 
 }

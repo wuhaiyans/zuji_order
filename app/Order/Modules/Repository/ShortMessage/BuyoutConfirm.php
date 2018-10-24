@@ -40,7 +40,7 @@ class BuyoutConfirm{
 		// 短息模板
 		$code = Config::getCode($channel_id, $class);
 		if( !$code ){
-			return false;
+			$code = Config::getCode(Config::CHANNELID_OFFICAL, $class);
 		}
 
 		// 发送短息

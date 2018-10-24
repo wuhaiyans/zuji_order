@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Controllers\Api\v1;
 
+use App\Order\Modules\Inc\GivebackAddressStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Lib\ApiStatus;
@@ -11,6 +12,8 @@ use App\Order\Modules\Service\OrderGoodsInstalment;
 use App\Order\Modules\Service\OrderWithhold;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 
 class GivebackController extends Controller
 {
@@ -79,7 +82,18 @@ class GivebackController extends Controller
 		}
 		//组合最终返回商品基础数据
 		$data['goods_info'] = $orderGoodsInfo;//商品信息
-		$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+		// jinlin 2018-09-28 临时配置收货地址
+		//$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
+		$giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		if($giveback){
+			$data['giveback_address'] = $giveback['giveback_address'];
+			$data['giveback_username'] = $giveback['giveback_username'];
+			$data['giveback_tel'] = $giveback['giveback_tel'];
+		}else{
+			$data['giveback_address'] = 'spu参数错误';
+			$data['giveback_username'] ='无';
+			$data['giveback_tel'] = '无';
+		}
 		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 		$data['status_text'] = '还机申请中';//后台状态
 		
@@ -170,6 +184,16 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
 		}
 		$goodsNoArr = is_array($paramsArr['goods_no']) ? $paramsArr['goods_no'] : [$paramsArr['goods_no']];
+		
+		
+		//判断订单是否冻结，冻结中不允许还机操作
+		$orderObj = new OrderRepository();
+		$orderInfo = $orderObj->get_order_info(['order_no'=>$paramsArr['order_no']]);
+		if( !$orderInfo || $orderInfo[0]['freeze_type'] ){
+			$msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo[0]['freeze_type']) . '中，禁止还机！';
+			return apiResponse([],ApiStatus::CODE_92500,$msg);
+		}
+		
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
@@ -219,6 +243,8 @@ class GivebackController extends Controller
 						'goods_no'=>$goodsNo,
 						'goods_name'=>$orderGoodsInfo['goods_name'],
 						'business_no' => $giveback_no,
+						'zuqi' => $orderGoodsInfo['zuqi'],
+						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
@@ -247,6 +273,8 @@ class GivebackController extends Controller
 
 			$orderFreezeResult = \App\Order\Modules\Repository\OrderRepository::orderFreezeUpdate($paramsArr['order_no'], \App\Order\Modules\Inc\OrderFreezeStatus::Reback);
 			if( !$orderFreezeResult ){
+				//事务回滚
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'订单冻结失败！');
 			}
 			
@@ -263,6 +291,8 @@ class GivebackController extends Controller
 				'msg'=>'用户申请还机',
 			]);
 			if( !$goodsLog ){
+				//事务回滚
+				DB::rollBack();
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 
@@ -583,6 +613,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
 		$paramsArr = isset($params['params'])? $params['params'] :[];
+		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		$rules = [
 			'goods_no'     => 'required',//还机单编号
 			'callback_url'     => 'required',//回调地址
@@ -604,11 +635,27 @@ class GivebackController extends Controller
 			return apiResponse([], get_code(), get_msg());
 		}
 		try{
+			//支付 扩展参数
+			$ip= isset($userInfo['ip'])?$userInfo['ip']:'';
+			$extended_params= isset($paramsArr['extended_params'])?$paramsArr['extended_params']:[];
+			// 微信支付，交易类型：JSAPI，redis读取openid
+			if( $paramsArr['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
+				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
+					$_key = 'wechat_openid_'.$orders['auth_token'];
+					$openid = \Illuminate\Support\Facades\Redis::get($_key);
+					if( $openid ){
+						$extended_params['wechat_params']['openid'] = $openid;
+					}
+				}
+			}
+			
 			//获取支付的url
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,$orderGivebackInfo['giveback_no'] );
 			$paymentUrl = $payObj->getCurrentUrl($paramsArr['pay_channel_id'], [
 				'name'=>'订单' .$orderGoodsInfo['order_no']. '设备'.$orderGivebackInfo['goods_no'].'还机支付',
 				'front_url' => $paramsArr['callback_url'],
+				'ip'=>$ip,
+				'extended_params' => $extended_params,// 扩展参数
 			]);
 		} catch (\Exception $ex) {
 			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());
@@ -806,13 +853,27 @@ class GivebackController extends Controller
 		$orderGivebackService = new OrderGiveback();
 		//获取还机单基本信息
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		//还机地址 jinlin 2018-9-29 改
+		$giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		if($giveback){
+			$data['giveback_address'] = $giveback['giveback_address'];
+			$data['giveback_username'] = $giveback['giveback_username'];
+			$data['giveback_tel'] = $giveback['giveback_tel'];
+		}else{
+			$data['giveback_address'] = 'spu参数错误';
+			$data['giveback_username'] ='无';
+			$data['giveback_tel'] = '无';
+		}
+
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
 			//组合最终返回商品基础数据
 			$data['goods_info'] = $orderGoodsInfo;//商品信息
-			$data['giveback_address'] = config('tripartite.Customer_Service_Address');
-			$data['giveback_username'] = config('tripartite.Customer_Service_Name');;
-			$data['giveback_tel'] = config('tripartite.Customer_Service_Phone');;
+			// jinlin 2018-9-29 改
+			//$data['giveback_address'] = config('tripartite.Customer_Service_Address');
+			//$data['giveback_username'] = config('tripartite.Customer_Service_Name');;
+			//$data['giveback_tel'] = config('tripartite.Customer_Service_Phone');
+
 			$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 			$data['status_text'] = '还机申请中';//后台状态
 
@@ -931,7 +992,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		// | 有押金->退押金处理（执行清算处理）
 		//-+--------------------------------------------------------------------
-		if( $paramsArr['yajin'] ){
+		if( $paramsArr['yajin'] != 0 ){
 			//还机单清算
 			$orderCleanResult = $this->__orderClean( $paramsArr );
 			if( !$orderCleanResult ){
@@ -1183,7 +1244,7 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
-		if( $paramsArr['yajin'] ){
+		if( $paramsArr['yajin'] != 0 ){
 			//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
 			$paymentNo = $payObj->getPaymentNo();

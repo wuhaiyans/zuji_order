@@ -10,6 +10,7 @@ use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
+use App\Lib\Payment\LebaifenApi;
 use App\Lib\Payment\mini\MiniApi;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
@@ -263,55 +264,86 @@ class OrderCleaning
 
                     self::refundRequest($orderCleanData);
                 }
-                //需扣除金额大于0，并且属于待扣押金状态，发起带扣押金请求
-                /**
-                 * 预授权转支付接口
-                 * @param string $appid		应用ID
-                 * @param array $params
-                 * [
-                 *		'name'		=> '', //交易名称
-                 *		'out_trade_no' => '', //业务系统授权码
-                 *		'auth_no' => '', //支付系统授权码
-                 *		'amount' => '', //交易金额；单位：分
-                 *		'back_url' => '', //后台通知地址
-                 *		'user_id' => '', //用户id
-                 * ]
-                 * @return mixed false：失败；array：成功
-                 * [
-                 *		'out_trade_no' => '',//支付系统交易码
-                 *		'trade_no' => '',//业务系统交易码
-                 *		'out_auth_no' => '',//支付系统授权码
-                 * ]
-                 */
-                //根据预授权编号查找预授权相关数据
-                if (empty($orderCleanData['auth_no'])) return false;
-                $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
-                if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
-                    LogApi::info(__method__.'[cleanAccount发起]财务进入预授权转支付请求的逻辑');
-                    if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
-                        LogApi::error(__method__.'[cleanAccount发起]财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
-                        return apiResponseArray(31202,[],"财务发起预授权转支付前，发现获取out_fundauth_no失败");
+
+
+                if ($orderCleanData['order_type'] == OrderStatus::miniRecover) {
+
+                    /**
+                     *   @param array $params  二选一参数,优先使用payment_no
+                     * [
+                     *		 "payment_no":"10A92662696246007", //支付系统的支付单号
+                     *      "amount":"123",                    //要扣的押金金额；单位：分
+                     *      "back_url":"http://_._.com"        //异步通知的url地址
+                     * ]
+                     */
+                   if (($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) || ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed))
+                   {
+
+                       $lebaiParam = array(
+                           'out_payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
+                           "amount" => intval($orderCleanData['auth_deduction_amount']*100),                    //要扣的押金金额；单位：分
+                           'back_url' => config('ordersystem.ORDER_API').'/lebaiUnfreezeClean'        //异步通知的url地址
+                       );
+                       $succss = LebaifenApi::backRefund($lebaiParam);
+
+                       LogApi::info(__method__.'[lebaiCleanAccount发起]微回收买断或者还机申请完成', [$succss,  $lebaiParam]);
+                   }
+
+
+                } else {
+
+                    //需扣除金额大于0，并且属于待扣押金状态，发起带扣押金请求
+                    /**
+                     * 非微回收接口预授权转支付接口
+                     * @param string $appid		应用ID
+                     * @param array $params
+                     * [
+                     *		'name'		=> '', //交易名称
+                     *		'out_trade_no' => '', //业务系统授权码
+                     *		'auth_no' => '', //支付系统授权码
+                     *		'amount' => '', //交易金额；单位：分
+                     *		'back_url' => '', //后台通知地址
+                     *		'user_id' => '', //用户id
+                     * ]
+                     * @return mixed false：失败；array：成功
+                     * [
+                     *		'out_trade_no' => '',//支付系统交易码
+                     *		'trade_no' => '',//业务系统交易码
+                     *		'out_auth_no' => '',//支付系统授权码
+                     * ]
+                     */
+                    //根据预授权编号查找预授权相关数据
+                    if (empty($orderCleanData['auth_no'])) return false;
+                    $authInfo = PayQuery::getAuthInfoByAuthNo($orderCleanData['auth_no']);
+                    if ($orderCleanData['auth_deduction_amount']>0 && $orderCleanData['auth_deduction_status']== OrderCleaningStatus::depositDeductionStatusUnpayed) {
+                        LogApi::info(__method__.'[cleanAccount发起]财务进入预授权转支付请求的逻辑');
+                        if (!isset($authInfo['out_fundauth_no']) || empty($authInfo['out_fundauth_no'])) {
+                            LogApi::error(__method__.'[cleanAccount发起]财务发起预授权转支付前，发现获取out_fundauth_no失败：', $authInfo);
+                            return apiResponseArray(31202,[],"财务发起预授权转支付前，发现获取out_fundauth_no失败");
+                        }
+                        $freezePayParams = [
+
+                            'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
+                            'out_trade_no' => $orderCleanData['auth_deduction_no'], //业务系统授权码
+                            'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+                            'amount' => intval($orderCleanData['auth_deduction_amount']*100), //交易金额；单位：分
+                            'back_url' => config('ordersystem.ORDER_API').'/unfreezeAndPayClean', //押金转支付回调URL
+                            'user_id' => $orderCleanData['user_id'], //用户id
+
+                        ];
+                        LogApi::info(__method__.'[cleanAccount发起]财务发起预授权转支付请求以前，请求的参数：',$freezePayParams);
+                        $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
+                        LogApi::info(__method__.'[cleanAccount发起]财务已经预授权转支付请求以后，返回的结果：',$succss);
                     }
-                    $freezePayParams = [
 
-                        'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
-                        'out_trade_no' => $orderCleanData['auth_deduction_no'], //业务系统授权码
-                        'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
-                        'amount' => $orderCleanData['auth_deduction_amount']*100, //交易金额；单位：分
-                        'back_url' => config('ordersystem.ORDER_API').'/unfreezeAndPayClean', //押金转支付回调URL
-                        'user_id' => $orderCleanData['user_id'], //用户id
+                    //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
+                    if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
+                        && (empty(floatval($orderCleanData['auth_deduction_amount'])) || $orderCleanData['auth_deduction_status']==OrderCleaningStatus::depositDeductionStatusPayd)) {
+                        self::unfreezeRequest($orderCleanData);
+                    }
 
-                    ];
-                    LogApi::info(__method__.'[cleanAccount发起]财务发起预授权转支付请求以前，请求的参数：',$freezePayParams);
-                    $succss = CommonFundAuthApi::unfreezeAndPay($freezePayParams);
-                    LogApi::info(__method__.'[cleanAccount发起]财务已经预授权转支付请求以后，返回的结果：',$succss);
                 }
 
-                //需解押金额大于0，并且属于待解押金状态，发起解押押金请求
-                if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed
-                    && (empty(floatval($orderCleanData['auth_deduction_amount'])) || $orderCleanData['auth_deduction_status']==OrderCleaningStatus::depositDeductionStatusPayd)) {
-                    self::unfreezeRequest($orderCleanData);
-                }
 
             } else {
 
@@ -319,18 +351,12 @@ class OrderCleaning
                 //小程序待退还押金大于0，并且处于待退押金状态miniUnfreezeAndPayClean
                 if ($orderCleanData['auth_unfreeze_amount']>0 && $orderCleanData['auth_unfreeze_status']== OrderCleaningStatus::depositUnfreezeStatusUnpayed) {
 
-
-
                     $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderCleanData['order_no']);
-
-
                     if (empty($miniOrderData))
                     {
                         LogApi::error(__method__.'[minicleanAccount发起]小程序没有找到芝麻订单号相关信息', $orderCleanData['order_no']);
                         return apiResponseArray(31202,[],"没有找到芝麻订单号相关信息");
                     }
-
-
 
                     //查询分期有没有代扣并且扣款成功的记录
                     $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>OrderInstalmentStatus::SUCCESS, 'pay_type'=>0]);
@@ -361,7 +387,6 @@ class OrderCleaning
                             'zm_order_no'=>$miniOrderData['zm_order_no'],//芝麻订单号
                             'app_id'=>  $miniOrderData['app_id'],//芝麻小程序APPID
                         ];
-
                         $success =  miniApi::OrderCancel($orderParams);
                         //dd($success);
                         LogApi::info(__method__.'[minicleanAccount发起]支付小程序解冻押金', [$success,  $orderParams]);
@@ -377,7 +402,6 @@ class OrderCleaning
             return apiResponseArray(31202,[],"操作请求异常".$e->getMessage());
 
         }
-
 
     }
 
@@ -421,7 +445,6 @@ class OrderCleaning
                 //需退款金额大于0，并且属于待退款状态，
                 //发起清算，退租金
                 if ($orderCleanData['refund_amount'] > 0 && $orderCleanData['refund_status'] == OrderCleaningStatus::refundUnpayed) {
-
 
                     //根据支付编号查找支付相关数据
                     $payInfo = PayQuery::getPaymentInfoByPaymentNo($orderCleanData['payment_no']);

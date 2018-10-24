@@ -87,6 +87,8 @@ class GoodsReturn {
      * @return bool
      */
     public function refundAgree(string $remark):bool{
+        LogApi::debug("[refundApply]更新退款单状态为同意的接受参数",$remark);
+        LogApi::debug("[refundApply]更新退款的状态".$this->model->status);
         //退换货单必须是待审核
         if( $this->model->status !=ReturnStatus::ReturnCreated ){
             return false;
@@ -114,7 +116,7 @@ class GoodsReturn {
      */
     public function cancelRefund():bool{
         //退换货单必须未取消
-        if( $this->model->status =ReturnStatus::ReturnCanceled ){
+        if( $this->model->status ==ReturnStatus::ReturnCanceled ){
             return false;
         }
         $this->model->status = ReturnStatus::ReturnCanceled;  //已取消
@@ -383,6 +385,29 @@ class GoodsReturn {
     public static function getReturnInfoByGoodsNo(string $goods_no,string $status,int $lock=0 ) {
         $builder = \App\Order\Models\OrderReturn::where([
             ['goods_no', '=', $goods_no],['status','=',ReturnStatus::ReturnAgreed]
+        ])->limit(1);
+        if( $lock ){
+            $builder->lockForUpdate();
+        }
+        $order_info = $builder->first();
+        if( !$order_info ){
+            return false;
+        }
+        return new self( $order_info );
+    }
+
+    /**
+     * 根据订单编号和退货状态获取退货单数据
+     *
+     * @param string $order_no	商品编号
+     * @param string $status	退货状态
+     * @param int		$lock			锁
+     * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
+     * @return bool
+     */
+    public static function getReturnInfoByOrderNo(string $order_no,int $lock=0 ) {
+        $builder = \App\Order\Models\OrderReturn::where([
+            ['order_no', '=', $order_no],['status','!=',ReturnStatus::ReturnCanceled]
         ])->limit(1);
         if( $lock ){
             $builder->lockForUpdate();

@@ -308,12 +308,16 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+            LogApi::info('checkItemsFinish_info_Receive',$params);
+
             $this->receive->checkItem($params);
+            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+
             DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
+            LogApi::info('checkItemsFinish_info_Receive_error',$e->getMessage());
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 

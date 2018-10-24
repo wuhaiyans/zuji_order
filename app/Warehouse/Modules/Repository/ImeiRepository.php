@@ -10,6 +10,8 @@ namespace App\Warehouse\Modules\Repository;
 use App\Warehouse\Models\ImeiLog;
 use App\Warehouse\Models\ImeiUpdateLog;
 use App\Warehouse\Models\Receive;
+use App\Warehouse\Models\ReceiveGoods;
+use App\Warehouse\Models\ReceiveGoodsImei;
 use Illuminate\Support\Facades\DB;
 use App\Warehouse\Models\Imei;
 class ImeiRepository
@@ -271,6 +273,9 @@ class ImeiRepository
         $imeilog_obj = ImeiLog::where(['imei_id'=>$id])->get();
         if($imeilog_obj){
             $data['imeilog'] = $imeilog_obj->toArray();
+            foreach ($data['imeilog'] as $k=>$item){
+                $data['imeilog'][$k]['zuqi_type'] = ImeiLog::zuqi_type($item['zuqi_type']);
+            }
         }
 
         $imeiupdatelog_obj = ImeiUpdateLog::where(['imei_id'=>$id])->get();
@@ -289,16 +294,32 @@ class ImeiRepository
         $model = Receive::find($receive_no);
         //目前是一个收货单对应一个商品一个IMEI
         $imei = $model->imeis;
+        //$goods = $model->goods;
 
         if(!$imei) {
             return false;
         }
-        foreach($imei as $imeModel) {
+//        foreach ($goods as $item){
+//            $imei = ReceiveGoodsImei::where(['receive_no'=>$receive_no,'goods_no'=>$item->goods_no])->first();
+//            if(!$imei){
+//                return false;
+//            }
+//            if(!ImeiLog::in($imei->imei,$model->order_no,$item->zuqi,$item->zuqi_type)){
+//                return false;
+//            }
+//            if(!Imei::where(['imei'=>$imei->imei])->update(['status'=>Imei::STATUS_IN])){
+//                return false;
+//            }
+//            $imei->status = ReceiveGoodsImei::STATUS_CHECK_OVER;
+//            if(!$imei->update()){
+//                return false;
+//            }
+//        }
+        foreach($imei as $k=>$imeModel) {
             if(!ImeiLog::in($imeModel->imei,$model->order_no)){
                 return false;
             }
-            $imeModel->status = Imei::STATUS_IN;
-            if (!$imeModel->update()){
+            if(!Imei::where(['imei'=>$imeModel->imei])->update(['status'=>Imei::STATUS_IN])){
                 return false;
             }
 

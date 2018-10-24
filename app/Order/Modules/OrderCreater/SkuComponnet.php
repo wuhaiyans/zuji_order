@@ -34,6 +34,7 @@ class SkuComponnet implements OrderCreater
     //租期类型
     private $zuqiType=1;
     private $zuqiTypeName;
+    private $orderType=0;//订单类型
 
     private $goodsArr;
     //支付方式
@@ -51,6 +52,7 @@ class SkuComponnet implements OrderCreater
     private $orderInsurance=0;//订单 意外险
 
 
+
 	/**
 	 * 
 	 * @param \App\Order\Modules\OrderCreater\OrderCreater $componnet
@@ -62,7 +64,7 @@ class SkuComponnet implements OrderCreater
 	 * @param int $payType  //创建订单才有支付方式
 	 * @throws Exception
 	 */
-    public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
+    public function __construct(OrderCreater $componnet, array $sku,int $payType =0,int $orderType = 0)
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
@@ -111,6 +113,7 @@ class SkuComponnet implements OrderCreater
 
         }
         $this->goodsArr =$goodsArr;
+        $this->orderType =$orderType;
     }
 
 
@@ -333,13 +336,17 @@ class SkuComponnet implements OrderCreater
      *  计算押金
      * @param int $amount
      */
-    public function discrease_yajin($jianmian,$yajin,$mianyajin,$sku_id): array{
+    public function discrease_yajin($jianmian,$yajin,$yajinLimit,$sku_id): array{
         if( $jianmian<0 ){
             return [];
         }
+        //判断如果押金限额 大于 风控押金值 取押金限额
+        if($yajinLimit > $yajin){
+            $yajin =$yajinLimit;
+        }
+
         // 优惠金额 大于 总金额 时，总金额设置为0.01
         $arr[$sku_id]['deposit_yajin'] = $yajin;// 更新押金
-        //$arr[$sku_id]['mianyajin'] = $mianyajin +$jianmian;// 更新免押金额
         $arr[$sku_id]['mianyajin'] = $jianmian;// 更新免押金额
         $arr[$sku_id]['jianmian'] = $jianmian;
         $arr[$sku_id]['yajin'] = $yajin+$jianmian;
@@ -447,11 +454,16 @@ class SkuComponnet implements OrderCreater
                     'weight'=>$v['weight'],
                     'create_time'=>time(),
                 ];
-                //如果是短租 把租期时间写到goods 和goods_unit 中
+                //如果是短租 把租期时间写到goods 和goods_unit 中(小程序续租时间为75天)
                 if($this->zuqiType ==1){
                     $goodsData['begin_time'] =strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
                     $goodsData['zuqi'] = $v['zuqi'];
+                    if( $this->orderType == OrderStatus::orderMiniService ){//小程序
+                        $goodsData['relet_day'] = 75;
+                    }else{//非小程序
+                        $goodsData['relet_day'] = 0;
+                    }
                     $unitData['unit_value'] =$v['zuqi'];
                     $unitData['unit'] =1;
                     $unitData['goods_no'] =$goodsData['goods_no'];

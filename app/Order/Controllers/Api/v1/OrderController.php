@@ -64,16 +64,21 @@ class OrderController extends Controller
 	 */
     public function confirmation(Request $request){
         $params = $request->all();
-
         //获取appid
         $appid		= $params['appid'];
         $sku		= $params['params']['sku_info'];
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-
-
+        if( isset($params['params']['coupon']) ){
+            $coupon = $params['params']['coupon'];
+        }else{
+            //自动调用接口查询优惠券
+            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $sku[0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+            ]);
+        }
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
@@ -91,7 +96,10 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
         }
 
-
+        //查询地址信息接口
+        $address_list = \App\Lib\Address\Address::addressQuery([
+            'auth_token'=>$params['auth_token'],
+        ]);
 
         $data =[
             'appid'		=> $appid,
@@ -104,6 +112,12 @@ class OrderController extends Controller
         if(!is_array($res)){
             return apiResponse([],ApiStatus::CODE_60000,get_msg());
         }
+        if(empty($address_list)){
+            $res['address_list'] = [];
+        }else{
+            $res = array_merge($res,$address_list);
+        }
+
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
@@ -344,7 +358,7 @@ class OrderController extends Controller
 
         // 租期，成色，颜色，容量，网络制式
         $headers = ['订单编号','预计发货时间', '下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-            '订单实际总租金','订单总押金','意外险总金额'];
+            '订单实际总租金','订单总押金','回访标识','回访内容','意外险总金额','意外险成本','身份证号','芝麻分','免押金额'];
 
         $orderExcel = array();
         while(true) {
@@ -375,8 +389,18 @@ class OrderController extends Controller
                         implode(",",array_column($item['goodsInfo'],"specs")),
                         $item['order_amount'],
                         $item['order_yajin'],
+                        $item['visit_name'],
+                        $item['visit_text'],
                         $item['order_insurance'],
+                        implode(",",array_column($item['goodsInfo'],"insurance_cost")),
+                        "'".$item['cret_no'],
+                        $item['zhima_score'],
+                        normalizeNum($item['goods_yajin']-$item['order_yajin'])
+
+
+
                     ];
+
                 }
 
                 $orderExcel =  Excel::csvWrite1($data,  $headers, '订单列表导出',$abc);

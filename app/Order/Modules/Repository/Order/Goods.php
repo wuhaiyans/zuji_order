@@ -167,6 +167,16 @@ class Goods {
         $this->model->goods_status=OrderGoodStatus::REFUNDED;  //退货完成
         return $this->model->save();
     }
+
+    /**
+     * 拒签，修改状态为退货完成
+     * @return bool
+     */
+    public function returnSign( ):bool{
+        $this->model->goods_status = OrderGoodStatus::REFUNDED;  //退货完成
+        $this->model->update_time = time();
+        return $this->model->save();
+    }
 	
     //-+------------------------------------------------------------------------
     // | 换货
@@ -287,6 +297,22 @@ class Goods {
         $this->model->goods_status = OrderGoodStatus::RENEWAL_OF_RENT;
         $this->model->update_time = time();
         return $this->model->save();
+    }
+
+    /**
+     * 修改小程序商品剩余续租天数
+     *
+     * @return bool
+     */
+    public function setReletTime($zuqi){
+        $relet_day = $this->model->relet_day;
+        if($relet_day>=$zuqi){
+            $this->model->relet_day = $relet_day-$zuqi;
+            $this->model->update_time = time();
+            return $this->model->save();
+        }else{
+            return false;
+        }
     }
 	
 	//-+------------------------------------------------------------------------

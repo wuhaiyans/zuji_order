@@ -70,7 +70,13 @@ class OrderCreater
 
     public function create($data){
         $orderNo = OrderOperate::createOrderNo(1);
-        $orderType =OrderStatus::orderOnlineService;
+        if($data['pay_type'] == PayInc::LebaifenPay){
+            //如果支付方式为乐百分 订单类型为 微回收
+            $orderType =OrderStatus::miniRecover;
+        }else{
+            $orderType =OrderStatus::orderOnlineService;
+        }
+
         try{
             DB::beginTransaction();
             $order_no = OrderOperate::createOrderNo(1);
@@ -130,23 +136,24 @@ class OrderCreater
             DB::commit();
             //组合数据
             $result = [
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['credit'],
-                'credit_status'		=> $b,
-                //支付方式
                 'pay_type'=>$data['pay_type'],
-                // 是否需要 签收代扣协议
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $schemaData,
-                'pay_info'=>$schemaData['pay_info'],
                 'order_no'=>$orderNo,
+                'pay_info'=>$schemaData['pay_info'],
 
             ];
            // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
+
+            //发送订单风控信息保存队列
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
+                'method' => 'api.inner.orderRisk',
+                'order_no'=>$orderNo,
+                'user_id'=>$data['user_id'],
+                'time' => time(),
+            ],time()+60,"");
+
+
             //发送取消订单队列
         $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
             'method' => 'api.inner.cancelOrder',
@@ -156,7 +163,7 @@ class OrderCreater
         ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-			
+
             return $result;
 
             } catch (\Exception $exc) {
@@ -189,7 +196,7 @@ class OrderCreater
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type'],$orderType);
             $orderCreater->setSkuComponnet($skuComponnet);
             //风控(小程序风控信息接口不处理)
             $orderCreater = new RiskComponnet($orderCreater);
@@ -264,33 +271,177 @@ class OrderCreater
         $total_amount =0;
         $payType =$schemaData['order']['pay_type'];
         foreach ($schemaData['sku'] as $key=>$value) {
+
+            $amount =  normalizeNum($schemaData['sku'][$key]['amount_after_discount']); //总租金
+            $zuqi =$schemaData['sku'][$key]['zuqi']; //租期
+            $insurance =normalizeNum($value['insurance']); //意外险
+
+            $totalAmount =normalizeNum($amount+$insurance);
+
+            $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
+            
             //代扣+预授权 ，小程序发的分期信息
             if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay) {
-                $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                $schemaData['sku'][$key]['first_amount'] = number_format($value['instalment'][0]['amount'], 2); //首期支付金额
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
+                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum($value['instalment'][0]['amount']); //首期支付金额
+
 
             } //乐百分支付的分期信息
             elseif ($payType == PayInc::LebaifenPay) {
-                $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] / $value['zuqi'] + $value['insurance'], 2); //首期支付金额
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
-            } //其他支付方式（花呗） 分期信息
+                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额（包含碎屏保）
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum($amount/$zuqi + $insurance); //首期支付金额
+            }
+            //（花呗） 分期信息
+            elseif ($payType == PayInc::PcreditPayInstallment){
+                if ($schemaData['order']['zuqi_type'] == 1) {
+                    $schemaData['sku'][$key]['month_amount'] = $totalAmount;
+                    $schemaData['sku'][$key]['first_amount'] = $totalAmount;
+                } else {
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
+                }
+            }
+            //其他支付方式
             else {
                 if ($schemaData['order']['zuqi_type'] == 1) {
-                    $schemaData['sku'][$key]['month_amount'] = number_format($value['month_amount'] + $value['insurance'], 2);
-                    $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
+                    $schemaData['sku'][$key]['month_amount'] = $totalAmount;
+                    $schemaData['sku'][$key]['first_amount'] = $totalAmount;
                 } else {
-                    $schemaData['sku'][$key]['month_amount'] = number_format(($schemaData['sku'][$key]['amount_after_discount']+$schemaData['sku'][$key]['insurance'])/$schemaData['sku'][$key]['zuqi'], 2); //每期支付金额（包含碎屏保）
-                    $schemaData['sku'][$key]['first_amount'] = number_format($value['amount_after_discount'] / $value['zuqi'] + $value['insurance'], 2); //首期支付金额
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
                 }
-                $schemaData['sku'][$key]['instalment_total_amount'] = number_format($value['amount_after_discount'] + $value['insurance'], 2);
-
             }
         }
 
         return $schemaData;
 
+
+    }
+
+    /**
+     * 校园订单生成接口
+     * @author wuhaiyan
+     * @param $data
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
+     *		'pay_type'	=> '',	        //【必选】int 支付方式
+     *		'address_id'	=> '',	    //【必选】int 用户收货地址
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     *		//'coupon'	=> [1,1],	//【可选】array 优惠券
+     *      $userinfo [
+     *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *          'user_id'=>1,   //【必须】int用户ID
+     *          'user_name'=>1, //【必须】string用户名
+     *          'mobile'=>1,    //【必须】string手机号
+     *      ]
+     * @return array
+     */
+
+    public function SchoolCreate($data){
+
+        $orderNo = OrderOperate::createOrderNo(1);
+        $orderType =OrderStatus::orderStoreService;
+        //判断是否预约使用过此商品--
+
+        //判断是否预约使用过此商品--
+        try{
+            DB::beginTransaction();
+            $order_no = OrderOperate::createOrderNo(1);
+            //订单创建构造器
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
+
+            // 用户
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
+            $orderCreater->setUserComponnet($userComponnet);
+
+            // 商品
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $orderCreater->setSkuComponnet($skuComponnet);
+
+            //风控
+            $orderCreater = new RiskComponnet($orderCreater);
+            //优惠券
+            //$orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+
+            //押金
+            // $orderCreater = new DepositComponnet($orderCreater);
+
+            //收货地址
+            $orderCreater = new AddressComponnet($orderCreater);
+
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+
+            //分期
+            //$orderCreater = new InstalmentComponnet($orderCreater);
+            //支付
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
+
+
+            //调用各个组件 过滤一些参数 和无法下单原因
+            $b = $orderCreater->filter();
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
+            $schemaData = $orderCreater->getDataSchema();
+            //调用各个组件 创建方法
+            $b = $orderCreater->create();
+            //创建成功组装数据返回结果
+            if(!$b){
+                DB::rollBack();
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
+
+            DB::commit();
+            //组合数据
+            $result = [
+                'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                'credit'			=> ''.$schemaData['user']['credit'],
+                'credit_status'		=> $b,
+                //支付方式
+                'pay_type'=>$data['pay_type'],
+                // 是否需要 签收代扣协议
+                // 是否需要 信用认证
+                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+                '_order_info' => $schemaData,
+                'pay_info'=>$schemaData['pay_info'],
+                'order_no'=>$orderNo,
+
+            ];
+            // 创建订单后 发送支付短信。;
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
+            //发送取消订单队列
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
+                'method' => 'api.inner.cancelOrder',
+                'order_no'=>$orderNo,
+                'user_id'=>$data['user_id'],
+                'time' => time(),
+            ],time()+config('web.order_cancel_hours'),"");
+            //增加操作日志
+            OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
+
+            return $result;
+
+        } catch (\Exception $exc) {
+            DB::rollBack();
+            set_msg($exc->getMessage());
+            return false;
+        }
 
     }
 
@@ -345,10 +496,6 @@ class OrderCreater
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon']['coupon'],$data['user_id']);
 
-
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
 
@@ -368,23 +515,69 @@ class OrderCreater
                 $userRemark =User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
 
             }
+
             //调用过滤的参数方法
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
 
             $result = [
-                'coupon'         => $data['coupon'],
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
+                //'coupon'         => $data['coupon'],
+                //'certified'			=> $schemaData['user']['certified']?'Y':'N',
+                //'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['credit'],
-                'credit_status'		=> $b,
+               // 'credit_status'		=> $b,
                 //支付方式
                 'pay_type'=>$schemaData['order']['pay_type'],
                 // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $schemaData,
-                'pay_info'=>$schemaData['pay_info'],
+               // 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
+              //  'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
+                '_error_code' =>get_code(),
+            ];
+            $result['_order_info']['order']=[
+                'pay_type'=>$schemaData['order']['pay_type'],
+                'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
+            ];
+            $result['_order_info']['coupon']=$schemaData['coupon'];
+            $result['_order_info']['instalment'][0]=[
+                'pay_type'=>$schemaData['order']['pay_type'],
+                'zuqi_type_name'=>$schemaData['order']['zuqi_type_name'],
+            ];
+            $result['_order_info']['user']=[
+                'cert_no'=>$schemaData['user']['cert_no'],
+                'realname'=>$schemaData['user']['realname'],
+                'user_mobile'=>$schemaData['user']['user_mobile'],
+            ];
+            $result['_order_info']['sku'][0]=[
+                'all_amount'=>$schemaData['sku'][0]['all_amount'],
+                'amount'=>$schemaData['sku'][0]['amount'],
+                'discount_amount'=>$schemaData['sku'][0]['discount_amount'],
+                'mianyajin'=>$schemaData['sku'][0]['mianyajin'],
+                'zujin'=>$schemaData['sku'][0]['zujin'],
+                'yajin'=>$schemaData['sku'][0]['yajin'],
+                'deposit_yajin'=>$schemaData['sku'][0]['deposit_yajin'],
+                'jianmian'=>$schemaData['sku'][0]['jianmian'],
+                'first_amount'=>$schemaData['sku'][0]['first_amount'],
+                'zuqi'=>$schemaData['sku'][0]['zuqi'],
+                'market_price'=>$schemaData['sku'][0]['market_price'],
+                'buyout_price'=>$schemaData['sku'][0]['buyout_price'],
+                'amount_after_discount'=>$schemaData['sku'][0]['amount_after_discount'],
+                'insurance'=>$schemaData['sku'][0]['insurance'],
+                'order_coupon_amount'=>$schemaData['sku'][0]['order_coupon_amount'],
+                'first_coupon_amount'=>$schemaData['sku'][0]['first_coupon_amount'],
+                'instalment'=>isset($schemaData['sku'][0]['instalment'])?$schemaData['sku'][0]['instalment']:[],
+                'specs'=>$schemaData['sku'][0]['specs'],
+                'sku_id'=>$schemaData['sku'][0]['sku_id'],
+                'spu_name'=>$schemaData['sku'][0]['spu_name'],
+                'thumb'=>$schemaData['sku'][0]['thumb'],
+                'category_id'=>$schemaData['sku'][0]['category_id'],
+                'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
+                'pay_type'=>$schemaData['sku'][0]['pay_type'],
+                'begin_time'=>isset($data['sku'][0]['begin_time'])?$data['sku'][0]['begin_time']:"",
+                'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
+                'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
+                'month_amount'=>$schemaData['sku'][0]['month_amount'],
+
             ];
             return $result;
         } catch (\Exception $exc) {
@@ -452,6 +645,7 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 'pay_type'=>$data['pay_type'],
+                '_error_code' =>get_code(),
             ];
             return $result;
         } catch (\Exception $exc) {
