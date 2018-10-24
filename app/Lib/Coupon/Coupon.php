@@ -212,9 +212,6 @@ class Coupon extends \App\Lib\BaseApi{
             'request'=>$data,
             'response'=>$info
         ]);
-        if(!is_array($info)){
-            return ApiStatus::CODE_60000;
-        }
         if($info['code']!=0){
             return $info['code'];
         }

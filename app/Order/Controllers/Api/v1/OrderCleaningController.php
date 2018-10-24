@@ -94,6 +94,7 @@ class OrderCleaningController extends Controller
 
             $orderData = OrderCleaning::getOrderCleaningListExport($params,$pre_count);
             $orderDataArray=objectToArray($orderData);
+            print_r($orderData);
             LogApi::debug("[cleanListExport]查询结果",$orderData);
             if ($orderDataArray) {
                 $data = array();
