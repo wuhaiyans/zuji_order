@@ -143,7 +143,28 @@ class OrderCleaning
                 $orderCleanList[$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
+
                 $orderCleanList[$keys]['app_id_name'] = $channelData['appid']['name'];
+                //退款时间
+                if($orderCleanList[$keys]['refund_time']>0){
+                    $orderCleanList[$keys]['refund_time'] = date('Y-m-d H:i:s');
+                }else{
+                    $orderCleanList[$keys]['refund_time'] = 0;
+                }
+                //扣除预授权时间
+
+                 if($orderCleanList[$keys]['auth_deduction_amount']>0){
+                     $orderCleanList[$keys]['auth_deduction_amount'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_deduction_amount']);
+                 }else{
+                     $orderCleanList[$keys]['auth_deduction_amount'] = 0;
+                 }
+                //解冻时间
+
+                 if($orderCleanList[$keys]['auth_unfreeze_time']>0){
+                     $orderCleanList[$keys]['auth_unfreeze_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_unfreeze_time']);
+                 }else{
+                     $orderCleanList[$keys]['auth_unfreeze_time'] = 0;
+                 }
 
             }
 

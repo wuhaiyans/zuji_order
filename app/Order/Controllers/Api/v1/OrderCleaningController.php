@@ -106,11 +106,11 @@ class OrderCleaningController extends Controller
                         $item['order_no'],
                         $item['out_account_name'],
                         $item['refund_amount']+$item['auth_unfreeze_amount'],
-                        date('Y-m-d H:i:s',$item['refund_time']),
+                        $item['refund_time'],
                         $item['auth_deduction_amount'],
-                        date('Y-m-d H:i:s',$item['auth_deduction_time']),
+                        $item['auth_deduction_time'],
                         $item['auth_unfreeze_amount'],
-                        date('Y-m-d H:i:s',$item['auth_unfreeze_time']),
+                        $item['auth_unfreeze_time'],
                         $item['refund_amount'],
 
                     ];
