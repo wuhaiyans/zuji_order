@@ -1212,7 +1212,7 @@ class PayController extends Controller
             $orderData = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryListExport($params,$pre_count);
             LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
             if ($orderData) {
-                $data = array();
+                $data = [];
                 foreach ($orderData as $item) {
                     $data[] = [
                         $item['name'],
