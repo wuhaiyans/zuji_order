@@ -117,6 +117,9 @@ $api->version('v1', [
 
         //缴款记录导出
         $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
+        //出账记录导出
+        $api->any('cleanListExport', 'OrderCleaningController@cleanListExport');
+
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
      ***********************************************************************************************/

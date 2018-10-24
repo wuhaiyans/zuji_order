@@ -7,6 +7,7 @@ use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderClearingRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -1196,7 +1197,7 @@ class PayController extends Controller
         $smallPage = ceil($total_export_count/$pre_count);
         $abc = 1;
 
-        $headers = ['名称','用户名','手机号', '入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码'];
+        $headers = ['名称', '入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码'];
 
         $orderExcel = array();
         while(true) {
@@ -1210,22 +1211,20 @@ class PayController extends Controller
             LogApi::debug("[payIncomeQueryExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
 
             $orderData = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryListExport($params,$pre_count);
+            $orderDataArray=objectToArray($orderData);
             LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
-            if ($orderData) {
+            if ($orderDataArray) {
                 $data = array();
-                foreach ($orderData as $item) {
+                foreach ($orderDataArray as $item) {
                     $data[] = [
                         $item['name'],
-                        $item['realname'],
-                        $item['mobile'],
                         date('Y-m-d H:i:s', $item['create_time']),
-                        $item['business_type'],
-                        $item['channel'],
+                        OrderStatus::getBusinessName( $item['business_type']),
+                        Channel::getBusinessName($item['channel']),
                         $item['business_no'],
                         $item['amount'],
                         $item['order_no'],
                         $item['trade_no'],
-
                         $item['out_trade_no'],
                     ];
 
