@@ -99,7 +99,7 @@ class OrderCleaningController extends Controller
                 foreach ($orderData['data'] as $item) {
 
                     $data[] = [
-                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['create_time'],
                         $item['order_type_name'],
                         $item['status_name'],
                         $item['app_id_name'],
