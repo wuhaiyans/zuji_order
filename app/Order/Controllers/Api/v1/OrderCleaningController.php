@@ -93,12 +93,10 @@ class OrderCleaningController extends Controller
             LogApi::debug("[cleanListExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
 
             $orderData = OrderCleaning::getOrderCleaningListExport($params,$pre_count);
-            $orderDataArray=objectToArray($orderData);
-            print_r($orderData);
             LogApi::debug("[cleanListExport]查询结果",$orderData);
-            if ($orderDataArray) {
+            if ($orderData) {
                 $data = array();
-                foreach ($orderDataArray['data'] as $item) {
+                foreach ($orderData['data'] as $item) {
                     $data[] = [
                         date('Y-m-d H:i:s', $item['create_time']),
                         $item['order_type_name'],
