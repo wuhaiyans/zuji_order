@@ -1222,7 +1222,7 @@ class PayController extends Controller
                         OrderStatus::getBusinessName( $item['business_type']),
                         Channel::getBusinessName($item['channel']),
                         $item['business_no'],
-                        $item['amount'].'元',
+                        $item['amount'],
                         $item['order_no'],
                         $item['trade_no'],
                         $item['out_trade_no'],

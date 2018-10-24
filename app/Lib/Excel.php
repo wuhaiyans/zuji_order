@@ -175,7 +175,7 @@ class Excel
         if ($curPage==2) {
 
             header("Content-type:application/vnd.ms-excel");
-            header("Content-Disposition:filename=" . iconv("UTF-8", "GB18030", ".$title.") . ".csv");
+            header("Content-Disposition:filename=" . iconv("UTF-8", "GB18030", ".$title") . ".csv");
 
         }
 //       打开PHP文件句柄，php://output 表示直接输出到浏览器
