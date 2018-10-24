@@ -96,7 +96,7 @@ class OrderCleaningController extends Controller
             LogApi::debug("[cleanListExport]查询结果",$orderData);
             if ($orderData) {
                 $data = array();
-                foreach ($orderData['data']['data'] as $item) {
+                foreach ($orderData['data'] as $item) {
 
                     $data[] = [
                         date('Y-m-d H:i:s', $item['create_time']),
