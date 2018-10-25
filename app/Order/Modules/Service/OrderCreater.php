@@ -577,6 +577,7 @@ class OrderCreater
                 'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
+                'sku_num'=>$schemaData['sku'][0]['sku_num'],
 
             ];
             return $result;
