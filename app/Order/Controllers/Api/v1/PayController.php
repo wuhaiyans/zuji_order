@@ -68,7 +68,7 @@ class PayController extends Controller
 			$_key = 'wechat_openid_'.$auth_token;
 			$openid = \Illuminate\Support\Facades\Redis::get($_key);
 			if( $openid ){
-				$extended_params['wechat_params']['openid'] = $openid;
+				$extended_params['wechat_params']['openid'] = trim($openid,'"');
 			}
 		}
 		
