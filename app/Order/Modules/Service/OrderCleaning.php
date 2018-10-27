@@ -331,7 +331,8 @@ class OrderCleaning
 
                        $lebaiParam = array(
                            'out_payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
-                           "amount" => intval($orderCleanData['auth_deduction_amount']*100),                    //要扣的押金金额；单位：分
+						   // 金额单位转换(元=>分)，解决问题： intval(8926.80*100) 结果为 892679 的问题
+                           "amount" => intval(intval($orderCleanData['auth_deduction_amount']*10000)/100),                    //要扣的押金金额；单位：分
                            'back_url' => config('ordersystem.ORDER_API').'/lebaiUnfreezeClean'        //异步通知的url地址
                        );
                        $succss = LebaifenApi::backRefund($lebaiParam);
