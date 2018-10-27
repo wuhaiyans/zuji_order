@@ -646,6 +646,9 @@ class OrderController extends Controller
 
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        if (redisIncr("deliveryOrder_".$params['order_info'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30014);
@@ -681,6 +684,9 @@ class OrderController extends Controller
         }
         $params['userinfo'] =$userInfo;
 
+        if (redisIncr("deliveryReceiveOrder_".$params['order_info'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
         $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
@@ -736,6 +742,10 @@ class OrderController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        if (redisIncr("confirmOrder_".$params['params']['order_no'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
+
         $params =$params['params'];
         $params['userinfo'] =$userInfo;
         $res =Service\OrderOperate::confirmOrder($params);
