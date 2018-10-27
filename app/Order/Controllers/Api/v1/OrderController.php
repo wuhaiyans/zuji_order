@@ -646,9 +646,6 @@ class OrderController extends Controller
 
             return  apiResponse([],ApiStatus::CODE_20001);
         }
-        if (redisIncr("deliveryOrder_".$params['order_info'],5)>1) {
-            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
-        }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30014);
