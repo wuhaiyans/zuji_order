@@ -62,13 +62,13 @@ class PayController extends Controller
 
 		LogApi::id($params['order_no']);
 		
-		if( isset($params['extended_params']['wechat_params']['trade_type']) 
-				&& ($params['extended_params']['wechat_params']['trade_type']=='JSAPI'
-						|| $params['extended_params']['wechat_params']['trade_type']=='MINI' ) ){
+		if( isset($extended_params['wechat_params']['trade_type']) 
+				&& ($extended_params['wechat_params']['trade_type']=='JSAPI'
+						|| $extended_params['wechat_params']['trade_type']=='MINI' ) ){
 			$_key = 'wechat_openid_'.$auth_token;
 			$openid = \Illuminate\Support\Facades\Redis::get($_key);
 			if( $openid ){
-				$params['extended_params']['wechat_params']['openid'] = $openid;
+				$extended_params['wechat_params']['openid'] = $openid;
 			}
 		}
 		
