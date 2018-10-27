@@ -681,7 +681,7 @@ class OrderController extends Controller
         }
         $params['userinfo'] =$userInfo;
 
-        if (redisIncr("deliveryReceiveOrder_".$params['order_info'],5)>1) {
+        if (redisIncr("deliveryReceiveOrder_".$params['order_no'],5)>1) {
             return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
         }
         $res = OrderOperate::deliveryReceive($params,0);

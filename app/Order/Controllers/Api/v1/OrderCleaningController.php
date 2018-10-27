@@ -117,7 +117,7 @@ class OrderCleaningController extends Controller
 
                 }
                 LogApi::debug("【cleanListExport】导出数据列表",$data);
-                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '出账列表列表导出',$abc);
+                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '出账列表导出',$abc);
 
             }else{
                 break;
