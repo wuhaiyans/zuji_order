@@ -409,7 +409,7 @@ class OrderCleaning
                     }
 
                     //查询分期有没有代扣并且扣款成功的记录
-                    $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>OrderInstalmentStatus::SUCCESS, 'pay_type'=>0]);
+                    $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>array(OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::FAIL ,OrderInstalmentStatus::PAYING)]);
                     if ($instaleCount>0) {
                         $params = [
                             'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
