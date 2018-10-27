@@ -43,6 +43,8 @@ class PayController extends Controller
 //		]);exit;
 		
         $params =$request->all();
+		$auth_token = $params['auth_token'];
+		
         $rules = [
             'callback_url'  => 'required',
             'order_no'  => 'required',
@@ -59,6 +61,16 @@ class PayController extends Controller
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 
 		LogApi::id($params['order_no']);
+		
+		if( isset($params['extended_params']['wechat_params']['trade_type']) 
+				&& ($params['extended_params']['wechat_params']['trade_type']=='JSAPI'
+						|| $params['extended_params']['wechat_params']['trade_type']=='MINI' ) ){
+			$_key = 'wechat_openid_'.$auth_token;
+			$openid = \Illuminate\Support\Facades\Redis::get($_key);
+			if( $openid ){
+				$params['extended_params']['wechat_params']['openid'] = $openid;
+			}
+		}
 		
 //			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
 //			LogApi::info('获取支付的params', ['params'=>$params]);
