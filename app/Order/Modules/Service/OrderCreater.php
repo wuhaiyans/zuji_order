@@ -240,6 +240,16 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
+
+            //发送订单风控信息保存队列
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
+                'method' => 'api.inner.orderRisk',
+                'order_no'=>$data['order_no'],
+                'user_id'=>$data['user_id'],
+                'time' => time(),
+            ],time()+60,"");
+
+
 //            发送取消订单队列（小程序取消订单队列）
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
                 'method' => 'api.inner.miniCancelOrder',
@@ -425,6 +435,7 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
+
             //发送取消订单队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
                 'method' => 'api.inner.cancelOrder',
