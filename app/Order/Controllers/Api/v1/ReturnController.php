@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\PublicFunc;
+use App\Lib\User\User;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\ReturnStatus;
 use Illuminate\Http\Request;
@@ -709,6 +710,13 @@ class ReturnController extends Controller
         $aa=OrderReturnCreater::refundUpdate($params,$orders['userinfo']);
         p($aa);
 
+    }
+
+    public function test(Request $request){
+        $orders = $request->all();
+        $params = $orders['params'];
+        $aa=User::getReceiveInfo($params['spu_id']);
+        p($aa);
     }
 
 
