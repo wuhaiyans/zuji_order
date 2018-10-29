@@ -217,6 +217,9 @@ return [
     'api.Return.returnReceive'       =>'ReturnController@returnReceive',
     //线下退货退款列表
     'api.Return.underLineReturn'       =>'ReturnController@underLineReturn',
+    //测试
+    'api.Return.test'       =>'ReturnController@test',
+
 
 
 
