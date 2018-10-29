@@ -731,7 +731,7 @@ class Pay extends \App\Lib\Configurable
 		}
 		$data =[
             'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-            'payment_amount'	=> intval($this->getPaymentAmount()*100),//【必选】int 交易金额；单位：分
+            'payment_amount'	=> bcmul($this->getPaymentAmount(),100),//【必选】int 交易金额；单位：分
             'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
             'channel_type'	=> $channel,						//【必选】int 支付渠道
             'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
@@ -748,17 +748,17 @@ class Pay extends \App\Lib\Configurable
                 [
                     'key' => 'zujin',
                     'name' => '租金',
-                    'amount' => intval($paymentAmountBillList['zujin']*100),//【必选】int 交易金额；单位：分
+                    'amount' => bcmul($paymentAmountBillList['zujin'],100),//【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yajin',
                     'name' => '押金',
-                    'amount' => intval($paymentAmountBillList['yajin']*100), //【必选】int 交易金额；单位：分
+                    'amount' =>bcmul($paymentAmountBillList['yajin'],100), //【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yiwaixian',
                     'name' => '碎屏险',
-                    'amount' => intval($paymentAmountBillList['yiwaixian']*100),//【必选】int 交易金额；单位：分
+                    'amount' => bcmul($paymentAmountBillList['yiwaixian'],100),//【必选】int 交易金额；单位：分
                 ],
             ];
         }
