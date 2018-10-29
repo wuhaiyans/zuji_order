@@ -1708,10 +1708,12 @@ class OrderReturnCreater
                 }
                 //不等于审核拒绝拒绝并且是创建审核后的状态
                 if($return_info['status'] != ReturnStatus::ReturnDenied && $return_info['status'] >ReturnStatus::ReturnCreated){
-                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){  //退货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        //退货业务
                         $buss->setStatusText("您的退货申请已通过审核");
                     }
-                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){  //换货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        //换货业务
                         $buss->setStatusText("您的换货申请已通过审核");
                     }
 
