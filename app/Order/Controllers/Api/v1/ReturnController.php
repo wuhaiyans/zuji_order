@@ -712,12 +712,7 @@ class ReturnController extends Controller
 
     }
 
-    public function test(Request $request){
-        $orders = $request->all();
-        $params = $orders['params'];
-        $aa=User::getReceiveInfo($params['spu_id']);
-        p($aa);
-    }
+
 
 
 
