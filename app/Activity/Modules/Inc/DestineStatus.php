@@ -40,11 +40,11 @@ class DestineStatus{
     /**
      * @var int 年度草单
      */
-    const NumberOnePlayer =1;
+    const ANNUALGRASSSHEET =1;
     /**
      * @var int 头号玩家
      */
-    const ANNUALGRASSSHEET =2;
+    const NumberOnePlayer =2;
     /**
      * @var int 全民焕新
      */
@@ -149,9 +149,10 @@ class DestineStatus{
      */
     public static function getActivityType(){
         return [
+            self::ANNUALGRASSSHEET => '年度草单',
             self::NumberOnePlayer => '头号玩家',
             self::TheWholePepole => '全民焕新',
-            self::ExquisiteLife => '精致生活',
+            self::ExquisiteLife => '女神养成',
         ];
     }
 
