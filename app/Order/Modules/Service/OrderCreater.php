@@ -585,6 +585,7 @@ class OrderCreater
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
                 'pay_type'=>$schemaData['sku'][0]['pay_type'],
                 'begin_time'=>isset($data['sku'][0]['begin_time'])?$data['sku'][0]['begin_time']:"",
+                'end_time'=>isset($data['sku'][0]['end_time'])?$data['sku'][0]['end_time']:"",
                 'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
