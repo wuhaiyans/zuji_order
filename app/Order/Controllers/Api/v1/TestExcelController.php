@@ -148,4 +148,9 @@ class TestExcelController extends Controller
         $obj->everMonth();
         echo "success";
     }
+    public function riskAll(){
+        $obj = new CronRisk();
+        $obj->everAll();
+        echo "success";
+    }
 }

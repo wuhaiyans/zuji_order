@@ -166,6 +166,7 @@ class OrderPayComponnet implements OrderCreater
         //判断是否需要支付 如果需要支付则更新订单状态
         if(!$this->isPay){
             $data['order_status']=OrderStatus::OrderPayed;
+            $data['pay_time']= time();
             $b =Order::where('order_no', '=', $this->orderNo)->update($data);
             if(!$b){
                 LogApi::error(config('app.env')."[下单]更新订单状态失败",$data);

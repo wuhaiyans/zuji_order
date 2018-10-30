@@ -105,6 +105,11 @@ class OrderReturnCreater
                 if(!$payInfo){
                     return false;//支付单不存在
                 }
+                //短租不允许退货
+                if($order_info['zuqi_type'] ==OrderStatus::ZUQI_TYPE1){
+                    return false;
+                }
+
                 //乐百分支付的用户在14天内可申请退货
                 if( $order_info['pay_type'] == PayInc::LebaifenPay){
                     if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time()) {
@@ -3289,7 +3294,7 @@ class OrderReturnCreater
             }
             // 如果待退款金额为0，则直接调退款成功的回调
 
-            if(!( $result['auth_unfreeze_amount']>0)){
+            if(!( $result['auth_unfreeze_amount']>0 || $result['refund_amount']>0)){
                 //如果是小程序的订单
                 if($order_info['order_type'] == OrderStatus::orderMiniService){
                     //查询芝麻订单
