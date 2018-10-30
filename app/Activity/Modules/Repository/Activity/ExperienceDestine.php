@@ -101,6 +101,24 @@ class ExperienceDestine{
         return $ret;
     }
     /**
+     * 活动领取下单
+     * @param int $endTime 结束时间
+     * @param int $isStudent 是否是学生 1 是  0否
+     * @return bool
+     */
+    public function updateDestineForOrder($endTime,$isStudent):bool{
+        if($this->model->destine_status != DestineStatus::DestinePayed){
+            return false;
+        }
+        $this->model->destine_status = DestineStatus::DestineReceive;
+        $this->model->is_student  = $isStudent;
+        $this->model->end_time  = $endTime;
+        $this->model->update_time  = time();
+        $this->model->receive_time  = time();
+        return $this->model->save();
+    }
+
+    /**
      * 更新预定状态为退款中
      * @param array $refund_remark
      *
