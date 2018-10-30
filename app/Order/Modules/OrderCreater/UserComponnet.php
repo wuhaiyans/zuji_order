@@ -42,6 +42,7 @@ class UserComponnet implements OrderCreater
     private $credit;
     private $age;
     private $risk;
+    private $addressID;
 
 
 
@@ -65,6 +66,8 @@ class UserComponnet implements OrderCreater
             $this->address['mobile'] = $userInfo['mobile'];
             $this->address['name'] = $userInfo['realname'];
         }
+
+
         $this->mobile = $userInfo['username'];
         $this->islock = intval($userInfo['islock'])?1:0;
         $this->block = intval($userInfo['block'])?1:0;
@@ -78,6 +81,7 @@ class UserComponnet implements OrderCreater
         $now = date("Ymd");
         $this->age = intval(($now-$age)/10000);
         $this->risk = $userInfo['risk']?1:0;
+        $this->addressID =$addressId;
     }
 
     /**
@@ -149,17 +153,20 @@ class UserComponnet implements OrderCreater
         //var_dump($data);die;
 
         //调用第三方接口 获取用户是否在第三方平台下过单
-        $params= [
-            'phone'=>$data['address']['mobile'],
-            'identity'=>$data['user']['cert_no'],
-            'consignee'=>$data['address']['name'],
-            'province'=>$data['address']['province_name'],
-            'city'=>$data['address']['city_name'],
-            'county'=>$data['address']['country_name'],
-            'shipping_address'=>$data['address']['address'],
-        ];
-        $matching = User::getUserMatching($params);
+        $matching =0;
 
+        if($this->addressID){
+            $params= [
+                'phone'=>$data['address']['mobile'],
+                'identity'=>$data['user']['cert_no'],
+                'consignee'=>$data['address']['name'],
+                'province'=>$data['address']['province_name'],
+                'city'=>$data['address']['city_name'],
+                'county'=>$data['address']['country_name'],
+                'shipping_address'=>$data['address']['address'],
+            ];
+            $matching = User::getUserMatching($params);
+        }
         //保存用户认证信息
         $RiskData = [
             'order_no'=>$orderNo,

@@ -10,6 +10,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Inc\StoreAddress;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 
 class AddressComponnet implements OrderCreater
@@ -23,6 +24,9 @@ class AddressComponnet implements OrderCreater
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
+
+        $appid =$this->getOrderCreater()->getAppid();
+        $this->address =StoreAddress::getStoreAddress($appid);
 
     }
 
@@ -47,11 +51,11 @@ class AddressComponnet implements OrderCreater
         $filter =$this->componnet->filter();
         //获取用户信息
         $schema =$this->componnet->getOrderCreater()->getUserComponnet()->getDataSchema();
-        if(empty($schema['address'])){
+
+        if(empty($schema['address']) && ! $this->address){
             $this->getOrderCreater()->setError('收货地址不允许为空');
             $this->flag = false;
         }
-
         return $this->flag && $filter;
     }
 
@@ -75,18 +79,21 @@ class AddressComponnet implements OrderCreater
             return false;
         }
         $data =$this->getDataSchema();
+
         if(isset($data['address']['province_name']) && isset($data['address']['city_name']) && isset($data['address']['country_name']) ){
             $address_info = $data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name'].' '.$data['address']['address'];
-        }else{
+        }elseif(isset($data['address']['address'])){
             $address_info =  $data['address']['address'];
+        }else{
+            $address_info = $this->address;
         }
         $addressData = [
             'order_no'=>$data['order']['order_no'],
-            'consignee_mobile' =>$data['address']['mobile']?$data['address']['mobile']:"",
-            'name'=>$data['address']['name']?$data['address']['name']:"",
-            'province_id'=>$data['address']['province_id']?$data['address']['province_id']:"",
-            'city_id'=>$data['address']['city_id']?$data['address']['city_id']:"",
-            'area_id'=>$data['address']['district_id']?$data['address']['district_id']:"",
+            'consignee_mobile' =>isset($data['address']['mobile'])?$data['address']['mobile']:$data['user']['user_mobile'],
+            'name'=>isset($data['address']['name'])?$data['address']['name']:$data['user']['user_mobile'],
+            'province_id'=>isset($data['address']['province_id'])?$data['address']['province_id']:0,
+            'city_id'=>isset($data['address']['city_id'])?$data['address']['city_id']:0,
+            'area_id'=>isset($data['address']['district_id'])?$data['address']['district_id']:0,
             'address_info'=>$address_info,
             'create_time'=>time(),
         ];
