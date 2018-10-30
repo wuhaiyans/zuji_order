@@ -325,7 +325,6 @@ class CronRisk
             $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
             $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
         }
-
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
 
@@ -578,7 +577,7 @@ class CronRisk
         ];
 
 
-        Excel::localWrite($data,$headers,date("Y-m-d"),"risk");
+        Excel::localWrite($data,$headers,date("Y-m-d H.i.s"),"risk");
         echo "订单总数:".$single."<br/><br/>";
         echo "订单：".$orderError."<br/><br/>";
         echo "用户：".$userError."<br/><br/>";
