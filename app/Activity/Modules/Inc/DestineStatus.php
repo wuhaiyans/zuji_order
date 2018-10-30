@@ -25,6 +25,10 @@ class DestineStatus{
      */
     const DestinePayed = 2;
     /**
+     * @var int 预定已领取
+     */
+    const DestineReceive = 3;
+    /**
      * @var int 预定已退款
      */
     const DestineRefunded = 4;
