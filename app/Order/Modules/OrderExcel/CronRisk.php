@@ -52,7 +52,7 @@ class CronRisk
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i*$limit;
-            $orderList = Order::query()->wherein("order_status",$status)->offset($offset)->limit($limit)->get()->toArray();
+            $orderList = Order::query()->where($where)->wherein("order_status",$status)->offset($offset)->limit($limit)->get()->toArray();
             $single += count($orderList);
             //拆分出订单号
             $orderNos = array_column($orderList,"order_no");
