@@ -884,19 +884,19 @@ class OrderReturnCreater
 				}
 				//-+------------------------------------------------------------
                 //判断退款是否为小程序订单
-                if($order_info['order_type'] != OrderStatus::orderMiniService){
+                if($order_info['order_type'] != OrderStatus::orderMiniService ){
                     //获取订单的支付信息
                     $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
                     LogApi::info("[refundApply]获取订单的支付信息",$pay_result);
-                    if(!$pay_result){
-                        return false;
+                    if($pay_result){
+                        if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
+                        }
+                        if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
+                        }
                     }
-                    if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                        $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
-                    }
-                    if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                        $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
-                    }
+
 
                 }
 
@@ -3208,7 +3208,7 @@ class OrderReturnCreater
                 $result['refund_amount'] = $result['pay_amount'];
             }
             //花呗分期+预授权
-            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
+            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay && $order_info['pay_type'] != PayInc::WeChatPay){
                 if(!$payInfo){
                     return false;
                 }
@@ -3350,7 +3350,7 @@ class OrderReturnCreater
                 }
             }
 
-            if($order_info['pay_type'] == PayInc::WeChatPay || $order_info['pay_type'] == PayInc::LebaifenPay){
+            if($order_info['pay_type'] == PayInc::WeChatPay){
                 $create_data['refund_amount'] = $result['refund_amount'] - $params['compensate_amount'];
             }else{
                 $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
