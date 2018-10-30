@@ -153,18 +153,21 @@ class AdvanceActivityController extends Controller
         $count = ActiveInviteRepository::getCount(['uid'=>$userInfo['uid'],'activity_id'=>1]);
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
-        $activityInfo['head_images'] = "";
-        //获取微信授权登录信息
-        $userWechat = "";//User::getUserWechat($userInfo['uid']);
-        if($userWechat){
-            $activityInfo['head_images'] = $userWechat['headimgurl'];
+        if($activityInfo){
+            $activityInfo['head_images'] = "";
+            //获取微信授权登录信息
+            $userWechat = "";//User::getUserWechat($userInfo['uid']);
+            if($userWechat){
+                $activityInfo['head_images'] = $userWechat['headimgurl'];
+            }
+            $activityInfo['zuqi_day'] = $count;
+            $activityInfo['zuqi'] -= $count;
+            $activityInfo['type'] = 2;
+            $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
+            //把一元活动数据追加到苹果预约数据后面
+            $list[] = $activityInfo;
         }
-        $activityInfo['zuqi_day'] = $count;
-        $activityInfo['zuqi'] -= $count;
-        $activityInfo['type'] = 2;
-        $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
-        //把一元活动数据追加到苹果预约数据后面
-        $list[] = $activityInfo;
+
         $data = [
             'count' => $count,
             'total_page' =>$sum,
