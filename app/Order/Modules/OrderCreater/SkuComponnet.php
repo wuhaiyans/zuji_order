@@ -251,7 +251,6 @@ class SkuComponnet implements OrderCreater
             //计算原始押金
             $yajin =isset($this->deposit[$skuInfo['sku_id']]['yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['yajin']):$skuInfo['yajin'];
 
-
             //计算买断金额
             $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
 
@@ -265,6 +264,19 @@ class SkuComponnet implements OrderCreater
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
             $this->orderYajin =$deposit_yajin;
             $this->orderInsurance =$spuInfo['yiwaixian'];
+
+            //如果是活动领取接口  押金 意外险 租金都 为0
+            if($this->orderType == OrderStatus::orderActivityService){
+                $jianmian = $this->orderYajin;
+                $mianyajin = $this->orderYajin;
+                $this->orderZujin = 0.00;
+                $this->orderYajin = 0.00;
+                $deposit_yajin = 0.00;
+                $spuInfo['yiwaixian'] =0.00; //意外险
+                $amount_after_discount =0.00;
+                $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2)));
+
+            }
 
 
             $arr['sku'][] = [
@@ -306,7 +318,7 @@ class SkuComponnet implements OrderCreater
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => $mianyajin,
                     'jianmian' => $jianmian,
-                    'deposit_yajin' => $this->orderYajin,//应缴押金
+                    'deposit_yajin' => $deposit_yajin,//应缴押金
                     'amount_after_discount'=>$amount_after_discount,
                     'begin_time'=>$skuInfo['begin_time'],
                     'end_time'=>$skuInfo['end_time'],
