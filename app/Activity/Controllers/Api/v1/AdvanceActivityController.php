@@ -113,8 +113,7 @@ class AdvanceActivityController extends Controller
             ['user_id','=',$userInfo['uid']],
             ['destine_status','<>',DestineStatus::DestineCreated]
         ];
-        //查询我的预约列表
-
+        //获取新苹果预约数据
         $count = ActivityDestine::query()->where($where)->count();
 
         $sum = ceil($count/$limit);
@@ -123,33 +122,33 @@ class AdvanceActivityController extends Controller
         $limit = $limit<50?$limit:20;
         $offset = $page*$limit;
         $list = ActivityDestine::query()->where($where)->offset($offset)->limit($limit)->get()->toArray();
-        if(!$list){
-            return apiResponse($list,ApiStatus::CODE_0);
-        }
-        //拆分活动id
-        $advanceIds = array_column($list,"activity_id");
-        array_unique($advanceIds);
-        //获取预约活动
-        $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
-        $activityList = array_column($activityList,null,"id");
-        //获取活动商品
-        $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->get()->toArray();
-        $goodsList = array_keys_arrange($goodsList,"appointment_id");
-        //拼装数据格式
-        foreach($list as &$item){
-            //下单按钮
-            $order_btn = false;
-            if(!empty($goodsList[$item['activity_id']]['spu_id'])){
-                $order_btn = true;
+        if($list){
+            //拆分活动id
+            $advanceIds = array_column($list,"activity_id");
+            array_unique($advanceIds);
+            //获取预约活动
+            $activityList = ActivityAppointment::query()->whereIn("id",$advanceIds)->get()->toArray();
+            $activityList = array_column($activityList,null,"id");
+            //获取活动商品
+            $goodsList = ActivityGoodsAppointment::query()->wherein("appointment_id",$advanceIds)->get()->toArray();
+            $goodsList = array_keys_arrange($goodsList,"appointment_id");
+            //拼装数据格式
+            foreach($list as &$item){
+                //下单按钮
+                $order_btn = false;
+                if(!empty($goodsList[$item['activity_id']]['spu_id'])){
+                    $order_btn = true;
+                }
+                $item['destine_amount'] = sprintf('%.2f',$item['destine_amount']);
+                $item['order_btn'] = $order_btn;
+                $item['destine_status'] = DestineStatus::getStatusName($item['destine_status']);
+                $item['title'] = $activityList[$item['activity_id']]['title'];
+                $item['appointment_image'] = $activityList[$item['activity_id']]['appointment_image'];
+                $item['type'] = 1;
             }
-            $item['destine_amount'] = sprintf('%.2f',$item['destine_amount']);
-            $item['order_btn'] = $order_btn;
-            $item['destine_status'] = DestineStatus::getStatusName($item['destine_status']);
-            $item['title'] = $activityList[$item['activity_id']]['title'];
-            $item['appointment_image'] = $activityList[$item['activity_id']]['appointment_image'];
-            $item['type'] = 1;
         }
-        //1元预约活动数据
+
+        //获取1元预约活动数据
         $count = ActiveInviteRepository::getCount(['uid'=>$userInfo['uid'],'activity_id'=>1]);
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
