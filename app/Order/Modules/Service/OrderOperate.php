@@ -1848,21 +1848,29 @@ class OrderOperate
 		if( empty( $param['business_key'] ) || empty( $param['business_no'] ) ){
 			throw new \Exception('支付状态获取失败参数出错');
 		}
-		
-		//获取支付单信息
-		$payInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($param['business_key'], $param['business_no']);
-		if( $payInfo->isSuccess() ){
+		try{
+			//获取支付单信息
+			$payInfo = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness($param['business_key'], $param['business_no']);
+			if( $payInfo->isSuccess() ){
+				return [
+					'withholdStatus' => false,
+					'paymentStatus' => false,
+					'fundauthStatus' => false,
+				];
+			}
+			return [
+				'withholdStatus' => $payInfo->needWithhold(),
+				'paymentStatus' => $payInfo->needPayment(),
+				'fundauthStatus' => $payInfo->needFundauth(),
+			];
+		} catch (\App\Lib\NotFoundException $ex) {
+			//支付单不存在，默认无需进行支付等操作
 			return [
 				'withholdStatus' => false,
 				'paymentStatus' => false,
 				'fundauthStatus' => false,
 			];
 		}
-		return [
-			'withholdStatus' => $payInfo->needWithhold(),
-			'paymentStatus' => $payInfo->needPayment(),
-			'fundauthStatus' => $payInfo->needFundauth(),
-		];
 		//-+--------------------------------------------------------------------
 		// | 从新修改次方法 【结束，下面内容没有用】
 		//-+--------------------------------------------------------------------

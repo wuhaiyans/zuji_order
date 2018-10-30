@@ -53,8 +53,10 @@ class OrderWithhold implements UnderLine {
 
             if($surplusAmount >= $item['amount']){
                 \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
-
             }
+
+            $surplusAmount -= $item['amount'];
+
         }
 
         return true;

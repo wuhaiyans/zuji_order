@@ -360,7 +360,7 @@ class GoodsReturn {
      * @return \App\Order\Modules\Repository\GoodsReturn\GoodsReturn
      * @return bool
      */
-    public static function getReturnGoodsInfo(string $goods_no,int $lock=0 ) {
+    public static function getReturnGoodsInfo(string $goods_no,int $lock=0 ){
         $builder = \App\Order\Models\OrderReturn::where([
             ['goods_no', '=', $goods_no],['status','!=',ReturnStatus::ReturnCanceled]
         ])->limit(1);

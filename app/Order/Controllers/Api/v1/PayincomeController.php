@@ -169,18 +169,19 @@ class PayincomeController extends Controller
             $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
         }
 
-        // 入账类型
-        $type = \App\Order\Modules\Inc\OrderStatus::getBusinessType();
-
-        // 入账方式
-        $channel = \App\Order\Modules\Repository\Pay\Channel::getBusinessType();
-
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
         // 入账类型
-        $info['business_type']  = $type[$info['business_type']];
+        $info['business_type']  = \App\Order\Modules\Inc\OrderStatus::getBusinessName($info['business_type']);
+
         // 入账方式
-        $info['channel']        = $channel[$info['channel']];
+        $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
+        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+
+            $channel       = $channel . "-" . \App\Order\Modules\Repository\Pay\Channel::getUnderLineBusinessTypeName($info['under_channel']);;
+        }
+
+        $info['channel'] = $channel;
 
         return apiResponse($info,ApiStatus::CODE_0,"success");
     }
@@ -228,26 +229,8 @@ class PayincomeController extends Controller
         $params = $params['params'];
 
         // 实现业务
-        $business_type = $params['business_type'];
-        switch ($business_type) {
-            case UnderPayStatus::OrderWithhold:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderWithhold($params);
-                break;
-            case UnderPayStatus::OrderGiveback:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderGiveback($params);
-                break;
-            case UnderPayStatus::OrderRefund:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRefund($params);
-                break;
-            case UnderPayStatus::OrderBuyout:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout($params);
-                break;
-            case UnderPayStatus::OrderRelet:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRelet($params);
-                break;
-        }
+        $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $amount = $orderService->getPayAmount();
-
 
         return $amount;
     }
@@ -291,26 +274,9 @@ class PayincomeController extends Controller
         $params = $params['params'];
 
         // 实现业务
-        $business_type = $params['business_type'];
-        switch ($business_type) {
-            case UnderPayStatus::OrderWithhold:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderWithhold($params);
-                break;
-            case UnderPayStatus::OrderGiveback:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderGiveback($params);
-                break;
-            case UnderPayStatus::OrderRefund:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRefund($params);
-                break;
-            case UnderPayStatus::OrderBuyout:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout($params);
-                break;
-            case UnderPayStatus::OrderRelet:
-                $orderService =  new \App\Order\Modules\Repository\Pay\UnderPay\OrderRelet($params);
-                break;
-        }
-
+        $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $result = $orderService->execute();
+
         if(!$result){
             DB::rollBack();
             \App\Lib\Common\LogApi::error('[underLineAdd]业务实现失败',$params);
@@ -325,6 +291,7 @@ class PayincomeController extends Controller
             'channel'       => \App\Order\Modules\Repository\Pay\Channel::UnderLine,
             'amount'        => $params['amount'],
             'create_time'   => strtotime($params['create_time']),
+            'under_channel' => $params['under_channel'],
             'remark'        => $params['remark'],
         ];
 

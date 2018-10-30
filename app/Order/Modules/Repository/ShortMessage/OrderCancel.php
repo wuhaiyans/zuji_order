@@ -2,6 +2,7 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
@@ -57,6 +58,12 @@ class OrderCancel implements ShortMessage {
         }
 
 		// 发送短息
+        LogApi::info("cancelOrderMessage",[
+            'realName'=>$orderInfo['realname'],
+            'orderNo'=>$orderInfo['order_no'],
+            'goodsName'=>$goodsName,
+            'serviceTel'=>config('tripartite.Customer_Service_Phone'),
+        ]);
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName'=>$orderInfo['realname'],
             'orderNo'=>$orderInfo['order_no'],

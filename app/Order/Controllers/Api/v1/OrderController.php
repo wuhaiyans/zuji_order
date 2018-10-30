@@ -681,6 +681,9 @@ class OrderController extends Controller
         }
         $params['userinfo'] =$userInfo;
 
+        if (redisIncr("deliveryReceiveOrder_".$params['order_no'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
         $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
@@ -736,6 +739,10 @@ class OrderController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        if (redisIncr("confirmOrder_".$params['params']['order_no'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
+
         $params =$params['params'];
         $params['userinfo'] =$userInfo;
         $res =Service\OrderOperate::confirmOrder($params);
@@ -1002,8 +1009,8 @@ class OrderController extends Controller
                 $payInfo = array();
 
                 if ($orderData) {
-
-                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
+					//订单任何状态都可以查询当前订单的支付状态
+//                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
                         $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
@@ -1015,10 +1022,12 @@ class OrderController extends Controller
                         $payInfo = OrderOperate::getPayStatus($orderParams);
 
 
-                    }
+//                    }
 
 
-                }
+                }else{
+					throw new \Exception('当前订单不存在!');
+				}
                 return apiResponse($payInfo,ApiStatus::CODE_0);
 
             }catch (\Exception $e)

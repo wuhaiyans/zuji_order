@@ -266,7 +266,73 @@ class OrderClearingRepository
     }
 
 
+    /**
+     * 退款结算数据列表导出
+     * Author: qinliping
+     * @param $param
+     * @param int $pagesize
+     * @return mixed
+     */
+    public static function getOrderCleanListExport($param, $pagesize=5)
+    {
+        $whereArray = array();
+        //出账状态
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
 
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+        //应用来源ID
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
+        }
+
+        //出账类型
+        if (isset($param['out_type']) && !empty($param['out_type'])) {
+            $whereArray[] = ['business_type', '=', $param['out_type']];
+        }
+
+        //出账方式
+        if (isset($param['out_account']) && !empty($param['out_account'])) {
+            $whereArray[] = ['out_account', '=', $param['out_account']];
+        }
+
+        //出账状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['status', '=', $param['status']];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+        LogApi::debug("[getOrderCleanListExport]查询条件",$whereArray );
+        $result =  OrderClearing::query()
+            ->where($whereArray)
+            ->orderBy('create_time','DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get()->toArray();
+        return $result;
+
+    }
 
     /**
      * 订单清算取消接口

@@ -97,26 +97,27 @@ class OrderCleaningController extends Controller
             if ($orderData) {
                 $data = array();
                 foreach ($orderData['data'] as $item) {
+
                     $data[] = [
-                        date('Y-m-d H:i:s', $item['create_time']),
+                        $item['create_time'],
                         $item['order_type_name'],
                         $item['status_name'],
                         $item['app_id_name'],
                         $item['order_no'],
                         $item['out_account_name'],
                         $item['refund_amount']+$item['auth_unfreeze_amount'],
-                        date('Y-m-d H:i:s', $item['refund_time']),
+                        $item['refund_time'],
                         $item['auth_deduction_amount'],
-                        date('Y-m-d H:i:s', $item['auth_deduction_time']),
+                        $item['auth_deduction_time'],
                         $item['auth_unfreeze_amount'],
-                        date('Y-m-d H:i:s', $item['auth_unfreeze_time']),
+                        $item['auth_unfreeze_time'],
                         $item['refund_amount'],
 
                     ];
 
                 }
                 LogApi::debug("【cleanListExport】导出数据列表",$data);
-                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '入账列表导出',$abc);
+                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '出账列表导出',$abc);
 
             }else{
                 break;

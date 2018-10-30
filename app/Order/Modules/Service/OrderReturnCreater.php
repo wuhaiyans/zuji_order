@@ -1708,10 +1708,12 @@ class OrderReturnCreater
                 }
                 //不等于审核拒绝拒绝并且是创建审核后的状态
                 if($return_info['status'] != ReturnStatus::ReturnDenied && $return_info['status'] >ReturnStatus::ReturnCreated){
-                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){  //退货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        //退货业务
                         $buss->setStatusText("您的退货申请已通过审核");
                     }
-                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){  //换货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        //换货业务
                         $buss->setStatusText("您的换货申请已通过审核");
                     }
 
@@ -3330,16 +3332,18 @@ class OrderReturnCreater
             //创建清单参数
             $create_data['order_no']=$params['order_no']; //订单类型
             if($order_info['pay_type'] == PayInc::LebaifenPay){
-                $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+                $create_data['order_type'] = OrderStatus::miniRecover;//订单类型
             }else{
-                $create_data['order_type']=$order_info['order_type'];//订单类型
+                $create_data['order_type'] = $order_info['order_type'];//订单类型
             }
-            $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
-            $create_data['business_no']=$data['refund_no'];//业务编号
+            $create_data['business_type'] = OrderStatus::BUSINESS_RETURN;//业务类型
+            $create_data['business_no'] = $data['refund_no'];//业务编号
+            if($payInfo){
+                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $create_data['out_auth_no'] = $payInfo['fundauth_no'];//预授权编号
+                }
+            }
 
-            if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
-            }
             $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
             $create_data['auth_deduction_amount']=isset($params['compensate_amount'])?$params['compensate_amount']:0.00;//应扣押金金额
             $create_data['auth_deduction_time']=time();//扣除押金时间

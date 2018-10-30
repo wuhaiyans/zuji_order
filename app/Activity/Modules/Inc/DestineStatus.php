@@ -36,18 +36,23 @@ class DestineStatus{
     //--------------------------------------------------------------------------------------------
     //--+ 活动体验类型 --------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
+
+    /**
+     * @var int 年度草单
+     */
+    const ANNUALGRASSSHEET =1;
     /**
      * @var int 头号玩家
      */
-    const NumberOnePlayer =0;
+    const NumberOnePlayer =2;
     /**
      * @var int 全民焕新
      */
-    const TheWholePepole = 1;
+    const TheWholePepole = 3;
     /**
-     * @var int 精致生活
+     * @var int 女神养成
      */
-    const ExquisiteLife = 2;
+    const ExquisiteLife = 4;
 
     //--------------------------------------------------------------------------------------------
     //--+ 活动类型 --------------------------------------------------------------------------
@@ -144,9 +149,10 @@ class DestineStatus{
      */
     public static function getActivityType(){
         return [
+            self::ANNUALGRASSSHEET => '年度草单',
             self::NumberOnePlayer => '头号玩家',
             self::TheWholePepole => '全民焕新',
-            self::ExquisiteLife => '精致生活',
+            self::ExquisiteLife => '女神养成',
         ];
     }
 

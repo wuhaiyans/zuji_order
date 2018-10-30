@@ -38,5 +38,35 @@ class UnderPayStatus{
         ];
     }
 
+    /**
+     * 订单租期类型 名称
+     * @return array
+     */
+    public static function getBusinessTypeName(int $type):string {
+        $list = self::getBusinessType();
+        if( isset($list[$type]) ){
+            return $list[$type];
+        }
+        return '';
+    }
+
+    /**
+     * 订单租期类型 实例化类名称
+     * @return array
+     */
+    public static function getBusinessClassName(int $type):string {
+        $list =  [
+            self::OrderWithhold     => 'OrderWithhold',
+            self::OrderGiveback     => 'OrderGiveback',
+            self::OrderRefund       => 'OrderRefund',
+            self::OrderBuyout       => 'OrderBuyout',
+            self::OrderRelet        => 'OrderRelet',
+        ];
+        if( isset($list[$type]) ){
+            return $list[$type];
+        }
+        return '';
+    }
+
 }
 
