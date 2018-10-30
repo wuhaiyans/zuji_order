@@ -162,6 +162,7 @@ class AdvanceActivityController extends Controller
         $activityInfo['zuqi_day'] = $count;
         $activityInfo['zuqi'] -= $count;
         $activityInfo['type'] = 2;
+        $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
         //把一元活动数据追加到苹果预约数据后面
         $list[] = $activityInfo;
         $data = [
