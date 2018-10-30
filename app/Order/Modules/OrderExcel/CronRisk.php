@@ -30,7 +30,12 @@ class CronRisk
     public static function everMonth()
     {
         error_reporting(E_ALL ^ E_NOTICE);
-
+        $where = [
+            ['id','<>',0]
+        ];
+        if($_GET['channel_id']){
+            $where[] = ['channel_id','=',$_GET['channel_id']];
+        }
         //cul获取渠道应用信息
         $channelList = Channel::getChannelAppidListName();
 
@@ -39,8 +44,9 @@ class CronRisk
             Inc\OrderStatus::OrderInService,
             Inc\OrderStatus::OrderCompleted
         ];
+
         $limit = 500;
-        $count = Order::query()->wherein("order_status",$status)->count();
+        $count = Order::query()->where($where)->wherein("order_status",$status)->count();
         $data = [];
         $single = 0;
         //分批获取订单信息
