@@ -236,6 +236,14 @@ return [
     'api.Relet.userListRelet'       => 'ReletController@userListRelet',
     // 创建续租(支付)
     'api.Relet.createRelet'       => 'ReletController@createRelet',
+    //-+------------------------------------------------------------------------
+    // | 线下订单相关接口
+    //-+------------------------------------------------------------------------
+
+    //线下领取商品接口
+    'api.order.activityReceive' => 'OrderController@activityReceive',
+
+
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
