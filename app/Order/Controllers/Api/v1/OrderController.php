@@ -209,6 +209,80 @@ class OrderController extends Controller
 
         return apiResponse($res,ApiStatus::CODE_0);
     }
+
+    /**
+     *  线下活动领取接口
+     * @author wuhaiyan
+     * @param Request $request
+     * $request['appid']
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     * ]
+     * $request['params']
+     * [
+     *		'address_id'	=> '',	    //【必选】int 用户收货地址
+     *      'destine_no'=>'',           //【必选】 string 预定编号
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     * $request['userinfo']     //【必须】array 用户信息  - 转发接口获取
+     * $userinfo [
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】string 用户ID
+     *      'user_name'=>1, //【必须】string 用户名
+     *      'mobile'=>1,    //【必须】string手机号
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+
+    public function activityReceive(Request $request){
+
+        $params = $request->all();
+
+        $sku		= isset($params['params']['sku_info'])?$params['params']['sku_info']:[];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
+
+        //判断参数是否设置
+        if(empty($params['appid']) && $params['appid'] <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        }
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+        }
+        if(empty($params['params']['destine_no']) || !isset($params['params']['destine_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"预定编号不能为空");
+        }
+        if(count($sku)<1){
+            return apiResponse([],ApiStatus::CODE_20001,"商品信息错误");
+        }
+        $destineNo		= $params['params']['destine_no'];
+        $appid		    = $params['appid'];
+
+        $data =[
+            'appid'=>$appid,
+            'pay_type'=>7,
+            'address_id'=>0,
+            'sku'=>$sku,
+            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
+            'pay_channel_id'=>4,
+            'destine_no'=>$destineNo,
+        ];
+        $res = $this->OrderCreate->SchoolCreate($data);
+        if(!$res){
+            LogApi::info("活动领取失败",get_msg());
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+
+        }
+
+        return apiResponse($res,ApiStatus::CODE_0);
+    }
     /**
      * 门店下单接口
      * @param Request $request
