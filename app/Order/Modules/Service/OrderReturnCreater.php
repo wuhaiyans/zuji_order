@@ -3342,6 +3342,9 @@ class OrderReturnCreater
             $create_data['business_type'] = OrderStatus::BUSINESS_RETURN;//业务类型
             $create_data['business_no'] = $data['refund_no'];//业务编号
             if($payInfo){
+                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $create_data['payment_no'] = $payInfo['payment_no'];//支付编号
+                }
                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $create_data['out_auth_no'] = $payInfo['fundauth_no'];//预授权编号
                 }
