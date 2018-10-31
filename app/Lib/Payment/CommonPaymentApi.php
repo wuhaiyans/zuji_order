@@ -38,7 +38,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		$info = self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.url', '1.0', $params);
 		if( !isset($info['url']) )
 		{
@@ -69,7 +69,7 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.query', '1.0', $params);
 	}
 

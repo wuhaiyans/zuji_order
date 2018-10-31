@@ -33,7 +33,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.url', '1.0', $params);
     }
 
@@ -66,7 +66,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.query', '1.0', $params);
     }
 
@@ -99,7 +99,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.api.unfreezeandpaystatus', '1.0', $params);
     }
 
@@ -129,7 +129,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.unfreeze', '1.0', $params);
     }
 
@@ -160,7 +160,7 @@ class CommonFundAuthApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.fundauth.topay.apply', '1.0', $params);
     }
 }

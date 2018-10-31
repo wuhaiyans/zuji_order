@@ -32,7 +32,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.url', '1.0', $params);
 	}
 
@@ -63,7 +63,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.query', '1.0', $params);
 	}
 	
@@ -94,7 +94,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.applay', '1.0', $params);
     }
 
@@ -125,7 +125,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.query', '1.0', $params);
     }
 
@@ -155,7 +155,7 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.agreement.unsign', '1.0', $params);
     }
 }

@@ -31,7 +31,7 @@ class CommonRefundApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.refund.apply', '1.0', $params);
     }
 	
@@ -58,7 +58,7 @@ class CommonRefundApi extends \App\Lib\BaseApi {
         //生成秘钥
         $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
         $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), config('paysystem.PAY_API'),'pay.refund.query', '1.0', $params);
     }
 }
