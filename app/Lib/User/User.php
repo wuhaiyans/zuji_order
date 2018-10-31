@@ -31,7 +31,10 @@ class User extends \App\Lib\BaseApi{
         ];
 
         $userInfo = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
-		$userInfo['realname'] = $userInfo['realname']?$userInfo['realname']: substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11);
+		//用户认证姓名为空的取用户地址里的姓名,地址也为空时取手机号(中间四个为*)
+		if( !$userInfo['realname'] ){
+			$userInfo['realname'] = isset($userInfo['address']['name']) && $userInfo['address']['name'] ? $userInfo['address']['name'] : substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11) ;
+		}
 		return $userInfo;
     }
     /**
