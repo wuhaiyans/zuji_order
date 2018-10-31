@@ -244,17 +244,19 @@ class ApiRequest {
 	 * @return array	关联数组
 	 */
 	public function toArray() {
-		return array(
-			'appid' => $this->appid,
-			'method' => $this->method,
-			'version' => $this->version,
-			'params' => $this->params,
-			'userinfo' => $this->userInfo,
-			
-			'sign_type'=>'',
-			'sign'=>'',
-			'timestamp'=>date("Y-m-d H:i:s"),
-		);
+	    //添加验签
+        $data = [
+            'appid' => $this->appid,
+            'method' => $this->method,
+            'version' => $this->version,
+            'params' => $this->params,
+            'userinfo' => $this->userInfo,
+            'sign_type'=>'MD5',
+            'timestamp'=>date("Y-m-d H:i:s"),
+        ];
+        $sign = \app\Lib\Certificate\ApiUtil::generateSign($data);
+        $data['sign'] = $sign;
+		return $data;
 	}
 
 	public function toString() {
