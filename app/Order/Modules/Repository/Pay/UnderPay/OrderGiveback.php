@@ -1,5 +1,5 @@
 <?php
-namespace App\Order\Modules\Repository\Instalment;
+namespace App\Order\Modules\Repository\Pay\UnderPay;
 
 use App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter;
 use App\Order\Modules\Repository\Instalment\Discounter\Discounter;
