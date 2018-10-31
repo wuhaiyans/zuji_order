@@ -162,6 +162,22 @@ class OrderPayComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+
+        //判断是否需要支付 如果需要支付则更新订单状态
+        if(!$this->isPay){
+            $data['order_status']=OrderStatus::OrderPayed;
+            $data['pay_time']= time();
+            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
+            if(!$b){
+                LogApi::error(config('app.env')."[下单]更新订单状态失败",$data);
+                $this->getOrderCreater()->setError("更新订单状态失败");
+                return false;
+            }
+            //不需要支付则不生成支付单，退出
+            return true;
+        }
+
+
         $orderInsurance =$this->getOrderCreater()->getSkuComponnet()->getOrderInsurance();
         $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
         if($zuqiType ==1){
@@ -236,15 +252,6 @@ class OrderPayComponnet implements OrderCreater
         }catch (Exception $e){
             $this->getOrderCreater()->setError($e->getMessage());
             return false;
-        }
-
-        //判断是否需要支付 如果需要支付则更新订单状态
-        if(!$this->isPay){
-            $data['order_status']=OrderStatus::OrderPayed;
-            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
-            if(!$b){
-                return false;
-            }
         }
 
         return true;

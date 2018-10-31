@@ -216,6 +216,26 @@ class User extends \App\Lib\BaseApi{
         $info =json_decode($info,true);
         return $info;
     }
+    /**
+     * 获取收件信息
+     * Author: qinliping
+     * @param $spu_id
+     */
+    public static function getReceiveInfo($spu_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.return.address';//获取收件地址信息
+        $data['params'] = [
+            'spu_id' =>$spu_id
+        ];
+        $header = ['Content-Type: application/json'];
+        $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
+        LogApi::info("[getReceiveInfo]获取收件信息".$data['method'],$list);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
+        LogApi::info("[getReceiveInfo]获取收件信息返回结果".$info);
+        $info = str_replace("\r\n","",$info);
+        $info =json_decode($info,true);
+        return $info;
+    }
 }
 
 

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Order\Modules\Repository\ShortMessage;
+use App\Lib\Common\LogApi;
+
 
 /**
  * 花呗分期退款
@@ -46,7 +48,13 @@ class ReturnTokio{
 		if( !$code ){
 			return false;
 		}
-
+        LogApi::debug("[returnTokio]",[
+            'realName' =>$data['realName'],
+            'orderNo'  =>$data['orderNo'],
+            'goodsName'=>$data['goodsName'],
+            'zuJin'     =>$data['zuJin'],
+            'serviceTel'=>config('tripartite.Customer_Service_Phone')
+        ]);
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($data['mobile'], $code, [
             'realName' =>$data['realName'],

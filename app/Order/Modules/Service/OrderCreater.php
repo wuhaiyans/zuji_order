@@ -1,5 +1,8 @@
 <?php
 namespace App\Order\Modules\Service;
+use App\Activity\Modules\Inc\DestineStatus;
+use App\Activity\Modules\Repository\Activity\ExperienceDestine;
+use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\ApiStatus;
 use App\Lib\Certification;
 use App\Lib\Common\JobQueueApi;
@@ -79,7 +82,6 @@ class OrderCreater
 
         try{
             DB::beginTransaction();
-            $order_no = OrderOperate::createOrderNo(1);
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
@@ -240,6 +242,16 @@ class OrderCreater
             // 创建订单后 发送支付短信。;
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
+
+            //发送订单风控信息保存队列
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
+                'method' => 'api.inner.orderRisk',
+                'order_no'=>$data['order_no'],
+                'user_id'=>$data['user_id'],
+                'time' => time(),
+            ],time()+60,"");
+
+
 //            发送取消订单队列（小程序取消订单队列）
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
                 'method' => 'api.inner.miniCancelOrder',
@@ -327,15 +339,16 @@ class OrderCreater
      *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
      *		'pay_type'	=> '',	        //【必选】int 支付方式
      *		'address_id'	=> '',	    //【必选】int 用户收货地址
-     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *      'destine_no'=>'',  //【必选】 string 预定编号
+     *		'sku'	=> [	        //【必选】array	SKU信息
      *			[
+     *
      *				'sku_id' => '',		//【必选】 int SKU ID
      *				'sku_num' => '',	//【必选】 int SKU 数量
      *              'begin_time'=>'',   //【短租必须】string 租用开始时间
      *              'end_time'=>'',     //【短租必须】string 租用结束时间
      *			]
      *		]',
-     *		//'coupon'	=> [1,1],	//【可选】array 优惠券
      *      $userinfo [
      *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
      *          'user_id'=>1,   //【必须】int用户ID
@@ -348,13 +361,29 @@ class OrderCreater
     public function SchoolCreate($data){
 
         $orderNo = OrderOperate::createOrderNo(1);
-        $orderType =OrderStatus::orderStoreService;
-        //判断是否预约使用过此商品--
+        $orderType =OrderStatus::orderActivityService;
 
-        //判断是否预约使用过此商品--
+        //判断用户是否 已经参与活动
+        $destine = ExperienceDestine::getByNo($data['destine_no']);
+        if($destine) {
+            $destineData = $destine->getData();
+            //判断用户信息 与预定信息
+            if($destineData['user_id']!=$data['user_id']){
+                set_msg("预订信息与用户不匹配");
+                return false;
+            }
+            if ($destineData['destine_status'] != DestineStatus::DestinePayed) {
+                set_msg("该活动不能领取");
+                return false;
+            }
+        }else{
+            set_msg("活动未预约");
+            return false;
+        }
+
         try{
             DB::beginTransaction();
-            $order_no = OrderOperate::createOrderNo(1);
+
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
@@ -363,7 +392,7 @@ class OrderCreater
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type'],$orderType);
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
@@ -396,6 +425,16 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
+
+            $isStudent = $schemaData['risk']['is_chsi']?1:0;  //判断是否是学生
+            //更新 预约单状态
+            $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time']),$isStudent);
+            if(!$b){
+                DB::rollBack();
+                set_msg("更新预约单信息失败");
+                return false;
+            }
+
             //调用各个组件 创建方法
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
@@ -408,30 +447,21 @@ class OrderCreater
             DB::commit();
             //组合数据
             $result = [
-                'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
-                'credit'			=> ''.$schemaData['user']['credit'],
-                'credit_status'		=> $b,
-                //支付方式
-                'pay_type'=>$data['pay_type'],
-                // 是否需要 签收代扣协议
-                // 是否需要 信用认证
-                'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-                '_order_info' => $schemaData,
-                'pay_info'=>$schemaData['pay_info'],
                 'order_no'=>$orderNo,
-
+                'app_id'=>$data['appid']
             ];
             // 创建订单后 发送支付短信。;
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-            $orderNoticeObj->notify();
-            //发送取消订单队列
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
-                'method' => 'api.inner.cancelOrder',
+//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+//            $orderNoticeObj->notify();
+
+            //发送订单风控信息保存队列
+            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
+                'method' => 'api.inner.orderRisk',
                 'order_no'=>$orderNo,
                 'user_id'=>$data['user_id'],
                 'time' => time(),
-            ],time()+config('web.order_cancel_hours'),"");
+            ],time()+60,"");
+
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 
@@ -574,9 +604,11 @@ class OrderCreater
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
                 'pay_type'=>$schemaData['sku'][0]['pay_type'],
                 'begin_time'=>isset($data['sku'][0]['begin_time'])?$data['sku'][0]['begin_time']:"",
+                'end_time'=>isset($data['sku'][0]['end_time'])?$data['sku'][0]['end_time']:"",
                 'zuqi_type_name'=>$schemaData['sku'][0]['zuqi_type_name'],
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
+                'sku_num'=>$schemaData['sku'][0]['sku_num'],
 
             ];
             return $result;
