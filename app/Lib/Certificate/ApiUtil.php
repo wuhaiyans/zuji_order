@@ -1,5 +1,5 @@
 <?php
-namespace app\Lib\Certificate;
+namespace App\Lib\Certificate;
 
 /**
  * 数字签名工具

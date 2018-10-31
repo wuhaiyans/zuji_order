@@ -254,7 +254,7 @@ class ApiRequest {
             'sign_type'=>'MD5',
             'timestamp'=>date("Y-m-d H:i:s"),
         ];
-        $sign = \app\Lib\Certificate\ApiUtil::generateSign($data);
+        $sign = \App\Lib\Certificate\ApiUtil::generateSign($data);
         $data['sign'] = $sign;
 		return $data;
 	}
