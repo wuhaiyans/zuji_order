@@ -251,7 +251,7 @@ class ApiRequest {
 			'params' => $this->params,
 			'userinfo' => $this->userInfo,
 			
-			'sign_type'=>'MD5',
+			'sign_type'=>'',
 			'sign'=>'',
 			'timestamp'=>date("Y-m-d H:i:s"),
 		);
