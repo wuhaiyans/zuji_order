@@ -381,6 +381,11 @@ class OrderCreater
             return false;
         }
 
+        //租用时间 为领取的第二天时间开始算
+        $data['sku'][0]['begin_time'] = date("Y-m-d",strtotime("+1 day"));
+        //结束时间为 租用时间开始+租期
+        $data['sku'][0]['end_time'] = date("Y-m-d",strtotime("+".$destineData['zuqi']." day"));
+
         try{
             DB::beginTransaction();
 
