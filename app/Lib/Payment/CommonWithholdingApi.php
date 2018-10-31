@@ -27,12 +27,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function getSignUrl( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.url', '1.0', $params);
 	}
 
@@ -58,12 +52,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function queryAgreement( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.withhold.agreement.query', '1.0', $params);
 	}
 	
@@ -89,12 +77,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function deduct( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.applay', '1.0', $params);
     }
 
@@ -120,12 +102,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function deductQuery( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.deduct.query', '1.0', $params);
     }
 
@@ -150,12 +126,6 @@ class CommonWithholdingApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function unSign( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'), 'pay.withhold.agreement.unsign', '1.0', $params);
     }
 }

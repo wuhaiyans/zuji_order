@@ -33,12 +33,6 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function pageUrl( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		$info = self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.url', '1.0', $params);
 		if( !isset($info['url']) )
 		{
@@ -64,12 +58,6 @@ class CommonPaymentApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function query( array $params ){
-        $params['sign_type'] = 'RSA';
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.payment.query', '1.0', $params);
 	}
 
