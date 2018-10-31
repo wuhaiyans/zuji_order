@@ -448,6 +448,7 @@ class OrderCreater
             //组合数据
             $result = [
                 'order_no'=>$orderNo,
+                'app_id'=>$data['appid']
             ];
             // 创建订单后 发送支付短信。;
 //            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
