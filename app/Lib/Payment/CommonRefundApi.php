@@ -26,12 +26,6 @@ class CommonRefundApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function apply( array $params ){
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.refund.apply', '1.0', $params);
     }
 	
@@ -53,12 +47,6 @@ class CommonRefundApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
      */
     public static function query( array $params ){
-        //数据排序
-        ksort($params);
-        //生成秘钥
-        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
-        $params['sign'] = $sign;
-        $params['sign_type'] = 'rsa';
 		return self::request(\config('paysystem.PAY_APPID'), config('paysystem.PAY_API'),'pay.refund.query', '1.0', $params);
     }
 }

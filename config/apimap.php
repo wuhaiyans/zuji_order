@@ -43,6 +43,9 @@ return [
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
 
+    
+    //gaobo
+    'api.payment.url' => 'PayCenterController@pay',
 
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
@@ -286,6 +289,7 @@ return [
     'api.buyout.cancel'       => 'BuyoutController@cancel',
     //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    
     //支付宝小程序h5买断支付
     'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
 

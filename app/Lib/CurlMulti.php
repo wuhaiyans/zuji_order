@@ -156,7 +156,7 @@ class CurlMulti {
             }
             return self::$outputs;
         }
-        self::$error = '400 Bad request';
+        self::$error = 'Bad request';
         return false;
     }
     
