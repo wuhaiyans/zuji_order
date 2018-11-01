@@ -81,15 +81,6 @@ class PayCenterController extends Controller
             }
         }
         
-        //组装url参数
-        $currenturl_params = [
-            'name'=>'test',
-            'front_url' => $to_business_params['callback_url'],
-            'business_no'=>$to_business_params['business_no'],
-            'ip'=>$ip,
-            'extended_params' => $extended_params,// 扩展参数
-        ];
-        
         //业务工厂获取业务
         $business = \App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayFactory::getBusinessPay($to_business_params['business_type'], $to_business_params['business_no']);
         //获取业务详情
@@ -129,6 +120,15 @@ class PayCenterController extends Controller
                 //更新支付单
                 $pay->update();
             }
+            
+            //组装url参数
+            $currenturl_params = [
+                'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].$pay->get.'用户'.$pay->getUserId(),
+                'front_url' => $to_business_params['callback_url'],
+                'business_no'=>$to_business_params['business_no'],
+                'ip'=>$ip,
+                'extended_params' => $extended_params,// 扩展参数
+            ];
             
             $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
             //插入日志FIXME
@@ -179,6 +179,14 @@ class PayCenterController extends Controller
             if($create_center->getGoingOnPay()){
                 $create_center->create();
                 $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $to_business_params['business_no']);
+                //组装url参数
+                $currenturl_params = [
+                    'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].$pay->get.'用户'.$pay->getUserId(),
+                    'front_url' => $to_business_params['callback_url'],
+                    'business_no'=>$to_business_params['business_no'],
+                    'ip'=>$ip,
+                    'extended_params' => $extended_params,// 扩展参数
+                ];
                 $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
                 //插入日志FIXME
                 //$business->addLog();
