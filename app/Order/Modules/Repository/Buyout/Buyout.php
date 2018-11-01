@@ -15,9 +15,9 @@ class Buyout implements BusinessPayInterface{
     private $fundauthInfo;
     private $did;
     
-    public function __construct( int $bid, string $did ){
+    public function __construct(string $business_no){
         //find
-        $this->did = $did;
+        $this->did = $business_no;
         $this->pamentInfo = new PaymentInfo();
         $this->pamentInfo->setNeedPayment(true);
         $this->withholdInfo = new WithholdInfo();
@@ -30,9 +30,9 @@ class Buyout implements BusinessPayInterface{
      * 获取业务信息
      * @param array $params
      */
-    public function getBusinessInfo(string $did) : array
+    public function getBusinessInfo(string $business_no) : array
     {
-        $buyout = OrderBuyout::getInfo($did);
+        $buyout = OrderBuyout::getInfo($business_no);
         
         if(!$buyout){
             return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
@@ -45,14 +45,8 @@ class Buyout implements BusinessPayInterface{
         }
         $this->pamentInfo->setPaymentAmount($buyout['amount']);
         $this->pamentInfo->setPaymentFenqi(0);
-        $this->pamentInfo->setPaymentNo(\creage_payment_no()); 
         
         return $buyout;
-    }
-    
-    public function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ) : array 
-    {
-        
     }
     
     /**

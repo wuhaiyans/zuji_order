@@ -25,12 +25,12 @@ class BusinessPayFactory {
       * @param int $did
       * @return BusinessPayInterface
       */
-    public static function getBusinessPay( int $bid, string $did ) : BusinessPayInterface{
+    public static function getBusinessPay( int $business_type, string $business_no ) : BusinessPayInterface{
         $business = config('businesspay.business');
-        if(!array_key_exists($bid,$business)){
+        if(!array_key_exists($business_type,$business)){
             LogApi::error('没有此项业务');
             return apiResponse([],ApiStatus::CODE_20002,"没有此项业务");//应增加新的apistatus_code
         }
-        return new $business[$bid]( $bid,$did );
+        return new $business[$business_type]($business_no);
     }
 }

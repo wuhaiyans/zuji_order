@@ -18,11 +18,6 @@ interface BusinessPayInterface{
     public function getBusinessInfo(string $did) : array;
     
     /**
-     * 获取支付单
-     */
-    public function getPayByBusiness( int $business_type, string $business_no, int $lock=0 ) : array;
-    
-    /**
      * 直付
      */
     public function getPaymentInfo() : PaymentInfo;
