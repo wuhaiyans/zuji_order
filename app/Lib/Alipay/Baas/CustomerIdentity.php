@@ -7,7 +7,7 @@
  */
 
 
-namespace App\Lib\Alipay\Bass;
+namespace App\Lib\Alipay\Baas;
 
 /**
  * CustomerIdentity 客户身份标识 类
@@ -17,9 +17,9 @@ namespace App\Lib\Alipay\Bass;
 class CustomerIdentity {
 	
 	private $userType = 'PERSON';
+	private $certType = 'IDENTITY_CARD';
 	
 	private $certName = '';
-	private $certType = '';
 	private $certNo = '';
 	private $mobileNo = '';
 	private $properties = '';
@@ -49,16 +49,6 @@ class CustomerIdentity {
 		return $this->certName;
 	}
 
-
-	/**
-	 * 设置 证件类型
-	 * @param string $certType
-	 * @return \App\Lib\Alipay\Bass\CustomerIdentity
-	 */
-	public function setCertType(string $certType): CustomerIdentity {
-		$this->certType = $certType;
-		return $this;
-	}
 	/**
 	 * 读取 证件类型
 	 * @return string

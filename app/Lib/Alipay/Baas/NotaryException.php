@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Alipay\Bass;
+namespace App\Lib\Alipay\Baas;
 
 /**
  * 蚂蚁金服 金融科技 可信存证 异常封装
