@@ -143,9 +143,7 @@ class OrderCleaning
                 $orderCleanList[$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
                 $orderCleanList[$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
-                $channelData = OrderInfo::getAppidInfo($values['appid']);;
-
-                $orderCleanList[$keys]['app_id_name'] = $channelData;
+                $orderCleanList[$keys]['app_id_name'] = OrderInfo::getAppidInfo($values['appid']);
                 //退款时间
                 if($orderCleanList[$keys]['refund_time']>0){
                     $orderCleanList[$keys]['refund_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['refund_time']);
