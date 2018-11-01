@@ -105,6 +105,7 @@ class DestineStatus{
         return [
             self::DestineCreated => '未支付',
             self::DestinePayed => '已支付',
+            self::DestineReceive => '已领取',
             self::DestineRefunded => '已退款',
             self::DestineRefund => '退款中',
         ];
