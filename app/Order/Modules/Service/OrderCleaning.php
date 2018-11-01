@@ -8,6 +8,7 @@ namespace App\Order\Modules\Service;
 use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
+use App\Lib\Order\OrderInfo;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
 use App\Lib\Payment\LebaifenApi;
@@ -142,7 +143,7 @@ class OrderCleaning
                 $orderCleanList[$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
                 $orderCleanList[$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
                 //入账来源
-               // $channelData = Channel::getChannel($values['app_id']);
+//                $channelData = Channel::getChannel($values['app_id']);
 
                 $orderCleanList[$keys]['app_id_name'] = OrderInfo::getAppidInfo($values['app_id']);
                 //退款时间
