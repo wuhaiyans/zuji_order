@@ -187,9 +187,8 @@ class AdvanceActivityController extends Controller
             $activityInfo['lingqu_btn'] = $lingqu_btn;
             //获取商品信息
             $spuInfo = Goods::getSpuInfo($activityInfo['spu_id']);
-            $activityInfo['spu'] = $spuInfo;
             if($spuInfo){
-                //$activityInfo['goods_images'] = $spuInfo['thumb'];
+                $activityInfo['goods_images'] = $spuInfo["spu_info"]['thumb'];
             }
             $list[] = $activityInfo;
         }
