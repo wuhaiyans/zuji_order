@@ -40,16 +40,24 @@ class NotaryApi {
 	
 	// 商户的实名信息
 	private $entity = [
-		// 用户类型；固定值：ENTERPRISE_REGISTERED_NUMBER
-		'userType'	=> 'ENTERPRISE_REGISTERED_NUMBER',
-		'certName'	=> '',
-		'certType'	=> '',
-		'certNo'	=> '',
+		// 用户类型；固定值；ENTERPRISE：企业实体
+		'userType'	=> 'ENTERPRISE',
+		// 企业名称
+		'certName'	=> '深圳回收宝科技有限公司',
+		// 证件类型；UNIFIED_SOCIAL_CREDIT_CODE：统一社会信用代码
+		'certType'	=> 'UNIFIED_SOCIAL_CREDIT_CODE',
+		// 证件号
+		'certNo'	=> '91440300311802545U',
 		'mobileNo'	=> '',
-		'legalPerson'	=> '',
-		'legalPersonId'	=> '',
-		'agent'		=> '',
-		'agentId'	=> '',
+		// 企业法人
+		'legalPerson'	=> '何帆',
+		// 企业法人身份证号
+		'legalPersonId'	=> '420102198108011012',	
+		// 经办人姓名
+		'agent'		=> '赵明亮',	
+		// 经办人身份证
+		'agentId'	=> '232301199005211535',
+		// 扩展参数
 		'properties' => '',
 	];
 	
