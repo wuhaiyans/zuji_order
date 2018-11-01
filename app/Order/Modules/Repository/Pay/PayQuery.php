@@ -42,6 +42,32 @@ class PayQuery {
 			throw new \App\Lib\NotFoundException('支付单不存在getPayByBusiness');
 	}
 	
+	//-+------------------------------------------------------------------------
+	// | 静态方法方法gaobo
+	//-+------------------------------------------------------------------------
+	/**
+	 * 根据业务 获取支付单
+	 * @param int		$business_type		业务类型
+	 * @param string	$business_no		业务编号
+	 * @param int		$lock			锁
+	 * @return \App\Order\Modules\Repository\Pay\Pay
+	 * @throws \App\Lib\NotFoundException
+	 */
+	public static function getPayByBusinessTest( int $business_type, string $business_no, int $lock=0 ){
+	    $builder = \App\Order\Models\OrderPayModel::where([
+	        'business_type'	=> $business_type,
+	        'business_no'	=> $business_no,
+	    ]);
+	    if( $lock ){
+	        $builder->lockForUpdate();
+	    }
+	    $info =  $builder->first();
+	    if( $info ){
+	        return new Pay( $info->toArray() );
+	    }
+	    return false;
+	}
+	
 	/**
 	 * 根据业务系统支付编号 获取支付单
 	 * @param string	$payment_no		支付编号
