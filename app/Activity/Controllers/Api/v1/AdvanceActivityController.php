@@ -155,12 +155,6 @@ class AdvanceActivityController extends Controller
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
         if($activityInfo){
-            $activityInfo['head_images'] = "";
-            //获取微信授权登录信息
-            $userWechat = "";//User::getUserWechat($userInfo['uid']);
-            if($userWechat){
-                $activityInfo['head_images'] = $userWechat['headimgurl'];
-            }
             $activityInfo['zuqi_day'] = $count;
             $activityInfo['zuqi'] -= $count;
             $activityInfo['type'] = 2;
