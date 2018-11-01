@@ -165,15 +165,22 @@ class AdvanceActivityController extends Controller
             $activityInfo['zuqi'] -= $count;
             $activityInfo['type'] = 2;
             $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
-            $activityInfo['destine_status'] = DestineStatus::getStatusName($activityInfo['destine_status']);
+            $activityInfo['destine_name'] = DestineStatus::getStatusName($activityInfo['destine_status']);
             //把一元活动数据追加到苹果预约数据后面
 
             $yaoqin_btn = false;
             $renzheng_btn = false;
             $lingqu_btn = false;
-            $risk = new Risk();
-            $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
-            $riskInfo['is_chsi']?1:0;
+
+            if($activityInfo['destine_status'] == DestineStatus::DestinePayed){
+                $yaoqin_btn = true;
+
+                $risk = new Risk();
+                $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
+                if($riskInfo['is_chsi']!=1){
+                    $renzheng_btn= true;
+                }
+            }
 
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
             $activityInfo['renzheng_btn'] = $renzheng_btn;
