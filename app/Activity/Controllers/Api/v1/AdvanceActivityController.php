@@ -177,6 +177,7 @@ class AdvanceActivityController extends Controller
                 else{
                     $renzheng_btn= true;
                 }
+
             }
 
 
