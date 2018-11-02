@@ -13,7 +13,7 @@ interface BusinessPayInterface{
      * 获取业务信息
      * @param array $params
      */
-    public function getBusinessInfo(string $business_no) : array;
+    public function getBusinessInfo(string $business_no);
     
     /**
      * 直付
