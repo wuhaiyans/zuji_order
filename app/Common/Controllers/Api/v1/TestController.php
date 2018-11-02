@@ -43,6 +43,15 @@ class TestController extends Controller
 	
     public function test()
     {
+		$customer = new \App\Lib\Alipay\Baas\CustomerIdentity();
+		$customer->setCertNo('123456789012345678');
+		$customer->setCertName('张三');
+		$customer->setMobileNo('15300001111');
+		$customer->setProperties('');
+		
+		$token = \App\Lib\Alipay\Baas\NotaryApi::notaryToken( $customer );
+		
+		var_dump( $token );exit;
 		
 		$info = [
 			'refund_no' => '',
