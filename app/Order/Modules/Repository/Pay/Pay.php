@@ -768,7 +768,7 @@ class Pay extends \App\Lib\Configurable
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];
-		
+
 		if($channel == Channel::Lebaifen) {
             $paymentAmountBillList = json_decode($this->getPaymentAmountBillList(),true);
 

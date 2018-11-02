@@ -16,6 +16,21 @@ interface BusinessPayInterface{
     public function getBusinessInfo(string $business_no);
     
     /**
+     * 获取用户ID
+     */
+    public function getUserId();
+    
+    /**
+     * 
+     */
+    public function getPayName();
+    
+    /**
+     * 
+     */
+    public function getBusinessStatus();
+    
+    /**
      * 直付
      */
     public function getPaymentInfo() : PaymentInfo;
@@ -33,6 +48,6 @@ interface BusinessPayInterface{
     /**
      * 写日志
      */
-    public function addLog(array $business_info) : array;
+    public function addLog(array $userInfo);
     
 }

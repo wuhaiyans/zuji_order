@@ -3,32 +3,17 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Excel;
-use App\Order\Modules\Inc\OrderBuyoutStatus;
-use App\Order\Modules\Inc\OrderFreezeStatus;
-use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\PayInc;
-use App\Order\Modules\OrderExcel\CronCollection;
-use App\Order\Modules\OrderExcel\CronOperator;
-use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Modules\Repository\Order\Order;
+use App\Order\Modules\Inc\{OrderBuyoutStatus,OrderFreezeStatus,OrderStatus,OrderGoodStatus,PayInc};
+use App\Order\Modules\OrderExcel\{CronCollection,CronOperator};
+use App\Order\Modules\Repository\Order\{Goods,Order};
 use App\Order\Modules\Repository\OrderUserAddressRepository;
-use App\Order\Modules\Repository\ShortMessage\BuyoutConfirm;
-use App\Order\Modules\Repository\ShortMessage\SceneConfig;
+use App\Order\Modules\Repository\ShortMessage\{BuyoutConfirm,SceneConfig};
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderBuyout;
-use App\Order\Modules\Repository\OrderRepository;
-use App\Order\Modules\Repository\OrderGoodsRepository;
-use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
-use App\Order\Modules\Repository\OrderUserCertifiedRepository;
+use App\Order\Modules\Repository\{OrderRepository,OrderGoodsRepository,OrderGoodsInstalmentRepository,OrderUserCertifiedRepository};
 use Illuminate\Support\Facades\DB;
-use App\Order\Modules\Repository\OrderLogRepository;
-use App\Order\Modules\Repository\GoodsLogRepository;
-use App\Order\Modules\Repository\Pay;
-use App\Order\Modules\Repository\Pay\PayStatus;
-use App\Order\Modules\Repository\Pay\PaymentStatus;
-use App\Order\Modules\Repository\Pay\WithholdStatus;
-use App\Order\Modules\Repository\Pay\FundauthStatus;
+use App\Order\Modules\Repository\{Pay,OrderLogRepository,GoodsLogRepository};
+use App\Order\Modules\Repository\Pay\{PayStatus,PaymentStatus,WithholdStatus,FundauthStatus,PayQuery};
 use App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayFactory;
 
 /**
@@ -82,23 +67,13 @@ class PayCenterController extends Controller
                 }
             }
         }
-        
         //业务工厂获取业务
         $business = \App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayFactory::getBusinessPay($to_business_params['business_type'], $to_business_params['business_no']);
         //获取业务详情
-        $business_info = $business->getBusinessInfo($to_business_params['business_no']);
+        $businessStatus = $business->getBusinessStatus();
         //校验业务状态是否有效
-        if(!$business_info){
-            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
-        }
-        if($business_info['status'] == OrderBuyoutStatus::OrderPaid){
-            return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
-        }
-        if($business_info['status'] == OrderBuyoutStatus::OrderCancel){
-            return apiResponse([],ApiStatus::CODE_0,"该订单已取消");
-        }
-        if($business_info['status'] != OrderBuyoutStatus::OrderInitialize){
-            return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
+        if(!$businessStatus){
+            return apiResponse([],ApiStatus::CODE_0,"该订单无需支付");
         }
         
         //获取支付单
@@ -125,22 +100,22 @@ class PayCenterController extends Controller
             
             //组装url参数
             $currenturl_params = [
-                'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].'用户'.$pay->getUserId(),
-                'front_url' => $to_business_params['callback_url'],
-                'business_no'=>$to_business_params['business_no'],
-                'ip'=>$ip,
+                'name'            => $business->getPayName(),
+                'front_url'       => $to_business_params['callback_url'],
+                'business_no'     => $to_business_params['business_no'],
+                'ip'              => $ip,
                 'extended_params' => $extended_params,// 扩展参数
             ];
             
             $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
             //插入日志FIXME
-            $business->addLog($business_info);
+            $business->addLog($userInfo);
             return apiResponse($paymentUrl,ApiStatus::CODE_0);
         }else{
             //创建支付
             $create_center = new \App\Order\Modules\Repository\Pay\PayCreateCenter();
             //设置基础参数
-            $create_center->setUserId($business_info['user_id']);
+            $create_center->setUserId($business->getUserId());
             $create_center->setBusinessNo($to_business_params['business_no']);
             $create_center->setBusinessType($to_business_params['business_type']);
             
@@ -183,15 +158,15 @@ class PayCenterController extends Controller
                 $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $to_business_params['business_no']);
                 //组装url参数
                 $currenturl_params = [
-                    'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].'用户'.$pay->getUserId(),
-                    'front_url' => $to_business_params['callback_url'],
-                    'business_no'=>$to_business_params['business_no'],
-                    'ip'=>$ip,
+                    'name'            => $business->getPayName(),
+                    'front_url'       => $to_business_params['callback_url'],
+                    'business_no'     => $to_business_params['business_no'],
+                    'ip'              => $ip,
                     'extended_params' => $extended_params,// 扩展参数
                 ];
                 $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
                 //插入日志FIXME
-                $business->addLog($business_info);
+                $business->addLog($userInfo);
                 return apiResponse($paymentUrl,ApiStatus::CODE_0);
             }
             //空请求
