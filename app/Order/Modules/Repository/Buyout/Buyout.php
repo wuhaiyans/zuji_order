@@ -35,7 +35,7 @@ class Buyout implements BusinessPayInterface{
         $buyout = OrderBuyout::getInfo($business_no);
         if($buyout){
             $this->pamentInfo->setPaymentAmount($buyout['amount']);
-            $this->pamentInfo->setPaymentFenqi($buyout['fenqi']);
+            $this->pamentInfo->setPaymentFenqi(0);
         }
         return $buyout;
     }
