@@ -11,6 +11,7 @@ namespace App\Lib\Alipay\Baas;
 
 /**
  * CustomerIdentity 客户身份标识 类
+ * <p><b>注意：</b>客户身份信息，必须实名，否则无法使用可信存证</p>
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -51,14 +52,14 @@ class CustomerIdentity {
 
 	/**
 	 * 读取 证件类型
-	 * @return string
+	 * @return string 身份证号
 	 */
 	public function getCertType(): string {
 		return $this->certType;
 	}
 
 	/**
-	 * 设置 证件号
+	 * 设置 身份证号
 	 * @param string $certNo
 	 * @return \App\Lib\Alipay\Bass\CustomerIdentity
 	 */
@@ -67,7 +68,7 @@ class CustomerIdentity {
 		return $this;
 	}
 	/**
-	 * 读取 证件号
+	 * 读取 身份证号
 	 * @return string
 	 */
 	public function getCertNo(): string {
@@ -108,5 +109,20 @@ class CustomerIdentity {
 		return $this->properties;
 	}
 
+
+	public function toArray(): array{
+		$arr = [];
+		foreach(get_object_vars($this) as $p => $v){
+			if( is_null($v) ){
+				continue;
+			}
+			if(is_object($v) && method_exists($v, 'toArray')){
+				$arr[$p] = $v->toArray();
+			}else{
+				$arr[$p] = $v;
+			}
+		}
+		return $arr;
+	}
 
 }

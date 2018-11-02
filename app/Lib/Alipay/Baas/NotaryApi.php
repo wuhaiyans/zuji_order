@@ -30,8 +30,8 @@ class NotaryApi {
 	 * 商户私钥
 	 * @var string
 	 */
-	private static $priv_key = 'MIID/DCCAuSgAwIBAgIUefihOkZRAUxnHR9ut7cporSIg8IwDQYJKoZIhvcNAQEFBQAwgYExCzAJBgNVBAYTAkNOMTkwNwYDVQQKDDDljJfkuqzlpKnlqIHor5rkv6HnlLXlrZDllYbliqHmnI3liqHmnInpmZDlhazlj7gxHjAcBgNVBAsMFeWPr+S/oei6q+S7vee9kee7nFJTQTEXMBUGA1UEAwwO6JqC6JqB6YeR5pyNQ0EwHhcNMTgxMTAxMTAwMjA1WhcNMjExMDMxMTAwMjA1WjBbMR8wHQYDVQQKFhZBbGlwYXkuY29tIENvcnBvcmF0aW9uMRIwEAYDVQQLDAlDQSBDZW50ZXIxETAPBgNVBAMMCERDT0RNVkNOMREwDwYDVQQFDAhEQ09ETVZDTjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMw3fPicbisllStZ+rOeF1GPFUpmA+d8lcLXBNGOUENW0VHHyoH72Kvr78RPMsjpAKK45lIE6g7seV+VgferR/FDZWR6xy0OTZYYYLGktiMfKcvdHiI9lqNvQrYQh3UUFZl2bT/7utVqIMkG+v7VtDCoGejUK6tciDX/gwqgy20Qk7v1ckJkPfeoXDhhwIsfbyFOHO8LAwY5mfDjDPjtBX8nSxulBRfLImTngu3DytUGuHt2YnSZb1LSMv3KOyyvtGDjiUMGSHrPvcGFlRBD7Mzp4zwrpySmD7W9K+kOwtabpJp7DsxXmy8UpB2BWI2ISfvmYQypdIIQiBqMbrCHDYsCAwEAAaOBkDCBjTAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIF4DAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwEQYJYIZIAYb4QgEBBAQDAgbAMB8GA1UdIwQYMBaAFCHP1ToZY2a5xRK4kKL101uz69taMB0GA1UdDgQWBBTDk6nqqAEgjMyoQFb5VwaYsrPnnTANBgkqhkiG9w0BAQUFAAOCAQEAHOzM5t6yer63gWEapNvknJLrlljg+c7Iuc3s91TFy8QCg1fwoEQrZhudWXkB7P2WUuVX14itxCIof+fWNJIkhCqWvNWOLdVOLLllM6Ci0CBHx4IzBXcuu0xREHJqttHp3z0WOQbK+bU5pHDUDTKMtXQPNv1DbAvg5l8lJH49Dq2GKXCfe0oW9PHZdpBASTQjNdiHyH/poTHcf58iInHh9moEzsd3ZjkNKGCFiXtemwoeGjD5hyTWn2/dt6zK2VMIFwUIOZ3xaBk+aDnu242CNvxhBsCOCBonMeGJxcfxZbkAvM6bgIc5PPh5DqwgGi5aaPTtK+5aMK8yJJdM7g4FZg==';
-//	private static $priv_key = 'MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAykkFyu1iYcCAggAMBQGCCqGSIb3DQMHBAhaTTVF33iBXgSCBMhj4S919rvjna6rL4sujCjQVDqUJeGKrIP8vXdgUJGCdcS2bBYdhU8SjC/jZSGJ9zJkTPUJQMlcZ+xOn7SZdKB+HctUa32RevJ4GNhiV6OBfwcImob416nWYFecMhF4A2ut8y6JSpFkCfDLwvKIR+t1JajpaZT9lZMA81tlL3/1swZsczQCDIuFsgbdPfBmNz0vlC1dIqUXJSjFg0wC9sbPWZj8ovdH1dNXCS/r/jSPzj39ebvq0HKmp9pqncDEKUeuJcMbXRNLq1Xbje0NA0d1grMNrcMV/XErONaeXbxhMfYRioYhoUKvfdRvueikjYfedXWwc5r7rtHdyILC68yy/thYgmKCIyJ0Eg9alXbV1atVcutS6C78VbIO85t2zp4x6eGJRxJTWCPSBEWzlMNeFVq3ly8MT62fR1ssYb6WJRdt+0pp0M3qiLqbS24ofd10OSxbnp3y4rZPQgo1OYai7BXFDVzCB+q3JPEaW4xjkNh+qcrIDbtJmRl5fB0YJStjvu9Rc64OeCoe07LJbcjqsUntyuktlGeIiy2TjrrxmyGBScnN54ez9CyIcMXXG2PYZb4vZbLGUUHOTYb/nMe/Za4zaFNnLMW9LJW1ATg3CBproIpIycXTMJRfh/kMCL7jvLjaeDUgKnHu+Dcnxxvh6mbmug7OVoK1VmEVuNLA34XAtCIhKyHodVhSVKnLDlOJDH1wdAC4WqBaC3iH/wCoNAhP0HpgcLbUIQDiQqWCmyvMdo3z5BqE7sLKPwuFw6hY16i3fru5jNJBfS9WoGU4JVYQP6CGB6tlujjNLZ7rKFiGpqpBukH2gKA1wZFJ5dLd3kNTPpi4MYGe2w0HWZRgcKcXO+6N4MYI9mpYzxgEHBn7hcDJBGTUlC1u2a9dZML90JIYPV2WU/3+JD/j+JQldCsWh+pvju5A1uNRbEZPxESvDtWMFoMYcCuQ9/x+GKRUoN/b/PHzhUmIXpZamdmwO2nsOcn3hJIW7IfUt/C/yQHxeC1HgkG7i+L4pbtTw2Knrxapb8XzaB2FIrKFme5qytgv4AkhpXTiJV6gSKPxkJgQpLRnt0TnjiJAWGA4QTLeBAS9FyD8FLATWMLSOA/VKmhuu2x8Sj9MzxgOW8H0rC3R3pUfZwCmOP1TerdtrTH7ov5mC2fMql0vNe7KsDtbr04tCTolkfm899udgMyDoYcVoNq5oqBBwfglzJLjf5szw5NbpIx3cRTu+bedf25Vm7PIBFM/9b1biiHBaK33JohPSe1NwYAMFqG8FKdnuRg6Or9P7+7MAQsjXzPMLlNSORx3l+/2NUPQwEq46lltzoPrcJD2KtlhD84PbwSicxkYOf6QQKgA7gbjDc/azNjyJdfqP003a+KTT1CPzF/iknVFwGHQ2aEHHhXL89y1OVa834OgPiZkiTt5lwhDqayjFH40dr4K56Sd5Td0C1V8Jro19A6/7DmnNkjXe72y/WDiCj34PayA1GC/cXmVyUkkCVUUhVL0iSR9qa9TSefr/2GHP3aeNilowUvXKha+ysZDhf5OBkwondl66gFWVhxn06BxU2JfU1CxweZRXLDqb5FjQ7QTWsFD5pA6Rj8R4o/5itzR21zSUj4FxbukETG4VBP69cz7xdg=';
+//	private static $priv_key = 'MIID/DCCAuSgAwIBAgIUefihOkZRAUxnHR9ut7cporSIg8IwDQYJKoZIhvcNAQEFBQAwgYExCzAJBgNVBAYTAkNOMTkwNwYDVQQKDDDljJfkuqzlpKnlqIHor5rkv6HnlLXlrZDllYbliqHmnI3liqHmnInpmZDlhazlj7gxHjAcBgNVBAsMFeWPr+S/oei6q+S7vee9kee7nFJTQTEXMBUGA1UEAwwO6JqC6JqB6YeR5pyNQ0EwHhcNMTgxMTAxMTAwMjA1WhcNMjExMDMxMTAwMjA1WjBbMR8wHQYDVQQKFhZBbGlwYXkuY29tIENvcnBvcmF0aW9uMRIwEAYDVQQLDAlDQSBDZW50ZXIxETAPBgNVBAMMCERDT0RNVkNOMREwDwYDVQQFDAhEQ09ETVZDTjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMw3fPicbisllStZ+rOeF1GPFUpmA+d8lcLXBNGOUENW0VHHyoH72Kvr78RPMsjpAKK45lIE6g7seV+VgferR/FDZWR6xy0OTZYYYLGktiMfKcvdHiI9lqNvQrYQh3UUFZl2bT/7utVqIMkG+v7VtDCoGejUK6tciDX/gwqgy20Qk7v1ckJkPfeoXDhhwIsfbyFOHO8LAwY5mfDjDPjtBX8nSxulBRfLImTngu3DytUGuHt2YnSZb1LSMv3KOyyvtGDjiUMGSHrPvcGFlRBD7Mzp4zwrpySmD7W9K+kOwtabpJp7DsxXmy8UpB2BWI2ISfvmYQypdIIQiBqMbrCHDYsCAwEAAaOBkDCBjTAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIF4DAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwEQYJYIZIAYb4QgEBBAQDAgbAMB8GA1UdIwQYMBaAFCHP1ToZY2a5xRK4kKL101uz69taMB0GA1UdDgQWBBTDk6nqqAEgjMyoQFb5VwaYsrPnnTANBgkqhkiG9w0BAQUFAAOCAQEAHOzM5t6yer63gWEapNvknJLrlljg+c7Iuc3s91TFy8QCg1fwoEQrZhudWXkB7P2WUuVX14itxCIof+fWNJIkhCqWvNWOLdVOLLllM6Ci0CBHx4IzBXcuu0xREHJqttHp3z0WOQbK+bU5pHDUDTKMtXQPNv1DbAvg5l8lJH49Dq2GKXCfe0oW9PHZdpBASTQjNdiHyH/poTHcf58iInHh9moEzsd3ZjkNKGCFiXtemwoeGjD5hyTWn2/dt6zK2VMIFwUIOZ3xaBk+aDnu242CNvxhBsCOCBonMeGJxcfxZbkAvM6bgIc5PPh5DqwgGi5aaPTtK+5aMK8yJJdM7g4FZg==';
+	private static $priv_key = 'MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAykkFyu1iYcCAggAMBQGCCqGSIb3DQMHBAhaTTVF33iBXgSCBMhj4S919rvjna6rL4sujCjQVDqUJeGKrIP8vXdgUJGCdcS2bBYdhU8SjC/jZSGJ9zJkTPUJQMlcZ+xOn7SZdKB+HctUa32RevJ4GNhiV6OBfwcImob416nWYFecMhF4A2ut8y6JSpFkCfDLwvKIR+t1JajpaZT9lZMA81tlL3/1swZsczQCDIuFsgbdPfBmNz0vlC1dIqUXJSjFg0wC9sbPWZj8ovdH1dNXCS/r/jSPzj39ebvq0HKmp9pqncDEKUeuJcMbXRNLq1Xbje0NA0d1grMNrcMV/XErONaeXbxhMfYRioYhoUKvfdRvueikjYfedXWwc5r7rtHdyILC68yy/thYgmKCIyJ0Eg9alXbV1atVcutS6C78VbIO85t2zp4x6eGJRxJTWCPSBEWzlMNeFVq3ly8MT62fR1ssYb6WJRdt+0pp0M3qiLqbS24ofd10OSxbnp3y4rZPQgo1OYai7BXFDVzCB+q3JPEaW4xjkNh+qcrIDbtJmRl5fB0YJStjvu9Rc64OeCoe07LJbcjqsUntyuktlGeIiy2TjrrxmyGBScnN54ez9CyIcMXXG2PYZb4vZbLGUUHOTYb/nMe/Za4zaFNnLMW9LJW1ATg3CBproIpIycXTMJRfh/kMCL7jvLjaeDUgKnHu+Dcnxxvh6mbmug7OVoK1VmEVuNLA34XAtCIhKyHodVhSVKnLDlOJDH1wdAC4WqBaC3iH/wCoNAhP0HpgcLbUIQDiQqWCmyvMdo3z5BqE7sLKPwuFw6hY16i3fru5jNJBfS9WoGU4JVYQP6CGB6tlujjNLZ7rKFiGpqpBukH2gKA1wZFJ5dLd3kNTPpi4MYGe2w0HWZRgcKcXO+6N4MYI9mpYzxgEHBn7hcDJBGTUlC1u2a9dZML90JIYPV2WU/3+JD/j+JQldCsWh+pvju5A1uNRbEZPxESvDtWMFoMYcCuQ9/x+GKRUoN/b/PHzhUmIXpZamdmwO2nsOcn3hJIW7IfUt/C/yQHxeC1HgkG7i+L4pbtTw2Knrxapb8XzaB2FIrKFme5qytgv4AkhpXTiJV6gSKPxkJgQpLRnt0TnjiJAWGA4QTLeBAS9FyD8FLATWMLSOA/VKmhuu2x8Sj9MzxgOW8H0rC3R3pUfZwCmOP1TerdtrTH7ov5mC2fMql0vNe7KsDtbr04tCTolkfm899udgMyDoYcVoNq5oqBBwfglzJLjf5szw5NbpIx3cRTu+bedf25Vm7PIBFM/9b1biiHBaK33JohPSe1NwYAMFqG8FKdnuRg6Or9P7+7MAQsjXzPMLlNSORx3l+/2NUPQwEq46lltzoPrcJD2KtlhD84PbwSicxkYOf6QQKgA7gbjDc/azNjyJdfqP003a+KTT1CPzF/iknVFwGHQ2aEHHhXL89y1OVa834OgPiZkiTt5lwhDqayjFH40dr4K56Sd5Td0C1V8Jro19A6/7DmnNkjXe72y/WDiCj34PayA1GC/cXmVyUkkCVUUhVL0iSR9qa9TSefr/2GHP3aeNilowUvXKha+ysZDhf5OBkwondl66gFWVhxn06BxU2JfU1CxweZRXLDqb5FjQ7QTWsFD5pA6Rj8R4o/5itzR21zSUj4FxbukETG4VBP69cz7xdg=';
 //	private static $priv_key = 'MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMcMZH43GUYNs1zl8F5kZOHYvPG5P6jSFYKZRbmX3C9ZHbZmrOMGhxDn2JZWu7lfvyjx4Md0ek14GpWPKELjf+m1iEninUh6kUgxMYwyJ2OYfFNZ5W3lbBpZB41AdORjAJrRr1sLbwx1G5Pcdkpu1kQWGti7VT7i7JIeNp7CS3HFAgMBAAECgYEAhBNHAzDQRlmE8Flqu1dmUS2dgc9n3D86IqRNTa7kXU6GlqdehG2qZZ9RacA3Y/OSRjro6a/yD0FocmDBWFDYaDGHkvQjG7n9lnO1nV+R+dMb2s8eCsRL378j9oc+MEeie2N2YCn54GGI4X5jV5oR3zNZLfZcm/IN5ZWS9P1Bh8ECQQDio05lrYHZH5ajSswHwHkWJEy70UwenGuK65yEGelZ8z+cM7XYD/JgPmhUled/KjDu5kIKakahXA0uyiZgQ/FNAkEA4NYM2zK5HpfNl5RBnNwnAkTq00qrWkmT61hvx+bAXfYJtdTq0VR3yyDaJ2Jq4xbGNBh6AzbNvJRG++ymQLfGWQJAUH7qQGjg3qo+iZ7uWq59E2UvL+JFo/WwqLXIcI73d7BS3nrrUmNPlel0it53S45DtQZpXGOk1HjqYb0A5l4bXQJBALhPQCLApfhqQOMtacwIvQGjNU0YPPe6sUOQL7ITe0aLVtJ0RDptn/YobC01BKI8HSa/meXgmy8n7ji+els7S6ECQGO70AuqSFPTO+Tl6iHoguzMBg9SypgvRWb57rMgCXHOCS+nHvEBqu33syB1qEReJB5+75Z7etKGiHssl5dMo68=';
 	/**
 	 * 接口地址前缀
@@ -49,7 +49,7 @@ class NotaryApi {
 	 * 租户ID
 	 * @var string
 	 */
-	private static $accountId = '123';
+	private static $accountId = 'DCODMVCN';
 	
 	/**
 	 * 商户的实名信息
@@ -83,6 +83,9 @@ class NotaryApi {
 	 * @throws NotaryException 初始化失败抛出异常
 	 */
 	public static function notaryToken( CustomerIdentity $customer ): string{
+//		return '790fef66-1e3f-401d-83a1-ac2d2926e67e';
+		return '5bdb27ad-c306-4e6a-b6bd-cc110739e068';
+		
 		$url = self::$url.'/api/notaryToken';
 		$timestamp = self::_getTimestamp();
 		$bizId = '2';
@@ -103,6 +106,7 @@ class NotaryApi {
 			'timestamp' => $timestamp,
 			'signedData' => self::_signe(self::$accountId.$bizId.$timestamp),
 		];
+		$params = json_encode($params);
 		$response_str = \App\Lib\Curl::post($url, $params, self::$header);
 		
 		// 解析返回值
@@ -119,13 +123,40 @@ class NotaryApi {
 	}
 	
 	/**
-	 * 
+	 * 文本存证
+	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
+	 * @param string $content		存证文本内容
 	 * @return string
 	 * @throws NotaryException
 	 */
-	public static function textNotary(): string{
-		throw new NotaryException();
-		return '';
+	public static function textNotary(NotaryMeta $meta, string $content): string{
+//		return '44d80351c6b51ae6624fa3a024a0d67c699891e5b649ee831374a7ba584d29b7';
+//		return 'e726e700ddf969ac7a13268584d389bb5974269189088706e4817a5b7b32570f';
+		return 'b0d242b94ff1b81afdf1b2960677e35c0432fac0c7c138ac644b3673da3473bb';
+		
+		$url = self::$url.'/api/textNotary';
+		$timestamp = self::_getTimestamp();
+		
+		$meta->setAccountId( self::$accountId );
+		
+		$params = [
+			'meta' => json_encode($meta->toArray()),
+			'notaryContent' => $content,
+			'timestamp' => $timestamp,
+			'signedData' => self::_signe(self::$accountId.$meta->getPhase().$timestamp),
+		];
+		$response_str = \App\Lib\Curl::post($url, $params,['content-type: application/x-www-form-urlencoded']);
+		// 解析返回值
+		if( self::_parseResult($response_str, $result)){
+			throw new NotaryException( $result );
+		}
+		
+		// 返回 存证事务ID
+		if( self::_verifyResult($result) ){
+			 return $result['responseData'];
+		}
+		
+		throw new NotaryException( $result );
 	}
 	
 	public static function getTextNotary(): string{
@@ -133,9 +164,39 @@ class NotaryApi {
 		return '';
 	}
 	
-	public static function fileNotary(): string{
-		throw new NotaryException();
-		return '';
+	/**
+	 * 文件存证
+	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
+	 * @param string $file		文件地址
+	 * @return string
+	 * @throws NotaryException
+	 */
+	public static function fileNotary(NotaryMeta $meta, string $file): string{
+		$url = self::$url.'/api/fileNotary';
+		$timestamp = self::_getTimestamp();
+		
+		$meta->setAccountId( self::$accountId );
+		
+		$params = [
+			'meta' => json_encode($meta->toArray()),
+			'notaryFile' => new \CURLFile(realpath($file)),
+			'timestamp' => $timestamp,
+			'signedData' => self::_signe(self::$accountId.$meta->getPhase().$timestamp),
+		];
+		var_dump( $params );
+		$response_str = \App\Lib\Curl::post($url, $params);
+		var_dump( $response_str,\App\Lib\Curl::getInfo() );exit;
+		// 解析返回值
+		if( self::_parseResult($response_str, $result)){
+			throw new NotaryException( $result );
+		}
+		
+		// 返回 存证事务ID
+		if( self::_verifyResult($result) ){
+			 return $result['responseData'];
+		}
+		
+		throw new NotaryException( $result );
 	}
 	public static function getFileNotary(): string{
 		throw new NotaryException();
@@ -202,13 +263,24 @@ class NotaryApi {
 	 * @return string
 	 */
 	private static function _signe( string $data ): string{
-		$pri_key = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n" .
-				wordwrap(self::$priv_key, 64, "\n", true) .
-				"\n-----END ENCRYPTED PRIVATE KEY-----";
-		$res = openssl_get_privatekey($pri_key);
-		var_dump( openssl_error_string() );exit;
-		
-		openssl_sign($data, $signature, $res, OPENSSL_ALGO_SHA256);
+		$pri_key = '-----BEGIN PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMdoMcJwN584qMj/
+PRbEd+2so6+sz/mXGJ3gVv5hkosnB5hG8YhnF8mao71G4pK4XqDpX52YzTtICAGI
+Q3FcoKIbSbR/7Jfd2jATIMZkeZ6erUx0RrXUhZcQ8cNOjL+W0eFfhpcfp/UbqKfv
+dvLK9aRJOCk2+pJxnz5etj265zSRAgMBAAECgYEAt6+Bds0MT71PraeAzII6v1Oy
+jNcx1YacBIJtYHLdHRXc5yciwzXEMdAjWO39NI5ljPCtRW1GUH9v8IlnJvvecxVN
+v/oQ1YKxWP2Wn8WM0qm/nVGnKjBVYGO40rGYScqs9RQcGm/SUpEiJLXwqPTXkE0F
+NSEum4Zh5FkTkWN/luECQQDkAxZeouqt2M8GHTdM1TkyxYVRmXyiQ8VCkIfoYzo7
+SJy3CSR6P53OmVJxBp23UUKuXUH9M2jFBa+hnPvxAnXtAkEA3+I9PlT3cOPf+4Tn
+6dm9sI7kYZQT7J8F5odV5okSI32ID5bFFy+XwC2uBMFuwmiX90IOsdyvRZD0Z7qb
+T1aktQJAWD6ppa6/zNCgLumXwXC0VmYDlvUkO1inO3/cWaAtpUwQ+vXa3EVKue60
+7XF2EMCuYfVN2MTQw4/TzWSITVp6cQJAbevVZ/Itnway5PnnJ6DZioNNzD743Vdi
+fUH7QfoQps4ubID4+Z5LYnbLFtil+duCqUqMjnUstPorlXZAZN7EdQJAVzA/a5sN
+ujuP5+7901+MGl2AhJ+Lkyylo4UgX+PK+sWhJMg1a1u9hQfPJMG3OwEiSwIObBuq
+pt5rWqJOmo6+Ew==
+-----END PRIVATE KEY-----';
+		$b = openssl_sign($data, $signature, $pri_key, OPENSSL_ALGO_SHA256);
+		$signature = bin2hex($signature);
 		return $signature;
 	}
 	

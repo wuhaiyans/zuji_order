@@ -43,15 +43,37 @@ class TestController extends Controller
 	
     public function test()
     {
-		$customer = new \App\Lib\Alipay\Baas\CustomerIdentity();
-		$customer->setCertNo('123456789012345678');
-		$customer->setCertName('张三');
-		$customer->setMobileNo('15300001111');
-		$customer->setProperties('');
-		
-		$token = \App\Lib\Alipay\Baas\NotaryApi::notaryToken( $customer );
-		
-		var_dump( $token );exit;
+		try{
+			$customer = new \App\Lib\Alipay\Baas\CustomerIdentity();
+			$customer->setCertNo('130423198906021038');
+			$customer->setCertName('刘红星');
+			$customer->setMobileNo('15300001111');
+			$customer->setProperties('');
+
+			$token = \App\Lib\Alipay\Baas\NotaryApi::notaryToken( $customer );
+
+			// 位置
+			$location = new \App\Lib\Alipay\Baas\Location();
+			$location->setIp('192.168.1.123');
+			
+			// 元数据
+			$meta = new \App\Lib\Alipay\Baas\NotaryMeta();
+			$meta->setToken($token);
+			$meta->setPhase('test-1');
+			$meta->setTimestamp( date('y-m-d H:i:s') );
+			$meta->setLocation($location);
+			
+			// 文本存证
+			$result = \App\Lib\Alipay\Baas\NotaryApi::textNotary( $meta, 'test-1: haha' );
+			
+			// 文件存证
+			$result = \App\Lib\Alipay\Baas\NotaryApi::fileNotary( $meta, __DIR__.'/test.jpg' );
+			
+			var_dump( $result );exit;
+			
+		} catch (\Exception $ex) {
+			var_dump( $ex );exit;
+		}
 		
 		$info = [
 			'refund_no' => '',
