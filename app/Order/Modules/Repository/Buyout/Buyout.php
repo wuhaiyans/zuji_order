@@ -30,22 +30,13 @@ class Buyout implements BusinessPayInterface{
      * 获取业务信息
      * @param array $params
      */
-    public function getBusinessInfo(string $business_no) : array
+    public function getBusinessInfo(string $business_no)
     {
         $buyout = OrderBuyout::getInfo($business_no);
-        
-        if(!$buyout){
-            return apiResponse([],ApiStatus::CODE_50001,"没有找到该订单");
+        if($buyout){
+            $this->pamentInfo->setPaymentAmount($buyout['amount']);
+            $this->pamentInfo->setPaymentFenqi(0);
         }
-        if($buyout['status']==OrderBuyoutStatus::OrderPaid){
-            return apiResponse([],ApiStatus::CODE_0,"该订单已支付");
-        }
-        if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
-            return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
-        }
-        $this->pamentInfo->setPaymentAmount($buyout['amount']);
-        $this->pamentInfo->setPaymentFenqi(0);
-        
         return $buyout;
     }
     
@@ -78,7 +69,7 @@ class Buyout implements BusinessPayInterface{
     /**
      * 添加日志
      */
-    public function addLog()
+    public function addLog(array $business_info) : array
     {
         //插入日志
         /* OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","创建支付成功");
@@ -95,5 +86,6 @@ class Buyout implements BusinessPayInterface{
          'msg'=>'用户发起支付',
          ];
          GoodsLogRepository::add($log); */
+        return [];
     }
 }

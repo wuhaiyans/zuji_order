@@ -1,7 +1,8 @@
 <?php
 
 /**
- * 
+ * 业务配置
+ * int 业务标识 => 业务class
  */
 return [
 
