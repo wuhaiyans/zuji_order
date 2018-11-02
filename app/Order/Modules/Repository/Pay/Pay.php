@@ -380,8 +380,13 @@ class Pay extends \App\Lib\Configurable
 		$this->status = PayStatus::CLOSED;
 		return true;
 	}
-	
-	//更新支付单
+	/**
+	* 更新支付单
+	* @access public
+	* @author gaobo
+	* @throws \Exception
+	* @return bool
+	**/
 	public function update()
 	{
 	    LogApi::debug('[支付阶段]'.$this->trade.'更新');

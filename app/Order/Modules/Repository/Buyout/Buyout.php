@@ -78,7 +78,7 @@ class Buyout implements BusinessPayInterface{
     /**
      * 添加日志
      */
-    public function addLog()
+    public function addLog(array $business_info) : array
     {
         //插入日志
         /* OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$buyout['order_no'],"用户买断发起支付","创建支付成功");
@@ -95,5 +95,6 @@ class Buyout implements BusinessPayInterface{
          'msg'=>'用户发起支付',
          ];
          GoodsLogRepository::add($log); */
+        return [];
     }
 }

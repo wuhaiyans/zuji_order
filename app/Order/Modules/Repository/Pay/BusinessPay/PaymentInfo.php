@@ -7,10 +7,11 @@ namespace App\Order\Modules\Repository\Pay\BusinessPay;
  */
 class PaymentInfo{
     private $needPayment    = true;
+    private $isLeBaiFen     = true;
     private $paymentAmount  = 0.00;
-    private $paymentNo = '';
+    private $paymentNo      = '';
     private $paymentFenqi   = 0;
-    private $trade   = 'P';
+    private $trade          = 'P';
     
     public function __construct()
     {

@@ -46,6 +46,8 @@ class PayCenterController extends Controller
     
     /**
      * 支付入口
+     * @access public
+     * @author gaobo
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -132,7 +134,7 @@ class PayCenterController extends Controller
             
             $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
             //插入日志FIXME
-            //$business->addLog($business_info);
+            $business->addLog($business_info);
             return apiResponse($paymentUrl,ApiStatus::CODE_0);
         }else{
             //创建支付
@@ -181,7 +183,7 @@ class PayCenterController extends Controller
                 $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $to_business_params['business_no']);
                 //组装url参数
                 $currenturl_params = [
-                    'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].$pay->get.'用户'.$pay->getUserId(),
+                    'name'=>'业务类型'.$to_business_params['business_type'].'业务编码'.$to_business_params['business_no'].'用户'.$pay->getUserId(),
                     'front_url' => $to_business_params['callback_url'],
                     'business_no'=>$to_business_params['business_no'],
                     'ip'=>$ip,
@@ -189,7 +191,7 @@ class PayCenterController extends Controller
                 ];
                 $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
                 //插入日志FIXME
-                //$business->addLog($business_info);
+                $business->addLog($business_info);
                 return apiResponse($paymentUrl,ApiStatus::CODE_0);
             }
             //空请求
