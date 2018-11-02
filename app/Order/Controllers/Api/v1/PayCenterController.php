@@ -42,7 +42,7 @@ class PayCenterController extends Controller
         $request_params = $request->all();
         $to_business_params = $request_params['params'];
         //过滤参数
-        $rule = [
+       /*  $rule = [
             'business_type'=>'required',
             'business_no'=>'required',
             'pay_channel_id'=>'required',
@@ -51,7 +51,9 @@ class PayCenterController extends Controller
         $validator = app('validator')->make($to_business_params, $rule);
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
-        }
+        } */
+        $to_business_params['business_type'] = 5;
+        $to_business_params['business_no'] = $to_business_params['buyout_no'];
         $userInfo = $request_params['userinfo'];
         //支付 扩展参数
         $ip = isset($userInfo['ip'])?$userInfo['ip']:'';
@@ -108,7 +110,6 @@ class PayCenterController extends Controller
             ];
             
             $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
-            //插入日志FIXME
             $business->addLog($userInfo);
             return apiResponse($paymentUrl,ApiStatus::CODE_0);
         }else{
@@ -165,7 +166,6 @@ class PayCenterController extends Controller
                     'extended_params' => $extended_params,// 扩展参数
                 ];
                 $paymentUrl = $pay->getCurrentUrl($to_business_params['pay_channel_id'],$currenturl_params);
-                //插入日志FIXME
                 $business->addLog($userInfo);
                 return apiResponse($paymentUrl,ApiStatus::CODE_0);
             }
