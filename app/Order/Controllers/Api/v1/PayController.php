@@ -128,7 +128,6 @@ class PayController extends Controller
 	{
 		$input = file_get_contents("php://input");
 		LogApi::setSource('payment_notify');
-
 		$params = json_decode($input,true);
 
 		LogApi::id($params['out_payment_no']??'');

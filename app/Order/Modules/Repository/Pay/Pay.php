@@ -380,8 +380,13 @@ class Pay extends \App\Lib\Configurable
 		$this->status = PayStatus::CLOSED;
 		return true;
 	}
-	
-	//更新支付单
+	/**
+	* 更新支付单
+	* @access public
+	* @author gaobo
+	* @throws \Exception
+	* @return bool
+	**/
 	public function update()
 	{
 	    LogApi::debug('[支付阶段]'.$this->trade.'更新');
@@ -763,7 +768,7 @@ class Pay extends \App\Lib\Configurable
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];
-		
+
 		if($channel == Channel::Lebaifen) {
             $paymentAmountBillList = json_decode($this->getPaymentAmountBillList(),true);
 

@@ -177,10 +177,7 @@ class AdvanceActivityController extends Controller
                 else{
                     $renzheng_btn= true;
                 }
-
-            }
-
-
+            };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
             $activityInfo['renzheng_btn'] = $renzheng_btn;
             $activityInfo['lingqu_btn'] = $lingqu_btn;

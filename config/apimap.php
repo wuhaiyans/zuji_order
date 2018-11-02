@@ -289,6 +289,7 @@ return [
     'api.buyout.cancel'       => 'BuyoutController@cancel',
     //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    'api.buyout.pay'       => 'PayCenterController@pay',//gaobo
     
     //支付宝小程序h5买断支付
     'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
