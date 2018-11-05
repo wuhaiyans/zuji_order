@@ -51,6 +51,11 @@ class Config {
      * @var int 35
      */
     const CHANNELID_FLOWER_ENJOY  = '35';
+    /**
+     * 渠道配置<b>【校园门店】</b>
+     * @var int 37
+     */
+    const CHANNELID_SCHOOL_STORE  = '37';
 
 	
 	/**
@@ -224,6 +229,13 @@ class Config {
             self::CHANNELID_FLOWER_ENJOY => [
                 SceneConfig::ORDER_CREATE 			 	=> 'SMS_000000000', //用户下单
                 SceneConfig::RETURN_TOKIO 			 	=> 'SMS_113461198', //花呗分期退款
+            ],
+            // 校园门店
+            self::CHANNELID_SCHOOL_STORE => [
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461219', //用户下单
+                SceneConfig::ORDER_DELIVERY            	=> 'SMS_113461220', //订单发货短信
+                SceneConfig::GIVEBACK_CREATE 			=> 'SMS_000000000', //还机申请
+                SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_000000000', //还机确认收货 有剩余的租金
             ],
 		];
 		if( isset($arr[$channelId][$scene]) ){
