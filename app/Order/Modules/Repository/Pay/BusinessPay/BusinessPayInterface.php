@@ -1,10 +1,8 @@
 <?php
 namespace App\Order\Modules\Repository\Pay\BusinessPay;
-use App\Order\Modules\Repository\Pay\BusinessPay\PaymentInfo;
-use App\Order\Modules\Repository\Pay\BusinessPay\WithholdInfo;
-use App\Order\Modules\Repository\Pay\BusinessPay\FundauthInfo;
+use App\Order\Modules\Repository\Pay\BusinessPay\{PaymentInfo , WithholdInfo , FundauthInfo};
 /**
- * 业务接口,每种业务需要实现以下三个接口
+ * 业务接口,每种业务需要实现以下五个接口
  * @author gaobo
  * @access public
  * @copyright (c) 2017, Huishoubao
@@ -15,7 +13,22 @@ interface BusinessPayInterface{
      * 获取业务信息
      * @param array $params
      */
-    public function getBusinessInfo(string $did) : array;
+    public function getBusinessInfo(string $business_no);
+    
+    /**
+     * 获取用户ID
+     */
+    public function getUserId();
+    
+    /**
+     * 
+     */
+    public function getPayName();
+    
+    /**
+     * 
+     */
+    public function getBusinessStatus();
     
     /**
      * 直付
@@ -35,6 +48,6 @@ interface BusinessPayInterface{
     /**
      * 写日志
      */
-    public function addLog();
+    public function addLog(array $userInfo);
     
 }

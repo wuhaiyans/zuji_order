@@ -2,7 +2,7 @@
 /**
  * App\Order\Modules\Repository\Pay\PayCreater.php
  * @access public
- * @author liuhongxing <liuhongxing@huishoubao.com.cn>
+ * @author gaobo
  * @copyright (c) 2017, Huishoubao
  */
 

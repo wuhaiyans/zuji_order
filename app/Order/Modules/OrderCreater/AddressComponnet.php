@@ -87,10 +87,12 @@ class AddressComponnet implements OrderCreater
         }else{
             $address_info = $this->address;
         }
+
+        $realname = $data['user']['realname']?$data['user']['realname']: substr($data['user']['realname'],0,3)."****".substr($data['user']['realname'],7,11);
         $addressData = [
             'order_no'=>$data['order']['order_no'],
             'consignee_mobile' =>isset($data['address']['mobile'])?$data['address']['mobile']:$data['user']['user_mobile'],
-            'name'=>isset($data['address']['name'])?$data['address']['name']:$data['user']['user_mobile'],
+            'name'=>isset($data['address']['name'])?$data['address']['name']:$realname ,
             'province_id'=>isset($data['address']['province_id'])?$data['address']['province_id']:0,
             'city_id'=>isset($data['address']['city_id'])?$data['address']['city_id']:0,
             'area_id'=>isset($data['address']['district_id'])?$data['address']['district_id']:0,

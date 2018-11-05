@@ -112,9 +112,9 @@ class Curl {
      * @return string
      */    
     public static function post(string $url, $params=null,array $header=[]){
-		if(is_array($params) ){
-			$params = http_build_query( $params );
-		}
+//		if(is_array($params) ){
+//			$params = http_build_query( $params );
+//		}
         $output = self::_send($url, $params, $header);
         return $output;
     }
@@ -167,11 +167,20 @@ class Curl {
 	 * @param array $header		请求头 array('k'=>'v')形式的关联数组
 	 * @return string
 	 */
-    private static function _send(string $url,string $params=null,array $header=[]){
+    private static function _send(string $url, $params=null,array $header=[]){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		
 		if( $params ){
+//			if( is_array($params) ){
+//				foreach( $params as $k => $v ){
+//					// 文件上传
+//					if( $v instanceof \CURLFile ){
+//						curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
+//					}
+//				}
+//			}
 			// post数据
 			curl_setopt($ch, CURLOPT_POST, true);
 			// post的变量
