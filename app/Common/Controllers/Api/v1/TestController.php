@@ -43,6 +43,10 @@ class TestController extends Controller
 	
     public function test()
     {
+		if( count($_FILES) ){
+			
+			var_dump( $_FILES );exit;
+		}
 		try{
 			$customer = new \App\Lib\Alipay\Baas\CustomerIdentity();
 			$customer->setCertNo('130423198906021038');
@@ -60,16 +64,23 @@ class TestController extends Controller
 			$meta = new \App\Lib\Alipay\Baas\NotaryMeta();
 			$meta->setToken($token);
 			$meta->setPhase('test-1');
-			$meta->setTimestamp( date('y-m-d H:i:s') );
+			$meta->setTimestamp( date('Y-m-d H:i:s') );
 			$meta->setLocation($location);
 			
-			// 文本存证
-			$result = \App\Lib\Alipay\Baas\NotaryApi::textNotary( $meta, 'test-1: haha' );
+			$str = 'test-1: haha';
+			var_dump( '文本内容：'.$str );
 			
-			// 文件存证
-			$result = \App\Lib\Alipay\Baas\NotaryApi::fileNotary( $meta, __DIR__.'/test.jpg' );
+			// 文本存证
+			$txhash = \App\Lib\Alipay\Baas\NotaryApi::textNotary( $str, $meta );
+			var_dump( '文本存证：'.$txhash );
+			
+			// 存证核验
+			$result = \App\Lib\Alipay\Baas\NotaryApi::notaryStatus( $txhash, hash('sha256', $str) , $meta);
 			
 			var_dump( $result );exit;
+			// 文件存证
+			$result = \App\Lib\Alipay\Baas\NotaryApi::fileNotary( __DIR__.'/test.jpg', $meta );
+			
 			
 		} catch (\Exception $ex) {
 			var_dump( $ex );exit;

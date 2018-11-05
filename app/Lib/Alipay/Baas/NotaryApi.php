@@ -79,6 +79,8 @@ class NotaryApi {
 	
 	/**
 	 * 初始化存证事务
+	 * 注意：该接口是“application/json”方式提交
+	 * 提交值整体 json_encode() 编码
 	 * @return string 事务ID
 	 * @throws NotaryException 初始化失败抛出异常
 	 */
@@ -124,15 +126,18 @@ class NotaryApi {
 	
 	/**
 	 * 文本存证
-	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
+	 * 注意：该接口是“multipart/form-data”方式提交
+	 * meta的值做 json_encode()编码
 	 * @param string $content		存证文本内容
+	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
 	 * @return string
 	 * @throws NotaryException
 	 */
-	public static function textNotary(NotaryMeta $meta, string $content): string{
+	public static function textNotary(string $content, NotaryMeta $meta): string{
 //		return '44d80351c6b51ae6624fa3a024a0d67c699891e5b649ee831374a7ba584d29b7';
 //		return 'e726e700ddf969ac7a13268584d389bb5974269189088706e4817a5b7b32570f';
-		return 'b0d242b94ff1b81afdf1b2960677e35c0432fac0c7c138ac644b3673da3473bb';
+//		return 'b0d242b94ff1b81afdf1b2960677e35c0432fac0c7c138ac644b3673da3473bb';
+		return '9c307c97018e744e503820997d668842ff921b3f813d58ee9fb11a10ee42277e';
 		
 		$url = self::$url.'/api/textNotary';
 		$timestamp = self::_getTimestamp();
@@ -145,7 +150,7 @@ class NotaryApi {
 			'timestamp' => $timestamp,
 			'signedData' => self::_signe(self::$accountId.$meta->getPhase().$timestamp),
 		];
-		$response_str = \App\Lib\Curl::post($url, $params,['content-type: application/x-www-form-urlencoded']);
+		$response_str = \App\Lib\Curl::post($url, $params,['Content-Type: multipart/form-data;']);
 		// 解析返回值
 		if( self::_parseResult($response_str, $result)){
 			throw new NotaryException( $result );
@@ -166,12 +171,14 @@ class NotaryApi {
 	
 	/**
 	 * 文件存证
-	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
 	 * @param string $file		文件地址
+	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
 	 * @return string
 	 * @throws NotaryException
 	 */
-	public static function fileNotary(NotaryMeta $meta, string $file): string{
+	public static function fileNotary(string $file, NotaryMeta $meta): string{
+		return '7741dbd25bce502b39730afc71e77a16f3774aaf2f4eaffb5029ccd42fbd967a';
+		
 		$url = self::$url.'/api/fileNotary';
 		$timestamp = self::_getTimestamp();
 		
@@ -183,9 +190,7 @@ class NotaryApi {
 			'timestamp' => $timestamp,
 			'signedData' => self::_signe(self::$accountId.$meta->getPhase().$timestamp),
 		];
-		var_dump( $params );
 		$response_str = \App\Lib\Curl::post($url, $params);
-		var_dump( $response_str,\App\Lib\Curl::getInfo() );exit;
 		// 解析返回值
 		if( self::_parseResult($response_str, $result)){
 			throw new NotaryException( $result );
@@ -203,9 +208,45 @@ class NotaryApi {
 		return '';
 	}
 	
-	public static function notaryStatus(): string{
-		throw new NotaryException();
-		return '';
+	/**
+	 * 
+	 * 存证事务核验
+	 * 注意：该接口是“application/json”方式提交
+	 * 提交值整体 json_encode() 编码
+	 * @param string $txHash	存证凭证
+	 * @param string $contentHash	存证内容或存证文件的sha256哈希值
+	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta 元数据，accountId必选，其余字段可选
+	 * @return bool	true：存证；false：不存在
+	 * @throws NotaryException
+	 */
+	public static function notaryStatus(string $txHash,string $contentHash, NotaryMeta $meta): bool{
+		$url = self::$url.'/api/notaryStatus';
+		$timestamp = self::_getTimestamp();
+		
+		$params = json_encode([
+			'txHash' => $txHash,
+			'contentHash' => $contentHash,
+			// 注意：meta 只包含 accountId，否则会差找不到存证（阿里技术反馈）
+			'meta' => [
+				'accountId' => self::$accountId,
+			],
+			'timestamp' => $timestamp,
+			'signedData' => self::_signe(self::$accountId.$txHash.$timestamp),
+		]);
+		echo( $params );
+		$response_str = \App\Lib\Curl::post($url, $params,['Content-Type: application/json;charset=UTF-8']);
+		var_dump($response_str, \App\Lib\Curl::getInfo());exit;
+		// 解析返回值
+		if( self::_parseResult($response_str, $result)){
+			throw new NotaryException( $result );
+		}
+		
+		// 返回 存证是否存在
+		if( self::_verifyResult($result) ){
+			 return $result['responseData'];
+		}
+		
+		throw new NotaryException( $result );
 	}
 	
 	public static function notaryTransaction(): string{
