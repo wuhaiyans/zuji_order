@@ -381,6 +381,11 @@ class OrderCreater
             return false;
         }
 
+        //租用时间 为领取的第二天时间开始算
+        $data['sku'][0]['begin_time'] = date("Y-m-d",strtotime("+1 day"));
+        //结束时间为 租用时间开始+租期
+        $data['sku'][0]['end_time'] = date("Y-m-d",strtotime("+".$destineData['zuqi']." day"));
+
         try{
             DB::beginTransaction();
 
@@ -451,8 +456,8 @@ class OrderCreater
                 'app_id'=>$data['appid']
             ];
             // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
 
             //发送订单风控信息保存队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [

@@ -14,6 +14,7 @@ use App\Order\Models\OrderRisk;
 use App\Order\Modules\Inc;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
+use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 
@@ -91,6 +92,9 @@ class CronRisk
             $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
             //获取订单地址信息
             $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
+            //获取订单信用分信息
+            $riskSoceList = OrderRiskRepository::getRiskColumn($orderNos);
+
 
             $orderError = "";
             $userError = "";
@@ -111,7 +115,9 @@ class CronRisk
                     $item['sex'] = (int)substr($item['cret_no'],16,1)% 2 === 0 ? '女' : '男';
                     $item['credit'] =  $user['credit'];
                 }
-
+                if($riskSoceList[$item['order_no']]){
+                    $item['credit'] =  $riskSoceList[$item['order_no']]['score'];
+                }
 
                 //商品相关信息
                 if(empty($goodsList[$item['order_no']])){
@@ -371,6 +377,8 @@ class CronRisk
             $userList = OrderUserCertifiedRepository::getUserColumn($orderNos);
             //获取订单地址信息
             $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
+            //获取订单信用分信息
+            $riskSoceList = OrderRiskRepository::getRiskColumn($orderNos);
 
             $orderError = "";
             $userError = "";
@@ -391,7 +399,9 @@ class CronRisk
                     $item['sex'] = (int)substr($item['cret_no'],16,1)% 2 === 0 ? '女' : '男';
                     $item['credit'] =  $user['credit'];
                 }
-
+                if($riskSoceList[$item['order_no']]){
+                    $item['credit'] =  $riskSoceList[$item['order_no']]['score'];
+                }
 
                 //商品相关信息
                 if(empty($goodsList[$item['order_no']])){

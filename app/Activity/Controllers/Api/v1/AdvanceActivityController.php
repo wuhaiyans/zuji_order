@@ -171,13 +171,13 @@ class AdvanceActivityController extends Controller
 
                 $risk = new Risk();
                 $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
-                if($riskInfo['is_chsi']!=1){
+                if($riskInfo['is_chsi']==1){
+                    $lingqu_btn = true;
+                }
+                else{
                     $renzheng_btn= true;
                 }
-                $activityInfo['fengkong'] = $riskInfo;
-            }
-
-
+            };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
             $activityInfo['renzheng_btn'] = $renzheng_btn;
             $activityInfo['lingqu_btn'] = $lingqu_btn;
