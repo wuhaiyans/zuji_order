@@ -74,10 +74,10 @@ class OrderController extends Controller
             $coupon = $params['params']['coupon'];
         }else{
             //自动调用接口查询优惠券
-            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
-                'sku_id' => $sku[0]['sku_id'],
-                'auth_token' => $params['auth_token'],
-            ]);
+//            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+//                'sku_id' => $sku[0]['sku_id'],
+//                'auth_token' => $params['auth_token'],
+//            ]);
         }
         $payChannelId =$params['params']['pay_channel_id'];
 
