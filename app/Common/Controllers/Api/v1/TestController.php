@@ -48,13 +48,40 @@ class TestController extends Controller
 			var_dump( $_FILES );exit;
 		}
 		try{
+			
+			$accountId = 'DCODMVCN';
+			$entity = [
+				// 用户类型；固定值；ENTERPRISE：企业实体
+				'userType'	=> 'ENTERPRISE',
+				// 企业名称
+				'certName'	=> '深圳回收宝科技有限公司',
+				// 证件类型；UNIFIED_SOCIAL_CREDIT_CODE：统一社会信用代码
+				'certType'	=> 'UNIFIED_SOCIAL_CREDIT_CODE',
+				// 证件号
+				'certNo'	=> '91440300311802545U',
+				'mobileNo'	=> '',
+				// 企业法人
+				'legalPerson'	=> '何帆',
+				// 企业法人身份证号
+				'legalPersonId'	=> '420102198108011012',	
+				// 经办人姓名
+				'agent'		=> '赵明亮',	
+				// 经办人身份证
+				'agentId'	=> '232301199005211535',
+				// 扩展参数
+				'properties' => '',
+			];
+			
+			// 用户信息
 			$customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
 			$customer->setCertNo('130423198906021038');
 			$customer->setCertName('刘红星');
 			$customer->setMobileNo('15300001111');
 			$customer->setProperties('');
-
-			$token = \App\Lib\Alipay\Notary\NotaryApi::notaryToken( $customer );
+			
+			
+			// 存证事务
+			$token = \App\Lib\Alipay\Notary\NotaryApi::notaryToken( $accountId, $entity, $customer );
 
 			// 位置
 			$location = new \App\Lib\Alipay\Notary\Location();
@@ -62,6 +89,7 @@ class TestController extends Controller
 			
 			// 元数据
 			$meta = new \App\Lib\Alipay\Notary\NotaryMeta();
+			$meta->setAccountId( $accountId );
 			$meta->setToken($token);
 			$meta->setPhase('test-1');
 			$meta->setTimestamp( date('Y-m-d H:i:s') );
@@ -75,9 +103,15 @@ class TestController extends Controller
 			var_dump( '文本存证：'.$txhash );
 			
 			// 存证核验
-			$result = \App\Lib\Alipay\Notary\NotaryApi::notaryStatus( $txhash, hash('sha256', $str) , $meta);
+//			$result = \App\Lib\Alipay\Notary\NotaryApi::notaryStatus( $txhash, hash('sha256', $str) , $meta);
+//			
+//			var_dump( $result );exit;
+			
+			// 存证下载
+			$result = \App\Lib\Alipay\Notary\NotaryApi::textNotaryGet( $txhash, $meta);
 			
 			var_dump( $result );exit;
+			
 			// 文件存证
 			$result = \App\Lib\Alipay\Notary\NotaryApi::fileNotary( __DIR__.'/test.jpg', $meta );
 			
