@@ -73,6 +73,7 @@ class OrderController extends Controller
         if( isset($params['params']['coupon']) ){
             $coupon = $params['params']['coupon'];
         }else{
+            $coupon =[];
             //自动调用接口查询优惠券
 //            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
 //                'sku_id' => $sku[0]['sku_id'],
