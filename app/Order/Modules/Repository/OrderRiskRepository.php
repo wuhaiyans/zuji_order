@@ -40,4 +40,20 @@ class OrderRiskRepository
 
         return objectToArray($order);
     }
+    /**
+     * 根据多个订单号
+     * 获取订单风控信息
+     * @param string $mobile
+     * @return bool
+     */
+    public static function getRiskColumn($orderNos){
+        //根据订单号
+        if (!is_array($orderNos)) return false;
+        array_unique($orderNos);
+        $whereArray[] = ['type', '=', 'zhima'];
+        $result =  OrderRisk::query()->where($whereArray)->wherein('order_no', $orderNos)->get()->toArray();
+        if (!$result) return false;
+        //指定order_no为数组下标
+        return array_keys_arrange($result,"order_no");
+    }
 }
