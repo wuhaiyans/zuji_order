@@ -14,6 +14,8 @@ use App\Activity\Models\ActivityGoodsAppointment;
 use App\Activity\Modules\Inc\DestineStatus;
 use App\Activity\Modules\Repository\ActiveInviteRepository;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
+use App\Lib\Goods\Goods;
+use App\Lib\Risk\Risk;
 use Illuminate\Http\Request;
 use App\Lib\ApiStatus;
 
@@ -153,17 +155,37 @@ class AdvanceActivityController extends Controller
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
         if($activityInfo){
-            $activityInfo['head_images'] = "";
-            //获取微信授权登录信息
-            $userWechat = "";//User::getUserWechat($userInfo['uid']);
-            if($userWechat){
-                $activityInfo['head_images'] = $userWechat['headimgurl'];
-            }
             $activityInfo['zuqi_day'] = $count;
             $activityInfo['zuqi'] -= $count;
             $activityInfo['type'] = 2;
             $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
+            $activityInfo['destine_name'] = DestineStatus::getStatusName($activityInfo['destine_status']);
             //把一元活动数据追加到苹果预约数据后面
+
+            $yaoqin_btn = false;
+            $renzheng_btn = false;
+            $lingqu_btn = false;
+
+            if($activityInfo['destine_status'] == DestineStatus::DestinePayed){
+                $yaoqin_btn = true;
+
+                $risk = new Risk();
+                $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
+                if($riskInfo['is_chsi']==1){
+                    $lingqu_btn = true;
+                }
+                else{
+                    $renzheng_btn= true;
+                }
+            };
+            $activityInfo['yaoqin_btn'] = $yaoqin_btn;
+            $activityInfo['renzheng_btn'] = $renzheng_btn;
+            $activityInfo['lingqu_btn'] = $lingqu_btn;
+            //获取商品信息
+            $spuInfo = Goods::getSpuInfo($activityInfo['spu_id']);
+            if($spuInfo){
+                $activityInfo['goods_images'] = $spuInfo["spu_info"]['thumb'];
+            }
             $list[] = $activityInfo;
         }
 
