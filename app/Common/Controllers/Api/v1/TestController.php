@@ -43,33 +43,44 @@ class TestController extends Controller
 	
     public function test()
     {
+		if( count($_FILES) ){
+			
+			var_dump( $_FILES );exit;
+		}
 		try{
-			$customer = new \App\Lib\Alipay\Baas\CustomerIdentity();
+			$customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
 			$customer->setCertNo('130423198906021038');
 			$customer->setCertName('刘红星');
 			$customer->setMobileNo('15300001111');
 			$customer->setProperties('');
 
-			$token = \App\Lib\Alipay\Baas\NotaryApi::notaryToken( $customer );
+			$token = \App\Lib\Alipay\Notary\NotaryApi::notaryToken( $customer );
 
 			// 位置
-			$location = new \App\Lib\Alipay\Baas\Location();
+			$location = new \App\Lib\Alipay\Notary\Location();
 			$location->setIp('192.168.1.123');
 			
 			// 元数据
-			$meta = new \App\Lib\Alipay\Baas\NotaryMeta();
+			$meta = new \App\Lib\Alipay\Notary\NotaryMeta();
 			$meta->setToken($token);
 			$meta->setPhase('test-1');
-			$meta->setTimestamp( date('y-m-d H:i:s') );
+			$meta->setTimestamp( date('Y-m-d H:i:s') );
 			$meta->setLocation($location);
 			
-			// 文本存证
-			$result = \App\Lib\Alipay\Baas\NotaryApi::textNotary( $meta, 'test-1: haha' );
+			$str = 'test-1: haha';
+			var_dump( '文本内容：'.$str );
 			
-			// 文件存证
-			$result = \App\Lib\Alipay\Baas\NotaryApi::fileNotary( $meta, __DIR__.'/test.jpg' );
+			// 文本存证
+			$txhash = \App\Lib\Alipay\Notary\NotaryApi::textNotary( $str, $meta );
+			var_dump( '文本存证：'.$txhash );
+			
+			// 存证核验
+			$result = \App\Lib\Alipay\Notary\NotaryApi::notaryStatus( $txhash, hash('sha256', $str) , $meta);
 			
 			var_dump( $result );exit;
+			// 文件存证
+			$result = \App\Lib\Alipay\Notary\NotaryApi::fileNotary( __DIR__.'/test.jpg', $meta );
+			
 			
 		} catch (\Exception $ex) {
 			var_dump( $ex );exit;

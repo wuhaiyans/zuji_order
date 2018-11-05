@@ -7,7 +7,7 @@
  */
 
 
-namespace App\Lib\Alipay\Baas;
+namespace App\Lib\Alipay\Notary;
 
 /**
  * CustomerIdentity 客户身份标识 类
@@ -113,7 +113,7 @@ class CustomerIdentity {
 	public function toArray(): array{
 		$arr = [];
 		foreach(get_object_vars($this) as $p => $v){
-			if( is_null($v) ){
+			if( empty($v) ){
 				continue;
 			}
 			if(is_object($v) && method_exists($v, 'toArray')){
