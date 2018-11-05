@@ -74,16 +74,19 @@ class OrderController extends Controller
             $coupon = $params['params']['coupon'];
         }else{
             //自动调用接口查询优惠券
-//            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
-//                'sku_id' => $sku[0]['sku_id'],
-//                'auth_token' => $params['auth_token'],
-//            ]);
+            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $sku[0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+            ]);
+            if(isset($coupon[0])){
+                $coupon = $coupon[0];
+            }
         }
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid) && $appid <1){
-            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        if(empty($appid)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
         }
 
         if($userType!=2 && empty($userInfo)){
@@ -165,15 +168,25 @@ class OrderController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-
+        if( isset($params['params']['coupon']) ){
+            $coupon = $params['params']['coupon'];
+        }else{
+            //自动调用接口查询优惠券
+            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $sku[0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+            ]);
+            if(isset($coupon[0])){
+                $coupon = $coupon[0];
+            }
+        }
         $addressId		= $params['params']['address_id'];
 
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid) && $appid <1){
-            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        if(empty($appid)){
+            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
         if(empty($payType) || !isset($payType) || $payType <1){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式错误");
