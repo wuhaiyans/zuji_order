@@ -7,7 +7,7 @@
  */
 
 
-namespace App\Lib\Alipay\Baas;
+namespace App\Lib\Alipay\Notary;
 
 /**
  * CustomerIdentity 客户身份标识 类

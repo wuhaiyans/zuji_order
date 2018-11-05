@@ -1,5 +1,5 @@
 <?php
-namespace App\Lib\Alipay\Baas;
+namespace App\Lib\Alipay\Notary;
 
 /**
  * 蚂蚁金服 金融科技 可信存证 API 封装
@@ -129,7 +129,7 @@ class NotaryApi {
 	 * 注意：该接口是“multipart/form-data”方式提交
 	 * meta的值做 json_encode()编码
 	 * @param string $content		存证文本内容
-	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta		存证元数据
 	 * @return string
 	 * @throws NotaryException
 	 */
@@ -172,7 +172,7 @@ class NotaryApi {
 	/**
 	 * 文件存证
 	 * @param string $file		文件地址
-	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta		存证元数据
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta		存证元数据
 	 * @return string
 	 * @throws NotaryException
 	 */
@@ -215,7 +215,7 @@ class NotaryApi {
 	 * 提交值整体 json_encode() 编码
 	 * @param string $txHash	存证凭证
 	 * @param string $contentHash	存证内容或存证文件的sha256哈希值
-	 * @param \App\Lib\Alipay\Baas\NotaryMeta $meta 元数据，accountId必选，其余字段可选
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta 元数据，accountId必选，其余字段可选
 	 * @return bool	true：存证；false：不存在
 	 * @throws NotaryException
 	 */
