@@ -102,9 +102,7 @@ class OrderReturnCreater
                 }
                 //获取支付信息
                 $payInfo = OrderPayRepository::find($order_info['order_no']);
-                if(!$payInfo){
-                    return false;//支付单不存在
-                }
+
                 //短租不允许退货
                 if($order_info['zuqi_type'] ==OrderStatus::ZUQI_TYPE1){
                     return false;
@@ -147,14 +145,17 @@ class OrderReturnCreater
                 }
                 //花呗分期+预授权
                 if($order_info['pay_type'] == PayInc::PcreditPayInstallment){
-                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                        $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
-                        $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
+                    if( $payInfo ){
+                        if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
+                            $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
+                        }
+
+                        if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                            $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+                        }
                     }
 
-                    if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                        $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    }
                 }
 
                 // 创建退换货单参数
