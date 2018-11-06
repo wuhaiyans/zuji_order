@@ -340,6 +340,7 @@ class Delivery
 
       $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
       $response =json_decode($response,true);
+      return $response;
       if($response['code']!=ApiStatus::CODE_0){
           return false;
       }

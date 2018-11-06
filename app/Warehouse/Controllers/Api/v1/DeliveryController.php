@@ -330,10 +330,11 @@ class DeliveryController extends Controller
             $user_info['user_id'] = $params['user_id'];
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
-            return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口");
+
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
-            //LogApi::info('delivery send order info :',$orderDetail);
+            //LogApi::info('delivery send order info :',$result['order_no'].$a);
+            return \apiResponse([], ApiStatus::CODE_50000, $a);
             if(!$a){
                 DB::rollBack();
                 return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口失败");
@@ -342,7 +343,7 @@ class DeliveryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getFile()."*".$e->getLine()."*".$e->getTraceAsString());
         }
 
         return \apiResponse([]);
