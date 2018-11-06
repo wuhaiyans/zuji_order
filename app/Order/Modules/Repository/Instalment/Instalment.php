@@ -1,39 +1,38 @@
 <?php
-namespace App\Order\Modules\Repository\Buyout;
-use App\Order\Modules\Repository\Pay\BusinessPay\{PaymentInfo,WithholdInfo,FundauthInfo};
+namespace App\Order\Modules\Repository\Instalment;
+use App\Order\Modules\Repository\Pay\BusinessPay\PaymentInfo;
+use App\Order\Modules\Repository\Pay\BusinessPay\WithholdInfo;
+use App\Order\Modules\Repository\Pay\BusinessPay\FundauthInfo;
 use App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayInterface;
-use App\Order\Modules\Repository\OrderLogRepository;
-use App\Order\Modules\Repository\GoodsLogRepository;
-use App\Lib\ApiStatus;
-use App\Order\Modules\Inc\OrderBuyoutStatus;
-use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Service\OrderBuyout;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Service\OrderGoodsInstalment;
 
-class Buyout implements BusinessPayInterface{
-    
+
+class Instalment implements BusinessPayInterface{
+
     private $pamentInfo;
     private $withholdInfo;
     private $fundauthInfo;
     private $business_no = '';
     private $status      = false;
     private $user_id     = 0;
-    private $butout      = null;
     private $pay_name    = '';
-    
+
     public function __construct(string $business_no){
-        //find
+
         $this->business_no = $business_no;
-        $this->buyout = OrderBuyout::getInfo($business_no);
-        if($this->buyout){
-            $this->user_id = $this->buyout['user_id'];
-            if($this->buyout['status'] == OrderBuyoutStatus::OrderInitialize){
+        $instalmentInfo = OrderGoodsInstalment::getByBusinessNo($business_no);
+        if($instalmentInfo){
+            $this->user_id = $instalmentInfo['user_id'];
+            // 判断支付状态
+            if($instalmentInfo['status'] == OrderInstalmentStatus::UNPAID || $instalmentInfo['status'] == OrderInstalmentStatus::FAIL ){
                 $this->status = true;
-                $this->pay_name = '买断单号'.$this->buyout['buyout_no'].'订单编号'.$this->buyout['order_no'].'商品单号'.$this->buyout['goods_no'].'用户ID'.$this->butout['user_id'];
-                
+                $this->pay_name = '订单' .$instalmentInfo['order_no']. '分期'.$instalmentInfo['term'].'提前还款';
+
                 //实例化支付方式并根据业务信息传值
                 $this->pamentInfo = new PaymentInfo();
                 $this->pamentInfo->setNeedPayment(true);
-                $this->pamentInfo->setPaymentAmount($this->buyout['amount']);
+                $this->pamentInfo->setPaymentAmount($instalmentInfo['amount']);
                 $this->pamentInfo->setPaymentFenqi(0);
                 $this->withholdInfo = new WithholdInfo();
                 $this->withholdInfo->setNeedWithhold(false);
@@ -42,48 +41,52 @@ class Buyout implements BusinessPayInterface{
             }
         }
     }
-    
+
     /**
-     * 
+     * 获取用户ID
      */
     public function getUserId()
     {
         return $this->user_id;
     }
-    
+
+    /**
+     * 获取支付名称
+     */
     public function getPayName(){
         return $this->pay_name;
     }
-    
-    public function getBusinessStatus()
-    {
+
+    /**
+     * 获取支付交易状态
+     */
+    public function getBusinessStatus(){
         return $this->status;
     }
-    
+
     /**
-     * 
-     * {@inheritDoc}
+     * 获取支付信息
      * @see \App\Order\Modules\Repository\BusinessPay\BusinessPayInterface::getPaymentInfo()
      */
     public function getPaymentInfo(): PaymentInfo
     {
         return $this->pamentInfo;
     }
-    
+
     /**
-     * 代扣
+     * 签约代扣信息
      */
     public function getWithHoldInfo() : WithholdInfo
     {
         return $this->withholdInfo;
     }
-    
+
     /**
-     * 预授权
+     * 签约预授权信息
      */
     public function getFundauthInfo() : FundauthInfo
     {
         return $this->fundauthInfo;
     }
-    
+
 }
