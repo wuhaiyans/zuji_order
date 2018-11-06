@@ -123,7 +123,7 @@ class Delivery
             'method'=> 'api.order.delivery',//模拟
             'params' => $params
         ]);
-        LogApi::info("发货请求返回",$response);
+        LogApi::info("发货请求返回",json_decode($response));
 
         return $response;
 
