@@ -30,6 +30,7 @@ class Buyout implements BusinessPayInterface{
                 $this->status = true;
                 $this->pay_name = '买断单号'.$this->buyout['buyout_no'].'订单编号'.$this->buyout['order_no'].'商品单号'.$this->buyout['goods_no'].'用户ID'.$this->butout['user_id'];
                 
+                //实例化支付方式并根据业务信息传值
                 $this->pamentInfo = new PaymentInfo();
                 $this->pamentInfo->setNeedPayment(true);
                 $this->pamentInfo->setPaymentAmount($this->buyout['amount']);
@@ -60,20 +61,6 @@ class Buyout implements BusinessPayInterface{
     }
     
     /**
-     * 获取业务信息
-     * @param array $params
-     */
-    public function getBusinessInfo(string $business_no)
-    {
-        $buyout = OrderBuyout::getInfo($business_no);
-        if($buyout){
-            $this->pamentInfo->setPaymentAmount($buyout['amount']);
-            $this->pamentInfo->setPaymentFenqi(0);
-        }
-        return $buyout;
-    }
-    
-    /**
      * 
      * {@inheritDoc}
      * @see \App\Order\Modules\Repository\BusinessPay\BusinessPayInterface::getPaymentInfo()
@@ -99,25 +86,4 @@ class Buyout implements BusinessPayInterface{
         return $this->fundauthInfo;
     }
     
-    /**
-     * 添加日志
-     */
-    public function addLog(array $userInfo)
-    {
-        //插入日志
-        OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$this->buyout['order_no'],"用户买断发起支付","创建支付成功");
-         //插入订单设备日志
-         $log = [
-         'order_no'      => $this->buyout['order_no'],
-         'action'        =>'用户买断支付',
-         'business_key'  => OrderStatus::BUSINESS_BUYOUT,//此处用常量
-         'business_no'   => $this->buyout['buyout_no'],
-         'goods_no'      => $this->buyout['goods_no'],
-         'operator_id'   => $this->user_id,
-         'operator_name' => $userInfo['username'],
-         'operator_type' => $userInfo['type'],
-         'msg'=>'用户发起支付',
-         ];
-         GoodsLogRepository::add($log);
-    }
 }
