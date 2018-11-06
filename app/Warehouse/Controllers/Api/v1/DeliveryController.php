@@ -334,6 +334,7 @@ class DeliveryController extends Controller
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             //LogApi::info('delivery send order info :',$result['order_no'].$a);
+            return \apiResponse([], ApiStatus::CODE_50000, $a?"true":"false");
             if(!$a){
                 DB::rollBack();
                 return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口失败");
