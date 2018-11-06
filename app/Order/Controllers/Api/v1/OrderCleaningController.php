@@ -294,14 +294,13 @@ class OrderCleaningController extends Controller
      */
     public function createOrderClean(Request $request)
     {
-
         $params = $request->all();
-
         $rules = [
             'business_type'  => 'required',
             'business_no'  => 'required',
             'order_no'   => 'required'
         ];
+
 
         $validateParams = $this->validateParams($rules,$params);
 
