@@ -31,7 +31,10 @@ class User extends \App\Lib\BaseApi{
         ];
 
         $userInfo = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
-		$userInfo['realname'] = $userInfo['realname']?$userInfo['realname']: substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11);
+		//用户认证姓名为空的取用户地址里的姓名,地址也为空时取手机号(中间四个为*)
+		if( !$userInfo['realname'] ){
+			$userInfo['realname'] = isset($userInfo['address']['name']) && $userInfo['address']['name'] ? $userInfo['address']['name'] : substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11) ;
+		}
 		return $userInfo;
     }
     /**
@@ -209,6 +212,26 @@ class User extends \App\Lib\BaseApi{
         LogApi::info("checkToken获取用户信息".$data['method'],$list);
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);//通过token获取用户信息
         LogApi::info("checkToken返回结果".$info);
+        $info = str_replace("\r\n","",$info);
+        $info =json_decode($info,true);
+        return $info;
+    }
+    /**
+     * 获取收件信息
+     * Author: qinliping
+     * @param $spu_id
+     */
+    public static function getReceiveInfo($spu_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.return.address';//获取收件地址信息
+        $data['params'] = [
+            'spu_id' =>$spu_id
+        ];
+        $header = ['Content-Type: application/json'];
+        $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
+        LogApi::info("[getReceiveInfo]获取收件信息".$data['method'],$list);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
+        LogApi::info("[getReceiveInfo]获取收件信息返回结果".$info);
         $info = str_replace("\r\n","",$info);
         $info =json_decode($info,true);
         return $info;

@@ -73,17 +73,21 @@ class OrderController extends Controller
         if( isset($params['params']['coupon']) ){
             $coupon = $params['params']['coupon'];
         }else{
+            $coupon =[];
             //自动调用接口查询优惠券
             $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
                 'sku_id' => $sku[0]['sku_id'],
                 'auth_token' => $params['auth_token'],
             ]);
+            if(isset($coupon[0])){
+                $coupon = $coupon[0];
+            }
         }
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid) && $appid <1){
-            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        if(empty($appid)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[appid]");
         }
 
         if($userType!=2 && empty($userInfo)){
@@ -165,15 +169,25 @@ class OrderController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
 
-        $coupon		= isset($params['params']['coupon'])?$params['params']['coupon']:[];
-
+        if( isset($params['params']['coupon']) ){
+            $coupon = $params['params']['coupon'];
+        }else{
+            //自动调用接口查询优惠券
+            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $sku[0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+            ]);
+            if(isset($coupon[0])){
+                $coupon = $coupon[0];
+            }
+        }
         $addressId		= $params['params']['address_id'];
 
         $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
-        if(empty($appid) && $appid <1){
-            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        if(empty($appid)){
+            return apiResponse([],ApiStatus::CODE_20001,"appid不能为空");
         }
         if(empty($payType) || !isset($payType) || $payType <1){
             return apiResponse([],ApiStatus::CODE_20001,"支付方式错误");
@@ -203,6 +217,80 @@ class OrderController extends Controller
         $res = $this->OrderCreate->create($data);
         if(!$res){
             LogApi::info("下单失败",get_msg());
+            return apiResponse([],ApiStatus::CODE_30005,get_msg());
+
+        }
+
+        return apiResponse($res,ApiStatus::CODE_0);
+    }
+
+    /**
+     *  线下活动领取接口
+     * @author wuhaiyan
+     * @param Request $request
+     * $request['appid']
+     * [
+     *      'appid'	=> '',	            //【必选】int 渠道入口
+     * ]
+     * $request['params']
+     * [
+     *		'address_id'	=> '',	    //【必选】int 用户收货地址
+     *      'destine_no'=>'',           //【必选】 string 预定编号
+     *		'sku_info'	=> [	        //【必选】array	SKU信息
+     *			[
+     *				'sku_id' => '',		//【必选】 int SKU ID
+     *				'sku_num' => '',	//【必选】 int SKU 数量
+     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
+     *              'end_time'=>'',     //【短租必须】string 租用结束时间
+     *			]
+     *		]',
+     * $request['userinfo']     //【必须】array 用户信息  - 转发接口获取
+     * $userinfo [
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'user_id'=>1,   //【必须】string 用户ID
+     *      'user_name'=>1, //【必须】string 用户名
+     *      'mobile'=>1,    //【必须】string手机号
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+
+    public function activityReceive(Request $request){
+
+        $params = $request->all();
+
+        $sku		= isset($params['params']['sku_info'])?$params['params']['sku_info']:[];
+        $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
+        $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
+
+        //判断参数是否设置
+        if(empty($params['appid']) && $params['appid'] <1){
+            return apiResponse([],ApiStatus::CODE_20001,"appid错误");
+        }
+        if($userType!=2 && empty($userInfo)){
+            return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
+        }
+        if(empty($params['params']['destine_no']) || !isset($params['params']['destine_no'])){
+            return apiResponse([],ApiStatus::CODE_20001,"预定编号不能为空");
+        }
+        if(count($sku)<1){
+            return apiResponse([],ApiStatus::CODE_20001,"商品信息错误");
+        }
+        $destineNo		= $params['params']['destine_no'];
+        $appid		    = $params['appid'];
+
+        $data =[
+            'appid'=>$appid,
+            'pay_type'=>7,
+            'address_id'=>0,
+            'sku'=>$sku,
+            'user_id'=>$params['userinfo']['uid'],  //增加用户ID
+            'pay_channel_id'=>4,
+            'destine_no'=>$destineNo,
+        ];
+        $res = $this->OrderCreate->SchoolCreate($data);
+        if(!$res){
+            LogApi::info("活动领取失败",get_msg());
             return apiResponse([],ApiStatus::CODE_30005,get_msg());
 
         }
@@ -681,6 +769,9 @@ class OrderController extends Controller
         }
         $params['userinfo'] =$userInfo;
 
+        if (redisIncr("deliveryReceiveOrder_".$params['order_no'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
         $res = OrderOperate::deliveryReceive($params,0);
         if(!$res){
             return apiResponse([],ApiStatus::CODE_30012);
@@ -736,6 +827,10 @@ class OrderController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+        if (redisIncr("confirmOrder_".$params['params']['order_no'],5)>1) {
+            return apiResponse([],ApiStatus::CODE_30011,'操作太快，请稍等重试');
+        }
+
         $params =$params['params'];
         $params['userinfo'] =$userInfo;
         $res =Service\OrderOperate::confirmOrder($params);
@@ -1002,8 +1097,8 @@ class OrderController extends Controller
                 $payInfo = array();
 
                 if ($orderData) {
-
-                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
+					//订单任何状态都可以查询当前订单的支付状态
+//                    if ($orderData['order_status']==1 || $orderData['order_status']==2) {
                         $orderParams = [
                             'payType' => $orderData['pay_type'],//支付方式 【必须】<br/>
                             'payChannelId' => Channel::Alipay,//支付渠道 【必须】<br/>
@@ -1015,10 +1110,12 @@ class OrderController extends Controller
                         $payInfo = OrderOperate::getPayStatus($orderParams);
 
 
-                    }
+//                    }
 
 
-                }
+                }else{
+					throw new \Exception('当前订单不存在!');
+				}
                 return apiResponse($payInfo,ApiStatus::CODE_0);
 
             }catch (\Exception $e)

@@ -7,6 +7,7 @@ use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderClearingRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,8 @@ class PayController extends Controller
 //		]);exit;
 		
         $params =$request->all();
+		$auth_token = $params['auth_token'];
+		
         $rules = [
             'callback_url'  => 'required',
             'order_no'  => 'required',
@@ -58,6 +61,16 @@ class PayController extends Controller
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 
 		LogApi::id($params['order_no']);
+		
+		if( isset($extended_params['wechat_params']['trade_type']) 
+				&& ($extended_params['wechat_params']['trade_type']=='JSAPI'
+						|| $extended_params['wechat_params']['trade_type']=='MINI' ) ){
+			$_key = 'wechat_openid_'.$auth_token;
+			$openid = \Illuminate\Support\Facades\Redis::get($_key);
+			if( $openid ){
+				$extended_params['wechat_params']['openid'] = trim($openid,'"');
+			}
+		}
 		
 //			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
 //			LogApi::info('获取支付的params', ['params'=>$params]);
@@ -115,29 +128,28 @@ class PayController extends Controller
 	{
 		$input = file_get_contents("php://input");
 		LogApi::setSource('payment_notify');
-
 		$params = json_decode($input,true);
 
 		LogApi::id($params['out_payment_no']??'');
 		LogApi::info('支付异步通知', $input);
-        if(isset($params['sign'])){
-            //数据签名验证
-            $sign = $params['sign'];
-            unset($params['sign']);
-            ksort($params);
-            $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-            if(!$b){
-                echo json_encode([
-                    'status' => 'error',
-                    'msg' => 'Signature error ',
-                ]);exit;
-            }
-        }else{
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'notice Sign is null',
-            ]);exit;
-        }
+//        if(isset($params['sign'])){
+//            //数据签名验证
+//            $sign = $params['sign'];
+//            unset($params['sign']);
+//            ksort($params);
+//            $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//            if(!$b){
+//                echo json_encode([
+//                    'status' => 'error',
+//                    'msg' => 'Signature error ',
+//                ]);exit;
+//            }
+//        }else{
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'notice Sign is null',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -239,17 +251,17 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
 
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 
 		if( is_null($params) ){
 			echo json_encode([
@@ -356,16 +368,16 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
         //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -446,17 +458,17 @@ class PayController extends Controller
 		LogApi::info('预授权冻结异步通知', $input);
 		
 		$params = json_decode($input,true);
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -554,16 +566,16 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
         //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
@@ -1046,17 +1058,17 @@ class PayController extends Controller
 //		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑参数为空', $params);
 			echo json_encode([
@@ -1196,7 +1208,7 @@ class PayController extends Controller
         $smallPage = ceil($total_export_count/$pre_count);
         $abc = 1;
 
-        $headers = ['名称','用户名','手机号', '入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码'];
+        $headers = ['名称', '入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码'];
 
         $orderExcel = array();
         while(true) {
@@ -1210,22 +1222,20 @@ class PayController extends Controller
             LogApi::debug("[payIncomeQueryExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
 
             $orderData = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryListExport($params,$pre_count);
+            $orderDataArray=objectToArray($orderData);
             LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
-            if ($orderData) {
+            if ($orderDataArray) {
                 $data = array();
-                foreach ($orderData['data'] as $item) {
+                foreach ($orderDataArray as $item) {
                     $data[] = [
                         $item['name'],
-                        $item['realname'],
-                        $item['mobile'],
                         date('Y-m-d H:i:s', $item['create_time']),
-                        $item['business_type'],
-                        $item['channel'],
+                        OrderStatus::getBusinessName( $item['business_type']),
+                        Channel::getBusinessName($item['channel']),
                         $item['business_no'],
                         $item['amount'],
                         $item['order_no'],
                         $item['trade_no'],
-
                         $item['out_trade_no'],
                     ];
 

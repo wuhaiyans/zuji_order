@@ -189,6 +189,7 @@ class ExperienceDestineController extends Controller
      * @return array
      * [
      *   'mobile'           => '',  //【可选】 string 用户手机
+     *   'destine_status'   => '',  //【可选】 string 领取状态
      *   'page'             =>'' ,  //【可选】 string 页数
      *   'size'             =>'' ,  //【可选】 string 每页数量
      * ]

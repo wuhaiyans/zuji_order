@@ -1,5 +1,5 @@
 <?php
-namespace App\Order\Modules\Repository\Instalment;
+namespace App\Order\Modules\Repository\Pay\UnderPay;
 
 use App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter;
 use App\Order\Modules\Repository\Instalment\Discounter\Discounter;
@@ -8,7 +8,7 @@ use App\Order\Modules\Repository\Instalment\Discounter\Discounter;
  * 分期计算（日租，n天作为一期）
  *
  */
-class OrderWithhold implements UnderLine {
+class OrderGiveback implements UnderLine {
 
 
     /**

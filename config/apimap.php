@@ -43,6 +43,9 @@ return [
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
 
+    
+    //gaobo
+    'api.payment.url' => 'PayCenterController@pay',
 
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
@@ -221,6 +224,8 @@ return [
 
 
 
+
+
     //续租接口
     // 续租页
     'api.Relet.pageRelet'       => 'ReletController@pageRelet',
@@ -234,6 +239,14 @@ return [
     'api.Relet.userListRelet'       => 'ReletController@userListRelet',
     // 创建续租(支付)
     'api.Relet.createRelet'       => 'ReletController@createRelet',
+    //-+------------------------------------------------------------------------
+    // | 线下订单相关接口
+    //-+------------------------------------------------------------------------
+
+    //线下领取商品接口
+    'api.order.activityReceive' => 'OrderController@activityReceive',
+
+
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
@@ -276,6 +289,8 @@ return [
     'api.buyout.cancel'       => 'BuyoutController@cancel',
     //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    'api.buyout.pay'       => 'PayCenterController@pay',//gaobo
+    
     //支付宝小程序h5买断支付
     'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
 

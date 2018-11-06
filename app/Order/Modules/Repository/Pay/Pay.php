@@ -117,7 +117,6 @@ class Pay extends \App\Lib\Configurable
 		parent::__construct($data);
 	}
 	
-	
 	//-+------------------------------------------------------------------------
 	// | 属性相关 setter 和 getter
 	//-+------------------------------------------------------------------------
@@ -380,6 +379,34 @@ class Pay extends \App\Lib\Configurable
 		LogApi::debug('[支付阶段]取消成功');
 		$this->status = PayStatus::CLOSED;
 		return true;
+	}
+	/**
+	* 更新支付单
+	* @access public
+	* @author gaobo
+	* @throws \Exception
+	* @return bool
+	**/
+	public function update()
+	{
+	    LogApi::debug('[支付阶段]'.$this->trade.'更新');
+	    // 更新 支付阶段 表
+	    $payModel = new OrderPayModel();
+	    $payment_no = \creage_payment_no();
+	    $b = $payModel->limit(1)->where([
+	        'business_type'	=> $this->businessType,
+	        'business_no'	=> $this->businessNo,
+	    ])->update([
+	        'payment_no'  => $payment_no,
+	        'update_time' => time()
+	    ]);
+	    if( !$b ){
+	        LogApi::error('[支付阶段]'.$this->trade.'更新失败');
+	        throw new \Exception( '更新失败' );
+	    }
+	    $this->paymentNo = $payment_no;
+	    LogApi::debug('[支付阶段]'.$this->trade.'更新成功');
+	    return true;
 	}
 	
 	/**
@@ -731,7 +758,7 @@ class Pay extends \App\Lib\Configurable
 		}
 		$data =[
             'out_payment_no'	=> $this->getPaymentNo(),	//【必选】string 业务支付唯一编号
-            'payment_amount'	=> intval($this->getPaymentAmount()*100),//【必选】int 交易金额；单位：分
+            'payment_amount'	=> bcmul($this->getPaymentAmount(),100),//【必选】int 交易金额；单位：分
             'payment_fenqi'		=> $this->getPaymentFenqi(),	//【必选】int 分期数
             'channel_type'	=> $channel,						//【必选】int 支付渠道
             'user_id'		=> $this->getUserId(),			//【可选】int 业务平台yonghID
@@ -741,6 +768,7 @@ class Pay extends \App\Lib\Configurable
             //【必选】string 后台通知地址
             'back_url'		=> config('ordersystem.ORDER_DOMAIN').'/order/pay/paymentNotify',
         ];
+
 		if($channel == Channel::Lebaifen) {
             $paymentAmountBillList = json_decode($this->getPaymentAmountBillList(),true);
 
@@ -748,17 +776,17 @@ class Pay extends \App\Lib\Configurable
                 [
                     'key' => 'zujin',
                     'name' => '租金',
-                    'amount' => intval($paymentAmountBillList['zujin']*100),//【必选】int 交易金额；单位：分
+                    'amount' => bcmul($paymentAmountBillList['zujin'],100),//【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yajin',
                     'name' => '押金',
-                    'amount' => intval($paymentAmountBillList['yajin']*100), //【必选】int 交易金额；单位：分
+                    'amount' =>bcmul($paymentAmountBillList['yajin'],100), //【必选】int 交易金额；单位：分
                 ],
                 [
                     'key' => 'yiwaixian',
                     'name' => '碎屏险',
-                    'amount' => intval($paymentAmountBillList['yiwaixian']*100),//【必选】int 交易金额；单位：分
+                    'amount' => bcmul($paymentAmountBillList['yiwaixian'],100),//【必选】int 交易金额；单位：分
                 ],
             ];
         }
@@ -769,7 +797,6 @@ class Pay extends \App\Lib\Configurable
 				$data['extended_params'] = $params['extended_params'];
 			}
 		}
-		
 		// 获取url
 		$url_info = \App\Lib\Payment\CommonPaymentApi::pageUrl($data);
 		return $url_info;

@@ -6,7 +6,6 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -89,6 +88,25 @@ class OrderBuyout
 		return OrderBuyoutRepository::getInfo($where);
 	}
 
+	/**
+	 * 根据订单号查询买断金额
+	 * @param $data
+	 * @return id
+	 */
+	public static function getByOrderNo($orderNo){
+		if(!$orderNo){
+			return false;
+		}
+		$goodsRepository = new OrderGoodsRepository();
+		$where = [
+			'order_no'=>$orderNo
+		];
+		$goodsInfo = $goodsRepository->getGoodsRow($where);
+		if(!$goodsInfo){
+			return false;
+		}
+		return $goodsInfo;
+	}
 
     /**
      * 查询客服操作提前买断的设备

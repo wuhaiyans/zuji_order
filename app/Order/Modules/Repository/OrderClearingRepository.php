@@ -33,6 +33,38 @@ class OrderClearingRepository
         }
 
         $orderClearData = new OrderClearing();
+
+
+        $authDeductionNo    =   0;
+        $authUnfreezeNo     =   0;
+        $refundCleanNo      =   0;
+        //是否是押金转支付
+        $isAuthDeduction    =   0;
+        //是否是解预授权
+        $isAuthUnfreeze     =   0;
+        //是否是退款
+        $isRefund           =   0;
+        //押金转支付金额
+        $authDeductionAmount = 0;
+        //解押金额
+        $authUnfreezeAmount = 0;
+        //退款金额
+        $refundAmount   =   0;
+        if (isset($param['auth_deduction_amount'])  && floatval($param['auth_deduction_amount'])>0) {
+            $isAuthDeduction = 1;
+            $authDeductionAmount = floatval($param['auth_deduction_amount']);
+        }
+
+        if (isset($param['auth_unfreeze_amount'])  && floatval($param['auth_unfreeze_amount'])>0) {
+            $isAuthUnfreeze = 1;
+            $authUnfreezeAmount = floatval($param['auth_unfreeze_amount']);
+        }
+
+        if (isset($param['refund_amount'])  &&  floatval($param['refund_amount'])>0) {
+            $isRefund   =   1;
+            $refundAmount = floatval($param['auth_unfreeze_amount']);
+        }
+
         //根据订单号查询订单信息
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
@@ -44,27 +76,32 @@ class OrderClearingRepository
 
                 $param['order_type'] = OrderStatus::miniRecover;
             }
-        }
 
-        $authDeductionNo    =   0;
-        $authUnfreezeNo     =   0;
-        $refundCleanNo      =   0;
-        //是否是押金转支付
-        $isAuthDeduction    =   0;
-        //是否是解预授权
-        $isAuthUnfreeze     =   0;
-        //是否是退款
-        $isRefund           =   0;
-        if (isset($param['auth_deduction_amount'])  && floatval($param['auth_deduction_amount'])>0) {
-            $isAuthDeduction = 1;
-        }
+            //如果是微信支付
+            if ($orderInfo['pay_type'] == PayInc::WeChatPay) {
 
-        if (isset($param['auth_unfreeze_amount'])  && floatval($param['auth_unfreeze_amount'])>0) {
-            $isAuthUnfreeze = 1;
-        }
+                    //退款或者退货
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn))
+                    {
+                            $refundAmount   =   normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount)>0 ? normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount): 0;
+                    }
 
-        if (isset($param['refund_amount'])  &&  floatval($param['refund_amount'])>0) {
-            $isRefund   =   1;
+                    //买断或者还机
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturnGoods) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeBuy))
+                    {
+                            $refundAmount   =   normalizeNum($authUnfreezeAmount);
+                    }
+                /**
+                 * 微信支付的方式直接走退款模式，押金和租金一起付的
+                 */
+                    //押金转支付金额
+                    $authDeductionAmount = 0;
+                    //解押金额
+                    $authUnfreezeAmount = 0;
+
+                }
+
+
         }
 
         if ($isAuthDeduction) {
@@ -99,17 +136,13 @@ class OrderClearingRepository
             $status    =   OrderCleaningStatus::orderCleaningUnRefund;
         }
 
-       // if (empty($orderInfo)) return false;
-        //if(redisIncr($param['order_no'].'_orderCleaning_create',60)>1) {
-       //     return false;
-      //  }
         
         if(redisIncr($param['business_no'].'_orderCleaning_create',60)>1) {
             LogApi::debug("[clear]redisIncr");
             return false;
          }
 
-        //小程序如果是穿已经完成的状态，将其它状态也全部变为已完成的状态
+        //小程序如果是传已经完成的状态，将其它状态也全部变为已完成的状态
         if (isset($param['status']) && $param['status']==OrderCleaningStatus::orderCleaningComplete) {
 
             $status    =   OrderCleaningStatus::orderCleaningComplete;
@@ -133,13 +166,13 @@ class OrderClearingRepository
             'order_type' => $param['order_type'] ?? 1,
             'auth_no'=> $param['out_auth_no'] ??  '',
             'payment_no'=> $param['out_payment_no'] ??  '',
-            'auth_deduction_amount'=>    $param['auth_deduction_amount'] ?? 0.00 ,
+            'auth_deduction_amount'=>    $authDeductionAmount ,
             'auth_deduction_time'=>  $param['auth_deduction_time'] ??  0 ,
             'auth_deduction_status'=>    $authDeductionStatus ?? 0 ,
-            'auth_unfreeze_amount'=>    $param['auth_unfreeze_amount']   ??  0.00 ,
+            'auth_unfreeze_amount'=>    $authUnfreezeAmount ,
             'auth_unfreeze_time'=>   $param['auth_unfreeze_time']   ??  0 ,
             'auth_unfreeze_status'=> $authUnfreezeStatus  ??  0 ,
-            'refund_amount'=>   $param['refund_amount']  ??  0.00 ,
+            'refund_amount'=>   $refundAmount ,
             'refund_time'=>     $param['refund_time']  ??  0 ,
             'refund_status'=>   $authRefundStatus  ??  0 ,
             'status'=>  $status  ??  0 ,
@@ -266,7 +299,73 @@ class OrderClearingRepository
     }
 
 
+    /**
+     * 退款结算数据列表导出
+     * Author: qinliping
+     * @param $param
+     * @param int $pagesize
+     * @return mixed
+     */
+    public static function getOrderCleanListExport($param, $pagesize=5)
+    {
+        $whereArray = array();
+        //出账状态
+        //根据订单编号
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
 
+            $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+        //应用来源ID
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
+        }
+
+        //出账类型
+        if (isset($param['out_type']) && !empty($param['out_type'])) {
+            $whereArray[] = ['business_type', '=', $param['out_type']];
+        }
+
+        //出账方式
+        if (isset($param['out_account']) && !empty($param['out_account'])) {
+            $whereArray[] = ['out_account', '=', $param['out_account']];
+        }
+
+        //出账状态
+        if (isset($param['status']) && !empty($param['status'])) {
+            $whereArray[] = ['status', '=', $param['status']];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+        LogApi::debug("[getOrderCleanListExport]查询条件",$whereArray );
+        $result =  OrderClearing::query()
+            ->where($whereArray)
+            ->orderBy('create_time','DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get()->toArray();
+        return $result;
+
+    }
 
     /**
      * 订单清算取消接口

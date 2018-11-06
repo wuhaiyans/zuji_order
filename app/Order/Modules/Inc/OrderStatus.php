@@ -80,6 +80,8 @@ class OrderStatus{
     const orderMiniService=3;
     //微回收
     const miniRecover=4;
+    //活动领取订单
+    const orderActivityService =5;
 
     //--------------------------------------------------------------------------------------------
     //--+ 订单业务类型 --------------------------------------------------------------------------
@@ -191,6 +193,7 @@ class OrderStatus{
             self::orderStoreService => '门店订单',
             self::orderMiniService => '小程序订单',
             self::miniRecover       => '微回收',
+            self::orderActivityService => '活动领取订单',
 
         ];
     }
