@@ -324,7 +324,7 @@ class DeliveryController extends Controller
 
             //修改发货信息
             $this->delivery->send($params);
-            LogApi::info('delivery send info :',$params);
+            //LogApi::info('delivery send info :',$params);
 
             //操作员信息,用户或管理员操作有
             $user_info['user_id'] = $params['user_id'];
