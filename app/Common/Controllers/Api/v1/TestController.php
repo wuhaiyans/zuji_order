@@ -49,6 +49,9 @@ class TestController extends Controller
 		}
 		try{
 			
+			$str = 'test-1: haha';
+			var_dump( '文本内容：'.$str );
+			
 			$accountId = 'DCODMVCN';
 			
 			// 用户实名身份信息
@@ -63,8 +66,49 @@ class TestController extends Controller
 			// 注册事务
 			$b = $notaryApp->registerTransation('1', 'Test123', $customer);
 			
+			// 位置
+			$location = new \App\Lib\Alipay\Notary\Location();
+			$location->setIp('192.168.1.123');
 			
-			var_dump( $b,$notaryApp );exit;
+			// 元数据
+			$meta = new \App\Lib\Alipay\Notary\NotaryMeta();
+			$meta->setPhase('test-1');
+			$meta->setTimestamp( date('Y-m-d H:i:s') );
+			$meta->setLocation($location);
+			
+//			$notary = $notaryApp->textNotary( $str, $meta );
+//			var_dump( '文本存证：', $notary );
+			
+			$notary = $notaryApp->fileNotary( __DIR__.'/test.jpg', $meta );
+			var_dump( '文件存证：', $notary );
+			
+			
+//			$b = $notaryApp->notaryStatus( $notary->getTxHash(), $notary->getContentHash() );
+//			var_dump( '存证核验：', $b );
+			
+//			$content = $notaryApp->textNotaryGet( $notary->getTxHash() );
+//			var_dump( '文本存证下载：', $content );
+			
+			$content = $notaryApp->fileNotaryGet( $notary->getTxHash() );
+			var_dump( '文本存证下载：', $content );
+			$contentHash = hash('sha256', $content);
+			var_dump( '$contentHash：', $contentHash );
+			if( $contentHash == $notary->getContentHash() ){
+				file_put_contents(__DIR__.'/test.download.jpg', $content);
+			}
+			
+			
+			$content = $notaryApp->notaryTransactionGet( );
+			var_dump( '事务下载：', $content );
+			if( $content ){
+				file_put_contents(__DIR__.'/t-'.$notaryApp->getTransationToken().'.zip', $content);
+			}
+			
+			exit;
+			
+			
+			
+			
 			exit;
 			$entity = [
 				// 用户类型；固定值；ENTERPRISE：企业实体
@@ -115,8 +159,6 @@ class TestController extends Controller
 			$meta->setTimestamp( date('Y-m-d H:i:s') );
 			$meta->setLocation($location);
 			
-			$str = 'test-1: haha';
-			var_dump( '文本内容：'.$str );
 			
 			// 文本存证
 			$txhash = \App\Lib\Alipay\Notary\NotaryApi::textNotary( $str, $meta );
@@ -127,8 +169,11 @@ class TestController extends Controller
 //			
 //			var_dump( $result );exit;
 			
-			// 存证下载
-			$result = \App\Lib\Alipay\Notary\NotaryApi::textNotaryGet( $txhash, $meta);
+//			// 文本存证下载
+//			$result = \App\Lib\Alipay\Notary\NotaryApi::textNotaryGet( $txhash, $meta);
+			
+			// 文本存证下载
+			$result = \App\Lib\Alipay\Notary\NotaryApi::fileNotaryGet( $txhash, $meta);
 			
 			var_dump( $result );exit;
 			

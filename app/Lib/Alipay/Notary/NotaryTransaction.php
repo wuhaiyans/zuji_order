@@ -98,19 +98,82 @@ class NotaryTransaction {
 	/**
 	 * 文本存证
 	 * @param string $content
-	 * @return bool
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
+	 * @return \App\Lib\Alipay\Notary\Notary
 	 */
-	public function textNotary(string $content): bool {
-		return false;
+	public function textNotary(string $content, NotaryMeta $meta): Notary {
+		$meta->setAccountId($this->accountId);
+		$meta->setToken($this->token);
+		// 文本存证
+		$txhash = NotaryApi::textNotary( $content, $meta );
+		$contentHash = hash('sha256', $content);
+		
+		// 保存
+		$id = 123;
+		
+		$textNotary = new Notary($id, $this->token, $txhash, Notary::TYPE_TEXT, $content, $contentHash, $meta);
+		
+		return $textNotary;
+	}
+	public function textNotaryGet($txHash):string{
+		$meta = new NotaryMeta();
+		$meta->setAccountId($this->accountId);
+		$meta->setToken($this->token);
+		return NotaryApi::textNotaryGet( $txHash, $meta );
 	}
 
 	/**
 	 * 文件存证
 	 * @param string $file
-	 * @return bool
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
+	 * @return \App\Lib\Alipay\Notary\Notary
 	 */
-	public function fileNotary(string $file): bool {
-		return false;
+	public function fileNotary(string $file, NotaryMeta $meta): Notary {
+		$meta->setAccountId($this->accountId);
+		$meta->setToken($this->token);
+		// 文件存证
+		$txhash = NotaryApi::fileNotary( $file, $meta );
+		$content = file_get_contents($file);
+		$contentHash = hash('sha256', $content);
+		
+		// 保存
+		$id = 123;
+		
+		$textNotary = new Notary($id, $this->token, $txhash, Notary::TYPE_TEXT, $file, $contentHash, $meta);
+		
+		return $textNotary;
+	}
+	
+	/**
+	 * 下载 文件存证
+	 * @param type $txHash
+	 * @return string
+	 */
+	public function fileNotaryGet($txHash):string{
+		$meta = new NotaryMeta();
+		$meta->setAccountId($this->accountId);
+		$meta->setToken($this->token);
+		return NotaryApi::fileNotaryGet( $txHash, $meta );
 	}
 
+	/**
+	 * 核验存证
+	 * @param string $txHash	存证凭证
+	 * @param string $contentHash	存证内容hash值
+	 * @return bool	true：存证；false：不存在
+	 */
+	public function notaryStatus( string $txHash, string $contentHash ):string{
+		$meta = new NotaryMeta();
+		$meta->setAccountId($this->accountId);
+		$meta->setToken($this->token);
+		return NotaryApi::notaryStatus( $txHash, $contentHash, $meta);
+	}
+	
+	/**
+	 * 下载 事务
+	 * @return string
+	 */
+	public function notaryTransactionGet():string{
+		return NotaryApi::notaryTransactionGet( $this->accountId, $this->token );
+	}
 }
