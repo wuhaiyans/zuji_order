@@ -343,7 +343,7 @@ class DeliveryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getFile());
         }
 
         return \apiResponse([]);
