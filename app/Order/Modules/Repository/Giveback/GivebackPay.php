@@ -1,15 +1,15 @@
 <?php
-namespace App\Order\Modules\Repository\Buyout;
+namespace App\Order\Modules\Repository\Giveback;
 use App\Order\Modules\Repository\Pay\BusinessPay\{PaymentInfo,WithholdInfo,FundauthInfo};
 use App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayInterface;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Lib\ApiStatus;
-use App\Order\Modules\Inc\OrderBuyoutStatus;
+use \App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Service\OrderBuyout;
+use \App\Order\Modules\Service\OrderGiveback;
 
-class Buyout implements BusinessPayInterface{
+class GivebackPay implements BusinessPayInterface{
     
     private $pamentInfo;
     private $withholdInfo;
@@ -17,23 +17,24 @@ class Buyout implements BusinessPayInterface{
     private $business_no = '';
     private $status      = false;
     private $user_id     = 0;
-    private $butout      = null;
+    private $giveback    = null;
     private $pay_name    = '';
     
     public function __construct(string $business_no){
+		$givebackService = new OrderGiveback();
         //find
         $this->business_no = $business_no;
-        $this->buyout = OrderBuyout::getInfo($business_no);
-        if($this->buyout){
-            $this->user_id = $this->buyout['user_id'];
-            if($this->buyout['status'] == OrderBuyoutStatus::OrderInitialize){
+        $this->giveback = $givebackService->getInfoByGivabackNo($business_no);
+        if($this->giveback){
+            $this->user_id = $this->giveback['user_id'];
+            if($this->giveback['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_PAY){
                 $this->status = true;
-                $this->pay_name = '买断单号'.$this->buyout['buyout_no'].'订单编号'.$this->buyout['order_no'].'商品单号'.$this->buyout['goods_no'].'用户ID'.$this->butout['user_id'];
+                $this->pay_name = '还机单号'.$this->giveback['giveback_no'].'订单编号'.$this->giveback['order_no'].'商品单号'.$this->giveback['goods_no'].'用户ID'.$this->giveback['user_id'];
                 
                 //实例化支付方式并根据业务信息传值
                 $this->pamentInfo = new PaymentInfo();
                 $this->pamentInfo->setNeedPayment(true);
-                $this->pamentInfo->setPaymentAmount($this->buyout['amount']);
+                $this->pamentInfo->setPaymentAmount($this->giveback['instalment_amount']+$this->giveback['compensate_amount']);
                 $this->pamentInfo->setPaymentFenqi(0);
                 $this->withholdInfo = new WithholdInfo();
                 $this->withholdInfo->setNeedWithhold(false);

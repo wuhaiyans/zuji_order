@@ -167,7 +167,11 @@ class ExperienceDestineRepository
 
             $whereArray[] = ['mobile', '=', $param['mobile']];
         }
+        //根据领取状态
+        if (isset($param['destine_status']) && !empty($param['destine_status'])) {
 
+            $whereArray[] = ['destine_status', '=', $param['destine_status']];
+        }
         return $whereArray;
     }
 
