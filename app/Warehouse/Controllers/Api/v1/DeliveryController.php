@@ -330,7 +330,7 @@ class DeliveryController extends Controller
             $user_info['user_id'] = $params['user_id'];
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
-
+            return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口");
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             //LogApi::info('delivery send order info :',$orderDetail);
