@@ -168,80 +168,77 @@ class LogApi {
 				$key,
 				$msg,
 				trim($data));
+		\Illuminate\Support\Facades\Storage::append('logjob.log', $str);
 		
-		$job = new \App\Jobs\LogJob($str);
-		//$job->delay(5);
-//		dispatch( $job );
-		
-		$_data = [
-			'service' => gethostname(),					// 服务器名称
-			'source' => self::$source,					// 日志来源
-			'message' => $msg,
-			'host' => request()->server('HTTP_HOST'),	// 	Host名称
-			'data' => [
-				'id'	=> self::$id,					// 数据标记
-				'type'	=> $type,						// 数据类型
-				'key'	=> $key,						// 程序标记
-				'level' => $level,						// 级别
-				'session_id' => session_id(),			// 回话
-				'user_id' => '',						// 用户ID
-				'serial_no' => self::_autoincrement(),	// 序号
-				'content' => $data,						// 内容
-				'trace' => $file.'('.$line.'):'.$function,// 位置信息
-			],
-		];
-//		// Redis 发布
-		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
-		
-		// 日志系统接口
-		try {
-			// 请求
-			$err_flag = false;
-			$__data = $_data;
-			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
-			
-			// 请求失败
-			if( Curl::getErrno() !=0 ){
-				$err_flag = true;
-				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
-				$__data['message'] = '日志Api请求Curl错误';
-				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
-				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
-				$__data['data']['content'] = Curl::getInfo();
-			}
-			
-			// 请求结果装换
-			$res_arr = json_decode($res,true);
-			
-			// 请求返回格式错误
-			if( !is_array($res_arr) || !isset($res_arr['code']) ){
-				$err_flag = true;
-				$__data['message'] = '日志Api请求结果格式错误';
-				$__data['data']['content'] = $res;
-				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
-				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
-			}
-			
-			// 请求处理状态
-			if( $res_arr['code']!='0' ){// 非0为不正常
-				$err_flag = true;
-				$__data['message'] = '日志Api请求处理失败';
-				$__data['data']['content'] = $res;
-				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
-				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
-			}
-			// 请求错误
-			if( $err_flag ){
-				dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
-				$__data['data']['id'] = 'LogApi';
-				$__data['data']['type'] = 'api-error';
-				$__data['data']['level'] = 'Error';
-				$__data['data']['serial_no'] = self::_autoincrement();
-				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
-			}
-		} catch (\Exception $exc) {
-			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
-		}
+//		$_data = [
+//			'service' => gethostname(),					// 服务器名称
+//			'source' => self::$source,					// 日志来源
+//			'message' => $msg,
+//			'host' => request()->server('HTTP_HOST'),	// 	Host名称
+//			'data' => [
+//				'id'	=> self::$id,					// 数据标记
+//				'type'	=> $type,						// 数据类型
+//				'key'	=> $key,						// 程序标记
+//				'level' => $level,						// 级别
+//				'session_id' => session_id(),			// 回话
+//				'user_id' => '',						// 用户ID
+//				'serial_no' => self::_autoincrement(),	// 序号
+//				'content' => $data,						// 内容
+//				'trace' => $file.'('.$line.'):'.$function,// 位置信息
+//			],
+//		];
+////		// Redis 发布
+//		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
+//		
+//		// 日志系统接口
+//		try {
+//			// 请求
+//			$err_flag = false;
+//			$__data = $_data;
+//			$res = Curl::post(config('logsystem.LOG_API'), json_encode($_data));
+//			
+//			// 请求失败
+//			if( Curl::getErrno() !=0 ){
+//				$err_flag = true;
+//				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
+//				$__data['message'] = '日志Api请求Curl错误';
+//				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+//				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+//				$__data['data']['content'] = Curl::getInfo();
+//			}
+//			
+//			// 请求结果装换
+//			$res_arr = json_decode($res,true);
+//			
+//			// 请求返回格式错误
+//			if( !is_array($res_arr) || !isset($res_arr['code']) ){
+//				$err_flag = true;
+//				$__data['message'] = '日志Api请求结果格式错误';
+//				$__data['data']['content'] = $res;
+//				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+//				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+//			}
+//			
+//			// 请求处理状态
+//			if( $res_arr['code']!='0' ){// 非0为不正常
+//				$err_flag = true;
+//				$__data['message'] = '日志Api请求处理失败';
+//				$__data['data']['content'] = $res;
+//				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
+//				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
+//			}
+//			// 请求错误
+//			if( $err_flag ){
+//				dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
+//				$__data['data']['id'] = 'LogApi';
+//				$__data['data']['type'] = 'api-error';
+//				$__data['data']['level'] = 'Error';
+//				$__data['data']['serial_no'] = self::_autoincrement();
+//				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
+//			}
+//		} catch (\Exception $exc) {
+//			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
+//		}
 
 		
 		return self::getInstace();
