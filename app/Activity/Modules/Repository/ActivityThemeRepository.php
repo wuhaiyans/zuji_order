@@ -11,8 +11,8 @@ class ActivityThemeRepository
      * @param $id int 活动主题id
      * @return $data
      */
-   public static function getInfo($id){
-       $data = ActivityTheme::query()->where(['id='.$id])->first();
+   public static function getInfo($where){
+       $data = ActivityTheme::query()->where($where)->first();
        if (!$data) return false;
        return $data->toArray();
    }
