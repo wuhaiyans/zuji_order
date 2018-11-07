@@ -176,9 +176,9 @@ class PayincomeController extends Controller
 
         // 入账方式
         $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
-        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
 
-            $channel       = $channel . "-" . \App\Order\Modules\Repository\Pay\Channel::getUnderLineBusinessTypeName($info['under_channel']);;
+        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+            $channel = $channel . "-" . \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
         }
 
         $info['channel'] = $channel;
@@ -233,6 +233,17 @@ class PayincomeController extends Controller
     public function underLineScene(Request $request){
 
         $list = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessType();
+
+        return apiResponse($list,ApiStatus::CODE_0,"success");
+    }
+
+    /**
+     * 线下缴款类型
+     * @return Array
+     */
+    public function underLinePayType(Request $request){
+
+        $list = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderBusinessType();
 
         return apiResponse($list,ApiStatus::CODE_0,"success");
     }
