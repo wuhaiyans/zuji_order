@@ -188,6 +188,45 @@ class PayincomeController extends Controller
 
 
     /**
+     * 线下手机号获取订单信息
+     * @return Array
+     */
+    public function getOrderInfoByPhone(Request $request){
+        $params     = $request->all();
+        $rules = [
+            'mobile'          => 'required',  // 手机号
+        ];
+        // 参数过滤
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([], $validateParams['code']);
+        }
+
+        $params = $params['params'];
+        $whereArray = [
+            'mobile'    => $params['mobile']
+        ];
+
+        $orderList = DB::table('order_info')
+            ->select('order_no')
+            ->where($whereArray)
+            ->get();
+        $orderList = objectToArray($orderList);
+        if(!$orderList){
+            return apiResponse( [], ApiStatus::CODE_50000, '参数错误...');
+        }
+
+        foreach($orderList as &$item){
+            $goods_obj = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$item]);
+            $goodsInfo = objectToArray($goods_obj);
+
+            $item['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
+            $item['goods_no']   =   $goodsInfo['goods_no'] ? $goodsInfo['goods_no'] : "";
+        }
+        return apiResponse($orderList,ApiStatus::CODE_0,"success");
+    }
+
+    /**
      * 线下还款场景
      * @return Array
      */
@@ -276,10 +315,9 @@ class PayincomeController extends Controller
         // 实现业务
         $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $result = $orderService->execute();
-
         if(!$result){
             DB::rollBack();
-            \App\Lib\Common\LogApi::error('[underLineAdd]业务实现失败',$params);
+            \App\Lib\Common\LogApi::error('[underLinePay]业务实现失败',$params);
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
         }
 

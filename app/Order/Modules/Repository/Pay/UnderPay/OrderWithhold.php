@@ -11,13 +11,21 @@ class OrderWithhold implements UnderLine {
      */
     protected $order_no = '';
 
+    /**
+    * 分期数组
+    */
+    private $instalment_ids;
+
     private $componnet;
 
 
     public function __construct( $params ) {
-        $this->order_no = $params['order_no'];
 
         $this->componnet = $params;
+
+        $this->order_no = $params['order_no'];
+
+        $this->instalment_ids = $params['extend'];
     }
 
 
@@ -27,9 +35,7 @@ class OrderWithhold implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-
         $instalmentList  = $this->instalmentList();
-
         $amount = 0;
         foreach($instalmentList as $item){
             $amount += $item['amount'];
@@ -43,20 +49,17 @@ class OrderWithhold implements UnderLine {
      * 实现具体业务
      * @return bool true  false
      */
-    public function execute( ){
+    public function execute(){
 
-        $surplusAmount  = $this->componnet['amount'];
 
         $instalmentList  = $this->instalmentList();
 
         foreach($instalmentList as $item){
-
-            if($surplusAmount >= $item['amount']){
-                \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
+            $resule = \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
+            if(!$resule){
+                LogApi::debug('[underLinePay]修改分期状态错误：'.$this->order_no);
+                return false;
             }
-
-            $surplusAmount -= $item['amount'];
-
         }
 
         return true;
@@ -72,17 +75,20 @@ class OrderWithhold implements UnderLine {
 
         $statusArr = [OrderInstalmentStatus::UNPAID,  OrderInstalmentStatus::FAIL];
 
-        $where = [
-            'order_no'  => $this->order_no,
-        ];
+        if(!$this->instalment_ids){
+            LogApi::debug('[underLinePay]获取分期信息错误：'.$this->order_no);
+            return [];
+        }
+
+        $instalment_ids = explode(',',$this->instalment_ids);
 
         $instalmentList = \App\Order\Models\OrderGoodsInstalment::query()
-            ->where($where)
+            ->whereIn('id',$instalment_ids)
             ->whereIn('status',$statusArr)
             ->get()->toArray();
 
         if(!$instalmentList){
-            LogApi::debug('[getPayAmount]分期错误：'.$this->order_no);
+            LogApi::debug('[underLinePay]分期错误：'.$this->order_no);
             return [];
         }
 
