@@ -20,19 +20,6 @@ class OrderPayIncomeStatus{
      */
     const UNDERLINE = 4;
 
-    /**
-     * @var int 线下转账方式 银行转账
-     */
-    const UNDER_BANK = 1;
-    /**
-     * @var int 线下转账方式 支付宝
-     */
-    const UNDER_ALIPAY = 2;
-    /**
-     * @var int 线下转账方式 微信
-     */
-    const UNDER_WECHAT = 3;
-
 
     /**
      * 入账渠道
@@ -47,16 +34,6 @@ class OrderPayIncomeStatus{
         ];
     }
 
-    /**
-     * 线下缴款类型
-     * @return array
-     */
-    public static function getUnderBusinessType(){
-        return [
-            self::UNDER_BANK 	    => '银行转账',
-            self::UNDER_ALIPAY 	    => '支付宝转账',
-            self::UNDER_WECHAT 	    => '微信转账',
-        ];
-    }
+
 }
 
