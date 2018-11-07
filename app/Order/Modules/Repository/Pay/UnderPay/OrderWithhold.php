@@ -11,11 +11,6 @@ class OrderWithhold implements UnderLine {
      */
     protected $order_no = '';
 
-    /**
-    * 分期数组
-    */
-    private $instalment_ids;
-
     private $componnet;
 
 
@@ -25,7 +20,6 @@ class OrderWithhold implements UnderLine {
 
         $this->order_no = $params['order_no'];
 
-        $this->instalment_ids = $params['extend'];
     }
 
 
@@ -52,18 +46,21 @@ class OrderWithhold implements UnderLine {
     public function execute(){
 
 
+        $surplusAmount  = $this->componnet['amount'];
+
         $instalmentList  = $this->instalmentList();
 
         foreach($instalmentList as $item){
-            $resule = \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
-            if(!$resule){
-                LogApi::debug('[underLinePay]修改分期状态错误：'.$this->order_no);
-                return false;
+
+            if($surplusAmount >= $item['amount']){
+                \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
             }
+
+            $surplusAmount -= $item['amount'];
+
         }
 
         return true;
-
     }
 
     /**
@@ -75,15 +72,12 @@ class OrderWithhold implements UnderLine {
 
         $statusArr = [OrderInstalmentStatus::UNPAID,  OrderInstalmentStatus::FAIL];
 
-        if(!$this->instalment_ids){
-            LogApi::debug('[underLinePay]获取分期信息错误：'.$this->order_no);
-            return [];
-        }
-
-        $instalment_ids = explode(',',$this->instalment_ids);
+        $where = [
+            'order_no'  => $this->order_no,
+        ];
 
         $instalmentList = \App\Order\Models\OrderGoodsInstalment::query()
-            ->whereIn('id',$instalment_ids)
+            ->where($where)
             ->whereIn('status',$statusArr)
             ->get()->toArray();
 
@@ -94,7 +88,5 @@ class OrderWithhold implements UnderLine {
 
         return $instalmentList;
     }
-
-
 
 }

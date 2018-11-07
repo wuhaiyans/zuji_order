@@ -31,8 +31,8 @@ class UnderPayStatus{
     public static function getBusinessType(){
         return [
             self::OrderWithhold     => '支付租金',
-            self::OrderGiveback     => '支付还机赔偿金',
-            self::OrderRefund       => '支付退货赔偿金',
+            self::OrderGiveback     => '支付赔偿金',
+//            self::OrderRefund       => '支付退货赔偿金',
             self::OrderBuyout       => '支付买断金',
             self::OrderRelet        => '支付续租金',
         ];
