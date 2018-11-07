@@ -56,7 +56,7 @@ class OrderRelet implements UnderLine {
         /**
          * 请求接口 计算商品总租金
          */
-        $url = config('ordersystem.OLD_ORDER_API');
+        $url  = config('ordersystem.OLD_ORDER_API');
         $data = [
             'version'		=> '1.0',
             'sign_type'		=> 'MD5',
@@ -69,11 +69,18 @@ class OrderRelet implements UnderLine {
                 'spu_id'	=> $spu_id,
             ],
         ];
+
         $info = Curl::post($url, json_encode($data));
         $info = json_decode($info,true);
-        p($info);
 
+        if($info['code'] !== '0'){
+            LogApi::debug('[underLinePay]获取续租商品金额错误：'.$this->order_no);
+            return false;
+        }
 
+        $price  = $info['data'][0]['price'];
+
+        return $price;
 
 
     }
