@@ -237,6 +237,17 @@ class PayincomeController extends Controller
         return apiResponse($list,ApiStatus::CODE_0,"success");
     }
 
+    /**
+     * 线下缴款类型
+     * @return Array
+     */
+    public function underLinePayType(Request $request){
+
+        $list = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderBusinessType();
+
+        return apiResponse($list,ApiStatus::CODE_0,"success");
+    }
+
 
     /**
      * 线下支付 获取所需要支付金额
