@@ -3,6 +3,7 @@ namespace App\Order\Modules\Repository\Pay\UnderPay;
 
 use App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter;
 use App\Order\Modules\Repository\Instalment\Discounter\Discounter;
+use App\Order\Modules\Repository\Order\Goods;
 
 class OrderBuyout implements UnderLine {
 
@@ -12,7 +13,7 @@ class OrderBuyout implements UnderLine {
      */
     protected $order_no = '';
 
-    private $componnet;
+    private $componnet = null;
 
 
     public function __construct( $params ) {
@@ -28,7 +29,11 @@ class OrderBuyout implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-
+        $goodsInfo = Goods::getByOrderNo($this->order_no);
+        if($goodsInfo){
+            return $goodsInfo['buyout_price'];
+        }
+        return false;
     }
 
     /**

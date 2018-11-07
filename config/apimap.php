@@ -308,6 +308,8 @@ return [
     'api.pay.payIncomeWhere'        => 'PayincomeController@payIncomeWhere',
     // 线下还款场景
     'api.pay.getOrderInfoByPhone'   => 'PayincomeController@getOrderInfoByPhone',
+    // 线下缴款类型
+    'api.pay.underLinePayType'      => 'PayincomeController@underLinePayType',
     // 线下还款场景
     'api.pay.underLineScene'        => 'PayincomeController@underLineScene',
     // 线下支付 获取所需要支付金额
