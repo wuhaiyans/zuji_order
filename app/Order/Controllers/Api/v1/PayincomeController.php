@@ -59,9 +59,23 @@ class PayincomeController extends Controller
             'business_type'     => 'required',
             'channel'      		=> 'required',
             'amount'  			=> 'required',
+            'kw_type'           => 'required',
+            'keywords'          => 'required',
             'begin_time'       	=> 'required',
             'end_time'       	=> 'required',
         ]);
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
 
         $incomeList = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
         if(!is_array($incomeList)){
