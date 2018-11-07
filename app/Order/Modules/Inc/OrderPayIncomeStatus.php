@@ -48,7 +48,7 @@ class OrderPayIncomeStatus{
     }
 
     /**
-     * 入账渠道
+     * 线下缴款类型
      * @return array
      */
     public static function getUnderBusinessType(){
