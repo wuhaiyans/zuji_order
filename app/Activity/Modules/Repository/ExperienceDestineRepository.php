@@ -120,14 +120,13 @@ class ExperienceDestineRepository
     public static function getUserExperience($userId,$experienceId){
         if (empty($userId)) return false;
         if (empty($experienceId)) return false;
-        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'experience_id'=>$experienceId])->first();
+        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'activity_id'=>$experienceId])->first();
         if($info){
             $info = $info->toArray();
-            $experience = ActivityExperience::query()->where(['id'=>$experienceId])->first()->toArray();;
+            $experience = ActivityExperience::query()->where(['id'=>$info['experience_id']])->first()->toArray();;
             $info = array_merge($experience,$info);
         }
         return !empty($info)?objectToArray($info):false;
-
     }
     /**
      * 获取预定活动分页列表

@@ -28,7 +28,7 @@ class OrderBuyout implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-        return 100;
+
     }
 
     /**

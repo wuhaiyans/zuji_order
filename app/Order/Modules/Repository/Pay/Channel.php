@@ -34,20 +34,6 @@ class Channel {
 	 */
 	const UnderLine = 6;
 
-
-	/**
-	 * 线下支付 1银行转账
-	 */
-	const UnderBank = 1;
-	/**
-	 * 线下支付 2支付宝转账
-	 */
-	const UnderAlipay = 2;
-	/**
-	 * 线下支付 3微信转账
-	 */
-	const UnderWeChat = 3;
-
 	/**
 	 * 订单入账方式
 	 * @return array
@@ -59,7 +45,7 @@ class Channel {
 			self::Jdpay 	=> '京东支付',
 			self::Wechat 	=> '微信支付',
 			self::Lebaifen 	=> '乐百分支付',
-			self::UnderLine 	=> '线下支付',
+			self::UnderLine => '线下支付',
 		];
 	}
     /**
@@ -75,29 +61,4 @@ class Channel {
         }
         return '';
     }
-
-	/**
-	 * 线下支付方式
-	 * @return array
-	 */
-	public static function getUnderLineBusinessType(){
-		return [
-			self::UnderBank 	=> '银行转账',
-			self::UnderAlipay 	=> '支付宝转账',
-			self::UnderWeChat 	=> '微信转账',
-		];
-	}
-
-	/**
-	 * 获取线下支付方式方式名称
-	 * @param  $type int 线下入账方式类型
-	 * @return string 线下入账方式名称
-	 */
-	public static function getUnderLineBusinessTypeName(int $type):string {
-		$list = self::getUnderLineBusinessType();
-		return $list[$type];
-	}
-
-
-
 }
