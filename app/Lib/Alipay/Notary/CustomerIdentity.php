@@ -1,6 +1,6 @@
 <?php
 /**
- * 蚂蚁金服 金融科技 客户身份标识 封装
+ * 蚂蚁金服 金融科技 客户实名身份标识 封装
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  * @copyright (c) 2018, Huishoubao
@@ -10,8 +10,8 @@
 namespace App\Lib\Alipay\Notary;
 
 /**
- * CustomerIdentity 客户身份标识 类
- * <p><b>注意：</b>客户身份信息，必须实名，否则无法使用可信存证</p>
+ * CustomerIdentity 客户实名身份标识 类
+ * <p><b>注意：</b>客户实名身份信息，必须实名，否则无法使用可信存证</p>
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
