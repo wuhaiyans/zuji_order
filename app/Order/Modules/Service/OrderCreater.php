@@ -13,6 +13,7 @@ use App\Order\Models\Order;
 use App\Order\Models\OrderLog;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\OrderCreater\ActivityComponnet;
 use App\Order\Modules\OrderCreater\AddressComponnet;
 use App\Order\Modules\OrderCreater\ChannelComponnet;
 use App\Order\Modules\OrderCreater\CouponComponnet;
@@ -24,6 +25,7 @@ use App\Order\Modules\OrderCreater\OrderPayComponnet;
 use App\Order\Modules\OrderCreater\ReceiveCouponComponnet;
 use App\Order\Modules\OrderCreater\RiskComponnet;
 use App\Order\Modules\OrderCreater\SkuComponnet;
+use App\Order\Modules\OrderCreater\StoreAddressComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
 use App\Order\Modules\PublicInc;
@@ -72,16 +74,13 @@ class OrderCreater
      */
 
     public function create($data){
-        $orderNo = OrderOperate::createOrderNo(1);
-        if($data['pay_type'] == PayInc::LebaifenPay){
-            //如果支付方式为乐百分 订单类型为 微回收
-            $orderType =OrderStatus::miniRecover;
-        }else{
-            $orderType =OrderStatus::orderOnlineService;
-        }
+
+        $orderType = OrderStatus::getOrderTypeId(['pay_type'=>$data['pay_type'],'destine_no'=>$data['destine_no']]);
+
+        $orderNo = OrderOperate::createOrderNo($orderType);
 
         try{
-            DB::beginTransaction();
+
             //订单创建构造器
             $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
 
@@ -95,6 +94,10 @@ class OrderCreater
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
+
+            //活动
+            $orderCreater = new ActivityComponnet($orderCreater,$data['destine_no']);
+
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
@@ -104,16 +107,17 @@ class OrderCreater
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
 
+            //门店地址
+            $orderCreater = new StoreAddressComponnet($orderCreater);
+
             //渠道
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-
-
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
 
             //支付
-            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id']);
 
 
             //调用各个组件 过滤一些参数 和无法下单原因
@@ -126,6 +130,8 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
+
+            DB::beginTransaction();
             //调用各个组件 创建方法
             $b = $orderCreater->create();
             //创建成功组装数据返回结果
@@ -141,6 +147,7 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
                 'order_no'=>$orderNo,
                 'pay_info'=>$schemaData['pay_info'],
+                'app_id'=>$data['appid'],
 
             ];
            // 创建订单后 发送支付短信。;
@@ -198,7 +205,7 @@ class OrderCreater
             $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
             $orderCreater->setUserComponnet($userComponnet);
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type'],$orderType);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
             //风控(小程序风控信息接口不处理)
             $orderCreater = new RiskComponnet($orderCreater);
@@ -240,8 +247,8 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
             // 创建订单后 发送支付短信。;
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
-            $orderNoticeObj->notify();
+//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
+//            $orderNoticeObj->notify();
 
             //发送订单风控信息保存队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
@@ -363,29 +370,6 @@ class OrderCreater
         $orderNo = OrderOperate::createOrderNo(1);
         $orderType =OrderStatus::orderActivityService;
 
-        //判断用户是否 已经参与活动
-        $destine = ExperienceDestine::getByNo($data['destine_no']);
-        if($destine) {
-            $destineData = $destine->getData();
-            //判断用户信息 与预定信息
-            if($destineData['user_id']!=$data['user_id']){
-                set_msg("预订信息与用户不匹配");
-                return false;
-            }
-            if ($destineData['destine_status'] != DestineStatus::DestinePayed) {
-                set_msg("该活动不能领取");
-                return false;
-            }
-        }else{
-            set_msg("活动未预约");
-            return false;
-        }
-
-        //租用时间 为领取的第二天时间开始算
-        $data['sku'][0]['begin_time'] = date("Y-m-d",strtotime("+1 day"));
-        //结束时间为 租用时间开始+租期
-        $data['sku'][0]['end_time'] = date("Y-m-d",strtotime("+".$destineData['zuqi']." day"));
-
         try{
             DB::beginTransaction();
 
@@ -397,16 +381,20 @@ class OrderCreater
             $orderCreater->setUserComponnet($userComponnet);
 
             // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type'],$orderType);
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
+
+            //活动
+            $orderCreater = new ActivityComponnet($orderCreater,$data['destine_no']);
+
             //优惠券
-            //$orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
 
             //押金
-            // $orderCreater = new DepositComponnet($orderCreater);
+            $orderCreater = new DepositComponnet($orderCreater);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
@@ -415,7 +403,7 @@ class OrderCreater
             $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //分期
-            //$orderCreater = new InstalmentComponnet($orderCreater);
+            $orderCreater = new InstalmentComponnet($orderCreater);
             //支付
             $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
 
@@ -430,15 +418,6 @@ class OrderCreater
                 return false;
             }
             $schemaData = $orderCreater->getDataSchema();
-
-            $isStudent = $schemaData['risk']['is_chsi']?1:0;  //判断是否是学生
-            //更新 预约单状态
-            $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time']),$isStudent);
-            if(!$b){
-                DB::rollBack();
-                set_msg("更新预约单信息失败");
-                return false;
-            }
 
             //调用各个组件 创建方法
             $b = $orderCreater->create();
@@ -541,7 +520,7 @@ class OrderCreater
             $orderCreater = new InstalmentComponnet($orderCreater);
 
             //支付
-            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id']);
 
             //调用各个组件 过滤方法
             $b = $orderCreater->filter();

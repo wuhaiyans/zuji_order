@@ -26,11 +26,15 @@ class InstalmentComponnet implements OrderCreater
     private $flag = true;
     private $payType;
 
+    //订单类型
+    private $orderType;
+
 
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
         $this->payType =$this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
+        $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
     }
     /**
      * 获取订单创建器
@@ -62,9 +66,15 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
+        //乐百分支付不需要生成分期并计算分期
         if($this->payType == PayInc::LebaifenPay){
             return $schema;
         }
+        //活动领取订单不需要分期计算
+        if($this->orderType == OrderStatus::orderActivityService){
+            return $schema;
+        }
+
         foreach ($schema['sku'] as $k=>$sku){
 			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
@@ -151,6 +161,11 @@ class InstalmentComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+        //活动领取订单不需要生成分期
+        if($this->orderType == OrderStatus::orderActivityService){
+            return true;
+        }
+
         //支持分期支付方式
         $payType = [
             PayInc::WithhodingPay,

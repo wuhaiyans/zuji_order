@@ -51,12 +51,12 @@ class OrderPayComponnet implements OrderCreater
     private $isWithholdStatus=false;
 
 
-    public function __construct(OrderCreater $componnet,int $userId,int $payChannelId)
+    public function __construct(OrderCreater $componnet,int $userId)
     {
         $this->componnet = $componnet;
         $this->payType = $this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
         $this->userId = $userId;
-        $this->payChannelId = $payChannelId;
+        $this->payChannelId = PayInc::getPayChannelName($this->payType);
     }
     /**
      * 获取订单创建器
