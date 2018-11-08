@@ -182,6 +182,7 @@ class AdvanceActivityController extends Controller
                 if($riskInfo['is_chsi']==1){
                     $lingqu_btn = true;
                 }
+                $activityInfo['risk'] = $riskInfo;
             };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
             $activityInfo['renzheng_btn'] = $renzheng_btn;
