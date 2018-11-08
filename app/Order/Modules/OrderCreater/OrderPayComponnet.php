@@ -82,6 +82,10 @@ class OrderPayComponnet implements OrderCreater
         $this->orderZujin =$this->getOrderCreater()->getSkuComponnet()->getOrderZujin();
         $this->orderFenqi =$this->getOrderCreater()->getSkuComponnet()->getOrderFenqi();
 
+        // 租金押金 都为0 不需要支付
+        if($this->orderZujin ==0 && $this->orderYajin==0){
+            $this->isPay =false;
+        }
         //-+--------------------------------------------------------------------
         // | 判断租金支付方式（分期/代扣）
         //-+--------------------------------------------------------------------
@@ -108,10 +112,6 @@ class OrderPayComponnet implements OrderCreater
             }
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
-            }
-            // 租金押金 都为0 不需要支付
-            if($this->orderZujin ==0 && $this->orderYajin==0){
-                $this->isPay =false;
             }
 
         }

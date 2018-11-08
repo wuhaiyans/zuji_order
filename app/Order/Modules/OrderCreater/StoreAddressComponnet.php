@@ -55,8 +55,7 @@ class StoreAddressComponnet implements OrderCreater
 
             $appid =$this->getOrderCreater()->getAppid();
             $this->address =StoreAddress::getStoreAddress($appid);
-
-            if($this->address){
+            if(!$this->address){
                 $this->getOrderCreater()->setError('店面地址配置不允许为空');
                 $this->flag = false;
             }
