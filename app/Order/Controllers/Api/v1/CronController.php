@@ -109,7 +109,7 @@ class CronController extends Controller
         ini_set('max_execution_time', '0');
         Service\CronOperate::cronPrepaymentMessage($day);
 		self::addLog('[cronWithholdMessage]提前一天 三天 七天 发送扣款短信-end-', [$day]);
-        die;echo "complete";die;
+        echo "complete";die;
     }
 	
 	private static function addLog($name, $data = []){
