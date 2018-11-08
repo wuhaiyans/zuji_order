@@ -174,15 +174,16 @@ class AdvanceActivityController extends Controller
                 //获取活动主题信息 门店开业显示前往认证
                 $themeInfo = ActivityThemeRepository::getInfo(['activity_id'=>1]);
                 if(time()>=$themeInfo['opening_time']){
-                    $renzheng_btn =true;
+                    //获取认证信息 通过认证显示领取
+                    $risk = new Risk();
+                    $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
+                    if($riskInfo['is_chsi']==1){
+                        $lingqu_btn = true;
+                    }
+                    else{
+                        $renzheng_btn =true;
+                    }
                 }
-                //获取认证信息 通过认证显示领取
-                $risk = new Risk();
-                $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
-                if($riskInfo['is_chsi']==1){
-                    $lingqu_btn = true;
-                }
-                $activityInfo['risk'] = $riskInfo;
             };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
             $activityInfo['renzheng_btn'] = $renzheng_btn;
