@@ -288,15 +288,17 @@ class PayincomeController extends Controller
         }
 
         // 根据缴款用途( 业务类型 ) 实现不同业务操作
-
-
         $params = $params['params'];
 
         // 实现业务
         $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $amount = $orderService->getPayAmount();
+        if(!$amount){
+            return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
+        }
 
-        return $amount;
+        return apiResponse($amount, ApiStatus::CODE_0, "success");
+
     }
 
 
