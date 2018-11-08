@@ -51,12 +51,12 @@ class OrderPayComponnet implements OrderCreater
     private $isWithholdStatus=false;
 
 
-    public function __construct(OrderCreater $componnet,int $userId,int $payChannelId)
+    public function __construct(OrderCreater $componnet,int $userId)
     {
         $this->componnet = $componnet;
         $this->payType = $this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
         $this->userId = $userId;
-        $this->payChannelId = $payChannelId;
+        $this->payChannelId = PayInc::getPayChannelName($this->payType);
     }
     /**
      * 获取订单创建器
@@ -82,6 +82,10 @@ class OrderPayComponnet implements OrderCreater
         $this->orderZujin =$this->getOrderCreater()->getSkuComponnet()->getOrderZujin();
         $this->orderFenqi =$this->getOrderCreater()->getSkuComponnet()->getOrderFenqi();
 
+        // 租金押金 都为0 不需要支付
+        if($this->orderZujin ==0 && $this->orderYajin==0){
+            $this->isPay =false;
+        }
         //-+--------------------------------------------------------------------
         // | 判断租金支付方式（分期/代扣）
         //-+--------------------------------------------------------------------
@@ -108,10 +112,6 @@ class OrderPayComponnet implements OrderCreater
             }
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
-            }
-            // 租金押金 都为0 不需要支付
-            if($this->orderZujin ==0 && $this->orderYajin==0){
-                $this->isPay =false;
             }
 
         }
@@ -169,8 +169,8 @@ class OrderPayComponnet implements OrderCreater
             $data['pay_time']= time();
             $b =Order::where('order_no', '=', $this->orderNo)->update($data);
             if(!$b){
-                LogApi::error(config('app.env')."[下单]更新订单状态失败",$data);
-                $this->getOrderCreater()->setError("更新订单状态失败");
+                LogApi::error(config('app.env')."OrderCreate-Update-OrderStatus-error",$data);
+                $this->getOrderCreater()->setError("OrderCreate-Update-OrderStatus-error");
                 return false;
             }
             //不需要支付则不生成支付单，退出
@@ -206,12 +206,12 @@ class OrderPayComponnet implements OrderCreater
                         'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                     ]);
                     if (!$b) {
-                        LogApi::error(config('app.env')."[下单]绑定订单代扣协议失败 用户：".$this->userId,[
+                        LogApi::error(config('app.env')."OrderCreate-Blind-WithholdStatus-error：".$this->userId,[
                             'business_type' => $param['businessType'],  // 【必须】int    业务类型
                             'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                         ]);
 
-                        $this->getOrderCreater()->setError('绑定订单代扣协议失败');
+                        $this->getOrderCreater()->setError('OrderCreate-Blind-WithholdStatus-error');
                         return false;
                     }
                 }
@@ -250,6 +250,7 @@ class OrderPayComponnet implements OrderCreater
 
 
         }catch (Exception $e){
+            LogApi::error("OrderCreate-Add-OrderPay-error:".$e->getMessage());
             $this->getOrderCreater()->setError($e->getMessage());
             return false;
         }

@@ -21,7 +21,7 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getInfo(array $where){
-		$orderBuyoutRow =  OrderBuyout::query()->where($where)->first();
+		$orderBuyoutRow =  OrderBuyout::query()->where($where)->orderBy("id","desc")->first();
 		if (!$orderBuyoutRow) return false;
 		return $orderBuyoutRow->toArray();
 	}
