@@ -172,7 +172,7 @@ class AdvanceActivityController extends Controller
                 //已支付显示邀请
                 $yaoqin_btn = true;
                 //获取活动主题信息 门店开业显示前往认证
-                $themeInfo = ActivityThemeRepository::getInfo(1);
+                $themeInfo = ActivityThemeRepository::getInfo(['activity_id'=>1]);
                 if(time()>=$themeInfo['opening_time']){
                     $renzheng_btn =true;
                 }
