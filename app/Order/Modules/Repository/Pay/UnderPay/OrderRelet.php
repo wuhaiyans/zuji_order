@@ -25,10 +25,15 @@ class OrderRelet implements UnderLine {
 
     /**
      * 计算该付款金额
+     * @param [
+     * ''=>'',
+     * ''=>'',
+     * ''=>''
+     * ]
+     *
      * return string
      */
     public function getPayAmount(){
-
         $order_no = $this->order_no;
 
         $goods_obj = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$order_no]);
@@ -81,8 +86,6 @@ class OrderRelet implements UnderLine {
         $price  = $info['data'][0]['price'];
 
         return $price;
-
-
     }
 
     /**

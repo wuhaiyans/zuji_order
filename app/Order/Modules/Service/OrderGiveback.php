@@ -509,7 +509,7 @@ class OrderGiveback
 					$status = OrderGivebackStatus::STATUS_DEAL_DONE;
 					$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$params['business_no']], [
 						'status'=> $status,
-						'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_NO_NEED_RETURN,
+						'yajin_status'=> OrderGivebackStatus::YAJIN_STATUS_RETURN_COMOLETION,
 						'payment_status'=> OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY,
 						'payment_time'=> time(),
 					]);

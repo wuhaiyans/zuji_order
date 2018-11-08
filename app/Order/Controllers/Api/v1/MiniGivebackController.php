@@ -26,12 +26,10 @@ class MiniGivebackController extends Controller
      * @param $param
      * @return array
      */
-    public function givebackPay(Request $request){
-
+    public function givebackPay($params){
         //-+--------------------------------------------------------------------
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
-        $params = $request->input();
 //        \App\Lib\Common\LogApi::debug('调用主动支付接口',$params);
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
@@ -379,17 +377,21 @@ class MiniGivebackController extends Controller
         if( $orderCloseResult['code'] != 10000  ){
             return false;
         }
-        //拼接需要更新还机单状态
-        $data['status'] = $status =$goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
-        $data['payment_time'] = time();
-        $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
-        \App\Lib\Common\LogApi::notify('检测合格-代扣成功(无剩余分期)',[
-            $paramsArr,
-            $data
-        ]);
-        //更新还机单
-        $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+        //查询还机单状态是否已经改变
+        $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $paramsArr['goods_no'] );
+        if($orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_DONE ){
+            //拼接需要更新还机单状态
+            $data['status'] = $status =$goodsStatus = OrderGivebackStatus::STATUS_DEAL_WAIT_RETURN_DEPOSTI;
+            $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+            $data['payment_time'] = time();
+            $data['yajin_status'] = OrderGivebackStatus::YAJIN_STATUS_IN_RETURN;
+            \App\Lib\Common\LogApi::notify('检测合格-代扣成功(无剩余分期)',[
+                $paramsArr,
+                $data
+            ]);
+            //更新还机单
+            $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+        }
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
             \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
@@ -450,6 +452,7 @@ class MiniGivebackController extends Controller
             $data
         ]);
         $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
+
         //发送短信
         $notice = new \App\Order\Modules\Service\OrderNotice(
             \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
