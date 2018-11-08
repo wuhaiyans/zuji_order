@@ -29,6 +29,8 @@ class ActivityComponnet implements OrderCreater
     private $beginTime;
     //设备租用结束时间
     private $endTime;
+    //活动ID
+    private $activityId;
 
     public function __construct(OrderCreater $componnet,$destineNo='')
     {
@@ -77,6 +79,7 @@ class ActivityComponnet implements OrderCreater
                 //结束时间为 租用时间开始+租期
                 $this->endTime = date("Y-m-d",strtotime("+".$destineData['zuqi']." day"));
                 $this->componnet->getOrderCreater()->getSkuComponnet()->unitTime($this->beginTime, $this->endTime);
+                $this->activityId = $destineData['activity_id'];
             }else{
                 $this->getOrderCreater()->setError('该活动未预约');
                 $this->flag = false;
@@ -93,9 +96,11 @@ class ActivityComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        $data = $this->componnet->getDataSchema();
-        return $data;
-
+        $schema = $this->componnet->getDataSchema();
+        $activity['activity'] =[
+            'activity_id'=>$this->activityId,
+        ];
+        return array_merge($schema,$activity);
 
     }
 
