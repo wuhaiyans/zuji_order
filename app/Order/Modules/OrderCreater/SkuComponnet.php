@@ -52,6 +52,11 @@ class SkuComponnet implements OrderCreater
     private $orderInsurance=0;//订单 意外险
 
 
+    //短租租用时间
+    private $beginTime=0;
+    private $endTime=0;
+
+
 
 	/**
 	 * 
@@ -64,7 +69,7 @@ class SkuComponnet implements OrderCreater
 	 * @param int $payType  //创建订单才有支付方式
 	 * @throws Exception
 	 */
-    public function __construct(OrderCreater $componnet, array $sku,int $payType =0,int $orderType = 0)
+    public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
         $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
@@ -113,7 +118,7 @@ class SkuComponnet implements OrderCreater
 
         }
         $this->goodsArr =$goodsArr;
-        $this->orderType =$orderType;
+        $this->orderType =$this->componnet->getOrderCreater()->getOrderType();
     }
 
 
@@ -320,8 +325,8 @@ class SkuComponnet implements OrderCreater
                     'jianmian' => $jianmian,
                     'deposit_yajin' => $deposit_yajin,//应缴押金
                     'amount_after_discount'=>$amount_after_discount,
-                    'begin_time'=>$skuInfo['begin_time'],
-                    'end_time'=>$skuInfo['end_time'],
+                    'begin_time'=>$this->beginTime?:$skuInfo['begin_time'],
+                    'end_time'=>$this->endTime?:$skuInfo['end_time'],
             ];
         }
         return $arr;
@@ -365,7 +370,18 @@ class SkuComponnet implements OrderCreater
         $this->deposit =$arr;
         return $arr;
     }
+    /**
+     *  覆盖 租用时间
+     * @param $beginTime
+     * @param $endTime
+     * @return true
+     */
+    public function unitTime($beginTime,$endTime): bool {
 
+        $this->beginTime =$beginTime;
+        $this->endTime = $endTime;
+        return true;
+    }
     /**
      * 计算优惠券信息
      *

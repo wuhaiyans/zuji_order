@@ -59,14 +59,39 @@ class PayincomeController extends Controller
             'business_type'     => 'required',
             'channel'      		=> 'required',
             'amount'  			=> 'required',
+            'kw_type'           => 'required',
+            'keywords'          => 'required',
             'begin_time'       	=> 'required',
             'end_time'       	=> 'required',
         ]);
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
 
         $incomeList = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
         if(!is_array($incomeList)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
+
+        // 线下入账列表接口 展示缴款用途名称
+        foreach($incomeList as &$item){
+            $business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($item['business_type']);
+            $businessType = \App\Order\Modules\Inc\OrderStatus::getBusinessName($item['business_type']);
+            if(!$business_type_name){
+                $business_type_name = "业务类型-" . $businessType . "支付";
+            }
+            $item['business_type_name'] = $business_type_name;
+        }
+
         $list['data']   = $incomeList;
         $list['total']  = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($params);
 
@@ -274,15 +299,17 @@ class PayincomeController extends Controller
         }
 
         // 根据缴款用途( 业务类型 ) 实现不同业务操作
-
-
         $params = $params['params'];
 
         // 实现业务
         $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $amount = $orderService->getPayAmount();
+        if(!$amount){
+            return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
+        }
 
-        return $amount;
+        return apiResponse($amount, ApiStatus::CODE_0, "success");
+
     }
 
 

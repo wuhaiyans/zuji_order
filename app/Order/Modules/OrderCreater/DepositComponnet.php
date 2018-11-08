@@ -13,6 +13,7 @@ use App\Lib\Certification;
 use App\Lib\Common\LogApi;
 use App\Lib\Goods;
 use App\Lib\Risk\Yajin;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use Mockery\Exception;
 
@@ -22,6 +23,8 @@ class DepositComponnet implements OrderCreater
     private $componnet;
     //支付方式
     private $payType;
+    //订单类型
+    private $orderType;
 
     private $schema;
 
@@ -44,6 +47,8 @@ class DepositComponnet implements OrderCreater
         $this->componnet = $componnet;
         $this->certifiedFlag =$certifiedFlag;
         $this->miniCreditAmount =$miniCreditAmount;
+        $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
+
 
     }
     /**
@@ -65,6 +70,10 @@ class DepositComponnet implements OrderCreater
     public function filter(): bool
     {
         $filter =  $this->componnet->filter();
+        //活动领取订单 不需要走押金接口计算押金
+        if($this->orderType == OrderStatus::orderActivityService){
+            return $this->flag && $filter;
+        }
         $schema = $this->componnet->getDataSchema();
         $this->schema =$schema;
         $this->orderNo =$schema['order']['order_no'];
@@ -140,6 +149,10 @@ class DepositComponnet implements OrderCreater
         $b = $this->componnet->create();
         if( !$b ){
             return false;
+        }
+        //活动领取订单 不需要走押金接口计算押金
+        if($this->orderType == OrderStatus::orderActivityService){
+            return true;
         }
         //保存减免押金详情信息
         $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);

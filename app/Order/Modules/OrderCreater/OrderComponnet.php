@@ -172,12 +172,21 @@ class OrderComponnet implements OrderCreater
     }
 
     /**
-     * 获取appid
-     * @return int
-     */
+ * 获取appid
+ * @return int
+ */
     public function getAppid(): int
     {
         return $this->appid;
+    }
+
+    /**
+     * 获取orderType
+     * @return int
+     */
+    public function getOrderType(): int
+    {
+        return $this->orderType;
     }
 
     /**
