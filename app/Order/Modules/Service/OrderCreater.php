@@ -488,7 +488,7 @@ class OrderCreater
     public function confirmation($data)
     {
         try {
-            $orderType = OrderStatus::getOrderTypeId(['pay_type'=>$data['pay_type'],'destine_no'=>$data['destine_no']]);
+            $orderType = OrderStatus::getOrderTypeId(['pay_type'=>0,'destine_no'=>$data['destine_no']]);
 
             $order_no = OrderOperate::createOrderNo($orderType);
             //订单创建构造器
