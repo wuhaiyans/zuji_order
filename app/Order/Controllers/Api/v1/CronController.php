@@ -102,28 +102,29 @@ class CronController extends Controller
     /**
      * 定时任务  提前一天 三天 七天 发送扣款短信
      */
-    public function cronWithholdMessage(Request $request){
-		self::addLog('[cronWithholdMessage]提前一天 三天 七天 发送扣款短信-start-');
-        $day = $request->get('day', 1);
+    public static function cronWithholdMessage($day = 1){
+		self::addLog('[cronWithholdMessage]提前一天 三天 七天 发送扣款短信-start-', [$day]);
+
         // 超时时间
         ini_set('max_execution_time', '0');
         Service\CronOperate::cronPrepaymentMessage($day);
-		self::addLog('[cronWithholdMessage]提前一天 三天 七天 发送扣款短信-end-');
-        echo "complete";die;
+		self::addLog('[cronWithholdMessage]提前一天 三天 七天 发送扣款短信-end-', [$day]);
+        die;echo "complete";die;
     }
 	
-	private static function addLog($name){
-		\App\Lib\Common\LogApi::error($name.date('Y-m-d H:i:s'));
+	private static function addLog($name, $data = []){
+		\App\Lib\Common\LogApi::error($name.date('Y-m-d H:i:s'),$data);
 	}
 
     /**
      * 定时任务 用户扣款逾期 一天、三天
      */
-    public function cronOverdueMessage(Request $request){
-        $day = $request->get('day', 1);
+    public static function cronOverdueMessage($day = 1){
+        self::addLog('[cronOverdueMessage]逾期一天 三天 发送短信-start-', [$day]);
         // 超时时间
         ini_set('max_execution_time', '0');
         Service\CronOperate::cronOverdueMessage($day);
+        self::addLog('[cronOverdueMessage]逾期一天 三天发送短信-start-', [$day]);
         echo "complete";die;
     }
 

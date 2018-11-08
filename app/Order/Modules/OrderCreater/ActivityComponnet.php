@@ -117,8 +117,8 @@ class ActivityComponnet implements OrderCreater
             //更新 预约单状态
             $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time']),$isStudent);
             if(!$b){
-                LogApi::error(config('app.env')."[下单]更新预约单信息失败".$this->destineNo);
-                $this->getOrderCreater()->setError("更新预约单信息失败");
+                LogApi::error(config('app.env')."OrderCreate-UpdateDestine-error-".$this->destineNo);
+                $this->getOrderCreater()->setError("OrderCreate-UpdateDestine-error");
                 return false;
             }
         }

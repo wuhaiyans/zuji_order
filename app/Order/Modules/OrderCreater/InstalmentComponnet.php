@@ -146,7 +146,8 @@ class InstalmentComponnet implements OrderCreater
             return $computer->compute();
 
         }catch( \Exception $exc ){
-            throw new Exception("获取分期信息错误");
+            LogApi::error("OrderCreate-GetInstalmentInfo-error");
+            throw new Exception("OrderCreate-GetInstalmentInfo-error");
         }
     }
 
@@ -199,8 +200,8 @@ class InstalmentComponnet implements OrderCreater
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();
                     if (!$id) {
-                        LogApi::error(config('app.env')."[下单]保存分期数据失败",$instalmentData);
-                        $this->getOrderCreater()->setError('保存分期数据失败');
+                        LogApi::error(config('app.env')."OrderCreate-Add-Instalment-error",$instalmentData);
+                        $this->getOrderCreater()->setError('OrderCreate-Add-Instalment-error');
                         return false;
                     }
                 }

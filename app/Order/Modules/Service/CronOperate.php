@@ -490,7 +490,7 @@ class CronOperate
             $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
-
+            $whereArray[] = ['order_goods_instalment.order_no', '=', 'AB07175752759085'];
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
@@ -544,7 +544,7 @@ class CronOperate
      * $return bool
      */
     public static function cronOverdueMessage($type){
-        try{
+//        try{
             $limit  = 50;
             $page   = 1;
             $sleep  = 10;
@@ -611,9 +611,9 @@ class CronOperate
 
             \App\Lib\Common\LogApi::debug('[cronOverdueMessage:逾期 ' . $type . '天扣款 发送短信成功]');
 
-        }catch(\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[cronOverdueMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
-        }
+//        }catch(\Exception $exc){
+//            \App\Lib\Common\LogApi::debug('[cronOverdueMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
+//        }
     }
 
 

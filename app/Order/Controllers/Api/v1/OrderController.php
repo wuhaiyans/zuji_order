@@ -69,6 +69,7 @@ class OrderController extends Controller
         $sku		= $params['params']['sku_info'];
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
+        $destineNo  = isset($params['params']['destine_no'])?$params['params']['destine_no']:'';
 
         if( isset($params['params']['coupon']) ){
             $coupon = $params['params']['coupon'];
@@ -83,7 +84,6 @@ class OrderController extends Controller
                 $coupon = $coupon[0];
             }
         }
-        $payChannelId =$params['params']['pay_channel_id'];
 
         //判断参数是否设置
         if(empty($appid)){
@@ -92,9 +92,6 @@ class OrderController extends Controller
 
         if($userType!=2 && empty($userInfo)){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[用户信息错误]");
-        }
-        if(empty($payChannelId) || !isset($payChannelId)){
-            return apiResponse([],ApiStatus::CODE_20001,"参数错误[支付渠道]");
         }
         if(count($sku)<1){
             return apiResponse([],ApiStatus::CODE_20001,"参数错误[商品]");
@@ -110,7 +107,7 @@ class OrderController extends Controller
             'sku'		=> $sku,
             'coupon'	=> $coupon,
             'user_id'	=> $params['userinfo']['uid'],  //增加用户ID
-            'pay_channel_id'=>$payChannelId,
+            'destine_no'=>$destineNo,
         ];
         $res = $this->OrderCreate->confirmation( $data );
         if(!is_array($res)){

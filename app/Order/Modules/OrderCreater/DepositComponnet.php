@@ -95,7 +95,7 @@ class DepositComponnet implements OrderCreater
                         'user_id'=>$this->schema['user']['user_id'],
                         'is_order'=>1,
                     ];
-                    LogApi::info(config('app.env')."[下单]jisuan_yajin:",$arr);
+                    LogApi::info(config('app.env')."OrderCreate-jisuan_yajin:",$arr);
                     try{
                         //调用风控押金计算接口
                         $deposit = Yajin::calculate($arr);
@@ -103,13 +103,13 @@ class DepositComponnet implements OrderCreater
                         //如果押金接口请求失败 押金不进行减免
 //                        $this->getOrderCreater()->setError('商品押金接口错误');
 //                        $this->flag = false;
-                        LogApi::error(config('app.env')."[下单/确认订单]商品押金接口错误",$arr);
+                        LogApi::error(config('app.env')."OrderCreate-YajinCalculate-interface-error",$arr);
                         $deposit['jianmian'] =0;
                         $deposit['yajin'] = $v['yajin'] * 100;
                         $deposit['_msg'] ='商品押金接口错误';
                         $deposit['jianmian_detail'] =[];
                     }
-                    LogApi::info(config('app.env')."[下单]deposit_yajin:",$deposit);
+                    LogApi::info(config('app.env')."OrderCreate-deposit_yajin:",$deposit);
                     $jianmian = priceFormat($deposit['jianmian'] / 100);
                     $yajin = priceFormat($deposit['yajin'] / 100);
 
@@ -157,8 +157,8 @@ class DepositComponnet implements OrderCreater
         //保存减免押金详情信息
         $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);
         if(!$b){
-            LogApi::error(config('app.env')."[下单]保存用户减免押金详情信息失败",$this->orderNo);
-            $this->getOrderCreater()->setError('保存用户减免押金详情信息失败');
+            LogApi::error(config('app.env')."OrderCreate-UpdateDEpoist-error:".$this->orderNo);
+            $this->getOrderCreater()->setError('OrderCreate-UpdateDEpoist-error');
             return false;
         }
         return true;

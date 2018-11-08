@@ -72,16 +72,20 @@ class SkuComponnet implements OrderCreater
     public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
-        $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
-        if (!is_array($goodsArr)) {
-            throw new Exception("获取商品接口失败");
+        try{
+            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
+            throw new Exception("OrderCreate-GetSkuList-error");
         }
+
 
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             if(empty($goodsArr[$skuId]['spu_info']['payment_list'][0]['id']) || !isset($goodsArr[$skuId]['spu_info']['payment_list'][0]['id'])){
+                LogApi::error(config('app.env')."OrderCreate-PayType-error:".$skuId);
                 throw new Exception("商品支付方式错误");
             }
             //默认 获取 商品列表的第一个支付方式
@@ -502,15 +506,15 @@ class SkuComponnet implements OrderCreater
 
                     $b =ServicePeriod::createService($unitData);
                     if(!$b){
-                        LogApi::error(config('app.env')."[下单]保存设备周期表信息失败",$unitData);
-                        $this->getOrderCreater()->setError("保存设备周期表信息失败");
+                        LogApi::error(config('app.env')."OrderCreate-Add-Unit-error",$unitData);
+                        $this->getOrderCreater()->setError("OrderCreate-Add-Unit-error");
                         return false;
                     }
                 }
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
-                    LogApi::error(config('app.env')."[下单]保存商品信息失败",$goodsData);
-                    $this->getOrderCreater()->setError("保存商品信息失败");
+                    LogApi::error(config('app.env')."OrderCreate-AddGoods-error",$goodsData);
+                    $this->getOrderCreater()->setError("OrderCreate-AddGoods-error");
                     return false;
                 }
 
@@ -523,8 +527,8 @@ class SkuComponnet implements OrderCreater
         if(!empty($goodsArr)){
             $b =Goods::reduceStock($goodsArr);
             if(!$b){
-                LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
-                $this->getOrderCreater()->setError("减少库存失败");
+                LogApi::error(config('app.env')."OrderCreate-reduceStock-error",$goodsArr);
+                $this->getOrderCreater()->setError("OrderCreate-reduceStock-error");
                 return false;
             }
         }

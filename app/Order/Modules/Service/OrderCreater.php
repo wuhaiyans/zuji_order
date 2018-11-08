@@ -177,6 +177,7 @@ class OrderCreater
 
             } catch (\Exception $exc) {
                 DB::rollBack();
+                LogApi::error("OrderCreate-Exception:".$exc->getMessage());
                 set_msg($exc->getMessage());
                 return false;
             }
@@ -487,10 +488,11 @@ class OrderCreater
     public function confirmation($data)
     {
         try {
-            //var_dump($data);die;
-            $order_no = OrderOperate::createOrderNo(1);
+            $orderType = OrderStatus::getOrderTypeId(['pay_type'=>0,'destine_no'=>$data['destine_no']]);
+
+            $order_no = OrderOperate::createOrderNo($orderType);
             //订单创建构造器
-            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['appid'],OrderStatus::orderOnlineService);
+            $orderCreater = new OrderComponnet($order_no,$data['user_id'],$data['appid'],$orderType);
 
             // 用户
             $userComponnet = new UserComponnet($orderCreater,$data['user_id']);
@@ -597,7 +599,7 @@ class OrderCreater
             ];
             return $result;
         } catch (\Exception $exc) {
-            LogApi::info("确认订单异常：".$exc->getMessage());
+            LogApi::info("ConfirmationOrder-Exception：".$exc->getMessage());
              set_msg($exc->getMessage());
             return false;
         }

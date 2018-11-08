@@ -108,8 +108,8 @@ class AddressComponnet implements OrderCreater
         ];
         $id =OrderUserAddressRepository::add($addressData);
         if(!$id){
-            LogApi::error(config('app.env')."[下单]保存用户地址信息失败",$addressData);
-            $this->getOrderCreater()->setError("保存用户地址信息失败");
+            LogApi::error(config('app.env')."OrderCreate-Add-error",$addressData);
+            $this->getOrderCreater()->setError("OrderCreate-Add-error");
             return false;
         }
         return true;
