@@ -247,8 +247,8 @@ class OrderCreater
                 'pay_type'=>$data['pay_type'],
             ];
             // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
 
             //发送订单风控信息保存队列
             $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [

@@ -2,10 +2,14 @@
 namespace App\Order\Modules\Repository\Pay\UnderPay;
 
 use App\Order\Modules\Inc\OrderBuyoutStatus;
+use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
+use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
+use App\Order\Modules\Repository\OrderRepository;
 
 class OrderBuyout implements UnderLine {
 
@@ -52,38 +56,57 @@ class OrderBuyout implements UnderLine {
      */
     public function execute(){
         $amount = $this->componnet['amount'];
+        //获取订单信息
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
+        if(!$orderInfo){
+            return false;
+        }
+        //获取订单商品信息;
+        $goodsInfo = Goods::getByOrderNo($this->order_no);
+        if(!$goodsInfo){
+            return false;
+        }
         $where = [
             ['order_no','=',$this->order_no],
         ];
         //获取买断单
         $buyout = OrderBuyoutRepository::getInfo($where);
-        if($buyout['']){
-
-        }
-        if(!$buyout){
-            return false;
-        }
-        if($buyout['status']==OrderBuyoutStatus::OrderPaid){
+        //如果存在买断单并且支付禁止执行
+        if(in_array($buyout['status'],[OrderBuyoutStatus::OrderPaid,OrderBuyoutStatus::OrderRelease])){
             return false;
         }
         $data = [
-            'order_no'=>$buyout['order_no'],
-            'goods_no'=>$buyout['goods_no'],
+            'order_no'=>$this->order_no,
+            'goods_no'=>$goodsInfo['goods_no'],
         ];
         $ret = Instalment::close($data);
         if(!$ret){
-            //return false;
+            return false;
         }
-        //更新买断单
-        $ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
+        //更新买断单或创建买断单
+        if($buyout){
+            $ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
+        }else{
+            //创建买断单
+            $buyout = [
+                'type'=>1,
+                'buyout_no'=>createNo(8),
+                'order_no'=>$goodsInfo['order_no'],
+                'goods_no'=>$goodsInfo['goods_no'],
+                'user_id'=>$goodsInfo['user_id'],
+                'plat_id'=>$goodsInfo['user_id'],
+                'goods_name'=>$goodsInfo['goods_name'],
+                'buyout_price'=>$amount,
+                'amount'=>$amount,
+                'status'=>OrderBuyoutStatus::OrderPaid,
+                'create_time'=>time()
+            ];
+            $ret = OrderBuyoutRepository::create($data);
+        }
         if(!$ret){
             return false;
         }
-        //获取订单信息
-        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyout['order_no']));
-        //获取订单商品信息
-        $OrderGoodsRepository = new OrderGoodsRepository;
-        $goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);
+
 
         //清算处理数据拼接
         $clearData = [
