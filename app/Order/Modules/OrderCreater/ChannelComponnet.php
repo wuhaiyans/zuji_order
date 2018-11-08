@@ -65,10 +65,13 @@ class ChannelComponnet implements OrderCreater
     {
         $this->componnet = $componnet;
         //获取渠道信息
-        $ChannelInfo = Channel::getChannel($appid);
-        if (!is_array($ChannelInfo)) {
-            throw new Exception("获取渠道接口数据失败");
+        try{
+            $ChannelInfo = Channel::getChannel($appid);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."OrderCreate-GetChannel-Exception:".$e->getMessage());
+            throw new Exception("OrderCreate-GetChannel-Exception");
         }
+
         $this->appId = intval($ChannelInfo['appid']['id']);
         $this->appName = $ChannelInfo['appid']['name'];
         $this->appType = intval($ChannelInfo['appid']['type']);
@@ -157,8 +160,8 @@ class ChannelComponnet implements OrderCreater
         //保存订单渠道信息
         $b= OrderRepository::updateChannel($data['order']['order_no'],$this->channelId);
         if(!$b){
-            LogApi::error(config('app.env')."[下单]保存渠道信息失败",$data['order']['order_no']);
-            $this->getOrderCreater()->setError('保存渠道信息失败');
+            LogApi::error(config('app.env')."OrderCreate-UpdateOrderChannel-error:",$data['order']['order_no']);
+            $this->getOrderCreater()->setError('OrderCreate-UpdateOrderChannel-error');
             return false;
         }
         return true;

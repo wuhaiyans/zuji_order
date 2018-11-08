@@ -59,14 +59,39 @@ class PayincomeController extends Controller
             'business_type'     => 'required',
             'channel'      		=> 'required',
             'amount'  			=> 'required',
+            'kw_type'           => 'required',
+            'keywords'          => 'required',
             'begin_time'       	=> 'required',
             'end_time'       	=> 'required',
         ]);
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == 1){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == 2){
+                $params['mobile'] = $params['keywords'];
+            }
+            else{
+                $params['order_no'] = $params['keywords'];
+            }
+        }
 
         $incomeList = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryList($params,$additional);
         if(!is_array($incomeList)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
+
+        // 线下入账列表接口 展示缴款用途名称
+        foreach($incomeList as &$item){
+            $business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($item['business_type']);
+            $businessType = \App\Order\Modules\Inc\OrderStatus::getBusinessName($item['business_type']);
+            if(!$business_type_name){
+                $business_type_name = "业务类型-" . $businessType . "支付";
+            }
+            $item['business_type_name'] = $business_type_name;
+        }
+
         $list['data']   = $incomeList;
         $list['total']  = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($params);
 
@@ -171,21 +196,78 @@ class PayincomeController extends Controller
 
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
+
         // 入账类型
+        $business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($info['business_type']);
+
         $info['business_type']  = \App\Order\Modules\Inc\OrderStatus::getBusinessName($info['business_type']);
+        if(!$business_type_name){
+            $business_type_name = "业务类型-" . $info['business_type'] . "支付";
+        }
+        $info['business_type_name'] = $business_type_name;
+
 
         // 入账方式
         $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
-        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
 
-            $channel       = $channel . "-" . \App\Order\Modules\Repository\Pay\Channel::getUnderLineBusinessTypeName($info['under_channel']);;
+        // 线下支付方式
+        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+            $under_channel =  \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
+            $under_channel = $under_channel ? $under_channel : "--";
+            $channel = $channel . "-" . $under_channel;
         }
 
         $info['channel'] = $channel;
 
+        // 从属设备
+        $goods_obj = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$info['order_no']]);
+        $goodsInfo = objectToArray($goods_obj);
+
+        $info['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
+
+
         return apiResponse($info,ApiStatus::CODE_0,"success");
     }
 
+
+    /**
+     * 线下手机号获取订单信息
+     * @return Array
+     */
+    public function getOrderInfoByPhone(Request $request){
+        $params     = $request->all();
+        $rules = [
+            'mobile'          => 'required',  // 手机号
+        ];
+        // 参数过滤
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([], $validateParams['code']);
+        }
+
+        $params = $params['params'];
+        $whereArray = [
+            'mobile'    => $params['mobile']
+        ];
+
+        $orderList = DB::table('order_info')
+            ->select('order_no')
+            ->where($whereArray)
+            ->get();
+        $orderList = objectToArray($orderList);
+        if(!$orderList){
+            return apiResponse( [], ApiStatus::CODE_50000, '参数错误...');
+        }
+
+        foreach($orderList as &$item){
+            $goods_obj = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$item]);
+            $goodsInfo = objectToArray($goods_obj);
+
+            $item['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
+            $item['goods_no']   =   $goodsInfo['goods_no'] ? $goodsInfo['goods_no'] : "";
+        }
+        return apiResponse($orderList,ApiStatus::CODE_0,"success");
+    }
 
     /**
      * 线下还款场景
@@ -194,6 +276,17 @@ class PayincomeController extends Controller
     public function underLineScene(Request $request){
 
         $list = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessType();
+
+        return apiResponse($list,ApiStatus::CODE_0,"success");
+    }
+
+    /**
+     * 线下缴款类型
+     * @return Array
+     */
+    public function underLinePayType(Request $request){
+
+        $list = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderBusinessType();
 
         return apiResponse($list,ApiStatus::CODE_0,"success");
     }
@@ -224,15 +317,17 @@ class PayincomeController extends Controller
         }
 
         // 根据缴款用途( 业务类型 ) 实现不同业务操作
-
-
         $params = $params['params'];
 
         // 实现业务
         $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $amount = $orderService->getPayAmount();
+        if(!$amount){
+            return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
+        }
 
-        return $amount;
+        return apiResponse($amount, ApiStatus::CODE_0, "success");
+
     }
 
 
@@ -276,10 +371,9 @@ class PayincomeController extends Controller
         // 实现业务
         $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
         $result = $orderService->execute();
-
         if(!$result){
             DB::rollBack();
-            \App\Lib\Common\LogApi::error('[underLineAdd]业务实现失败',$params);
+            \App\Lib\Common\LogApi::error('[underLinePay]业务实现失败',$params);
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
         }
 
