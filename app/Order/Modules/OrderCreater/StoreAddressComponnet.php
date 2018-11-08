@@ -9,6 +9,7 @@
 namespace App\Order\Modules\OrderCreater;
 
 
+use App\Activity\Modules\Repository\ActivityThemeRepository;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\StoreAddress;
@@ -52,9 +53,13 @@ class StoreAddressComponnet implements OrderCreater
         $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
 
         if($this->orderType == OrderStatus::orderActivityService){
-
-            $appid =$this->getOrderCreater()->getAppid();
-            $this->address =StoreAddress::getStoreAddress($appid);
+            $data = $this->componnet->getDataSchema();
+            $activity = ActivityThemeRepository::getInfo(['activity_id'=>$data['activity']['activity_id']]);
+            if(!$activity){
+                $this->getOrderCreater()->setError('活动店面主题错误');
+                $this->flag = false;
+            }
+            $this->address =StoreAddress::getStoreAddress($activity['appid']);
             if(!$this->address){
                 $this->getOrderCreater()->setError('店面地址配置不允许为空');
                 $this->flag = false;
