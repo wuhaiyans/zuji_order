@@ -1,6 +1,7 @@
 <?php
 /**
- * 收货地址组件
+ * 门店收货地址组件
+ * @access public (访问修饰符)
  * @author wuhaiyan <wuhaiyan@huishoubao.com>
  * @copyright (c) 2017, Huishoubao
  */
@@ -13,7 +14,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\StoreAddress;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 
-class AddressComponnet implements OrderCreater
+class StoreAddressComponnet implements OrderCreater
 {
     //组件
     private $componnet;
@@ -22,6 +23,8 @@ class AddressComponnet implements OrderCreater
     //订单类型
     private $orderType;
 
+    //收货地址
+    private $address;
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
@@ -48,16 +51,14 @@ class AddressComponnet implements OrderCreater
         $filter =$this->componnet->filter();
         $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
 
-        //如果是线下领取订单 不走用户组件
         if($this->orderType == OrderStatus::orderActivityService){
-            return $this->flag && $filter;
-        }
-        //获取用户信息
-        $schema =$this->componnet->getOrderCreater()->getUserComponnet()->getDataSchema();
 
-        if(empty($schema['address'])){
-            $this->getOrderCreater()->setError('收货地址不允许为空');
-            $this->flag = false;
+            $appid =$this->getOrderCreater()->getAppid();
+            $this->address =StoreAddress::getStoreAddress($appid);
+            if(!$this->address){
+                $this->getOrderCreater()->setError('店面地址配置不允许为空');
+                $this->flag = false;
+            }
         }
         return $this->flag && $filter;
     }
@@ -81,35 +82,25 @@ class AddressComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-
-        //如果是线下领取订单 不走用户组件
-        if($this->orderType == OrderStatus::orderActivityService){
+        if($this->orderType != OrderStatus::orderActivityService){
             return true;
         }
-
         $data =$this->getDataSchema();
 
-        if(isset($data['address']['province_name']) && isset($data['address']['city_name']) && isset($data['address']['country_name']) ){
-            $address_info = $data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name'].' '.$data['address']['address'];
-        }else{
-            $address_info =  $data['address']['address'];
-        }
-
-        $realname = $data['user']['realname']?$data['user']['realname']: substr($data['user']['user_mobile'],0,3)."****".substr($data['user']['user_mobile'],7,11);
         $addressData = [
             'order_no'=>$data['order']['order_no'],
-            'consignee_mobile' =>isset($data['address']['mobile'])?$data['address']['mobile']:$data['user']['user_mobile'],
-            'name'=>isset($data['address']['name'])?$data['address']['name']:$realname ,
-            'province_id'=>isset($data['address']['province_id'])?$data['address']['province_id']:0,
-            'city_id'=>isset($data['address']['city_id'])?$data['address']['city_id']:0,
-            'area_id'=>isset($data['address']['district_id'])?$data['address']['district_id']:0,
-            'address_info'=>$address_info,
+            'consignee_mobile' =>$data['user']['user_mobile'],
+            'name'=>$data['user']['realname'],
+            'province_id'=>0,
+            'city_id'=>0,
+            'area_id'=>0,
+            'address_info'=>$this->address,
             'create_time'=>time(),
         ];
         $id =OrderUserAddressRepository::add($addressData);
         if(!$id){
-            LogApi::error(config('app.env')."OrderCreate-Add-error",$addressData);
-            $this->getOrderCreater()->setError("OrderCreate-Add-error");
+            LogApi::error(config('app.env')."OrderCreate-Add-StoreAddress-error",$addressData);
+            $this->getOrderCreater()->setError("OrderCreate-Add-StoreAddress-error");
             return false;
         }
         return true;

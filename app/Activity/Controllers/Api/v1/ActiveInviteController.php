@@ -89,7 +89,7 @@ class ActiveInviteController extends Controller
             return apiResponse($data,ApiStatus::CODE_5000,"失败");
         }
         //更新租期天数
-        ExperienceDestine::upZuqi($uid,$activity_id);
+        ExperienceDestine::upZuqi($uid,$activityInfo['experience_id']);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
     }
     /*
