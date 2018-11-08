@@ -156,7 +156,7 @@ class AdvanceActivityController extends Controller
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
         if($activityInfo){
-            $activityInfo['zuqi_day'] = $count;
+            $activityInfo['zuqi_day'] = $activityInfo['zuqi'];
             $activityInfo['zuqi'] -= $count;
             $activityInfo['type'] = 2;
             $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
@@ -172,7 +172,7 @@ class AdvanceActivityController extends Controller
                 //已支付显示邀请
                 $yaoqin_btn = true;
                 //获取活动主题信息 门店开业显示前往认证
-                $themeInfo = ActivityThemeRepository::getInfo(['id'=>1]);
+                $themeInfo = ActivityThemeRepository::getInfo(['activity_id'=>1]);
                 if(time()>=$themeInfo['opening_time']){
                     $renzheng_btn =true;
                 }
