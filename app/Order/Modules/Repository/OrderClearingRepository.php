@@ -33,8 +33,6 @@ class OrderClearingRepository
         }
 
         $orderClearData = new OrderClearing();
-
-
         $authDeductionNo    =   0;
         $authUnfreezeNo     =   0;
         $refundCleanNo      =   0;
@@ -65,6 +63,19 @@ class OrderClearingRepository
             $refundAmount = floatval($param['refund_amount']);
         }
 
+
+        if ($isAuthDeduction) {
+            $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $authDeductionNo    = createNo('AD');
+        }
+        if ($isAuthUnfreeze)    {
+            $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $authUnfreezeNo    = createNo('AU');
+        }
+        if ($isRefund) {
+            $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
+            $refundCleanNo    = createNo('RC');
+        }
         //根据订单号查询订单信息
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
@@ -100,24 +111,19 @@ class OrderClearingRepository
                     $authDeductionAmount = 0;
                     //解押金额
                     $authUnfreezeAmount = 0;
+                    //扣除押金状态
+                    $authDeductionStatus =  0;
+                    //解押状态
+                    $authUnfreezeStatus = 0;
+                    //退款状态
+                    $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
 
                 }
 
 
         }
 
-        if ($isAuthDeduction) {
-            $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-            $authDeductionNo    = createNo('AD');
-        }
-        if ($isAuthUnfreeze)    {
-            $authUnfreezeStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-            $authUnfreezeNo    = createNo('AU');
-        }
-        if ($isRefund) {
-            $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-            $refundCleanNo    = createNo('RC');
-        }
+
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
         if (empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund))
