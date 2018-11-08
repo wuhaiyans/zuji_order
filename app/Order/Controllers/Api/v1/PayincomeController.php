@@ -81,6 +81,17 @@ class PayincomeController extends Controller
         if(!is_array($incomeList)){
             return apiResponse([], ApiStatus::CODE_50000, "程序异常");
         }
+
+        // 线下入账列表接口 展示缴款用途名称
+        foreach($incomeList as &$item){
+            $business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($item['business_type']);
+            $businessType = \App\Order\Modules\Inc\OrderStatus::getBusinessName($item['business_type']);
+            if(!$business_type_name){
+                $business_type_name = "业务类型-" . $businessType . "支付";
+            }
+            $item['business_type_name'] = $business_type_name;
+        }
+
         $list['data']   = $incomeList;
         $list['total']  = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryCount($params);
 
