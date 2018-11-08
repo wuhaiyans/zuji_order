@@ -630,17 +630,6 @@ class GivebackController extends Controller
 		if( !$orderGivebackInfo ){
 			return apiResponse([], get_code(), get_msg());
 		}
-        //查询订单信息
-        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $orderGivebackInfo['order_no'] );
-        if( $orderInfo == false ){
-            return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
-        }
-        //当为小程序订单则直接调起其他接口进行处理
-        if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
-            $MiniGivebackController = new MiniGivebackController();
-            $MiniGivebackController->givebackPay($params);
-            die;
-        }
 		$orderGoodsInfo = $this->__getOrderGoodsInfo($orderGivebackInfo['goods_no']);
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
