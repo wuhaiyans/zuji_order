@@ -25,9 +25,17 @@ class OrderRelet implements UnderLine {
 
     /**
      * 计算该付款金额
+     * @param [
+     * ''=>'',
+     * ''=>'',
+     * ''=>''
+     * ]
+     *
      * return string
      */
     public function getPayAmount(){
+
+
         return 100;
     }
 
