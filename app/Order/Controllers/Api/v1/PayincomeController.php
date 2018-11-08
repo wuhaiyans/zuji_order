@@ -196,17 +196,35 @@ class PayincomeController extends Controller
 
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
+
         // 入账类型
+        $business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($info['business_type']);
+
         $info['business_type']  = \App\Order\Modules\Inc\OrderStatus::getBusinessName($info['business_type']);
+        if(!$business_type_name){
+            $business_type_name = "业务类型-" . $info['business_type'] . "支付";
+        }
+        $info['business_type_name'] = $business_type_name;
+
 
         // 入账方式
         $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
 
+        // 线下支付方式
         if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
-            $channel = $channel . "-" . \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
+            $under_channel =  \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
+            $under_channel = $under_channel ? $under_channel : "--";
+            $channel = $channel . "-" . $under_channel;
         }
 
         $info['channel'] = $channel;
+
+        // 从属设备
+        $goods_obj = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$info['order_no']]);
+        $goodsInfo = objectToArray($goods_obj);
+
+        $info['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
+
 
         return apiResponse($info,ApiStatus::CODE_0,"success");
     }
