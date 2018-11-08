@@ -93,6 +93,14 @@ class UserComponnet implements OrderCreater
     }
 
     /**
+     * 获取 用户地址ID
+     * @return int
+     */
+    public function getAddressId(){
+        return $this->addressID;
+    }
+
+    /**
      * 获取订单创建器
      * @return OrderCreater
      */
