@@ -324,7 +324,7 @@ class DeliveryController extends Controller
 
             //修改发货信息
             $this->delivery->send($params);
-            //LogApi::info('delivery send info :',$params);
+            LogApi::info('delivery send info :',$params);
 
             //操作员信息,用户或管理员操作有
             $user_info['user_id'] = $params['user_id'];
@@ -333,7 +333,7 @@ class DeliveryController extends Controller
 
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
-            //LogApi::info('delivery send order info :',$result['order_no'].$a);
+            LogApi::info('delivery send order info :',$result['order_no'].$a);
             if(!$a){
                 DB::rollBack();
                 return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口失败");
@@ -342,7 +342,7 @@ class DeliveryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage().$e->getFile()."*".$e->getLine());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
 
         return \apiResponse([]);

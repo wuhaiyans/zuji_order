@@ -112,9 +112,9 @@ class Curl {
      * @return string
      */    
     public static function post(string $url, $params=null,array $header=[]){
-		if(is_array($params) ){
-			$params = http_build_query( $params );
-		}
+//		if(is_array($params) ){
+//			$params = http_build_query( $params );
+//		}
         $output = self::_send($url, $params, $header);
         return $output;
     }

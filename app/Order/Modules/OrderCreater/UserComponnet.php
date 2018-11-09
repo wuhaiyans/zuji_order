@@ -59,7 +59,7 @@ class UserComponnet implements OrderCreater
             $userInfo =User::getUser($this->userId,$addressId);
         }catch (\Exception $e){
             LogApi::error("OrderCreate-GetUser-error:".$e->getMessage());
-            throw new Exception("OrderCreate-GetUser-error:".$e->getMessage());
+            throw new Exception("GetUser:".$e->getMessage());
         }
 
         if( empty($addressInfo) ){
