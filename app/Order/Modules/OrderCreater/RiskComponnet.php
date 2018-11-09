@@ -37,7 +37,7 @@ class RiskComponnet implements OrderCreater
             $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
             $this->knight =$knight;
         }catch (\Exception $e){
-            LogApi::error(config('app.env')."[下单/确认订单] 获取用户风控接口失败",$data['user']['user_id']);
+            LogApi::error(config('app.env')."OrderCreate-GetRisk-error:".$e->getMessage());
             $this->knight =[];
         }
 
@@ -98,8 +98,8 @@ class RiskComponnet implements OrderCreater
         $certified->user_type = $isStudent;
         $certified->card_img = isset($this->knight['card_img']) && !empty($this->knight['card_img'])?$this->knight['card_img']:"";
         if (!$certified->save()) {
-            LogApi::error(config('app.env')."[下单]保存用户身份类型失败",$this->knight);
-            $this->getOrderCreater()->setError('保存用户身份类型失败');
+            LogApi::error(config('app.env')."OrderCreate-Update-UserCertified-error",$this->knight);
+            $this->getOrderCreater()->setError('OrderCreate-Update-UserCertified-error');
             return false;
         }
 

@@ -1,7 +1,6 @@
 <?php
 /**
- * 收货地址主键
- * @access public (访问修饰符)
+ * 收货地址组件
  * @author wuhaiyan <wuhaiyan@huishoubao.com>
  * @copyright (c) 2017, Huishoubao
  */
@@ -10,6 +9,7 @@ namespace App\Order\Modules\OrderCreater;
 
 
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\StoreAddress;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 
@@ -19,15 +19,12 @@ class AddressComponnet implements OrderCreater
     private $componnet;
     private $flag = true;
 
-    //收货地址
-    private $address;
+    //订单类型
+    private $orderType;
+
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
-
-        $appid =$this->getOrderCreater()->getAppid();
-        $this->address =StoreAddress::getStoreAddress($appid);
-
     }
 
     /**
@@ -49,10 +46,16 @@ class AddressComponnet implements OrderCreater
     public function filter(): bool
     {
         $filter =$this->componnet->filter();
+        $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
+
+        //如果是线下领取订单 不走用户组件
+        if($this->orderType == OrderStatus::orderActivityService){
+            return $this->flag && $filter;
+        }
         //获取用户信息
         $schema =$this->componnet->getOrderCreater()->getUserComponnet()->getDataSchema();
 
-        if(empty($schema['address']) && ! $this->address){
+        if(empty($schema['address'])){
             $this->getOrderCreater()->setError('收货地址不允许为空');
             $this->flag = false;
         }
@@ -78,17 +81,21 @@ class AddressComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+
+        //如果是线下领取订单 不走用户组件
+        if($this->orderType == OrderStatus::orderActivityService){
+            return true;
+        }
+
         $data =$this->getDataSchema();
 
         if(isset($data['address']['province_name']) && isset($data['address']['city_name']) && isset($data['address']['country_name']) ){
             $address_info = $data['address']['province_name']." ".$data['address']['city_name']." ".$data['address']['country_name'].' '.$data['address']['address'];
-        }elseif(isset($data['address']['address'])){
-            $address_info =  $data['address']['address'];
         }else{
-            $address_info = $this->address;
+            $address_info =  $data['address']['address'];
         }
 
-        $realname = $data['user']['realname']?$data['user']['realname']: substr($data['user']['realname'],0,3)."****".substr($data['user']['realname'],7,11);
+        $realname = $data['user']['realname']?$data['user']['realname']: substr($data['user']['user_mobile'],0,3)."****".substr($data['user']['user_mobile'],7,11);
         $addressData = [
             'order_no'=>$data['order']['order_no'],
             'consignee_mobile' =>isset($data['address']['mobile'])?$data['address']['mobile']:$data['user']['user_mobile'],
@@ -101,8 +108,8 @@ class AddressComponnet implements OrderCreater
         ];
         $id =OrderUserAddressRepository::add($addressData);
         if(!$id){
-            LogApi::error(config('app.env')."[下单]保存用户地址信息失败",$addressData);
-            $this->getOrderCreater()->setError("保存用户地址信息失败");
+            LogApi::error(config('app.env')."OrderCreate-Add-error",$addressData);
+            $this->getOrderCreater()->setError("OrderCreate-Add-error");
             return false;
         }
         return true;

@@ -132,28 +132,6 @@ class OrderComponnet implements OrderCreater
     }
 
     /**
-     * 设置免押状态
-     * @param int $status
-     * @return OrderComponnet
-     */
-    public function setMianyaStatus( int $status ): OrderComponnet
-    {
-        if( !in_array($status, [0,1]) ){
-            throw new Exception('免押状态值设置异常');
-        }
-        $this->mianyaStatus = $status;
-        return $this;
-    }
-    /**
-     * 获取免押状态
-     * @return int
-     */
-    public function getMianyaStatus(): int
-    {
-        return $this->mianyaStatus;
-    }
-
-    /**
      * 获取 订单编号
      * @return string
      */
@@ -172,12 +150,21 @@ class OrderComponnet implements OrderCreater
     }
 
     /**
-     * 获取appid
-     * @return int
-     */
+ * 获取appid
+ * @return int
+ */
     public function getAppid(): int
     {
         return $this->appid;
+    }
+
+    /**
+     * 获取orderType
+     * @return int
+     */
+    public function getOrderType(): int
+    {
+        return $this->orderType;
     }
 
     /**
@@ -329,8 +316,8 @@ class OrderComponnet implements OrderCreater
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {
-            LogApi::error(config('app.env')."[下单]保存订单数据失败",$orderData);
-            $this->getOrderCreater()->setError('保存订单数据失败');
+            LogApi::error(config('app.env')."OrderCreate-Add-OrderData-error",$orderData);
+            $this->getOrderCreater()->setError('OrderCreate-Add-OrderData-error');
             return false;
         }
 
