@@ -19,6 +19,12 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function confirmReceipt( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'RSA';
 		self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.confirmReceipt', '1.0', $params);
 		return true;
 	}
@@ -49,6 +55,12 @@ class LebaifenApi extends \App\Lib\BaseApi {
 	 * @throws \App\Lib\ApiException			请求失败时抛出异常
 	 */
 	public static function getPaymentInfo( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'RSA';
 		return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.info', '1.0', $params);
 	}
 
@@ -66,6 +78,12 @@ class LebaifenApi extends \App\Lib\BaseApi {
      * @return array
      */
     public static function backRefund( array $params ){
+        //数据排序
+        ksort($params);
+        //生成秘钥
+        $sign = \App\Lib\AlipaySdk\sdk\aop\AopClient::generateSignVal( http_build_query( $params ) );
+        $params['sign'] = $sign;
+        $params['sign_type'] = 'RSA';
         return self::request(\config('paysystem.PAY_APPID'), \config('paysystem.PAY_API'),'pay.lebaifen.payment.backRefund', '1.0', $params);
     }
 	

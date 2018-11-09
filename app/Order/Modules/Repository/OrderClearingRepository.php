@@ -62,13 +62,12 @@ class OrderClearingRepository
 
         if (isset($param['refund_amount'])  &&  floatval($param['refund_amount'])>0) {
             $isRefund   =   1;
-            $refundAmount = floatval($param['refund_amount']);
+            $refundAmount = floatval($param['auth_unfreeze_amount']);
         }
 
         //根据订单号查询订单信息
         if(isset($param['order_no'])){
             $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
-
             if (empty($orderInfo)) {
                 LogApi::debug("[clear]获取订单信息失败",$orderInfo);
                 return false;
@@ -78,18 +77,17 @@ class OrderClearingRepository
                 $param['order_type'] = OrderStatus::miniRecover;
             }
 
-
             //如果是微信支付
             if ($orderInfo['pay_type'] == PayInc::WeChatPay) {
 
                     //退款或者退货
-                    if (($param['business_type'] == OrderCleaningStatus::businessTypeReturn) ||  ($param['business_type'] == OrderCleaningStatus::businessTypeRefund))
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn))
                     {
                             $refundAmount   =   normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount)>0 ? normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount): 0;
                     }
 
                     //买断或者还机
-                    if (($param['business_type'] == OrderCleaningStatus::businessTypeReturnGoods) ||  ($param['business_type'] == OrderCleaningStatus::businessTypeBuy))
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturnGoods) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeBuy))
                     {
                             $refundAmount   =   normalizeNum($authUnfreezeAmount);
                     }
