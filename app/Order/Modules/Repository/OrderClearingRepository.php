@@ -33,6 +33,8 @@ class OrderClearingRepository
         }
 
         $orderClearData = new OrderClearing();
+
+
         $authDeductionNo    =   0;
         $authUnfreezeNo     =   0;
         $refundCleanNo      =   0;
@@ -60,9 +62,49 @@ class OrderClearingRepository
 
         if (isset($param['refund_amount'])  &&  floatval($param['refund_amount'])>0) {
             $isRefund   =   1;
-            $refundAmount = floatval($param['refund_amount']);
+            $refundAmount = floatval($param['auth_unfreeze_amount']);
         }
 
+        //根据订单号查询订单信息
+        if(isset($param['order_no'])){
+            $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
+            if (empty($orderInfo)) {
+                LogApi::debug("[clear]获取订单信息失败",$orderInfo);
+                return false;
+            }
+            if ($orderInfo['pay_type'] == PayInc::LebaifenPay) {
+
+                $param['order_type'] = OrderStatus::miniRecover;
+            }
+
+            //如果是微信支付
+            if ($orderInfo['pay_type'] == PayInc::WeChatPay) {
+
+                    //退款或者退货
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturn))
+                    {
+                            $refundAmount   =   normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount)>0 ? normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount): 0;
+                    }
+
+                    //买断或者还机
+                    if (($orderInfo['business_type'] == OrderCleaningStatus::businessTypeReturnGoods) ||  ($orderInfo['business_type'] == OrderCleaningStatus::businessTypeBuy))
+                    {
+                            $refundAmount   =   normalizeNum($authUnfreezeAmount);
+                    }
+                /**
+                 * 微信支付的方式直接走退款模式，押金和租金一起付的
+                 */
+                    //押金转支付金额
+                    $authDeductionAmount = 0;
+                    //解押金额
+                    $authUnfreezeAmount = 0;
+
+                    $refundCleanNo    = empty($refundCleanNo) ? createNo('RC'):$refundCleanNo;
+
+                }
+
+
+        }
 
         if ($isAuthDeduction) {
             $authDeductionStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
@@ -76,56 +118,6 @@ class OrderClearingRepository
             $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
             $refundCleanNo    = createNo('RC');
         }
-        //根据订单号查询订单信息
-        if(isset($param['order_no'])){
-            $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$param['order_no']));
-
-            if (empty($orderInfo)) {
-                LogApi::debug("[clear]获取订单信息失败",$orderInfo);
-                return false;
-            }
-            if ($orderInfo['pay_type'] == PayInc::LebaifenPay) {
-
-                $param['order_type'] = OrderStatus::miniRecover;
-            }
-
-
-            //如果是微信支付
-            if ($orderInfo['pay_type'] == PayInc::WeChatPay) {
-
-                    //退款或者退货
-                    if (($param['business_type'] == OrderCleaningStatus::businessTypeReturn) ||  ($param['business_type'] == OrderCleaningStatus::businessTypeRefund))
-                    {
-                            $refundAmount   =   normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount)>0 ? normalizeNum($authUnfreezeAmount+$refundAmount-$authDeductionAmount): 0;
-                    }
-
-                    //买断或者还机
-                    if (($param['business_type'] == OrderCleaningStatus::businessTypeReturnGoods) ||  ($param['business_type'] == OrderCleaningStatus::businessTypeBuy))
-                    {
-                            $refundAmount   =   normalizeNum($authUnfreezeAmount);
-                    }
-                /**
-                 * 微信支付的方式直接走退款模式，押金和租金一起付的
-                 */
-                    //押金转支付金额
-                    $authDeductionAmount = 0;
-                    //解押金额
-                    $authUnfreezeAmount = 0;
-                    //扣除押金状态
-                    $authDeductionStatus =  0;
-                    //解押状态
-                    $authUnfreezeStatus = 0;
-                    //退款状态
-                    $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
-
-                    $refundCleanNo    = empty($refundCleanNo) ? createNo('RC'):$refundCleanNo;
-
-                }
-
-
-        }
-
-
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
         if (empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund))

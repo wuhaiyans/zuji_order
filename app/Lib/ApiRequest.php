@@ -251,12 +251,11 @@ class ApiRequest {
             'version' => $this->version,
             'params' => $this->params,
             'userinfo' => $this->userInfo,
-            'sign_type'=>'',
-            'sign'=>'',
+            'sign_type'=>'MD5',
             'timestamp'=>date("Y-m-d H:i:s"),
         ];
-//        $sign = \App\Lib\Certificate\ApiUtil::generateSign($data);
-//        $data['sign'] = $sign;
+        $sign = \App\Lib\Certificate\ApiUtil::generateSign($data);
+        $data['sign'] = $sign;
 		return $data;
 	}
 

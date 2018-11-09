@@ -26,11 +26,11 @@ class MiniGivebackController extends Controller
      * @param $param
      * @return array
      */
-    public function givebackPay($params){
+    public function givebackPay(Request $request){
         //-+--------------------------------------------------------------------
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
-//        \App\Lib\Common\LogApi::debug('调用主动支付接口',$params);
+        $params = $request->input();
         $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
             return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
