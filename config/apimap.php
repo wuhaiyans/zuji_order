@@ -3,7 +3,7 @@
 //路由映射
 return [
     //订单相关
-
+    'api.order.buyout' => 'TestController@test',
     //线上下单接口
     'api.order.create' => 'OrderController@create',
     //门店下单接口

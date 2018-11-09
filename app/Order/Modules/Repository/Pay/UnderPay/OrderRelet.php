@@ -8,10 +8,15 @@ class OrderRelet implements UnderLine {
 
 
     /**
-     * 商品编号
+     * 订单编号
      */
     protected $order_no = '';
 
+    /**
+     * 请求参数
+     * @params
+     * [''=>'']
+     */
     private $componnet;
 
 
@@ -91,18 +96,45 @@ class OrderRelet implements UnderLine {
     /**
      * 获取订单最大续租时间接口（小程序有限制，H5续租为无限制）
      */
-    public function getReletTime( ){
+    public function getReletTime(){
         $order_no = $this->order_no;
-
-
-
-
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $order_no );
+        if( $orderInfo == false ){
+            LogApi::debug('[underLinePay]获取订单信息错误：'.$this->order_no);
+            return false;
+        }
+        //（小程序有限制，H5续租为无限制）
+        if($orderInfo['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
+            $goods_info= \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$order_no]);
+            if(!$goods_info){
+                LogApi::debug('[underLinePay]获取商品信息错误：'.$this->order_no);
+                return false;
+            }
+            return ['relet_day'=>$goods_info['relet_day']];
+        }else{
+            return ['relet_day'=>''];
+        }
     }
     /**
-     * 实现具体业务
+     * 实现具体业务（H5 + 小程序 线下续租操作）
+     * 进行入账，数据操作
+     * @params[
+     * 'order_no'=>'',
+     * 'business_type'=>'',
+     * 'goods_no'=>'',
+     * 'under_channel'=>'',
+     * 'amount'=>'',
+     * 'create_time'=>'',
+     * 'remark'=>'',
+     * 'begin_time'=>'',
+     * 'end_time'=>'',
+     * ]
      * @return bool true  false
      */
     public function execute( ){
+
+
+
 
         return true;
 
