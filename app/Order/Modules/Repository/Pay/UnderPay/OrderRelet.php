@@ -89,6 +89,16 @@ class OrderRelet implements UnderLine {
     }
 
     /**
+     * 获取订单最大续租时间接口（小程序有限制，H5续租为无限制）
+     */
+    public function getReletTime( ){
+        $order_no = $this->order_no;
+
+
+
+
+    }
+    /**
      * 实现具体业务
      * @return bool true  false
      */

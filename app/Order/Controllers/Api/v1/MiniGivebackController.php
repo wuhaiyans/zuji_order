@@ -26,7 +26,7 @@ class MiniGivebackController extends Controller
      * @param $param
      * @return array
      */
-    public function givebackPay($params){
+    public function givebackPay(Request $request){
         //-+--------------------------------------------------------------------
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
