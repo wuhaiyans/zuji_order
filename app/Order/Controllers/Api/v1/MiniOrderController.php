@@ -62,8 +62,10 @@ class MiniOrderController extends Controller
         try{
             //获取订单号
             $orderNo = \App\Order\Modules\Service\OrderOperate::createOrderNo(1);
+            echo 12;
             //获取商品信息
             $goods_info = \App\Lib\Goods\Goods::getSku([$params['sku_id']]);
+            echo 45;die;
             $sku_info = $goods_info[$params['sku_id']]['sku_info'];
             $spu_info = $goods_info[$params['sku_id']]['spu_info'];
             //判断租期与租期类型
