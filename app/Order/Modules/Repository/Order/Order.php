@@ -42,7 +42,15 @@ class Order {
 	public function getData():array{
 		return $this->model->toArray();
 	}
-	
+    /**
+     * 修改风控审核状态
+     * @param $status 风控状态值
+     * @return bool
+     */
+    public function editOrderRiskStatus($status):bool{
+        $this->model->risk_check = $status;
+        return $this->model->save();
+    }
 	/**
 	 * 强制关闭
 	 * @return bool 

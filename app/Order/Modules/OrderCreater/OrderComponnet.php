@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
+use App\Order\Modules\Inc\OrderRiskCheckStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
@@ -295,6 +296,10 @@ class OrderComponnet implements OrderCreater
             }
 
         }
+        if($this->orderType != OrderStatus::orderMiniService){
+            $orderData['risk_check'] = OrderRiskCheckStatus::SystemPass;
+        }
+
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
             'order_no' => $this->orderNo,  // 编号

@@ -751,8 +751,28 @@ class OrderOperate
         try{
             $knight =Risk::getAllKnight(['user_id'=>$userId]);
         }catch (\Exception $e){
-            LogApi::error(config('app.env')."[队列] 获取风控接口失败",$userId);
+            LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
             return  ApiStatus::CODE_31006;
+        }
+
+        //查询订单信息
+        $order = $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
+        $orderInfo = $order->getData();
+
+        if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService){
+            $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
+            if($knight['risk_grade'] == 'ACCEPT'){
+                $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
+            }
+            $b = $order->editOrderRiskStatus($riskStatus);
+            if(!$b){
+                LogApi::error(config('app.env')."[orderRiskSave] Order-editOrderRiskStatus:".$orderNo);
+                return ApiStatus::CODE_31006;
+            }
         }
 
         //获取风控信息详情 保存到数据表
