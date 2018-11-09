@@ -297,11 +297,12 @@ class OrderComponnet implements OrderCreater
 
         }
         if($this->orderType != OrderStatus::orderMiniService){
-            $orderData['risk_check'] = OrderRiskCheckStatus::SystemPass;
+            $orderRiskStatus = OrderRiskCheckStatus::SystemPass;
         }
 
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
+            'risk_check' => $orderRiskStatus,
             'order_no' => $this->orderNo,  // 编号
             'user_id' => $this->userId,
             'pay_type' => $this->payType,
@@ -318,6 +319,7 @@ class OrderComponnet implements OrderCreater
             'mobile'=>$data['user']['user_mobile'],
             'predict_delivery_time'=>$PredictDeliveryTime,
         ];
+
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {
