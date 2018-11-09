@@ -69,7 +69,7 @@ class ChannelComponnet implements OrderCreater
             $ChannelInfo = Channel::getChannel($appid);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."OrderCreate-GetChannel-Exception:".$e->getMessage());
-            throw new Exception("OrderCreate-GetChannel-Exception");
+            throw new Exception("GetChannel：".$e->getMessage());
         }
 
         $this->appId = intval($ChannelInfo['appid']['id']);

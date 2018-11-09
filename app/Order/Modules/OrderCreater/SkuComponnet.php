@@ -76,7 +76,7 @@ class SkuComponnet implements OrderCreater
             $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
         }catch (\Exception $e){
             LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
-            throw new Exception("OrderCreate-GetSkuList-error");
+            throw new Exception("GetSkuList:".$e->getMessage());
         }
 
 
