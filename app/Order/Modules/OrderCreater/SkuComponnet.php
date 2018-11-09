@@ -72,8 +72,9 @@ class SkuComponnet implements OrderCreater
     public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
+        $mobile = $this->componnet->getOrderCreater()->getUserComponnet()->getMobile();
         try{
-            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
+            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') ,$mobile);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
             throw new Exception("GetSkuList:".$e->getMessage());
