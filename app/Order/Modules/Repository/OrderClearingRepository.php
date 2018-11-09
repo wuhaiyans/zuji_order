@@ -118,6 +118,8 @@ class OrderClearingRepository
                     //退款状态
                     $authRefundStatus = OrderCleaningStatus::depositDeductionStatusUnpayed;
 
+                    $refundCleanNo    = empty($refundCleanNo) ? createNo('RC'):$refundCleanNo;
+
                 }
 
 
