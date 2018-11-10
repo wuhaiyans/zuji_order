@@ -283,9 +283,6 @@ class OrderOperate
 
     }
 
-
-
-
     /**
      * 保存回访标识
      * @author wuhaiyan
@@ -335,6 +332,65 @@ class OrderOperate
         }
     }
 
+
+    /**
+     * 保存回访标识
+     * @author wuhaiyan
+     * @param $params
+     * [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'check_status'=>'', //【必须】int    状态ID     3，复核通过； 4，复核拒绝
+     *          'check_text'=>'',   //【必须】string 备注信息
+     * ]
+     * @param $userinfo
+     * [
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'uid'=>1,   //【必须】string 用户ID
+     *      'username'=>1, //【必须】string 用户名
+     *      'ip'=>1,    //【必须】string IP 地址
+     * ]
+     * @return array|bool
+     */
+
+    public static function saveOrderRiskCheck($params,$userInfo)
+    {
+        DB::beginTransaction();
+        try{
+            //查询订单信息
+            $order = Order::getByNo($params['order_no']);
+            if(!$order){
+                set_msg("订单不存在");
+                DB::rollBack();
+                return false;
+            }
+
+            $orderInfo =$order->getData();
+
+            //更新订单风控审核状态
+            $b= $order->editOrderRiskStatus($params['check_status']);
+            if(!$b){
+                set_msg("操作失败");
+                DB::rollBack();
+                return false;
+            }
+            //增加风控审核操作日志
+            $b =OrderRiskCheckLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$params['order_no'],$params['check_text'],$params['check_status'],$orderInfo['risk_check']);
+            if(!$b){
+                set_msg("操作失败");
+                DB::rollBack();
+                return false;
+            }
+
+            DB::commit();
+            return true;
+        }catch (\Exception $exc){
+            DB::rollBack();
+            echo $exc->getMessage();
+            die;
+
+        }
+    }
+
     /**
      * 获取订单日志接口
      * @author wuhaiyan
@@ -355,6 +411,34 @@ class OrderOperate
         }
         return $logData;
     }
+
+    /**
+     * 获取订单风控审核日志接口
+     * @author wuhaiyan
+     * @param $orderNo
+     * @return array|bool
+     */
+
+    public static function orderRiskCheckLog($orderNo)
+    {
+        if(empty($orderNo)){return false;}
+        $logData = OrderRiskCheckLogRepository::getOrderLog($orderNo);
+        if(!$logData){
+            return [];
+        }
+        foreach ($logData as $k=>$v){
+
+            $logData[$k]['operator_type_name'] = \App\Lib\PublicInc::getRoleName($v['operator_type']);
+            $oldStatus='';
+            if($v['old_status']){
+                $oldStatus = "由“".Inc\OrderRiskCheckStatus::getStatusName($v['old_status'])."”";
+            }
+            $newStatus =Inc\OrderRiskCheckStatus::getStatusName($v['new_status']);
+            $logData[$k]['title'] = "将风控审核状态".$oldStatus."修改为“".$newStatus."”。";
+        }
+        return $logData;
+    }
+
     /**
      * 确认收货接口
      * @author wuhaiyan
