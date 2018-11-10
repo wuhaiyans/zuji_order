@@ -35,6 +35,7 @@ use App\Order\Modules\Repository\OrderPayPaymentRepository;
 use App\Order\Modules\Repository\OrderPayRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
+use App\Order\Modules\Repository\OrderRiskCheckLogRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
 use App\Order\Modules\Repository\Pay\Channel;
@@ -754,25 +755,35 @@ class OrderOperate
             LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
             return  ApiStatus::CODE_31006;
         }
-
+        //开启事务
+        DB::beginTransaction();
         //查询订单信息
         $order = $order = Order::getByNo($orderNo);
         if(!$order){
+            DB::rollBack();
             LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
             return ApiStatus::CODE_31006;
         }
         $orderInfo = $order->getData();
-
+        $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
         if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService){
-            $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
             if($knight['risk_grade'] == 'ACCEPT'){
                 $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
             }
-            $b = $order->editOrderRiskStatus($riskStatus);
-            if(!$b){
-                LogApi::error(config('app.env')."[orderRiskSave] Order-editOrderRiskStatus:".$orderNo);
-                return ApiStatus::CODE_31006;
-            }
+        }
+        $b = $order->editOrderRiskStatus($riskStatus);
+        if(!$b){
+            DB::rollBack();
+            LogApi::error(config('app.env')."[orderRiskSave] Order-editOrderRiskStatus:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
+
+        //保存风控审核日志
+        $b =OrderRiskCheckLogRepository::add(0,"系统",\App\Lib\PublicInc::Type_System,$orderNo,"系统风控操作",$riskStatus);
+        if(!$b){
+            DB::rollBack();
+            LogApi::error(config('app.env')."[orderRiskSave] save-orderRiskCheckLogErro:".$orderNo);
+            return ApiStatus::CODE_31006;
         }
 
         //获取风控信息详情 保存到数据表
@@ -787,11 +798,12 @@ class OrderOperate
                 ];
                 $id =OrderRiskRepository::add($riskData);
                 if(!$id){
-                    LogApi::error(config('app.env')."[队列]保存风控数据失败",$riskData);
+                    DB::rollBack();
+                    LogApi::error(config('app.env')."[orderRiskSave] save-error",$riskData);
                     return  ApiStatus::CODE_31006;
                 }
             }
-            LogApi::info(config('app.env')."[队列]订单风控信息保存成功：".$orderNo,$riskData);
+            LogApi::info(config('app.env')."[orderRiskSave]save-success：".$riskData);
             return  ApiStatus::CODE_0;
         }
 
