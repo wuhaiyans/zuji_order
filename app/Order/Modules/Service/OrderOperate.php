@@ -766,10 +766,9 @@ class OrderOperate
         }
         $orderInfo = $order->getData();
         $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
-        if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService){
-            if($knight['risk_grade'] == 'ACCEPT'){
+
+        if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService && $knight['risk_grade'] == 'ACCEPT'){
                 $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
-            }
         }
         $b = $order->editOrderRiskStatus($riskStatus);
         if(!$b){
@@ -779,12 +778,12 @@ class OrderOperate
         }
 
         //保存风控审核日志
-//        $b =OrderRiskCheckLogRepository::add(0,"系统",\App\Lib\PublicInc::Type_System,$orderNo,"系统风控操作",$riskStatus);
-//        if(!$b){
-//            DB::rollBack();
-//            LogApi::error(config('app.env')."[orderRiskSave] save-orderRiskCheckLogErro:".$orderNo);
-//            return ApiStatus::CODE_31006;
-//        }
+        $b =OrderRiskCheckLogRepository::add(0,"系统",\App\Lib\PublicInc::Type_System,$orderNo,"系统风控操作",$riskStatus);
+        if(!$b){
+            DB::rollBack();
+            LogApi::error(config('app.env')."[orderRiskSave] save-orderRiskCheckLogErro:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
 
         //获取风控信息详情 保存到数据表
 
@@ -806,6 +805,7 @@ class OrderOperate
             LogApi::info(config('app.env')."[orderRiskSave]save-success：",$riskData);
             return  ApiStatus::CODE_0;
         }
+        DB::commit();
 
 
     }
