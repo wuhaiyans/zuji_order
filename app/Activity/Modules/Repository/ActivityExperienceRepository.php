@@ -23,7 +23,8 @@ class ActivityExperienceRepository
         $experienceList = DB::table('order_activity_experience')
             ->leftJoin('order_activity_theme','order_activity_experience.activity_id', '=', 'order_activity_theme.activity_id')
             ->select('order_activity_experience.* ','order_activity_theme.begin_time','order_activity_theme.end_time','order_activity_theme.opening_time')
-            ->orderBy('order_activity_experience.create_time', 'DESC')-> get();
+            ->orderBy('order_activity_experience.create_time', 'DESC')
+            ->get();
         // $experienceList=ActivityExperience::query()->orderBy('create_time', 'DESC')-> get();
          if(!$experienceList){
              return false;
