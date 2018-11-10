@@ -20,10 +20,10 @@ class ActivityExperienceRepository
      * 获取体验活动信息
      */
     public static function getActivityExperienceInfo(){
-        $experienceList = DB::table('activity_experience')
-            ->leftJoin('activity_theme','activity_experience.activity_id', '=', 'activity_theme.activity_id')
-            ->select('activity_experience.* ','activity_theme.begin_time','activity_theme.end_time','activity_theme.opening_time')
-            ->orderBy('create_time', 'DESC')-> get();
+        $experienceList = DB::table('order_activity_experience')
+            ->leftJoin('order_activity_theme','order_activity_experience.activity_id', '=', 'order_activity_theme.activity_id')
+            ->select('order_activity_experience.* ','order_activity_theme.begin_time','order_activity_theme.end_time','order_activity_theme.opening_time')
+            ->orderBy('order_activity_experience.create_time', 'DESC')-> get();
         // $experienceList=ActivityExperience::query()->orderBy('create_time', 'DESC')-> get();
          if(!$experienceList){
              return false;
