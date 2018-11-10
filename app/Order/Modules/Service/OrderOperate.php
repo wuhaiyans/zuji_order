@@ -764,10 +764,10 @@ class OrderOperate
             return ApiStatus::CODE_31006;
         }
         $orderInfo = $order->getData();
-        $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
+        $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
 
-        if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService && $knight['risk_grade'] == 'ACCEPT'){
-                $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
+        if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService && $knight['risk_grade'] == 'REJECT'){
+                $riskStatus = Inc\OrderRiskCheckStatus::ProposeReview;
         }
         $b = $order->editOrderRiskStatus($riskStatus);
         if(!$b){
