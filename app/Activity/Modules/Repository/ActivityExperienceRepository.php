@@ -22,7 +22,7 @@ class ActivityExperienceRepository
     public static function getActivityExperienceInfo(){
         $experienceList = DB::table('order_activity_experience')
             ->leftJoin('order_activity_theme','order_activity_experience.activity_id', '=', 'order_activity_theme.activity_id')
-            ->select('order_activity_experience.* ','order_activity_theme.begin_time','order_activity_theme.end_time','order_activity_theme.opening_time')
+            ->select('order_activity_experience.id','order_activity_experience.group_type','order_activity_experience.goods_name','order_activity_experience.spu_id','order_activity_experience.experience_status','order_activity_experience.price','order_activity_experience.old_price','order_activity_experience.destine_amount','order_activity_experience.zuqi','order_activity_experience.goods_images','order_activity_experience.activity_id','order_activity_theme.begin_time','order_activity_theme.end_time','order_activity_theme.opening_time')
             ->orderBy('order_activity_experience.create_time', 'DESC')
             ->get();
         // $experienceList=ActivityExperience::query()->orderBy('create_time', 'DESC')-> get();
