@@ -185,12 +185,12 @@ class OrderPayIncomeRepository
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
 
-        if(isset($params['keywords'])){
-            if($params['kw_type'] == "order_no"){
-                $params['order_no'] = $params['keywords'];
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
             }
-            elseif($params['kw_type'] == "mobile"){
-                $params['mobile'] = $params['keywords'];
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
             }
         }
 

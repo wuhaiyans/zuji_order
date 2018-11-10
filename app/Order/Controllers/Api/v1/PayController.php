@@ -1208,7 +1208,7 @@ class PayController extends Controller
         $smallPage = ceil($total_export_count/$pre_count);
         $abc = 1;
 
-        $headers = ['名称', '入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码'];
+        $headers = ['名称', '姓名','电话','入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码','缴款用途'];
 
         $orderExcel = array();
         while(true) {
@@ -1227,8 +1227,17 @@ class PayController extends Controller
             if ($orderDataArray) {
                 $data = array();
                 foreach ($orderDataArray as $item) {
+					// 缴款用途
+					$business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($item['business_type']);
+					if(!$business_type_name){
+						$businessType = \App\Order\Modules\Inc\OrderStatus::getBusinessName($item['business_type']);
+						$business_type_name = "业务类型-" . $businessType . "支付";
+					}
+
                     $data[] = [
                         $item['name'],
+						$item['realname'],
+						$item['mobile'],
                         date('Y-m-d H:i:s', $item['create_time']),
                         OrderStatus::getBusinessName( $item['business_type']),
                         Channel::getBusinessName($item['channel']),
@@ -1237,6 +1246,7 @@ class PayController extends Controller
                         $item['order_no'],
                         $item['trade_no'],
                         $item['out_trade_no'],
+						$business_type_name,
                     ];
 
                 }
