@@ -34,7 +34,7 @@ class ActivityExperienceController extends Controller
         if( !$experienceList ){
             return apiResponse([],ApiStatus::CODE_95005);
         }
-        if(time()<$experienceList[0]['begin_time']){
+        if(time()<$experienceList[1][0]['begin_time']){
             return apiResponse($experienceList,ApiStatus::CODE_95006);//未开始
         }
         if(time()>$experienceList[0]['end_time']){
