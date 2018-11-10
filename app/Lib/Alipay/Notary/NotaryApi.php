@@ -56,7 +56,7 @@ class NotaryApi {
 	 * @return string 事务ID
 	 * @throws NotaryException 初始化失败抛出异常
 	 */
-	public static function notaryToken(string $accountId, EnterpriseIdentity $entity, CustomerIdentity $customer ): string{
+	public static function notaryToken(string $accountId, $entity, CustomerIdentity $customer ): string{
 //		return '790fef66-1e3f-401d-83a1-ac2d2926e67e';
 		return '5bdb27ad-c306-4e6a-b6bd-cc110739e068';
 		
@@ -65,7 +65,7 @@ class NotaryApi {
 		$bizId = '2';
 		$params = [
 			'accountId' => $accountId,
-			'entity'	=> $entity->toArray(),
+			'entity'	=> $entity,
 			'bizId'		=> $bizId,		// 业务类型；2：合同
 			'subBizId'	=> 'LEASING',	// 子业务类型； LEASING：租赁合同
 			'customer'	=> [			// 您的客户身份标识

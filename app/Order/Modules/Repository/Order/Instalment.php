@@ -512,12 +512,6 @@ class Instalment {
 			return false;
 		}
 
-		// 查询订单
-		$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($instalmentInfo['order_no']);
-		if( !$orderInfo ){
-			LogApi::error('[underLinePaySuccess]线下分期还款-订单信息错误');
-			return false;
-		}
 		$business_no = createNo();
 		$data = [
 			'business_no'		=> $business_no,	//设置交易号 为发送短信根据 business_no  查询分期

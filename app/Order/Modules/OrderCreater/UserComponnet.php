@@ -55,10 +55,13 @@ class UserComponnet implements OrderCreater
         $this->userId =$userId;
 
         //获取用户信息
-        $userInfo =User::getUser($this->userId,$addressId);
-        if (!is_array($userInfo)) {
-            throw new Exception("获取用户接口失败");
+        try{
+            $userInfo =User::getUser($this->userId,$addressId);
+        }catch (\Exception $e){
+            LogApi::error("OrderCreate-GetUser-error:".$e->getMessage());
+            throw new Exception("GetUser:".$e->getMessage());
         }
+
         if( empty($addressInfo) ){
             $this->address = $userInfo['address'];
         }else{
@@ -90,6 +93,22 @@ class UserComponnet implements OrderCreater
      */
     public function getUserId(){
         return $this->userId;
+    }
+
+    /**
+     * 获取 用户地址ID
+     * @return int
+     */
+    public function getAddressId(){
+        return $this->addressID;
+    }
+
+    /**
+     * 获取 用户手机号
+     * @return int
+     */
+    public function getMobile(){
+        return $this->mobile ;
     }
 
     /**
@@ -180,8 +199,8 @@ class UserComponnet implements OrderCreater
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
         if(!$id){
-            LogApi::error(config('app.env')."[下单]保存用户认证信息失败",$RiskData);
-            $this->getOrderCreater()->setError("保存用户认证信息失败");
+            LogApi::error(config('app.env')."OrderCreate-Add-RistData-error",$RiskData);
+            $this->getOrderCreater()->setError("OrderCreate-Add-RistData-error");
             return false;
         }
 

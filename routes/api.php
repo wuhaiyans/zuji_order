@@ -103,7 +103,7 @@ $api->version('v1', [
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
 
-        //隊列取消订单
+        //隊列增加风控看板信息
         $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');

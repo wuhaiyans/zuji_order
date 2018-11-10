@@ -50,22 +50,6 @@ class TestController extends Controller
 		try{
 			
 			$accountId = 'DCODMVCN';
-			
-			// 用户实名身份信息
-			$customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
-			$customer->setCertNo('130423198906021038');
-			$customer->setCertName('刘红星');
-			$customer->setMobileNo('15300001111');
-			$customer->setProperties('');
-			
-			$notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
-			
-			// 注册事务
-			$b = $notaryApp->registerTransation('1', 'Test123', $customer);
-			
-			
-			var_dump( $b,$notaryApp );exit;
-			exit;
 			$entity = [
 				// 用户类型；固定值；ENTERPRISE：企业实体
 				'userType'	=> 'ENTERPRISE',
@@ -88,20 +72,16 @@ class TestController extends Controller
 				'properties' => '',
 			];
 			
-			
-			// 企业实名身份信息
-			$enterprise = new \App\Lib\Alipay\Notary\EnterpriseIdentity();
-			$enterprise->setCertName('深圳回收宝科技有限公司');
-			$enterprise->setCertType( $enterprise::CERT_TYPE_UNIFIED_SOCIAL_CREDIT_CODE );
-			$enterprise->setCertNo('91440300311802545U');
-			$enterprise->setLegalPerson('何帆');
-			$enterprise->setLegalPersonId('420102198108011012');
-			$enterprise->setAgent('赵明亮');
-			$enterprise->setAgentId('232301199005211535');
+			// 用户信息
+			$customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
+			$customer->setCertNo('130423198906021038');
+			$customer->setCertName('刘红星');
+			$customer->setMobileNo('15300001111');
+			$customer->setProperties('');
 			
 			
 			// 存证事务
-			$token = \App\Lib\Alipay\Notary\NotaryApi::notaryToken( $accountId, $enterprise, $customer );
+			$token = \App\Lib\Alipay\Notary\NotaryApi::notaryToken( $accountId, $entity, $customer );
 
 			// 位置
 			$location = new \App\Lib\Alipay\Notary\Location();

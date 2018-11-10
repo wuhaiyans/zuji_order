@@ -389,7 +389,7 @@ class Pay extends \App\Lib\Configurable
 	**/
 	public function update()
 	{
-	    LogApi::debug('[支付阶段]'.$this->trade.'更新');
+	    LogApi::debug('[支付阶段]直付方式支付单更新');
 	    // 更新 支付阶段 表
 	    $payModel = new OrderPayModel();
 	    $payment_no = \creage_payment_no();
@@ -401,11 +401,11 @@ class Pay extends \App\Lib\Configurable
 	        'update_time' => time()
 	    ]);
 	    if( !$b ){
-	        LogApi::error('[支付阶段]'.$this->trade.'更新失败');
+	        LogApi::error('[支付阶段]直付方式支付单更新失败');
 	        throw new \Exception( '更新失败' );
 	    }
 	    $this->paymentNo = $payment_no;
-	    LogApi::debug('[支付阶段]'.$this->trade.'更新成功');
+	    LogApi::debug('[支付阶段]直付方式支付单更新成功');
 	    return true;
 	}
 	

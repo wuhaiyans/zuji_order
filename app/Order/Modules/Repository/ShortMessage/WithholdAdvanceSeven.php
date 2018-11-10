@@ -34,8 +34,14 @@ class WithholdAdvanceSeven implements ShortMessage {
     }
 
     public function notify(){
-
-
+        /**
+         * 当天发送短信设置  超时时间 12小时
+         */
+        $time = 60 * 60 * 12;
+        if(redisIncr('WithholdAdvanceSeven'.$this->business_no, $time)>1) {
+            LogApi::debug("[WithholdAdvanceSeven]短信已经发送");
+            return false;
+        }
 
         // 查询分期信息
         $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['id'=>$this->business_no]);
