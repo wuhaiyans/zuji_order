@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository\Pay\UnderPay;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
@@ -105,7 +106,7 @@ class OrderBuyout implements UnderLine {
         $ret = Instalment::close($data);
         if(!$ret){
             DB::rollBack();
-            echo  "";die;
+            LogApi::info("offline-buyout","关闭分期失败");
             return false;
         }
 
@@ -135,7 +136,7 @@ class OrderBuyout implements UnderLine {
         $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
         if(!$orderCleanResult){
             DB::rollBack();
-            echo  "进入清算失败";die;
+            LogApi::info("offline-buyout","进入清算失败");
             return false;
         }
 
@@ -179,7 +180,7 @@ class OrderBuyout implements UnderLine {
             $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
             if(!$ret){
                 DB::rollBack();
-                echo  "解冻订单";die;
+                LogApi::info("offline-buyout","解冻订单失败");
                 return false;
             }
             //更新订单商品
@@ -191,7 +192,7 @@ class OrderBuyout implements UnderLine {
             $ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
             if(!$ret){
                 DB::rollBack();
-                echo  "更新商品失败";die;
+                LogApi::info("offline-buyout","更新商品失败");
                 return false;
             }
 
@@ -238,7 +239,7 @@ class OrderBuyout implements UnderLine {
 
         if(!$ret){
             DB::rollBack();
-            echo  "创建买断单失败";die;
+            LogApi::info("offline-buyout","更新商品失败");
             return false;
         }
         echo  "success";

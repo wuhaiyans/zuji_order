@@ -29,7 +29,7 @@ class ActivityExperienceRepository
          if(!$experienceList){
              return false;
          }
-         return $experienceList;
+         return $experienceList->toArray();
     }
 
 
