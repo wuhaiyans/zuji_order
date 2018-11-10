@@ -129,7 +129,7 @@ class OrderClearingRepository
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
         if ((empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund)) ||
-            (empty($authDeductionAmount) && empty($authUnfreezeAmount) && empty($refundAmount))
+            (empty(floatval($authDeductionAmount)) && empty(floatval($authUnfreezeAmount)) && empty(floatval($refundAmount)))
         )
         {
             $status    =   OrderCleaningStatus::orderCleaningComplete;
@@ -206,7 +206,7 @@ class OrderClearingRepository
         if(!$success){
             return false;
         }
-        
+
         //如果是还机完成并且是微信支付的推送给业务方
         if ( ($status  == OrderCleaningStatus::orderCleaningComplete) && ($orderInfo['pay_type'] == PayInc::WeChatPay)) {
 
