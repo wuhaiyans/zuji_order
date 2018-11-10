@@ -112,9 +112,9 @@ class Curl {
      * @return string
      */    
     public static function post(string $url, $params=null,array $header=[]){
-//		if(is_array($params) ){
-//			$params = http_build_query( $params );
-//		}
+		if(is_array($params) ){
+			$params = http_build_query( $params );
+		}
         $output = self::_send($url, $params, $header);
         return $output;
     }
@@ -170,7 +170,6 @@ class Curl {
     private static function _send(string $url, $params=null,array $header=[]){
 //        echo "<pre>";
 //        print_r($params);
-        echo $url;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
