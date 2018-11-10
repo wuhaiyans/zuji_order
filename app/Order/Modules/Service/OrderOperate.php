@@ -1487,6 +1487,8 @@ class OrderOperate
                 $orderListArray['data'][$keys]['freeze_type_name'] = Inc\OrderFreezeStatus::getStatusName($values['freeze_type']);
                 //发货时间
                 $orderListArray['data'][$keys]['predict_delivery_time'] = date("Y-m-d H:i:s", $values['predict_delivery_time']);
+                //风控审核状态名称
+                $orderListArray['data'][$keys]['risk_check_name'] = Inc\OrderRiskCheckStatus::getStatusName($values['risk_check']);
 
 
                 //设备名称
