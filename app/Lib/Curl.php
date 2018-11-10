@@ -168,6 +168,8 @@ class Curl {
 	 * @return string
 	 */
     private static function _send(string $url, $params=null,array $header=[]){
+        echo "<pre>";
+        print_r($params);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
