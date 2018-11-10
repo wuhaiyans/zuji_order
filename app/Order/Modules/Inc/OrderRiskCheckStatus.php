@@ -37,7 +37,6 @@ class OrderRiskCheckStatus{
      */
     public static function getStatusList(){
         return [
-            self::Non => '无',
             self::SystemPass => '系统通过',
             self::ProposeReview => '建议复核',
             self::ReviewPass => '复核通过',
