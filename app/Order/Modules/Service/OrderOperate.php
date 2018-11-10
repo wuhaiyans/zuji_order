@@ -760,7 +760,6 @@ class OrderOperate
         //查询订单信息
         $order = $order = Order::getByNo($orderNo);
         if(!$order){
-            DB::rollBack();
             LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
             return ApiStatus::CODE_31006;
         }
@@ -772,7 +771,6 @@ class OrderOperate
         }
         $b = $order->editOrderRiskStatus($riskStatus);
         if(!$b){
-            DB::rollBack();
             LogApi::error(config('app.env')."[orderRiskSave] Order-editOrderRiskStatus:".$orderNo);
             return ApiStatus::CODE_31006;
         }
@@ -780,7 +778,6 @@ class OrderOperate
         //保存风控审核日志
         $b =OrderRiskCheckLogRepository::add(0,"系统",\App\Lib\PublicInc::Type_System,$orderNo,"系统风控操作",$riskStatus);
         if(!$b){
-            DB::rollBack();
             LogApi::error(config('app.env')."[orderRiskSave] save-orderRiskCheckLogErro:".$orderNo);
             return ApiStatus::CODE_31006;
         }
@@ -805,7 +802,6 @@ class OrderOperate
             LogApi::info(config('app.env')."[orderRiskSave]save-success：",$riskData);
             return  ApiStatus::CODE_0;
         }
-        DB::commit();
 
 
     }
