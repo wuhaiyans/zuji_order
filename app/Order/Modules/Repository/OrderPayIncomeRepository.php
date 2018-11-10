@@ -42,6 +42,15 @@ class OrderPayIncomeRepository
      */
     public static function queryCount($param = []){
         $whereArray = [];
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
         if (isset($param['name']) && !empty($param['name'])) {
             $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
@@ -101,6 +110,15 @@ class OrderPayIncomeRepository
         $page       = isset($additional['page']) ? $additional['page'] : 1;
         $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
         $offset     = ($page - 1) * $pageSize;
+
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
 
         $whereArray = [];
         if (isset($param['name']) && !empty($param['name'])) {
@@ -166,6 +184,15 @@ class OrderPayIncomeRepository
      */
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
+
+        if(isset($params['keywords'])){
+            if($params['kw_type'] == "order_no"){
+                $params['order_no'] = $params['keywords'];
+            }
+            elseif($params['kw_type'] == "mobile"){
+                $params['mobile'] = $params['keywords'];
+            }
+        }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
