@@ -803,7 +803,7 @@ class OrderOperate
                     return  ApiStatus::CODE_31006;
                 }
             }
-            LogApi::info(config('app.env')."[orderRiskSave]save-success：".$riskData);
+            LogApi::info(config('app.env')."[orderRiskSave]save-success：",$riskData);
             return  ApiStatus::CODE_0;
         }
 
