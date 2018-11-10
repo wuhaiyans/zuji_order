@@ -15,9 +15,11 @@ class OrderWithhold implements UnderLine {
 
 
     public function __construct( $params ) {
-        $this->order_no = $params['order_no'];
 
         $this->componnet = $params;
+
+        $this->order_no = $params['order_no'];
+
     }
 
 
@@ -27,9 +29,7 @@ class OrderWithhold implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-
         $instalmentList  = $this->instalmentList();
-
         $amount = 0;
         foreach($instalmentList as $item){
             $amount += $item['amount'];
@@ -43,7 +43,8 @@ class OrderWithhold implements UnderLine {
      * 实现具体业务
      * @return bool true  false
      */
-    public function execute( ){
+    public function execute(){
+
 
         $surplusAmount  = $this->componnet['amount'];
 
@@ -60,7 +61,6 @@ class OrderWithhold implements UnderLine {
         }
 
         return true;
-
     }
 
     /**
@@ -82,13 +82,11 @@ class OrderWithhold implements UnderLine {
             ->get()->toArray();
 
         if(!$instalmentList){
-            LogApi::debug('[getPayAmount]分期错误：'.$this->order_no);
+            LogApi::debug('[underLinePay]分期错误：'.$this->order_no);
             return [];
         }
 
         return $instalmentList;
     }
-
-
 
 }

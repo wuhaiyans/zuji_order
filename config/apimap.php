@@ -3,7 +3,7 @@
 //路由映射
 return [
     //订单相关
-
+    'api.order.buyout' => 'TestController@test',
     //线上下单接口
     'api.order.create' => 'OrderController@create',
     //门店下单接口
@@ -43,7 +43,13 @@ return [
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
 
-    
+    //-+------------------------------------------------------------------------
+	// | 设备相关
+    //-+------------------------------------------------------------------------
+	//设备日志列表信息
+	'api.goods.log' => 'GoodsController@goodsLog',
+	
+	
     //gaobo
     'api.payment.url' => 'PayCenterController@pay',
 
@@ -306,6 +312,10 @@ return [
     'api.pay.payIncomeInfo'         => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
     'api.pay.payIncomeWhere'        => 'PayincomeController@payIncomeWhere',
+    // 线下还款场景
+    'api.pay.getOrderInfoByPhone'   => 'PayincomeController@getOrderInfoByPhone',
+    // 线下缴款类型
+    'api.pay.underLinePayType'      => 'PayincomeController@underLinePayType',
     // 线下还款场景
     'api.pay.underLineScene'        => 'PayincomeController@underLineScene',
     // 线下支付 获取所需要支付金额

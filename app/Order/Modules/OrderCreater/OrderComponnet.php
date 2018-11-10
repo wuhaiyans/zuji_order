@@ -12,6 +12,7 @@ namespace App\Order\Modules\OrderCreater;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Order\Models\Order;
+use App\Order\Modules\Inc\OrderRiskCheckStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
@@ -132,28 +133,6 @@ class OrderComponnet implements OrderCreater
     }
 
     /**
-     * 设置免押状态
-     * @param int $status
-     * @return OrderComponnet
-     */
-    public function setMianyaStatus( int $status ): OrderComponnet
-    {
-        if( !in_array($status, [0,1]) ){
-            throw new Exception('免押状态值设置异常');
-        }
-        $this->mianyaStatus = $status;
-        return $this;
-    }
-    /**
-     * 获取免押状态
-     * @return int
-     */
-    public function getMianyaStatus(): int
-    {
-        return $this->mianyaStatus;
-    }
-
-    /**
      * 获取 订单编号
      * @return string
      */
@@ -172,12 +151,21 @@ class OrderComponnet implements OrderCreater
     }
 
     /**
-     * 获取appid
-     * @return int
-     */
+ * 获取appid
+ * @return int
+ */
     public function getAppid(): int
     {
         return $this->appid;
+    }
+
+    /**
+     * 获取orderType
+     * @return int
+     */
+    public function getOrderType(): int
+    {
+        return $this->orderType;
     }
 
     /**
@@ -308,8 +296,13 @@ class OrderComponnet implements OrderCreater
             }
 
         }
+        if($this->orderType != OrderStatus::orderMiniService){
+            $orderRiskStatus = OrderRiskCheckStatus::SystemPass;
+        }
+
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
+            'risk_check' => $orderRiskStatus,
             'order_no' => $this->orderNo,  // 编号
             'user_id' => $this->userId,
             'pay_type' => $this->payType,
@@ -326,11 +319,12 @@ class OrderComponnet implements OrderCreater
             'mobile'=>$data['user']['user_mobile'],
             'predict_delivery_time'=>$PredictDeliveryTime,
         ];
+
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {
-            LogApi::error(config('app.env')."[下单]保存订单数据失败",$orderData);
-            $this->getOrderCreater()->setError('保存订单数据失败');
+            LogApi::error(config('app.env')."OrderCreate-Add-OrderData-error",$orderData);
+            $this->getOrderCreater()->setError('OrderCreate-Add-OrderData-error');
             return false;
         }
 

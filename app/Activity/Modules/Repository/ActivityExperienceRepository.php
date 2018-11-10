@@ -2,6 +2,7 @@
 namespace App\Activity\Modules\Repository;
 
 use App\Activity\Models\ActivityExperience;
+use Illuminate\Support\Facades\DB;
 
 
 class ActivityExperienceRepository

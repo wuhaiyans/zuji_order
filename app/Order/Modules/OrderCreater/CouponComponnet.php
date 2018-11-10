@@ -137,8 +137,8 @@ class CouponComponnet implements OrderCreater
                 ];
                 $couponId = OrderCouponRepository::add($couponData);
                 if(!$couponId){
-                    LogApi::error(config('app.env')."[下单]保存订单优惠券信息失败",$couponData);
-                    $this->getOrderCreater()->setError("保存订单优惠券信息失败");
+                    LogApi::error(config('app.env')."OrderCreate-Add-Coupon-error",$couponData);
+                    $this->getOrderCreater()->setError("OrderCreate-Add-Coupon-error");
                     return false;
                 }
                 $coupon[] =intval($v['coupon_id']);
@@ -151,8 +151,8 @@ class CouponComponnet implements OrderCreater
          */
         $coupon = Coupon::useCoupon($coupon);
         if($coupon !=ApiStatus::CODE_0){
-            LogApi::error(config('app.env')."[下单]调用使用优惠券接口失败",$coupon);
-            $this->getOrderCreater()->setError("调用使用优惠券接口失败");
+            LogApi::error(config('app.env')."OrderCreate-useCoupon-interface-error",$coupon);
+            $this->getOrderCreater()->setError("OrderCreate-useCoupon-interface-error");
             return false;
         }
 
