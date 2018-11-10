@@ -27,16 +27,17 @@ class ActivityExperience
      * 获取体验活动列表
      */
     public static function experienceList(){
-       $experienceList = ActivityExperienceRepository::getActivityExperienceInfo();//获取体验活动信息
-       if(!$experienceList){
+       $experienceList1 = ActivityExperienceRepository::getActivityExperienceInfo();//获取体验活动信息
+       if(!$experienceList1){
            return false;
        }
+        $experienceList=objectToArray($experienceList1);
        foreach($experienceList as $key=>$item){
            $experienceList[$key]['group_type_name'] = DestineStatus::getActivityTypeName($item['group_type']);   //活动分组名称
            $experienceList[$key]['experience_status_name'] = DestineStatus::getExperienceStatusName($item['experience_status']);  //体验状态名称
            $experienceList[$key]['activity_name'] = DestineStatus::getExperienceActivityStatusName($item['activity_id']);   //活动类型
            $experienceList[$key]['zuqi_name'] = DestineStatus::getZuqiTypeStatusTypeName($item['zuqi']);   //租期类型
-           $new_arr[$item['group_type']][] = $item;
+           $new_arr[$item['group_type']][] =  $experienceList[$key];
        }
        return $new_arr;
 

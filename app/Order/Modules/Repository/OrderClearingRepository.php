@@ -14,6 +14,7 @@ use App\Order\Models\OrderClearing;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Service\OrderCleaning;
 
 class OrderClearingRepository
 {
@@ -127,7 +128,9 @@ class OrderClearingRepository
 
 
         //预授权转支付，预授权解押，退款金额全为空，清算状态设为已完成
-        if (empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund))
+        if ((empty($isAuthDeduction) && empty($isAuthUnfreeze) && empty($isRefund)) ||
+            (empty($authDeductionAmount) && empty($authUnfreezeAmount) && empty($refundAmount))
+        )
         {
             $status    =   OrderCleaningStatus::orderCleaningComplete;
             //预授权转支付不为空，为待押金转支付状态
@@ -203,8 +206,51 @@ class OrderClearingRepository
         if(!$success){
             return false;
         }
+        
+        //如果是还机完成并且是微信支付的推送给业务方
+        if ( ($status  == OrderCleaningStatus::orderCleaningComplete) && ($orderInfo['pay_type'] == PayInc::WeChatPay)) {
+
+            $businessParam['business_type'] = $order_data['business_type'];
+            $businessParam['business_no'] = $order_data['business_no'];
+            $businessParam['status'] = 'success';
+            $businessParam['userinfo'] =  [
+                'uid'		=> 1,
+                'username'	=> 'admin',
+                'type'		=> 1
+            ];
+            self::giveBackInfo($businessParam);
+
+        }
+
         return $order_data['clean_no'];
 }
+
+    /**
+     * 还机回调处理
+     *
+     * Author: heaven
+     */
+    public static function giveBackInfo($param)
+    {
+        //更新业务系统的状态
+        $businessParam = [
+            'business_type' => $param['business_type'],	// 业务类型
+            'business_no'	=> $param['business_no'],	// 业务编码
+            'status'		=> $param['status'],	// 支付状态  processing：处理中；success：支付完成
+        ];
+        $b =  OrderCleaning::getBusinessCleanCallback($businessParam['business_type'],
+            $businessParam['business_no'],
+            $businessParam['status'],
+            $param['userinfo']);
+
+        if( !$b ){
+            LogApi::error(__method__.'[cleanAccount回调还机]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $param['userinfo'],$b]);
+            return false;
+        }
+        LogApi::info(__method__.'[cleanAccount回调还机]业务接口OrderCleaning::getBusinessCleanCallback返回的结果', [$businessParam, $param['userinfo'],$b]);
+        return true;
+
+    }
 
     /**
      * 获取订单清算详情数据

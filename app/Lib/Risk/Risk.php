@@ -188,7 +188,7 @@ class Risk extends \App\Lib\BaseApi{
         $data['auth_token'] = $token;
         $data['appid'] = $appid;
         $data['params'] = $arr;
-        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), $data);
+        $info = Curl::post(config('tripartite.Interior_Fengkong_Url'), json_encode($data));
         $info =json_decode($info,true);
         if(!is_array($info)){
             return ApiStatus::CODE_60000;

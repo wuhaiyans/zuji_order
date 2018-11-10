@@ -49,7 +49,22 @@ class GoodsLogRepository
 		$data['create_time'] =time();
         return GoodsLog::insertGetId($data);
     }
-
+	
+    /**
+     * ydx
+     * 获取设备日志信息列表
+     * @param $goodsNo 设备号
+     * @return array
+     */
+    public static function getLogInfo($goodsNo)
+    {
+        if (empty($goodsNo)) return [];
+        $result = GoodsLog::query()->where([
+            ['goods_no', '=', $goodsNo],
+        ])->get()->toArray();
+        return $result ?? [];
+    }
+	
     /**
      * heaven
      * 获取订单日志
