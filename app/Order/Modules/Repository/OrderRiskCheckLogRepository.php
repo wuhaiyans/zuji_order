@@ -50,7 +50,7 @@ class OrderRiskCheckLogRepository
         if (empty($orderNo)) return false;
         $LogData = OrderRiskCheckLog::query()->where([
             ['order_no', '=', $orderNo],
-        ])->get();
+        ])->get()->toArray();
         return $LogData ?? false;
     }
 
