@@ -19,7 +19,6 @@ class Instalment implements BusinessPayInterface{
     private $pay_name    = '';
 
     public function __construct(string $business_no){
-
         $this->business_no = $business_no;
         $instalmentInfo = OrderGoodsInstalment::getByBusinessNo($business_no);
         if($instalmentInfo){
@@ -45,23 +44,29 @@ class Instalment implements BusinessPayInterface{
     /**
      * 获取用户ID
      */
-    public function getUserId()
+    public function getUserId():int
     {
-        return $this->user_id;
+        return intval($this->user_id);
     }
 
     /**
      * 获取支付名称
      */
-    public function getPayName(){
+    public function getPayName(): string
+    {
         return $this->pay_name;
     }
 
     /**
      * 获取支付交易状态
      */
-    public function getBusinessStatus(){
-        return $this->status;
+    public function getBusinessStatus(): bool
+    {
+        if($this->status == OrderInstalmentStatus::UNPAID || $this->status == OrderInstalmentStatus::FAIL){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -87,6 +92,14 @@ class Instalment implements BusinessPayInterface{
     public function getFundauthInfo() : FundauthInfo
     {
         return $this->fundauthInfo;
+    }
+
+    /**
+     * 增加日志方法
+     */
+    public function addlog(array $userInfo) {
+
+        return true;
     }
 
 }

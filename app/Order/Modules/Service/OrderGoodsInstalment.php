@@ -47,6 +47,22 @@ class OrderGoodsInstalment
 
 
     /**
+     * 根据business_no查询分期数据
+     * @return array
+     */
+    public static function getByBusinessNo($business_no){
+        if (empty($business_no)) {
+            return ApiStatus::CODE_20001;
+        }
+
+        $result =  OrderGoodsInstalmentRepository::getInfo(['business_no'=>$business_no]);
+        if(!$result){
+            return ApiStatus::CODE_71001;
+        }
+        return $result;
+    }
+
+    /**
      * 查询分期数据
      * @return array
      */
