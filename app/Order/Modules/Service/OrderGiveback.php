@@ -362,10 +362,10 @@ class OrderGiveback
 				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
 				'business_no'=>$orderGivebackInfo['giveback_no'],
 				'goods_no'=>$orderGivebackInfo['goods_no'],
-				'operator_id'=>0,
-				'operator_name'=>'支付回调',
-				'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
-				'msg'=>'还机单支付完成',
+				'operator_id'=>isset($params['uid']) ? $params['uid'] : 0,
+				'operator_name'=>isset($params['username']) ? $params['username'] :'清算回调',
+				'operator_type'=>isset($params['type']) ? $params['type'] :\App\Lib\PublicInc::Type_System,//此处用常量
+				'msg'=>'还机单清算完成',
 			]);
 			if( !$goodsLog ){
 				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
@@ -553,9 +553,9 @@ class OrderGiveback
 				'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
 				'business_no'=>$orderGivebackInfo['giveback_no'],
 				'goods_no'=>$orderGivebackInfo['goods_no'],
-				'operator_id'=>0,
-				'operator_name'=>'支付回调',
-				'operator_type'=>\App\Lib\PublicInc::Type_System,//此处用常量
+				'operator_id'=>isset($params['uid']) ? $params['uid'] : 0,
+				'operator_name'=>isset($params['username']) ? $params['username'] :'支付回调',
+				'operator_type'=>isset($params['type']) ? $params['type'] :\App\Lib\PublicInc::Type_System,//此处用常量
 				'msg'=>'还机单支付完成',
 			]);
 			if( !$goodsLog ){

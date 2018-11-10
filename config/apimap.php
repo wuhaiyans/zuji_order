@@ -43,7 +43,13 @@ return [
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
 
-    
+    //-+------------------------------------------------------------------------
+	// | 设备相关
+    //-+------------------------------------------------------------------------
+	//设备日志列表信息
+	'api.goods.log' => 'GoodsController@goodsLog',
+	
+	
     //gaobo
     'api.payment.url' => 'PayCenterController@pay',
 
