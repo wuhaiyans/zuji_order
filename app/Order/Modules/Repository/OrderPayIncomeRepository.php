@@ -170,6 +170,11 @@ class OrderPayIncomeRepository
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
         }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
+
         if (isset($param['appid']) && !empty($param['appid'])) {
             $whereArray[] = ['appid', '=', $param['appid']];
         }
@@ -208,7 +213,10 @@ class OrderPayIncomeRepository
         }
         LogApi::debug("[queryListExport]查询条件",$whereArray );
         $result =  OrderPayIncome::query()
+            ->select('order_pay_income.*','order_info.mobile','order_user_certified.realname')
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_pay_income.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_pay_income.order_no')
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get()->toArray();
