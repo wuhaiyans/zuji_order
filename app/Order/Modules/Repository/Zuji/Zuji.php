@@ -160,4 +160,8 @@ class Zuji implements BusinessPayInterface{
         return $this->fundauthInfo;
     }
 
+    public function addLog(){
+        return true;
+    }
+
 }
