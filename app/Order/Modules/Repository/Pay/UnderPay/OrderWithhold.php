@@ -53,11 +53,14 @@ class OrderWithhold implements UnderLine {
         foreach($instalmentList as $item){
 
             if($surplusAmount >= $item['amount']){
-                \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
+                $instalmentStatus = \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
+                if(!$instalmentStatus){
+                    return false;
+                }
             }
 
+            // 根据后端输入金额 循环修改分期状态
             $surplusAmount -= $item['amount'];
-
         }
 
         return true;
