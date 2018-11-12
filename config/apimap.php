@@ -16,8 +16,16 @@ return [
     'api.order.orderdetail'=>'OrderController@orderInfo',
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
+
+    //订单风控审核日志接口
+    'api.order.orderRiskCheckLog'=>'OrderController@orderRiskCheckLog',
+
+    //保存订单风控审核日志
+    'api.order.saveOrderRiskCheck'=>'OrderController@saveOrderRiskCheck',
+
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+
     //保存订单出险信息
     'api.order.outInsurance'=>'OrderController@addOrderInsurance',
     //设备出险详情

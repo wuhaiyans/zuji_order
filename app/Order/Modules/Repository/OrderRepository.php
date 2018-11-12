@@ -697,6 +697,11 @@ class OrderRepository
             $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
         }
 
+        //风控审核状态
+        if (isset($param['risk_check']) && !empty($param['risk_check'])) {
+            $whereArray[] = ['order_info.risk_check', '=', $param['risk_check']];
+        }
+
         //订单状态
         if (isset($param['order_status']) && !empty($param['order_status'])) {
             if ($param['order_status'] == OrderStatus::validOrder) {
@@ -793,7 +798,7 @@ class OrderRepository
 //           dd($orderIds);
 //            sql_profiler();
                 $orderList =  DB::table('order_info as o')
-                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
+                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','o.risk_check','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
                     ->whereIn('o.order_no', $orderIds)
                     ->join('order_user_address as d',function($join){
                         $join->on('o.order_no', '=', 'd.order_no');
