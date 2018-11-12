@@ -438,13 +438,13 @@ class MiniGivebackController extends Controller
                 "GivebackConfirmDelivery");
             $notice->notify();
             //未扣款代扣全部执行
-            foreach ($instalmentList[$paramsArr['goods_no']] as $instalmentInfo) {
-                OrderWithhold::instalment_withhold($instalmentInfo['id']);
-            }
+//            foreach ($instalmentList[$paramsArr['goods_no']] as $instalmentInfo) {
+//                OrderWithhold::instalment_withhold($instalmentInfo['id']);
+//            }
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
         $data['payment_time'] = time();
         //更新还机单
         \App\Lib\Common\LogApi::notify('检测合格-代扣失败(有剩余分期)',[
