@@ -6,9 +6,6 @@ use App\Order\Modules\Repository\Order\Order;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\BusinessPay\{PaymentInfo,WithholdInfo,FundauthInfo};
 use App\Order\Modules\Repository\Pay\BusinessPay\BusinessPayInterface;
-use \App\Order\Modules\Inc\OrderGivebackStatus;
-use \App\Order\Modules\Service\OrderGiveback;
-use App\Order\Modules\Service\OrderGoods;
 use Mockery\Exception;
 
 class Zuji implements BusinessPayInterface{
@@ -16,15 +13,12 @@ class Zuji implements BusinessPayInterface{
     private $pamentInfo;
     private $withholdInfo;
     private $fundauthInfo;
-    private $business_no = '';
     private $status      = false;
     private $user_id     = 0;
-    private $order       = null;
     private $pay_name    = '';
 
     public function __construct(string $business_no){
 
-        $this->business_no = $business_no;
         $order = Order::getByNo($business_no);
 
         if($order){
@@ -33,9 +27,9 @@ class Zuji implements BusinessPayInterface{
 
             if($orderInfo['order_status'] == OrderStatus::OrderWaitPaying || $orderInfo['order_status'] == OrderStatus::OrderPaying){
                 $this->status = true;
-                $this->pay_name = "订单编号：".$this->business_no." 用户ID：".$this->user_id;
+                $this->pay_name = "订单编号：".$business_no." 用户ID：".$this->user_id;
 
-                $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
+                $goods = OrderRepository::getGoodsListByOrderId($business_no);
                 if(!$goods){
                    throw new Exception("订单商品信息不存在");
                 }
@@ -100,7 +94,6 @@ class Zuji implements BusinessPayInterface{
         //支付方式为代扣+预授权
         if($payType == PayInc::WithhodingPay){
             if($yajin > 0){$arr['isFundauth'] = true;}
-            if($zujin > 0){$arr['isWithhold'] = true;}
         }
 
         //支付方式为 花呗支付 （一次性支付）
