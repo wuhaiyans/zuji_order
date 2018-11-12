@@ -45,7 +45,7 @@ class OrderRelet implements UnderLine {
         $goodsInfo = objectToArray($goods_obj);
         if(!$goodsInfo){
             LogApi::debug('[underLinePay]获取商品信息错误：'.$this->order_no);
-            return false;
+            throw new \Exception("获取订单信息错误");
         }
         $spu_id = $goodsInfo['prod_id'];
 
@@ -57,7 +57,7 @@ class OrderRelet implements UnderLine {
 
         if($begin_time >= $end_time){
             LogApi::debug('[underLinePay]续租时间错误：'.$this->order_no);
-            return false;
+            throw new \Exception("续租时间错误");
         }
 
         $end_time = $end_time + (3600 * 24) - 1;
@@ -85,7 +85,7 @@ class OrderRelet implements UnderLine {
 
         if($info['code'] !== '0'){
             LogApi::debug('[underLinePay]获取续租商品金额错误：'.$this->order_no);
-            return false;
+            throw new \Exception("获取续租商品金额错误：".$this->order_no);
         }
 
         $price  = $info['data'][0]['price'];
