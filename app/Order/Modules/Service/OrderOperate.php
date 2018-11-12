@@ -1303,6 +1303,9 @@ class OrderOperate
         //订单状态名称
         $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);
 
+        //订单风控审核状态名称
+        $orderData['risk_check_name'] = Inc\OrderRiskCheckStatus::getStatusName($orderData['risk_check']);
+
         //支付方式名称
         $orderData['pay_type_name'] = Inc\PayInc::getPayName($orderData['pay_type']);
 
