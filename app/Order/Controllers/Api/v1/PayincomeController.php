@@ -254,6 +254,16 @@ class PayincomeController extends Controller
 
             $item['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
             $item['goods_no']   =   $goodsInfo['goods_no'] ? $goodsInfo['goods_no'] : "";
+
+            // 获取商品最大 续租天数
+
+            $data = [
+                'business_type' => \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::OrderRelet,
+                'order_no' => $item['order_no'],
+            ];
+            $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($data);
+            $maxRelet = $orderService->getClssObj()->getReletTime();
+            $item = array_merge($item,$maxRelet);
         }
         return apiResponse($orderList,ApiStatus::CODE_0,"success");
     }
