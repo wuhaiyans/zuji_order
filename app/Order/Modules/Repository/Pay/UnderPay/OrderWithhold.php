@@ -55,7 +55,7 @@ class OrderWithhold implements UnderLine {
             if($surplusAmount >= $item['amount']){
                 $instalmentStatus = \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
                 if(!$instalmentStatus){
-                    return false;
+                    throw new \Exception("修改分期状态失败");
                 }
             }
 
