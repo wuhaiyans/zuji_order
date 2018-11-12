@@ -132,7 +132,8 @@ class Zuji implements BusinessPayInterface{
 
     public function getPayName():string
     {
-        return string($this->pay_name);
+
+        return $this->pay_name;
     }
 
     public function getBusinessStatus(): bool
