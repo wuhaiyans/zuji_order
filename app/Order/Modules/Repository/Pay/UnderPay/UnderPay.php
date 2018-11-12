@@ -66,7 +66,7 @@ class UnderPay{
      */
     public function getClssObj(){
 
-
+        $className = $this->getClssName();
 
         return new $className($this->componnet);
     }
