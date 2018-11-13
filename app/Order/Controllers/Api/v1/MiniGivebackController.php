@@ -72,6 +72,7 @@ class MiniGivebackController extends Controller
             //-+------------------------------------------------------------------------------
             //获取当前商品未完成分期列表数据
             $instalmentList = OrderGoodsInstalment::queryList(['goods_no'=>$paramsArr['goods_no'],'status'=>[OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL]], ['limit'=>36,'page'=>1]);
+            print_r($instalmentList);die;
             if( !empty($instalmentList[$paramsArr['goods_no']]) ){
                 //发送短信
                 $notice = new \App\Order\Modules\Service\OrderNotice(
