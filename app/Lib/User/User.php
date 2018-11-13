@@ -135,7 +135,7 @@ class User extends \App\Lib\BaseApi{
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.mini.user.id.get';
         $data['auth_token'] = $token;
-//        $data['appid'] = $appid;
+        $data['appid'] = $appid;
         if($params['zm_face'] == 'Y'){
             $zm_face = 1;
         }else{
