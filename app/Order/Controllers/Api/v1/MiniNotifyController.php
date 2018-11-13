@@ -292,7 +292,6 @@ class MiniNotifyController extends Controller
                     'business_no'=>$business_no,
                 ]
             );
-            print_r($instalment);die;
             //判断当前订单是否已经修改分期状态
             if($instalment['status'] != \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS){
                 //修改分期状态
