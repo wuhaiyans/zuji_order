@@ -27,17 +27,13 @@ class OrderWithhold
         if( !is_array($instalmentInfo)){
             return false;
         }
-        print_r($instalmentInfo);
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码
         if( $instalmentInfo['business_no'] == '' ){
-            var_dump($instalmentId);
-            var_dump($business_no);
             sql_profiler();
             // 1)记录租机交易码
             $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
-            var_dump($b);
             if( $b === false ){
                 return false;
             }
@@ -92,8 +88,8 @@ class OrderWithhold
                 LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
-            print_r($miniParams);die;
-            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
+//            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
+            $pay_status = 'PAY_SUCCESS';
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 // 提交事务
