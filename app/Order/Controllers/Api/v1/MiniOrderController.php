@@ -189,6 +189,11 @@ class MiniOrderController extends Controller
 			\App\Lib\Common\LogApi::error('无会话标识', $params);
             return apiResponse([],ApiStatus::CODE_50000,'请求失败，请稍候重试');
         }
+        // appid是否存在
+        if ( !isset($params['appid']) && strlen( $params['appid'] ) ) {
+            \App\Lib\Common\LogApi::error('appid不存在', $params);
+            return apiResponse([],ApiStatus::CODE_50000,'请求失败，请稍候重试');
+        }
 		
         $param = $params['params'];
         //开启事务
@@ -237,7 +242,7 @@ class MiniOrderController extends Controller
             $miniData = $miniApi->getResult();
 			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
             //用户处理
-            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token']);
+            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token'],$params['appid']);
 			if( !$_user ){
                 \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
 				return apiResponse([],ApiStatus::CODE_50000,'芝麻确认订单，获取用户失败');
