@@ -42,6 +42,15 @@ class OrderPayIncomeRepository
      */
     public static function queryCount($param = []){
         $whereArray = [];
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
         if (isset($param['name']) && !empty($param['name'])) {
             $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
@@ -101,6 +110,15 @@ class OrderPayIncomeRepository
         $page       = isset($additional['page']) ? $additional['page'] : 1;
         $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
         $offset     = ($page - 1) * $pageSize;
+
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
 
         $whereArray = [];
         if (isset($param['name']) && !empty($param['name'])) {
@@ -167,9 +185,23 @@ class OrderPayIncomeRepository
     public static function queryListExport($param = array(),$pagesize=5){
         $whereArray = [];
 
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
         }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
+
         if (isset($param['appid']) && !empty($param['appid'])) {
             $whereArray[] = ['appid', '=', $param['appid']];
         }
@@ -208,7 +240,10 @@ class OrderPayIncomeRepository
         }
         LogApi::debug("[queryListExport]查询条件",$whereArray );
         $result =  OrderPayIncome::query()
+            ->select('order_pay_income.*','order_info.mobile','order_user_certified.realname')
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_pay_income.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_pay_income.order_no')
             ->orderBy('create_time','DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get()->toArray();

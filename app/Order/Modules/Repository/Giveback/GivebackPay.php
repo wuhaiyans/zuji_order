@@ -34,7 +34,7 @@ class GivebackPay implements BusinessPayInterface{
                 //实例化支付方式并根据业务信息传值
                 $this->pamentInfo = new PaymentInfo();
                 $this->pamentInfo->setNeedPayment(true);
-                $this->pamentInfo->setPaymentAmount((intval($this->giveback['instalment_amount']+$this->giveback['compensate_amount'])));
+                $this->pamentInfo->setPaymentAmount($this->giveback['instalment_amount']+$this->giveback['compensate_amount']);
                 $this->pamentInfo->setPaymentFenqi(0);
                 $this->withholdInfo = new WithholdInfo();
                 $this->withholdInfo->setNeedWithhold(false);

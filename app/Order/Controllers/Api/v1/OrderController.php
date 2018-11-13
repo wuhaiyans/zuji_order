@@ -8,6 +8,7 @@ use App\Lib\Excel;
 use App\Lib\Order\OrderInfo;
 use App\Lib\User\User;
 use App\Order\Models\OrderUserAddress;
+use App\Order\Modules\Repository\OrderRiskCheckLogRepository;
 use App\Order\Modules\Repository\OrderRiskRepository;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
@@ -658,6 +659,76 @@ class OrderController extends Controller
             return apiResponse([],ApiStatus::CODE_60001,"无订单日志");
         }
         return apiResponse($res,ApiStatus::CODE_0);
+
+    }
+    /**
+     * 获取订单风控审核日志
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *      ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function orderRiskCheckLog(Request $request)
+    {
+        $params =$request->all();
+        $params =$params['params'];
+        if(empty($params['order_no'])){
+            return  apiResponse([],ApiStatus::CODE_20001);
+        }
+
+        $res = OrderOperate::orderRiskCheckLog($params['order_no']);
+        if(!is_array($res)){
+            return apiResponse([],ApiStatus::CODE_60001,"无订单风控审核日志");
+        }
+        return apiResponse($res,ApiStatus::CODE_0);
+
+    }
+
+    /**
+     *  增加风控审核
+     * @author wuhaiyan
+     * @param Request $request['params']
+     *      [
+     *          'order_no'=>'',     //【必须】string 订单编号
+     *          'check_status'=>'', //【必须】int    状态ID     3，复核通过； 4，复核拒绝
+     *          'check_text'=>'',   //【必须】string 备注信息
+     *      ]
+     * $userinfo [
+     *      'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
+     *      'uid'=>1,   //【必须】string 用户ID
+     *      'username'=>1, //【必须】string 用户名
+     *      'ip'=>1,    //【必须】string IP 地址
+     * ]
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function saveOrderRiskCheck(Request $request)
+    {
+        $params =$request->all();
+        $rules = [
+            'order_no'      =>'required',
+            'check_status'  =>'required',
+            'check_text'    =>'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+        if (empty($validateParams) || $validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+        if(!isset($params['userinfo'])){
+            return apiResponse([],ApiStatus::CODE_20001,"用户信息错误");
+        }
+
+        $res = OrderOperate::saveOrderRiskCheck($params['params'],$params['userinfo']);
+        if(!$res){
+            return apiResponse([],ApiStatus::CODE_50000,get_msg());
+        }
+        return apiResponse([],ApiStatus::CODE_0);
 
     }
     /**
