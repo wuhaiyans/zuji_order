@@ -280,8 +280,12 @@ class PayincomeController extends Controller
                 $item['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
                 $item['goods_no']   =   $goodsInfo['goods_no'] ? $goodsInfo['goods_no'] : "";
 
-                // 获取商品最大 续租天数
 
+                // 订单服务 开始 结束时间
+                $item['begin_time'] = $goodsInfo['begin_time'] ? $goodsInfo['begin_time'] : "";
+                $item['end_time']   = $goodsInfo['end_time'] ? $goodsInfo['end_time'] : "";
+
+                // 获取商品最大 续租天数
                 $data = [
                     'business_type' => \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::OrderRelet,
                     'order_no' => $item['order_no'],

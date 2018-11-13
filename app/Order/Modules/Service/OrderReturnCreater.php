@@ -3095,15 +3095,15 @@ class OrderReturnCreater
                         //查询芝麻订单
                         $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($order_no);
                         LogApi::debug("[refuseSign]查询芝麻订单",$miniOrderInfo);
-                        $data = [
+                        $mini_data = [
                             'out_order_no' => $order_no,//商户端订单号
                             'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                             'remark' => "异常处理",//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
-                        LogApi::info("[refuseSign]通知芝麻取消请求参数",$data);
+                        LogApi::info("[refuseSign]通知芝麻取消请求参数",$mini_data);
                         //通知芝麻取消请求
-                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($mini_data);
                         if( !$canceRequest){
                             LogApi::debug("[refuseSign]通知芝麻取消请求失败",$canceRequest);
                             return false;
