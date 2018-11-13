@@ -34,6 +34,7 @@ class OrderWithhold
         if( $instalmentInfo['business_no'] == '' ){
             var_dump($instalmentId);
             var_dump($business_no);
+            sql_profiler();
             // 1)记录租机交易码
             $b = OrderGoodsInstalment::save(['id'=>$instalmentId],['business_no'=>$business_no]);
             var_dump($b);
