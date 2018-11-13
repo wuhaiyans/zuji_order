@@ -87,8 +87,7 @@ class OrderWithhold
                 LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
-//            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
-            $pay_status = 'PAY_SUCCESS';
+            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
             //判断请求发送是否成功
             if($pay_status == 'PAY_SUCCESS'){
                 // 提交事务
