@@ -449,7 +449,7 @@ class MiniGivebackController extends Controller
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
-        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NODEED_PAY;
+        $data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_NOT_PAY;
         $data['payment_time'] = time();
         //更新还机单
         \App\Lib\Common\LogApi::notify('检测合格-代扣失败(有剩余分期)',[
