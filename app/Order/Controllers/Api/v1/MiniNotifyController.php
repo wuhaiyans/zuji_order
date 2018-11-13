@@ -292,6 +292,7 @@ class MiniNotifyController extends Controller
                     'business_no'=>$business_no,
                 ]
             );
+            print_r($instalment);die;
             //判断当前订单是否已经修改分期状态
             if($instalment['status'] != \App\Order\Modules\Inc\OrderInstalmentStatus::SUCCESS){
                 //修改分期状态
@@ -419,6 +420,13 @@ class MiniNotifyController extends Controller
     }
 
     /**
+     *
+     */
+    public function creditQuery(){
+
+
+    }
+    /**
      * 测试发起请求小程序订单后续操作
      * @author zhangjinhui
      */
@@ -431,9 +439,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A730138799584988',//商户端订单号
-            'zm_order_no'=>'2018073000001001093861579004',//芝麻订单号
-            'out_trans_no'=>'A823119008551174',//商户端交易号
+            'out_order_no'=>'AA10131592451948',//商户端订单号
+            'zm_order_no'=>'2018101000001001108113330477',//芝麻订单号
+            'out_trans_no'=>'AA10131592451948',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid
