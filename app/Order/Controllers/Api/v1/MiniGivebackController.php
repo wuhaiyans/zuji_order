@@ -551,10 +551,10 @@ class MiniGivebackController extends Controller
                 $paramsArr['goods_no'],
                 "GivebackConfirmDelivery");
             $notice->notify();
-            //未扣款代扣全部执行
-            foreach ($instalmentList[$paramsArr['goods_no']] as $instalmentInfo) {
-                OrderWithhold::instalment_withhold($instalmentInfo['id']);
-            }
+//            //未扣款代扣全部执行
+//            foreach ($instalmentList[$paramsArr['goods_no']] as $instalmentInfo) {
+//                OrderWithhold::instalment_withhold($instalmentInfo['id']);
+//            }
         }
         //拼接需要更新还机单状态
         $data['status'] = $status = OrderGivebackStatus::STATUS_DEAL_WAIT_PAY;
