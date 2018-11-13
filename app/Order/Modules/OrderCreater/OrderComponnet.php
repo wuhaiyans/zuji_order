@@ -296,13 +296,9 @@ class OrderComponnet implements OrderCreater
             }
 
         }
-        if($this->orderType != OrderStatus::orderMiniService){
-            $orderRiskStatus = OrderRiskCheckStatus::SystemPass;
-        }
 
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
-            'risk_check' => $orderRiskStatus,
             'order_no' => $this->orderNo,  // 编号
             'user_id' => $this->userId,
             'pay_type' => $this->payType,

@@ -508,7 +508,7 @@ class OrderCleaning
                     $params = [
                         'out_refund_no' => $orderCleanData['refund_clean_no'], //业务平台退款码
                         'payment_no' => $payInfo['out_payment_no'], //支付平台支付码
-                        'amount' => $orderCleanData['refund_amount'] * 100, //支付金额
+                        'amount' => bcmul($orderCleanData['refund_amount'] ,100), //支付金额
                         'refund_back_url' => config('ordersystem.ORDER_API') . '/refundClean', //退款回调URL
                     ];
                     LogApi::info(__method__.'[cleanAccount发起]财务发起退款请求前，请求的参数：', $params);
