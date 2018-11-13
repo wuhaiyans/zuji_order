@@ -92,8 +92,12 @@ class MiniGivebackController extends Controller
                 //更新还机单
                 $orderGivebackResult = $orderGivebackService->update(['goods_no'=>$paramsArr['goods_no']], $data);
                 if($orderGivebackResult){
+                    //提交事务
+                    DB::commit();
                     return apiResponse([], ApiStatus::CODE_0, '小程序分期金额支付请求成功');
                 }else{
+                    //提交事务
+                    DB::commit();
                     return apiResponse([], ApiStatus::CODE_35006, '小程序分期金额修改支付状态失败');
                 }
 
