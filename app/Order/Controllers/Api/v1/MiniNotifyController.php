@@ -46,7 +46,6 @@ class MiniNotifyController extends Controller
             \App\Lib\Common\LogApi::id($_POST['out_order_no']);
         }
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
-
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;

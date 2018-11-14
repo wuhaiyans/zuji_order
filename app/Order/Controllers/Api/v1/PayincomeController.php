@@ -316,7 +316,6 @@ class PayincomeController extends Controller
     public function underLineGetPayAmount(Request $request){
         try{
 
-
             $params     = $request->all();
 
             $rules = [
@@ -336,7 +335,7 @@ class PayincomeController extends Controller
             // 实现业务
             $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
             $amount = $orderService->getPayAmount();
-            if(!$amount){
+            if($amount === false){
                 return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
             }
 

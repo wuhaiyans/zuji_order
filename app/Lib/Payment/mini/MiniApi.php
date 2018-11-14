@@ -36,6 +36,8 @@ class MiniApi {
     public static function withhold( $params ){
         $params['order_operate_type'] = self::$INSTALLMENT;
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
+        //加redis订单扣款标示
+        Redis::set('zuji:order:miniorder:'.$params['out_trans_no'], 'MiniWithhold');
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b == false){
             self::$error = $CommonMiniApi->getError();
@@ -43,8 +45,6 @@ class MiniApi {
         }
         $result = $CommonMiniApi->getResult();
         \App\Lib\Common\LogApi::error('发送扣款请求',['request'=>$params,'response'=>$result]);
-        //加redis订单扣款标示
-        Redis::set('zuji:order:miniorder:'.$params['out_trans_no'], 'MiniWithhold');
         //返回字符串
         return $result['pay_status'];
     }
@@ -63,6 +63,8 @@ class MiniApi {
     public static function OrderClose( $params ){
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
         $params['order_operate_type'] = self::$FINISH;
+        //加redis订单完成标示
+        Redis::set('zuji:order:miniorder:'.$params['out_order_no'], 'MiniOrderClose');
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
             self::$error = $CommonMiniApi->getError();
@@ -70,13 +72,6 @@ class MiniApi {
         }
         $result = $CommonMiniApi->getResult();
         \App\Lib\Common\LogApi::error('发送关闭订单请求',['request'=>$params,'response'=>$result]);
-        //加redis订单完成标示
-//        if(isset($params['out_trans_no'])){
-//        Redis::set('zuji:order:miniorder:'.$params['out_trans_no'], 'MiniOrderClose');
-//        }else{
-            Redis::set('zuji:order:miniorder:'.$params['out_order_no'], 'MiniOrderClose');
-//        }
-
         //返回
         return $result;
     }

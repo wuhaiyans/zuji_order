@@ -118,16 +118,12 @@ class OrderBuyout implements UnderLine {
         $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
         $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
         $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-
+        $clearData['out_payment_no'] = $payObj->getPaymentNo();
         if($orderInfo['order_type'] == OrderStatus::orderMiniService){
             $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
             $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
             $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
         }
-        elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
-            $clearData['out_payment_no'] = $payObj->getPaymentNo();
-        }
-
         //进入清算处理
         $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
         if(!$orderCleanResult){
