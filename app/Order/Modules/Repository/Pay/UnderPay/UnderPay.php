@@ -54,7 +54,7 @@ class UnderPay{
 
         $className = '\App\Order\Modules\Repository\Pay\UnderPay\\' . $this->className;
         if(!class_exists($className) ){
-            return false;
+            throw new \Exception("UnderPay没有此项业务");
         }
 
         return $className;
@@ -65,7 +65,9 @@ class UnderPay{
      * 获取对象 class 对象
      */
     public function getClssObj(){
+
         $className = $this->getClssName();
+
         return new $className($this->componnet);
     }
 

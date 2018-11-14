@@ -280,8 +280,12 @@ class PayincomeController extends Controller
                 $item['goods_name'] =   $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
                 $item['goods_no']   =   $goodsInfo['goods_no'] ? $goodsInfo['goods_no'] : "";
 
-                // 获取商品最大 续租天数
 
+                // 订单服务 开始 结束时间
+                $item['begin_time'] = $goodsInfo['begin_time'] ? $goodsInfo['begin_time'] : "";
+                $item['end_time']   = $goodsInfo['end_time'] ? $goodsInfo['end_time'] : "";
+
+                // 获取商品最大 续租天数
                 $data = [
                     'business_type' => \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::OrderRelet,
                     'order_no' => $item['order_no'],
@@ -312,7 +316,6 @@ class PayincomeController extends Controller
     public function underLineGetPayAmount(Request $request){
         try{
 
-
             $params     = $request->all();
 
             $rules = [
@@ -332,7 +335,7 @@ class PayincomeController extends Controller
             // 实现业务
             $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
             $amount = $orderService->getPayAmount();
-            if(!$amount){
+            if($amount === false){
                 return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
             }
 

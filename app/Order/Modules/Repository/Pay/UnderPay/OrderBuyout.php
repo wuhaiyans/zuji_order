@@ -95,9 +95,6 @@ class OrderBuyout implements UnderLine {
             ];
 
         }
-
-        //开启事务
-        DB::beginTransaction();
         //关闭分期
         $data = [
             'order_no'=>$this->order_no,
@@ -105,7 +102,6 @@ class OrderBuyout implements UnderLine {
         ];
         $ret = Instalment::close($data);
         if(!$ret){
-            DB::rollBack();
             LogApi::info("offline-buyout","关闭分期失败");
             return false;
         }
@@ -122,20 +118,15 @@ class OrderBuyout implements UnderLine {
         $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
         $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
         $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-
+        $clearData['out_payment_no'] = $payObj->getPaymentNo();
         if($orderInfo['order_type'] == OrderStatus::orderMiniService){
             $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
             $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
             $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
         }
-        elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
-            $clearData['out_payment_no'] = $payObj->getPaymentNo();
-        }
-
         //进入清算处理
         $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
         if(!$orderCleanResult){
-            DB::rollBack();
             LogApi::info("offline-buyout","进入清算失败");
             return false;
         }
@@ -179,7 +170,6 @@ class OrderBuyout implements UnderLine {
             //解冻订单
             $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
             if(!$ret){
-                DB::rollBack();
                 LogApi::info("offline-buyout","解冻订单失败");
                 return false;
             }
@@ -191,7 +181,6 @@ class OrderBuyout implements UnderLine {
             $OrderGoodsRepository = new OrderGoodsRepository();
             $ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
             if(!$ret){
-                DB::rollBack();
                 LogApi::info("offline-buyout","更新商品失败");
                 return false;
             }
@@ -238,7 +227,6 @@ class OrderBuyout implements UnderLine {
         }
 
         if(!$ret){
-            DB::rollBack();
             LogApi::info("offline-buyout","更新商品失败");
             return false;
         }

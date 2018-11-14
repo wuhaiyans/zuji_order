@@ -240,14 +240,11 @@ class OrderBuyout
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-
+			$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
 				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-			}
-			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
-				$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			}
 			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
 		}
