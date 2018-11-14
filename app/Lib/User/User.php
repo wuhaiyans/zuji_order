@@ -35,6 +35,8 @@ class User extends \App\Lib\BaseApi{
 		if( !$userInfo['realname'] ){
 			$userInfo['realname'] = isset($userInfo['address']['name']) && $userInfo['address']['name'] ? $userInfo['address']['name'] : substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11) ;
 		}
+		//收货人姓名 读取用户认证姓名
+		$userInfo['address']['name'] = $userInfo['realname'];
 		return $userInfo;
     }
     /**
