@@ -55,19 +55,7 @@ class OrderRelet implements UnderLine {
         }
         $spu_id = $goodsInfo['prod_id'];
 
-        $begin_time = $this->componnet['extend']['begin_time'];
-        $end_time   = $this->componnet['extend']['end_time'];
-
-        $begin_time = strtotime($begin_time) > 0 ? strtotime($begin_time) : 0 ;
-        $end_time   = strtotime($end_time) > 0 ? strtotime($end_time) : 0 ;
-
-        if($begin_time >= $end_time){
-            LogApi::debug('[underLinePay]续租时间错误：'.$this->order_no);
-            throw new \Exception("续租时间错误");
-        }
-
-        $end_time = $end_time + (3600 * 24) - 1;
-        $day = ceil( ($end_time - $begin_time) / 86400 );
+        $day = $this->componnet['extend']['zuqi'];
 
         /**
          * 请求接口 计算商品总租金
