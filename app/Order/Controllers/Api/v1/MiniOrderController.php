@@ -380,6 +380,8 @@ class MiniOrderController extends Controller
             'credit_amount'=>$res['credit_amount'],
             'cert_no'=>$res['cert_no'],
         ];
+        //创建订单接口参数记录
+        \App\Lib\Common\LogApi::error('芝麻创建订单接口参数记录',$params);
         $res = $this->OrderCreate->miniCreate($data);
         if($res == false){
             if(get_msg() == ApiStatus::CODE_35017){
