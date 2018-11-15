@@ -135,7 +135,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = \App\Lib\User\User::getUserInfo(['user_id'=>$params['id'],'mobile'=>$params['mobile']]);
+        $userInfo = \App\Lib\User\User::getUserInfo(['user_id'=>$params['user_id'],'mobile'=>$params['username']]);
         if(!$userInfo){
             return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
         }
