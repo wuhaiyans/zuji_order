@@ -139,7 +139,7 @@ class UserController extends Controller
         if(!$userInfo){
             return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
         }
-        $ret = \App\Lib\User\User::setUserName($userInfo['id'],$params['mobile']);
+        $ret = \App\Lib\User\User::setUserName(['user_id'=>$userInfo['id'],'mobile'=>$params['mobile']]);
         if(!$ret){
             return apiResponse([],ApiStatus::CODE_50000,"更换手机号失败");
         }
