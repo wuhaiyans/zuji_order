@@ -1,7 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository\Pay\UnderPay;
 
-use App\Order\Modules\Service\OrderGiveback;
+use App\Order\Modules\Service\OrderGiveback AS OG;
 
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
@@ -56,7 +56,7 @@ class OrderGiveback implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-		$orderGiveback = new OrderGiveback();
+		$orderGiveback = new OG();
 		$givebackInfo = $orderGiveback->getInfoByGoodsNo($this->goodsNo);
 		if( !$givebackInfo ){
 			\App\Lib\Common\LogApi::error('huanji-xianxiazhifu还机-线下支付：还机信息为空',['goodsNo'=>$this->goodsNo,'givebackInfo'=>$givebackInfo]);
@@ -79,7 +79,7 @@ class OrderGiveback implements UnderLine {
 			}
 			$order_type = $orderInfo['order_type'];
 			
-			$orderGivebackService = new OrderGiveback();
+			$orderGivebackService = new OG();
 			//获取还机单信息
 			$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->goodsNo);
 			if( !$orderGivebackInfo ) {

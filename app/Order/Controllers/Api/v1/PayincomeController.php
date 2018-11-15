@@ -166,6 +166,7 @@ class PayincomeController extends Controller
             $info['mobile']     =   isset($orderInfo['mobile']) ? $orderInfo['mobile'] : "";
 
         }
+
         if(!empty($user_id)){
             $memberInfo = \App\Lib\User\User::getUser($user_id);
             $info['realname']   = isset($memberInfo['realname']) ? $memberInfo['realname'] : "";
@@ -198,14 +199,12 @@ class PayincomeController extends Controller
 
         // 入账方式
         $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
-
         // 线下支付方式
-        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+        if($info['under_channel'] && $info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine ){
             $under_channel =  \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
             $under_channel = $under_channel ? $under_channel : "--";
             $channel = $channel . "-" . $under_channel;
         }
-
         $info['channel'] = $channel;
 
         // 从属设备
