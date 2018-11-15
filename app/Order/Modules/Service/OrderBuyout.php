@@ -388,8 +388,10 @@ class OrderBuyout
 		if(!$ret){
 			return false;
 		}
-		OrderOperate::isOrderComplete($buyout['order_no']);
-
+		$ret = OrderOperate::isOrderComplete($buyout['order_no']);
+		if(!$ret){
+			return false;
+		}
 		//无押金直接返回成功
 		if($goodsInfo['yajin']==0){
 			return true;

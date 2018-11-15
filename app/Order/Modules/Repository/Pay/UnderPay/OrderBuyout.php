@@ -184,7 +184,10 @@ class OrderBuyout implements UnderLine {
                 return false;
             }
 
-            OrderOperate::isOrderComplete($buyout['order_no']);
+            $ret = OrderOperate::isOrderComplete($buyout['order_no']);
+            if(!$ret){
+                return false;
+            }
 
             //设置短信发送内容
             $smsContent = [
