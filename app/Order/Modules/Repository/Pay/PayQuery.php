@@ -76,6 +76,7 @@ class PayQuery {
 	 * @throws \App\Lib\NotFoundException
 	 */
 	public static function getPayByPaymentNo( string $payment_no, int $lock=0 ){
+	    sql_profiler();
 		$builder = \App\Order\Models\OrderPayModel::where([
 			'payment_no'	=> $payment_no,
 		]);
