@@ -101,11 +101,10 @@ class UserController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
         $userInfo = \App\Lib\User\User::getUserInfo(['mobile'=>$params['mobile']]);
-        var_dump($userInfo);die;
         if(!$userInfo){
             return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
         }
-        $orderInfo = Order::query()->where(['user_id'=>$userInfo['user_id'],'order_status'=>6])->first();
+        $orderInfo = Order::query()->where(['user_id'=>$userInfo['id'],'order_status'=>6])->first();
         if($orderInfo){
             $userInfo['orderInfo'] = $orderInfo->toArray();
         }
@@ -136,7 +135,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
-        $userInfo = \App\Lib\User\User::getUserInfo(['user_id'=>$params['user_id'],'mobile'=>$params['mobile']]);
+        $userInfo = \App\Lib\User\User::getUserInfo(['user_id'=>$params['id'],'mobile'=>$params['mobile']]);
         if(!$userInfo){
             return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
         }
