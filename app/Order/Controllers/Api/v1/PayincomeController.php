@@ -270,7 +270,7 @@ class PayincomeController extends Controller
                 ->get();
             $orderList = objectToArray($orderList);
             if(!$orderList){
-                return apiResponse( [], ApiStatus::CODE_50000, '参数错误...');
+                return apiResponse( [], ApiStatus::CODE_50000, '此用户没有服务中订单...');
             }
 
             foreach($orderList as &$item){
