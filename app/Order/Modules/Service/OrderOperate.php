@@ -1185,13 +1185,7 @@ class OrderOperate
             }
             //解除小程序代扣绑定
             if($orderInfo['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
-                //查询是否已经解绑过
-                $where = [
-                    'out_order_no'=>$orderInfo['order_no'],
-                    'order_operate_type'=>'FINISH',
-                ];
-                $orderMiniCreditPayInfo = \App\Order\Modules\Repository\OrderMiniCreditPayRepository::getMiniCreditPayInfo($where);
-                if( empty($orderMiniCreditPayInfo) ) {
+                if($orderInfo['order_yajin'] == 0.00){
                     //查询芝麻订单
                     $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderInfo['order_no']);
                     LogApi::info("[advanceReturn]查询芝麻订单",$miniOrderInfo);
