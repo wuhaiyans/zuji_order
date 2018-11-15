@@ -260,7 +260,8 @@ class PayincomeController extends Controller
 
             $params = $params['params'];
             $whereArray = [
-                'mobile'    => $params['mobile']
+                'order_status'  => \App\Order\Modules\Inc\OrderStatus::OrderInService,
+                'mobile'        => $params['mobile']
             ];
 
             $orderList = DB::table('order_info')
