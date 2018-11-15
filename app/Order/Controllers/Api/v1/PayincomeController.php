@@ -166,6 +166,7 @@ class PayincomeController extends Controller
             $info['mobile']     =   isset($orderInfo['mobile']) ? $orderInfo['mobile'] : "";
 
         }
+
         if(!empty($user_id)){
             $memberInfo = \App\Lib\User\User::getUser($user_id);
             $info['realname']   = isset($memberInfo['realname']) ? $memberInfo['realname'] : "";
@@ -198,14 +199,12 @@ class PayincomeController extends Controller
 
         // 入账方式
         $channel        = \App\Order\Modules\Repository\Pay\Channel::getBusinessName($info['channel']);
-
         // 线下支付方式
-        if($info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine){
+        if($info['under_channel'] && $info['channel'] == \App\Order\Modules\Repository\Pay\Channel::UnderLine ){
             $under_channel =  \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getUnderLineBusinessTypeName($info['under_channel']);
             $under_channel = $under_channel ? $under_channel : "--";
             $channel = $channel . "-" . $under_channel;
         }
-
         $info['channel'] = $channel;
 
         // 从属设备
@@ -265,7 +264,7 @@ class PayincomeController extends Controller
             ];
 
             $orderList = DB::table('order_info')
-                ->select('order_no')
+                ->select('order_no','order_type')
                 ->where($whereArray)
                 ->get();
             $orderList = objectToArray($orderList);
@@ -285,6 +284,10 @@ class PayincomeController extends Controller
                 $item['begin_time'] = $goodsInfo['begin_time'] ? $goodsInfo['begin_time'] : "";
                 $item['end_time']   = $goodsInfo['end_time'] ? $goodsInfo['end_time'] : "";
 
+                // 小程序渠道判断
+                $item['mini']   =   $item['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService ? true : false;
+
+
                 // 获取商品最大 续租天数
                 $data = [
                     'business_type' => \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::OrderRelet,
@@ -292,6 +295,7 @@ class PayincomeController extends Controller
                 ];
                 $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($data);
                 $maxRelet = $orderService->getClssObj()->getReletTime();
+
                 $item = array_merge($item,$maxRelet);
             }
             return apiResponse($orderList,ApiStatus::CODE_0,"success");
