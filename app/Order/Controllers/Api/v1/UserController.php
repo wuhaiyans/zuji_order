@@ -101,6 +101,7 @@ class UserController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
         }
         $userInfo = \App\Lib\User\User::getUserInfo(['mobile'=>$params['mobile']]);
+        var_dump($userInfo);die;
         if(!$userInfo){
             return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
         }

@@ -263,7 +263,7 @@ class User extends \App\Lib\BaseApi{
      * @return array
      * @throws \Exception			请求失败时抛出异常
      */
-    public static function setUserName($user_id,$mobile){
+    public static function setUserName($params){
         if(!isset($params['user_id']) || !isset($params['mobile'])){
             return false;
         }
