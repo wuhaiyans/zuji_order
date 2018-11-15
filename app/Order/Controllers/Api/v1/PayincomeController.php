@@ -265,7 +265,7 @@ class PayincomeController extends Controller
             ];
 
             $orderList = DB::table('order_info')
-                ->select('order_no')
+                ->select('order_no','order_type')
                 ->where($whereArray)
                 ->get();
             $orderList = objectToArray($orderList);
@@ -285,6 +285,10 @@ class PayincomeController extends Controller
                 $item['begin_time'] = $goodsInfo['begin_time'] ? $goodsInfo['begin_time'] : "";
                 $item['end_time']   = $goodsInfo['end_time'] ? $goodsInfo['end_time'] : "";
 
+                // 小程序渠道判断
+                $item['mini']   =   $item['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService ? true : false;
+
+
                 // 获取商品最大 续租天数
                 $data = [
                     'business_type' => \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::OrderRelet,
@@ -292,6 +296,7 @@ class PayincomeController extends Controller
                 ];
                 $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($data);
                 $maxRelet = $orderService->getClssObj()->getReletTime();
+
                 $item = array_merge($item,$maxRelet);
             }
             return apiResponse($orderList,ApiStatus::CODE_0,"success");
