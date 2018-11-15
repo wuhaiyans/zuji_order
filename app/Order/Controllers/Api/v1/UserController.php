@@ -8,6 +8,8 @@
  */
 
 namespace App\Order\Controllers\Api\v1;
+use App\Lib\ApiStatus;
+use App\Order\Models\Order;
 use App\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -77,5 +79,70 @@ class UserController extends Controller
     {
         Auth::guard($this->guard)->logout();
         return response()->json(['status' => 'ok']);
+    }
+
+    /*
+    * 查询用户手机号信息
+    * @param array $params 【必选】
+    * [
+    *      "mobile"=>"",用户手机号
+    * ]
+    * @return json
+    */
+    public function getUserInfo(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        //过滤参数
+        $rule= [
+            'mobile'=>'required',
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+        }
+        $userInfo = \App\Lib\User\User::getUserInfo(['mobile'=>$params['mobile']]);
+        if(!$userInfo){
+            return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
+        }
+        $orderInfo = Order::query()->where(['user_id'=>$userInfo['user_id'],'order_status'=>6])->first();
+        if($orderInfo){
+            $userInfo['orderInfo'] = $orderInfo->toArray();
+        }
+        $userInfo['orderInfo'] = [];
+        return apiResponse($userInfo,ApiStatus::CODE_0);
+    }
+
+    /*
+    * 修改用户手机号
+    * @param array $params 【必选】
+    * [
+    *      "user_id"=>"",用户id
+    *      "username"=>"",用户名（当前手机号）
+    *      "mobile"=>"",新手机号
+    * ]
+    * @return json
+    */
+    public function setMobile(Request $request){
+        $orders =$request->all();
+        $params = $orders['params'];
+        //过滤参数
+        $rule= [
+            'user_id'=>'required',
+            'username'=>'required',
+            'mobile'=>'required',
+        ];
+        $validator = app('validator')->make($params, $rule);
+        if ($validator->fails()) {
+            return apiResponse([],ApiStatus::CODE_20001,$validator->errors()->first());
+        }
+        $userInfo = \App\Lib\User\User::getUserInfo(['user_id'=>$params['user_id'],'mobile'=>$params['mobile']]);
+        if(!$userInfo){
+            return apiResponse([],ApiStatus::CODE_50001,"未找到该用户");
+        }
+        $ret = \App\Lib\User\User::setUserName($params['user_id'],$params['mobile']);
+        if(!$ret){
+            return apiResponse([],ApiStatus::CODE_50000,"更换手机号失败");
+        }
+        return apiResponse($userInfo,ApiStatus::CODE_0);
     }
 }
