@@ -113,13 +113,17 @@ class OrderBuyout implements UnderLine {
             'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
             'business_no' => $buyout['buyout_no']
         ];
-        $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
-        $clearData['out_auth_no'] = $payObj->getFundauthNo();
-        $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-        $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-        $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-        $clearData['out_payment_no'] = $payObj->getPaymentNo();
-        if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+        if($goodsInfo['yajin']>0 ){
+            if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+                $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+                $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+                $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+            }
+            else{
+                $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+                $clearData['out_auth_no'] = $payObj->getFundauthNo();
+                $clearData['out_payment_no'] = $payObj->getPaymentNo();
+            }
             $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
             $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
             $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;

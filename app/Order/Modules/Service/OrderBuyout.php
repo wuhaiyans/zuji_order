@@ -234,21 +234,20 @@ class OrderBuyout
 		];
 		$payObj = null;
 		if($goodsInfo['yajin']>0 ){
-
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
-			$clearData['out_auth_no'] = $payObj->getFundauthNo();
-			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-			$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
 				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 			}
-			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
+			else{
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+				$clearData['out_auth_no'] = $payObj->getFundauthNo();
+				$clearData['out_payment_no'] = $payObj->getPaymentNo();
+			}
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
+			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 		}
-
 
 		//进入清算处理
 		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
