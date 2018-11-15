@@ -146,7 +146,7 @@ class UserController extends Controller
         $data = [
             'mobile'=>$params['mobile']
         ];
-        Order::where(['user_id'=>$userInfo['id']])->save($data);
+        Order::where(['user_id'=>$userInfo['id']])->update($data);
         return apiResponse($userInfo,ApiStatus::CODE_0);
     }
 }
