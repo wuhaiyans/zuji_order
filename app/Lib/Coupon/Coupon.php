@@ -27,12 +27,13 @@ class Coupon extends \App\Lib\BaseApi{
      *  'user_id'=>'',//【必须】 string 用户id
      *  'coupon_on'=>''//【必须】string 优惠券码
      * ]
+     * @param $appid 【必须】int appid
      * @return array
      * @throws \Exception			请求失败时抛出异常
      */
-    public static function getCoupon($coupon){
+    public static function getCoupon($coupon,$appid){
 
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.coupon.rows.get', '1.0', ['coupon'=>$coupon]);
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.coupon.rows.get', '1.0', ['coupon'=>$coupon,'appid'=>$appid]);
 
     }
 
@@ -138,6 +139,7 @@ class Coupon extends \App\Lib\BaseApi{
         $data['params'] = [
             'user_id'=>$arr['user_id'],
             'only_id'=>$arr['only_id'],
+            'appid'  =>$arr['appid'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
 
@@ -196,6 +198,7 @@ class Coupon extends \App\Lib\BaseApi{
      * @author zhangjinhui
      * @param  $arr[
      *      sku_id =>2//【必须】 string skuid
+     *      'appid'=>''//【必须】int appid
      * ]
      * @return string or array
      */
@@ -205,6 +208,7 @@ class Coupon extends \App\Lib\BaseApi{
         $data['auth_token'] = $arr['auth_token'];
         $data['params'] = [
             'sku_id'=>$arr['sku_id'],
+            'appid'=>$arr['appid'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
