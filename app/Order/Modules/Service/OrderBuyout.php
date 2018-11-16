@@ -232,30 +232,23 @@ class OrderBuyout
 				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
-		$payObj = null;
 		if($goodsInfo['yajin']>0 ){
-
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
-			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-			$clearData['out_payment_no'] = $payObj->getPaymentNo();
-			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
-				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+			if($orderInfo['order_type'] != OrderStatus::orderMiniService){
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+				$clearData['out_auth_no'] = $payObj->getFundauthNo();
+				$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			}
-			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
+			//进入清算处理
+			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+			if(!$orderCleanResult){
+				return false;
+			}
 		}
-
-
-		//进入清算处理
-		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-		if(!$orderCleanResult){
-			return false;
-		}
-		if($goodsInfo['yajin']==0){
+		else
+		{
 			$params = [
 					'business_type'     => $clearData['business_type'],
 					'business_no'     => $clearData['business_no'],
@@ -395,10 +388,31 @@ class OrderBuyout
 		if(!$ret){
 			return false;
 		}
-		OrderOperate::isOrderComplete($buyout['order_no']);
-
+		$ret = OrderOperate::isOrderComplete($buyout['order_no']);
+		if(!$ret){
+			return false;
+		}
 		//无押金直接返回成功
 		if($goodsInfo['yajin']==0){
+			if($orderInfo['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
+				//查询芝麻订单
+				$miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderInfo['order_no']);
+				$data1 = [
+						'out_order_no' => $orderInfo['order_no'],//商户端订单号
+						'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+						'out_trans_no'=>$orderInfo['order_no'],//商户端交易号
+						'pay_amount'=>0.00,//支付金额
+						'remark' => "押金为0解约代扣",//订单操作说明
+						'app_id' => $miniOrderInfo['app_id'],//小程序appid
+				];
+				LogApi::info("[advanceReturn]通知芝麻取消请求参数",$data1);
+				//通知芝麻订单关闭
+				$canceRequest = \App\Lib\Payment\mini\MiniApi::OrderClose($data1);
+				if( !$canceRequest){
+					LogApi::info("[advanceReturn]通知芝麻订单关闭失败",$canceRequest);
+					return false;
+				}
+			}
 			return true;
 		}
 		//日志记录
