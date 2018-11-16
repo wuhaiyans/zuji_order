@@ -32,10 +32,12 @@ class ReceiveCouponComponnet implements OrderCreater
         if( !empty($coupon) ){
             $this->coupon = $coupon;
         }else{
+            $appid =$this->componnet->getOrderCreater()->getAppid();
             //自动领取优惠券
             $drawCouponArr = [
                 'only_id'=> $this->only_id,
                 'user_id'=>$userId,
+                'appid'  =>$appid,
             ];
             $this->recceive = $drawCouponArr;
             $this->status = \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
