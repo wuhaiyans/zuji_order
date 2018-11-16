@@ -86,6 +86,11 @@ class OrderGiveback implements UnderLine {
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单信息获取失败', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
+			//还机单不处于待支付的订单不允许线下还机
+			if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_PAY ){
+				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单不处于待支付', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
 			//创建服务层对象
 			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
 			if( !$orderGoods ){
