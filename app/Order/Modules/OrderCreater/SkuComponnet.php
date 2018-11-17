@@ -403,20 +403,23 @@ class SkuComponnet implements OrderCreater
         foreach ($sku as $k => $v) {
             for ($i =0;$i<$v['sku_num'];$i++){
                 $youhui =0;
+                $zongzujin = $v['zuqi'] * $v['zujin'];
                 foreach ($coupon as $key=>$val) {
-                    //首月0租金
+
+                    $skuyouhui[$v['sku_id']]['order_coupon_amount'] =0;
+                    //首月0租金 coupon_type =3
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                         $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
                         $coupon[$key]['discount_amount'] = $v['zujin'];
                     }
-                    //现金券
-                    if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
+                    //现金券 coupon_type =1  分期递减 coupon_type =4  总金额和现金券计算同等
+                    if ($val['coupon_type'] == CouponStatus::CouponTypeFixed || $val['coupon_type'] == CouponStatus::CouponTypeDecline ) {
 
                         if ($v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                             $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'];
                         } else {
-                            $zongzujin = $v['zuqi'] * $v['zujin'];
+
                             $skuyouhui[$v['sku_id']]['order_coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
                             if ($k == count($sku) - 1 && $i ==$v['sku_num']-1) {
                                 $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'] - $zongyouhui;
@@ -426,6 +429,21 @@ class SkuComponnet implements OrderCreater
                         }
                         $coupon[$key]['is_use'] = 1;
                         $coupon[$key]['discount_amount'] = $val['discount_amount'];
+                    }
+                    //租金折扣券 coupon_type =2  四舍五入 保留一位小数
+                    if ($val['coupon_type'] == CouponStatus::CouponTypePercentage) {
+
+                        $skuyouhui[$v['sku_id']]['order_coupon_amount'] =round($zongzujin-$zongzujin*$val['discount_amount'],1);
+                        $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['discount_amount'] = round($zongzujin-$zongzujin*$val['discount_amount'],1);
+                    }
+                    //满减券 coupon_type =5
+                    if ($val['coupon_type'] == CouponStatus::CouponFullSubtraction) {
+                        if($zongzujin>= $val['use_restrictions']){
+                            $skuyouhui[$v['sku_id']]['order_coupon_amount'] =$val['discount_amount'];
+                            $coupon[$key]['is_use'] = 1;
+                            $coupon[$key]['discount_amount'] = $val['discount_amount'];
+                        }
                     }
                 }
             }

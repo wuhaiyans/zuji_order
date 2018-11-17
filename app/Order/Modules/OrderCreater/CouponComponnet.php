@@ -56,11 +56,22 @@ class CouponComponnet implements OrderCreater
                         'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
                         'discount_amount'=>$v['coupon_value']/100,
                         'coupon_name'=>$v['coupon_name'],
+                        'use_restrictions'=>$v['use_restrictions'],//满多少
                         'is_use'=>0,//是否使用 0未使用
                     ];
 
                 }
             }
+
+//            $couponInfo[]=[
+//                'coupon_id'=>508,
+//                'coupon_no'=>"241cbb9248a5010a",//$v['coupon_no'],
+//                'coupon_type'=>6,//$v['coupon_type'],// 1,现金券 3,首月0租金
+//                'discount_amount'=>'0.03',//$v['coupon_value']/100,
+//                'coupon_name'=>'抵用券',//$v['coupon_name'],
+//                'is_use'=>0,//是否使用 0未使用
+//                'use_restrictions'=>'0.01',//满多少
+//            ];
             $this->couponInfo = $couponInfo;
         }
     }

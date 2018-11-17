@@ -72,19 +72,21 @@ class OrderController extends Controller
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
         $destineNo  = isset($params['params']['destine_no'])?$params['params']['destine_no']:'';
 
-        if( isset($params['params']['coupon']) ){
+        $couponList['coupon_list']=[];
+        //自动调用接口查询优惠券
+        $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
+            'sku_id' => $sku[0]['sku_id'],
+            'auth_token' => $params['auth_token'],
+            'appid'=>$appid,
+        ]);
+        $coupon =[];
+        if(isset($couponInfo[0]) && is_array($couponInfo)){
+            $coupon[] = $couponInfo[0]['coupon_no'];
+            $couponList['coupon_list'] = $couponInfo;
+        }
+
+        if( isset($params['params']['coupon']) && !empty($params['params']['coupon'])){
             $coupon = $params['params']['coupon'];
-        }else{
-            $coupon =[];
-            //自动调用接口查询优惠券
-            $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
-                'sku_id' => $sku[0]['sku_id'],
-                'auth_token' => $params['auth_token'],
-                'appid'=>$appid,
-            ]);
-            if(isset($coupon[0])){
-                $coupon = $coupon[0];
-            }
         }
 
         //判断参数是否设置
@@ -103,7 +105,6 @@ class OrderController extends Controller
         $address_list = \App\Lib\Address\Address::addressQuery([
             'auth_token'=>$params['auth_token'],
         ]);
-
         $data =[
             'appid'		=> $appid,
             'sku'		=> $sku,
@@ -120,7 +121,7 @@ class OrderController extends Controller
         }else{
             $res = array_merge($res,$address_list);
         }
-
+        $res = array_merge($res,$couponList);
         return apiResponse($res,ApiStatus::CODE_0);
 
     }
