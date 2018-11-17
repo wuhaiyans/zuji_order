@@ -210,42 +210,42 @@ class Coupon extends \App\Lib\BaseApi{
             'sku_id'=>$arr['sku_id'],
             'appid'=>$arr['appid'],
         ];
-        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-//        $info ='{
-//  "code": "0",
-//  "msg": "",
-//  "sub_code": "",
-//  "sub_msg": "",
-//  "data": [
-//    {
-//      "coupon_id": "508",
-//      "coupon_type_id": "7",
-//      "coupon_no": "241cbb9248a5010a",
-//      "status": "1",
-//      "start_time": "1514736000",
-//      "end_time": "1517328000",
-//      "user_id": "85051",
-//      "coupon_name": "6000元抵用券",
-//      "coupon_type": "1",
-//      "coupon_value": "600000",
-//      "use_restrictions": "0"
-//    },
-//    {
-//      "coupon_id": "47123",
-//      "coupon_type_id": "6",
-//      "coupon_no": "c80eb0dee581c0bd",
-//      "status": "1",
-//      "start_time": "1541433600",
-//      "end_time": "1543507200",
-//      "user_id": "85051",
-//      "coupon_name": "100元抵用券",
-//      "coupon_type": "1",
-//      "coupon_value": "10000",
-//      "use_restrictions": "0"
-//    }
-//  ],
-//  "sign": ""
-//}';
+    //    $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+        $info ='{
+  "code": "0",
+  "msg": "",
+  "sub_code": "",
+  "sub_msg": "",
+  "data": [
+    {
+      "coupon_id": "508",
+      "coupon_type_id": "7",
+      "coupon_no": "241cbb9248a5010a",
+      "status": "1",
+      "start_time": "1514736000",
+      "end_time": "1517328000",
+      "user_id": "85051",
+      "coupon_name": "6000元抵用券",
+      "coupon_type": "1",
+      "coupon_value": "600000",
+      "use_restrictions": "0"
+    },
+    {
+      "coupon_id": "47123",
+      "coupon_type_id": "6",
+      "coupon_no": "c80eb0dee581c0bd",
+      "status": "1",
+      "start_time": "1541433600",
+      "end_time": "1543507200",
+      "user_id": "85051",
+      "coupon_name": "100元抵用券",
+      "coupon_type": "1",
+      "coupon_value": "10000",
+      "use_restrictions": "0"
+    }
+  ],
+  "sign": ""
+}';
         $info =json_decode($info,true);
         \App\Lib\Common\LogApi::notify('优惠券商品可用列表查询接口zuji.coupon.checked',[
             'request'=>$data,
