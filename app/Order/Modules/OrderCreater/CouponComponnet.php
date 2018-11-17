@@ -40,7 +40,13 @@ class CouponComponnet implements OrderCreater
                 ];
             }
             $appid =$this->componnet->getOrderCreater()->getAppid();
-            $coupon = Coupon::getCoupon($couponData,$appid);
+            try{
+                $coupon = Coupon::getCoupon($couponData,$appid);
+            }catch (\Exception $e){
+                LogApi::error(config('app.env')."OrderCreate-GetCoupon-error:".$e->getMessage());
+                throw new Exception("获取优惠券接口错误:".$e->getMessage());
+            }
+
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");
             }
@@ -62,7 +68,7 @@ class CouponComponnet implements OrderCreater
 
                 }
             }
-
+//
 //            $couponInfo[]=[
 //                'coupon_id'=>508,
 //                'coupon_no'=>"241cbb9248a5010a",//$v['coupon_no'],
