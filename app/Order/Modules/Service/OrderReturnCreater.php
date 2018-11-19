@@ -3271,7 +3271,7 @@ class OrderReturnCreater
             $data = [
                 'goods_no'      => $goods_info['goods_no'],
                 'order_no'      => $params['order_no'],
-            //    'business_type'  => ReturnStatus::UnderLineBusiness,
+                'business_type'  => ReturnStatus::UnderLineBusiness,
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
                 'reason_text'   => "中途退机",

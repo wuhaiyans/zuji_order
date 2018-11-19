@@ -612,6 +612,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$authtoken = isset($params['auth_token'])?$params['auth_token']:'';
 		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		$rules = [
@@ -641,7 +642,7 @@ class GivebackController extends Controller
 			// 微信支付，交易类型：JSAPI，redis读取openid
 			if( $paramsArr['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
 				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
-					$_key = 'wechat_openid_'.$orders['auth_token'];
+					$_key = 'wechat_openid_'.$authtoken;
 					$openid = \Illuminate\Support\Facades\Redis::get($_key);
 					if( $openid ){
 						$extended_params['wechat_params']['openid'] = $openid;

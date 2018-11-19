@@ -39,45 +39,34 @@ class CouponComponnet implements OrderCreater
                     'coupon_no'=>$v,
                 ];
             }
-//            $appid =$this->componnet->getOrderCreater()->getAppid();
-//            try{
-//                $coupon = Coupon::getCoupon($couponData,$appid);
-//            }catch (\Exception $e){
-//                LogApi::error(config('app.env')."OrderCreate-GetCoupon-error:".$e->getMessage());
-//                throw new Exception("获取优惠券接口错误:".$e->getMessage());
-//            }
-//
-//            if(!is_array($coupon)){
-//                throw new Exception("优惠券信息错误");
-//            }
-//            if(empty($coupon)){
-//                throw new Exception("该优惠券已使用");
-//            }
-//            $couponInfo =[];
-//            foreach ($coupon as $key=>$value){
-//                foreach ($value as $k=>$v){
-//                    $couponInfo[]=[
-//                        'coupon_id'=>$v['coupon_id'],
-//                        'coupon_no'=>$v['coupon_no'],
-//                        'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
-//                        'discount_amount'=>$v['coupon_value']/100,
-//                        'coupon_name'=>$v['coupon_name'],
-//                        'use_restrictions'=>$v['use_restrictions'],//满多少
-//                        'is_use'=>0,//是否使用 0未使用
-//                    ];
-//
-//                }
-//            }
-//
-            $couponInfo[]=[
-                'coupon_id'=>508,
-                'coupon_no'=>"241cbb9248a5010a",//$v['coupon_no'],
-                'coupon_type'=>6,//$v['coupon_type'],// 1,现金券 3,首月0租金
-                'discount_amount'=>'0.03',//$v['coupon_value']/100,
-                'coupon_name'=>'抵用券',//$v['coupon_name'],
-                'is_use'=>0,//是否使用 0未使用
-                'use_restrictions'=>'0.01',//满多少
-            ];
+            $appid =$this->componnet->getOrderCreater()->getAppid();
+            try{
+                $coupon = Coupon::getCoupon($couponData,$appid);
+            }catch (\Exception $e){
+                LogApi::error(config('app.env')."OrderCreate-GetCoupon-error:".$e->getMessage());
+                throw new Exception("获取优惠券接口错误:".$e->getMessage());
+            }
+            if(!is_array($coupon)){
+                throw new Exception("优惠券信息错误");
+            }
+            if(empty($coupon)){
+                throw new Exception("该优惠券已使用");
+            }
+            $couponInfo =[];
+            foreach ($coupon as $key=>$value){
+                foreach ($value as $k=>$v){
+                    $couponInfo[]=[
+                        'coupon_id'=>$v['coupon_id'],
+                        'coupon_no'=>$v['coupon_no'],
+                        'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
+                        'discount_amount'=>$v['coupon_value']/100,
+                        'coupon_name'=>$v['coupon_name'],
+                        'use_restrictions'=>$v['use_restrictions'],//满多少
+                        'is_use'=>0,//是否使用 0未使用
+                    ];
+
+                }
+            }
             $this->couponInfo = $couponInfo;
         }
     }
