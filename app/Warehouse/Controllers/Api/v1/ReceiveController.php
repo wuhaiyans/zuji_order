@@ -181,6 +181,31 @@ class ReceiveController extends Controller
     }
 
     /**
+     * 订单2.0工具
+     *  确认入库
+     *
+     * $params=[
+     *      order_no=>'订单编号'
+     * ]
+     */
+    public function orderImeiIn(){
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        DB::beginTransaction();
+        try{
+            ImeiRepository::orderImeiIn($params['order_no']);
+        } catch (\Exception $e){
+            DB::rollBack();
+            LogApi::debug("Receive[orderImeiIn]error:",$e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+        }
+        DB::commit();
+        return \apiResponse([], ApiStatus::CODE_0);
+    }
+
+    /**
      * 修改物流
      */
     public function logistics()

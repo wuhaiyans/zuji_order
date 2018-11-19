@@ -23,7 +23,7 @@ class GoodsController extends Controller
 			foreach ($goodsLog as $key => &$value) {
 				$value['create_time_show'] = date('Y-m-d H:i:s',$value['create_time']);
 				$value['business_name'] = \App\Order\Modules\Inc\OrderStatus::getBusinessName($value['business_key']);
-				$value['rolw_name'] = \App\Lib\PublicInc::getRoleName($value['operator_type']);
+				$value['role_name'] = \App\Lib\PublicInc::getRoleName($value['operator_type']);
 			}
             return apiResponse($goodsLog);
         }catch (\Exception $e) {

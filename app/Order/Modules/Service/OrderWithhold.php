@@ -27,7 +27,6 @@ class OrderWithhold
         if( !is_array($instalmentInfo)){
             return false;
         }
-
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码

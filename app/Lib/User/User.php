@@ -35,6 +35,8 @@ class User extends \App\Lib\BaseApi{
 		if( !$userInfo['realname'] ){
 			$userInfo['realname'] = isset($userInfo['address']['name']) && $userInfo['address']['name'] ? $userInfo['address']['name'] : substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11) ;
 		}
+		//收货人姓名 读取用户认证姓名
+		$userInfo['address']['name'] = $userInfo['realname'];
 		return $userInfo;
     }
     /**
@@ -236,6 +238,36 @@ class User extends \App\Lib\BaseApi{
         $info = str_replace("\r\n","",$info);
         $info =json_decode($info,true);
         return $info;
+    }
+    /**
+     * 查询用户信息
+     * @author limin
+     * @param $array  [
+     *      ''user_id'' =>  ""  【可选 二选一】 用户id
+     *      "mobile" =>  ""   【可选 二选一】 手机号
+     * ]
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+    public static function getUserInfo($params){
+        if(!isset($params['user_id']) && !isset($params['mobile'])){
+            return false;
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.get', '1.0', $params);
+    }
+    /**
+     * 更换用户名手机号
+     * @author limin
+     * @param $user_id //【必须】 当前用户id
+     * @param $mobile //【必须】 新手机号
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+    public static function setUserName($params){
+        if(!isset($params['user_id']) || !isset($params['mobile'])){
+            return false;
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.setinfo', '1.0', $params);
     }
 }
 

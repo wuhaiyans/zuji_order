@@ -80,17 +80,26 @@ class InstalmentComponnet implements OrderCreater
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
 			// 开始日期，只有日租有，月租没有
             $skuInfo['end_time'] = strtotime($sku['end_time']);
+            //判断优惠券类型 进行分期计算  默认平均分配
+            $couponStatus =CouponStatus::CouponTypeAvg;
+            if($sku['order_coupon_amount'] >0){
+                $couponType =$schema['coupon'][0]['coupon_type'];
+                if($couponType == CouponStatus::CouponTypeDecline){
+                    $couponStatus =CouponStatus::CouponTypeSerialize;
+                }
+            }
+
             $skuInfo['discount_info'] = [
                 [
                     'discount_amount' =>(float)$sku['first_coupon_amount'],
-                    'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize:商品券
+                    'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize 分期顺序优惠
                 ],
                 [
                     'discount_amount' =>(float)$sku['order_coupon_amount'],
-                    'zuqi_policy' =>CouponStatus::CouponTypeAvg,
+                    'zuqi_policy' =>$couponStatus,// 分期类型根据优惠券类型来进行分期 serialize 分期顺序优惠 （递减）
                 ],
 //                [
-//                    'discount_amount' =>(float)$sku['discount_amount'],
+//                    'discount_amount' =>(float)$sku['order_coupon_amount'],
 //                    'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
 //                ]
             ];

@@ -113,21 +113,16 @@ class OrderBuyout implements UnderLine {
             'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
             'business_no' => $buyout['buyout_no']
         ];
-        $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
-        $clearData['out_auth_no'] = $payObj->getFundauthNo();
-        $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-        $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-        $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-
-        if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+        if($goodsInfo['yajin']>0 ){
             $clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
             $clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
             $clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
+            if($orderInfo['order_type'] != OrderStatus::orderMiniService){
+                $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+                $clearData['out_auth_no'] = $payObj->getFundauthNo();
+                $clearData['out_payment_no'] = $payObj->getPaymentNo();
+            }
         }
-        elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
-            $clearData['out_payment_no'] = $payObj->getPaymentNo();
-        }
-
         //进入清算处理
         $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
         if(!$orderCleanResult){
@@ -189,7 +184,10 @@ class OrderBuyout implements UnderLine {
                 return false;
             }
 
-            OrderOperate::isOrderComplete($buyout['order_no']);
+            $ret = OrderOperate::isOrderComplete($buyout['order_no']);
+            if(!$ret){
+                return false;
+            }
 
             //设置短信发送内容
             $smsContent = [
