@@ -152,6 +152,7 @@ class OrderGoodsInstalmentRepository
                 $statusArr = [$param['status']];
             }
         }
+        
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
