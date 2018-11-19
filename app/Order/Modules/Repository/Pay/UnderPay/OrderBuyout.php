@@ -122,13 +122,14 @@ class OrderBuyout implements UnderLine {
                 $clearData['out_auth_no'] = $payObj->getFundauthNo();
                 $clearData['out_payment_no'] = $payObj->getPaymentNo();
             }
+            //进入清算处理
+            $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+            if(!$orderCleanResult){
+                LogApi::info("offline-buyout:进入清算失败",$clearData);
+                return false;
+            }
         }
-        //进入清算处理
-        $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-        if(!$orderCleanResult){
-            LogApi::info("offline-buyout","进入清算失败");
-            return false;
-        }
+
 
         //设置短信发送内容
         $smsContent = [

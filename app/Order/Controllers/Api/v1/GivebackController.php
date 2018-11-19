@@ -667,7 +667,7 @@ class GivebackController extends Controller
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
 		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
 		$data['giveback_info'] =$orderGivebackInfo;
-		$data['payment_info'] =['url'=>$paymentUrl['url']];
+		$data['payment_info'] =$paymentUrl;
 		$data['status'] = OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$data['status_text'] =OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$return  = $this->givebackReturn($data);
