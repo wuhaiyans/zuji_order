@@ -55,19 +55,7 @@ class OrderRelet implements UnderLine {
         }
         $spu_id = $goodsInfo['prod_id'];
 
-        $begin_time = $this->componnet['extend']['begin_time'];
-        $end_time   = $this->componnet['extend']['end_time'];
-
-        $begin_time = strtotime($begin_time) > 0 ? strtotime($begin_time) : 0 ;
-        $end_time   = strtotime($end_time) > 0 ? strtotime($end_time) : 0 ;
-
-        if($begin_time >= $end_time){
-            LogApi::debug('[underLinePay]续租时间错误：'.$this->order_no);
-            throw new \Exception("续租时间错误");
-        }
-
-        $end_time = $end_time + (3600 * 24) - 1;
-        $day = ceil( ($end_time - $begin_time) / 86400 );
+        $day = $this->componnet['extend']['zuqi'];
 
         /**
          * 请求接口 计算商品总租金
@@ -137,115 +125,110 @@ class OrderRelet implements UnderLine {
      */
     public function execute(){
         $params = $this->componnet;
+        $zuqi   = $params['extend']['zuqi'];
         //获取商品对象
-        $goodsObj = Goods::getByGoodsId($params['goods_id']);
+        $goodsObj = Goods::getByGoodsNo($params['goods_no']);
         if( $goodsObj ){
             $goods = $goodsObj->getData();
-            if( $goods['zuqi_type']==OrderStatus::ZUQI_TYPE1 ){
-                if( $params['zuqi']<1 || $params['zuqi']>30 ){
-                    set_msg('租期错误'.$params['goods_id']);
-                    LogApi::info("[OrderRelet]租期错误", $params['goods_id']);
-                    return false;
+            if( $goods['zuqi_type'] == OrderStatus::ZUQI_TYPE1 ){
+                if( $zuqi < 1 || $zuqi > 30 ){
+                    LogApi::info("[OrderRelet]租期错误", [$this->order_no]);
+                    throw new \Exception("租期错误,租期天数错误：".$this->order_no);
                 }
             }else{
-                set_msg('租期错误,当前只支持短租续租'.$params['goods_id']);
-                LogApi::info("[OrderRelet]租期错误,当前只支持短租续租", $params['goods_id']);
-                return false;
+                LogApi::info("[OrderRelet]租期错误,当前只支持短租续租", [$this->order_no]);
+                throw new \Exception("租期错误,当前只支持短租续租：".$this->order_no);
             }
 
             //获取订单信息
-            $orderInfo = OrderRepository::getInfoById($params['order_no']);
+            $orderInfo = OrderRepository::getInfoById($this->order_no);
             //验证是否小程序订单
             if($orderInfo['order_type']==OrderStatus::orderMiniService){
-                if($goods['relet_day']<$params['zuqi']){
-                    set_msg('小程序订单续租的租期必须小于剩余续租天数'.json_encode($params));
+                if($goods['relet_day'] < $zuqi){
                     LogApi::info("[OrderRelet]小程序订单续租的租期必须小于剩余续租天数", json_encode($params));
-                    return false;
+                    throw new \Exception("小程序订单续租的租期必须小于剩余续租天数：".$this->order_no);
                 }
             }
 
             //创建续租完成
-            if($params['relet_amount']){
+            if($params['amount']){
+                $certified  = \App\Order\Models\OrderUserCertified::where('order_no','=',$this->order_no)->first();
+                $userInfo   = objectToArray($certified);
+
+                $user_name  = $userInfo['realname'] ? $userInfo['realname'] : "--";
+
                 $data = [
-                    'user_id'=>$params['user_id'],
-                    'zuqi_type'=>$goods['zuqi_type'],
-                    'zuqi'=>$params['zuqi'],
-                    'order_no'=>$params['order_no'],
-                    'relet_no'=>createNo(9),
-                    'create_time'=>time(),
-                    'pay_type'=>$params['pay_type'],
-                    'user_name'=>$params['user_name'],
-                    'goods_id'=>$params['goods_id'],
-                    'relet_amount'=>$params['relet_amount'],
-                    'status'=>ReletStatus::STATUS2,
+                    'user_id'       => $orderInfo['user_id'],
+                    'zuqi_type'     => $goods['zuqi_type'],
+                    'zuqi'          => $zuqi,
+                    'order_no'      => $goods['order_no'],
+                    'relet_no'      => createNo(9),
+                    'create_time'   => time(),
+                    'pay_type'      => \App\Order\Modules\Inc\PayInc::UnderLinePay, // 线下支付
+                    'user_name'     => $user_name,
+                    'goods_id'      => $goods['id'],
+                    'relet_amount'  => $params['amount'],
+                    'status'        => ReletStatus::STATUS2,
                 ];
 
                 if(!ReletRepository::createRelet($data)){
-                    set_msg('创建续租失败'.json_encode($data));
                     LogApi::info("[OrderRelet]创建续租失败", json_encode($data));
-                    return false;
+                    throw new \Exception("创建续租失败：".$this->order_no);
                 }
             }else{
-                set_msg('续租金额错误'.$params['relet_amount']);
-                LogApi::info("[OrderRelet]续租金额错误", $params['relet_amount']);
-                return false;
+                LogApi::info("[OrderRelet]续租金额错误", $params['amount']);
+                throw new \Exception("续租金额错误：".$params['amount']);
             }
 
-            //获取订单信息
-            $orderInfo = OrderRepository::getInfoById($params['order_no']);
-
             //修改小程序续租剩余时间
-            if($orderInfo['order_type']==OrderStatus::orderMiniService){
-                if(!$goodsObj->setReletTime($data['zuqi'])){
-                    set_msg('修改小程序短租商品续租剩余天数失败'.$params['goods_id']);
+            if($orderInfo['order_type'] == OrderStatus::orderMiniService){
+                if(!$goodsObj->setReletTime($zuqi)){
                     LogApi::info("[OrderRelet]修改小程序短租商品续租剩余天数失败", $params['goods_id']);
-                    return false;
+                    throw new \Exception("修改小程序短租商品续租剩余天数失败：".$goods['id']);
                 }
             }
 
             // 获取周期最新一条对象
-            $goodsUnitObj = ServicePeriod::getByGoodsUnitNo($goods['order_no'],$goods['goods_no']);
+            $goodsUnitObj = ServicePeriod::getByGoodsUnitNo($this->order_no,$goods['goods_no']);
             if($goodsUnitObj){
                 $goodsUnit = $goodsUnitObj->getData();
             }else{
-                set_msg('设备周期未找到'.$params['goods_id']);
                 LogApi::info("[OrderRelet]设备周期未找到", $params['goods_id']);
-                return false;
+                throw new \Exception("设备周期未找到：".$goods['id']);
             }
             //判断租期类型
-            if($data['zuqi_type']==OrderStatus::ZUQI_TYPE1){
-                $t = strtotime("+".$data['zuqi']." day",$goodsUnit['end_time']);
+            if($data['zuqi_type'] == OrderStatus::ZUQI_TYPE1){
+                $t = strtotime("+" . $zuqi . " day", $goodsUnit['end_time']);
             }else{
-                $t = strtotime("+".$data['zuqi']." month",$goodsUnit['end_time']);
+                $t = strtotime("+" . $zuqi . " month", $goodsUnit['end_time']);
             }
+
             $data_goods = [
-                'order_no'=>$goods['order_no'],
-                'goods_no'=>$goods['goods_no'],
-                'user_id'=>$goods['user_id'],
-                'unit'=>$data['zuqi_type'],
-                'unit_value'=>$data['zuqi'],
-                'begin_time'=>$goodsUnit['begin_time'],
-                'end_time'=>$t,
+                'order_no'      => $this->order_no,
+                'goods_no'      => $goods['goods_no'],
+                'user_id'       => $orderInfo['user_id'],
+                'unit'          => $goods['zuqi_type'],
+                'unit_value'    => $zuqi,
+                'begin_time'    => $goodsUnit['begin_time'],
+                'end_time'      => $t,
             ];
+
             //添加设备周期表
             if( !ServicePeriod::createService($data_goods) ){
-                set_msg('续租添加设备周期表失败'.$params['goods_id']);
                 LogApi::info("[OrderRelet]续租添加设备周期表失败", $params['goods_id']);
-                return false;
+                throw new \Exception("续租添加设备周期表失败：".$goods['id']);
             }
             //修改订单商品服务结束时间和租期
             if( !ServicePeriod::updateGoods($data_goods) ){
-                set_msg('续租修改订单商品服务结束时间失败'.$params['goods_id']);
                 LogApi::info("[OrderRelet]续租修改订单商品服务结束时间失败", $params['goods_id']);
-                return false;
+                throw new \Exception("续租修改订单商品服务结束时间失败：".$goods['id']);
             }
             LogApi::info("[OrderRelet]续租支付成功", $data['relet_no']);
             return true;
 
         }else{
-            set_msg('未获取到订单商品信息');
-            LogApi::info("[OrderRelet]未获取到订单商品信息", $params['goods_id']);
-            return false;
+            LogApi::info("[OrderRelet]未获取到订单商品信息", $params['goods_no']);
+            throw new \Exception("未获取到订单商品信息：");
         }
 
     }

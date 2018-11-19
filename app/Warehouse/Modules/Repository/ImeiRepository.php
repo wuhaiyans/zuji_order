@@ -7,6 +7,8 @@
 
 namespace App\Warehouse\Modules\Repository;
 
+use App\Warehouse\Models\Delivery;
+use App\Warehouse\Models\DeliveryGoodsImei;
 use App\Warehouse\Models\ImeiLog;
 use App\Warehouse\Models\ImeiUpdateLog;
 use App\Warehouse\Models\Receive;
@@ -325,6 +327,30 @@ class ImeiRepository
 
         }
 
+        return true;
+
+    }
+
+    /**
+     * 根据订单号入库
+     */
+    public static function orderImeiIn($order_no){
+        $delivery = Delivery::where(['order_no'=>$order_no])->first(['delivery_no']);
+        if(!$delivery){
+            throw new \Exception('发货单号未查到:'.$order_no);
+        }
+        $delivery_arr = $delivery->toArray();
+        $deliverygoodsimei = DeliveryGoodsImei::where(['delivery_no'=>$delivery_arr['delivery_no']])->first(['imei']);
+        if(!$deliverygoodsimei){
+            throw new \Exception('发货单号设备未查到:'.$delivery_arr['delivery_no']);
+        }
+        $deliverygoodsimei_arr = $deliverygoodsimei->toArray();
+        if(!ImeiLog::in($deliverygoodsimei_arr['imei'],$order_no)){
+            throw new \Exception('imei入库日志添加失败:'.$deliverygoodsimei_arr['imei']);
+        }
+        if(!Imei::where(['imei'=>$deliverygoodsimei_arr['imei']])->update(['status'=>Imei::STATUS_IN])){
+            throw new \Exception('imei入库修改失败:'.$deliverygoodsimei_arr['imei']);
+        }
         return true;
 
     }

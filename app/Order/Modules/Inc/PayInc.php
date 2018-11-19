@@ -5,6 +5,10 @@ use App\Order\Modules\Repository\Pay\Channel;
 
 class PayInc{
     /**
+     * @var int 线下支付
+     */
+    const UnderLinePay = 9;
+    /**
      * @var int 花呗分期+预授权
      */
     const  PcreditPayInstallment = 8;
@@ -39,6 +43,8 @@ class PayInc{
      */
     const WithhodingPay = 1;
 
+
+
     /**
      * 订单支付列表
      * @return array
@@ -53,6 +59,7 @@ class PayInc{
             self::LebaifenPay=>'乐百分支付',
             self::WeChatPay=>'微信支付',
             self::PcreditPayInstallment=>'花呗分期+预授权',
+            self::UnderLinePay=>'线下支付',
         ];
     }
 

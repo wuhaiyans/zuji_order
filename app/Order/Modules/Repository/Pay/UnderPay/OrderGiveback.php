@@ -1,7 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository\Pay\UnderPay;
 
-use App\Order\Modules\Service\OrderGiveback;
+use App\Order\Modules\Service\OrderGiveback AS OG;
 
 
 use App\Order\Modules\Inc\OrderCleaningStatus;
@@ -56,7 +56,7 @@ class OrderGiveback implements UnderLine {
      * return string
      */
     public function getPayAmount(){
-		$orderGiveback = new OrderGiveback();
+		$orderGiveback = new OG();
 		$givebackInfo = $orderGiveback->getInfoByGoodsNo($this->goodsNo);
 		if( !$givebackInfo ){
 			\App\Lib\Common\LogApi::error('huanji-xianxiazhifu还机-线下支付：还机信息为空',['goodsNo'=>$this->goodsNo,'givebackInfo'=>$givebackInfo]);
@@ -79,11 +79,16 @@ class OrderGiveback implements UnderLine {
 			}
 			$order_type = $orderInfo['order_type'];
 			
-			$orderGivebackService = new OrderGiveback();
+			$orderGivebackService = new OG();
 			//获取还机单信息
 			$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->goodsNo);
 			if( !$orderGivebackInfo ) {
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单信息获取失败', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
+				return false;
+			}
+			//还机单不处于待支付的订单不允许线下还机
+			if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_PAY ){
+				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单不处于待支付', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
 				return false;
 			}
 			//创建服务层对象

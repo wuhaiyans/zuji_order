@@ -46,7 +46,6 @@ class MiniNotifyController extends Controller
             \App\Lib\Common\LogApi::id($_POST['out_order_no']);
         }
         \App\Lib\Common\LogApi::notify('芝麻小程序回调参数记录',$_POST);
-
         if( ! isset($_POST['notify_app_id']) ){
             \App\Lib\Common\LogApi::error('芝麻小程序回调参数错误',$_POST);
             echo '芝麻小程序回调参数错误';exit;
@@ -419,6 +418,13 @@ class MiniNotifyController extends Controller
     }
 
     /**
+     *
+     */
+    public function creditQuery(){
+
+
+    }
+    /**
      * 测试发起请求小程序订单后续操作
      * @author zhangjinhui
      */
@@ -431,9 +437,9 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A730138799584988',//商户端订单号
-            'zm_order_no'=>'2018073000001001093861579004',//芝麻订单号
-            'out_trans_no'=>'A823119008551174',//商户端交易号
+            'out_order_no'=>'A919154437698134',//商户端订单号
+            'zm_order_no'=>'2018091900001001103544157614',//芝麻订单号
+            'out_trans_no'=>'A919154437698134',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
             'pay_amount'=>'0.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid
