@@ -133,7 +133,10 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
-
+        //逾期天数
+        if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
+            $whereArray = getBeoverduetime($param['beoverdue_day']);
+        }
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
@@ -149,6 +152,7 @@ class OrderGoodsInstalmentRepository
                 $statusArr = [$param['status']];
             }
         }
+        
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
