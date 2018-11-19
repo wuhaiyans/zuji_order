@@ -448,6 +448,7 @@ function getBeoverdue($re_day){
 
 /**
  * 计算逾期条件
+ * 返回数组
  */
 function getBeoverduetime($type){
     $time = date('Y-m-d',time());
