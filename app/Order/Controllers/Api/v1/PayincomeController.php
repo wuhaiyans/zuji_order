@@ -51,7 +51,7 @@ class PayincomeController extends Controller
     public function payIncomeQuery(Request $request){
         $request               = $request->all()['params'];
         $additional['page']    = isset($request['page']) ? $request['page'] : 1;
-        $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+        $additional['limit']   = isset($request['size']) ? $request['size'] : config("web.pre_page_size");
 
         $params         = filter_array($request, [
             'appid'            	=> 'required',
