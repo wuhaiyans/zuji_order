@@ -633,7 +633,8 @@ class WithholdController extends Controller
                 ['id', '>=', $minId],
                 ['id', '<=', $maxId],
                 ['withhold_day', '>', 0],
-                ['withhold_day', '<=', $dateTime],
+//                ['withhold_day', '<=', $dateTime],
+                ['withhold_day', '=', 1544803200],
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
@@ -768,7 +769,8 @@ class WithholdController extends Controller
                 $miniParams['out_trans_no'] = $item['business_no'];
                 $miniParams['pay_amount'] = $item['amount'];
                 $miniParams['remark'] = $subject;
-                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+//                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+                $pay_status = "TestCreatepay";
                 LogApi::info('[crontabCreatepay]小程序发起扣款后：'.$subject.':扣款的结果：'.$pay_status.':发起的参数.',$miniParams);
                 //判断请求发送是否成功
                 if($pay_status == 'PAY_SUCCESS'){
@@ -810,15 +812,16 @@ class WithholdController extends Controller
                     ];
 
                     try {
-                        // 请求代扣接口
-                        $withStatus = $withholding->deduct($withholding_data);
-
-                        if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-
-                            \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
-                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
-                        }
-
+//
+//                        // 请求代扣接口
+//                        $withStatus = $withholding->deduct($withholding_data);
+//
+//                        if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
+//
+//                            \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+//                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
+//                        }
+                        $withStatus = "TestCreatepay";
                         LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
                     }catch(\App\Lib\ApiException $exc){
                         LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
@@ -858,39 +861,7 @@ class WithholdController extends Controller
 //                sleep($time);
 //            }
 //            ++$page;
-
-
 //        }
-
-
-        //记录执行成功的总数和失败的总数
-        $whereFailArray =
-            [
-                ['id', '>=', $minId],
-                ['id', '<=', $maxId],
-                ['withhold_day', '>', 0],
-                ['withhold_day', '<=', $dateTime],
-                ['status', '=', OrderInstalmentStatus::FAIL]
-            ];
-        $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
-            ->where($whereFailArray)
-            ->count();
-        LogApi::info('[crontabCreatepay]脚本执行完成后待扣款或者扣款失败的总条数：'.$failTotal);
-
-        $whereSuccessArray =
-            [
-                ['id', '>=', $minId],
-                ['id', '<=', $maxId],
-                ['withhold_day', '>', 0],
-                ['withhold_day', '<=', $dateTime],
-                ['status', '=', OrderInstalmentStatus::SUCCESS]
-            ];
-        $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
-            ->where($whereSuccessArray)
-            ->count();
-        LogApi::info('[crontabCreatepay]脚本执行完成后扣款成功的总条数：'.$successTotal);
-
-
 
     }
 
