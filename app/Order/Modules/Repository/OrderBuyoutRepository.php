@@ -60,7 +60,6 @@ class OrderBuyoutRepository
 		if(!isset($additional['limit'])){
 			return false;
 		}
-		$additional['offset'] = $additional['offset']* $additional['limit'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->where($where)

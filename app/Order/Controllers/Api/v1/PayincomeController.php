@@ -425,7 +425,7 @@ class PayincomeController extends Controller
             return apiResponse([],ApiStatus::CODE_0,"success");
 
         } catch (\Exception $e) {
-
+            DB::rollBack();
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
         }

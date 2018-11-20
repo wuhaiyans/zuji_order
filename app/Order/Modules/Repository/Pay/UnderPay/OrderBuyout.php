@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository\Pay\UnderPay;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
@@ -69,6 +70,10 @@ class OrderBuyout implements UnderLine {
         if(!$orderInfo){
             return false;
         }
+        if($orderInfo['order_status'] == OrderStatus::OrderCompleted){
+            LogApi::info("offline-buyout","该订单已完成");
+            return false;
+        }
         //获取订单商品信息;
         $goodsInfo = Goods::getOrderNo($this->order_no);
         if(!$goodsInfo){
@@ -80,6 +85,10 @@ class OrderBuyout implements UnderLine {
         ];
         //获取买断单
         $buyout = OrderBuyoutRepository::getInfo($where);
+        if($buyout['status'] == OrderBuyoutStatus::OrderPaid || $buyout['status'] == OrderBuyoutStatus::OrderRelease){
+            LogApi::info("offline-buyout","该订单已经买断支付");
+            return false;
+        }
         if(!$buyout){
             $buyout = [
                 'type'=>1,
@@ -167,12 +176,15 @@ class OrderBuyout implements UnderLine {
         //不需要解冻则直接完成订单
         if($goodsInfo['yajin']==0 ){
             $buyout['status'] = OrderBuyoutStatus::OrderRelease;
-            //解冻订单
-            $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
-            if(!$ret){
-                LogApi::info("offline-buyout","解冻订单失败");
-                return false;
+            //如果订单冻结就解冻订单
+            if($orderInfo['freeze_type']>0){
+                $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+                if(!$ret){
+                    LogApi::info("offline-buyout","解冻订单失败");
+                    return false;
+                }
             }
+
             //更新订单商品
             $goods = [
                 'goods_status' => \App\Order\Modules\Inc\OrderGoodStatus::BUY_OUT,
@@ -187,6 +199,7 @@ class OrderBuyout implements UnderLine {
 
             $ret = OrderOperate::isOrderComplete($buyout['order_no']);
             if(!$ret){
+                LogApi::info("offline-buyout","关闭订单失败");
                 return false;
             }
 
@@ -233,7 +246,7 @@ class OrderBuyout implements UnderLine {
             LogApi::info("offline-buyout","更新商品失败");
             return false;
         }
-        echo  "success";
+        LogApi::info("offline-buyout","成功");
         return true;
     }
     static function log($orderLog,$goodsLog){
