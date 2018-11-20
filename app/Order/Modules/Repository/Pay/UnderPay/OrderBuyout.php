@@ -174,12 +174,15 @@ class OrderBuyout implements UnderLine {
         //不需要解冻则直接完成订单
         if($goodsInfo['yajin']==0 ){
             $buyout['status'] = OrderBuyoutStatus::OrderRelease;
-            //解冻订单
-            $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
-            if(!$ret){
-                LogApi::info("offline-buyout","解冻订单失败");
-                return false;
+            //如果订单冻结就解冻订单
+            if($orderInfo['freeze_type']>0){
+                $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
+                if(!$ret){
+                    LogApi::info("offline-buyout","解冻订单失败");
+                    return false;
+                }
             }
+
             //更新订单商品
             $goods = [
                 'goods_status' => \App\Order\Modules\Inc\OrderGoodStatus::BUY_OUT,
