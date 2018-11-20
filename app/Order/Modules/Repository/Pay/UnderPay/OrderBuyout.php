@@ -70,6 +70,9 @@ class OrderBuyout implements UnderLine {
         if(!$orderInfo){
             return false;
         }
+        if($orderInfo['order_status'] == OrderStatus::OrderCompleted){
+            return false;
+        }
         //获取订单商品信息;
         $goodsInfo = Goods::getOrderNo($this->order_no);
         if(!$goodsInfo){
