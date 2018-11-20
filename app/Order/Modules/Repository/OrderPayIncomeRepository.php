@@ -176,7 +176,7 @@ class OrderPayIncomeRepository
             ->limit($pageSize)
             ->get();
 
-        if (!$result) return false;
+        if (!$result) return [];
         return $result->toArray();
     }
     /**
