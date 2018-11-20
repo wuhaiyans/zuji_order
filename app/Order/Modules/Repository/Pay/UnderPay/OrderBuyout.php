@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository\Pay\UnderPay;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
@@ -67,6 +68,9 @@ class OrderBuyout implements UnderLine {
         //获取订单信息
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
         if(!$orderInfo){
+            return false;
+        }
+        if($orderInfo['order_status'] == OrderStatus::OrderCompleted){
             return false;
         }
         //获取订单商品信息;
