@@ -4,6 +4,7 @@ namespace App\Order\Modules\Repository\Pay\UnderPay;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
