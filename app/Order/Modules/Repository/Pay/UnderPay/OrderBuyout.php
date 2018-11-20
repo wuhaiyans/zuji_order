@@ -246,7 +246,7 @@ class OrderBuyout implements UnderLine {
             LogApi::info("offline-buyout","更新商品失败");
             return false;
         }
-        echo  "success";
+        LogApi::info("offline-buyout","成功");
         return true;
     }
     static function log($orderLog,$goodsLog){
