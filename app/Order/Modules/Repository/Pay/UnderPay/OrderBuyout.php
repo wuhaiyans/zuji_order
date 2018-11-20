@@ -84,6 +84,9 @@ class OrderBuyout implements UnderLine {
         ];
         //获取买断单
         $buyout = OrderBuyoutRepository::getInfo($where);
+        if($buyout['status'] == OrderBuyoutStatus::OrderPaid || $buyout['status'] == OrderBuyoutStatus::OrderRelease){
+            return false;
+        }
         if(!$buyout){
             $buyout = [
                 'type'=>1,
