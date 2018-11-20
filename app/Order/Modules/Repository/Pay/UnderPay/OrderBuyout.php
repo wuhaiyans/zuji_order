@@ -71,6 +71,7 @@ class OrderBuyout implements UnderLine {
             return false;
         }
         if($orderInfo['order_status'] == OrderStatus::OrderCompleted){
+            LogApi::info("offline-buyout","该订单已完成");
             return false;
         }
         //获取订单商品信息;
@@ -85,6 +86,7 @@ class OrderBuyout implements UnderLine {
         //获取买断单
         $buyout = OrderBuyoutRepository::getInfo($where);
         if($buyout['status'] == OrderBuyoutStatus::OrderPaid || $buyout['status'] == OrderBuyoutStatus::OrderRelease){
+            LogApi::info("offline-buyout","该订单已经买断支付");
             return false;
         }
         if(!$buyout){
@@ -197,6 +199,7 @@ class OrderBuyout implements UnderLine {
 
             $ret = OrderOperate::isOrderComplete($buyout['order_no']);
             if(!$ret){
+                LogApi::info("offline-buyout","关闭订单失败");
                 return false;
             }
 
