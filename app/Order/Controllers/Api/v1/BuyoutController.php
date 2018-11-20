@@ -119,7 +119,7 @@ class BuyoutController extends Controller
             $where['appid'] = $params['appid'];
         }
         
-        $where['page'] = $params['page'];
+        $where['page'] = $params['page']>0?$params['page']:1;
         $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
 
