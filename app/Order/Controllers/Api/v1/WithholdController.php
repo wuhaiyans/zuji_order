@@ -722,7 +722,7 @@ class WithholdController extends Controller
                 continue;
             }
             // 价格单位转换
-            $amount = intval( strval($item['amount'] * 100) );
+            $amount = bcmul($item['amount'] , 100 );
 
 
             // 分期若在 支付中状态 则跳出
