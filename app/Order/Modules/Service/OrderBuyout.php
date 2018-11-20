@@ -147,8 +147,7 @@ class OrderBuyout
 		$additional['offset'] = $params['page'];
 		$additional['limit'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
-		echo sql_profiler();
-		$data = OrderBuyoutRepository::getList($where, $additional);die;
+		$data = OrderBuyoutRepository::getList($where, $additional);
 		return $data;
 	}
 	/**
