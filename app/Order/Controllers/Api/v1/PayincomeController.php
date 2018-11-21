@@ -174,17 +174,6 @@ class PayincomeController extends Controller
             $info['realname']   = "--";
         }
 
-        // 入账订单
-        if($info['business_type'] == 1){
-            $info['remark'] = isset($orderInfo['remark']) ? $orderInfo['remark'] : "";
-        }else{
-
-            // 查询分期
-            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$info['business_no']]);
-            $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
-        }
-
-
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
 
         // 入账类型
