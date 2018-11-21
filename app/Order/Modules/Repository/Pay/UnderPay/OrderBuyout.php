@@ -235,7 +235,7 @@ class OrderBuyout implements UnderLine {
             ];
             self::log($orderLog,$goodsLog);
         }
-        
+
         $ret = OrderRepository::orderFreezeUpdate($buyout['order_no'],OrderFreezeStatus::Buyout);
         if(!$ret){
             LogApi::info("offline-buyout","线下买断冻结订单失败");
@@ -243,7 +243,7 @@ class OrderBuyout implements UnderLine {
 
         if(isset($buyout['id'])){
             //更新买断单
-            $ret = OrderBuyoutRepository::setOrderRelease($buyout['id']);
+            $ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
         }
         else{
             //创建买断单
