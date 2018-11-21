@@ -316,6 +316,7 @@ class MiniOrderController extends Controller
         }
         //提交事务
         DB::commit();
+        $res = array_merge($res,$couponList);
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
