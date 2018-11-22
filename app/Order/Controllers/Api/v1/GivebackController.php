@@ -194,7 +194,7 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_92500,$msg);
 		}
 		
-		if(redisIncr($paramsArr['order_no'], 60)>1){
+		if(redisIncr('huanji'.$paramsArr['order_no'], 60)>1){
 			return apiResponse([],ApiStatus::CODE_92500,'不能重复操作');
 		}
 		//-+--------------------------------------------------------------------
