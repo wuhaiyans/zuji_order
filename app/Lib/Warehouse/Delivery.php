@@ -122,6 +122,7 @@ class Delivery
             'order_no'  => $orderInfo['order_no'],
             'business_key'=>$orderInfo['business_key'],
             'business_no'=>$orderInfo['business_no'],
+            'channel_id'=>$orderInfo['channel_id'],
             'predict_delivery_time'=>$orderInfo['predict_delivery_time'],
             'customer'  => $orderInfo['name'],
             'customer_mobile'    => $orderInfo['consignee_mobile'],
