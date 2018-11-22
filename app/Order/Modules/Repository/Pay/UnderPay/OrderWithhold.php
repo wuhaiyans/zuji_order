@@ -83,8 +83,9 @@ class OrderWithhold implements UnderLine {
             ->get()->toArray();
 
         if(!$instalmentList){
+
             LogApi::debug('[underLinePay]分期错误：'.$this->order_no);
-            return [];
+            throw new \Exception("暂无服务中未扣款分期！");
         }
 
         return $instalmentList;
