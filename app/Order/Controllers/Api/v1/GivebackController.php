@@ -194,6 +194,9 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_92500,$msg);
 		}
 		
+		if(redisIncr('huanji'.$paramsArr['order_no'], 60)>1){
+			return apiResponse([],ApiStatus::CODE_92500,'不能重复操作');
+		}
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
