@@ -51,6 +51,18 @@ class ToolController extends Controller
             }
 
 
+            //订单详情
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($order_no);
+            if (!$orderInfo) {
+                LogApi::debug('[ToolDelay]订单不存在');
+                return apiResponse([],ApiStatus::CODE_50000, "订单不存在");
+            }
+
+            if($orderInfo['zuqi_type'] == \App\Order\Modules\Inc\OrderStatus::ZUQI_TYPE2){
+                return apiResponse([],ApiStatus::CODE_50000, "租期类型错误-目前只支持短租");
+            }
+
+
             $end_time = $end_time + (3600 * 24) - 1;
             $day = ceil( ($end_time - $begin_time) / 86400 );
 

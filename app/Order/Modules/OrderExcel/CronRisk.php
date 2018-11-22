@@ -116,7 +116,8 @@ class CronRisk
                     $item['credit'] =  $user['credit'];
                 }
                 if($riskSoceList[$item['order_no']]){
-                    $item['credit'] =  $riskSoceList[$item['order_no']]['score'];
+                    $riskData = json_decode($riskSoceList[$item['order_no']]['data'],true);
+                    $item['credit'] =  $riskData['score']?$riskData['score']:"";
                 }
 
                 //商品相关信息

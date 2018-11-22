@@ -46,23 +46,21 @@ class OrderWithhold implements UnderLine {
     public function execute(){
 
 
-        $surplusAmount  = $this->componnet['amount'];
+        $surplusAmount  = bcmul($this->componnet['amount'],100);
 
         $instalmentList  = $this->instalmentList();
 
         foreach($instalmentList as $item){
-
+            $item['amount'] = bcmul($item['amount'],100);
             if($surplusAmount >= $item['amount']){
                 $instalmentStatus = \App\Order\Modules\Repository\Order\Instalment::underLinePaySuccess($item['id']);
                 if(!$instalmentStatus){
                     throw new \Exception("修改分期状态失败");
                 }
             }
-
             // 根据后端输入金额 循环修改分期状态
             $surplusAmount -= $item['amount'];
         }
-
         return true;
     }
 

@@ -633,7 +633,8 @@ class WithholdController extends Controller
                 ['id', '>=', $minId],
                 ['id', '<=', $maxId],
                 ['withhold_day', '>', 0],
-                ['withhold_day', '<=', $dateTime],
+//                ['withhold_day', '<=', $dateTime],
+                ['withhold_day', '=', 1544803200],
             ];
         $total = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($whereArray)
@@ -644,254 +645,223 @@ class WithholdController extends Controller
             return;
         }
 
-        $limit          = 100;
-        $page           = 1;
-        $startOffset    = ($page - 1) * $limit;
-        /*
-         * 隔10秒执行一次扣款
-         */
-        $time           = 10;
-        $totalpage      = ceil($total/$limit);
-        LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
+//        $limit          = 100;
+//        $page           = 1;
+//        $startOffset    = ($page - 1) * $limit;
+//        /*
+//         * 隔10秒执行一次扣款
+//         */
+//        $time           = 10;
+//        $totalpage      = ceil($total/$limit);
+//        LogApi::info('[crontabCreatepay]需要扣款的总页数'.$totalpage);
+//
+//        while(true) {
+//
 
-        while(true) {
 
-            if ($page > $totalpage ){
-                //记录执行成功的总数和失败的总数
-                $whereFailArray =
-                    [
-                        ['id', '>=', $minId],
-                        ['id', '<=', $maxId],
-                        ['withhold_day', '>', 0],
-                        ['withhold_day', '<=', $dateTime],
-                        ['status', '=', OrderInstalmentStatus::FAIL]
-                    ];
-                $failTotal = \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where($whereFailArray)
-                    ->count();
-                LogApi::info('[crontabCreatepay]脚本执行完成后待扣款或者扣款失败的总条数：'.$failTotal);
+        // 查询数据
+        $result =  \App\Order\Models\OrderGoodsInstalment::query()
+            ->where($whereArray)
+            ->whereIn('status', $needPayArray)
+            ->orderBy('id','ASC')
+            ->get()
+            ->toArray();
+        if(empty($result)){
+            return;
+        }
 
-                $whereSuccessArray =
-                    [
-                        ['id', '>=', $minId],
-                        ['id', '<=', $maxId],
-                        ['withhold_day', '>', 0],
-                        ['withhold_day', '<=', $dateTime],
-                        ['status', '=', OrderInstalmentStatus::SUCCESS]
-                    ];
-                $successTotal = \App\Order\Models\OrderGoodsInstalment::query()
-                    ->where($whereSuccessArray)
-                    ->count();
-                LogApi::info('[crontabCreatepay]脚本执行完成后扣款成功的总条数：'.$successTotal);
-                exit;
+        foreach($result as $item) {
+            // 商品
+            $subject = $item['order_no'].'-'.$item['term'].'-'.$item['times'];
+
+            LogApi::info('[crontabCreatepay]操作的扣款订单和期数：'.$subject.'-扣款');
+
+            $instalmentKey = "instalmentWithhold_" . $item['id'];
+            // 频次限制
+            if(redisIncr($instalmentKey, 300) > 1){
+                LogApi::error('[crontabCreatepay]当前分期正在操作，不能重复操作,操作的key:'.$instalmentKey);
+                continue;
             }
 
-            // 查询数据
-            $result =  \App\Order\Models\OrderGoodsInstalment::query()
-                ->where($whereArray)
-                ->whereIn('status', $needPayArray)
-                ->orderBy('id','ASC')
-                ->offset($startOffset)
-                ->limit($limit)
-                ->get()
-                ->toArray();
-            if(empty($result)){
-                return;
+            // 扣款交易码
+            if( $item['business_no'] == '' ){
+                // 生成交易码
+                $business_no = createNo();
+                // 1)记录租机交易码
+                $b = OrderGoodsInstalment::save(['id'=>$item['id']],['business_no'=>$business_no]);
+                if( $b === false ){
+                    LogApi::error('[crontabCreatepay]分期扣款交易码保存失败',[
+                        'id' => $item['id'],
+                        'business_no'=>$business_no,
+                    ]);
+                    continue;
+                }
+                $item['business_no'] = $business_no;
+            }
+            $business_no = $item['business_no'];
+
+            // 订单
+            $orderInfo = OrderRepository::getInfoById($item['order_no']);
+            if (!$orderInfo) {
+                LogApi::error('[crontabCreatepay]订单不存在：'.$subject);
+                continue;
             }
 
-            foreach($result as $item) {
-                // 商品
-                $subject = $item['order_no'].'-'.$item['term'].'-'.$item['times'];
+            // 订单状态不在服务中 或 有冻结  不允许扣款
+            if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non) {
+                LogApi::error('[crontabCreatepay]订单状态不处于租用中 或 有冻结：'.$subject);
+                continue;
+            }
 
-                LogApi::info('[crontabCreatepay]操作的扣款订单和期数：'.$subject.'-扣款');
+            if(!(in_array($item['status'],$needPayArray))){
+                LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
+                continue;
+            }
 
-                $instalmentKey = "instalmentWithhold_" . $item['id'];
-                // 频次限制
-                if(redisIncr($instalmentKey, 300) > 1){
-                    LogApi::error('[crontabCreatepay]当前分期正在操作，不能重复操作,操作的key:'.$instalmentKey);
-                    continue;
-                }
-
-                // 扣款交易码
-                if( $item['business_no'] == '' ){
-                    // 生成交易码
-                    $business_no = createNo();
-                    // 1)记录租机交易码
-                    $b = OrderGoodsInstalment::save(['id'=>$item['id']],['business_no'=>$business_no]);
-                    if( $b === false ){
-                        LogApi::error('[crontabCreatepay]分期扣款交易码保存失败',[
-                            'id' => $item['id'],
-                            'business_no'=>$business_no,
-                        ]);
-                        continue;
-                    }
-                    $item['business_no'] = $business_no;
-                }
-                $business_no = $item['business_no'];
-
-                // 订单
-                $orderInfo = OrderRepository::getInfoById($item['order_no']);
-                if (!$orderInfo) {
-                    LogApi::error('[crontabCreatepay]订单不存在：'.$subject);
-                    continue;
-                }
-
-                // 订单状态不在服务中 或 有冻结  不允许扣款
-                if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non) {
-                    LogApi::error('[crontabCreatepay]订单状态不处于租用中 或 有冻结：'.$subject);
-                    continue;
-                }
-
-                if(!(in_array($item['status'],$needPayArray))){
-                    LogApi::error('[crontabCreatepay]分期状态不可扣款：'.$subject);
-                    continue;
-                }
-
-                if ($item['amount'] <= 0) {
-                    LogApi::error('[crontabCreatepay]扣款金额错误<=0：'.$subject);
-                    continue;
-                }
-                // 价格单位转换
-                $amount = intval( strval($item['amount'] * 100) );
+            if ($item['amount'] <= 0) {
+                LogApi::error('[crontabCreatepay]扣款金额错误<=0：'.$subject);
+                continue;
+            }
+            // 价格单位转换
+            $amount = bcmul($item['amount'] , 100 );
 
 
-                // 分期若在 支付中状态 则跳出
-                if( $item['status'] == OrderInstalmentStatus::PAYING ){
-                    /**
-                     * 分期时间update_time超过一个小时 则修改为失败状态
-                     */
-                    $pastTimes = time() - 3600;
-                    if($pastTimes >= $item['update_time']){
-                        $updateFailStatus = \App\Order\Models\OrderGoodsInstalment::query()
-                            ->where(['id' => $item['id']])
-                            ->update(['status' => OrderInstalmentStatus::FAIL,'update_time' => time()]);
-                        if(!$updateFailStatus){
-                            LogApi::error('[crontabCreatepay]修改分期状态支付中为失败：'.$subject);
-                        }
-                    }
-                    continue;
-
-                }else{
-                    // 修改分期支付中状态
-                    $paying = \App\Order\Models\OrderGoodsInstalment::query()
+            // 分期若在 支付中状态 则跳出
+            if( $item['status'] == OrderInstalmentStatus::PAYING ){
+                /**
+                 * 分期时间update_time超过一个小时 则修改为失败状态
+                 */
+                $pastTimes = time() - 3600;
+                if($pastTimes >= $item['update_time']){
+                    $updateFailStatus = \App\Order\Models\OrderGoodsInstalment::query()
                         ->where(['id' => $item['id']])
-                        ->update(['status' => OrderInstalmentStatus::PAYING,'update_time' => time()]);
-                    if(!$paying){
-                        LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                        ->update(['status' => OrderInstalmentStatus::FAIL,'update_time' => time()]);
+                    if(!$updateFailStatus){
+                        LogApi::error('[crontabCreatepay]修改分期状态支付中为失败：'.$subject);
                     }
                 }
+                continue;
+
+            }else{
+                // 修改分期支付中状态
+                $paying = \App\Order\Models\OrderGoodsInstalment::query()
+                    ->where(['id' => $item['id']])
+                    ->update(['status' => OrderInstalmentStatus::PAYING,'update_time' => time()]);
+                if(!$paying){
+                    LogApi::error('[crontabCreatepay]修改分期支付中状态：'.$subject);
+                }
+            }
 
 
-                //判断支付方式
-                if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
-                    //获取订单的芝麻订单编号
-                    $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($item['order_no']);
-                    if (empty($miniOrderInfo)) {
-                        LogApi::error('[crontabCreatepay]本地小程序确认订单回调记录查询失败：'.$subject);
+            //判断支付方式
+            if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
+                //获取订单的芝麻订单编号
+                $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($item['order_no']);
+                if (empty($miniOrderInfo)) {
+                    LogApi::error('[crontabCreatepay]本地小程序确认订单回调记录查询失败：'.$subject);
+                    continue;
+                }
+                //芝麻小程序扣款请求
+                $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
+                $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
+                $miniParams['app_id'] = $miniOrderInfo['app_id'];
+                //扣款交易号
+                $miniParams['out_trans_no'] = $item['business_no'];
+                $miniParams['pay_amount'] = $item['amount'];
+                $miniParams['remark'] = $subject;
+//                $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
+                $pay_status = "TestCreatepay";
+                LogApi::info('[crontabCreatepay]小程序发起扣款后：'.$subject.':扣款的结果：'.$pay_status.':发起的参数.',$miniParams);
+                //判断请求发送是否成功
+                if($pay_status == 'PAY_SUCCESS'){
+                    continue;
+                }elseif($pay_status =='PAY_FAILED'){
+                    OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
+                    continue;
+                }elseif($pay_status == 'PAY_INPROGRESS'){
+                    continue;
+                }else{
+                    continue;
+                }
+            } else {
+
+                try{
+                    // 代扣协议编号
+                    $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
+                    // 查询用户协议
+                    $withhold = WithholdQuery::getByUserChannel($item['user_id'], $channel);
+
+                    $withholdInfo = $withhold->getData();
+
+                    $agreementNo = $withholdInfo['out_withhold_no'];
+                    if (!$agreementNo) {
+                        LogApi::error('[crontabCreatepay]用户代扣协议编号错误：'.$subject);
                         continue;
                     }
-                    //芝麻小程序扣款请求
-                    $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
-                    $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
-                    $miniParams['app_id'] = $miniOrderInfo['app_id'];
-                    //扣款交易号
-                    $miniParams['out_trans_no'] = $item['business_no'];
-                    $miniParams['pay_amount'] = $item['amount'];
-                    $miniParams['remark'] = $subject;
-                    $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
-                    LogApi::info('[crontabCreatepay]小程序发起扣款后：'.$subject.':扣款的结果：'.$pay_status.':发起的参数.',$miniParams);
-                    //判断请求发送是否成功
-                    if($pay_status == 'PAY_SUCCESS'){
-                        continue;
-                    }elseif($pay_status =='PAY_FAILED'){
+                    // 代扣接口
+                    $withholding = new \App\Lib\Payment\CommonWithholdingApi;
+                    $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
+                    $withholding_data = [
+                        'agreement_no'  => $agreementNo,            //支付平台代扣协议号
+                        'out_trade_no'  => $business_no,             //业务系统业务吗
+                        'amount'        => $amount,                 //交易金额；单位：分
+                        'back_url'      => $backUrl,                //后台通知地址
+                        'name'          => $subject,                //交易备注
+                        'user_id'       => $orderInfo['user_id'],   //业务平台用户id
+                    ];
+
+                    try {
+//
+//                        // 请求代扣接口
+//                        $withStatus = $withholding->deduct($withholding_data);
+//
+//                        if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
+//
+//                            \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+//                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
+//                        }
+                        $withStatus = "TestCreatepay";
+                        LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
+                    }catch(\App\Lib\ApiException $exc){
+                        LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
-                        continue;
-                    }elseif($pay_status == 'PAY_INPROGRESS'){
-                        continue;
-                    }else{
-                        continue;
-                    }
-                } else {
-
-                    try{
-                        // 代扣协议编号
-                        $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
-                        // 查询用户协议
-                        $withhold = WithholdQuery::getByUserChannel($item['user_id'], $channel);
-
-                        $withholdInfo = $withhold->getData();
-
-                        $agreementNo = $withholdInfo['out_withhold_no'];
-                        if (!$agreementNo) {
-                            LogApi::error('[crontabCreatepay]用户代扣协议编号错误：'.$subject);
+                        //捕获异常 买家余额不足
+                        if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
+                            LogApi::error('[crontabCreatepay]分期扣款余额不足：'.$subject);
                             continue;
                         }
-                        // 代扣接口
-                        $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                        $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
-                        $withholding_data = [
-                            'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-                            'out_trade_no'  => $business_no,             //业务系统业务吗
-                            'amount'        => $amount,                 //交易金额；单位：分
-                            'back_url'      => $backUrl,                //后台通知地址
-                            'name'          => $subject,                //交易备注
-                            'user_id'       => $orderInfo['user_id'],   //业务平台用户id
-                        ];
-
-                        try {
-                            // 请求代扣接口
-                            $withStatus = $withholding->deduct($withholding_data);
-
-                            if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-
-                                \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
-                                OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
-                            }
-
-                            LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
-                        }catch(\App\Lib\ApiException $exc){
-                            LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
-                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
-                            //捕获异常 买家余额不足
-                            if ($exc->getMessage() == "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage() == "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
-                                LogApi::error('[crontabCreatepay]分期扣款余额不足：'.$subject);
-                                continue;
-                            }
-
-                        }
-
-                    }catch (\Exception $exc) {
-                        LogApi::error('[crontabCreatepay]分期扣款异常：'.$subject, $exc);
-                        continue;
                     }
 
-                }
-
-                //记录日志
-                $logData = [
-                    'order_no'      => $item['order_no'],
-                    'action'        => '分期扣款',
-                    'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
-                    'business_no'   => $business_no,
-                    'goods_no'      => $item['goods_no'],
-                ];
-                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData, true);
-                if( !$goodsLog ){
-                    LogApi::error('[crontabCreatepay]分期扣款记录分期操作日志失败：'.$subject, $logData);
+                }catch (\Exception $exc) {
+                    LogApi::error('[crontabCreatepay]分期扣款异常：'.$subject, $exc);
                     continue;
                 }
 
             }
 
-            if($page < $totalpage){
-                sleep($time);
+            //记录日志
+            $logData = [
+                'order_no'      => $item['order_no'],
+                'action'        => '分期扣款',
+                'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,//此处用常量
+                'business_no'   => $business_no,
+                'goods_no'      => $item['goods_no'],
+            ];
+            $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add($logData, true);
+            if( !$goodsLog ){
+                LogApi::error('[crontabCreatepay]分期扣款记录分期操作日志失败：'.$subject, $logData);
+                continue;
             }
-            ++$page;
 
-
-        } ;
-
+        }
+//
+//            if($page < $totalpage){
+//                sleep($time);
+//            }
+//            ++$page;
+//        }
 
     }
 

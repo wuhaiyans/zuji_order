@@ -442,12 +442,13 @@ function set_apistatus( $code, $msg ){
 function getBeoverdue($re_day){
     $time = date('Y-m-d',time());
     $day  = strtotime($time);
-    $wday = strtotime($re_day);
+    $wday = $re_day;
     return $day>=$wday ? ($day-$wday)/86400 : "";
 }
 
 /**
  * 计算逾期条件
+ * 返回数组
  */
 function getBeoverduetime($type){
     $time = date('Y-m-d',time());

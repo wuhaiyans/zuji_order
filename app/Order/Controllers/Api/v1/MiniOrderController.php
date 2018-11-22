@@ -250,26 +250,25 @@ class MiniOrderController extends Controller
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
-            if( empty($data['coupon']) ){//前端无传输coupon
-                //小程序自动领取优惠券
-                $drawCouponArr = [
-                    'only_id'=>\App\Lib\Coupon\Coupon::$coupon_only,
-                    'user_id'=>$data['user_id'],
-                ];
-                \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
-                $queryCouponArr = [
-                    'spu_id'=>$data['goods_info']['spu_id'],
-                    'sku_id'=>$data['goods_info']['sku_id'],
-                    'user_id'=>$data['user_id'],
-                    'payment'=>$data['goods_info']['total_amount'],
-                ];
-                $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
-                    $data['coupon'] = [
-                        $queryCoupon[0]['coupon_no']
-                    ];
-                }
+
+            $couponList['coupon_list']=[];
+            //自动调用接口查询优惠券
+            $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $data['sku'][0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+                'appid'=>$params['appid'],
+            ]);
+            $coupon =[];
+            if(isset($couponInfo[0]) && is_array($couponInfo)){
+                $coupon[] = $couponInfo[0]['coupon_no'];
+                $couponList['coupon_list'] = $couponInfo;
             }
+
+            if( isset($params['params']['coupon']) && !empty($params['params']['coupon'])){
+                $coupon = $params['params']['coupon'];
+            }
+            $data['coupon'] = $coupon;
+
             //风控系统处理
             if($params['auth_token']){
                 $auth_token = $params['auth_token'];
@@ -317,6 +316,7 @@ class MiniOrderController extends Controller
         }
         //提交事务
         DB::commit();
+        $res = array_merge($res,$couponList);
         return apiResponse($res,ApiStatus::CODE_0);
     }
 

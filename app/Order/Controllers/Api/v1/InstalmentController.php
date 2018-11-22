@@ -83,7 +83,7 @@ class InstalmentController extends Controller
             $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
 
             //逾期天数
-            $item['beoverdue']      = $item['day'] ? getBeoverdue($item['day']) : "";            
+            $item['beover_due']      = $item['withhold_day'] ? getBeoverdue($item['withhold_day']) : "";            
 
             // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);
