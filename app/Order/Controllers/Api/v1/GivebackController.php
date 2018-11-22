@@ -194,6 +194,9 @@ class GivebackController extends Controller
 			return apiResponse([],ApiStatus::CODE_92500,$msg);
 		}
 		
+		if(redisIncr('huanji'.$paramsArr['order_no'], 60)>1){
+			return apiResponse([],ApiStatus::CODE_92500,'不能重复操作');
+		}
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
@@ -612,6 +615,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$authtoken = isset($params['auth_token'])?$params['auth_token']:'';
 		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		$rules = [
@@ -641,7 +645,7 @@ class GivebackController extends Controller
 			// 微信支付，交易类型：JSAPI，redis读取openid
 			if( $paramsArr['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
 				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
-					$_key = 'wechat_openid_'.$orders['auth_token'];
+					$_key = 'wechat_openid_'.$authtoken;
 					$openid = \Illuminate\Support\Facades\Redis::get($_key);
 					if( $openid ){
 						$extended_params['wechat_params']['openid'] = $openid;
@@ -666,7 +670,7 @@ class GivebackController extends Controller
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
 		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
 		$data['giveback_info'] =$orderGivebackInfo;
-		$data['payment_info'] =['url'=>$paymentUrl['url']];
+		$data['payment_info'] =$paymentUrl;
 		$data['status'] = OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$data['status_text'] =OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$return  = $this->givebackReturn($data);

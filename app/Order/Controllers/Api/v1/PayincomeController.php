@@ -51,7 +51,7 @@ class PayincomeController extends Controller
     public function payIncomeQuery(Request $request){
         $request               = $request->all()['params'];
         $additional['page']    = isset($request['page']) ? $request['page'] : 1;
-        $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+        $additional['limit']   = isset($request['size']) ? $request['size'] : config("web.pre_page_size");
 
         $params         = filter_array($request, [
             'appid'            	=> 'required',
@@ -173,17 +173,6 @@ class PayincomeController extends Controller
         }else{
             $info['realname']   = "--";
         }
-
-        // 入账订单
-        if($info['business_type'] == 1){
-            $info['remark'] = isset($orderInfo['remark']) ? $orderInfo['remark'] : "";
-        }else{
-
-            // 查询分期
-            $instalmentInfo = \App\Order\Modules\Service\OrderGoodsInstalment::queryInfo(['business_no'=>$info['business_no']]);
-            $info['remark'] = isset($instalmentInfo['remark']) ? $instalmentInfo['remark'] : "";
-        }
-
 
         $info['create_time']    = date("Y-m-d H:i:s",$info['create_time']);
 
@@ -425,7 +414,7 @@ class PayincomeController extends Controller
             return apiResponse([],ApiStatus::CODE_0,"success");
 
         } catch (\Exception $e) {
-
+            DB::rollBack();
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
         }
