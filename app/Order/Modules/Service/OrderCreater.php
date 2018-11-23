@@ -29,6 +29,7 @@ use App\Order\Modules\OrderCreater\StoreAddressComponnet;
 use App\Order\Modules\OrderCreater\UserComponnet;
 use App\Order\Modules\OrderCreater\WithholdingComponnet;
 use App\Order\Modules\PublicInc;
+use App\Order\Modules\Repository\Order\OrderScheduleOnce;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ShortMessage\OrderCreate;
@@ -154,22 +155,31 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
 
+            //发送订单消息队列
+            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
             //发送订单风控信息保存队列
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
-                'method' => 'api.inner.orderRisk',
-                'order_no'=>$orderNo,
-                'user_id'=>$data['user_id'],
-                'time' => time(),
-            ],time()+60,"");
-
-
+            $schedule->OrderRisk();
             //发送取消订单队列
-        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
-            'method' => 'api.inner.cancelOrder',
-            'order_no'=>$orderNo,
-            'user_id'=>$data['user_id'],
-            'time' => time(),
-        ],time()+config('web.order_cancel_hours'),"");
+            $schedule->CancelOrder();
+            //发送订单押金信息返回风控系统
+            $schedule->YajinReduce();
+
+
+//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
+//                'method' => 'api.inner.orderRisk',
+//                'order_no'=>$orderNo,
+//                'user_id'=>$data['user_id'],
+//                'time' => time(),
+//            ],time()+60,"");
+//
+//
+//
+//        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
+//            'method' => 'api.inner.cancelOrder',
+//            'order_no'=>$orderNo,
+//            'user_id'=>$data['user_id'],
+//            'time' => time(),
+//        ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 
@@ -335,128 +345,6 @@ class OrderCreater
 
         return $schemaData;
 
-
-    }
-
-    /**
-     * 校园订单生成接口
-     * @author wuhaiyan
-     * @param $data
-     * [
-     *      'appid'	=> '',	            //【必选】int 渠道入口
-     *		'pay_channel_id'	=> '',	//【必选】int 支付支付渠道
-     *		'pay_type'	=> '',	        //【必选】int 支付方式
-     *		'address_id'	=> '',	    //【必选】int 用户收货地址
-     *      'destine_no'=>'',  //【必选】 string 预定编号
-     *		'sku'	=> [	        //【必选】array	SKU信息
-     *			[
-     *
-     *				'sku_id' => '',		//【必选】 int SKU ID
-     *				'sku_num' => '',	//【必选】 int SKU 数量
-     *              'begin_time'=>'',   //【短租必须】string 租用开始时间
-     *              'end_time'=>'',     //【短租必须】string 租用结束时间
-     *			]
-     *		]',
-     *      $userinfo [
-     *          'type'=>'',     //【必须】string 用户类型:1管理员，2用户,3系统，4线下,
-     *          'user_id'=>1,   //【必须】int用户ID
-     *          'user_name'=>1, //【必须】string用户名
-     *          'mobile'=>1,    //【必须】string手机号
-     *      ]
-     * @return array
-     */
-
-    public function SchoolCreate($data){
-
-        $orderNo = OrderOperate::createOrderNo(1);
-        $orderType =OrderStatus::orderActivityService;
-
-        try{
-            DB::beginTransaction();
-
-            //订单创建构造器
-            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
-
-            // 用户
-            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
-            $orderCreater->setUserComponnet($userComponnet);
-
-            // 商品
-            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
-            $orderCreater->setSkuComponnet($skuComponnet);
-
-            //风控
-            $orderCreater = new RiskComponnet($orderCreater);
-
-            //活动
-            $orderCreater = new ActivityComponnet($orderCreater,$data['destine_no']);
-
-            //优惠券
-            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-
-            //押金
-            $orderCreater = new DepositComponnet($orderCreater);
-
-            //收货地址
-            $orderCreater = new AddressComponnet($orderCreater);
-
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-
-            //分期
-            $orderCreater = new InstalmentComponnet($orderCreater);
-            //支付
-            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id'],$data['pay_channel_id']);
-
-
-            //调用各个组件 过滤一些参数 和无法下单原因
-            $b = $orderCreater->filter();
-            if(!$b){
-                DB::rollBack();
-                //把无法下单的原因放入到用户表中
-                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-                set_msg($orderCreater->getOrderCreater()->getError());
-                return false;
-            }
-            $schemaData = $orderCreater->getDataSchema();
-
-            //调用各个组件 创建方法
-            $b = $orderCreater->create();
-            //创建成功组装数据返回结果
-            if(!$b){
-                DB::rollBack();
-                set_msg($orderCreater->getOrderCreater()->getError());
-                return false;
-            }
-
-            DB::commit();
-            //组合数据
-            $result = [
-                'order_no'=>$orderNo,
-                'app_id'=>$data['appid']
-            ];
-            // 创建订单后 发送支付短信。;
-            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-            $orderNoticeObj->notify();
-
-            //发送订单风控信息保存队列
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
-                'method' => 'api.inner.orderRisk',
-                'order_no'=>$orderNo,
-                'user_id'=>$data['user_id'],
-                'time' => time(),
-            ],time()+60,"");
-
-            //增加操作日志
-            OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
-
-            return $result;
-
-        } catch (\Exception $exc) {
-            DB::rollBack();
-            set_msg($exc->getMessage());
-            return false;
-        }
 
     }
 

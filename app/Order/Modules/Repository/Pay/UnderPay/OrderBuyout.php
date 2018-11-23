@@ -68,16 +68,16 @@ class OrderBuyout implements UnderLine {
         //获取订单信息
         $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$this->order_no));
         if(!$orderInfo){
-            return false;
+            throw new \Exception("订单信息未查到");
         }
         if($orderInfo['order_status'] == OrderStatus::OrderCompleted){
             LogApi::info("offline-buyout","该订单已完成");
-            return false;
+            throw new \Exception("该订单已完成");
         }
         //获取订单商品信息;
         $goodsInfo = Goods::getOrderNo($this->order_no);
         if(!$goodsInfo){
-            return false;
+            throw new \Exception("获取订单商品信息失败");
         }
         $goodsInfo = $goodsInfo->getData();
         $where = [
@@ -87,7 +87,7 @@ class OrderBuyout implements UnderLine {
         $buyout = OrderBuyoutRepository::getInfo($where);
         if($buyout['status'] == OrderBuyoutStatus::OrderPaid || $buyout['status'] == OrderBuyoutStatus::OrderRelease){
             LogApi::info("offline-buyout","该订单已经买断支付");
-            return false;
+            throw new \Exception("该订单已经买断支付");
         }
         if(!$buyout){
             $buyout = [
@@ -112,7 +112,7 @@ class OrderBuyout implements UnderLine {
         $ret = Instalment::close($data);
         if(!$ret){
             LogApi::info("offline-buyout","关闭分期失败");
-            return false;
+            throw new \Exception("关闭分期失败");
         }
 
         //清算处理数据拼接
@@ -135,7 +135,7 @@ class OrderBuyout implements UnderLine {
             $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
             if(!$orderCleanResult){
                 LogApi::info("offline-buyout:进入清算失败",$clearData);
-                return false;
+                throw new \Exception("进入清算失败");
             }
         }
 
@@ -181,7 +181,7 @@ class OrderBuyout implements UnderLine {
                 $ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
                 if(!$ret){
                     LogApi::info("offline-buyout","解冻订单失败");
-                    return false;
+                    throw new \Exception("解冻订单失败");
                 }
             }
 
@@ -194,13 +194,13 @@ class OrderBuyout implements UnderLine {
             $ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
             if(!$ret){
                 LogApi::info("offline-buyout","更新商品失败");
-                return false;
+                throw new \Exception("更新商品失败");
             }
 
             $ret = OrderOperate::isOrderComplete($buyout['order_no']);
             if(!$ret){
                 LogApi::info("offline-buyout","关闭订单失败");
-                return false;
+                throw new \Exception("关闭订单失败");
             }
 
             //设置短信发送内容
@@ -235,16 +235,25 @@ class OrderBuyout implements UnderLine {
             ];
             self::log($orderLog,$goodsLog);
         }
+
+        $ret = OrderRepository::orderFreezeUpdate($buyout['order_no'],OrderFreezeStatus::Buyout);
+        if(!$ret){
+            LogApi::info("offline-buyout","线下买断冻结订单失败");
+            throw new \Exception("线下买断冻结订单失败");
+        }
+
         if(isset($buyout['id'])){
-            $ret = OrderBuyoutRepository::setOrderRelease($buyout['id']);
+            //更新买断单
+            $ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
         }
         else{
+            //创建买断单
             $ret = OrderBuyoutRepository::create($buyout);
         }
 
         if(!$ret){
             LogApi::info("offline-buyout","更新商品失败");
-            return false;
+            throw new \Exception("更新商品失败");
         }
         LogApi::info("offline-buyout","成功");
         return true;

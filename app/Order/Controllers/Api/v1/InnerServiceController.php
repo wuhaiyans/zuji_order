@@ -23,11 +23,46 @@ class InnerServiceController extends Controller
      * @param user_id 用户ID
      *
      */
+    public function YajinReduce(Request $request)
+    {
+
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-OrderRisk-YajinReduce-info:'.$input);
+        $params = json_decode($input,true);
+
+        $rules = [
+            'user_id'  => 'required',
+            'order_no'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+
+        $success =   \App\Order\Modules\Service\OrderOperate::YajinReduce($validateParams['data']['order_no'],$validateParams['data']['user_id']);
+        if ($success) {
+
+                return $this->innerErrMsg(ApiStatus::$errCodes[$success]);
+        }
+        return $this->innerOkMsg();
+
+    }
+    /**
+     * 订单风控信息存储
+     * @author wuhaiyan
+     * @param order_no 订单编号
+     * @param user_id 用户ID
+     *
+     */
     public function orderRisk(Request $request)
     {
 
         $input = file_get_contents("php://input");
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单风控看板保存处理接口消费处理参数:'.$input);
+        LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-OrderRisk-save-info:'.$input);
         $params = json_decode($input,true);
 
         $rules = [
@@ -46,7 +81,7 @@ class InnerServiceController extends Controller
         $success =   \App\Order\Modules\Service\OrderOperate::orderRiskSave($validateParams['data']['order_no'],$validateParams['data']['user_id']);
         if ($success) {
 
-                return $this->innerErrMsg(ApiStatus::$errCodes[$success]);
+            return $this->innerErrMsg(ApiStatus::$errCodes[$success]);
         }
         return $this->innerOkMsg();
 
@@ -61,7 +96,7 @@ class InnerServiceController extends Controller
     {
 
         $input = file_get_contents("php://input");
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单取消处理接口消费处理参数:'.$input);
+        LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-cancelOrder-info:'.$input);
         $params = json_decode($input,true);
 
         $rules = [
@@ -104,7 +139,7 @@ class InnerServiceController extends Controller
     {
         $input = file_get_contents("php://input");
 
-        LogApi::info(__METHOD__.'() '.microtime(true).'订单确认收货费处理参数:'.$input);
+        LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-deliveryReceive-info:'.$input);
         $params = json_decode($input,true);
         $rules = [
             'order_no'  => 'required',

@@ -105,6 +105,8 @@ $api->version('v1', [
 
         //隊列增加风控看板信息
         $api->any('OrderRisk', 'InnerServiceController@orderRisk');
+        //隊列返回风控 订单押金信息
+        $api->any('YajinReduce', 'InnerServiceController@YajinReduce');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单

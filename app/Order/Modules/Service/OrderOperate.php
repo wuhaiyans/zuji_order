@@ -13,6 +13,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Payment\LebaifenApi;
 use App\Lib\Risk\Risk;
+use App\Lib\Risk\Yajin;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderDelivery;
@@ -890,6 +891,66 @@ class OrderOperate
 
 
     }
+
+    /**
+     * 发送订单押金信息返回风控系统
+     * @author wuhaiyan
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
+     */
+    public static function YajinReduce($orderNo,$userId)
+    {
+
+        //查询订单信息
+        $order = $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::error(config('app.env')."[orderYajinReduce] Order-non-existent:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
+        $orderInfo = $order->getData();
+
+        $jianmian = ($orderInfo['goods_yajin']-$orderInfo['order_yajin'])*100;
+        //请求押金接口
+        try{
+            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[orderYajinReduce] Yajin-interface-error-".$orderNo.":".$e->getMessage());
+            return  ApiStatus::CODE_31006;
+        }
+
+        return  ApiStatus::CODE_0;
+    }
+
+    /**
+     * 发送订单押金信息返回风控系统
+     * @author wuhaiyan
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @param string $orderStatus 订单状态
+     * @return bool
+     */
+    public static function YajinRecovery($orderNo,$userId,$orderStatus)
+    {
+        //订单状态信息 - 取消状态
+        if($orderStatus ==  Inc\OrderStatus::OrderCancel || $orderStatus == Inc\OrderStatus::OrderClosedRefunded){
+            $type =2;
+        }elseif($orderStatus == Inc\OrderStatus::OrderCompleted){
+            $type =1;
+        }else{
+            LogApi::error(config('app.env')."[orderYajinRecovery] OrderStatus-Error-".$orderNo);
+            return false;
+        }
+        //请求押金接口
+        try{
+            $yajin = Yajin::OrderComplete(['user_id'=>$userId,'type'=>$type,'order_no'=>$orderNo]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[orderYajinRecovery] Yajin-interface-error-".$orderNo.":".$e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
     /**
      * 取消订单
      * Author: heaven
@@ -932,23 +993,23 @@ class OrderOperate
 
             //释放库存
             //查询商品的信息
-            $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
-            if ($orderGoods) {
-                foreach ($orderGoods as $orderGoodsValues){
-                    //暂时一对一
-                    $goods_arr[] = [
-                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
-                        'spu_id'=>$orderGoodsValues['prod_id'],
-                        'num'=>$orderGoodsValues['quantity']
-                    ];
-                }
-                $success =Goods::addStock($goods_arr);
-            }
-
-            if (!$success || empty($orderGoods)) {
-                DB::rollBack();
-                return ApiStatus::CODE_31003;
-            }
+//            $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
+//            if ($orderGoods) {
+//                foreach ($orderGoods as $orderGoodsValues){
+//                    //暂时一对一
+//                    $goods_arr[] = [
+//                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
+//                        'spu_id'=>$orderGoodsValues['prod_id'],
+//                        'num'=>$orderGoodsValues['quantity']
+//                    ];
+//                }
+//                $success =Goods::addStock($goods_arr);
+//            }
+//
+//            if (!$success || empty($orderGoods)) {
+//                DB::rollBack();
+//                return ApiStatus::CODE_31003;
+//            }
 
             //支付方式为代扣 需要解除订单代扣
             if($orderInfoData['pay_type'] == Inc\PayInc::WithhodingPay){
@@ -969,6 +1030,13 @@ class OrderOperate
                     //未签约 不解除
                 }
 
+            }
+
+            //返回风控押金信息
+            $b =self::YajinRecovery($orderNo,$userId,$orderInfoData['order_status']);
+            if(!$b){
+                DB::rollBack();
+                return ApiStatus::CODE_31003;
             }
 
             //优惠券归还
@@ -993,6 +1061,9 @@ class OrderOperate
             // 订单取消后发送取消短息。;
             $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CANCEL);
             $orderNoticeObj->notify();
+
+
+
             //增加操作日志
 
             $resonInfo = '';
@@ -1180,6 +1251,12 @@ class OrderOperate
             //解除代扣的订单绑定
             $b =self::orderUnblind($orderInfo);
             LogApi::info("order解除代扣的订单绑定",$b);
+            if(!$b){
+                return false;
+            }
+
+            //返回风控押金信息
+            $b =self::YajinRecovery($orderNo,$orderInfo['user_id'],$orderInfo['order_status']);
             if(!$b){
                 return false;
             }
