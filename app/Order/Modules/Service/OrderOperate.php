@@ -993,23 +993,23 @@ class OrderOperate
 
             //释放库存
             //查询商品的信息
-            $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
-            if ($orderGoods) {
-                foreach ($orderGoods as $orderGoodsValues){
-                    //暂时一对一
-                    $goods_arr[] = [
-                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
-                        'spu_id'=>$orderGoodsValues['prod_id'],
-                        'num'=>$orderGoodsValues['quantity']
-                    ];
-                }
-                $success =Goods::addStock($goods_arr);
-            }
-
-            if (!$success || empty($orderGoods)) {
-                DB::rollBack();
-                return ApiStatus::CODE_31003;
-            }
+//            $orderGoods = OrderRepository::getGoodsListByOrderId($orderNo);
+//            if ($orderGoods) {
+//                foreach ($orderGoods as $orderGoodsValues){
+//                    //暂时一对一
+//                    $goods_arr[] = [
+//                        'sku_id'=>$orderGoodsValues['zuji_goods_id'],
+//                        'spu_id'=>$orderGoodsValues['prod_id'],
+//                        'num'=>$orderGoodsValues['quantity']
+//                    ];
+//                }
+//                $success =Goods::addStock($goods_arr);
+//            }
+//
+//            if (!$success || empty($orderGoods)) {
+//                DB::rollBack();
+//                return ApiStatus::CODE_31003;
+//            }
 
             //支付方式为代扣 需要解除订单代扣
             if($orderInfoData['pay_type'] == Inc\PayInc::WithhodingPay){
