@@ -261,22 +261,32 @@ class OrderCreater
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$data['order_no'],SceneConfig::ORDER_CREATE);
             $orderNoticeObj->notify();
 
+            //发送订单消息队列
+            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
             //发送订单风控信息保存队列
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
-                'method' => 'api.inner.orderRisk',
-                'order_no'=>$data['order_no'],
-                'user_id'=>$data['user_id'],
-                'time' => time(),
-            ],time()+60,"");
+            $schedule->OrderRisk();
+            //发送取消订单队列
+            $schedule->miniCancelOrder();
+            //发送订单押金信息返回风控系统
+            $schedule->YajinReduce();
 
 
-//            发送取消订单队列（小程序取消订单队列）
-            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
-                'method' => 'api.inner.miniCancelOrder',
-                'order_no'=>$data['order_no'],
-                'user_id'=>$data['user_id'],
-                'time' => time(),
-            ],time()+config('web.mini_order_cancel_hours'),"");
+//            //发送订单风控信息保存队列
+//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
+//                'method' => 'api.inner.orderRisk',
+//                'order_no'=>$data['order_no'],
+//                'user_id'=>$data['user_id'],
+//                'time' => time(),
+//            ],time()+60,"");
+//
+//
+////            发送取消订单队列（小程序取消订单队列）
+//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
+//                'method' => 'api.inner.miniCancelOrder',
+//                'order_no'=>$data['order_no'],
+//                'user_id'=>$data['user_id'],
+//                'time' => time(),
+//            ],time()+config('web.mini_order_cancel_hours'),"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
             return $result;
 
