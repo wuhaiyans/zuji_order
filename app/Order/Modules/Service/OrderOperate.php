@@ -910,7 +910,7 @@ class OrderOperate
         }
         $orderInfo = $order->getData();
 
-        $jianmian = ($orderInfo['order_yajin']-$orderInfo['goods_yajin'])*100;
+        $jianmian = ($orderInfo['goods_yajin']-$orderInfo['order_yajin'])*100;
         //请求押金接口
         try{
             $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
