@@ -61,7 +61,7 @@ class CouponComponnet implements OrderCreater
                         'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
                         'discount_amount'=>$v['coupon_value']/100,
                         'coupon_name'=>$v['coupon_name'],
-                        'use_restrictions'=>$v['use_restrictions'],//满多少
+                        'use_restrictions'=>$v['use_restrictions']/100,//满多少
                         'is_use'=>0,//是否使用 0未使用
                     ];
 

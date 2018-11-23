@@ -26,6 +26,8 @@ return [
     'mini_order_cancel_hours' =>1800,
     //买断单多长时间未支付取消买断支付单
     'buyout_cancel_hours' =>600,
+    //订单多长时间请求风控系统
+    'order_request_risk' =>60,
     //检查androd审核情况
     'check_verify_app_android' => env('CHECK_VERIFY_APP_ANDROID',false),
     //检查ios审核情况

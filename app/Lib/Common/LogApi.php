@@ -121,12 +121,24 @@ class LogApi {
 	}
 	
 	/**
+	 * 预警提醒
+	 * @param string	$msg
+	 * @param mixed		$data
+	 * @param array		$mail_list	邮件地址列表
+	 * @return LogApi
+	 */
+	public static function alert( string $msg, $data=[], array $mail_list )
+	{
+		return self::log('Alert', $msg, $data, $mail_list);
+	}
+	
+	/**
 	 * 日志
 	 * @param string $level		日志级别
 	 * @param string $msg		日志内容
 	 * @param mixed		$data
 	 */
-	private static function log( string $level, string $msg, $data=[] )
+	private static function log( string $level, string $msg, $data=[], array $mail_list=[] )
 	{
 		$type = self::$type;
 		self::$type = '';
@@ -156,21 +168,21 @@ class LogApi {
 		$file = substr( $traces[1]['file'], strlen(app_path() ) );
 		$line = $traces[1]['line'];
 		$function = $traces[2]['function'];
-		$str = sprintf("%s\t%s:(%d):%s\t[%s]:\t%s\t%s\t%s\t%s\t%s\t%s\n", 
-				\udate('Y-m-d H:i:s.u'),
-				$file,
-				$line,
-				$function,
-				$level,
-				self::$source,
-				self::$id,
-				$type,
-				$key,
-				$msg,
-				trim($data));
 		
-		$job = new \App\Jobs\LogJob($str);
-		//$job->delay(5);
+//		$str = sprintf("%s\t%s:(%d):%s\t[%s]:\t%s\t%s\t%s\t%s\t%s\t%s\n", 
+//				\udate('Y-m-d H:i:s.u'),
+//				$file,
+//				$line,
+//				$function,
+//				$level,
+//				self::$source,
+//				self::$id,
+//				$type,
+//				$key,
+//				$msg,
+//				trim($data));
+//		$job = new \App\Jobs\LogJob($str);
+//		$job->delay(5);
 //		dispatch( $job );
 		
 		$_data = [
@@ -183,6 +195,7 @@ class LogApi {
 				'type'	=> $type,						// 数据类型
 				'key'	=> $key,						// 程序标记
 				'level' => $level,						// 级别
+				'level' => $mail_list,					// 邮件地址列表
 				'session_id' => session_id(),			// 回话
 				'user_id' => '',						// 用户ID
 				'serial_no' => self::_autoincrement(),	// 序号
@@ -191,7 +204,7 @@ class LogApi {
 			],
 		];
 //		// Redis 发布
-		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
+//		\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $_data ) );
 		
 		// 日志系统接口
 		try {

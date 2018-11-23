@@ -75,7 +75,7 @@ class OrderGiveback implements UnderLine {
 			$orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById( $this->orderNo );
 			if( !$orderInfo ){
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]订单单信息获取失败', ['$this->orderNo'=>$this->orderNo,'$orderInfo'=>$orderInfo]);
-				return false;
+				throw new \Exception("订单单信息获取失败");
 			}
 			$order_type = $orderInfo['order_type'];
 			
@@ -84,24 +84,24 @@ class OrderGiveback implements UnderLine {
 			$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($this->goodsNo);
 			if( !$orderGivebackInfo ) {
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单信息获取失败', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("还机单信息获取失败");
 			}
 			//还机单不处于待支付的订单不允许线下还机
 			if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_PAY ){
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单不处于待支付', ['$this->goodsNo'=>$this->goodsNo,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("还机单不处于待支付");
 			}
 			//创建服务层对象
 			$orderGoods = Goods::getByGoodsNo($orderGivebackInfo['goods_no']);
 			if( !$orderGoods ){
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]商品服务层创建失败', ['$orderGoods'=>$orderGoods,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("商品服务层创建失败");
 			}
 			//获取商品信息
 			$orderGoodsInfo = $orderGoods->getData();
 			if( !$orderGoodsInfo ) {
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]商品信息获取失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("商品信息获取失败");
 			}
 			
 			//-+--------------------------------------------------------------------
@@ -114,7 +114,7 @@ class OrderGiveback implements UnderLine {
 			}
 			if( !$instalmentResult ){
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]分期状态扭转失败', ['$orderGoodsInfo'=>$orderGoodsInfo,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("分期状态扭转失败");
 			}
 			
 			
@@ -130,12 +130,12 @@ class OrderGiveback implements UnderLine {
 				$orderGoodsResult = $orderGoods->givebackFinish();
 				if(!$orderGoodsResult){
 					\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]更新商品表状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-					return false;
+					throw new \Exception("更新商品表状态失败");
 				}
 				//解冻订单
 				if(!OrderGiveback::__unfreeze($orderGoodsInfo['order_no'])){
 					\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
-					return false;
+					throw new \Exception("订单解冻失败");
 				}
 				$status = OrderGivebackStatus::STATUS_DEAL_DONE;
 				$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$orderGivebackInfo['giveback_no']], [
@@ -170,12 +170,12 @@ class OrderGiveback implements UnderLine {
 					$orderGoodsResult = $orderGoods->givebackFinish();
 					if(!$orderGoodsResult){
 						\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]更新商品表状态失败', ['$orderGoodsResult'=>$orderGoodsResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-						return false;
+						throw new \Exception("更新商品表状态失败");
 					}
 					//解冻订单
 					if(!OrderGiveback::__unfreeze($orderGoodsInfo['order_no'])){
 						\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
-						return false;
+						throw new \Exception("订单解冻失败");
 					}
 					$status = OrderGivebackStatus::STATUS_DEAL_DONE;
 					$orderGivebackResult = $orderGivebackService->update(['giveback_no'=>$orderGivebackInfo['giveback_no']], [
@@ -190,7 +190,7 @@ class OrderGiveback implements UnderLine {
 			}
 			if( !$orderGivebackResult ){
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]还机单状态更新失败', ['$orderGivebackResult'=>$orderGivebackResult,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("还机单状态更新失败");
 			}
 			//清算处理数据拼接
 			$clearData = [
@@ -214,7 +214,7 @@ class OrderGiveback implements UnderLine {
 			if( !$orderCleanResult ){
 				set_apistatus(ApiStatus::CODE_93200, '押金退还清算单创建失败!');
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]押金退还清算单创建失败', ['$orderCleanResult'=>$orderCleanResult,'$clearData'=>$clearData,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("押金退还清算单创建失败");
 			}
 			
 			//记录日志
@@ -232,7 +232,7 @@ class OrderGiveback implements UnderLine {
 			if( !$goodsLog ){
 				set_apistatus(ApiStatus::CODE_92700, '设备日志记录失败!');
 				\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]设备日志记录失败', ['$goodsLog'=>$goodsLog,'$orderGivebackInfo'=>$orderGivebackInfo]);
-				return false;
+				throw new \Exception("设备日志记录失败");
 			}
 
 //			//发送短信
@@ -244,7 +244,7 @@ class OrderGiveback implements UnderLine {
 
 		} catch (\Exception $ex) {
 			\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]异常', $ex);
-			return false;
+			throw new \Exception("还机单线下支付异常");
 		}
 		return true;
 
