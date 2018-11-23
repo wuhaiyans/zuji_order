@@ -55,10 +55,12 @@ class Handler extends ExceptionHandler
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'code' => $exception->getCode(),
+                'trace' => array_slice($exception->getTrace(),0,4),
                 'url' => Request()->url(),
                 'method'=>request()->input('method')
             ];
-            LogApi::error("orderException异常",$err);
+            LogApi::setSource('orderException');
+            LogApi::error($err['message'],$err);
             return apiResponse([],500,$exception->getMessage());
         }
 
