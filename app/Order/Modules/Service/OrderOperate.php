@@ -13,6 +13,7 @@ use App\Lib\Coupon\Coupon;
 use App\Lib\Goods\Goods;
 use App\Lib\Payment\LebaifenApi;
 use App\Lib\Risk\Risk;
+use App\Lib\Risk\Yajin;
 use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderDelivery;
@@ -889,6 +890,36 @@ class OrderOperate
         }
 
 
+    }
+
+    /**
+     * 发送订单押金信息返回风控系统
+     * @author wuhaiyan
+     * @param $orderNo 订单编号
+     * @param string $userId 用户id
+     * @return bool|string
+     */
+    public static function YajinReduce($orderNo,$userId)
+    {
+
+        //查询订单信息
+        $order = $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::error(config('app.env')."[orderYajinReduce] Order-non-existent:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
+        $orderInfo = $order->getData();
+
+        $jianmian = ($orderInfo['order_yajin']-$orderInfo['goods_yajin'])*100;
+        //请求押金接口
+        try{
+            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[orderYajinReduce] Yajin-interface-error-".$orderNo.":".$e->getMessage());
+            return  ApiStatus::CODE_31006;
+        }
+
+        return  ApiStatus::CODE_0;
     }
     /**
      * 取消订单
