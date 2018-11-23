@@ -61,7 +61,7 @@ class Handler extends ExceptionHandler
             ];
             LogApi::setSource('orderException');
             LogApi::error($err['message'],$err);
-            return apiResponse([],500,$exception->getMessage());
+            return apiResponse([],50000,$exception->getMessage());
         }
 
         return parent::render($request, $exception);
