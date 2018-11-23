@@ -51,6 +51,10 @@ class MiniNotifyController extends Controller
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
+        //当appid = 123进行转发
+        if( $appid == '123'){
+            $this->curl_retran( $_POST );
+        }
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
         if(!$b){
@@ -418,12 +422,30 @@ class MiniNotifyController extends Controller
     }
 
     /**
-     *
+     * 小程序转发接口
+     * 转发到其他渠道（链接保持60秒）
      */
-    public function creditQuery(){
-
-
+    public function curl_retran(  $post = [], $timeout = 60 ){
+        if(env('APPID_ZUJI_URL')){
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, env('APPID_ZUJI_URL'));
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+            $result = curl_exec($ch);
+            Debug::error(Location::L_AlipayMini,'芝麻小程序回调转发处理结果APPID'.env('APPID_ZUJI_URL'),$_POST);
+            curl_close($ch);
+            if($result === 'success'){
+                echo $result;die;
+            }
+            echo 'fail';
+        }
     }
+
+
     /**
      * 测试发起请求小程序订单后续操作
      * @author zhangjinhui
