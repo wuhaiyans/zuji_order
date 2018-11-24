@@ -134,6 +134,9 @@ class OrderBuyout implements UnderLine {
             //进入清算处理
             $orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
             if(!$orderCleanResult){
+                //预警通知 参数1：问题标记  参数2：程序相关错误数据  参数3：通知人邮箱
+                LogApi::alert("offline-buyout:买断进入清算失败",$clearData,["limin@huishoubao.com"]);
+                //错误信息日志记录
                 LogApi::info("offline-buyout:进入清算失败",$clearData);
                 throw new \Exception("进入清算失败");
             }

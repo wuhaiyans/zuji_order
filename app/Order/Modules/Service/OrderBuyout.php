@@ -21,13 +21,17 @@ use Illuminate\Support\Facades\DB;
 
 class OrderBuyout
 {
+
+	private static $email = [
+		"limin@huishoubao.com.cn"
+	];
+
 	/**
 	 * 订单还机数据处理仓库
 	 * @var obj
 	 */
 	public function __construct() {
 	}
-
 
 	/** 查询条件过滤
 	 * @param array $where	【可选】查询条件
@@ -212,7 +216,8 @@ class OrderBuyout
 		];
 		$ret = Instalment::close($data);
 		if(!$ret){
-			//return false;
+			LogApi::alert("buyout-callback:关闭分期失败",$data,self::$email);
+			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
@@ -244,6 +249,7 @@ class OrderBuyout
 			//进入清算处理
 			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
 			if(!$orderCleanResult){
+				LogApi::alert("buyout-callback:进入清算失败",$clearData,self::$email);
 				return false;
 			}
 		}
@@ -372,6 +378,7 @@ class OrderBuyout
 		//解冻订单
 		$ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
+			LogApi::alert("buyout-callback:解冻订单失败",$goodsInfo['order_no'],self::$email);
 			return false;
 		}
 		//更新订单商品
@@ -381,15 +388,18 @@ class OrderBuyout
 		];
 		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
+			LogApi::alert("buyout-callback:更新订单商品失败",$goodsInfo,self::$email);
 			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id']);
 		if(!$ret){
+			LogApi::alert("buyout-callback:更新买断单为解押失败",$buyout['order_no'],self::$email);
 			return false;
 		}
 		$ret = OrderOperate::isOrderComplete($buyout['order_no']);
 		if(!$ret){
+			LogApi::alert("buyout-callback:关闭订单失败",$buyout['order_no'],self::$email);
 			return false;
 		}
 		//无押金直接返回成功

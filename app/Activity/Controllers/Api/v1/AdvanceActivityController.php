@@ -175,14 +175,15 @@ class AdvanceActivityController extends Controller
                 $themeInfo = ActivityThemeRepository::getInfo(['activity_id'=>1]);
                 if(time()>=$themeInfo['opening_time']){
                     //获取认证信息 通过认证显示领取
-                    $risk = new Risk();
+                    /*$risk = new Risk();
                     $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
                     if($riskInfo['is_chsi']==1){
                         $lingqu_btn = true;
                     }
                     else{
                         $renzheng_btn =true;
-                    }
+                    }*/
+                    $lingqu_btn = true;
                 }
             };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;
