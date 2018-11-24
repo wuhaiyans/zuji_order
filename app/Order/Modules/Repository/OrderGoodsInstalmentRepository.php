@@ -224,7 +224,7 @@ class OrderGoodsInstalmentRepository
     }
 
 
-    /*
+    /**
      * 修改方法
      * array    $where
      * array    $data
@@ -292,5 +292,55 @@ class OrderGoodsInstalmentRepository
         return $result->toArray();
     }
 
+    /**
+     * 延迟分期扣款时间 （只支持短租）
+     * string    $order_no  订单号
+     * string    $day       延期天数
+     * return bool
+     */
+    public static function delayInstalment($order_no,$day){
+        if ( $order_no == "") {
+            return false;
+        }
+        if ( $day == "") {
+            return false;
+        }
 
+        // 查询订单
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($order_no);
+        if (!$orderInfo) {
+            LogApi::error('[delayInstalment]订单不存在：'.$order_no);
+            return false;
+        }
+
+        // 订单不支持长租
+        if($orderInfo['zuqi_type'] == \App\Order\Modules\Inc\OrderStatus::ZUQI_TYPE2){
+            LogApi::error('[delayInstalment]延期不支持长租：'.$order_no);
+            return false;
+        }
+
+        // 查询分期
+        $instalmentInfo = self::getInfo(['order_no'=>$order_no]);
+        // 订单不支持长租
+        if(!$instalmentInfo || $instalmentInfo['withhold_day'] == ""){
+            LogApi::error('[delayInstalment]分期数据错误：'.$order_no);
+            return false;
+        }
+
+        $newWithholdDay = $instalmentInfo['withhold_day'] + 86400 * $day;
+
+        $newTerm = date("Ym",$newWithholdDay);
+        $newDay  = date("d",$newWithholdDay);
+
+        $data = [
+            'term'          => $newTerm,
+            'day'           => $newDay,
+            'withhold_day'  => $newWithholdDay,
+        ];
+
+        $result =  OrderGoodsInstalment::where(['order_no' => $order_no ])->limit(1)->update($data);
+        if (!$result) return false;
+
+        return true;
+    }
 }
