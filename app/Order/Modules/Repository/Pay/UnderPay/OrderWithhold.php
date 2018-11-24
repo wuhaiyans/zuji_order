@@ -30,12 +30,23 @@ class OrderWithhold implements UnderLine {
      */
     public function getPayAmount(){
         $instalmentList  = $this->instalmentList();
-        $amount = 0;
-        foreach($instalmentList as $item){
+
+        $amount    = 0;
+        $minAmount = 0;
+
+        foreach($instalmentList as $key=>$item){
+            if($key == 0){
+                $minAmount = $item['amount'];
+            }
             $amount += $item['amount'];
         }
 
-        return $amount;
+
+        $data = [
+            'amount'       => $amount,
+            'minAmount'    => $minAmount
+        ];
+        return $data;
 
     }
 
@@ -80,6 +91,7 @@ class OrderWithhold implements UnderLine {
         $instalmentList = \App\Order\Models\OrderGoodsInstalment::query()
             ->where($where)
             ->whereIn('status',$statusArr)
+            ->orderBy("times","asc")
             ->get()->toArray();
 
         if(!$instalmentList){

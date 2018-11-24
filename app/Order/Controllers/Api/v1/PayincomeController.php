@@ -328,12 +328,23 @@ class PayincomeController extends Controller
 
             // 实现业务
             $orderService = new \App\Order\Modules\Repository\Pay\UnderPay\UnderPay($params);
-            $amount = $orderService->getPayAmount();
-            if($amount === false){
+            $result = $orderService->getPayAmount();
+            if($result === false){
                 return apiResponse([], ApiStatus::CODE_50003, "获取支付金额失败");
             }
+            $amount     = $result;
+            $minAmount  = 0;
+            
+            if($params['business_type'] == \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI){
+                $amount     = $result['amount'];
+                $minAmount  = $result['minAmount'];
+            }
 
-            return apiResponse($amount, ApiStatus::CODE_0, "success");
+            $data = [
+                'amount'    => $amount,
+                'minAmount' => $minAmount,
+            ];
+            return apiResponse($data, ApiStatus::CODE_0, "success");
 
         } catch (\Exception $e) {
 
