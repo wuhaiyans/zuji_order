@@ -348,7 +348,7 @@ class Delivery
               'goodsInfo'=>$goods_info,
               'operator'=>$operatorInfo,
           ]);
-          LogApi::error("OrderDelivery-Response",$response);
+          LogApi::error("OrderDelivery-Response:".get_error(),$response);
           return false;
       }
       return true;
