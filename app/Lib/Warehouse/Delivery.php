@@ -344,12 +344,12 @@ class Delivery
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           LogApi::error("OrderDelivery-Request:",[
-              'orderDetail'=>$orderDetail,
-              'goodsInfo'=>$goods_info,
-              'operator'=>$operatorInfo,
+              'order_info'=>$orderDetail,
+              'goods_info'=>$goods_info,
+              'operator_info'=>$operatorInfo,
           ]);
           session()->flash(self::SESSION_ERR_KEY, $response['msg']);
-          LogApi::error("OrderDelivery-Response:".$response['msg'],$response);
+          LogApi::error("OrderDelivery-Response:",$response);
           return false;
       }
       return true;

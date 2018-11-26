@@ -90,7 +90,7 @@ class OrderOperate
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
-                set_error("获取订单信息失败");
+                set_msg("获取订单信息失败");
 //                LogApi::alert("OrderDelivery:获取订单信息失败",$orderDetail,[config('web.order_warning_user')]);
 //                LogApi::error(config('app.env')."环境 OrderDelivery:获取订单信息失败",$orderDetail);
                 DB::rollBack();
@@ -102,7 +102,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    set_error("更新订单状态失败");
+                    set_msg("更新订单状态失败");
 //                    LogApi::alert("OrderDelivery:更新订单状态失败",$orderDetail,[config('web.order_warning_user')]);
 //                    LogApi::error(config('app.env')."环境 OrderDelivery:更新订单状态失败",$orderDetail);
                     DB::rollBack();
@@ -112,7 +112,7 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                    set_error("增加订单发货信息");
+                    set_msg("增加订单发货信息");
 //                    LogApi::alert("OrderDelivery:增加订单发货信息",$orderDetail,[config('web.order_warning_user')]);
 //                    LogApi::error(config('app.env')."环境 OrderDelivery:增加订单发货信息",$orderDetail);
                     DB::rollBack();
@@ -122,7 +122,7 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                    set_error("增加发货详情失败");
+                    set_msg("增加发货详情失败");
 //                    LogApi::alert("OrderDelivery:增加发货详情失败",$orderDetail,[config('web.order_warning_user')]);
 //                    LogApi::error(config('app.env')."环境 OrderDelivery:增加发货详情失败",$orderDetail);
                     DB::rollBack();
@@ -131,7 +131,7 @@ class OrderOperate
                 //增加发货时生成合同
                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
                 if(!$b) {
-                    set_error("生成合同失败");
+                    set_msg("生成合同失败");
 //                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
 //                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
                     DB::rollBack();
@@ -162,7 +162,7 @@ class OrderOperate
                             ]);
 
                             if(!$b){
-                                set_error("修改商品服务时间失败");
+                                set_msg("修改商品服务时间失败");
 //                                LogApi::alert("OrderDelivery:修改商品服务时间失败",$orderDetail,[config('web.order_warning_user')]);
 //                                LogApi::error(config('app.env')."环境 OrderDelivery:修改商品服务时间失败",$orderDetail);
                                 DB::rollBack();
@@ -171,7 +171,7 @@ class OrderOperate
                             //修改 服务周期表时间
                             $b =ServicePeriod::updateUnitTime($orderDetail['order_no'],$beginTime,$endTime);
                             if(!$b){
-                                set_error("修改短租服务时间失败");
+                                set_msg("修改短租服务时间失败");
 //                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);
 //                                LogApi::error(config('app.env')."环境 OrderDelivery:修改短租服务时间失败",$orderDetail);
                                 DB::rollBack();
@@ -182,7 +182,7 @@ class OrderOperate
                             //修改订单分期扣款时间
                             $b = OrderGoodsInstalmentRepository::delayInstalment($orderDetail['order_no'],$delayDay);
                             if(!$b){
-                                set_error("修改分期延期扣款时间失败");
+                                set_msg("修改分期延期扣款时间失败");
 //                                LogApi::alert("OrderDelivery:修改分期延期扣款时间失败",$orderDetail,[config('web.order_warning_user')]);
 //                                LogApi::error(config('app.env')."环境 OrderDelivery:修改分期延期扣款时间失败",$orderDetail);
                                 DB::rollBack();
@@ -195,7 +195,7 @@ class OrderOperate
                     }
                 }
 
-                DB::commit();
+               // DB::commit();
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
                     $confirmTime = config('web.short_confirm_days');
