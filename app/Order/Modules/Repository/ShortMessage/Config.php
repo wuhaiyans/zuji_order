@@ -126,7 +126,8 @@ class Config {
                 SceneConfig::DESTINE_CREATE              => 'SMS_113461183', //订金退款申请短信
                 SceneConfig::DESTINE_REFUND              => 'SMS_113461184  ',//订金退款成功短信
 
-
+				// 续租
+				SceneConfig::RELETSUCCESS               => 'SMS_113461214  ',//续租成功
 
 			],
 

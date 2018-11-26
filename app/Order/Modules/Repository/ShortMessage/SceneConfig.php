@@ -220,5 +220,11 @@ class SceneConfig {
     const RETURN_TOKIO = 'ReturnTokio';
 
 
+    /**
+     * 场景：<b>【续租成功】</b>
+     */
+    const RELETSUCCESS = 'ReletSuccess';
+
+
 
 }
