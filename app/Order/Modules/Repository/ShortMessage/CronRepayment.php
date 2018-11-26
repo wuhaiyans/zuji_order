@@ -57,7 +57,7 @@ class CronRepayment implements ShortMessage {
         }
 
         // 短息模板
-        $code = $this->getCode($this->business_type);
+        $code = $this->getCode($orderInfo['channel_id']);
         if( !$code ){
             \App\Lib\Common\LogApi::debug('[定时任务短信-模板不存在]');
             return false;

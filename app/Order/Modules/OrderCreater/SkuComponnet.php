@@ -76,6 +76,7 @@ class SkuComponnet implements OrderCreater
         try{
             $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') ,$mobile);
         }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取商品接口失败",array_column($sku, 'sku_id'),[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
             throw new Exception("GetSkuList:".$e->getMessage());
         }
@@ -86,6 +87,7 @@ class SkuComponnet implements OrderCreater
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             if(empty($goodsArr[$skuId]['spu_info']['payment_list'][0]['id']) || !isset($goodsArr[$skuId]['spu_info']['payment_list'][0]['id'])){
+                LogApi::alert("OrderCreate:商品支付方式错误",$goodsArr[$skuId]['spu_info'],[config('web.order_warning_user')]);
                 LogApi::error(config('app.env')."OrderCreate-PayType-error:".$skuId);
                 throw new Exception("商品支付方式错误");
             }
@@ -106,7 +108,10 @@ class SkuComponnet implements OrderCreater
             } elseif ($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH) {
                 $this->zuqiTypeName = "month";
             }
-            $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
+            $spec =$goodsArr[$skuId]['sku_info']['spec'];
+            if(!is_array($spec)){
+                $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
+            }
             // 格式化 规格
             $_specs = [];
             foreach($spec as $it){
@@ -509,13 +514,15 @@ class SkuComponnet implements OrderCreater
                 if($this->zuqiType ==1){
                     $goodsData['begin_time'] =strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
-                    $goodsData['zuqi'] = $v['zuqi'];
+
+                    $zuqi =ceil((strtotime($v['end_time'])-strtotime($v['begin_time']))/86400+1);
+                    $goodsData['zuqi'] = $zuqi;
                     if( $this->orderType == OrderStatus::orderMiniService ){//小程序
                         $goodsData['relet_day'] = 75;
                     }else{//非小程序
                         $goodsData['relet_day'] = 0;
                     }
-                    $unitData['unit_value'] =$v['zuqi'];
+                    $unitData['unit_value'] =$zuqi;
                     $unitData['unit'] =1;
                     $unitData['goods_no'] =$goodsData['goods_no'];
                     $unitData['order_no'] =$orderNo;
@@ -525,6 +532,7 @@ class SkuComponnet implements OrderCreater
 
                     $b =ServicePeriod::createService($unitData);
                     if(!$b){
+                        LogApi::alert("OrderCreate:创建服务失败",$unitData,[config('web.order_warning_user')]);
                         LogApi::error(config('app.env')."OrderCreate-Add-Unit-error",$unitData);
                         $this->getOrderCreater()->setError("OrderCreate-Add-Unit-error");
                         return false;
@@ -532,6 +540,7 @@ class SkuComponnet implements OrderCreater
                 }
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
+                    LogApi::alert("OrderCreate:增加商品失败",$goodsData,[config('web.order_warning_user')]);
                     LogApi::error(config('app.env')."OrderCreate-AddGoods-error",$goodsData);
                     $this->getOrderCreater()->setError("OrderCreate-AddGoods-error");
                     return false;
@@ -546,6 +555,7 @@ class SkuComponnet implements OrderCreater
         if(!empty($goodsArr)){
             $b =Goods::reduceStock($goodsArr);
             if(!$b){
+                LogApi::alert("OrderCreate:减少库存接口失败",$goodsArr,[config('web.order_warning_user')]);
                 LogApi::error(config('app.env')."OrderCreate-reduceStock-error",$goodsArr);
                 $this->getOrderCreater()->setError("OrderCreate-reduceStock-error");
                 return false;

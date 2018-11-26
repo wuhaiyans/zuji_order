@@ -103,6 +103,7 @@ class DepositComponnet implements OrderCreater
                         //如果押金接口请求失败 押金不进行减免
 //                        $this->getOrderCreater()->setError('商品押金接口错误');
 //                        $this->flag = false;
+                        LogApi::alert("OrderCreate:获取押金接口失败",$arr,[config('web.order_warning_user')]);
                         LogApi::error(config('app.env')."OrderCreate-YajinCalculate-interface-error",$arr);
                         $deposit['jianmian'] =0;
                         $deposit['yajin'] = $v['yajin'] * 100;
@@ -157,6 +158,7 @@ class DepositComponnet implements OrderCreater
         //保存减免押金详情信息
         $b= OrderUserCertifiedRepository::updateDepoistDetail($this->orderNo,$this->deposit_detail,$this->deposit_msg);
         if(!$b){
+            LogApi::alert("OrderCreate:保存押金减免详情信息失败",['order'=>$this->orderNo],[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-UpdateDEpoist-error:".$this->orderNo);
             $this->getOrderCreater()->setError('OrderCreate-UpdateDEpoist-error');
             return false;

@@ -78,6 +78,9 @@ class Config {
                 SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_113461130',//订单逾期一个月发送信息-月租
                 SceneConfig::ORDER_DAY_BEFORE_ONE_ENDING     =>'SMS_113461158',//订单到期前一天发送信息-短租
 
+                SceneConfig::REFUND_APPLY_RISK_ACCEPT 			 	=> 'SMS_113461044', //申请退款1 风控审核通过
+                SceneConfig::REFUND_APPLY_RISK_REFUSE 			 	=> 'SMS_113461222', //申请退款2 风控未通过
+
 
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_113461054', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	 	    => 'SMS_113461055', //退货审核通过
@@ -126,7 +129,8 @@ class Config {
                 SceneConfig::DESTINE_CREATE              => 'SMS_113461183', //订金退款申请短信
                 SceneConfig::DESTINE_REFUND              => 'SMS_113461184  ',//订金退款成功短信
 
-
+				// 续租
+				SceneConfig::RELETSUCCESS               => 'SMS_113461214  ',//续租成功
 
 			],
 

@@ -58,6 +58,7 @@ class UserComponnet implements OrderCreater
         try{
             $userInfo =User::getUser($this->userId,$addressId);
         }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取用户接口失败",['error'=>$e->getMessage()],[config('web.order_warning_user')]);
             LogApi::error("OrderCreate-GetUser-error:".$e->getMessage());
             throw new Exception("GetUser:".$e->getMessage());
         }
@@ -176,13 +177,13 @@ class UserComponnet implements OrderCreater
 
         if($this->addressID){
             $params= [
-                'phone'=>$data['address']['mobile'],
-                'identity'=>$data['user']['cert_no'],
-                'consignee'=>$data['address']['name'],
-                'province'=>$data['address']['province_name'],
-                'city'=>$data['address']['city_name'],
-                'county'=>$data['address']['country_name'],
-                'shipping_address'=>$data['address']['address'],
+                'phone'=>isset($data['address']['mobile'])?$data['address']['mobile']:"",
+                'identity'=>isset($data['user']['cert_no'])?$data['user']['cert_no']:'',
+                'consignee'=>isset($data['address']['name'])?$data['user']['cert_no']:'',
+                'province'=>isset($data['address']['province_name'])?$data['user']['cert_no']:'',
+                'city'=>isset($data['address']['city_name'])?$data['user']['cert_no']:'',
+                'county'=>isset($data['address']['country_name'])?$data['user']['cert_no']:'',
+                'shipping_address'=>isset($data['address']['address'])?$data['user']['cert_no']:'',
             ];
             $matching = User::getUserMatching($params);
         }
@@ -199,6 +200,7 @@ class UserComponnet implements OrderCreater
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
         if(!$id){
+            LogApi::alert("OrderCreate:保存用户认证信息失败",$RiskData,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Add-RistData-error",$RiskData);
             $this->getOrderCreater()->setError("OrderCreate-Add-RistData-error");
             return false;

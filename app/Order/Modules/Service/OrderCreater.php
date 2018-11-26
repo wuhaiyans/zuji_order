@@ -262,7 +262,7 @@ class OrderCreater
             $orderNoticeObj->notify();
 
             //发送订单消息队列
-            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
+            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$data['order_no']]);
             //发送订单风控信息保存队列
             $schedule->OrderRisk();
             //发送取消订单队列

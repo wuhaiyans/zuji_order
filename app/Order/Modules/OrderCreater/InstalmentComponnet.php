@@ -209,6 +209,7 @@ class InstalmentComponnet implements OrderCreater
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();
                     if (!$id) {
+                        LogApi::alert("OrderCreate:增加分期信息失败",$instalmentData,[config('web.order_warning_user')]);
                         LogApi::error(config('app.env')."OrderCreate-Add-Instalment-error",$instalmentData);
                         $this->getOrderCreater()->setError('OrderCreate-Add-Instalment-error');
                         return false;

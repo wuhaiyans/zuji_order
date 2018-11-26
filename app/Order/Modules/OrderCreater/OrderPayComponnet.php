@@ -169,6 +169,7 @@ class OrderPayComponnet implements OrderCreater
             $data['pay_time']= time();
             $b =Order::where('order_no', '=', $this->orderNo)->update($data);
             if(!$b){
+                LogApi::alert("OrderCreate:更新订单已支付状态失败",$data,[config('web.order_warning_user')]);
                 LogApi::error(config('app.env')."OrderCreate-Update-OrderStatus-error",$data);
                 $this->getOrderCreater()->setError("OrderCreate-Update-OrderStatus-error");
                 return false;
@@ -206,6 +207,10 @@ class OrderPayComponnet implements OrderCreater
                         'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                     ]);
                     if (!$b) {
+                        LogApi::alert("OrderCreate:绑定代扣协议失败",[
+                            'business_type' => $param['businessType'],  // 【必须】int    业务类型
+                            'business_no' => $param['businessNo'],  // 【必须】string  业务编码
+                        ],[config('web.order_warning_user')]);
                         LogApi::error(config('app.env')."OrderCreate-Blind-WithholdStatus-error：".$this->userId,[
                             'business_type' => $param['businessType'],  // 【必须】int    业务类型
                             'business_no' => $param['businessNo'],  // 【必须】string  业务编码
@@ -250,6 +255,7 @@ class OrderPayComponnet implements OrderCreater
 
 
         }catch (Exception $e){
+            LogApi::alert("OrderCreate:增加支付单失败",['error'=>$e->getMessage()],[config('web.order_warning_user')]);
             LogApi::error("OrderCreate-Add-OrderPay-error:".$e->getMessage());
             $this->getOrderCreater()->setError($e->getMessage());
             return false;
