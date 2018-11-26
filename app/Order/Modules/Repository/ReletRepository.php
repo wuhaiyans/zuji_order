@@ -66,7 +66,7 @@ class ReletRepository
 
         //根据渠道appid
         if (isset($params['appid']) && !empty($params['appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $params['appid']];
+            $whereArray[] = ['order_info.channel_id', '=', $params['appid']];
         }
         //根据用户id
         if (isset($params['user_id']) && !empty($params['user_id'])) {
