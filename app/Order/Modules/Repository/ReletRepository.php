@@ -56,12 +56,12 @@ class ReletRepository
 
         // 开始时间（可选）
         if( isset($params['begin_time']) && $params['begin_time'] != ""){
-            $whereArray[] =  ['create_time', '>=', strtotime($params['begin_time'])];
+            $whereArray[] =  ['order_relet.create_time', '>=', strtotime($params['begin_time'])];
         }
 
         // 开始时间（可选）
         if( isset($params['end_time']) && $params['end_time'] != ""){
-            $whereArray[] =  ['create_time', '<=', strtotime($params['end_time'])];
+            $whereArray[] =  ['order_relet.create_time', '<=', strtotime($params['end_time'])];
         }
 
         //根据渠道appid
