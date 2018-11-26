@@ -81,10 +81,10 @@ class OrderOperate
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
 
-//        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
-//        if($res>1){
-//            return false;
-//        }
+        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
+        if($res>1){
+            return false;
+        }
 
         DB::beginTransaction();
             //更新订单状态
@@ -129,14 +129,14 @@ class OrderOperate
                     return false;
                 }
                 //增加发货时生成合同
-//               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
-//                if(!$b) {
-//                    set_msg("生成合同失败");
-////                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
-////                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
-//                    DB::rollBack();
-//                    return false;
-//                }
+               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+                if(!$b) {
+                    set_msg("生成合同失败");
+//                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
+//                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
+                    DB::rollBack();
+                    return false;
+                }
                 //增加操作日志
                 if(!empty($operatorInfo)){
 
@@ -168,6 +168,7 @@ class OrderOperate
                             }
                             //修改 服务周期表时间
                             $b =ServicePeriod::updateUnitTime($v['goods_no'],$beginTime,$endTime);
+
                             if(!$b){
                                 set_msg("修改短租服务时间失败");
 //                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);

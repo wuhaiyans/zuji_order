@@ -126,7 +126,7 @@ class ServicePeriod {
 
         $data['begin_time'] =$beginTime;
         $data['end_time'] =$endTime;
-        return OrderGoods::where('goods_no','=',$goodsNo)->update($data);
+        return OrderGoodsUnit::where('goods_no','=',$goodsNo)->update($data);
 
     }
 
