@@ -176,13 +176,13 @@ class UserComponnet implements OrderCreater
 
         if($this->addressID){
             $params= [
-                'phone'=>$data['address']['mobile'],
-                'identity'=>$data['user']['cert_no'],
-                'consignee'=>$data['address']['name'],
-                'province'=>$data['address']['province_name'],
-                'city'=>$data['address']['city_name'],
-                'county'=>$data['address']['country_name'],
-                'shipping_address'=>$data['address']['address'],
+                'phone'=>isset($data['address']['mobile'])?$data['address']['mobile']:"",
+                'identity'=>isset($data['user']['cert_no'])?$data['user']['cert_no']:'',
+                'consignee'=>isset($data['address']['name'])?$data['user']['cert_no']:'',
+                'province'=>isset($data['address']['province_name'])?$data['user']['cert_no']:'',
+                'city'=>isset($data['address']['city_name'])?$data['user']['cert_no']:'',
+                'county'=>isset($data['address']['country_name'])?$data['user']['cert_no']:'',
+                'shipping_address'=>isset($data['address']['address'])?$data['user']['cert_no']:'',
             ];
             $matching = User::getUserMatching($params);
         }

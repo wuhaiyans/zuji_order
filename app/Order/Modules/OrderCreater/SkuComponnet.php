@@ -510,7 +510,7 @@ class SkuComponnet implements OrderCreater
                     $goodsData['begin_time'] =strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
 
-                    $zuqi =(strtotime($v['end_time'])-strtotime($v['begin_time']))/86400+1;
+                    $zuqi =ceil((strtotime($v['end_time'])-strtotime($v['begin_time']))/86400+1);
                     $goodsData['zuqi'] = $zuqi;
                     if( $this->orderType == OrderStatus::orderMiniService ){//小程序
                         $goodsData['relet_day'] = 75;

@@ -92,7 +92,7 @@ class RiskComponnet implements OrderCreater
         }
 
         //保存用户风控信息
-        $isStudent = $this->knight['is_chsi']?1:0;  //判断是否是学生
+        $isStudent = isset($this->knight['is_chsi'])&&$this->knight['is_chsi']?1:0;  //判断是否是学生
         $certified = OrderUserCertified::where('order_no','=',$orderNo)->first();
         if (!$certified) return false;
         $certified->user_type = $isStudent;

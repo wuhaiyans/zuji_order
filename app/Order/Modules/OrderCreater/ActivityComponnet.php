@@ -118,7 +118,7 @@ class ActivityComponnet implements OrderCreater
             $data =$this->getDataSchema();
             //判断用户是否 已经参与活动
             $destine = ExperienceDestine::getByNo($this->destineNo);
-            $isStudent = $data['risk']['is_chsi']?1:0;  //判断是否是学生
+            $isStudent = isset($data['risk']['is_chsi'])&&$data['risk']['is_chsi']?1:0;  //判断是否是学生
             //更新 预约单状态
             $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time']),$isStudent);
             if(!$b){
