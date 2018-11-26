@@ -64,6 +64,10 @@ class ReletRepository
             $whereArray[] =  ['create_time', '<=', strtotime($params['end_time'])];
         }
 
+        //根据渠道appid
+        if (isset($params['appid']) && !empty($params['appid'])) {
+            $whereArray[] = ['order_info.appid', '=', $params['appid']];
+        }
         //根据用户id
         if (isset($params['user_id']) && !empty($params['user_id'])) {
             $whereArray[] = ['order_relet.user_id', '=', $params['user_id']];
@@ -99,6 +103,7 @@ class ReletRepository
         $result =  OrderRelet::query()
             ->where($whereArray)
             ->select('order_relet.*')
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_relet.order_no')
             ->offset($offset)
             ->limit($pagesize)
             ->get();
@@ -113,6 +118,7 @@ class ReletRepository
         }
         $count = OrderRelet::query()
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_relet.order_no')
             ->count();
         $data = [
             'page'=>$page,
