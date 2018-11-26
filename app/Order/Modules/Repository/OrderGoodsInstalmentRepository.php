@@ -321,8 +321,12 @@ class OrderGoodsInstalmentRepository
 
         // 查询分期
         $instalmentInfo = self::getInfo(['order_no'=>$order_no]);
-        // 订单不支持长租
-        if(!$instalmentInfo || $instalmentInfo['withhold_day'] == ""){
+        if(!$instalmentInfo){
+            LogApi::error('[delayInstalment]分期数据不存在：'.$order_no);
+            return true;
+        }
+
+        if($instalmentInfo['withhold_day'] == ""){
             LogApi::error('[delayInstalment]分期数据错误：'.$order_no);
             return false;
         }
