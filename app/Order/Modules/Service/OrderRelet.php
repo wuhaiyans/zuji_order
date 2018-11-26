@@ -435,6 +435,14 @@ class OrderRelet
                     LogApi::info("[OrderRelet]续租修改订单商品服务结束时间失败", $reletNo);
                     return false;
                 }
+
+                // 发送短信
+                $notice = new \App\Order\Modules\Service\OrderNotice(
+                    \App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+                    $reletNo,
+                    "ReletSuccess");
+                $notice->notify();
+
 //                //获取订单对象
 //                $orderObj = Order::getByNo($goodsObj->order_no);
 //                //订单解锁
