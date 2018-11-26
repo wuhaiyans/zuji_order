@@ -348,6 +348,7 @@ class Delivery
               'goodsInfo'=>$goods_info,
               'operator'=>$operatorInfo,
           ]);
+          session()->flash(self::SESSION_ERR_KEY, $response['msg']);
           LogApi::error("OrderDelivery-Response:".get_error(),$response);
           return false;
       }

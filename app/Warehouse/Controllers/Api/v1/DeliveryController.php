@@ -336,7 +336,7 @@ class DeliveryController extends Controller
             LogApi::info('delivery send order info :',$result['order_no'].$a);
             if(!$a){
                 DB::rollBack();
-                return \apiResponse([], ApiStatus::CODE_50000, "通知订单接口失败");
+                return \apiResponse([], ApiStatus::CODE_50000, "订单接口：".session()->get(self::SESSION_ERR_KEY));
             }
 
             DB::commit();
