@@ -137,6 +137,56 @@ class OrderOperate
 
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货",$orderDetail['logistics_note']);
                 }
+                //判断短租订单服务时间
+                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY){
+
+                    //判断发货三天后的起租时间 是否 大于 起租时间
+                    $beginTime = strtotime(date("Y-m-d",time()+86400*3));
+                    $goodsData = OrderGoodsRepository::getGoodsByOrderNo($orderDetail['order_no']);
+                    $goodsData =objectToArray($goodsData);
+                    foreach ($goodsData as $k=>$v){
+                        if($v['begin_time'] < $beginTime){
+                            //延期天数
+                            $delayDay = ($beginTime -$v['begin_time'])/86400;
+                            $endTime =$v['end_time']+$delayDay*86400;
+                            //如果起租时间小于三天后的时间  更新商品表起止时间
+                            $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsId($v['id']);
+                            $b =$goods->updateGoodsServiceTime([
+                                'begin_time'=>$beginTime,
+                                'end_time'=>$endTime,
+                            ]);
+
+                            if(!$b){
+                                LogApi::alert("OrderDelivery:修改商品服务时间失败",$orderDetail,[config('web.order_warning_user')]);
+                                LogApi::error(config('app.env')."环境 OrderDelivery:修改商品服务时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+                            }
+                            //修改 服务周期表时间
+                            $b =ServicePeriod::updateUnitTime($orderDetail['order_no'],$beginTime,$endTime);
+                            if(!$b){
+                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);
+                                LogApi::error(config('app.env')."环境 OrderDelivery:修改短租服务时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+                            }
+
+
+                            //修改订单分期扣款时间
+                            $b = OrderGoodsInstalmentRepository::delayInstalment($orderDetail['order_no'],$delayDay);
+                            if(!$b){
+                                LogApi::alert("OrderDelivery:修改分期延期扣款时间失败",$orderDetail,[config('web.order_warning_user')]);
+                                LogApi::error(config('app.env')."环境 OrderDelivery:修改分期延期扣款时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+
+                            }
+
+
+                        }
+                    }
+                }
+
                 DB::commit();
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){

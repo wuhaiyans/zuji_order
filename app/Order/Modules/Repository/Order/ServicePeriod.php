@@ -112,6 +112,22 @@ class ServicePeriod {
         }
         return true;
     }
+    /**
+     * 修改商品服务周期时间 （短租延迟发货）
+     * @author wuhaiyan
+     * @params
+     * $goodsNo  商品编号
+     * $beginTime 开始时间
+     * $endTime   结束时间
+     * @return bool
+     *
+     */
+    public static function updateUnitTime($goodsNo,$beginTime,$endTime):bool {
+        $res = OrderGoods::where(['goods_no'=>$goodsNo])->first();
+        $res->begin_time = $beginTime;
+        $res->end_time = $endTime;
+        return $res->update();
+    }
 
     /**
      * 修改订单商品服务结束时间和租期
