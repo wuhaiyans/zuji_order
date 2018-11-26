@@ -310,9 +310,9 @@ class DeliveryController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        DB::beginTransaction();
-        try {
 
+        try {
+            DB::beginTransaction();
             $result = $this->_info($params['delivery_no']);
 
             $orderDetail = [
