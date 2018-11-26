@@ -9,6 +9,7 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderOperateInc;
+use App\Order\Modules\Inc\OrderRiskCheckStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderPayPaymentRepository;
@@ -518,6 +519,19 @@ class OrderReturnCreater
             }
             //事务提交
             DB::commit();
+
+            //根据订单风控审核状态 申请发送短信
+            if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                //风控不通过取消订单
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                $orderNoticeObj->notify();
+            }else{
+                //其他默认通过
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                $orderNoticeObj->notify();
+            }
+
+
             return $no_list;
 
         }catch( \Exception $exc){
