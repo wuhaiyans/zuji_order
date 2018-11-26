@@ -81,10 +81,10 @@ class OrderOperate
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
 
-        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
-        if($res>1){
-            return false;
-        }
+//        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
+//        if($res>1){
+//            return false;
+//        }
 
         DB::beginTransaction();
             //更新订单状态
@@ -129,14 +129,14 @@ class OrderOperate
                     return false;
                 }
                 //增加发货时生成合同
-               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
-                if(!$b) {
-                    set_msg("生成合同失败");
-//                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
-//                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
-                    DB::rollBack();
-                    return false;
-                }
+//               $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+//                if(!$b) {
+//                    set_msg("生成合同失败");
+////                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
+////                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
+//                    DB::rollBack();
+//                    return false;
+//                }
                 //增加操作日志
                 if(!empty($operatorInfo)){
 
@@ -144,7 +144,6 @@ class OrderOperate
                 }
                 //判断短租订单服务时间
                 if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY){
-
                     //判断发货三天后的起租时间 是否 大于 起租时间
                     $beginTime = strtotime(date("Y-m-d",time()+86400*3));
                     $goodsData = OrderGoodsRepository::getGoodsByOrderNo($orderDetail['order_no']);
@@ -160,7 +159,6 @@ class OrderOperate
                                 'begin_time'=>$beginTime,
                                 'end_time'=>$endTime,
                             ]);
-
                             if(!$b){
                                 set_msg("修改商品服务时间失败");
 //                                LogApi::alert("OrderDelivery:修改商品服务时间失败",$orderDetail,[config('web.order_warning_user')]);
@@ -169,7 +167,7 @@ class OrderOperate
                                 return false;
                             }
                             //修改 服务周期表时间
-                            $b =ServicePeriod::updateUnitTime($orderDetail['order_no'],$beginTime,$endTime);
+                            $b =ServicePeriod::updateUnitTime($v['goods_no'],$beginTime,$endTime);
                             if(!$b){
                                 set_msg("修改短租服务时间失败");
 //                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);
@@ -194,8 +192,7 @@ class OrderOperate
                         }
                     }
                 }
-
-               // DB::commit();
+                DB::commit();
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
                     $confirmTime = config('web.short_confirm_days');
