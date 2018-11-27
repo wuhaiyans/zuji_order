@@ -178,7 +178,7 @@ class OrderGoodsInstalmentRepository
         if(isset($param['is_instalment_list'])){
             $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
         }
-
+        LogApi::info('[instalmentQueryList]',$whereArray);
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
