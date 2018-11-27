@@ -28,6 +28,8 @@ return [
     'buyout_cancel_hours' =>600,
     //订单多长时间请求风控系统
     'order_request_risk' =>60,
+    //订单预警通知邮箱
+    'order_warning_user'=>'wuhaiyan@huishoubao.com.cn',
     //检查androd审核情况
     'check_verify_app_android' => env('CHECK_VERIFY_APP_ANDROID',false),
     //检查ios审核情况

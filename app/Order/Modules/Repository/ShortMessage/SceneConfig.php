@@ -72,7 +72,14 @@ class SceneConfig {
      * 场景:<b>【扣款失败】</b>
      */
     const WITHHOLD_FAIL_INITIATIVE = 'WithholdFailInitiative';
-
+    /**
+     * 场景：<b>【申请退款1】风控审核通过</b>
+     */
+    const REFUND_APPLY_RISK_ACCEPT = 'RefundApplyRiskAccept';
+    /**
+     * 场景：<b>【申请退款2】风控审核未通过</b>
+     */
+    const REFUND_APPLY_RISK_REFUSE = 'RefundApplyRiskRefuse';
 	/**
      * 场景：<b>【申请退货】</b>
      */
@@ -218,6 +225,12 @@ class SceneConfig {
      * 场景：<b>【花呗分期退款】</b>
      */
     const RETURN_TOKIO = 'ReturnTokio';
+
+
+    /**
+     * 场景：<b>【续租成功】</b>
+     */
+    const RELETSUCCESS = 'ReletSuccess';
 
 
 

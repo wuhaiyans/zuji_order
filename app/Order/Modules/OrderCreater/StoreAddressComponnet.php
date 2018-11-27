@@ -104,6 +104,7 @@ class StoreAddressComponnet implements OrderCreater
         ];
         $id =OrderUserAddressRepository::add($addressData);
         if(!$id){
+            LogApi::alert("OrderCreate:保存订单门店地址失败",$addressData,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Add-StoreAddress-error",$addressData);
             $this->getOrderCreater()->setError("OrderCreate-Add-StoreAddress-error");
             return false;

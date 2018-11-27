@@ -90,6 +90,9 @@ class OrderOperate
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
+                set_msg("获取订单信息失败");
+//                LogApi::alert("OrderDelivery:获取订单信息失败",$orderDetail,[config('web.order_warning_user')]);
+//                LogApi::error(config('app.env')."环境 OrderDelivery:获取订单信息失败",$orderDetail);
                 DB::rollBack();
                 return false;
             }
@@ -99,7 +102,9 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                 //   LogApi::info(config('app.env')."环境-订单发货时更新订单状态失败 ",$orderDetail['order_no']);
+                    set_msg("更新订单状态失败");
+//                    LogApi::alert("OrderDelivery:更新订单状态失败",$orderDetail,[config('web.order_warning_user')]);
+//                    LogApi::error(config('app.env')."环境 OrderDelivery:更新订单状态失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -107,7 +112,9 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                 //   LogApi::info(config('app.env')."环境-订单发货时 订单发货信息失败",$orderDetail['order_no']);
+                    set_msg("增加订单发货信息");
+//                    LogApi::alert("OrderDelivery:增加订单发货信息",$orderDetail,[config('web.order_warning_user')]);
+//                    LogApi::error(config('app.env')."环境 OrderDelivery:增加订单发货信息",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -115,14 +122,18 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                //    LogApi::info(config('app.env')."环境-订单发货时 发货详情",$orderDetail['order_no']);
+                    set_msg("增加发货详情失败");
+//                    LogApi::alert("OrderDelivery:增加发货详情失败",$orderDetail,[config('web.order_warning_user')]);
+//                    LogApi::error(config('app.env')."环境 OrderDelivery:增加发货详情失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
                 if(!$b) {
-                 //   LogApi::info(config('app.env')."环境-订单发货时生成合同失败",$orderDetail['order_no']);
+                    set_msg("生成合同失败");
+//                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
+//                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
                     DB::rollBack();
                     return false;
                 }
@@ -130,6 +141,57 @@ class OrderOperate
                 if(!empty($operatorInfo)){
 
                     OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货",$orderDetail['logistics_note']);
+                }
+                //判断短租订单服务时间
+                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY){
+                    //判断发货三天后的起租时间 是否 大于 起租时间
+                    $beginTime = strtotime(date("Y-m-d",time()+86400*3));
+                    $goodsData = OrderGoodsRepository::getGoodsByOrderNo($orderDetail['order_no']);
+                    $goodsData =objectToArray($goodsData);
+                    foreach ($goodsData as $k=>$v){
+                        if($v['begin_time'] < $beginTime){
+                            //延期天数
+                            $delayDay = ($beginTime -$v['begin_time'])/86400;
+                            $endTime =$v['end_time']+$delayDay*86400;
+                            //如果起租时间小于三天后的时间  更新商品表起止时间
+                            $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsId($v['id']);
+                            $b =$goods->updateGoodsServiceTime([
+                                'begin_time'=>$beginTime,
+                                'end_time'=>$endTime,
+                            ]);
+                            if(!$b){
+                                set_msg("修改商品服务时间失败");
+//                                LogApi::alert("OrderDelivery:修改商品服务时间失败",$orderDetail,[config('web.order_warning_user')]);
+//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改商品服务时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+                            }
+                            //修改 服务周期表时间
+                            $b =ServicePeriod::updateUnitTime($v['goods_no'],$beginTime,$endTime);
+
+                            if(!$b){
+                                set_msg("修改短租服务时间失败");
+//                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);
+//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改短租服务时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+                            }
+
+
+                            //修改订单分期扣款时间
+                            $b = OrderGoodsInstalmentRepository::delayInstalment($orderDetail['order_no'],$delayDay);
+                            if(!$b){
+                                set_msg("修改分期延期扣款时间失败");
+//                                LogApi::alert("OrderDelivery:修改分期延期扣款时间失败",$orderDetail,[config('web.order_warning_user')]);
+//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改分期延期扣款时间失败",$orderDetail);
+                                DB::rollBack();
+                                return false;
+
+                            }
+
+
+                        }
+                    }
                 }
                 DB::commit();
                 //增加确认收货队列
@@ -459,20 +521,32 @@ class OrderOperate
      */
 
     public static function deliveryReceive($params,$system=0){
+
         $orderNo =$params['order_no'];
         $remark = isset($params['remark'])?$params['remark']:'';
+        $res=redisIncr("deliveryReceive".$orderNo,5*60);
+        if($res>1){
+            return false;
+        }
 
-        if(empty($orderNo)){set_msg("参数错误");return false;}
+        if(empty($orderNo)){
+            set_msg("参数错误");
+            return false;
+        }
         DB::beginTransaction();
             //获取订单信息
             $order = Order::getByNo($orderNo);
             if(!$order){
+                LogApi::alert("DeliveryReceive:获取订单信息失败",$params,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:获取订单信息失败",$params);
                 DB::rollBack();
                 return false;
             }
             //更新订单状态
             $b =$order->sign();
             if(!$b){
+                LogApi::alert("DeliveryReceive:更新订单状态失败",$params,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:更新订单状态失败",$params);
                 DB::rollBack();
                 return false;
             }
@@ -489,7 +563,8 @@ class OrderOperate
                 $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[0]['goods_no']);
                 $b =$goods->updateGoodsServiceTime($goodsData);
                 if(!$b){
-                    LogApi::error(config('app.env')."环境 确认收货更新商品表失败",$goodsInfo);
+                    LogApi::alert("DeliveryReceive:更新商品服务时间失败",$params,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."环境 DeliveryReceive:更新商品服务时间失败",$params);
                     DB::rollBack();
                     return false;
                 }
@@ -505,54 +580,56 @@ class OrderOperate
                 ];
                 $b =ServicePeriod::createService($unitData);
                 if(!$b){
-                    LogApi::error(config('app.env')."环境 确认收货 增加商品租期表失败",$unitData);
+                    LogApi::alert("DeliveryReceive:增加商品租期表失败",$params,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."环境 DeliveryReceive:增加商品租期表失败",$params);
                     DB::rollBack();
                     return false;
                 }
             }
             // 兼容老订单系统（短租服务时间为确认收货时间） 后期可以删除
-            if($orderInfo['zuqi_type'] == 1){
-                //查询商品信息
-                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
-                foreach ($goodsInfo as $k=>$v){
-                    if($goodsInfo[$k]['begin_time'] ==0 && $goodsInfo[$k]['end_time'] ==0){
-                        //更新商品表
-                        $goodsData['begin_time'] = time();
-                        $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[$k]['zuqi']);
-                        $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[$k]['goods_no']);
-                        $b =$goods->updateGoodsServiceTime($goodsData);
-                        if(!$b){
-                            LogApi::error(config('app.env')."环境 确认收货更新商品表失败",$goodsInfo);
-                            DB::rollBack();
-                            return false;
-                        }
-
-                        //增加商品租期表
-                        $unitData =[
-                            'order_no'=>$orderNo,
-                            'goods_no'=>$goodsInfo[$k]['goods_no'],
-                            'user_id'=>$orderInfo['user_id'],
-                            'unit'=>1,
-                            'unit_value'=>$goodsInfo[$k]['zuqi'],
-                            'begin_time'=>$goodsData['begin_time'],
-                            'end_time'=>$goodsData['end_time'],
-                        ];
-                        $b =ServicePeriod::createService($unitData);
-                        if(!$b){
-                            LogApi::error(config('app.env')."环境 确认收货 增加商品租期表失败",$unitData);
-                            DB::rollBack();
-                            return false;
-                        }
-
-                    }
-                }
-
-            }
+//            if($orderInfo['zuqi_type'] == 1){
+//                //查询商品信息
+//                $goodsInfo = OrderRepository::getGoodsListByOrderId($orderNo);
+//                foreach ($goodsInfo as $k=>$v){
+//                    if($goodsInfo[$k]['begin_time'] ==0 && $goodsInfo[$k]['end_time'] ==0){
+//                        //更新商品表
+//                        $goodsData['begin_time'] = time();
+//                        $goodsData['end_time']=OrderOperate::calculateEndTime($goodsData['begin_time'],$goodsInfo[$k]['zuqi']);
+//                        $goods = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goodsInfo[$k]['goods_no']);
+//                        $b =$goods->updateGoodsServiceTime($goodsData);
+//                        if(!$b){
+//                            LogApi::error(config('app.env')."环境 确认收货更新商品表失败",$goodsInfo);
+//                            DB::rollBack();
+//                            return false;
+//                        }
+//
+//                        //增加商品租期表
+//                        $unitData =[
+//                            'order_no'=>$orderNo,
+//                            'goods_no'=>$goodsInfo[$k]['goods_no'],
+//                            'user_id'=>$orderInfo['user_id'],
+//                            'unit'=>1,
+//                            'unit_value'=>$goodsInfo[$k]['zuqi'],
+//                            'begin_time'=>$goodsData['begin_time'],
+//                            'end_time'=>$goodsData['end_time'],
+//                        ];
+//                        $b =ServicePeriod::createService($unitData);
+//                        if(!$b){
+//                            LogApi::error(config('app.env')."环境 确认收货 增加商品租期表失败",$unitData);
+//                            DB::rollBack();
+//                            return false;
+//                        }
+//
+//                    }
+//                }
+//
+//            }
 
             //更新订单商品的状态
             $b = OrderGoodsRepository::setGoodsInService($orderNo);
             if(!$b){
-                LogApi::error(config('app.env')."环境 确认收货 更新订单商品状态失败 ",$orderNo);
+                LogApi::alert("DeliveryReceive:更新商品状态失败",$params,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:更新商品状态失败",$params);
                 DB::rollBack();
                 return false;
             }
@@ -582,7 +659,8 @@ class OrderOperate
             //通知给收发货系统
             $b =Delivery::orderReceive($params);
             if(!$b){
-                LogApi::error(config('app.env')."环境 通知发货系统确认收货失败",$orderNo);
+                LogApi::alert("DeliveryReceive:通知发货系统确认收货失败",$params,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:通知发货系统确认收货失败",$params);
                 DB::rollBack();
                 return false;
             }
@@ -591,7 +669,8 @@ class OrderOperate
             if($orderInfo['pay_type'] == PayInc::LebaifenPay){
                 $b =self::lebaifenDelivery($orderNo,$orderInfo['pay_type']);
                 if(!$b){
-                    LogApi::error(config('app.env')."环境 确认收货调用乐百分 失败",$orderNo);
+                    LogApi::alert("DeliveryReceive:乐百分调用乐百分失败",$params,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."环境 DeliveryReceive:乐百分调用乐百分失败",['order_no'=>$orderNo]);
                     DB::rollBack();
                     return false;
                 }
@@ -632,12 +711,14 @@ class OrderOperate
             //查询支付单信息
             $payInfo = OrderPayRepository::find($orderNo);
             if(empty($payInfo)){
-                LogApi::error(config('app.env')."环境 确认收货乐百分支付order_pay表为空",$orderNo);
+                LogApi::alert("DeliveryReceive:乐百分支付order_pay表为空",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:乐百分支付order_pay表为空",['order_no'=>$orderNo]);
                 return false;
             }
             $paymentInfo = OrderPayPaymentRepository::find($payInfo['payment_no']);
             if(empty($paymentInfo)){
-                LogApi::error(config('app.env')."环境 确认收货乐百分支付order_pay_payment表为空",$payInfo['payment_no']);
+                LogApi::alert("DeliveryReceive:乐百分支付order_pay_payment表为空",$payInfo,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 DeliveryReceive:乐百分支付order_pay_payment表为空",$payInfo);
                 return false;
             }
 
@@ -651,6 +732,7 @@ class OrderOperate
                 return true;
 
             }catch (\Exception $e){
+                LogApi::alert("DeliveryReceive:乐百分支付调用乐百分接口失败",$param,[config('web.order_warning_user')]);
                 LogApi::error(config('app.env')."环境 确认收货乐百分支付 确认收货调用乐百分接口失败",array_merge($payInfo,$paymentInfo));
                 return false;
             }
@@ -975,6 +1057,8 @@ class OrderOperate
             //关闭订单状态
             $orderData =  OrderRepository::closeOrder($orderNo,$userId);
             if (!$orderData) {
+                LogApi::alert("CancelOrder:关闭订单状态失败",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 CancelOrder:关闭订单状态失败",['order_no'=>$orderNo]);
                 DB::rollBack();
                 return ApiStatus::CODE_31002;
             }
@@ -986,6 +1070,8 @@ class OrderOperate
             if ($isInstalment) {
                 $success =  Instalment::close(['order_no'=>$orderNo]);
                 if (!$success) {
+                    LogApi::alert("CancelOrder:关闭分期失败",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."环境 CancelOrder:关闭分期失败",['order_no'=>$orderNo]);
                     DB::rollBack();
                     return ApiStatus::CODE_31004;
                 }
@@ -1007,6 +1093,8 @@ class OrderOperate
             }
 
             if (!$success || empty($orderGoods)) {
+                LogApi::alert("CancelOrder:恢复库存失败",$goods_arr,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 CancelOrder:恢复库存失败",$goods_arr);
                 DB::rollBack();
                 return ApiStatus::CODE_31003;
             }
@@ -1022,6 +1110,8 @@ class OrderOperate
                     ];
                     $b =$withhold->unbind($params);
                     if(!$b){
+                        LogApi::alert("CancelOrder:解除代扣失败",$params,[config('web.order_warning_user')]);
+                        LogApi::error(config('app.env')."环境 CancelOrder:解除代扣失败",$params);
                         DB::rollBack();
                         return ApiStatus::CODE_31008;
                     }
@@ -1048,6 +1138,8 @@ class OrderOperate
                 $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
 
                 if ($success) {
+                    LogApi::alert("CancelOrder:恢复优惠券失败",$orderCouponData,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."环境 CancelOrder:恢复优惠券失败",$orderCouponData);
                     DB::rollBack();
                     return ApiStatus::CODE_35023;
                 }
@@ -1084,6 +1176,7 @@ class OrderOperate
 
         } catch (\Exception $exc) {
             DB::rollBack();
+            LogApi::alert("CancelOrder:未支付取消订单异常",['error'=>$exc->getMessage()],[config('web.order_warning_user')]);
             LogApi::info("未支付取消订单异常",$exc);
             return  ApiStatus::CODE_31006;
         }

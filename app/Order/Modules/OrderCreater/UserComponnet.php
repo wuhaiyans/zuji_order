@@ -58,6 +58,7 @@ class UserComponnet implements OrderCreater
         try{
             $userInfo =User::getUser($this->userId,$addressId);
         }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取用户接口失败",['error'=>$e->getMessage()],[config('web.order_warning_user')]);
             LogApi::error("OrderCreate-GetUser-error:".$e->getMessage());
             throw new Exception("GetUser:".$e->getMessage());
         }
@@ -199,6 +200,7 @@ class UserComponnet implements OrderCreater
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
         if(!$id){
+            LogApi::alert("OrderCreate:保存用户认证信息失败",$RiskData,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Add-RistData-error",$RiskData);
             $this->getOrderCreater()->setError("OrderCreate-Add-RistData-error");
             return false;

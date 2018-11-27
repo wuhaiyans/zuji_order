@@ -37,6 +37,7 @@ class RiskComponnet implements OrderCreater
             $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
             $this->knight =$knight;
         }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取用户风控信息失败",['user_id'=>$data['user']['user_id']],[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-GetRisk-error:".$e->getMessage());
             $this->knight =[];
         }
@@ -98,6 +99,7 @@ class RiskComponnet implements OrderCreater
         $certified->user_type = $isStudent;
         $certified->card_img = isset($this->knight['card_img']) && !empty($this->knight['card_img'])?$this->knight['card_img']:"";
         if (!$certified->save()) {
+            LogApi::alert("OrderCreate:保存用户风控信息失败",['order_no'=>$orderNo],[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Update-UserCertified-error",$this->knight);
             $this->getOrderCreater()->setError('OrderCreate-Update-UserCertified-error');
             return false;

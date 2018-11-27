@@ -319,6 +319,7 @@ class OrderComponnet implements OrderCreater
         $orderRepository = new OrderRepository();
         $orderId = $orderRepository->add($orderData);
         if (!$orderId) {
+            LogApi::alert("OrderCreate:保存订单信息失败",$orderData,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Add-OrderData-error",$orderData);
             $this->getOrderCreater()->setError('OrderCreate-Add-OrderData-error');
             return false;
