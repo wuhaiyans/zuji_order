@@ -695,6 +695,7 @@ class OrderRepository
 
         //第三方渠道类型
         if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
             $whereInArray = $param['channel_id'];
         }
 
@@ -755,6 +756,9 @@ class OrderRepository
             $page = 1;
         }
 
+
+       // sql_profiler();
+
             $whereArray[] = ['order_info.create_time', '>', 0];
             $count = DB::table('order_info')
                 ->select(DB::raw('count(order_info.order_no) as order_count'))
@@ -770,8 +774,12 @@ class OrderRepository
                 ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                     return $join->whereIn('order_info.channel_id', $whereInArray);
                 })
-                ->where($whereArray)
-                ->where($orWhereArray)
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })
+                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
+                    return $join->where($orWhereArray);
+                })
                 ->first();
                 $count = objectToArray($count)['order_count'];
                 if (!isset($param['count'])) {
@@ -791,8 +799,12 @@ class OrderRepository
                 ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                     return $join->whereIn('order_info.channel_id', $whereInArray);
                 })
-                ->where($whereArray)
-                ->where($orWhereArray)
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })
+                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
+                    return $join->where($orWhereArray);
+                })
                 ->orderBy('order_info.create_time', 'DESC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
