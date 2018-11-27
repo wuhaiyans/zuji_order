@@ -18,6 +18,7 @@ use App\Order\Modules\Repository\Pay\WithholdQuery;
 class WithholdController extends Controller
 {
 
+    protected static $email = ['maxiaoyu@huishoubao.com.cn'];
     /**
      * 代扣协议查询
      * @param array $request
@@ -124,12 +125,14 @@ class WithholdController extends Controller
             // 判断用户代扣协议是否允许 解约
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
             if($withhold->getCounter() != 0){
+                LogApi::alert("unsign:不允许解除代扣",$params['params'],self::$email);
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '不允许解约');
             }
 
             $result   = $withhold->unsignApply();
             if(!$result){
+                LogApi::alert("unsign:解约代扣失败",$params['params'],self::$email);
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
             }
@@ -137,6 +140,7 @@ class WithholdController extends Controller
             DB::commit();
             return apiResponse([],ApiStatus::CODE_0,"success");
         } catch (\Exception $exc) {
+            LogApi::alert("unsign:解约失败",[$exc->getMessage()],self::$email);
             return apiResponse( [], ApiStatus::CODE_50000, '服务器繁忙，请稍候重试...');
 
         }
@@ -302,13 +306,14 @@ class WithholdController extends Controller
 
 
                 if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
-
+                    LogApi::alert("withhold_createpay:分期代扣错误,返回的结果及参数分别为",[$withholdStatus,$withholding_data],self::$email);
                     LogApi::error('[withhold_createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 }
                 LogApi::error('[withhold_createpay]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
+                LogApi::alert("withhold_createpay:分期代扣失败",[$exc->getMessage()],self::$email);
                 LogApi::error('[withhold_createpay]分期代扣失败', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
@@ -512,15 +517,15 @@ class WithholdController extends Controller
                     $withStatus = $withholding->deduct($withholding_data);
 
                     if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-
+                        LogApi::alert("multiCreatepay:分期代扣错误,返回的结果及参数分别为：", [$withStatus,$withholding_data],self::$email);
                         LogApi::error('[multiCreatepay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
                         OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     }
 
                     \App\Lib\Common\LogApi::error('multiCreatepay分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\App\Lib\ApiException $exc){
-
-                    \App\Lib\Common\LogApi::error('multiCreatepay分期代扣错误', $withholding_data);
+                    LogApi::alert("multiCreatepay:分期代扣错误", $withholding_data,self::$email);
+                    \App\Lib\Common\LogApi::error('multiCreatepay:分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
                     if ($exc->getMessage()== "BUYER_BALANCE_NOT_ENOUGH" || $exc->getMessage()== "BUYER_BANKCARD_BALANCE_NOT_ENOUGH") {
@@ -817,13 +822,14 @@ class WithholdController extends Controller
 //                        $withStatus = $withholding->deduct($withholding_data);
 //
 //                        if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-//
-//                            \App\Lib\Common\LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
+//                            LogApi::alert("crontabCreatepay:分期代扣错误,返回的结果及参数分别为", [$withStatus,$withholding_data],self::$email);
+//                            LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
 //                            OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
 //                        }
                         $withStatus = "TestCreatepay";
                         LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
                     }catch(\App\Lib\ApiException $exc){
+                        LogApi::alert("crontabCreatepay:分期代扣错误异常".$subject, [$exc->getMessage()],self::$email);
                         LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                         //捕获异常 买家余额不足
@@ -1008,10 +1014,12 @@ class WithholdController extends Controller
 			DB::commit();
 		} catch (\App\Lib\ApiException $ex) {
 			DB::rollBack();
-			LogApi::error('系统接口异常',$ex->getOriginalValue());
+            LogApi::alert("repayment:主动还款失败", [$ex->getOriginalValue(),$ex->getMessage()],self::$email);
+            LogApi::error('系统接口异常',$ex->getOriginalValue());
 			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
 		} catch (\Exception $ex) {
 			DB::rollBack();
+            LogApi::alert("repayment:主动还款失败", [$ex->getMessage()],self::$email);
 			LogApi::error('系统异常',$ex);
 			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
 		} 
