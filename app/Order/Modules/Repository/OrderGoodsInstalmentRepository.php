@@ -64,7 +64,8 @@ class OrderGoodsInstalmentRepository
 
         //逾期天数
         if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
-            $whereArray = getBeoverduetime($param['beoverdue_day']);
+            $beoverdue_day = strtoupper($param['beoverdue_day']);
+            $whereArray = getBeoverduetime($beoverdue_day);
         }
 
         //根据订单号
@@ -140,7 +141,8 @@ class OrderGoodsInstalmentRepository
 
         //逾期天数
         if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
-            $whereArray = getBeoverduetime($param['beoverdue_day']);
+            $beoverdue_day = strtoupper($param['beoverdue_day']);
+            $whereArray = getBeoverduetime($beoverdue_day);
         }
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
@@ -176,7 +178,7 @@ class OrderGoodsInstalmentRepository
         if(isset($param['is_instalment_list'])){
             $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
         }
-
+        LogApi::info('[instalmentQueryList]',$whereArray);
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)

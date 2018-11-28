@@ -204,6 +204,7 @@ class OrderClearingRepository
         LogApi::debug("[clear]创建结算清单参数",$order_data);
         $success =$orderClearData->insert($order_data);
         if(!$success){
+            OrderCleaning::warningCleanOrder('清算生成失败,插入的参数:',$order_data);
             return false;
         }
 

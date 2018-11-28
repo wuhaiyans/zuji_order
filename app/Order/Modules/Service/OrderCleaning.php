@@ -32,6 +32,23 @@ use Illuminate\Support\Facades\DB;
 class OrderCleaning
 {
 
+    protected static $toEmail = array (
+        'wutiantang@huishoubao.com.cn'
+        );
+
+
+    /**
+     * 清算报错日志
+     * Author: heaven
+     * @param $msg  警报标题
+     * @param array $data  警报内容
+     */
+    public static function warningCleanOrder($msg='',  $data= array())
+    {
+            $msg = '[warningCleanOrder]'.$msg;
+            LogApi::alert($msg, $data,self::$toEmail);
+    }
+
 
 
     /**
@@ -451,6 +468,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[minicleanAccount发起]操作请求异常',$e);
+            self::warningCleanOrder('发起清算异常，清算参数',[$param,$e]);
             return apiResponseArray(31202,[],"操作请求异常".$e->getMessage());
 
         }
@@ -521,6 +539,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起退款]操作请求异常',$e);
+            self::warningCleanOrder('请求支付系统退款异常',[$orderCleanData,$e]);
             return false;
         }
 
@@ -612,6 +631,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起预授权解除]操作请求异常',$e);
+            self::warningCleanOrder('请求支付系统预授权解除异常',[$orderCleanData,$e]);
             return false;
         }
 

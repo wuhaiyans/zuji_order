@@ -664,6 +664,7 @@ class PayController extends Controller
 									$userinfo);
 							if( !$b ){
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('回调退款业务接口异常:',[$businessParam, $userinfo,$b]);
                                 LogApi::error(__method__.'[cleanAccount回调退款]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$b]);
                                 $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款回调业务接口失败');
 							}
@@ -672,13 +673,15 @@ class PayController extends Controller
 							
                         }  else {
 							DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调退款]业务回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调退款更新清算status异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调退款]业务回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
 					DB::rollBack();
                     $this->innerErrMsg();
+                    OrderCleaning::warningCleanOrder('回调退款状态更新异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调退款]退款业务状态更新失败');
                     $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务状态更新失败');
                 }
@@ -778,6 +781,7 @@ class PayController extends Controller
                             if( !$success ){
 
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('清算退押金回调业务异常:',[$businessParam, $userinfo,$success]);
                                 LogApi::error(__method__.'[cleanAccount回调解除预授权]回调业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$success]);
                                 $this->innerErrMsg('回调业务接口失败');
                             }
@@ -786,12 +790,14 @@ class PayController extends Controller
                         }  else {
 
                             DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调解除预授权]业务回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调解除预授权更新订单status状态异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调解除预授权]业务回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg('押金解押业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('回调解除预授权更新订单退押金状态异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调解除预授权] 更新订单退押金状态失败');
                     $this->innerErrMsg('更新订单退押金状态失败');
 
@@ -895,18 +901,21 @@ class PayController extends Controller
                                 $businessParam['status'],$userinfo);
                             if( !$success ){//
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('清算押金转支付回调业务异常:',[$businessParam,$userinfo,$success]);
                                 LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调业务失败参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$userinfo,$success]);
                                 $this->innerErrMsg('押金转支付回调业务业务失败');
                             }
                             LogApi::info(__method__.'[cleanAccount回调预授权转支付]调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
                         }  else {
                             DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调预授权转支付更新status的状态异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg('押金转支付回调更新整体清算的状态失败');
                         }
                     }
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('回调预授权转支付更新押金转支付的状态异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调预授权转支付]更新押金转支付的状态失败');
                     $this->innerErrMsg('押金转支付的状态更新失败');
                 }
@@ -1013,12 +1022,14 @@ class PayController extends Controller
                     LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$userinfo,$success]);
                     if (!$success) {
                         DB::rollBack();
+                        OrderCleaning::warningCleanOrder('微回收回调订单清算业务接口失败:',[$businessParam,$userinfo,$success]);
                         $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
                     }
                     DB::commit();
                     $this->innerOkMsg();
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('微回收回调更新清算状态失败:',$orderParam);
                     LogApi::error(__method__.'[lebaiCleanAccount微回收回调 更新订单清算状态失败');
                     $this->innerErrMsg('微回收回调更新订单清算状态失败');
                 }

@@ -353,8 +353,10 @@ class OrderController extends Controller
     public function orderList(Request $request){
         try{
 
-            $params = $request->input('params');
+            $allParams = $request->all();
+            $params =   $allParams['params'];
 
+            $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
             $orderData = Service\OrderOperate::getOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
