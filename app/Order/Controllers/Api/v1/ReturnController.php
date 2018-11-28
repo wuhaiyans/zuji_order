@@ -220,6 +220,7 @@ class ReturnController extends Controller
     {
         $orders =$request->all();
         $params = $orders['params'];
+        $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
         $return_list = $this->OrderReturnCreater->get_list($params);
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 

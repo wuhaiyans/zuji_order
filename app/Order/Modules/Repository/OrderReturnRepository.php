@@ -92,14 +92,20 @@ class OrderReturnRepository
      * 查询退货、退款列表
      * @param $where
      * @param $additional
+     * @param $whereInArray渠道类型
      * @return array
      *
      */
-    public static function get_list(array $where,array $additional){
+    public static function get_list(array $where,$whereInArray,array $additional){
         $parcels = DB::table('order_return')
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
-            ->where($where)
+            ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                return $join->whereIn('order_info.channel_id', $whereInArray);
+            })
+            ->when(!empty($where),function($join) use ($where) {
+                return $join->where($where);
+            })
             ->select('order_return.create_time as c_time','order_return.*','order_info.create_time','order_info.mobile','order_info.order_amount','order_info.order_status','order_goods.goods_name','order_goods.zuqi')
             ->orderBy('order_return.create_time', 'DESC')
             ->paginate($additional['size'],$columns = ['*'], $pageName = 'page', $additional['page']);

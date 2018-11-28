@@ -1240,11 +1240,17 @@ class OrderReturnCreater
         if (isset($params['appid'])) {
             $where['appid'] = $params['appid'];
         }
+        //第三方渠道类型
+        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
+            $whereInArray = $param['channel_id'];
+        }
+
         // 查询退货申请单
         $additional['page'] = $page;
         $additional['size'] = $size;
         $where = $this->_parse_order_where($where);
-        $data = $this->orderReturnRepository->get_list($where, $additional);
+        $data = $this->orderReturnRepository->get_list($where,$whereInArray, $additional);
         foreach($data['data'] as $k=>$v){
             //是否显示审核操作
             if($data['data'][$k]->status!=ReturnStatus::ReturnCreated){
