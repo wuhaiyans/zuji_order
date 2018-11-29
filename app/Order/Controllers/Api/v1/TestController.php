@@ -24,11 +24,11 @@ class TestController extends Controller
 
 
 
-		//发送短信
+		// 发送短信
 		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'GA81697084214033',
-			"GivebackReturnDeposit");
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+			"XAB1568981254942",
+			"ReletSuccess");
 		$notice->notify();
 	
 //		//发送短信
