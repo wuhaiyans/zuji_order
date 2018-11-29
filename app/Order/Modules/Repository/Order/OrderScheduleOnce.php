@@ -46,7 +46,7 @@ class OrderScheduleOnce {
     {
         $this->__method([
             'method' => 'api.inner.yajinReduce',
-            'time' => time()+config('web.order_request_risk'),
+            'time' => time()+1,
             'function' => 'YajinReduce',
         ]);
     }
