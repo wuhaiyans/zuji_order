@@ -221,7 +221,9 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
-        LogApi::debug("[returnList]接受用户信息",$orders['userinfo']);
+        LogApi::debug("[returnList]接受用户信息",[
+            'userinfo'=>$orders['userinfo'],
+            'channe_id'=>$params['channel_id']]);
         $return_list = $this->OrderReturnCreater->get_list($params);
         //根据渠道判断是否显示导出按钮
         if(!empty($params['channel_id'])){
