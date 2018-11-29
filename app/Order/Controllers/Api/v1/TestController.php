@@ -27,7 +27,7 @@ class TestController extends Controller
 		// 发送短信
 		$notice = new \App\Order\Modules\Service\OrderNotice(
 			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
-			"XAB1568981254942",
+			"XAB2181696214512",
 			"ReletSuccess");
 		$notice->notify();
 	
