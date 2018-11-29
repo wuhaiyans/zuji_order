@@ -1252,11 +1252,8 @@ class OrderReturnCreater
             $where['appid'] = $params['appid'];
         }
         //第三方渠道类型
-        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
-            if(is_array($param['channel_id'])){
-                $whereInArray =implode(",", $param['channel_id']);
-            }
-            $whereInArray = $param['channel_id'];
+        if (isset($params['channel_id']) && !empty($params['channel_id'])) {
+            $whereInArray = $params['channel_id'];
         }
 
         // 查询退货申请单
