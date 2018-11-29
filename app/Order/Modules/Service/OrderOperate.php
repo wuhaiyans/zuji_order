@@ -1110,7 +1110,7 @@ class OrderOperate
             $b =self::YajinRecovery($orderNo,$userId,Inc\OrderStatus::OrderCancel);
             if(!$b){
                 DB::rollBack();
-                return ApiStatus::CODE_60002;
+                return ApiStatus::CODE_31009;
             }
 
             //优惠券归还

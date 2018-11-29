@@ -178,6 +178,7 @@ class OrderController extends Controller
             $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
                 'sku_id' => $sku[0]['sku_id'],
                 'auth_token' => $params['auth_token'],
+                'appid'=>$appid,
             ]);
             if(isset($coupon[0])){
                 $coupon = $coupon[0];
