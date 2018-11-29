@@ -3440,12 +3440,13 @@ class OrderReturnCreater
      *  'overDue_period'=>'', 【可选】 逾期时间段
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
-     * ]
      * 'channel_id'=>         【必传】渠道
+     * ]
+     *
      * @return array
      */
-    public static function overDue($params,$channel_id){
-        $orderListArray = OrderReturnRepository::getAdminOrderList($params,$channel_id);
+    public static function overDue($params){
+        $orderListArray = OrderReturnRepository::getAdminOrderList($params);
         LogApi::debug("[overDue]用户逾期获取数据",$orderListArray);
         if (!empty($orderListArray['data'])) {
 
@@ -3564,13 +3565,14 @@ class OrderReturnCreater
      *   'keyword'   =>'',   //关键词    string  【可选】
      *   'page'      =>'',   //页数       int    【可选】
      *   'size'      =>'',   //条数       int    【可选】
+     *   'channel_id'  =>''    //渠道   【必传】
      * ]
-     * 'channel_id'  =>''    //渠道   【必传】
+     *
      *@return array
      *
      */
-    public function underLineReturn(array $params,$channel_id){
-        $orderListArray = OrderReturnRepository::underLineReturn($params,$channel_id);
+    public function underLineReturn(array $params){
+        $orderListArray = OrderReturnRepository::underLineReturn($params);
         LogApi::debug("[underLineReturn]获取线下退货退款数据",$orderListArray);
         if (!empty($orderListArray['data'])) {
             foreach ($orderListArray['data'] as $keys=>$values) {
