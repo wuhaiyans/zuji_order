@@ -105,6 +105,8 @@ class Delivery
      *  'order_no'  => '', //【必须】string 订单编号
      *  'business_key'=>'',//【必须】string 业务编码
      *  'business_no'=>'',//【必须】string 业务编号
+     *  'channel_id'=>'',//【必须】string 所属渠道ID
+     *  'appid'=>'',//【必须】string 来源appid
      *  'predict_delivery_time'=>'',//【必须】string 预计发货时间
      *  'customer'  => '',//【必须】string 收货人姓名
      *  'customer_mobile' => '',//【必须】string 收货人手机号
@@ -123,6 +125,7 @@ class Delivery
             'business_key'=>$orderInfo['business_key'],
             'business_no'=>$orderInfo['business_no'],
             'channel_id'=>$orderInfo['channel_id'],
+            'appid'=>$orderInfo['appid'],
             'predict_delivery_time'=>$orderInfo['predict_delivery_time'],
             'customer'  => $orderInfo['name'],
             'customer_mobile'    => $orderInfo['consignee_mobile'],

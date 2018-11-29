@@ -739,6 +739,14 @@ class OrderReturnCreater
             }
             //存在审核同意商品
             if(isset($goodsDeliveryInfo)){
+                //获取订单信息
+                $order = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
+                if ( !$order ){
+                    LogApi::debug("[returnOfGoods]获取订单信息失败".$order);
+                    return false;
+                }
+                $order_info = $order->getData();
+
                 //获取用户下单信息
                 $userAddress = \App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
                 if(!$userAddress){
@@ -761,6 +769,8 @@ class OrderReturnCreater
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
+                        'channel_id'  =>$order_info['channel_id'],
+                        'app_id'       =>$order_info['appid']
                     ];
                 }
                 LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);
