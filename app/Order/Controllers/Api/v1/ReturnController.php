@@ -770,8 +770,8 @@ class ReturnController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-            $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
-            LogApi::debug("[underLineReturn]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
+        //    $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+         //   LogApi::debug("[underLineReturn]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
             $orderData =$this->OrderReturnCreater->underLineReturn($params);
 
             if ($orderData['code']===ApiStatus::CODE_0){
