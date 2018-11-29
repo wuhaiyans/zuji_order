@@ -770,7 +770,7 @@ class OrderReturnCreater
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
                         'channel_id'  =>$order_info['channel_id'],
-                        'app_id'       =>$order_info['appid']
+                        'appid'       =>$order_info['appid']
                     ];
                 }
                 LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);
