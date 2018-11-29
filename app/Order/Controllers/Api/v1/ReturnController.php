@@ -221,7 +221,16 @@ class ReturnController extends Controller
         $orders =$request->all();
         $params = $orders['params'];
         $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+        LogApi::debug("[returnList]接受用户信息",[
+            'userinfo'=>$orders['userinfo'],
+            'channe_id'=>$params['channel_id']]);
         $return_list = $this->OrderReturnCreater->get_list($params);
+        //根据渠道判断是否显示导出按钮
+        $return_list['export_status'] = true;//默认显示
+        if(!empty($params['channel_id'])){
+            $return_list['export_status'] = false;
+        }
+
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
 
     }
@@ -519,6 +528,7 @@ class ReturnController extends Controller
      *      'uid'      =>''     用户id      int      【必传】
      *      'username' =>''    用户名      string   【必传】
      *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *       'channel_id' =>'' 渠道                  【必传】 0 全部，array()
      * ]
      *
      * @return \Illuminate\Http\JsonResponse|string
@@ -743,6 +753,13 @@ class ReturnController extends Controller
      *   'page'      =>'',   //页数      int    【可选】
      *  'size'       =>'',   //条数      int    【可选】
      * ]
+     * [
+     *      'uid'      =>''     用户id      int      【必传】
+     *      'username' =>''    用户名      string   【必传】
+     *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
+     *       'channel_id' =>'' 渠道                  【必传】 0 全部，array()
+     * ]
+     *
      *@return array
      *
      */
@@ -753,7 +770,8 @@ class ReturnController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-
+            $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+            LogApi::debug("[underLineReturn]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
             $orderData =$this->OrderReturnCreater->underLineReturn($params);
 
             if ($orderData['code']===ApiStatus::CODE_0){

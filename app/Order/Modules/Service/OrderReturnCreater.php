@@ -1256,6 +1256,7 @@ class OrderReturnCreater
             $whereInArray = $params['channel_id'];
         }
 
+
         // 查询退货申请单
         $additional['page'] = $page;
         $additional['size'] = $size;
@@ -3439,7 +3440,9 @@ class OrderReturnCreater
      *  'overDue_period'=>'', 【可选】 逾期时间段
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
+     * 'channel_id'=>         【必传】渠道
      * ]
+     *
      * @return array
      */
     public static function overDue($params){
@@ -3562,7 +3565,9 @@ class OrderReturnCreater
      *   'keyword'   =>'',   //关键词    string  【可选】
      *   'page'      =>'',   //页数       int    【可选】
      *   'size'      =>'',   //条数       int    【可选】
+     *   'channel_id'  =>''    //渠道   【必传】
      * ]
+     *
      *@return array
      *
      */
