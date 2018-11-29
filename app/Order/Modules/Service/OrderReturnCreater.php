@@ -1217,6 +1217,7 @@ class OrderReturnCreater
         $page = empty($params['page']) ? 1 : $params['page'];
         $size = !empty($params['size']) ? $params['size'] : config('web.pre_page_size');
         $where = [];
+        $whereInArray = [];
         if (isset($params['begin_time'])!= '') {
             $where['begin_time'] = strtotime($params['begin_time']);
         }
