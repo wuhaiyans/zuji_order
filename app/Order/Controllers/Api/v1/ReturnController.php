@@ -759,6 +759,7 @@ class ReturnController extends Controller
      *      'type'     =>''   渠道类型     int      【必传】  1  管理员，2 用户，3 系统自动化
      *       'channel_id' =>'' 渠道                  【必传】 0 全部，array()
      * ]
+     *
      *@return array
      *
      */
@@ -769,9 +770,9 @@ class ReturnController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-            $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+            $channel_id = json_decode($orders['userinfo']['channel_id'], true);
             LogApi::debug("[underLineReturn]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
-            $orderData =$this->OrderReturnCreater->underLineReturn($params);
+            $orderData =$this->OrderReturnCreater->underLineReturn($params,$channel_id);
 
             if ($orderData['code']===ApiStatus::CODE_0){
 

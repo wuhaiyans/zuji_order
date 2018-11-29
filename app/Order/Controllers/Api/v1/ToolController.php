@@ -231,9 +231,9 @@ class ToolController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-            $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+            $where['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
             LogApi::debug("[overDue]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
-            $orderData = OrderReturnCreater::overDue($params);
+            $orderData = OrderReturnCreater::overDue($params,$where['channel_id']);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 

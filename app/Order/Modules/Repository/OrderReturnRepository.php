@@ -228,8 +228,9 @@ class OrderReturnRepository
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
      * ]
+     * 'channel_id' => ''     【必传】渠道
      */
-    public static function getAdminOrderList($param = array(), $pagesize=5)
+    public static function getAdminOrderList($param = array(),$channel_id, $pagesize=5)
     {
         $whereArray = array();
         $whereInArray = array();
@@ -297,9 +298,9 @@ class OrderReturnRepository
             $page = 1;
         }
         //第三方渠道类型
-        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+        if (isset($channel_id) && !empty($channel_id)) {
 
-            $whereInArray = $param['channel_id'];
+            $whereInArray = $channel_id;
         }
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
@@ -427,10 +428,11 @@ class OrderReturnRepository
      *   'page'      =>'',   //页数       int    【可选】
      *   'size'      =>'',   //条数       int    【可选】
      * ]
+     * 'channel_id'   =>''   //渠道       【必传】
      *@return array
      *
      */
-    public static function underLineReturn($param = array(), $pagesize=5){
+    public static function underLineReturn($param = array(),$channel_id, $pagesize=5){
         $whereArray = array();
         $whereInArray = array();
         //根据手机号
@@ -468,9 +470,9 @@ class OrderReturnRepository
         $whereArray[] = ['order_return.business_type','=',ReturnStatus::UnderLineBusiness];  //线下业务
         $whereArray[] = ['order_return.business_key','=',OrderStatus::BUSINESS_RETURN];      //退货业务
         //第三方渠道类型
-        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+        if (isset($channel_id) && !empty($channel_id)) {
 
-            $whereInArray = $param['channel_id'];
+            $whereInArray = $channel_id;
         }
 
         LogApi::debug("【underLineReturn】搜索条件",$whereArray);
