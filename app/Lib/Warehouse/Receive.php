@@ -39,6 +39,8 @@ class Receive
      *      'business_no'  => '',   退换货单号  string  【可传】
      *      'zuqi'  => '',   租期  string  【必传】
      *      'zuqi_type'  => '',   租期类型  string  【必传】
+     *      'channel_id'  => '',   渠道  string  【必传】
+     *      'app_id'  => '',      string  【必传】
      * ]
      * @params  $data
      * [
