@@ -231,7 +231,7 @@ class ToolController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-
+            $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
             $orderData = OrderReturnCreater::overDue($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
