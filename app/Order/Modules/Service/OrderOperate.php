@@ -1109,6 +1109,8 @@ class OrderOperate
             //返回风控押金信息
             $b =self::YajinRecovery($orderNo,$userId,Inc\OrderStatus::OrderCancel);
             if(!$b){
+                LogApi::alert("CancelOrder:返回风控押金信息",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 CancelOrder:返回风控押金信息",['order_no'=>$orderNo]);
                 DB::rollBack();
                 return ApiStatus::CODE_31009;
             }
