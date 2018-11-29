@@ -516,7 +516,13 @@ class OrderReturnRepository
                 ->join('order_goods',function($join){
                     $join->on('order_return.order_no', '=', 'order_goods.order_no');
                 }, null,null,'left')
-                ->where($whereArray)
+                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                    return $join->whereIn('order_info.channel_id', $whereInArray);
+                })
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })
+              //  ->where($whereArray)
                 ->orderBy('order_return.create_time', 'DESC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
