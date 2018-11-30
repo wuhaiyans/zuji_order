@@ -7,6 +7,7 @@ use App\Order\Models\OrderRisk;
 use App\Order\Models\OrderUserCertified;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
+use Illuminate\Support\Facades\DB;
 
 class OrderRiskRepository
 {
