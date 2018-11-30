@@ -9,6 +9,7 @@ use \App\Lib\Common\SmsApi;
 use App\Order\Models\OrderReturn;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderOperateInc;
+use App\Order\Modules\Inc\OrderRiskCheckStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderPayPaymentRepository;
@@ -73,7 +74,7 @@ class OrderReturnCreater
      * @return array
      * [
      *   'refund_no'   =>''  业务编号
-     *   'goods_no’   =>''  商品编号
+     *   'goods_no'   =>''  商品编号
      * ]
      */
     public function add(array $params,array $userinfo){
@@ -105,6 +106,11 @@ class OrderReturnCreater
                 if(!$payInfo){
                     return false;//支付单不存在
                 }
+                //短租不允许退货
+                if($order_info['zuqi_type'] ==OrderStatus::ZUQI_TYPE1){
+                    return false;
+                }
+
                 //乐百分支付的用户在14天内可申请退货
                 if( $order_info['pay_type'] == PayInc::LebaifenPay){
                     if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time()) {
@@ -126,7 +132,8 @@ class OrderReturnCreater
                 }
                 //直接支付
                 if( $order_info['pay_type'] == PayInc::FlowerStagePay
-                    || $order_info['pay_type'] == PayInc::UnionPay) {
+                    || $order_info['pay_type'] == PayInc::UnionPay
+                ) {
                     $result['refund_amount'] = $goods_info['amount_after_discount'];//应退退款金额：商品实际支付优惠后总租金
                     $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
@@ -309,6 +316,7 @@ class OrderReturnCreater
                 || $order_info['pay_type'] == PayInc::FlowerStagePay
                 || $order_info['pay_type'] == PayInc::UnionPay
                 || $order_info['pay_type'] == PayInc::WithhodingPay
+
             ){
 
                 if($payInfo){
@@ -326,10 +334,20 @@ class OrderReturnCreater
                 }
 
             }
-
+            //微信支付
+            if( $order_info['pay_type'] == PayInc::WeChatPay ){
+                if($payInfo) {
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                        $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                        $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                        $create_data['out_payment_no']=$payInfo['payment_no'];//支付编号
+                    }
+                }
+            }
 
             //乐百分支付
-            if($order_info['pay_type'] == PayInc::LebaifenPay){
+            if($order_info['pay_type'] == PayInc::LebaifenPay ){
                 LogApi::debug("[createRefund]乐百分支付");
                 if($payInfo){
                     if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
@@ -501,6 +519,19 @@ class OrderReturnCreater
             }
             //事务提交
             DB::commit();
+
+            //根据订单风控审核状态 申请发送短信
+            if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                //风控不通过取消订单
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                $orderNoticeObj->notify();
+            }else{
+                //其他默认通过
+                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                $orderNoticeObj->notify();
+            }
+
+
             return $no_list;
 
         }catch( \Exception $exc){
@@ -708,6 +739,14 @@ class OrderReturnCreater
             }
             //存在审核同意商品
             if(isset($goodsDeliveryInfo)){
+                //获取订单信息
+                $order = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
+                if ( !$order ){
+                    LogApi::debug("[returnOfGoods]获取订单信息失败".$order);
+                    return false;
+                }
+                $order_info = $order->getData();
+
                 //获取用户下单信息
                 $userAddress = \App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
                 if(!$userAddress){
@@ -730,6 +769,8 @@ class OrderReturnCreater
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
+                        'channel_id'  =>$order_info['channel_id'],
+                        'appid'       =>$order_info['appid']
                     ];
                 }
                 LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);
@@ -877,21 +918,16 @@ class OrderReturnCreater
 					return false;
 				}
 				//-+------------------------------------------------------------
-                //判断退款是否为小程序订单
-                if($order_info['order_type'] != OrderStatus::orderMiniService){
-                    //获取订单的支付信息
-                    $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
-                    LogApi::info("[refundApply]获取订单的支付信息",$pay_result);
-                    if(!$pay_result){
-                        return false;
-                    }
+                //获取订单的支付信息
+                $pay_result = $this->orderReturnRepository->getPayNo(1,$return_info['order_no']);
+                LogApi::info("[refundApply]获取订单的支付信息",$pay_result);
+                if($pay_result){
                     if($pay_result['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                         $create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                     }
                     if($pay_result['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                         $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                     }
-
                 }
 
                 //创建清单
@@ -1181,6 +1217,7 @@ class OrderReturnCreater
         $page = empty($params['page']) ? 1 : $params['page'];
         $size = !empty($params['size']) ? $params['size'] : config('web.pre_page_size');
         $where = [];
+        $whereInArray = [];
         if (isset($params['begin_time'])!= '') {
             $where['begin_time'] = strtotime($params['begin_time']);
         }
@@ -1214,11 +1251,17 @@ class OrderReturnCreater
         if (isset($params['appid'])) {
             $where['appid'] = $params['appid'];
         }
+        //第三方渠道类型
+        if (isset($params['channel_id']) && !empty($params['channel_id'])) {
+            $whereInArray = $params['channel_id'];
+        }
+
+
         // 查询退货申请单
         $additional['page'] = $page;
         $additional['size'] = $size;
         $where = $this->_parse_order_where($where);
-        $data = $this->orderReturnRepository->get_list($where, $additional);
+        $data = $this->orderReturnRepository->get_list($where,$whereInArray, $additional);
         foreach($data['data'] as $k=>$v){
             //是否显示审核操作
             if($data['data'][$k]->status!=ReturnStatus::ReturnCreated){
@@ -1708,10 +1751,12 @@ class OrderReturnCreater
                 }
                 //不等于审核拒绝拒绝并且是创建审核后的状态
                 if($return_info['status'] != ReturnStatus::ReturnDenied && $return_info['status'] >ReturnStatus::ReturnCreated){
-                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){  //退货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_RETURN){
+                        //退货业务
                         $buss->setStatusText("您的退货申请已通过审核");
                     }
-                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){  //换货业务
+                    if($params['business_key']==OrderStatus::BUSINESS_BARTER){
+                        //换货业务
                         $buss->setStatusText("您的换货申请已通过审核");
                     }
 
@@ -1874,14 +1919,11 @@ class OrderReturnCreater
                         //$create_data['out_payment_no']=$pay_result['payment_no'];//支付编号
                       //  $create_data['out_auth_no']=$pay_result['fundauth_no'];//预授权编号
                         $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金金额
-                        $create_data['auth_deduction_time']=0;//扣除押金时间
-                        $create_data['auth_unfreeze_time']=0;//退还时间
-                        $create_data['refund_time']=0;//退款时间
                         $create_data['refund_amount']=0;//退款金额
 
                         //退款：直接支付
-                        if($order_info['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerStagePay
-                            ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay
+                        if( $order_info['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerStagePay
+                            || $order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay
                         ){
                             $create_data['auth_unfreeze_amount']=$goods_info['yajin'];//商品实际支付押金
                             $create_data['refund_amount']=$goods_info['amount_after_discount'];//退款金额：商品实际支付优惠后总租金
@@ -2976,21 +3018,16 @@ class OrderReturnCreater
                    return false;
             }
              //-+------------------------------------------------------------
-             //判断退款是否为小程序订单
-             if($order_info['pay_type'] != PayInc::MiniAlipay){
-                 //获取支付信息
-                 $payInfo = OrderPayRepository::find($order_no);
-                 if(!$payInfo){
-                     return false;
-                     LogApi::debug("[refuseSign]未找到支付信息");
-                 }
+
+             //获取支付信息
+             $payInfo = OrderPayRepository::find($order_no);
+             if( $payInfo ){
                  if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                      $create_data['out_payment_no'] = $payInfo['payment_no'];//支付编号
                  }
                  if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
                      $create_data['out_auth_no'] = $payInfo['fundauth_no'];//预授权编号
                  }
-
              }
 
              $data['pay_amount'] = 0.00;
@@ -3007,21 +3044,33 @@ class OrderReturnCreater
                  || $order_info['pay_type'] == PayInc::UnionPay
                  || $order_info['pay_type'] == PayInc::WithhodingPay
              ){
+                 if($payInfo){
+                     if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                         $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                         $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                     }
 
-                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                     $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//实际支付金额=实付租金+意外险
-                     $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance'];//应退金额
+                     if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                         $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                     }
                  }
 
-                 if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                     $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
-                 }
+
 
              }
-
+             //微信支付
+             if( $order_info['pay_type'] == PayInc::WeChatPay ){
+                 if($payInfo) {
+                     if ($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS) {
+                         $data['pay_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//实际支付金额=实付租金+意外险
+                         $data['refund_amount'] = $order_info['order_amount'] + $order_info['order_insurance'];//应退金额
+                         $data['auth_unfreeze_amount'] = $order_info['order_yajin'];//应退押金=实付押金
+                     }
+                 }
+             }
 
              //乐百分支付
-             if($order_info['pay_type'] == PayInc::LebaifenPay){
+             if($order_info['pay_type'] == PayInc::LebaifenPay ){
 
                  //实际支付金额=实付租金+意外险+实付押金
                  $data['pay_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
@@ -3077,15 +3126,15 @@ class OrderReturnCreater
                         //查询芝麻订单
                         $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($order_no);
                         LogApi::debug("[refuseSign]查询芝麻订单",$miniOrderInfo);
-                        $data = [
+                        $mini_data = [
                             'out_order_no' => $order_no,//商户端订单号
                             'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
                             'remark' => "异常处理",//订单操作说明
                             'app_id' => $miniOrderInfo['app_id'],//小程序appid
                         ];
-                        LogApi::info("[refuseSign]通知芝麻取消请求参数",$data);
+                        LogApi::info("[refuseSign]通知芝麻取消请求参数",$mini_data);
                         //通知芝麻取消请求
-                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data);
+                        $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($mini_data);
                         if( !$canceRequest){
                             LogApi::debug("[refuseSign]通知芝麻取消请求失败",$canceRequest);
                             return false;
@@ -3118,9 +3167,9 @@ class OrderReturnCreater
                 $create_data['business_type'] = OrderCleaningStatus::businessTypeRefund;//业务类型
                 $create_data['business_no'] = $data['refund_no'];//业务编号
                 $create_data['refund_status'] = OrderCleaningStatus::refundUnpayed;//退款状态待退款
-                $create_data['refund_amount'] = isset($data['pay_amount']) ?$data['pay_amount']: 0.00;//应退金额
-                $create_data['auth_unfreeze_amount'] = isset($data['auth_unfreeze_amount'] )?$data['auth_unfreeze_amount']: 0;//应退押金
-                $create_data['auth_deduction_amount'] = 0;//应扣押金
+                $create_data['refund_amount'] = isset($data['refund_amount']) ?$data['refund_amount']: 0.00;//应退金额
+                $create_data['auth_unfreeze_amount'] = isset($data['auth_unfreeze_amount'] )?$data['auth_unfreeze_amount']: 0.00;//应退押金
+                $create_data['auth_deduction_amount'] = 0.00;//应扣押金
 
                 LogApi::debug("[refuseSign]创建退款清单参数",$create_data);
                 if( $create_data['refund_amount']>0 || $create_data['auth_unfreeze_amount']>0){
@@ -3189,58 +3238,71 @@ class OrderReturnCreater
             //获取支付信息
             $payInfo = OrderPayRepository::find($order_info['order_no']);
 
-//            if(!$payInfo){
-//                LogApi::debug("【advanceReturn】获取支付信息失败");
-//                return false;//支付单不存在
-//            }
             //获取商品数组
             $goods_info = $goods->getData();
             $result['pay_amount'] =0.00;
             $result['evaluation_amount'] =0.00;
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
-            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
-            if($order_info['pay_type'] == PayInc::LebaifenPay){
-                if($params['compensate_amount']>0){
-                    //应付赔偿金额
-                    $result['evaluation_amount'] = $params['compensate_amount'];
-                }
-
+            $result['auth_deduction_amount'] = 0.00;
+                LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
+            if($order_info['pay_type'] == PayInc::LebaifenPay ){
                 //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
+                $result['refund_amount'] = $result['pay_amount'];
             }
             //花呗分期+预授权
-            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay){
-                if(!$payInfo){
-                    return false;
-                }
-                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    $result['refund_amount'] = 0;//应退退款金额：商品实际支付优惠后总租金
-                    $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
-                }
-
-                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                    $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-                    if( $params['compensate_amount'] > 0 ) {
-                        //赔偿金额必须小于等于押金金额
-                        if( $goods_info['yajin'] < $params['compensate_amount'] ){
-                            LogApi::debug("【advanceReturn】赔偿金额必须小于等于押金金额");
-                            return false;
-                        }
-                        $result['auth_unfreeze_amount'] = $goods_info['yajin']-$params['compensate_amount'];
+            if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay && $order_info['pay_type'] != PayInc::WeChatPay  ){
+                if($payInfo){
+                    if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $result['refund_amount'] = 0.00;//应退退款金额：商品实际支付优惠后总租金
+                        $result['pay_amount'] = $goods_info['amount_after_discount'];//实际支付金额=实付租金
                     }
 
+                    if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                        $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
+
+                        if( $goods_info['yajin'] >= $params['compensate_amount']){
+                            $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                            $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                        }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                            $result['auth_unfreeze_amount'] = 0.00;
+                            $result['auth_deduction_amount'] =  $goods_info['yajin'];
+                        }
+
+                    }
                 }
+
             }
             if($order_info['pay_type'] == PayInc::MiniAlipay){
                 LogApi::debug("【advanceReturn】此订单是小程序订单");
-                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
-            }
+                if( $goods_info['yajin'] >= $params['compensate_amount']){
+                    $result['auth_unfreeze_amount'] = $goods_info['yajin'] - $params['compensate_amount'];//应退押金
+                    $result['auth_deduction_amount'] =  $params['compensate_amount'];
+                }else if( $goods_info['yajin'] < $params['compensate_amount'] ){
+                    $result['auth_unfreeze_amount'] = 0.00;
+                    $result['auth_deduction_amount'] =  $goods_info['yajin'];
+                }
 
+            }
+            //微信支付
+            if($order_info['pay_type'] == PayInc::WeChatPay){
+
+                $result['pay_amount'] = $goods_info['amount_after_discount'];//实付租金
+                $result['refund_amount'] = $result['pay_amount'];//应退租金
+                $result['auth_unfreeze_amount'] = $goods_info['yajin'];//应退押金
+                //赔偿金大于押金和租金的总和则退款金额为0
+                if($goods_info['amount_after_discount']+$goods_info['yajin']<$params['compensate_amount']){
+                    $result['auth_deduction_amount'] =  $goods_info['amount_after_discount']+$goods_info['yajin'];//应扣押金金额
+                }else{
+                    $result['auth_deduction_amount'] = $params['compensate_amount'];
+                }
+            }
             // 创建退换货单参数
             $data = [
                 'goods_no'      => $goods_info['goods_no'],
                 'order_no'      => $params['order_no'],
+                'business_type'  => ReturnStatus::UnderLineBusiness,
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
                 'reason_text'   => "中途退机",
@@ -3249,10 +3311,11 @@ class OrderReturnCreater
                 'refund_no'     => create_return_no(),
                 'pay_amount'    =>$result['pay_amount'] ,            //实付金额
                 'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
-                'auth_deduction_amount' => $params['compensate_amount'],  //应扣押金
+                'auth_deduction_amount' =>  $result['auth_deduction_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
                 'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
                 'evaluation_remark' =>'中途退机，与客户协商的异常订单',
+                'remark'              => '异常订单',
                 'check_time' =>time(),
                 'create_time'   => time(),
             ];
@@ -3287,7 +3350,7 @@ class OrderReturnCreater
             }
             // 如果待退款金额为0，则直接调退款成功的回调
 
-            if(!( $result['auth_unfreeze_amount']>0)){
+            if(!( $result['auth_unfreeze_amount']>0 || $result['refund_amount']>0 || $result['auth_deduction_amount']>0)){
                 //如果是小程序的订单
                 if($order_info['order_type'] == OrderStatus::orderMiniService){
                     //查询芝麻订单
@@ -3328,22 +3391,26 @@ class OrderReturnCreater
             //创建清单参数
             $create_data['order_no']=$params['order_no']; //订单类型
             if($order_info['pay_type'] == PayInc::LebaifenPay){
-                $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+                $create_data['order_type'] = OrderStatus::miniRecover;//订单类型
             }else{
-                $create_data['order_type']=$order_info['order_type'];//订单类型
+                $create_data['order_type'] = $order_info['order_type'];//订单类型
             }
-            $create_data['business_type']=OrderStatus::BUSINESS_RETURN;//业务类型
-            $create_data['business_no']=$data['refund_no'];//业务编号
+            $create_data['business_type'] = OrderStatus::BUSINESS_RETURN;//业务类型
+            $create_data['business_no'] = $data['refund_no'];//业务编号
+            if($payInfo){
+                if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $create_data['out_payment_no'] = $payInfo['payment_no'];//支付编号
+                }
+                if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
+                    $create_data['out_auth_no'] = $payInfo['fundauth_no'];//预授权编号
+                }
+            }
 
-            if($payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS){
-                $create_data['out_auth_no']=$payInfo['fundauth_no'];//预授权编号
-            }
             $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
             $create_data['auth_deduction_amount']=isset($params['compensate_amount'])?$params['compensate_amount']:0.00;//应扣押金金额
-            $create_data['auth_deduction_time']=time();//扣除押金时间
-            $create_data['auth_unfreeze_time']=time();//退还时间
-            $create_data['refund_time']=time();//退款时间
-            $create_data['refund_amount']= 0;//退款金额
+            $create_data['refund_amount']= $result['refund_amount'];//退款金额
+
+
             LogApi::debug("【advanceReturn】创建清单参数",$create_data);
             //创建清单
             $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
@@ -3364,7 +3431,19 @@ class OrderReturnCreater
     }
     /**
      * 用户逾期
+     * @params
+     *[
+     *'visit_id'    => '',  【可选】  回访id    int
+     * 'keywords'    =>'',   【可选】  关键字    string
+     * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
+     * 'page'        =>'',   【可选】  页数       int
+     * 'size'        =>''    【可选】  条数       int
+     * 'channel_id'=>         【必传】渠道
+     * ]
      *
+     * @return array
      */
     public static function overDue($params){
         $orderListArray = OrderReturnRepository::getAdminOrderList($params);
@@ -3477,7 +3556,35 @@ class OrderReturnCreater
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
     }
+    /*线下退货退款列表
+     *@params
+     * [
+     *   'begin_time' => '', //开始时间  int     【可选】
+     *   'end_time'   =>'',  //结束时间  int     【可选】
+     *   'kw_type'   =>'',   //搜索条件  string  【可选】
+     *   'keyword'   =>'',   //关键词    string  【可选】
+     *   'page'      =>'',   //页数       int    【可选】
+     *   'size'      =>'',   //条数       int    【可选】
+     *   'channel_id'  =>''    //渠道   【必传】
+     * ]
+     *
+     *@return array
+     *
+     */
+    public function underLineReturn(array $params){
+        $orderListArray = OrderReturnRepository::underLineReturn($params);
+        LogApi::debug("[underLineReturn]获取线下退货退款数据",$orderListArray);
+        if (!empty($orderListArray['data'])) {
+            foreach ($orderListArray['data'] as $keys=>$values) {
+                //订单状态名称
+                $orderListArray['data'][$keys]['return_status_name'] = ReturnStatus::getStatusName($values['status']);
 
+            }
+
+        }
+
+        return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
+    }
 
 
 }

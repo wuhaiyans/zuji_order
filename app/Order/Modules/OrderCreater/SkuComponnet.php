@@ -52,6 +52,11 @@ class SkuComponnet implements OrderCreater
     private $orderInsurance=0;//订单 意外险
 
 
+    //短租租用时间
+    private $beginTime=0;
+    private $endTime=0;
+
+
 
 	/**
 	 * 
@@ -64,19 +69,26 @@ class SkuComponnet implements OrderCreater
 	 * @param int $payType  //创建订单才有支付方式
 	 * @throws Exception
 	 */
-    public function __construct(OrderCreater $componnet, array $sku,int $payType =0,int $orderType = 0)
+    public function __construct(OrderCreater $componnet, array $sku,int $payType =0)
     {
         $this->componnet = $componnet;
-        $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') );
-        if (!is_array($goodsArr)) {
-            throw new Exception("获取商品接口失败");
+        $mobile = $this->componnet->getOrderCreater()->getUserComponnet()->getMobile();
+        try{
+            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') ,$mobile);
+        }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取商品接口失败",array_column($sku, 'sku_id'),[config('web.order_warning_user')]);
+            LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
+            throw new Exception("GetSkuList:".$e->getMessage());
         }
+
 
         //商品数量付值到商品信息中
         for($i=0;$i<count($sku);$i++){
             $skuNum =$sku[$i]['sku_num'];
             $skuId =$sku[$i]['sku_id'];
             if(empty($goodsArr[$skuId]['spu_info']['payment_list'][0]['id']) || !isset($goodsArr[$skuId]['spu_info']['payment_list'][0]['id'])){
+                LogApi::alert("OrderCreate:商品支付方式错误",$goodsArr[$skuId]['spu_info'],[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."OrderCreate-PayType-error:".$skuId);
                 throw new Exception("商品支付方式错误");
             }
             //默认 获取 商品列表的第一个支付方式
@@ -96,7 +108,10 @@ class SkuComponnet implements OrderCreater
             } elseif ($this->zuqiType == OrderStatus::ZUQI_TYPE_MONTH) {
                 $this->zuqiTypeName = "month";
             }
-            $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
+            $spec =$goodsArr[$skuId]['sku_info']['spec'];
+            if(!is_array($spec)){
+                $spec = json_decode($goodsArr[$skuId]['sku_info']['spec'],true);
+            }
             // 格式化 规格
             $_specs = [];
             foreach($spec as $it){
@@ -113,7 +128,7 @@ class SkuComponnet implements OrderCreater
 
         }
         $this->goodsArr =$goodsArr;
-        $this->orderType =$orderType;
+        $this->orderType =$this->componnet->getOrderCreater()->getOrderType();
     }
 
 
@@ -251,7 +266,6 @@ class SkuComponnet implements OrderCreater
             //计算原始押金
             $yajin =isset($this->deposit[$skuInfo['sku_id']]['yajin'])?normalizeNum($this->deposit[$skuInfo['sku_id']]['yajin']):$skuInfo['yajin'];
 
-
             //计算买断金额
             $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
 
@@ -265,6 +279,19 @@ class SkuComponnet implements OrderCreater
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
             $this->orderYajin =$deposit_yajin;
             $this->orderInsurance =$spuInfo['yiwaixian'];
+
+            //如果是活动领取接口  押金 意外险 租金都 为0
+            if($this->orderType == OrderStatus::orderActivityService){
+                $jianmian = $this->orderYajin;
+                $mianyajin = $this->orderYajin;
+                $this->orderZujin = 0.00;
+                $this->orderYajin = 0.00;
+                $deposit_yajin = 0.00;
+                $spuInfo['yiwaixian'] =0.00; //意外险
+                $amount_after_discount =0.00;
+                $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2)));
+
+            }
 
 
             $arr['sku'][] = [
@@ -306,10 +333,10 @@ class SkuComponnet implements OrderCreater
                     'order_coupon_amount' => $order_coupon_amount,
                     'mianyajin' => $mianyajin,
                     'jianmian' => $jianmian,
-                    'deposit_yajin' => $this->orderYajin,//应缴押金
+                    'deposit_yajin' => $deposit_yajin,//应缴押金
                     'amount_after_discount'=>$amount_after_discount,
-                    'begin_time'=>$skuInfo['begin_time'],
-                    'end_time'=>$skuInfo['end_time'],
+                    'begin_time'=>$this->beginTime?:$skuInfo['begin_time'],
+                    'end_time'=>$this->endTime?:$skuInfo['end_time'],
             ];
         }
         return $arr;
@@ -353,7 +380,18 @@ class SkuComponnet implements OrderCreater
         $this->deposit =$arr;
         return $arr;
     }
+    /**
+     *  覆盖 租用时间
+     * @param $beginTime
+     * @param $endTime
+     * @return true
+     */
+    public function unitTime($beginTime,$endTime): bool {
 
+        $this->beginTime =$beginTime;
+        $this->endTime = $endTime;
+        return true;
+    }
     /**
      * 计算优惠券信息
      *
@@ -370,20 +408,23 @@ class SkuComponnet implements OrderCreater
         foreach ($sku as $k => $v) {
             for ($i =0;$i<$v['sku_num'];$i++){
                 $youhui =0;
+                $zongzujin = $v['zuqi'] * $v['zujin'];
                 foreach ($coupon as $key=>$val) {
-                    //首月0租金
+
+                    $skuyouhui[$v['sku_id']]['order_coupon_amount'] =0;
+                    //首月0租金 coupon_type =3
                     if ($val['coupon_type'] == CouponStatus::CouponTypeFirstMonthRentFree && $v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                         $skuyouhui[$v['sku_id']]['first_coupon_amount'] = $v['zujin'];
                         $coupon[$key]['is_use'] = 1;
                         $coupon[$key]['discount_amount'] = $v['zujin'];
                     }
-                    //现金券
-                    if ($val['coupon_type'] == CouponStatus::CouponTypeFixed) {
+                    //现金券 coupon_type =1  分期递减 coupon_type =4  总金额和现金券计算同等
+                    if ($val['coupon_type'] == CouponStatus::CouponTypeFixed || $val['coupon_type'] == CouponStatus::CouponTypeDecline ) {
 
                         if ($v['zuqi_type'] == OrderStatus::ZUQI_TYPE_MONTH) {
                             $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'];
                         } else {
-                            $zongzujin = $v['zuqi'] * $v['zujin'];
+
                             $skuyouhui[$v['sku_id']]['order_coupon_amount'] = round($val['discount_amount'] / $totalAmount * $zongzujin, 2);
                             if ($k == count($sku) - 1 && $i ==$v['sku_num']-1) {
                                 $skuyouhui[$v['sku_id']]['order_coupon_amount'] = $val['discount_amount'] - $zongyouhui;
@@ -393,6 +434,21 @@ class SkuComponnet implements OrderCreater
                         }
                         $coupon[$key]['is_use'] = 1;
                         $coupon[$key]['discount_amount'] = $val['discount_amount'];
+                    }
+                    //租金折扣券 coupon_type =2  四舍五入 保留一位小数
+                    if ($val['coupon_type'] == CouponStatus::CouponTypePercentage) {
+
+                        $skuyouhui[$v['sku_id']]['order_coupon_amount'] =round($zongzujin-$zongzujin*$val['discount_amount'],1);
+                        $coupon[$key]['is_use'] = 1;
+                        $coupon[$key]['discount_amount'] = round($zongzujin-$zongzujin*$val['discount_amount'],1);
+                    }
+                    //满减券 coupon_type =5
+                    if ($val['coupon_type'] == CouponStatus::CouponFullSubtraction) {
+                        if($zongzujin>= $val['use_restrictions']){
+                            $skuyouhui[$v['sku_id']]['order_coupon_amount'] =$val['discount_amount'];
+                            $coupon[$key]['is_use'] = 1;
+                            $coupon[$key]['discount_amount'] = $val['discount_amount'];
+                        }
                     }
                 }
             }
@@ -458,13 +514,15 @@ class SkuComponnet implements OrderCreater
                 if($this->zuqiType ==1){
                     $goodsData['begin_time'] =strtotime($v['begin_time']);
                     $goodsData['end_time'] =strtotime($v['end_time']." 23:59:59");
-                    $goodsData['zuqi'] = $v['zuqi'];
+
+                    $zuqi =ceil((strtotime($v['end_time'])-strtotime($v['begin_time']))/86400+1);
+                    $goodsData['zuqi'] = $zuqi;
                     if( $this->orderType == OrderStatus::orderMiniService ){//小程序
                         $goodsData['relet_day'] = 75;
                     }else{//非小程序
                         $goodsData['relet_day'] = 0;
                     }
-                    $unitData['unit_value'] =$v['zuqi'];
+                    $unitData['unit_value'] =$zuqi;
                     $unitData['unit'] =1;
                     $unitData['goods_no'] =$goodsData['goods_no'];
                     $unitData['order_no'] =$orderNo;
@@ -474,15 +532,17 @@ class SkuComponnet implements OrderCreater
 
                     $b =ServicePeriod::createService($unitData);
                     if(!$b){
-                        LogApi::error(config('app.env')."[下单]保存设备周期表信息失败",$unitData);
-                        $this->getOrderCreater()->setError("保存设备周期表信息失败");
+                        LogApi::alert("OrderCreate:创建服务失败",$unitData,[config('web.order_warning_user')]);
+                        LogApi::error(config('app.env')."OrderCreate-Add-Unit-error",$unitData);
+                        $this->getOrderCreater()->setError("OrderCreate-Add-Unit-error");
                         return false;
                     }
                 }
                 $goodsId =$goodsRepository->add($goodsData);
                 if(!$goodsId){
-                    LogApi::error(config('app.env')."[下单]保存商品信息失败",$goodsData);
-                    $this->getOrderCreater()->setError("保存商品信息失败");
+                    LogApi::alert("OrderCreate:增加商品失败",$goodsData,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."OrderCreate-AddGoods-error",$goodsData);
+                    $this->getOrderCreater()->setError("OrderCreate-AddGoods-error");
                     return false;
                 }
 
@@ -495,8 +555,9 @@ class SkuComponnet implements OrderCreater
         if(!empty($goodsArr)){
             $b =Goods::reduceStock($goodsArr);
             if(!$b){
-                LogApi::error(config('app.env')."[下单]减少库存失败",$goodsArr);
-                $this->getOrderCreater()->setError("减少库存失败");
+                LogApi::alert("OrderCreate:减少库存接口失败",$goodsArr,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."OrderCreate-reduceStock-error",$goodsArr);
+                $this->getOrderCreater()->setError("OrderCreate-reduceStock-error");
                 return false;
             }
         }

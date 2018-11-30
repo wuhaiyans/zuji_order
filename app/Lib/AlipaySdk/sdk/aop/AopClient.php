@@ -1149,40 +1149,4 @@ class AopClient {
 		}
 	}
 
-    /**RSAServerProtocol
-     * 验签
-     * @param string $data 待验证字符串
-     * @param string $sign 字符串签名
-     * @return bool true：成功；false：失败
-     */
-    static public function verifySign($data, $sign){
-        $rsa_decrypt = new \App\Lib\Certificate\rsa\RSADecrypter(1024, self::getPrivateKeyFromX509(config('rsa.platform_private_key')), self::getPublicKeyFromX509(config('rsa.platform_public_key')));
-        $result = $rsa_decrypt->verify($data, $sign);
-        return $result;
-    }
-
-    /**
-     * 转换公钥格式
-     * @param string $certificate 公钥字符串
-     * @return string
-     */
-    public static function getPublicKeyFromX509(string $certificate):string {
-        $publicKeyString = "-----BEGIN PUBLIC KEY-----\n".
-            \wordwrap($certificate, 64, "\n", true) .
-            "\n-----END PUBLIC KEY-----";
-        return $publicKeyString;
-    }
-
-    /**
-     * 转换私钥格式
-     * @param string $certificate 私钥字符串
-     * @return string
-     */
-    public static function getPrivateKeyFromX509(string $certificate):string {
-        $publicKeyString = "-----BEGIN RSA PRIVATE KEY-----\n".
-            \wordwrap($certificate, 64, "\n", true) .
-            "\n-----END RSA PRIVATE KEY-----";
-        return $publicKeyString;
-    }
-
 }

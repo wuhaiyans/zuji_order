@@ -29,8 +29,6 @@ class UserComponnet implements OrderCreater
     private $userId;
     //手机号
     private $mobile;
-    //代扣协议号
-    private $withholdingNo;
     //地址
     private $address=[];
 
@@ -42,9 +40,9 @@ class UserComponnet implements OrderCreater
     private $realname;
     private $certNo;
     private $credit;
-    private $face;
     private $age;
     private $risk;
+    private $addressID;
 
 
 
@@ -57,10 +55,14 @@ class UserComponnet implements OrderCreater
         $this->userId =$userId;
 
         //获取用户信息
-        $userInfo =User::getUser($this->userId,$addressId);
-        if (!is_array($userInfo)) {
-            throw new Exception("获取用户接口失败");
+        try{
+            $userInfo =User::getUser($this->userId,$addressId);
+        }catch (\Exception $e){
+            LogApi::alert("OrderCreate:获取用户接口失败",['error'=>$e->getMessage()],[config('web.order_warning_user')]);
+            LogApi::error("OrderCreate-GetUser-error:".$e->getMessage());
+            throw new Exception("GetUser:".$e->getMessage());
         }
+
         if( empty($addressInfo) ){
             $this->address = $userInfo['address'];
         }else{
@@ -68,8 +70,9 @@ class UserComponnet implements OrderCreater
             $this->address['mobile'] = $userInfo['mobile'];
             $this->address['name'] = $userInfo['realname'];
         }
+
+
         $this->mobile = $userInfo['username'];
-        $this->withholdingNo = $userInfo['withholding_no'];
         $this->islock = intval($userInfo['islock'])?1:0;
         $this->block = intval($userInfo['block'])?1:0;
         $this->creditTime = intval( $userInfo['credit_time'] );
@@ -78,11 +81,11 @@ class UserComponnet implements OrderCreater
         $this->realname = $userInfo['realname'];
         $this->certNo = $userInfo['cert_no'];
         $this->credit = intval($userInfo['credit']);
-        $this->face = $userInfo['face']?1:0;
         $age =substr($this->certNo,6,8);
         $now = date("Ymd");
         $this->age = intval(($now-$age)/10000);
         $this->risk = $userInfo['risk']?1:0;
+        $this->addressID =$addressId;
     }
 
     /**
@@ -91,6 +94,22 @@ class UserComponnet implements OrderCreater
      */
     public function getUserId(){
         return $this->userId;
+    }
+
+    /**
+     * 获取 用户地址ID
+     * @return int
+     */
+    public function getAddressId(){
+        return $this->addressID;
+    }
+
+    /**
+     * 获取 用户手机号
+     * @return int
+     */
+    public function getMobile(){
+        return $this->mobile ;
     }
 
     /**
@@ -127,7 +146,6 @@ class UserComponnet implements OrderCreater
             'user' => [
                 'user_id' => $this->userId,
                 'user_mobile' => $this->mobile,
-                'withholding_no'=> $this->withholdingNo,
                 'is_lock'=>$this->islock,
                 'block'=>$this->block,
                 'credit_time'=>$this->creditTime,
@@ -136,7 +154,6 @@ class UserComponnet implements OrderCreater
                 'realname'=>$this->realname,
                 'cert_no'=>$this->certNo,
                 'credit'=>$this->credit,
-                'face'=>$this->face,
                 'age'=>$this->age,
                 'risk'=>$this->risk,
             ],
@@ -156,17 +173,20 @@ class UserComponnet implements OrderCreater
         //var_dump($data);die;
 
         //调用第三方接口 获取用户是否在第三方平台下过单
-        $params= [
-            'phone'=>$data['address']['mobile'],
-            'identity'=>$data['user']['cert_no'],
-            'consignee'=>$data['address']['name'],
-            'province'=>$data['address']['province_name'],
-            'city'=>$data['address']['city_name'],
-            'county'=>$data['address']['country_name'],
-            'shipping_address'=>$data['address']['address'],
-        ];
-        $matching = User::getUserMatching($params);
+        $matching =0;
 
+        if($this->addressID){
+            $params= [
+                'phone'=>isset($data['address']['mobile'])?$data['address']['mobile']:"",
+                'identity'=>isset($data['user']['cert_no'])?$data['user']['cert_no']:'',
+                'consignee'=>isset($data['address']['name'])?$data['user']['cert_no']:'',
+                'province'=>isset($data['address']['province_name'])?$data['user']['cert_no']:'',
+                'city'=>isset($data['address']['city_name'])?$data['user']['cert_no']:'',
+                'county'=>isset($data['address']['country_name'])?$data['user']['cert_no']:'',
+                'shipping_address'=>isset($data['address']['address'])?$data['user']['cert_no']:'',
+            ];
+            $matching = User::getUserMatching($params);
+        }
         //保存用户认证信息
         $RiskData = [
             'order_no'=>$orderNo,
@@ -180,8 +200,9 @@ class UserComponnet implements OrderCreater
         ];
         $id = OrderUserCertifiedRepository::add($RiskData);
         if(!$id){
-            LogApi::error(config('app.env')."[下单]保存用户认证信息失败",$RiskData);
-            $this->getOrderCreater()->setError("保存用户认证信息失败");
+            LogApi::alert("OrderCreate:保存用户认证信息失败",$RiskData,[config('web.order_warning_user')]);
+            LogApi::error(config('app.env')."OrderCreate-Add-RistData-error",$RiskData);
+            $this->getOrderCreater()->setError("OrderCreate-Add-RistData-error");
             return false;
         }
 

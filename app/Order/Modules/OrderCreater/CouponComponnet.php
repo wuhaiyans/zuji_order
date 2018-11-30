@@ -39,7 +39,14 @@ class CouponComponnet implements OrderCreater
                     'coupon_no'=>$v,
                 ];
             }
-            $coupon = Coupon::getCoupon($couponData);
+            $appid =$this->componnet->getOrderCreater()->getAppid();
+            try{
+                $coupon = Coupon::getCoupon($couponData,$appid);
+            }catch (\Exception $e){
+                LogApi::alert("OrderCreate:获取优惠券接口失败",$couponData,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."OrderCreate-GetCoupon-error:".$e->getMessage());
+                throw new Exception("获取优惠券接口错误:".$e->getMessage());
+            }
             if(!is_array($coupon)){
                 throw new Exception("优惠券信息错误");
             }
@@ -55,6 +62,7 @@ class CouponComponnet implements OrderCreater
                         'coupon_type'=>$v['coupon_type'],// 1,现金券 3,首月0租金
                         'discount_amount'=>$v['coupon_value']/100,
                         'coupon_name'=>$v['coupon_name'],
+                        'use_restrictions'=>$v['use_restrictions']/100,//满多少
                         'is_use'=>0,//是否使用 0未使用
                     ];
 
@@ -137,8 +145,9 @@ class CouponComponnet implements OrderCreater
                 ];
                 $couponId = OrderCouponRepository::add($couponData);
                 if(!$couponId){
-                    LogApi::error(config('app.env')."[下单]保存订单优惠券信息失败",$couponData);
-                    $this->getOrderCreater()->setError("保存订单优惠券信息失败");
+                    LogApi::alert("OrderCreate:增加订单优惠券信息失败",$couponData,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."OrderCreate-Add-Coupon-error",$couponData);
+                    $this->getOrderCreater()->setError("OrderCreate-Add-Coupon-error");
                     return false;
                 }
                 $coupon[] =intval($v['coupon_id']);
@@ -151,8 +160,9 @@ class CouponComponnet implements OrderCreater
          */
         $coupon = Coupon::useCoupon($coupon);
         if($coupon !=ApiStatus::CODE_0){
-            LogApi::error(config('app.env')."[下单]调用使用优惠券接口失败",$coupon);
-            $this->getOrderCreater()->setError("调用使用优惠券接口失败");
+            LogApi::alert("OrderCreate:调用优惠券使用接口失败",$coupon,[config('web.order_warning_user')]);
+            LogApi::error(config('app.env')."OrderCreate-useCoupon-interface-error",$coupon);
+            $this->getOrderCreater()->setError("OrderCreate-useCoupon-interface-error");
             return false;
         }
 

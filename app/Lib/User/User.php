@@ -31,7 +31,12 @@ class User extends \App\Lib\BaseApi{
         ];
 
         $userInfo = self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.goods.user.get', '1.0', $params);
-		$userInfo['realname'] = $userInfo['realname']?$userInfo['realname']: substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11);
+		//用户认证姓名为空的取用户地址里的姓名,地址也为空时取手机号(中间四个为*)
+		if( !$userInfo['realname'] ){
+			$userInfo['realname'] = isset($userInfo['address']['name']) && $userInfo['address']['name'] ? $userInfo['address']['name'] : substr($userInfo['mobile'],0,3)."****".substr($userInfo['mobile'],7,11) ;
+		}
+		//收货人姓名 读取用户认证姓名
+		$userInfo['address']['name'] = $userInfo['realname'];
 		return $userInfo;
     }
     /**
@@ -128,10 +133,11 @@ class User extends \App\Lib\BaseApi{
      * @param $params
      * @return false or array
      */
-    public static function getUserId($params, $token = ''){
+    public static function getUserId($params, $token = '',$appid){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.mini.user.id.get';
         $data['auth_token'] = $token;
+        $data['appid'] = $appid;
         if($params['zm_face'] == 'Y'){
             $zm_face = 1;
         }else{
@@ -212,6 +218,56 @@ class User extends \App\Lib\BaseApi{
         $info = str_replace("\r\n","",$info);
         $info =json_decode($info,true);
         return $info;
+    }
+    /**
+     * 获取收件信息
+     * Author: qinliping
+     * @param $spu_id
+     */
+    public static function getReceiveInfo($spu_id){
+        $data = config('tripartite.Interior_Goods_Request_data');
+        $data['method'] ='zuji.goods.return.address';//获取收件地址信息
+        $data['params'] = [
+            'spu_id' =>$spu_id
+        ];
+        $header = ['Content-Type: application/json'];
+        $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
+        LogApi::info("[getReceiveInfo]获取收件信息".$data['method'],$list);
+        $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);
+        LogApi::info("[getReceiveInfo]获取收件信息返回结果".$info);
+        $info = str_replace("\r\n","",$info);
+        $info =json_decode($info,true);
+        return $info;
+    }
+    /**
+     * 查询用户信息
+     * @author limin
+     * @param $array  [
+     *      ''user_id'' =>  ""  【可选 二选一】 用户id
+     *      "mobile" =>  ""   【可选 二选一】 手机号
+     * ]
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+    public static function getUserInfo($params){
+        if(!isset($params['user_id']) && !isset($params['mobile'])){
+            return false;
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.get', '1.0', $params);
+    }
+    /**
+     * 更换用户名手机号
+     * @author limin
+     * @param $user_id //【必须】 当前用户id
+     * @param $mobile //【必须】 新手机号
+     * @return array
+     * @throws \Exception			请求失败时抛出异常
+     */
+    public static function setUserName($params){
+        if(!isset($params['user_id']) || !isset($params['mobile'])){
+            return false;
+        }
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.user.setinfo', '1.0', $params);
     }
 }
 

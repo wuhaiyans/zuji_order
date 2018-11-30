@@ -29,7 +29,10 @@ class Channel {
      * 乐百分支付
      */
     const Lebaifen = 5;
-
+	/**
+	 * 线下支付
+	 */
+	const UnderLine = 6;
 
 	/**
 	 * 订单入账方式
@@ -42,8 +45,20 @@ class Channel {
 			self::Jdpay 	=> '京东支付',
 			self::Wechat 	=> '微信支付',
 			self::Lebaifen 	=> '乐百分支付',
+			self::UnderLine => '线下支付',
 		];
 	}
-
-
+    /**
+     *
+     * 订单入账方式 转换成 订单入账方式名称
+     * @param int $status   订单入账方式
+     * @return string 订单入账方式名称
+     */
+    public static function getBusinessName($status){
+        $list = self::getBusinessType();
+        if( isset($list[$status]) ){
+            return $list[$status];
+        }
+        return '';
+    }
 }

@@ -61,7 +61,7 @@ class ActiveInviteController extends Controller
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
         //检测邀请上限
-        if($activityInfo['zuqi']>=10){
+        if($activityInfo['zuqi']>=30){
             return apiResponse([],ApiStatus::CODE_50000,"已超过最大邀请人数");
         }
         //更新邀请信息
@@ -89,7 +89,7 @@ class ActiveInviteController extends Controller
             return apiResponse($data,ApiStatus::CODE_5000,"失败");
         }
         //更新租期天数
-        ExperienceDestine::upZuqi($uid,$activity_id);
+        ExperienceDestine::upZuqi($uid,$activityInfo['experience_id']);
         return apiResponse([],ApiStatus::CODE_0,"邀请成功");
     }
     /*

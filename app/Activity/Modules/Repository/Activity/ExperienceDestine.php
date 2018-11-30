@@ -100,7 +100,52 @@ class ExperienceDestine{
         $ret =ActivityExperienceDestine::where(['user_id'=>$user_id,'experience_id'=>$experience_id])->increment("zuqi",1);
         return $ret;
     }
+    /**
+     * 活动领取下单
+     * @param int $endTime 结束时间
+     * @param int $isStudent 是否是学生 1 是  0否
+     * @return bool
+     */
+    public function updateDestineForOrder($endTime,$isStudent):bool{
+        if($this->model->destine_status != DestineStatus::DestinePayed){
+            return false;
+        }
+        $this->model->destine_status = DestineStatus::DestineReceive;
+        $this->model->is_student  = $isStudent;
+        $this->model->end_time  = $endTime;
+        $this->model->update_time  = time();
+        $this->model->receive_time  = time();
+        return $this->model->save();
+    }
 
+    /**
+     * 更新预定状态为退款中
+     * @param array $refund_remark
+     *
+     * @return bool
+     */
+    public function updateDestineRefund(string $refund_remark):bool{
+        if($this->model->destine_status == DestineStatus::DestineRefund){
+            return false;
+        }
+        $this->model->destine_status = DestineStatus::DestineRefund;
+        $this->model->refund_remark  = $refund_remark;
+        $this->model->update_time  = time();
+        return $this->model->save();
+    }
+    /**
+     * 支付宝15个自然日之后的更新订金退款状态
+     * @param array $data
+     * @return bool
+     */
+    public function updateActivityDestine(array $data):bool{
+        $this->model->account_time = $data['account_time'];
+        $this->model->account_number = $data['account_number'];
+        $this->model->refund_remark = $data['refund_remark'];
+        $this->model->destine_status = DestineStatus::DestineRefunded;
+        $this->model->update_time  = time();
+        return $this->model->save();
+    }
 
 	/**
 	 * 通过体验活动编号获取活动预定表
@@ -123,6 +168,19 @@ class ExperienceDestine{
 		}
 		return new self( $destine_info );
 	}
+    /**
+     * 退款
+     * @return bool
+     */
+    public function refund():bool{
+        if($this->model->destine_status == DestineStatus::DestineRefunded){
+            return false;
+        }
+        $this->model->destine_status = DestineStatus::DestineRefunded;
+        $this->model->update_time = time();
+        $this->model->account_time = time();
+        return $this->model->save();
+    }
 
     /**
      * 通过体验活动ID获取活动预定表

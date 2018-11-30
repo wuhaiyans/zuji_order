@@ -1,7 +1,17 @@
 <?php
 namespace App\Order\Modules\Inc;
 
+use App\Order\Modules\Repository\Pay\Channel;
+
 class PayInc{
+    /**
+     * @var int 花呗预授权支付
+     */
+    const FlowerFundauth = 10;
+    /**
+     * @var int 线下支付
+     */
+    const UnderLinePay = 9;
     /**
      * @var int 花呗分期+预授权
      */
@@ -37,6 +47,8 @@ class PayInc{
      */
     const WithhodingPay = 1;
 
+
+
     /**
      * 订单支付列表
      * @return array
@@ -51,8 +63,42 @@ class PayInc{
             self::LebaifenPay=>'乐百分支付',
             self::WeChatPay=>'微信支付',
             self::PcreditPayInstallment=>'花呗分期+预授权',
+            self::UnderLinePay=>'线下支付',
+            self::FlowerFundauth=>'花呗预授权',
         ];
     }
+
+    /**
+     * 支付方式获取支付渠道列表
+     * @return array
+     */
+    public static function getPayChannelList(){
+        return [
+            self::WithhodingPay => Channel::Alipay,
+            self::FlowerStagePay => Channel::Alipay,
+            self::FlowerDepositPay => Channel::Alipay,
+            self::UnionPay => Channel::Unionpay,
+            self::MiniAlipay=>Channel::Alipay,
+            self::LebaifenPay=>Channel::Lebaifen,
+            self::WeChatPay=>Channel::Wechat,
+            self::PcreditPayInstallment=>Channel::Alipay,
+            self::FlowerFundauth=>Channel::Alipay,
+        ];
+    }
+
+    /**
+     * 支付方式获取支付渠道
+     * @param int $status 支付ID
+     * @return string 支付名称
+     */
+    public static function getPayChannelName($pay_type){
+        $list = self::getPayChannelList();
+        if( isset($list[$pay_type]) ){
+            return $list[$pay_type];
+        }
+        return '';
+    }
+
     /**
      * 预约支付列表
      * @return array

@@ -33,4 +33,31 @@ class Yajin extends \App\Lib\BaseApi {
 	public static function calculate( array $params ):array{
 		return self::request('1', \config('risksystem.FENGKONG_API'), 'fengkong.yajin.calculate', '1.0', $params);
 	}
+
+	/**
+     *  下单 之后调用风控押金（免押金额减少）
+     * @param [
+     *      'user_id'		=> '',	// 【必选】用户ID
+     *      'order_no'      =>'',   // 【必选】订单编号
+     *      'jianmian'      =>'',   // 【必选】押金减免值 单位：分
+     * ]
+     * @return array
+     */
+    public static function MianyajinReduce( array $params ):array{
+        return self::request('1', \config('risksystem.FENGKONG_API'), 'fengkong.yajin.order', '1.0', $params);
+    }
+
+    /**
+     *  订单完结 之后调用风控押金（免押金额减少）
+     * @param [
+     *      'user_id'		=> '',	// 【必选】用户ID
+     *      'order_no'      =>'',   // 【必选】订单编号
+     *      'type'      =>'',       // 【必选】订单完结类型 1订单正常结束，2订单取消，默认为1正常结束，此参数可不传
+     * ]
+     * @return array
+     */
+    public static function OrderComplete( array $params ):array{
+        return self::request('1', \config('risksystem.FENGKONG_API'), 'fengkong.yajin.complete', '1.0', $params);
+    }
+
 }

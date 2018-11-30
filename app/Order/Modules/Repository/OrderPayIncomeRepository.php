@@ -1,7 +1,9 @@
 <?php
 namespace App\Order\Modules\Repository;
 
+use App\Lib\Common\LogApi;
 use App\Order\Models\OrderPayIncome;
+use Illuminate\Support\Facades\DB;
 
 class OrderPayIncomeRepository
 {
@@ -40,28 +42,41 @@ class OrderPayIncomeRepository
      */
     public static function queryCount($param = []){
         $whereArray = [];
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
         if (isset($param['name']) && !empty($param['name'])) {
-            $whereArray[] = ['name', '=', $param['name']];
+            $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
+        }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
         if (isset($param['appid']) && !empty($param['appid'])) {
-            $whereArray[] = ['appid', '=', $param['appid']];
+            $whereArray[] = ['order_pay_income.appid', '=', $param['appid']];
         }
 
         if (isset($param['channel']) && !empty($param['channel'])) {
-            $whereArray[] = ['channel', '=', $param['channel']];
+            $whereArray[] = ['order_pay_income.channel', '=', $param['channel']];
         }
 
-        if (isset($param['type']) && !empty($param['type'])) {
-            $whereArray[] = ['type', '=', $param['type']];
+        if (isset($param['business_type']) && !empty($param['business_type'])) {
+            $whereArray[] = ['order_pay_income.business_type', '=', $param['business_type']];
         }
 
-        if (isset($param['account']) && !empty($param['account'])) {
-            $whereArray[] = ['account', '=', $param['account']];
+        if (isset($param['amount']) && !empty($param['amount'])) {
+            $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
         }
 
         // 结束时间（可选），默认为为当前时间
@@ -70,20 +85,21 @@ class OrderPayIncomeRepository
         }else{
             $param['end_time'] = $param['end_time'] . " 23:59:59";
         }
-
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
             if( $param['begin_time'] > $param['end_time'] ){
                 return false;
             }
-            $whereArray[] =  ['create_time', '>', strtotime($param['begin_time'])];
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '>', strtotime($param['begin_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }else{
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }
 
         $result = OrderPayIncome::query()->where($whereArray)
-                ->count();
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_pay_income.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_pay_income.order_no')
+            ->count();
         return $result;
     }
 
@@ -95,29 +111,42 @@ class OrderPayIncomeRepository
         $pageSize   = isset($additional['limit']) ? $additional['limit'] : config("web.pre_page_size");
         $offset     = ($page - 1) * $pageSize;
 
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
         $whereArray = [];
         if (isset($param['name']) && !empty($param['name'])) {
-            $whereArray[] = ['name', '=', $param['name']];
+            $whereArray[] = ['order_pay_income.name', '=', $param['name']];
         }
 
         if (isset($param['order_no']) && !empty($param['order_no'])) {
-            $whereArray[] = ['order_no', '=', $param['order_no']];
+            $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
+        }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
         }
 
         if (isset($param['appid']) && !empty($param['appid'])) {
-            $whereArray[] = ['appid', '=', $param['appid']];
+            $whereArray[] = ['order_pay_income.appid', '=', $param['appid']];
         }
 
         if (isset($param['channel']) && !empty($param['channel'])) {
-            $whereArray[] = ['channel', '=', $param['channel']];
+            $whereArray[] = ['order_pay_income.channel', '=', $param['channel']];
         }
 
         if (isset($param['business_type']) && !empty($param['business_type'])) {
-            $whereArray[] = ['business_type', '=', $param['business_type']];
+            $whereArray[] = ['order_pay_income.business_type', '=', $param['business_type']];
         }
 
         if (isset($param['amount']) && !empty($param['amount'])) {
-            $whereArray[] = ['amount', '=', $param['amount']];
+            $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
         }
 
         // 结束时间（可选），默认为为当前时间
@@ -131,22 +160,95 @@ class OrderPayIncomeRepository
             if( $param['begin_time'] > $param['end_time'] ){
                 return false;
             }
-            $whereArray[] =  ['create_time', '>', strtotime($param['begin_time'])];
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '>', strtotime($param['begin_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }else{
-            $whereArray[] =  ['create_time', '<', strtotime($param['end_time'])];
+            $whereArray[] =  ['order_pay_income.create_time', '<', strtotime($param['end_time'])];
         }
+
         $result =  OrderPayIncome::query()
+            ->select('order_pay_income.*','order_info.mobile','order_user_certified.realname')
             ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_pay_income.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_pay_income.order_no')
             ->offset($offset)
-			->orderBy('create_time','DESC')
+			->orderBy('order_pay_income.create_time','DESC')
             ->limit($pageSize)
             ->get();
 
-        if (!$result) return false;
+        if (!$result) return [];
         return $result->toArray();
     }
+    /**
+     * 查询列表导出
+     */
+    public static function queryListExport($param = array(),$pagesize=5){
+        $whereArray = [];
 
+        if(isset($param['keywords'])){
+            if($param['kw_type'] == "order_no"){
+                $param['order_no'] = $param['keywords'];
+            }
+            elseif($param['kw_type'] == "mobile"){
+                $param['mobile'] = $param['keywords'];
+            }
+        }
+
+        if (isset($param['order_no']) && !empty($param['order_no'])) {
+            $whereArray[] = ['order_pay_income.order_no', '=', $param['order_no']];
+        }
+
+        if (isset($param['mobile']) && !empty($param['mobile'])) {
+            $whereArray[] = ['order_info.mobile', '=', $param['mobile']];
+        }
+
+        if (isset($param['appid']) && !empty($param['appid'])) {
+            $whereArray[] = ['appid', '=', $param['appid']];
+        }
+
+        if (isset($param['channel']) && !empty($param['channel'])) {
+            $whereArray[] = ['order_pay_income.channel', '=', $param['channel']];
+        }
+
+        if (isset($param['business_type']) && !empty($param['business_type'])) {
+            $whereArray[] = ['order_pay_income.business_type', '=', $param['business_type']];
+        }
+
+        if (isset($param['amount']) && !empty($param['amount'])) {
+            $whereArray[] = ['order_pay_income.amount', '=', $param['amount']];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && (!isset($param['end_time']) || empty($param['end_time']))) {
+            $whereArray[] = ['order_pay_income.create_time', '>=', strtotime($param['begin_time'])];
+        }
+
+        //创建时间
+        if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
+            $whereArray[] = ['order_pay_income.create_time', '>=', strtotime($param['begin_time'])];
+            $whereArray[] = ['order_pay_income.create_time', '<', (strtotime($param['end_time'])+3600*24)];
+        }
+        if (isset($param['size'])) {
+            $pagesize = $param['size'];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+        LogApi::debug("[queryListExport]查询条件",$whereArray );
+        $result =  OrderPayIncome::query()
+            ->select('order_pay_income.*','order_info.mobile','order_user_certified.realname')
+            ->where($whereArray)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_pay_income.order_no')
+            ->leftJoin('order_user_certified', 'order_user_certified.order_no', '=', 'order_pay_income.order_no')
+            ->orderBy('create_time','DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get()->toArray();
+        return $result;
+    }
     /*
      * 修改方法
      * array    $where

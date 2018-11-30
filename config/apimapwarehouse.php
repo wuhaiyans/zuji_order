@@ -66,6 +66,7 @@ return [
     'warehouse.receiveGoods.publics'=> 'ReceiveGoodsController@publics',//公用参数
     'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems',//取检测项
     'warehouse.receive.imeiIn'=> 'ReceiveController@imeiIn', //确认入库
+    'warehouse.receive.orderImeiIn'=> 'ReceiveController@orderImeiIn', //确认入库(订单工具)
 
 
 ];

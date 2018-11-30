@@ -21,7 +21,7 @@ class OrderBuyoutRepository
 	 * @return array|bool
 	 */
 	public static function getInfo(array $where){
-		$orderBuyoutRow =  OrderBuyout::query()->where($where)->first();
+		$orderBuyoutRow =  OrderBuyout::query()->where($where)->orderBy("id","desc")->first();
 		if (!$orderBuyoutRow) return false;
 		return $orderBuyoutRow->toArray();
 	}
@@ -60,11 +60,11 @@ class OrderBuyoutRepository
 		if(!isset($additional['limit'])){
 			return false;
 		}
-		$additional['offset'] = $additional['offset']* $additional['limit'];
 		$parcels = OrderBuyout::query()
 				->leftJoin('order_info','order_buyout.order_no', '=', 'order_info.order_no')
 				->where($where)
 				->select('order_buyout.*','order_info.order_amount','order_info.appid','order_info.create_time as order_time',"order_info.mobile")
+				->orderBy("order_buyout.create_time","desc")
 				->paginate($additional['limit'],$columns = ['*'], $pageName = '', $additional['offset']);
 		if($parcels){
 			return $parcels->toArray();

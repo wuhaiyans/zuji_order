@@ -51,12 +51,12 @@ class OrderPayComponnet implements OrderCreater
     private $isWithholdStatus=false;
 
 
-    public function __construct(OrderCreater $componnet,int $userId,int $payChannelId)
+    public function __construct(OrderCreater $componnet,int $userId)
     {
         $this->componnet = $componnet;
         $this->payType = $this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
         $this->userId = $userId;
-        $this->payChannelId = $payChannelId;
+        $this->payChannelId = PayInc::getPayChannelName($this->payType);
     }
     /**
      * 获取订单创建器
@@ -82,6 +82,10 @@ class OrderPayComponnet implements OrderCreater
         $this->orderZujin =$this->getOrderCreater()->getSkuComponnet()->getOrderZujin();
         $this->orderFenqi =$this->getOrderCreater()->getSkuComponnet()->getOrderFenqi();
 
+        // 租金押金 都为0 不需要支付
+        if($this->orderZujin ==0 && $this->orderYajin==0){
+            $this->isPay =false;
+        }
         //-+--------------------------------------------------------------------
         // | 判断租金支付方式（分期/代扣）
         //-+--------------------------------------------------------------------
@@ -102,8 +106,10 @@ class OrderPayComponnet implements OrderCreater
             }
         }
         //一次性方式支付租金
-        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay || $this->payType == PayInc::PcreditPayInstallment){
-            $this->paymentStatus =true;
+        elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay || $this->payType == PayInc::PcreditPayInstallment || $this->payType == PayInc::WeChatPay){
+            if($this->orderZujin>0){
+                $this->paymentStatus =true;
+            }
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
             }
@@ -156,6 +162,23 @@ class OrderPayComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+
+        //判断是否需要支付 如果需要支付则更新订单状态
+        if(!$this->isPay){
+            $data['order_status']=OrderStatus::OrderPayed;
+            $data['pay_time']= time();
+            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
+            if(!$b){
+                LogApi::alert("OrderCreate:更新订单已支付状态失败",$data,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."OrderCreate-Update-OrderStatus-error",$data);
+                $this->getOrderCreater()->setError("OrderCreate-Update-OrderStatus-error");
+                return false;
+            }
+            //不需要支付则不生成支付单，退出
+            return true;
+        }
+
+
         $orderInsurance =$this->getOrderCreater()->getSkuComponnet()->getOrderInsurance();
         $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
         if($zuqiType ==1){
@@ -184,12 +207,16 @@ class OrderPayComponnet implements OrderCreater
                         'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                     ]);
                     if (!$b) {
-                        LogApi::error(config('app.env')."[下单]绑定订单代扣协议失败 用户：".$this->userId,[
+                        LogApi::alert("OrderCreate:绑定代扣协议失败",[
+                            'business_type' => $param['businessType'],  // 【必须】int    业务类型
+                            'business_no' => $param['businessNo'],  // 【必须】string  业务编码
+                        ],[config('web.order_warning_user')]);
+                        LogApi::error(config('app.env')."OrderCreate-Blind-WithholdStatus-error：".$this->userId,[
                             'business_type' => $param['businessType'],  // 【必须】int    业务类型
                             'business_no' => $param['businessNo'],  // 【必须】string  业务编码
                         ]);
 
-                        $this->getOrderCreater()->setError('绑定订单代扣协议失败');
+                        $this->getOrderCreater()->setError('OrderCreate-Blind-WithholdStatus-error');
                         return false;
                     }
                 }
@@ -219,20 +246,19 @@ class OrderPayComponnet implements OrderCreater
             elseif($this->payType == PayInc::LebaifenPay){
                 \App\Order\Modules\Repository\Pay\PayCreater::createLebaifenPayment($param);
             }
+            //微信支付 为 一次性支付
+            elseif ($this->payType == PayInc::WeChatPay){
+                $param['paymentAmount'] = $this->orderZujin + $this->orderYajin;
+                //创建普通支付
+                \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
+            }
 
 
         }catch (Exception $e){
+            LogApi::alert("OrderCreate:增加支付单失败",['error'=>$e->getMessage()],[config('web.order_warning_user')]);
+            LogApi::error("OrderCreate-Add-OrderPay-error:".$e->getMessage());
             $this->getOrderCreater()->setError($e->getMessage());
             return false;
-        }
-
-        //判断是否需要支付 如果需要支付则更新订单状态
-        if(!$this->isPay){
-            $data['order_status']=OrderStatus::OrderPayed;
-            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
-            if(!$b){
-                return false;
-            }
         }
 
         return true;

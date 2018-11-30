@@ -6,7 +6,6 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
@@ -22,13 +21,17 @@ use Illuminate\Support\Facades\DB;
 
 class OrderBuyout
 {
+
+	private static $email = [
+		"limin@huishoubao.com.cn"
+	];
+
 	/**
 	 * 订单还机数据处理仓库
 	 * @var obj
 	 */
 	public function __construct() {
 	}
-
 
 	/** 查询条件过滤
 	 * @param array $where	【可选】查询条件
@@ -89,6 +92,25 @@ class OrderBuyout
 		return OrderBuyoutRepository::getInfo($where);
 	}
 
+	/**
+	 * 根据订单号查询买断金额
+	 * @param $data
+	 * @return id
+	 */
+	public static function getByOrderNo($orderNo){
+		if(!$orderNo){
+			return false;
+		}
+		$goodsRepository = new OrderGoodsRepository();
+		$where = [
+			'order_no'=>$orderNo
+		];
+		$goodsInfo = $goodsRepository->getGoodsRow($where);
+		if(!$goodsInfo){
+			return false;
+		}
+		return $goodsInfo;
+	}
 
     /**
      * 查询客服操作提前买断的设备
@@ -126,7 +148,7 @@ class OrderBuyout
 	 * @return id
 	 */
 	public static function getList($params){
-		$additional['offset'] = $params['page']>1?($params['page']-1)*$params['size']:0;
+		$additional['offset'] = $params['page'];
 		$additional['limit'] = $params['size']?$params['size']:0;
 		$where = self::_where_filter($params);
 		$data = OrderBuyoutRepository::getList($where, $additional);
@@ -194,7 +216,8 @@ class OrderBuyout
 		];
 		$ret = Instalment::close($data);
 		if(!$ret){
-			//return false;
+			LogApi::alert("buyout-callback:关闭分期失败",$data,self::$email);
+			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
@@ -214,33 +237,24 @@ class OrderBuyout
 				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
-		$payObj = null;
 		if($goodsInfo['yajin']>0 ){
-
-			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
-			$clearData['out_auth_no'] = $payObj->getFundauthNo();
 			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-
-			if($orderInfo['order_type'] == OrderStatus::orderMiniService){
-				$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
-				$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
-				$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
-			}
-			elseif($orderInfo['order_type'] == OrderStatus::miniRecover){
+			if($orderInfo['order_type'] != OrderStatus::orderMiniService){
+				$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI,$orderInfo['order_no'] );
+				$clearData['out_auth_no'] = $payObj->getFundauthNo();
 				$clearData['out_payment_no'] = $payObj->getPaymentNo();
 			}
-			\App\Lib\Common\LogApi::info( '出账详情', ['obj'=>$payObj,"no"=>$payObj->getPaymentNo()] );
+			//进入清算处理
+			$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
+			if(!$orderCleanResult){
+				LogApi::alert("buyout-callback:进入清算失败",$clearData,self::$email);
+				return false;
+			}
 		}
-
-
-		//进入清算处理
-		$orderCleanResult = \App\Order\Modules\Service\OrderCleaning::createOrderClean($clearData);
-		if(!$orderCleanResult){
-			return false;
-		}
-		if($goodsInfo['yajin']==0){
+		else
+		{
 			$params = [
 					'business_type'     => $clearData['business_type'],
 					'business_no'     => $clearData['business_no'],
@@ -364,6 +378,7 @@ class OrderBuyout
 		//解冻订单
 		$ret = OrderRepository::orderFreezeUpdate($goodsInfo['order_no'],OrderFreezeStatus::Non);
 		if(!$ret){
+			LogApi::alert("buyout-callback:解冻订单失败",$goodsInfo['order_no'],self::$email);
 			return false;
 		}
 		//更新订单商品
@@ -373,17 +388,41 @@ class OrderBuyout
 		];
 		$ret = $OrderGoodsRepository->update(['id'=>$goodsInfo['id']],$goods);
 		if(!$ret){
+			LogApi::alert("buyout-callback:更新订单商品失败",$goodsInfo,self::$email);
 			return false;
 		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderRelease($buyout['id']);
 		if(!$ret){
+			LogApi::alert("buyout-callback:更新买断单为解押失败",$buyout['order_no'],self::$email);
 			return false;
 		}
-		OrderOperate::isOrderComplete($buyout['order_no']);
-
+		$ret = OrderOperate::isOrderComplete($buyout['order_no']);
+		if(!$ret){
+			LogApi::alert("buyout-callback:关闭订单失败",$buyout['order_no'],self::$email);
+			return false;
+		}
 		//无押金直接返回成功
 		if($goodsInfo['yajin']==0){
+			if($orderInfo['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
+				//查询芝麻订单
+				$miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderInfo['order_no']);
+				$data1 = [
+						'out_order_no' => $orderInfo['order_no'],//商户端订单号
+						'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+						'out_trans_no'=>$orderInfo['order_no'],//商户端交易号
+						'pay_amount'=>0.00,//支付金额
+						'remark' => "押金为0解约代扣",//订单操作说明
+						'app_id' => $miniOrderInfo['app_id'],//小程序appid
+				];
+				LogApi::info("[advanceReturn]通知芝麻取消请求参数",$data1);
+				//通知芝麻订单关闭
+				$canceRequest = \App\Lib\Payment\mini\MiniApi::OrderClose($data1);
+				if( !$canceRequest){
+					LogApi::info("[advanceReturn]通知芝麻订单关闭失败",$canceRequest);
+					return false;
+				}
+			}
 			return true;
 		}
 		//日志记录

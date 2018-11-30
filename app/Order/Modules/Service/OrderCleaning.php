@@ -8,6 +8,7 @@ namespace App\Order\Modules\Service;
 use App\Activity\Modules\Repository\Activity\ActivityDestine;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
+use App\Lib\Order\OrderInfo;
 use App\Lib\Payment\CommonFundAuthApi;
 use App\Lib\Payment\CommonRefundApi;
 use App\Lib\Payment\LebaifenApi;
@@ -30,6 +31,23 @@ use Illuminate\Support\Facades\DB;
 
 class OrderCleaning
 {
+
+    protected static $toEmail = array (
+        'wutiantang@huishoubao.com.cn'
+        );
+
+
+    /**
+     * 清算报错日志
+     * Author: heaven
+     * @param $msg  警报标题
+     * @param array $data  警报内容
+     */
+    public static function warningCleanOrder($msg='',  $data= array())
+    {
+            $msg = '[warningCleanOrder]'.$msg;
+            LogApi::alert($msg, $data,self::$toEmail);
+    }
 
 
 
@@ -123,7 +141,57 @@ class OrderCleaning
 //        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
 
     }
+    /**
+     * 订单清算列表导出
+     * Author: qinliping
+     * @param array $param
+     * @return array
+     */
+    public static function getOrderCleaningListExport($param = array(),$pagesize = 5 )
+    {
+        $orderCleanList = OrderClearingRepository::getOrderCleanListExport($param,$pagesize);
+        LogApi::debug("[getOrderCleaningListExport]订单清算列表",$orderCleanList);
+        if (!empty($orderCleanList)) {
 
+            foreach($orderCleanList as $keys=>$values){
+                $orderCleanList[$keys]['is_add_recover_remark'] = ($values['order_type']==OrderStatus::miniRecover && empty(floatval($values['mini_recover_transfer_num'])) && $values['status']==OrderCleaningStatus::orderCleaning) ?? false;
+                $orderCleanList[$keys]['order_type_name'] = OrderStatus::getTypeName($values['order_type']);
+                $orderCleanList[$keys]['out_account_name'] = PayInc::getPayName($values['out_account']);
+                $orderCleanList[$keys]['status_name'] = OrderCleaningStatus::getOrderCleaningName($values['status']);
+                $orderCleanList[$keys]['is_operate'] = in_array($values['status'],array(2,3,4,5)) ?? 0;
+                //入账来源
+//                $channelData = Channel::getChannel($values['app_id']);
+
+                $orderCleanList[$keys]['app_id_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                //退款时间
+                if($orderCleanList[$keys]['refund_time']>0){
+                    $orderCleanList[$keys]['refund_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['refund_time']);
+                }else{
+                    $orderCleanList[$keys]['refund_time'] = 0;
+                }
+                //扣除预授权时间
+
+                 if($orderCleanList[$keys]['auth_deduction_time']>0){
+                     $orderCleanList[$keys]['auth_deduction_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_deduction_time']);
+                 }else{
+                     $orderCleanList[$keys]['auth_deduction_time'] = 0;
+                 }
+                //解冻时间
+
+                 if($orderCleanList[$keys]['auth_unfreeze_time']>0){
+                     $orderCleanList[$keys]['auth_unfreeze_time'] = date('Y-m-d H:i:s',$orderCleanList[$keys]['auth_unfreeze_time']);
+                 }else{
+                     $orderCleanList[$keys]['auth_unfreeze_time'] = 0;
+                 }
+
+            }
+
+
+        }
+       // return $orderCleanList;
+        return apiResponseArray(ApiStatus::CODE_0,$orderCleanList);
+
+    }
 
 
     /**
@@ -281,7 +349,8 @@ class OrderCleaning
 
                        $lebaiParam = array(
                            'out_payment_no' => $orderCleanData['payment_no'], //支付系统的支付单号
-                           "amount" => intval($orderCleanData['auth_deduction_amount']*100),                    //要扣的押金金额；单位：分
+						   // 金额单位转换(元=>分)，解决问题： intval(8926.80*100) 结果为 892679 的问题
+                           "amount" => bcmul($orderCleanData['auth_deduction_amount'],100),                    //要扣的押金金额；单位：分
                            'back_url' => config('ordersystem.ORDER_API').'/lebaiUnfreezeClean'        //异步通知的url地址
                        );
                        $succss = LebaifenApi::backRefund($lebaiParam);
@@ -326,7 +395,7 @@ class OrderCleaning
                             'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'索赔扣押金', //交易名称
                             'out_trade_no' => $orderCleanData['auth_deduction_no'], //业务系统授权码
                             'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
-                            'amount' => intval($orderCleanData['auth_deduction_amount']*100), //交易金额；单位：分
+                            'amount' => bcmul($orderCleanData['auth_deduction_amount'],100), //交易金额；单位：分
                             'back_url' => config('ordersystem.ORDER_API').'/unfreezeAndPayClean', //押金转支付回调URL
                             'user_id' => $orderCleanData['user_id'], //用户id
 
@@ -359,7 +428,7 @@ class OrderCleaning
                     }
 
                     //查询分期有没有代扣并且扣款成功的记录
-                    $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>OrderInstalmentStatus::SUCCESS, 'pay_type'=>0]);
+                    $instaleCount =  OrderGoodsInstalmentRepository::queryCount(['order_no'=>$orderCleanData['order_no'], 'status'=>array(OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::FAIL ,OrderInstalmentStatus::PAYING)]);
                     if ($instaleCount>0) {
                         $params = [
                             'out_order_no'=>$orderCleanData['order_no'],//商户端订单号
@@ -399,6 +468,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[minicleanAccount发起]操作请求异常',$e);
+            self::warningCleanOrder('发起清算异常，清算参数',[$param,$e]);
             return apiResponseArray(31202,[],"操作请求异常".$e->getMessage());
 
         }
@@ -456,7 +526,7 @@ class OrderCleaning
                     $params = [
                         'out_refund_no' => $orderCleanData['refund_clean_no'], //业务平台退款码
                         'payment_no' => $payInfo['out_payment_no'], //支付平台支付码
-                        'amount' => $orderCleanData['refund_amount'] * 100, //支付金额
+                        'amount' => bcmul($orderCleanData['refund_amount'] ,100), //支付金额
                         'refund_back_url' => config('ordersystem.ORDER_API') . '/refundClean', //退款回调URL
                     ];
                     LogApi::info(__method__.'[cleanAccount发起]财务发起退款请求前，请求的参数：', $params);
@@ -469,6 +539,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起退款]操作请求异常',$e);
+            self::warningCleanOrder('请求支付系统退款异常',[$orderCleanData,$e]);
             return false;
         }
 
@@ -546,7 +617,7 @@ class OrderCleaning
                         'name'		=> OrderCleaningStatus::getBusinessTypeName($orderCleanData['business_type']).'解冻资金', //交易名称
                         'out_trade_no' => $orderCleanData['auth_unfreeze_no'], //订单系统交易码
                         'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
-                        'amount' => $orderCleanData['auth_unfreeze_amount']*100, //解冻金额 单位：分
+                        'amount' => bcmul($orderCleanData['auth_unfreeze_amount'],100), //解冻金额 单位：分
                         'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
                         'user_id' => $orderCleanData['user_id'],//用户id
                     ];
@@ -560,6 +631,7 @@ class OrderCleaning
 
         } catch (\Exception $e) {
             LogApi::error(__method__.'[cleanAccount发起预授权解除]操作请求异常',$e);
+            self::warningCleanOrder('请求支付系统预授权解除异常',[$orderCleanData,$e]);
             return false;
         }
 

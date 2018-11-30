@@ -659,6 +659,7 @@ class OrderRepository
     {
         $whereArray = array();
         $orWhereArray = array();
+        $whereInArray = array();
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -692,9 +693,20 @@ class OrderRepository
             $whereArray[] = ['order_info.channel_id', '=', $param['order_appid']];
         }
 
+        //第三方渠道类型
+        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
+            $whereInArray = $param['channel_id'];
+        }
+
         //支付类型
         if (isset($param['pay_type']) && !empty($param['pay_type'])) {
             $whereArray[] = ['order_info.pay_type', '=', $param['pay_type']];
+        }
+
+        //风控审核状态
+        if (isset($param['risk_check']) && !empty($param['risk_check'])) {
+            $whereArray[] = ['order_info.risk_check', '=', $param['risk_check']];
         }
 
         //订单状态
@@ -744,6 +756,9 @@ class OrderRepository
             $page = 1;
         }
 
+
+       // sql_profiler();
+
             $whereArray[] = ['order_info.create_time', '>', 0];
             $count = DB::table('order_info')
                 ->select(DB::raw('count(order_info.order_no) as order_count'))
@@ -756,14 +771,18 @@ class OrderRepository
                 ->join('order_delivery',function($join){
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
-                ->where($whereArray)
-                ->where($orWhereArray)
+                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                    return $join->whereIn('order_info.channel_id', $whereInArray);
+                })
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })
+                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
+                    return $join->where($orWhereArray);
+                })
                 ->first();
-
-
-
-        $count = objectToArray($count)['order_count'];
-        if (!isset($param['count'])) {
+                $count = objectToArray($count)['order_count'];
+                if (!isset($param['count'])) {
 
 //        sql_profiler();
             $orderList = DB::table('order_info')
@@ -777,23 +796,23 @@ class OrderRepository
                 ->join('order_delivery',function($join){
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
-                ->where($whereArray)
-                ->where($orWhereArray)
+                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                    return $join->whereIn('order_info.channel_id', $whereInArray);
+                })
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })
+                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
+                    return $join->where($orWhereArray);
+                })
                 ->orderBy('order_info.create_time', 'DESC')
-//            ->paginate($pagesize,$columns = ['order_info.order_no'], 'page', $param['page']);
-//            ->forPage($page, $pagesize)
-//
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
-
             $orderArray = objectToArray($orderList);
-
             if ($orderArray) {
                 $orderIds = array_column($orderArray,"order_no");
-//           dd($orderIds);
-//            sql_profiler();
                 $orderList =  DB::table('order_info as o')
-                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
+                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','o.risk_check','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
                     ->whereIn('o.order_no', $orderIds)
                     ->join('order_user_address as d',function($join){
                         $join->on('o.order_no', '=', 'd.order_no');
@@ -809,21 +828,14 @@ class OrderRepository
                     }, null,null,'left')
                     ->orderBy('o.create_time', 'DESC')
                     ->get();
-
                 $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
                 $orderArrays['orderIds'] = $orderIds;
                 $orderArrays['total'] = $count;
                 $orderArrays['last_page'] = ceil($count/$pagesize);
-
             } else {
-
                 return false;
             }
 
-
-
-
-//            leftJoin('order_user_address', 'order_info.order_no', '=', 'order_user_address.order_no')
 
         }else {
 

@@ -39,6 +39,8 @@ class Receive
      *      'business_no'  => '',   退换货单号  string  【可传】
      *      'zuqi'  => '',   租期  string  【必传】
      *      'zuqi_type'  => '',   租期类型  string  【必传】
+     *      'channel_id'  => '',   渠道  string  【必传】
+     *      'appid'  => '',      string  【必传】
      * ]
      * @params  $data
      * [
@@ -86,6 +88,8 @@ class Receive
             'customer' => $data['customer'],
             'customer_mobile' => $data['customer_mobile'],
             'customer_address' => $data['customer_address'],
+            'channel_id' => $data['channel_id'],
+            'appid' => $data['appid'],
             'business_no'      =>isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
         ];
 

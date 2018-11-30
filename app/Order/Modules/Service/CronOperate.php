@@ -379,7 +379,7 @@ class CronOperate
 
         $returnData = OrderReturn::query()->where($whereLong)->get()->toArray();
         if (!$returnData) {
-            LogApi::error("[cronBarterDelivey]获取换货信息失败:".$returnData);
+            LogApi::error("[cronBarterDelivey]获取换货信息失败");
             return false;
         }
         //var_dump($orderData);die;
@@ -389,7 +389,7 @@ class CronOperate
             $userinfo['type']=\App\Lib\PublicInc::Type_System;
             $b =OrderReturnCreater::updateorder($v['refund_no'],$userinfo);
             if(!$b){
-                LogApi::error("[cronBarterDelivey]换货确认收货失败:".$v['order_no']);
+                LogApi::error("[cronBarterDelivey]换货确认收货失败");
             }
 
         }
@@ -490,7 +490,7 @@ class CronOperate
             $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
-
+            $whereArray[] = ['order_goods_instalment.order_no', '=', 'AB07175752759085'];
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
@@ -570,6 +570,7 @@ class CronOperate
             $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
+            $whereArray[] = ['order_goods_instalment.order_no', '=', 'AB07175752759085'];
 
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()

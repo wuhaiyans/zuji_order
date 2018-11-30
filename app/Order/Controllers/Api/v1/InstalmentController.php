@@ -40,6 +40,7 @@ class InstalmentController extends Controller
             'order_no'      => 'required',
             'goods_no'      => 'required',
             'status'        => 'required',
+            'beoverdue_day' => 'required',
             'kw_type'       => 'required',
             'keywords'      => 'required',
             'term'          => 'required',
@@ -55,10 +56,9 @@ class InstalmentController extends Controller
             else{
                 $params['order_no'] = $params['keywords'];
             }
-        }
-
+        }        
         $params['is_instalment_list'] = 1;
-        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);
+        $list = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::queryList($params,$additional);   
         foreach($list as &$item){
 
             $item['payment_time']   = $item['payment_time'] ? date("Y-m-d H:i:s",$item['payment_time']) : "";
@@ -71,9 +71,13 @@ class InstalmentController extends Controller
             //线下手动还款按钮
             if(in_array($item['status'], [OrderInstalmentStatus::SUCCESS,OrderInstalmentStatus::CANCEL])){
                 $item['confirm_btn'] = false;
-            }
-            else{
+            }else{
                 $item['confirm_btn'] = true;
+            }
+
+            //逾期天数
+            if($item['status'] == OrderInstalmentStatus::UNPAID || $item['status'] == OrderInstalmentStatus::FAIL){
+                $item['beover_due']      = $item['withhold_day'] ? getBeoverdue($item['withhold_day']) : "";
             }
 
             // 状态
@@ -81,6 +85,8 @@ class InstalmentController extends Controller
 
             // 还款日
             $item['day']            = $item['day'] ? withholdDate($item['term'],$item['day']) : "";
+
+
 
             // 是否允许扣款 按钮
             $item['allowWithhold']  = OrderGoodsInstalment::allowWithhold($item['id']);

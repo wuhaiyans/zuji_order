@@ -143,6 +143,7 @@ class OrderRelet
                         return false;
                     }
                 }else{
+                    DB::rollBack();
                     set_msg('租期错误,当前只支持短租续租');
                     return false;
 //                    if( !publicInc::getCangzuRow($params['zuqi']) && $params['zuqi']!=0 ){
@@ -151,6 +152,18 @@ class OrderRelet
 //                        return false;
 //                    }
                 }
+
+                //获取订单信息
+                $orderInfo = OrderRepository::getInfoById($params['order_no']);
+                //验证是否小程序订单
+                if($orderInfo['order_type']==OrderStatus::orderMiniService){
+                    if($goods['relet_day']<$params['zuqi']){
+                        DB::rollBack();
+                        set_msg('小程序订单续租的租期必须小于75天');
+                        return false;
+                    }
+                }
+
 //                $amount = $goods['zujin']*$params['zuqi'];
 //
 //                if($amount == $params['relet_amount']){
@@ -158,7 +171,7 @@ class OrderRelet
                     $data = [
                         'user_id'=>$params['user_id'],
                         'zuqi_type'=>$goods['zuqi_type'],
-                        'zuqi'=>$goods['zuqi'],
+                        'zuqi'=>$params['zuqi'],
                         'order_no'=>$params['order_no'],
                         'relet_no'=>createNo(9),
                         'create_time'=>time(),
@@ -369,8 +382,10 @@ class OrderRelet
                 $goodsObj = Goods::getByGoodsId($relet['goods_id']);
                 $goods_arr = $goodsObj->getData();
 
+                //获取订单信息
+                $orderInfo = OrderRepository::getInfoById($relet['order_no']);
                 //修改小程序续租剩余时间
-                if($relet['zuqi_type']==ReletStatus::STATUS1){
+                if($relet['zuqi_type']==ReletStatus::STATUS1 && $orderInfo['order_type']==OrderStatus::orderMiniService){
                     if(!$goodsObj->setReletTime($relet['zuqi'])){
                         DB::rollBack();
                         LogApi::info("[OrderRelet]修改小程序短租商品续租剩余天数失败", $reletNo);
@@ -402,12 +417,12 @@ class OrderRelet
                     'begin_time'=>$goodsUnit['begin_time'],
                     'end_time'=>$t,
                 ];
-                //修改设备状态 续租完成
-                if( !$goodsObj->setGoodsStatusReletOff() ){
-                    DB::rollBack();
-                    LogApi::info("[OrderRelet]修改设备状态续租完成失败", $reletNo);
-                    return false;
-                }
+//                //修改设备状态 续租完成
+//                if( !$goodsObj->setGoodsStatusReletOff() ){
+//                    DB::rollBack();
+//                    LogApi::info("[OrderRelet]修改设备状态续租完成失败", $reletNo);
+//                    return false;
+//                }
                 //添加设备周期表
                 if( !ServicePeriod::createService($data) ){
                     DB::rollBack();
@@ -420,6 +435,14 @@ class OrderRelet
                     LogApi::info("[OrderRelet]续租修改订单商品服务结束时间失败", $reletNo);
                     return false;
                 }
+
+                // 发送短信
+                $notice = new \App\Order\Modules\Service\OrderNotice(
+                    \App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+                    $reletNo,
+                    "ReletSuccess");
+                $notice->notify();
+
 //                //获取订单对象
 //                $orderObj = Order::getByNo($goodsObj->order_no);
 //                //订单解锁

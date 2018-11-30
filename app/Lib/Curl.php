@@ -167,11 +167,22 @@ class Curl {
 	 * @param array $header		请求头 array('k'=>'v')形式的关联数组
 	 * @return string
 	 */
-    private static function _send(string $url,string $params=null,array $header=[]){
+    private static function _send(string $url, $params=null,array $header=[]){
+//        echo "<pre>";
+//        print_r($params);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		
 		if( $params ){
+//			if( is_array($params) ){
+//				foreach( $params as $k => $v ){
+//					// 文件上传
+//					if( $v instanceof \CURLFile ){
+//						curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
+//					}
+//				}
+//			}
 			// post数据
 			curl_setopt($ch, CURLOPT_POST, true);
 			// post的变量

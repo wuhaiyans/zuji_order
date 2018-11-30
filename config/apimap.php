@@ -3,7 +3,7 @@
 //路由映射
 return [
     //订单相关
-
+    'api.order.buyout' => 'TestController@test',
     //线上下单接口
     'api.order.create' => 'OrderController@create',
     //门店下单接口
@@ -16,8 +16,16 @@ return [
     'api.order.orderdetail'=>'OrderController@orderInfo',
     //订单操作日志接口
     'api.order.orderLog'=>'OrderController@orderLog',
+
+    //订单风控审核日志接口
+    'api.order.orderRiskCheckLog'=>'OrderController@orderRiskCheckLog',
+
+    //保存订单风控审核日志
+    'api.order.saveOrderRiskCheck'=>'OrderController@saveOrderRiskCheck',
+
     //保存回访备注信息
     'api.order.savevisit'=>'OrderController@saveOrderVisit',
+
     //保存订单出险信息
     'api.order.outInsurance'=>'OrderController@addOrderInsurance',
     //设备出险详情
@@ -43,6 +51,15 @@ return [
     //订单数量统计
     'api.order.counted'=>'OrderController@counted',
 
+    //-+------------------------------------------------------------------------
+	// | 设备相关
+    //-+------------------------------------------------------------------------
+	//设备日志列表信息
+	'api.goods.log' => 'GoodsController@goodsLog',
+	
+	
+    //gaobo
+    'api.payment.url' => 'PayCenterController@pay',
 
     //支付宝初始化接口
     'api.alipay.initialize'=>'AlipayController@alipayInitialize',
@@ -215,6 +232,10 @@ return [
     'api.Return.allowReturn'       =>'ReturnController@allowReturn',
     //退换货--确认收货
     'api.Return.returnReceive'       =>'ReturnController@returnReceive',
+    //线下退货退款列表
+    'api.Return.underLineReturn'       =>'ReturnController@underLineReturn',
+
+
 
 
 
@@ -232,6 +253,14 @@ return [
     'api.Relet.userListRelet'       => 'ReletController@userListRelet',
     // 创建续租(支付)
     'api.Relet.createRelet'       => 'ReletController@createRelet',
+    //-+------------------------------------------------------------------------
+    // | 线下订单相关接口
+    //-+------------------------------------------------------------------------
+
+    //线下领取商品接口
+    'api.order.activityReceive' => 'OrderController@activityReceive',
+
+
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
@@ -274,6 +303,10 @@ return [
     'api.buyout.cancel'       => 'BuyoutController@cancel',
     //支付宝h5买断支付
     'api.buyout.pay'       => 'BuyoutController@pay',
+    
+    //支付宝H5买断支付 新
+    'api.payment.pay'      => 'PayCenterController@pay',
+    
     //支付宝小程序h5买断支付
     'api.buyout.mini.pay'       => 'BuyoutController@mini_pay',
 
@@ -282,11 +315,21 @@ return [
     // | 收支明细
     //-+------------------------------------------------------------------------
     // 入账明细列表
-    'api.pay.payIncomeQuery'       => 'PayincomeController@payIncomeQuery',
+    'api.pay.payIncomeQuery'        => 'PayincomeController@payIncomeQuery',
     // 入账明细详情
-    'api.pay.payIncomeInfo'       => 'PayincomeController@payIncomeInfo',
+    'api.pay.payIncomeInfo'         => 'PayincomeController@payIncomeInfo',
     // 入账明细筛选条件
-    'api.pay.payIncomeWhere'       => 'PayincomeController@payIncomeWhere',
+    'api.pay.payIncomeWhere'        => 'PayincomeController@payIncomeWhere',
+    // 线下还款场景
+    'api.pay.getOrderInfoByPhone'   => 'PayincomeController@getOrderInfoByPhone',
+    // 线下缴款类型
+    'api.pay.underLinePayType'      => 'PayincomeController@underLinePayType',
+    // 线下还款场景
+    'api.pay.underLineScene'        => 'PayincomeController@underLineScene',
+    // 线下支付 获取所需要支付金额
+    'api.pay.underLineGetPayAmount' => 'PayincomeController@underLineGetPayAmount',
+    // 增加线下还款记录
+    'api.pay.underLineAdd'          => 'PayincomeController@underLineAdd',
 
     // test
     'api.Test.test'       => 'TestController@test',
@@ -328,6 +371,9 @@ return [
     'api.inner.miniCancelOrder'=>'InnerServiceController@miniCancelOrder',//小程序订单取消处理接口
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
+    'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+
+
     /*************************************************************************************************
      * ******************************队列消费处理接口end   heaven*************************************
      ************************************************************************************************/
@@ -357,4 +403,11 @@ return [
 
 
     'test'=>'PayController@paymentNotify',
+
+	/*************************************************************************************************
+	 * ******************************用户换绑手机号处理*************************************
+	 ************************************************************************************************/
+	'api.user.getInfo'        => 'UserController@getUserInfo',          //查询手机号
+
+	'api.user.setMobile'     => 'UserController@setMobile',          //更换手机号
 ];

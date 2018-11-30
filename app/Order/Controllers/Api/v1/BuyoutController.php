@@ -8,12 +8,7 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
-use App\Order\Modules\Inc\PayInc;
-use App\Order\Modules\OrderExcel\CronCollection;
-use App\Order\Modules\OrderExcel\CronOperator;
 use App\Order\Modules\Repository\Order\Goods;
-use App\Order\Modules\Repository\Order\Order;
-use App\Order\Modules\Repository\OrderUserAddressRepository;
 use App\Order\Modules\Repository\ShortMessage\BuyoutConfirm;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 use Illuminate\Http\Request;
@@ -124,7 +119,7 @@ class BuyoutController extends Controller
             $where['appid'] = $params['appid'];
         }
         
-        $where['page'] = $params['page']>0?$params['page']-1:0;
+        $where['page'] = $params['page']>0?$params['page']:1;
         $where['size'] = $params['size']?$params['size']:config('web.pre_page_size');
         $orderList = OrderBuyout::getList($where);
 
@@ -558,19 +553,30 @@ class BuyoutController extends Controller
         if($buyout['status']!=OrderBuyoutStatus::OrderInitialize){
             return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
         }
+        $payStatus = false;
+        //查询支付单不存在则创建支付单
+        try{
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
+            if($buyout['amount']!=$pay->getPaymentAmount()){
+                $payStatus = true;
+            }
+        }catch (\Exception $e){
+            $payStatus = true;
+        }
+        if($payStatus){
+            $payInfo = [
+                'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
+                'userId' => $buyout['user_id'],
+                'orderNo' => $buyout['order_no'],
+                'businessNo' => $buyout['buyout_no'],
+                'paymentAmount' => $buyout['amount'],
+                'paymentFenqi' => 0,
+            ];
+            \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
+        }
 
-        $payInfo = [
-            'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
-            'userId' => $buyout['user_id'],
-            'orderNo' => $buyout['order_no'],
-            'businessNo' => $buyout['buyout_no'],
-            'paymentAmount' => $buyout['amount'],
-            'paymentFenqi' => 0,
-        ];
-        \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
-
-        $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
-
+        //获取支付链接
         $paymentUrl = $pay->getCurrentUrl($params['pay_channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],
@@ -633,18 +639,30 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_0,"该订单支付异常");
         }
 
-        $payInfo = [
-            'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
-            'userId' => $buyout['user_id'],
-            'orderNo' => $buyout['order_no'],
-            'businessNo' => $buyout['buyout_no'],
-            'paymentAmount' => $buyout['amount'],
-            'paymentFenqi' => 0,
-        ];
-        \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
+        $payStatus = false;
+        //查询支付单不存在则创建支付单
+        try{
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
+            if($buyout['amount']!=$pay->getPaymentAmount()){
+                $payStatus = true;
+            }
+        }catch (\Exception $e){
+            $payStatus = true;
+        }
+        if($payStatus){
+            $payInfo = [
+                'businessType' => ''.OrderStatus::BUSINESS_BUYOUT,
+                'userId' => $buyout['user_id'],
+                'orderNo' => $buyout['order_no'],
+                'businessNo' => $buyout['buyout_no'],
+                'paymentAmount' => $buyout['amount'],
+                'paymentFenqi' => 0,
+            ];
+            \App\Order\Modules\Repository\Pay\PayCreater::createPayment($payInfo);
+            $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
+        }
 
-        $pay = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(OrderStatus::BUSINESS_BUYOUT, $buyout['buyout_no']);
-
+        //获取支付链接
         $paymentUrl = $pay->getCurrentUrl($params['channel_id'], [
             'name'=>'订单' .$buyout['order_no']. '设备'.$buyout['goods_no'].'买断支付',
             'front_url' => $params['callback_url'],

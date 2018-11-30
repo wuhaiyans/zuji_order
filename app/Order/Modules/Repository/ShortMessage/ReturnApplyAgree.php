@@ -3,6 +3,7 @@
 namespace App\Order\Modules\Repository\ShortMessage;
 
 use App\Lib\Common\LogApi;
+use App\Lib\User\User;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderReturnRepository;
 use App\Order\Modules\Repository\Pay\Channel;
@@ -69,14 +70,21 @@ class ReturnApplyAgree implements ShortMessage {
         if(!$userInfo){
             return false;
         }
+        //获取收件信息
+        $addressInfo = User::getReceiveInfo($goodsInfo['zuji_goods_id']);
+
+        $returnAddress = isset($addressInfo['data']['return_address_value']) ?$addressInfo['data']['return_address_value']:config('tripartite.Customer_Service_Address');
+        $serviceTel = isset($addressInfo['data']['return_phone']) ?$addressInfo['data']['return_phone']:config('tripartite.Customer_Service_Phone');
+        $shoujianrenName = isset($addressInfo['data']['return_name']) ?$addressInfo['data']['return_name']:config('tripartite.Customer_Service_Name');
+
         // 发送短息
          return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
             'realName' => $userInfo['realname'],
             'orderNo' => $returnInfo['order_no'],
             'goodsName' => $goodsInfo['goods_name'],
-            'shoujianrenName' => config('tripartite.Customer_Service_Name'),
-            'returnAddress' =>config('tripartite.Customer_Service_Address'),
-            'serviceTel' =>config('tripartite.Customer_Service_Phone'),
+            'shoujianrenName' => $shoujianrenName,
+            'returnAddress' =>$returnAddress,
+            'serviceTel' =>$serviceTel,
          ], $returnInfo['order_no']);
 
 	}

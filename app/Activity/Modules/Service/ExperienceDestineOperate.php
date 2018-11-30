@@ -9,6 +9,7 @@ use App\Activity\Modules\Inc\DestineInc;
 use App\Activity\Modules\Inc\DestineStatus;
 use App\Activity\Modules\Repository\ActiveInviteRepository;
 use App\Activity\Modules\Repository\Activity\ExperienceDestine;
+use App\Activity\Modules\Repository\ActivityThemeRepository;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\Channel\Channel;
 use App\Lib\Common\LogApi;
@@ -59,13 +60,20 @@ class ExperienceDestineOperate
             $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByIdNo($data['experience_id']);
             if(!$activity){
                 DB::rollBack();
-                set_msg("获取活动信息失败");
+                set_msg("活动不存在");
                 return false;
             }
 
             $activityInfo = $activity->getData();
 
-            if(time()>=$activityInfo['end_time']){
+            $activity = ActivityThemeRepository::getInfo(['activity_id'=>$activityInfo['activity_id']]);
+            if(!$activity){
+                DB::rollBack();
+                set_msg("活动不存在");
+                return false;
+            }
+
+            if(time()>=$activity['end_time']){
                 DB::rollBack();
                 set_msg("活动已结束");
                 return false;
@@ -226,16 +234,24 @@ class ExperienceDestineOperate
 
             $activity = \App\Activity\Modules\Repository\Activity\ActivityExperience::getByActivityId($data['activity_id']);
             if(!$activity){
-                set_msg("获取活动信息失败");
+                set_msg("活动不存在");
                 return false;
             }
 
             $activityInfo = $activity->getData();
             $res['invitation_code'] ='';
             $res['activity_status'] =0;
-            if(time()>=$activityInfo['end_time']){
+
+            $activity = ActivityThemeRepository::getInfo(['activity_id'=>$activityInfo['activity_id']]);
+            if(!$activity){
+                set_msg("活动不存在");
+                return false;
+            }
+
+            if(time()>=$activity['end_time']){
                 $res['activity_status'] =1;
             }
+
             //判断用户是否 已经参与活动
             $destine = ExperienceDestineRepository::unActivityDestineByUser($data['user_id'],$data['activity_id']);
             //如果有预订记录
@@ -345,6 +361,33 @@ class ExperienceDestineOperate
             $destineListArray['data'][$k]['pay_type_name'] = PayInc::getPayName($v['pay_type']);
             //应用来源名称
             $destineListArray['data'][$k]['app_id_name'] = OrderInfo::getAppidInfo($v['app_id']);
+            if( $destineListArray['data'][$k]['destine_status'] == DestineStatus::DestinePayed ){
+                if($destineListArray['data'][$k]['pay_type'] ==PayInc::WeChatPay){
+                    $destineListArray['data'][$k]['refundOperateBefore'] = true;
+                    $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                }else{
+                    //15个自然日之内
+                    if($destineListArray['data'][$k]['pay_time'] + 15*24*3600 >time()){
+                        $destineListArray['data'][$k]['refundOperateBefore'] = true;
+                    }else{
+                        $destineListArray['data'][$k]['refundOperateBefore'] = false;
+
+                    }
+                    //15个自然日后
+                    if($destineListArray['data'][$k]['pay_time'] + 15*24*3600<time()){
+                        $destineListArray['data'][$k]['refundOperateAfter'] = true;
+                    }else{
+                        $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                    }
+                }
+            }else if($destineListArray['data'][$k]['destine_status'] ==DestineStatus::DestineRefunded){
+                $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                $destineListArray['data'][$k]['refundOperateBefore'] = false;
+
+            }else{
+                $destineListArray['data'][$k]['refundOperateAfter'] = false;
+                $destineListArray['data'][$k]['refundOperateBefore'] = false;
+            }
 
         }
         return $destineListArray;

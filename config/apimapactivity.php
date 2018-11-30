@@ -23,7 +23,7 @@ return [
 
 
     //-+------------------------------------------------------------------------
-    // | 活动体验预定接口
+    // | 1元活动体验预定接口
     //-+------------------------------------------------------------------------
     'api.experience.destine'             => 'ExperienceDestineController@experienceDestine', //活动体验支付接口
     'api.experience.destineQuery'        => 'ExperienceDestineController@experienceDestineQuery', //活动体验查询接口
@@ -45,7 +45,10 @@ return [
 
     /********************************************1元体验活动接口***************************************************/
     'api.activity.experienceList'       => 'ActivityExperienceController@experienceList', //1元体验活动列表
-    'api.invite.numeration'       => 'ActiveInviteController@numeration', //注册邀请人数
-    'api.invite.myInvite'       => 'ActiveInviteController@myInvite', //我的邀请人数列表
+    'api.invite.numeration'              => 'ActiveInviteController@numeration', //注册邀请人数
+    'api.invite.myInvite'                 => 'ActiveInviteController@myInvite', //我的邀请人数列表
+    'api.activity.experienceRefund'     => 'ActivityExperienceController@experienceRefund', //预约退款（支付宝15个自然日内，微信退款）
+    'api.activity.afterRefund'                 => 'ActivityExperienceController@refund', //预约退款（支付宝15个自然日后）
+
 
 ];

@@ -80,6 +80,8 @@ class OrderStatus{
     const orderMiniService=3;
     //微回收
     const miniRecover=4;
+    //活动领取订单
+    const orderActivityService =5;
 
     //--------------------------------------------------------------------------------------------
     //--+ 订单业务类型 --------------------------------------------------------------------------
@@ -191,6 +193,7 @@ class OrderStatus{
             self::orderStoreService => '门店订单',
             self::orderMiniService => '小程序订单',
             self::miniRecover       => '微回收',
+            self::orderActivityService => '活动领取订单',
 
         ];
     }
@@ -243,6 +246,29 @@ class OrderStatus{
     }
 
 
+    /**
+     *  根据支付方式或者预定信息等获取订单类型
+     * @param $params
+     * [
+     *      'pay_type' =>'',    //【可选】 int 支付方式
+     *      'destine_no' =>'',  //【可选】 string 预定编号
+     *
+     * ]
+     *
+     * @return int 订单状态
+     */
+    public static function getOrderTypeId($params){
+        if($params['pay_type'] == PayInc::LebaifenPay){
+            //如果支付方式为乐百分 订单类型为 微回收
+            $orderType =OrderStatus::miniRecover;
+        }elseif($params['destine_no']!=''){
+            //如果有预订编号 则为领取订单
+            $orderType =OrderStatus::orderActivityService;
+        }else{
+            $orderType =OrderStatus::orderOnlineService;
+        }
+        return $orderType;
+    }
 
     /**
      * 回访类型

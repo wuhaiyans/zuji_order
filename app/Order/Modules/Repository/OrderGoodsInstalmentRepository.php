@@ -62,6 +62,12 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
+        //逾期天数
+        if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
+            $beoverdue_day = strtoupper($param['beoverdue_day']);
+            $whereArray = getBeoverduetime($beoverdue_day);
+        }
+
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
@@ -133,7 +139,11 @@ class OrderGoodsInstalmentRepository
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
         }
 
-
+        //逾期天数
+        if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
+            $beoverdue_day = strtoupper($param['beoverdue_day']);
+            $whereArray = getBeoverduetime($beoverdue_day);
+        }
         //根据订单号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
             $whereArray[] = ['order_goods_instalment.order_no', '=', $param['order_no']];
@@ -149,6 +159,7 @@ class OrderGoodsInstalmentRepository
                 $statusArr = [$param['status']];
             }
         }
+        
 
         //根据分期日期
         if (isset($param['term']) && !empty($param['term'])) {
@@ -167,7 +178,7 @@ class OrderGoodsInstalmentRepository
         if(isset($param['is_instalment_list'])){
             $whereArray[] = ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService];
         }
-
+        LogApi::info('[instalmentQueryList]',$whereArray);
         $result =  OrderGoodsInstalment::query()
             ->select('order_goods_instalment.*','order_info.mobile')
             ->where($whereArray)
@@ -215,7 +226,7 @@ class OrderGoodsInstalmentRepository
     }
 
 
-    /*
+    /**
      * 修改方法
      * array    $where
      * array    $data
@@ -283,5 +294,59 @@ class OrderGoodsInstalmentRepository
         return $result->toArray();
     }
 
+    /**
+     * 延迟分期扣款时间 （只支持短租）
+     * string    $order_no  订单号
+     * string    $day       延期天数
+     * return bool
+     */
+    public static function delayInstalment($order_no,$day){
+        if ( $order_no == "") {
+            return false;
+        }
+        if ( $day == "") {
+            return false;
+        }
 
+        // 查询订单
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($order_no);
+        if (!$orderInfo) {
+            LogApi::error('[delayInstalment]订单不存在：'.$order_no);
+            return false;
+        }
+
+        // 订单不支持长租
+        if($orderInfo['zuqi_type'] == \App\Order\Modules\Inc\OrderStatus::ZUQI_TYPE2){
+            LogApi::error('[delayInstalment]延期不支持长租：'.$order_no);
+            return false;
+        }
+
+        // 查询分期
+        $instalmentInfo = self::getInfo(['order_no'=>$order_no]);
+        if(!$instalmentInfo){
+            LogApi::error('[delayInstalment]分期数据不存在：'.$order_no);
+            return true;
+        }
+
+        if($instalmentInfo['withhold_day'] == ""){
+            LogApi::error('[delayInstalment]分期数据错误：'.$order_no);
+            return false;
+        }
+
+        $newWithholdDay = $instalmentInfo['withhold_day'] + 86400 * $day;
+
+        $newTerm = date("Ym",$newWithholdDay);
+        $newDay  = date("d",$newWithholdDay);
+
+        $data = [
+            'term'          => $newTerm,
+            'day'           => $newDay,
+            'withhold_day'  => $newWithholdDay,
+        ];
+
+        $result =  OrderGoodsInstalment::where(['order_no' => $order_no ])->limit(1)->update($data);
+        if (!$result) return false;
+
+        return true;
+    }
 }

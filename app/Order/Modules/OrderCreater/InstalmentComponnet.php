@@ -26,11 +26,15 @@ class InstalmentComponnet implements OrderCreater
     private $flag = true;
     private $payType;
 
+    //订单类型
+    private $orderType;
+
 
     public function __construct(OrderCreater $componnet)
     {
         $this->componnet = $componnet;
         $this->payType =$this->componnet->getOrderCreater()->getSkuComponnet()->getPayType();
+        $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
     }
     /**
      * 获取订单创建器
@@ -62,25 +66,40 @@ class InstalmentComponnet implements OrderCreater
     public function getDataSchema(): array
     {
         $schema =$this->componnet->getDataSchema();
+        //乐百分支付不需要生成分期并计算分期
         if($this->payType == PayInc::LebaifenPay){
             return $schema;
         }
+        //活动领取订单不需要分期计算
+        if($this->orderType == OrderStatus::orderActivityService){
+            return $schema;
+        }
+
         foreach ($schema['sku'] as $k=>$sku){
 			// 类型；1：日租；2：月租
             $skuInfo['zuqi_type'] = $sku['zuqi_type'];
 			// 开始日期，只有日租有，月租没有
             $skuInfo['end_time'] = strtotime($sku['end_time']);
+            //判断优惠券类型 进行分期计算  默认平均分配
+            $couponStatus =CouponStatus::CouponTypeAvg;
+            if($sku['order_coupon_amount'] >0){
+                $couponType =$schema['coupon'][0]['coupon_type'];
+                if($couponType == CouponStatus::CouponTypeDecline){
+                    $couponStatus =CouponStatus::CouponTypeSerialize;
+                }
+            }
+
             $skuInfo['discount_info'] = [
                 [
                     'discount_amount' =>(float)$sku['first_coupon_amount'],
-                    'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize:商品券
+                    'zuqi_policy' =>CouponStatus::CouponTypeFirst,// first：首月0租金；avg：优惠券优惠(订单优惠券固定金额) serialize 分期顺序优惠
                 ],
                 [
                     'discount_amount' =>(float)$sku['order_coupon_amount'],
-                    'zuqi_policy' =>CouponStatus::CouponTypeAvg,
+                    'zuqi_policy' =>$couponStatus,// 分期类型根据优惠券类型来进行分期 serialize 分期顺序优惠 （递减）
                 ],
 //                [
-//                    'discount_amount' =>(float)$sku['discount_amount'],
+//                    'discount_amount' =>(float)$sku['order_coupon_amount'],
 //                    'zuqi_policy' =>CouponStatus::CouponTypeSerialize,
 //                ]
             ];
@@ -136,7 +155,8 @@ class InstalmentComponnet implements OrderCreater
             return $computer->compute();
 
         }catch( \Exception $exc ){
-            throw new Exception("获取分期信息错误");
+            LogApi::error("OrderCreate-GetInstalmentInfo-error");
+            throw new Exception("OrderCreate-GetInstalmentInfo-error");
         }
     }
 
@@ -151,6 +171,11 @@ class InstalmentComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
+        //活动领取订单不需要生成分期
+        if($this->orderType == OrderStatus::orderActivityService){
+            return true;
+        }
+
         //支持分期支付方式
         $payType = [
             PayInc::WithhodingPay,
@@ -184,8 +209,9 @@ class InstalmentComponnet implements OrderCreater
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();
                     if (!$id) {
-                        LogApi::error(config('app.env')."[下单]保存分期数据失败",$instalmentData);
-                        $this->getOrderCreater()->setError('保存分期数据失败');
+                        LogApi::alert("OrderCreate:增加分期信息失败",$instalmentData,[config('web.order_warning_user')]);
+                        LogApi::error(config('app.env')."OrderCreate-Add-Instalment-error",$instalmentData);
+                        $this->getOrderCreater()->setError('OrderCreate-Add-Instalment-error');
                         return false;
                     }
                 }

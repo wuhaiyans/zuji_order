@@ -435,6 +435,52 @@ function set_apistatus( $code, $msg ){
     return get_instance()->setCode(strval($code))->setMsg(strval($msg));
 }
 
+/**
+ * 计算逾期天数
+ * 公式逾期天数=今天日期-还款日
+ */
+function getBeoverdue($re_day){
+    $time = date('Y-m-d',time());
+    $day  = strtotime($time);
+    $wday = $re_day;
+    return $day>=$wday ? ($day-$wday)/86400 : "";
+}
+
+/**
+ * 计算逾期条件
+ * 返回数组
+ */
+function getBeoverduetime($type){
+    $time = date('Y-m-d',time());
+    $day  = strtotime($time);    
+    switch($type){
+        case 'M0'://未逾期
+            $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];    
+            break;
+        case 'M1': //逾期0-30
+            $whereArray =  [['order_goods_instalment.withhold_day', '>=', $day-30*86400],['order_goods_instalment.withhold_day', '<=', $day]];
+        break;   
+        case 'M2': //逾期31-60
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-60*86400],['order_goods_instalment.withhold_day', '<=', $day-31*86400]];
+        break; 
+        case 'M3': //逾期61-90
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-90*86400],['order_goods_instalment.withhold_day', '<=', $day-61*86400]];
+        break;      
+        case 'M4': //逾期91-120
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-120*86400],['order_goods_instalment.withhold_day', '<=', $day-91*86400]];
+        break; 
+        case 'M5': //逾期121-150
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-150*86400],['order_goods_instalment.withhold_day', '<=', $day-121*86400]];
+        break;                                 
+        case 'M6': //逾期大于151
+            $whereArray[]= ['order_goods_instalment.withhold_day', '<=', $day-151*86400];
+        break;   
+        default://未逾期
+           $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];                          
+                        
+    }
+    return $whereArray;
+}
 
 /**
  * 格式化數字

@@ -88,6 +88,7 @@ $api->version('v1', [
         $api->any('Month', 'TestExcelController@Month');
         $api->any('otherMonth', 'TestExcelController@otherMonth');
         $api->any('riskMonth', 'TestExcelController@riskMonth');
+        $api->any('riskAll', 'TestExcelController@riskAll');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
@@ -101,6 +102,11 @@ $api->version('v1', [
 
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
+
+        //隊列增加风控看板信息
+        $api->any('OrderRisk', 'InnerServiceController@orderRisk');
+        //隊列返回风控 订单押金信息
+        $api->any('YajinReduce', 'InnerServiceController@YajinReduce');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
@@ -111,6 +117,11 @@ $api->version('v1', [
         $api->any('appointmentRefund', 'PayController@appointmentRefund');
         //用户逾期列表导出
         $api->any('overDueExport', 'ToolController@overDueExport');
+
+        //缴款记录导出
+        $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
+        //出账记录导出
+        $api->any('cleanListExport', 'OrderCleaningController@cleanListExport');
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************

@@ -31,7 +31,8 @@ class OrderListFiler
                     'visit_type_list' =>Inc\OrderStatus::getVisitType(),
                     'appid_list' => $channlistName,
                     'refund_list'=> Inc\ReturnStatus::getStatusGroupList(),
-                    'zuqi_type' =>Inc\OrderStatus::getZuqiType()
+                    'zuqi_type' =>Inc\OrderStatus::getZuqiType(),
+                    'risk_status_list' =>OrderRiskCheckStatus::getStatusList(),
                 );
     }
 

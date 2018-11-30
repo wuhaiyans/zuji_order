@@ -37,7 +37,8 @@ class RiskComponnet implements OrderCreater
             $knight =Risk::getKnight(['user_id'=>$data['user']['user_id']]);
             $this->knight =$knight;
         }catch (\Exception $e){
-            LogApi::error(config('app.env')."[下单/确认订单] 获取风控接口失败",$data['user']['user_id']);
+            LogApi::alert("OrderCreate:获取用户风控信息失败",['user_id'=>$data['user']['user_id']],[config('web.order_warning_user')]);
+            LogApi::error(config('app.env')."OrderCreate-GetRisk-error:".$e->getMessage());
             $this->knight =[];
         }
 
@@ -90,42 +91,17 @@ class RiskComponnet implements OrderCreater
         if(empty($this->knight)){
             return true;
         }
-        //保存用户身份证信息
-        if(isset($this->knight['user_info']['card_img']) && !empty($this->knight['user_info']['card_img'])){
-            $b= OrderUserCertifiedRepository::updateCardImg($orderNo,$this->knight['user_info']['card_img']);
-            if(!$b){
-                $this->getOrderCreater()->setError('保存身份证信息失败');
-                return false;
-            }
-        }
 
-        //获取风控信息详情 保存到数据表
-
-        $riskDetail =$this->knight['risk_detail']?? true;
-        if (is_array($riskDetail) && !empty($riskDetail)) {
-            foreach ($riskDetail as $k=>$v){
-                $riskData =[
-                    'order_no'=>$orderNo,  // 订单编号
-                    'data' => json_encode($riskDetail[$k]),
-                    'type'=>$k,
-                ];
-                $id =OrderRiskRepository::add($riskData);
-                if(!$id){
-                    LogApi::error(config('app.env')."[下单]保存风控数据失败",$riskData);
-                    $this->getOrderCreater()->setError('保存风控数据失败');
-                    return false;
-                }
-            }
-        }
-
-        //保存是否是学生
-        $isStudent = $this->knight['is_chsi']?1:0;  //判断是否是学生
+        //保存用户风控信息
+        $isStudent = isset($this->knight['is_chsi'])&&$this->knight['is_chsi']?1:0;  //判断是否是学生
         $certified = OrderUserCertified::where('order_no','=',$orderNo)->first();
         if (!$certified) return false;
         $certified->user_type = $isStudent;
+        $certified->card_img = isset($this->knight['card_img']) && !empty($this->knight['card_img'])?$this->knight['card_img']:"";
         if (!$certified->save()) {
-            LogApi::error(config('app.env')."[下单]保存用户身份类型失败",$riskData);
-            $this->getOrderCreater()->setError('保存用户身份类型失败');
+            LogApi::alert("OrderCreate:保存用户风控信息失败",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+            LogApi::error(config('app.env')."OrderCreate-Update-UserCertified-error",$this->knight);
+            $this->getOrderCreater()->setError('OrderCreate-Update-UserCertified-error');
             return false;
         }
 

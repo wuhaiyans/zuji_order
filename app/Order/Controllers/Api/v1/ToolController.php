@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
-
+    protected static $email = ['qinliping@huishoubao.com.cn'];
     /**
      * 延期
      * @author maxiaoyu
@@ -48,6 +48,18 @@ class ToolController extends Controller
 
             if($begin_time >= $end_time){
                 return apiResponse([], ApiStatus::CODE_50000, "时间错误");
+            }
+
+
+            //订单详情
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($order_no);
+            if (!$orderInfo) {
+                LogApi::debug('[ToolDelay]订单不存在');
+                return apiResponse([],ApiStatus::CODE_50000, "订单不存在");
+            }
+
+            if($orderInfo['zuqi_type'] == \App\Order\Modules\Inc\OrderStatus::ZUQI_TYPE2){
+                return apiResponse([],ApiStatus::CODE_50000, "租期类型错误-目前只支持短租");
             }
 
 
@@ -92,6 +104,11 @@ class ToolController extends Controller
 
             return apiResponse([],ApiStatus::CODE_0,"success");
         }catch(\Exception $exs){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'延期失败',//错误信息提示
+                'data'=>['$ex'=>$exs],//错误返回数据
+            ],self::$email);
             LogApi::error('订单延期处理异常',$exs);
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
         }
@@ -122,6 +139,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::refundRefuse($param['order_no'] ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-退款审核拒绝失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -144,6 +166,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::refuseSign($param['order_no'] ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-拒签失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33009,"修改失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -176,6 +203,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::advanceReturn($param ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-中途退机失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33009,"修改失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -188,6 +220,8 @@ class ToolController extends Controller
      * 'visit_id'    => '',  【可选】  回访id    int
      * 'keywords'    =>'',   【可选】  关键字    string
      * 'kw_type'     =>'',   【可选】  查询类型  string
+     * 'zuqi_type'   =>'',   【可选】  租期类型  int
+     *  'overDue_period'=>'', 【可选】 逾期时间段
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
      * ]
@@ -197,7 +231,8 @@ class ToolController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-
+           // $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+          //  LogApi::debug("[overDue]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
             $orderData = OrderReturnCreater::overDue($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
@@ -209,6 +244,11 @@ class ToolController extends Controller
             }
 
         }catch (\Exception $e) {
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'获取逾期列表失败',//错误信息提示
+                'data'=>['$ex'=>$e],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
         }

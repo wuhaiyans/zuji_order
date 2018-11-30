@@ -36,8 +36,10 @@ class ReceiveController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
+        $request = request()->input();
 
         try {
+            $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
             $list = $this->receive->list($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
@@ -84,6 +86,8 @@ class ReceiveController extends Controller
             'customer_mobile' => 'required',
             'customer_address' => 'required',
             'receive_detail' => 'required',
+            'channel_id' => 'required',
+            'appid' => 'required',
             'business_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
@@ -178,6 +182,31 @@ class ReceiveController extends Controller
 
         return apiResponse([]);
 
+    }
+
+    /**
+     * 订单2.0工具
+     *  确认入库
+     *
+     * $params=[
+     *      order_no=>'订单编号'
+     * ]
+     */
+    public function orderImeiIn(){
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+        DB::beginTransaction();
+        try{
+            ImeiRepository::orderImeiIn($params['order_no']);
+        } catch (\Exception $e){
+            DB::rollBack();
+            LogApi::debug("Receive[orderImeiIn]error:",$e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
+        }
+        DB::commit();
+        return \apiResponse([], ApiStatus::CODE_0);
     }
 
     /**
@@ -308,14 +337,16 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            LogApi::info('checkItemsFinish_info_Receive',$items);
+            LogApi::info('checkItemsFinish_info_Receive',$params);
 
-            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
             $this->receive->checkItem($params);
+            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+
             DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
+            LogApi::info('checkItemsFinish_info_Receive_error',$e->getMessage());
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 

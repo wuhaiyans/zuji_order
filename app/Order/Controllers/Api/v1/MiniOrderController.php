@@ -189,6 +189,11 @@ class MiniOrderController extends Controller
 			\App\Lib\Common\LogApi::error('无会话标识', $params);
             return apiResponse([],ApiStatus::CODE_50000,'请求失败，请稍候重试');
         }
+        // appid是否存在
+        if ( !isset($params['appid']) && strlen( $params['appid'] ) ) {
+            \App\Lib\Common\LogApi::error('appid不存在', $params);
+            return apiResponse([],ApiStatus::CODE_50000,'请求失败，请稍候重试');
+        }
 		
         $param = $params['params'];
         //开启事务
@@ -232,39 +237,38 @@ class MiniOrderController extends Controller
             $b = $miniApi->orderConfirm($miniParams);
             if($b === false){
                 \App\Lib\Common\LogApi::error('芝麻接口请求错误：'.$miniApi->getError(),$miniParams);
-				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+				return apiResponse([],ApiStatus::CODE_50000,'芝麻接口请求错误');
             }
             $miniData = $miniApi->getResult();
 			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
             //用户处理
-            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token']);
+            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token'],$params['appid']);
 			if( !$_user ){
                 \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
-				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+				return apiResponse([],ApiStatus::CODE_50000,'芝麻确认订单，获取用户失败');
 			}
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
             $data['user_id'] = $_user['user_id'];
             $miniData['member_id'] = $_user['user_id'];
-            if( empty($data['coupon']) ){//前端无传输coupon
-                //小程序自动领取优惠券
-                $drawCouponArr = [
-                    'only_id'=>\App\Lib\Coupon\Coupon::$coupon_only,
-                    'user_id'=>$data['user_id'],
-                ];
-                \App\Lib\Coupon\Coupon::drawCoupon($drawCouponArr);
-                $queryCouponArr = [
-                    'spu_id'=>$data['goods_info']['spu_id'],
-                    'sku_id'=>$data['goods_info']['sku_id'],
-                    'user_id'=>$data['user_id'],
-                    'payment'=>$data['goods_info']['total_amount'],
-                ];
-                $queryCoupon = \App\Lib\Coupon\Coupon::queryCoupon($queryCouponArr);
-                if( isset($queryCoupon[0]['coupon_no']) ){//查询优惠券是否存在
-                    $data['coupon'] = [
-                        $queryCoupon[0]['coupon_no']
-                    ];
-                }
+
+            $couponList['coupon_list']=[];
+            //自动调用接口查询优惠券
+            $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
+                'sku_id' => $data['sku'][0]['sku_id'],
+                'auth_token' => $params['auth_token'],
+                'appid'=>$params['appid'],
+            ]);
+            $coupon =[];
+            if(isset($couponInfo[0]) && is_array($couponInfo)){
+                $coupon[] = $couponInfo[0]['coupon_no'];
+                $couponList['coupon_list'] = $couponInfo;
             }
+
+            if( isset($params['params']['coupon']) && !empty($params['params']['coupon'])){
+                $coupon = $params['params']['coupon'];
+            }
+            $data['coupon'] = $coupon;
+
             //风控系统处理
             if($params['auth_token']){
                 $auth_token = $params['auth_token'];
@@ -273,8 +277,8 @@ class MiniOrderController extends Controller
             }
             $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$auth_token,$params['appid']);
             if($b != true){
-				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
-                //return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
+//				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                return apiResponse( [], ApiStatus::CODE_35008, '风控系统接口请求错误');
             }
             //处理用户收货地址
             $address = \App\Lib\User\User::getAddressId([
@@ -285,8 +289,8 @@ class MiniOrderController extends Controller
             ]);
             if(!$address){
                 \App\Lib\Common\LogApi::error('芝麻小程序收货地址设置错误',$miniData);
-				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
-                //return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
+//				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                return apiResponse([],ApiStatus::CODE_35013,'老系统收货地址信息处理失败');
             }
             $data['mobile']=$miniData['mobile'];
             $data['name']=$miniData['name'];
@@ -299,19 +303,20 @@ class MiniOrderController extends Controller
                 //回滚事务
                 DB::rollBack();
                 \App\Lib\Common\LogApi::error('芝麻确认订单失败',$data);
-				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
-                //return apiResponse([],ApiStatus::CODE_35012,get_msg());
+//				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+                return apiResponse([],ApiStatus::CODE_35012,get_msg());
             }
 			\App\Lib\Common\LogApi::debug('芝麻小程序确认订单结果',$res);
         } catch (\Exception $ex) {
             //回滚事务
             DB::rollBack();
 			\App\Lib\Common\LogApi::error('芝麻确认订单异常',$ex);
-			return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
-            //return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
+//			return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
+            return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
         //提交事务
         DB::commit();
+        $res = array_merge($res,$couponList);
         return apiResponse($res,ApiStatus::CODE_0);
     }
 
@@ -375,6 +380,8 @@ class MiniOrderController extends Controller
             'credit_amount'=>$res['credit_amount'],
             'cert_no'=>$res['cert_no'],
         ];
+        //创建订单接口参数记录
+        \App\Lib\Common\LogApi::error('芝麻创建订单接口参数记录',$params);
         $res = $this->OrderCreate->miniCreate($data);
         if($res == false){
             if(get_msg() == ApiStatus::CODE_35017){

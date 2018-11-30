@@ -1,23 +1,39 @@
 <?php
 namespace App\Order\Controllers\Api\v1;
 
+use App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout;
 use App\Order\Modules\Service\OrderNotice;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 
 class TestController extends Controller
 {
+	public function test(){
+		$param = [
+			'order_no'=>'A820162514895949',
+			'amount'=>1000
+		];
+		$orderBuyout = new OrderBuyout($param);
+		$amount = $orderBuyout->getPayAmount();
+		$orderBuyout->execute();
+		echo $amount;
+	}
 	public function sendSms() {
 
+		$data = [
+			'business_type'	=> 6,
+			'business_no'	=> 'XAB1568981254942',
+			'status'		=> 'success'
+		];
+
+		$a = \App\Order\Modules\Service\OrderRelet::callback($data);
+		p($a);
 
 
-
-
-
-		//发送短信
+		// 发送短信
 		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'GA81697084214033',
-			"GivebackReturnDeposit");
+			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+			"XAB2181696214512",
+			"ReletSuccess");
 		$notice->notify();
 	
 //		//发送短信

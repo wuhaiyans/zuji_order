@@ -18,6 +18,9 @@ use App\Order\Modules\Inc\OrderFreezeStatus;
 class GivebackController extends Controller
 {
 
+	protected static $email = ['yaodongxu@huishoubao.com.cn'];
+
+
 	/**
 	 * 公共返回方法
 	 * @param Request $request
@@ -191,9 +194,16 @@ class GivebackController extends Controller
 		$orderInfo = $orderObj->get_order_info(['order_no'=>$paramsArr['order_no']]);
 		if( !$orderInfo || $orderInfo[0]['freeze_type'] ){
 			$msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo[0]['freeze_type']) . '中，禁止还机！';
+			\App\Lib\Common\LogApi::alert('giveback-create:freeze_type-error', [
+					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+					'tip'=>$msg,//错误信息提示
+				],self::$email);
 			return apiResponse([],ApiStatus::CODE_92500,$msg);
 		}
 		
+		if(redisIncr('huanji'.$paramsArr['order_no'], 60)>1){
+			return apiResponse([],ApiStatus::CODE_92500,'不能重复操作');
+		}
 		//-+--------------------------------------------------------------------
 		// | 业务处理：冻结订单、生成还机单、推送到收发货系统【加事务】
 		//-+--------------------------------------------------------------------
@@ -256,6 +266,11 @@ class GivebackController extends Controller
 					'customer_address' => $userInfo['address_info'],
 				]);
 				if( !$warehouseResult ){
+					\App\Lib\Common\LogApi::alert('giveback-create:warehouse-error', [
+							'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+							'tip'=>'收发货创建失败'.$goodsNo,//错误信息提示
+							'data'=>['$warehouseResult'=>$warehouseResult],//错误数据提示
+						],self::$email);
 					//事务回滚
 					DB::rollBack();
 					return apiResponse([], ApiStatus::CODE_93200, '收货单创建失败!');
@@ -297,6 +312,11 @@ class GivebackController extends Controller
 			}
 
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::alert('giveback-create:exception-error', [
+					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+					'tip'=>'还机单创建异常',//错误信息提示
+					'data'=>['$ex'=>$ex],//错误数据提示
+				],self::$email);
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
@@ -411,6 +431,11 @@ class GivebackController extends Controller
 
 
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::alert('giveback-create:exception-error', [
+					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+					'tip'=>'还机单收货异常',//错误信息提示
+					'data'=>['$ex'=>$ex],//错误数据提示
+				],self::$email);
 			//事务回滚
 			DB::rollBack();
 			return apiResponse([],ApiStatus::CODE_94000,$ex->getMessage());
@@ -591,6 +616,11 @@ class GivebackController extends Controller
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::alert('giveback-create:exception-error', [
+					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+					'tip'=>'还机单检测异常',//错误信息提示
+					'data'=>['$ex'=>$ex],//错误数据提示
+				],self::$email);
 			//回滚事务
 			DB::rollBack();
 			return apiResponse([], ApiStatus::CODE_94000, $ex->getMessage());
@@ -612,6 +642,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		$authtoken = isset($params['auth_token'])?$params['auth_token']:'';
 		$paramsArr = isset($params['params'])? $params['params'] :[];
 		$userInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		$rules = [
@@ -641,7 +672,7 @@ class GivebackController extends Controller
 			// 微信支付，交易类型：JSAPI，redis读取openid
 			if( $paramsArr['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Wechat ){
 				if( isset($extended_params['wechat_params']['trade_type']) && $extended_params['wechat_params']['trade_type']=='JSAPI' ){
-					$_key = 'wechat_openid_'.$orders['auth_token'];
+					$_key = 'wechat_openid_'.$authtoken;
 					$openid = \Illuminate\Support\Facades\Redis::get($_key);
 					if( $openid ){
 						$extended_params['wechat_params']['openid'] = $openid;
@@ -658,6 +689,11 @@ class GivebackController extends Controller
 				'extended_params' => $extended_params,// 扩展参数
 			]);
 		} catch (\Exception $ex) {
+			\App\Lib\Common\LogApi::alert('giveback-create:exception-error', [
+					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+					'tip'=>'还机单支付信息获取异常',//错误信息提示
+					'data'=>['$ex'=>$ex],//错误数据提示
+				],self::$email);
 			return apiResponse([], ApiStatus::CODE_94000,$ex->getMessage());
 		}
 		//拼接返回数据
@@ -666,7 +702,7 @@ class GivebackController extends Controller
 		$orderGivebackInfo['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($orderGivebackInfo['payment_status']);
 		$orderGivebackInfo['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($orderGivebackInfo['evaluation_status']);
 		$data['giveback_info'] =$orderGivebackInfo;
-		$data['payment_info'] =['url'=>$paymentUrl['url']];
+		$data['payment_info'] =$paymentUrl;
 		$data['status'] = OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$data['status_text'] =OrderGivebackStatus::getStatusName(OrderGivebackStatus::STATUS_DEAL_WAIT_PAY);
 		$return  = $this->givebackReturn($data);

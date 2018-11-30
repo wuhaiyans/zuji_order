@@ -7,11 +7,15 @@ use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderClearingRepository;
+use App\Order\Modules\Repository\Pay\Channel;
 use App\Order\Modules\Service\OrderCleaning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 
 /**
  * 支付控制器
@@ -22,6 +26,8 @@ class PayController extends Controller
     public function __construct()
     {
     }
+
+
     /**
      * 代扣+预授权。。支付单跳转url
      * @param Request $request
@@ -37,6 +43,8 @@ class PayController extends Controller
 //		]);exit;
 		
         $params =$request->all();
+		$auth_token = $params['auth_token'];
+		
         $rules = [
             'callback_url'  => 'required',
             'order_no'  => 'required',
@@ -53,6 +61,16 @@ class PayController extends Controller
         $extended_params= isset($params['extended_params'])?$params['extended_params']:[];
 
 		LogApi::id($params['order_no']);
+		
+		if( isset($extended_params['wechat_params']['trade_type']) 
+				&& ($extended_params['wechat_params']['trade_type']=='JSAPI'
+						|| $extended_params['wechat_params']['trade_type']=='MINI' ) ){
+			$_key = 'wechat_openid_'.$auth_token;
+			$openid = \Illuminate\Support\Facades\Redis::get($_key);
+			if( $openid ){
+				$extended_params['wechat_params']['openid'] = trim($openid,'"');
+			}
+		}
 		
 //			LogApi::info('获取支付的url', ['url'=> json_decode(json_encode($paymentUrl),true),'params'=>$params]);
 //			LogApi::info('获取支付的params', ['params'=>$params]);
@@ -110,23 +128,28 @@ class PayController extends Controller
 	{
 		$input = file_get_contents("php://input");
 		LogApi::setSource('payment_notify');
-
 		$params = json_decode($input,true);
 
 		LogApi::id($params['out_payment_no']??'');
 		LogApi::info('支付异步通知', $input);
-
-		//数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        if(isset($params['sign'])){
+//            //数据签名验证
+//            $sign = $params['sign'];
+//            unset($params['sign']);
+//            ksort($params);
+//            $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//            if(!$b){
+//                echo json_encode([
+//                    'status' => 'error',
+//                    'msg' => 'Signature error ',
+//                ]);exit;
+//            }
+//        }else{
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'notice Sign is null',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -228,17 +251,17 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
 
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 
 		if( is_null($params) ){
 			echo json_encode([
@@ -345,16 +368,16 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
         //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -435,17 +458,17 @@ class PayController extends Controller
 		LogApi::info('预授权冻结异步通知', $input);
 		
 		$params = json_decode($input,true);
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo json_encode([
 				'status' => 'error',
@@ -543,16 +566,16 @@ class PayController extends Controller
 		
 		$params = json_decode($input,true);
         //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			echo 'notice data is null ';exit;
 		}
@@ -641,6 +664,7 @@ class PayController extends Controller
 									$userinfo);
 							if( !$b ){
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('回调退款业务接口异常:',[$businessParam, $userinfo,$b]);
                                 LogApi::error(__method__.'[cleanAccount回调退款]业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$b]);
                                 $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款回调业务接口失败');
 							}
@@ -649,13 +673,15 @@ class PayController extends Controller
 							
                         }  else {
 							DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调退款]业务回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调退款更新清算status异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调退款]业务回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
 					DB::rollBack();
                     $this->innerErrMsg();
+                    OrderCleaning::warningCleanOrder('回调退款状态更新异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调退款]退款业务状态更新失败');
                     $this->innerErrMsg(__METHOD__."() ".microtime(true).' 退款业务状态更新失败');
                 }
@@ -755,6 +781,7 @@ class PayController extends Controller
                             if( !$success ){
 
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('清算退押金回调业务异常:',[$businessParam, $userinfo,$success]);
                                 LogApi::error(__method__.'[cleanAccount回调解除预授权]回调业务接口失败OrderCleaning::getBusinessCleanCallback', [$businessParam, $userinfo,$success]);
                                 $this->innerErrMsg('回调业务接口失败');
                             }
@@ -763,12 +790,14 @@ class PayController extends Controller
                         }  else {
 
                             DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调解除预授权]业务回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调解除预授权更新订单status状态异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调解除预授权]业务回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg('押金解押业务回调更新整体清算的状态失败');
                         }
                     }
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('回调解除预授权更新订单退押金状态异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调解除预授权] 更新订单退押金状态失败');
                     $this->innerErrMsg('更新订单退押金状态失败');
 
@@ -872,18 +901,21 @@ class PayController extends Controller
                                 $businessParam['status'],$userinfo);
                             if( !$success ){//
                                 DB::rollBack();
+                                OrderCleaning::warningCleanOrder('清算押金转支付回调业务异常:',[$businessParam,$userinfo,$success]);
                                 LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调业务失败参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$userinfo,$success]);
                                 $this->innerErrMsg('押金转支付回调业务业务失败');
                             }
                             LogApi::info(__method__.'[cleanAccount回调预授权转支付]调业务接口参数及结果OrderCleaning::getBusinessCleanCallback', [$businessParam,$success]);
                         }  else {
                             DB::rollBack();
-                            LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调更新整体清算的状态失败', $orderParam);
+                            OrderCleaning::warningCleanOrder('回调预授权转支付更新status的状态异常:',$orderCleanParam);
+                            LogApi::error(__method__.'[cleanAccount回调预授权转支付]回调更新整体清算的状态失败', $orderCleanParam);
                             $this->innerErrMsg('押金转支付回调更新整体清算的状态失败');
                         }
                     }
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('回调预授权转支付更新押金转支付的状态异常:',$orderParam);
                     LogApi::error(__method__.'[cleanAccount回调预授权转支付]更新押金转支付的状态失败');
                     $this->innerErrMsg('押金转支付的状态更新失败');
                 }
@@ -990,12 +1022,14 @@ class PayController extends Controller
                     LogApi::info(__method__.'[lebaiCleanAccount微回收回调订单清算回调结果OrderCleaning::getBusinessCleanCallback业务接口回调参数:', [$businessParam,$userinfo,$success]);
                     if (!$success) {
                         DB::rollBack();
+                        OrderCleaning::warningCleanOrder('微回收回调订单清算业务接口失败:',[$businessParam,$userinfo,$success]);
                         $this->innerErrMsg('微回收回调订单清算回调业务结果失败');
                     }
                     DB::commit();
                     $this->innerOkMsg();
                 } else {
                     DB::rollBack();
+                    OrderCleaning::warningCleanOrder('微回收回调更新清算状态失败:',$orderParam);
                     LogApi::error(__method__.'[lebaiCleanAccount微回收回调 更新订单清算状态失败');
                     $this->innerErrMsg('微回收回调更新订单清算状态失败');
                 }
@@ -1035,17 +1069,17 @@ class PayController extends Controller
 //		LogApi::info('代扣异步通知', $input);
 
 		$params = json_decode($input,true);
-        //数据签名验证
-        $sign = $params['sign'];
-        unset($params['sign']);
-        ksort($params);
-        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
-        if(!$b){
-            echo json_encode([
-                'status' => 'error',
-                'msg' => 'Signature error ',
-            ]);exit;
-        }
+//        //数据签名验证
+//        $sign = $params['sign'];
+//        unset($params['sign']);
+//        ksort($params);
+//        $b = \App\Lib\AlipaySdk\sdk\aop\AopClient::verifySign(http_build_query($params),$sign);
+//        if(!$b){
+//            echo json_encode([
+//                'status' => 'error',
+//                'msg' => 'Signature error ',
+//            ]);exit;
+//        }
 		if( is_null($params) ){
 			LogApi::info('[crontabCreatepay]进入分期扣款回调逻辑参数为空', $params);
 			echo json_encode([
@@ -1119,7 +1153,7 @@ class PayController extends Controller
 
 
 
-	/**
+	 /**
 	 * 收支明细表
 	 * @requwet Array
 	 * [
@@ -1152,9 +1186,93 @@ class PayController extends Controller
 			return apiResponse([], ApiStatus::CODE_50000, "程序异常");
 		}
 		return apiResponse($list,ApiStatus::CODE_0,"success");
-
-
 	}
+
+    /**
+     * 收支明细表导出
+     * @requwet Array
+     * [
+     * 		'appid'				=> '', // 入账渠道：1生活号'
+     * 		'business_type'		=> '', // 订单号
+     *		'channel'			=> '', // 入账方式
+     * 		'amount'			=> '', // 金额
+     * 		'create_time'		=> '', // 创建时间
+     * ]
+     * @return array
+     *
+     */
+    public function payIncomeQueryExport(Request $request){
+        set_time_limit(0);
+        $params = $request->all();
+        $pageSize = 50000;
+        if (isset($params['size']) && $params['size']>=50000) {
+            $pageSize = 50000;
+        } else {
+            $pageSize = $params['size'];
+        }
+        $params['page'] = $params['page']?? 1;
+        $outPages       = $params['page']?? 1;
+
+        $total_export_count = $pageSize;
+        $pre_count = $params['smallsize']?? 500;
+
+        $smallPage = ceil($total_export_count/$pre_count);
+        $abc = 1;
+
+        $headers = ['名称', '姓名','电话','入账发起时间','入账类型', '入账方式','业务编号','入账金额','拿趣用订单编号','业务平台交易码','支付平台交易码','缴款用途'];
+
+        $orderExcel = array();
+        while(true) {
+            if ($abc>$smallPage) {
+                break;
+            }
+            $offset = ($outPages - 1) * $total_export_count;
+            $params['page'] = intval(($offset / $pre_count)+ $abc) ;
+            ++$abc;
+            $orderData = array();
+            LogApi::debug("[payIncomeQueryExport]导出参数",['params'=>$params,'pre_count'=>$pre_count]);
+
+            $orderData = \App\Order\Modules\Repository\OrderPayIncomeRepository::queryListExport($params,$pre_count);
+            $orderDataArray=objectToArray($orderData);
+            LogApi::debug("[payIncomeQueryExport]查询结果",$orderData);
+            if ($orderDataArray) {
+                $data = array();
+                foreach ($orderDataArray as $item) {
+					// 缴款用途
+					$business_type_name = \App\Order\Modules\Repository\Pay\UnderPay\UnderPayStatus::getBusinessTypeName($item['business_type']);
+					if(!$business_type_name){
+						$businessType = \App\Order\Modules\Inc\OrderStatus::getBusinessName($item['business_type']);
+						$business_type_name = "业务类型-" . $businessType . "支付";
+					}
+
+                    $data[] = [
+                        $item['name'],
+						$item['realname'],
+						$item['mobile'],
+                        date('Y-m-d H:i:s', $item['create_time']),
+                        OrderStatus::getBusinessName( $item['business_type']),
+                        Channel::getBusinessName($item['channel']),
+                        $item['business_no'],
+                        $item['amount'],
+                        $item['order_no'],
+                        $item['trade_no'],
+                        $item['out_trade_no'],
+						$business_type_name,
+                    ];
+
+                }
+                LogApi::debug("【payIncomeQueryExport】导出数据列表",$data);
+                $orderExcel =  \App\Lib\Excel::csvWrite1($data,  $headers, '入账列表导出',$abc);
+
+            }else{
+                break;
+            }
+        }
+
+        return $orderExcel;
+        exit;
+    }
+
 
 
 	/**
