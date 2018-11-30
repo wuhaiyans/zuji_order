@@ -21,20 +21,20 @@ class TestController extends Controller
 
 		$data = [
 			'business_type'	=> 6,
-			'business_no'	=> 'XAB1568981254942',
+			'business_no'	=> 'XAB3048073127160',
 			'status'		=> 'success'
 		];
 
 		$a = \App\Order\Modules\Service\OrderRelet::callback($data);
 		p($a);
 
-
-		// 发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
-			"XAB2181696214512",
-			"ReletSuccess");
-		$notice->notify();
+//
+//		// 发送短信
+//		$notice = new \App\Order\Modules\Service\OrderNotice(
+//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+//			"XAB3048073127160",
+//			"ReletSuccess");
+//		$notice->notify();
 	
 //		//发送短信
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
