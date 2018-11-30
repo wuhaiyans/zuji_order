@@ -45,6 +45,8 @@ class DeliveryController extends Controller
 	 *		'customer'			=> '',	//【必选】string 收货人姓名
 	 *		'customer_mobile'	=> '',	//【必选】string 收货人手机号
 	 *		'customer_address'	=> '',	//【必选】string 收货人地址
+     *      'channel_id'=>'',//【必须】string 所属渠道ID
+     *      'appid'=>'',//【必须】string 来源appid
 	 * ]
      */
     public function deliveryCreate(){
@@ -59,6 +61,8 @@ class DeliveryController extends Controller
             'business_key'		=> 'required', //业务类型
             'business_no'		=> 'required', //业务编号
             'predict_delivery_time'=>'required', //预计发货时间
+            'channel_id'=>'required', //预计发货时间
+            'appid'=>'required', //预计发货时间
         ];
 
         $params = $this->_dealParams($rules);
@@ -504,6 +508,8 @@ class DeliveryController extends Controller
     public function lists()
     {
         $params = $this->_dealParams([]);
+        $request = request()->input();
+        $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
         $list = $this->delivery->lists($params);
         return \apiResponse($list);
     }

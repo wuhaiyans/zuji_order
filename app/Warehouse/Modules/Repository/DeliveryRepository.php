@@ -64,7 +64,9 @@ class DeliveryRepository
             'customer_address' => isset($data['customer_address']) ? $data['customer_address'] : '',
             'business_key' => $data['business_key'],
             'business_no' => $data['business_no'],
-            'predict_delivery_time' => $data['predict_delivery_time']
+            'predict_delivery_time' => $data['predict_delivery_time'],
+            'channel_id' => $data['channel_id'],
+            'appid' => $data['appid'],
         ];
 
         try {
@@ -580,7 +582,7 @@ class DeliveryRepository
      *
      * 列表
      */
-    public static function lists($params, $logic_params, $limit, $page=null)
+    public static function lists($params, $logic_params, $limit, $page=null, $whereIn=null)
     {
         $query = Delivery::where($params)->orderByDesc('delivery_no');
 
@@ -588,6 +590,9 @@ class DeliveryRepository
             foreach ($logic_params as $logic) {
                 $query->where($logic[0], $logic[1] ,$logic[2]);
             }
+        }
+        if ($whereIn) {
+            $query->whereIn('channel_id',$whereIn);
         }
         return $query->paginate($limit,
             [
