@@ -100,10 +100,6 @@ class OrderPayComponnet implements OrderCreater
             if($this->orderYajin>0){
                 $this->fundauthStatus =true;
             }
-            //判断是否需要去支付 （代扣+预授权状态）
-            if(!$this->withholdStatus && !$this->fundauthStatus){
-                $this->isPay =false;
-            }
         }
         //一次性方式支付租金
         elseif( $this->payType == PayInc::FlowerStagePay || $this->payType == PayInc::UnionPay || $this->payType == PayInc::LebaifenPay || $this->payType == PayInc::PcreditPayInstallment || $this->payType == PayInc::WeChatPay){
@@ -113,7 +109,12 @@ class OrderPayComponnet implements OrderCreater
             if($this->orderYajin >0){
                 $this->fundauthStatus =true;
             }
-
+        }
+        //花呗预授权支付租金 押金
+        elseif($this->payType == PayInc::FlowerFundauth){
+            if($this->orderZujin + $this->orderYajin >0){
+                $this->fundauthStatus =true;
+            }
         }
 
         return $filter;
@@ -178,7 +179,6 @@ class OrderPayComponnet implements OrderCreater
             return true;
         }
 
-
         $orderInsurance =$this->getOrderCreater()->getSkuComponnet()->getOrderInsurance();
         $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
         if($zuqiType ==1){
@@ -192,7 +192,7 @@ class OrderPayComponnet implements OrderCreater
             'businessNo' => $this->orderNo,//业务编号（订单编号）【必须】<br/>
             'orderNo' => $this->orderNo,//业务编号（订单编号）【必须】<br/>
             'fundauthAmount' =>$this->orderYajin,//Price 预授权金额（押金），单位：元【必须】<br/>
-            'paymentAmount' => $this->orderZujin,//Price 支付金额（总租金），单位：元【必须】<br/>
+            'paymentAmount' => $this->orderZujin,//Price 支付金额（总租金），单位：元【必须】<br/>  包含意外险
             'paymentFenqi' => $this->orderFenqi,//int 分期数，取值范围[0,3,6,12]，0：不分期【必须】<br/>
             'yiwaixian' =>$orderInsurance,//Price 订单的意外险金额 单位：元 【必须】
         ];
@@ -251,6 +251,11 @@ class OrderPayComponnet implements OrderCreater
                 $param['paymentAmount'] = $this->orderZujin + $this->orderYajin;
                 //创建普通支付
                 \App\Order\Modules\Repository\Pay\PayCreater::createPayment($param);
+            }
+            //花呗预授权支付订单租金 和押金
+            elseif ($this->payType == PayInc::FlowerFundauth){
+                $param['fundauthAmount'] = $this->orderZujin + $this->orderYajin;
+                \App\Order\Modules\Repository\Pay\PayCreater::createFundauth($param);
             }
 
 
