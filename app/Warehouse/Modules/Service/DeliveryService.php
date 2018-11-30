@@ -296,7 +296,15 @@ class DeliveryService
             }
         }
 
-        $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page);
+        if($params['channel_id']){
+            $whereIn = $params['channel_id'];
+            $daochu = false;
+        }else{
+            $whereIn = null;
+            $daochu = true;
+        }
+
+        $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page, $whereIn);
         $items = $collect->items();
 
         if (!$items) {
@@ -380,7 +388,8 @@ class DeliveryService
             'total'=>$collect->total(),
             'current_page'=>$collect->currentPage(),
             'status_list' => $status_list,
-            'kw_types' => self::searchKws()
+            'kw_types' => self::searchKws(),
+            'daochu' => $daochu
         ];
 
     }

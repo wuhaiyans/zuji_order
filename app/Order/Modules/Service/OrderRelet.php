@@ -383,7 +383,7 @@ class OrderRelet
                 $goods_arr = $goodsObj->getData();
 
                 //获取订单信息
-                $orderInfo = OrderRepository::getInfoById($params['order_no']);
+                $orderInfo = OrderRepository::getInfoById($relet['order_no']);
                 //修改小程序续租剩余时间
                 if($relet['zuqi_type']==ReletStatus::STATUS1 && $orderInfo['order_type']==OrderStatus::orderMiniService){
                     if(!$goodsObj->setReletTime($relet['zuqi'])){

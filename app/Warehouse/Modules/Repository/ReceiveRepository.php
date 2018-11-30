@@ -40,7 +40,7 @@ class ReceiveRepository
      *
      * 列表
      */
-    public static function list($params, $logic_params, $limit, $page=null)
+    public static function list($params, $logic_params, $limit, $page=null, $whereIn=null)
     {
         $query = Receive::where($params);
 
@@ -48,6 +48,9 @@ class ReceiveRepository
             foreach ($logic_params as $logic) {
                 $query->where($logic[0], $logic[1] ,$logic[2]);
             }
+        }
+        if ($whereIn) {
+            $query->whereIn('channel_id',$whereIn);
         }
         return $query->paginate($limit,
             [
@@ -130,7 +133,9 @@ class ReceiveRepository
                 'create_time' => $time,
                 'type' => isset($data['type']) ? $data['type'] : 0,
                 'business_key' => $data['business_key'],
-                'business_no' => $data['business_no']
+                'business_no' => $data['business_no'],
+                'channel_id' => $data['channel_id'],
+                'appid' => $data['appid'],
             ];
 
             $model = new Receive();
