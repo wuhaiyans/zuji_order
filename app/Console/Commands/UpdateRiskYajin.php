@@ -81,7 +81,8 @@ class UpdateRiskYajin extends Command
             if(empty($arr)){
                 echo "发送成功";die;
             }
-            echo "失败订单";var_dump($arr);die;
+            LogApi::error("MianyajinReduce-error:",$arr);
+            echo "发送失败";die;
         }catch (\Exception $e){
             echo $e->getMessage();
             die;
