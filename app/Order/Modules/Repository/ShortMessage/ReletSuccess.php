@@ -33,6 +33,9 @@ class ReletSuccess implements ShortMessage {
 
     public function notify(){
 
+        LogApi::debug("[ReletMessage]短息参数",[
+            'business_no'   => $this->business_no
+        ]);
         //获取续租对象
         $reletObj = \App\Order\Modules\Repository\Relet\Relet::getByReletNo($this->business_no);
         $relet = $reletObj->getData();
