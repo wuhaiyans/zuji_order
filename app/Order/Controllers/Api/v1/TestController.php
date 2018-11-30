@@ -19,9 +19,14 @@ class TestController extends Controller
 	}
 	public function sendSms() {
 
+		$data = [
+			'business_type'	=> 6,
+			'business_no'	=> 'XAB1568981254942',
+			'status'		=> 'success'
+		];
 
-
-
+		$a = \App\Order\Modules\Service\OrderRelet::callback($data);
+		p($a);
 
 
 		// 发送短信
