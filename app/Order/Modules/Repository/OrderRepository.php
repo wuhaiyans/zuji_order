@@ -184,7 +184,7 @@ class OrderRepository
         if (empty($orderIds)) return false;
         $orderGoodData =  DB::connection('mysql_read')->table('order_goods')->whereIn('order_no', $orderIds)->select($coulumn)->get();
         if (!$orderGoodData) return false;
-        return $orderGoodData->toArray();
+        return objectToArray($orderGoodData->toArray());
     }
 
 

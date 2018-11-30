@@ -1993,7 +1993,6 @@ class OrderOperate
             'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
-
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
             $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];
