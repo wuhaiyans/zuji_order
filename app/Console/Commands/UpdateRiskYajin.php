@@ -22,6 +22,7 @@ class UpdateRiskYajin extends Command
     protected $signature = 'command:UpdateRiskYajin';
 
     /**
+     *
      * The console command description.
      *
      * @var string
