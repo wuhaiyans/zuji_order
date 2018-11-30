@@ -182,7 +182,7 @@ class OrderRepository
 
     public static function getGoodsListByOrderIdArray($orderIds,$coulumn='*'){
         if (empty($orderIds)) return false;
-        $orderGoodData =  OrderGoods::query()->whereIn('order_no', $orderIds)->select($coulumn)->get();
+        $orderGoodData =  DB::connection('mysql_read')->table('order_goods')->whereIn('order_no', $orderIds)->select($coulumn)->get();
         if (!$orderGoodData) return false;
         return $orderGoodData->toArray();
     }
@@ -949,8 +949,7 @@ class OrderRepository
         }
 
         $orderArrays = array();
-
-        $orderList =  DB::table('order_info as o')
+        $orderList =  DB::connection("mysql_read")::table('order_info as o')
             ->select('o.order_no','o.order_amount','o.order_amount','o.goods_yajin','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','c.cret_no')
             ->join('order_user_address as d',function($join){
                 $join->on('o.order_no', '=', 'd.order_no');

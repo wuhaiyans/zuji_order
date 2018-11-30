@@ -84,6 +84,20 @@ return [
 //			]
         ],
 
+        'mysql_read' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_READ','47.106.114.108'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'zuji_order'),
+            'username' => env('DB_USERNAME', 'hjx'),
+            'password' => env('DB_PASSWORD', '123456'),
+            'unix_socket' => env('DB_SOCKET_READ', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
         'mysql_01' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST_01'),

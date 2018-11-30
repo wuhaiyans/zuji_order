@@ -35,7 +35,7 @@ class OrderRiskRepository
 
             $whereArray[] = ['type', '=', $type];
         }
-        $order =  OrderRisk::query()->where($whereArray)->get();
+        $order =  DB::connection('mysql_read')->table('order_risk')->where($whereArray)->get();
         if (!$order) return false;
 
         return objectToArray($order);
