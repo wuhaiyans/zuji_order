@@ -831,6 +831,7 @@ class OrderRepository
                 $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
                 $orderArrays['orderIds'] = $orderIds;
                 $orderArrays['total'] = $count;
+                $orderArrays['is_out_channel'] = !empty($whereInArray)? 1:0;
                 $orderArrays['last_page'] = ceil($count/$pagesize);
             } else {
                 return false;
