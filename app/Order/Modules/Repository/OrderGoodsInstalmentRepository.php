@@ -47,6 +47,12 @@ class OrderGoodsInstalmentRepository
         $whereArray = [];
         $statusArr = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::SUCCESS, OrderInstalmentStatus::FAIL, OrderInstalmentStatus::CANCEL, OrderInstalmentStatus::PAYING];
 
+        //逾期天数
+        if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
+            $beoverdue_day = strtoupper($param['beoverdue_day']);
+            $whereArray = getBeoverduetime($beoverdue_day);
+        }
+
         // 开始时间（可选）
         if( isset($param['begin_time']) && $param['begin_time'] != ""){
             $whereArray[] =  ['term', '>=', $param['begin_time']];
@@ -60,12 +66,6 @@ class OrderGoodsInstalmentRepository
         //根据goods_no
         if (isset($param['goods_no']) && !empty($param['goods_no'])) {
             $whereArray[] = ['order_goods_instalment.goods_no', '=', $param['goods_no']];
-        }
-
-        //逾期天数
-        if(isset($param['beoverdue_day']) && !empty($param['beoverdue_day'])){
-            $beoverdue_day = strtoupper($param['beoverdue_day']);
-            $whereArray = getBeoverduetime($beoverdue_day);
         }
 
         //根据订单号
