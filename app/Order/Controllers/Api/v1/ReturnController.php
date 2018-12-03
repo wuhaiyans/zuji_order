@@ -226,9 +226,9 @@ class ReturnController extends Controller
             'channe_id'=>$params['channel_id']]);
         $return_list = $this->OrderReturnCreater->get_list($params);
         //根据渠道判断是否显示导出按钮
-        $return_list['export_status'] = true;//默认显示
+        $return_list['is_out_channel '] = true;//默认显示
         if(!empty($params['channel_id'])){
-            $return_list['export_status'] = false;
+            $return_list['is_out_channel '] = false;
         }
 
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');

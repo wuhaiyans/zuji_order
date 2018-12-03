@@ -86,7 +86,7 @@ return [
 
         'mysql_read' => [
             'driver' => 'mysql',
-            'host' => env('DB_HOST_READ','47.106.114.108'),
+            'host' => env('DB_HOST_READ',env('DB_HOST','119.29.141.207')),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'zuji_order'),
             'username' => env('DB_USERNAME', 'hjx'),
