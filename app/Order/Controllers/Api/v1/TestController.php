@@ -26,7 +26,7 @@ class TestController extends Controller
 			'out_trade_no' 	=> '20A80191759992478', //业务系统授权码
 			'fundauth_no' 	=> '20A80191759992478', //支付系统授权码
 			'amount' 		=> bcmul(1,100), //交易金额；单位：分
-			'back_url' 		=> '',
+			'back_url' 		=> config('app.url') . "/order/pay/withholdCreatePayNotify",
 			'user_id' 		=> 3209, //用户id
 
 		];
