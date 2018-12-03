@@ -361,8 +361,8 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false; //创建清单失败
                 }
-                $cleanAccount['parmas']['clean_no'] = $create_clear;
-                $cleanAccount['parmas']['userinfo'] = $userinfo;
+                $cleanAccount['params']['clean_no'] = $create_clear;
+                $cleanAccount['params']['userinfo'] = $userinfo;
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0) return true;
