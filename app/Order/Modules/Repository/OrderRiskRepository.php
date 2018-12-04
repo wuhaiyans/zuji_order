@@ -7,6 +7,7 @@ use App\Order\Models\OrderRisk;
 use App\Order\Models\OrderUserCertified;
 use App\Order\Models\OrderUserInfo;
 use App\Order\Models\OrderYidun;
+use Illuminate\Support\Facades\DB;
 
 class OrderRiskRepository
 {
@@ -35,7 +36,7 @@ class OrderRiskRepository
 
             $whereArray[] = ['type', '=', $type];
         }
-        $order =  OrderRisk::query()->where($whereArray)->get();
+        $order =  DB::connection('mysql_read')->table('order_risk')->where($whereArray)->get();
         if (!$order) return false;
 
         return objectToArray($order);

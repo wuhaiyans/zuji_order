@@ -86,6 +86,7 @@ class ReletSuccess implements ShortMessage {
             'endTime'       => $endTime,
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
+        LogApi::debug("[ReletMessage]短信参数",$dataSms);
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, $dataSms);
     }

@@ -1030,8 +1030,36 @@ class OrderOperate
             return  ApiStatus::CODE_31001;
         }
         $userId = $userInfo['uid'];
+        //增加操作日志
+
+        $resonInfo = '';
+
+        if ($reasonId) {
+
+            $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+        }
+
+        if ($resonText) {
+
+            $resonInfo = $resonText;
+
+        }
         //查询订单的状态
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
+
+        //如果订单为已支付 取消订单走申请退款方法
+        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed){
+            $params=[
+                'order_no'=>$orderNo,
+                'user_id'=>$userId,
+                'reason_text'=>$resonInfo,
+            ];
+            $b = OrderReturnCreater::createRefund($params,$userInfo);
+            if(!$b){
+                return ApiStatus::CODE_31010;
+            }
+            return ApiStatus::CODE_0;
+        }
 
         if ($orderInfoData['order_status']!=Inc\OrderStatus::OrderWaitPaying)  return  ApiStatus::CODE_31007;
         //开启事物
@@ -1142,20 +1170,7 @@ class OrderOperate
 
 
 
-            //增加操作日志
 
-            $resonInfo = '';
-
-            if ($reasonId) {
-
-                $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
-            }
-
-            if ($resonText) {
-
-                $resonInfo = $resonText;
-
-            }
             OrderLogRepository::add($userId ,$userInfo['username'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
 
             return ApiStatus::CODE_0;
@@ -1993,7 +2008,6 @@ class OrderOperate
             'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
-
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
             $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];
