@@ -591,7 +591,7 @@ class DeliveryRepository
                 $query->where($logic[0], $logic[1] ,$logic[2]);
             }
         }
-        if ($whereIn) {
+        if (isset($whereIn) && !empty($whereIn)) {
             $query->whereIn('channel_id',$whereIn);
         }
         return $query->paginate($limit,

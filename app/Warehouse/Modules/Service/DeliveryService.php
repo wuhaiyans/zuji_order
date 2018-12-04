@@ -295,14 +295,24 @@ class DeliveryService
                     array_push($logic_params, ['delivery_time', '>=', strtotime($params['begin_time'])]);
             }
         }
-
-        if($params['channel_id']){
+        /**
+         * qinliping 修改于 2018/12/04
+         */
+        //第三方渠道类型
+        if (isset($params['channel_id']) && !empty($params['channel_id'])) {
             $whereIn = $params['channel_id'];
             $daochu = false;
         }else{
             $whereIn = null;
             $daochu = true;
         }
+       /* if($params['channel_id']){
+            $whereIn = $params['channel_id'];
+            $daochu = false;
+        }else{
+            $whereIn = null;
+            $daochu = true;
+        }*/
 
         $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page, $whereIn);
         $items = $collect->items();
@@ -389,7 +399,7 @@ class DeliveryService
             'current_page'=>$collect->currentPage(),
             'status_list' => $status_list,
             'kw_types' => self::searchKws(),
-            'daochu' => $daochu
+            'is_out_channel ' => $daochu
         ];
 
     }
