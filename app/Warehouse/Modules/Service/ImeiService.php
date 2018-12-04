@@ -112,7 +112,7 @@ class ImeiService
             }
         }
 
-        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total(),'is_out_channel ' => $daochu];
+        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total(),'is_out_channel' => $daochu];
     }
 
 
