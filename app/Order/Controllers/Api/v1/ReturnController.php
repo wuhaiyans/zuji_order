@@ -232,7 +232,7 @@ class ReturnController extends Controller
         //根据渠道判断是否显示导出按钮
         $return_list['is_out_channel '] = true;//默认显示
         if(!empty($params['channel_id'])){
-            $return_list['is_out_channel '] = false;
+            $return_list['is_out_channel'] = false;
         }
 
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
