@@ -317,8 +317,11 @@ class OrderReturnCreater
                 if( isset( $getPayInfo['create_data'] ) ){
                     $create_data = $getPayInfo['create_data'];
                 }
-
             }
+            LogApi::debug("[createRefund]订单支付金额参数",[
+                'data'=>$data,
+                'create_data'=>$create_data
+            ]);
             //创建退款单参数
             $data['business_key'] = OrderStatus::BUSINESS_REFUND;
             $data['order_no'] = $params['order_no'];
@@ -362,9 +365,10 @@ class OrderReturnCreater
                     return false; //创建清单失败
                 }
                 //设置出账参数变量
-                $cleanAccount['parmas'] = [];
+                $cleanAccount = [];
                 $cleanAccount['params']['clean_no'] = $create_clear;
                 $cleanAccount['params']['userinfo'] = $userinfo;
+                LogApi::debug("[createRefund]出账参数",$cleanAccount);
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0) return true;
