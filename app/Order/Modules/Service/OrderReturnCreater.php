@@ -311,8 +311,17 @@ class OrderReturnCreater
             //订单的支付方式，获取应退款金额|| 应解冻金额|| 支付编号
             $getPayInfo = self::getPayInfo($order_info);
             if( $getPayInfo ){
-                if( isset( $getPayInfo['data'] ) ){
-                    $data[] = $getPayInfo['data'];
+                if( isset( $getPayInfo['data']['auth_unfreeze_amount'] ) ){
+                    $data['auth_unfreeze_amount'] = $getPayInfo['data']['auth_unfreeze_amount'];
+                }
+                if( isset( $getPayInfo['data']['pay_amount'] ) ){
+                    $data['pay_amount'] = $getPayInfo['data']['pay_amount'];
+                }
+                if( isset( $getPayInfo['data']['refund_amount'] ) ){
+                    $data['refund_amount'] = $getPayInfo['data']['refund_amount'];
+                }
+                if( isset( $getPayInfo['data']['auth_deduction_amount'] ) ){
+                    $data['auth_deduction_amount'] = $getPayInfo['data']['auth_deduction_amount'];
                 }
                 if( isset( $getPayInfo['create_data'] ) ){
                     $create_data[] = $getPayInfo['create_data'];
