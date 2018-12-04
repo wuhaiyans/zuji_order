@@ -312,10 +312,10 @@ class OrderReturnCreater
             $getPayInfo = self::getPayInfo($order_info);
             if( $getPayInfo ){
                 if( isset( $getPayInfo['data'] ) ){
-                    $data = $getPayInfo['data'];
+                    $data[] = $getPayInfo['data'];
                 }
                 if( isset( $getPayInfo['create_data'] ) ){
-                    $create_data = $getPayInfo['create_data'];
+                    $create_data[] = $getPayInfo['create_data'];
                 }
             }
             LogApi::debug("[createRefund]订单支付金额参数",[
