@@ -298,6 +298,7 @@ class OrderReturnCreater
                 return false;//订单正在操作中
             }
 
+            $data = [];
             //设置变量
             $data['pay_amount'] = 0.00; //实际支付金额
             $data['refund_amount'] = 0.00; //应退金额
@@ -352,8 +353,7 @@ class OrderReturnCreater
                     return true;
 
                 }
-                //设置出账参数变量
-                $cleanAccount['parmas'] = [];
+
                 //创建清单
                 $create_clear = self::createClear($order_info, $data, $create_data);
                 if (!$create_clear) {
@@ -361,6 +361,8 @@ class OrderReturnCreater
                     DB::rollBack();
                     return false; //创建清单失败
                 }
+                //设置出账参数变量
+                $cleanAccount['parmas'] = [];
                 $cleanAccount['params']['clean_no'] = $create_clear;
                 $cleanAccount['params']['userinfo'] = $userinfo;
                 //调用出账
