@@ -275,7 +275,7 @@ class WithholdController extends Controller
                 return apiResponse([], ApiStatus::CODE_50000, '小程序扣款处理失败（内部失败或芝麻处理错误）');
             }
 
-        }else if( $orderInfo['pay_type'] == PayInc::FlowerStagePay ){
+        }else if( $orderInfo['pay_type'] == PayInc::FlowerFundauth ){
             // 花呗支付方式 扣除押金 - 扣除预授权 金额
             if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
@@ -296,9 +296,10 @@ class WithholdController extends Controller
                     'user_id'		=> $orderInfo['user_id'],   //用户id
                     'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                 ];
+
                 $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
 
-                LogApi::info(__method__.'[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
+                LogApi::info('[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
 
             }catch(\App\Lib\ApiException $exc){
 
