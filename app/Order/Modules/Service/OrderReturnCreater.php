@@ -2395,7 +2395,11 @@ class OrderReturnCreater
      * @return bool
      */
     public static function refundUpdate(array $params,array $userinfo){
-
+        LogApi::debug("[refundUpdate]退款回调参数",
+            [
+                'params'=>$params,
+                'userinfo'=>$userinfo
+            ]);
         //参数过滤
         $rules = [
             'business_type'   => 'required',//业务类型
