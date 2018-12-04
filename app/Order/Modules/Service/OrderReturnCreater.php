@@ -702,12 +702,12 @@ class OrderReturnCreater
             //存在审核同意商品
             if(isset($goodsDeliveryInfo)){
                 //获取订单信息
-                $order = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
-                if ( !$order ){
+                $getOrderInfo = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
+                if ( !$getOrderInfo ){
                     LogApi::debug("[returnOfGoods]获取订单信息失败".$order);
                     return false;
                 }
-                $order_info = $order->getData();
+                $order_info = $getOrderInfo->getData();
 
                 //获取用户下单信息
                 $userAddress = \App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
