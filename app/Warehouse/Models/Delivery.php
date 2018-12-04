@@ -75,7 +75,8 @@ class Delivery extends Warehouse
         'status_remark',
         'business_key',
         'business_no',
-        'predict_delivery_time'
+        'predict_delivery_time',
+        'channel_id',
     ];
 
     /**
