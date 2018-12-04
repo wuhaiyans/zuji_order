@@ -366,6 +366,8 @@ class OrderReturnCreater
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0) return true;
+                //事务回滚
+                DB::rollBack();
                 return false;
             }
             //冻结订单
@@ -3669,8 +3671,7 @@ class OrderReturnCreater
             $cancel = Delivery::cancel($order_info['order_no']);
             if( !$cancel ){
                 LogApi::debug("[refundSuccessCallback]通知收发货系统取消发货失败");
-                //事务回滚
-                DB::rollBack();
+
                 return false;//取消发货失败
             }
         }
