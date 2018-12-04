@@ -91,6 +91,8 @@ class MiniApi {
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi($params['app_id']);
         $b = $CommonMiniApi->withholdingCancelClose($params);
         if($b === false){
+            //预警通知 参数1：问题标记  参数2：程序相关错误数据  参数3：通知人邮箱
+            \App\Lib\Common\LogApi::alert("miniCancel:小程序取消订单请求失败",$params,["zhangjinghui@huishoubao.com"]);
             self::$error = $CommonMiniApi->getError();
             return false;
         }
