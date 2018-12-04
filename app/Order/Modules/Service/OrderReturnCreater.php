@@ -288,7 +288,7 @@ class OrderReturnCreater
 
             //订单必须是已支付，未收货
             if( $order_info['order_status'] != OrderStatus::OrderPayed  && $order_info['order_status'] != OrderStatus::OrderPaying && $order_info['order_status'] != OrderStatus::OrderInStock){
-                LogApi::debug("[createRefund]订单必须状态不符合取消订单：".$order_info['order_status']);
+                LogApi::debug("[createRefund]订单状态不符合取消订单：".$order_info['order_status']);
                 return false;
             }
 
@@ -482,8 +482,8 @@ class OrderReturnCreater
 
         }catch( \Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
-            die;
+            LogApi::debug("[createRefund]通知收发货系统取消发货失败:".$exc->getMessage());
+            return false;
         }
     }
 

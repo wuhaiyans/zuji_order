@@ -112,6 +112,10 @@ class ReturnController extends Controller
         if(count($data)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        LogApi::debug("申请退款参数",[
+            'params'=> $params,
+            'userinfo'=>$orders['userinfo']
+        ]);
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);
         if(!$return){
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
