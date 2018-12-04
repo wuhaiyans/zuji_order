@@ -286,11 +286,15 @@ class WithholdController extends Controller
                 /**
                  * 查询用户下单时 预授权信息 获取支付系统授权码
                  */
-                $authInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                $fundauthNo = $orderAuthInfo->getFundauthNo();
+
+                $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
                 $unfreezeAndPayData = [
                     'name'			=> $subject,                //交易名称
                     'out_trade_no'	=> $business_no,            //业务系统授权码
-                    'fundauth_no'	=> $authInfo->getFundauthNo(), //支付系统授权码
+                    'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount'		=> $amount,                 //交易金额；单位：分
                     'back_url'		=> $backUrl,                //后台通知地址
                     'user_id'		=> $orderInfo['user_id'],   //用户id
@@ -308,6 +312,7 @@ class WithholdController extends Controller
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
+                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
             }
 
         }else {
