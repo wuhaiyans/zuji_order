@@ -324,7 +324,7 @@ class OrderReturnCreater
                     $data['auth_deduction_amount'] = $getPayInfo['data']['auth_deduction_amount'];
                 }
                 if( isset( $getPayInfo['create_data'] ) ){
-                    $create_data[] = $getPayInfo['create_data'];
+                    $create_data = $getPayInfo['create_data'];
                 }
             }
             LogApi::debug("[createRefund]订单支付金额参数",[
@@ -3639,7 +3639,7 @@ class OrderReturnCreater
      * 创建清算单
      */
     public static function createClear($order_info,$data,$createData){
-
+        LogApi::info("[createClear]创建清单编码参数",$createData);
         //创建清算单
         $create_data['order_no'] = $order_info['order_no'];//订单类型
         if($order_info['pay_type'] == PayInc::LebaifenPay){
