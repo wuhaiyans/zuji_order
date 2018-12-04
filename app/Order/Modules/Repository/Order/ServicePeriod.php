@@ -123,10 +123,11 @@ class ServicePeriod {
      *
      */
     public static function updateUnitTime($goodsNo,$beginTime,$endTime):bool {
-        $res = OrderGoods::where(['goods_no'=>$goodsNo])->first();
-        $res->begin_time = $beginTime;
-        $res->end_time = $endTime;
-        return $res->update();
+
+        $data['begin_time'] =$beginTime;
+        $data['end_time'] =$endTime;
+        return OrderGoodsUnit::where('goods_no','=',$goodsNo)->update($data);
+
     }
 
     /**

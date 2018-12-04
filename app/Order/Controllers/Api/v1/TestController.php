@@ -17,59 +17,34 @@ class TestController extends Controller
 		$orderBuyout->execute();
 		echo $amount;
 	}
+
 	public function sendSms() {
 
+		$data = [
 
+			'name'			=> "订金索赔扣押金",
+			'out_trade_no' 	=> '20A80191759992478', //业务系统授权码
+			'fundauth_no' 	=> '20A80191759992478', //支付系统授权码
+			'amount' 		=> bcmul(1,100), //交易金额；单位：分
+			'back_url' 		=> config('app.url') . "/order/pay/withholdCreatePayNotify",
+			'user_id' 		=> 3209, //用户id
 
+		];
 
+		$succss = \App\Lib\Payment\CommonFundAuthApi::unfreezeAndPay($data);
 
+		v($succss);
 
-		//发送短信
-		$notice = new \App\Order\Modules\Service\OrderNotice(
-			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-			'GA81697084214033',
-			"GivebackReturnDeposit");
-		$notice->notify();
-	
-//		//发送短信
+//
+//		// 发送短信
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
-//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
-//			'GA71199188045622',
-//			'GivebackEvaNoWitYesEnoNo',
-//			['amount'=>1]);
+//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
+//			"XAB3048073127160",
+//			"ReletSuccess");
 //		$notice->notify();
 
 
 
-//		$id = 1;
-//		$a  = \App\Order\Modules\Service\OrderWithhold::instalment_withhold($id);
-//		v($a);
-
-//		//发送短信通知 支付宝内部通知
-//		$notice = new \App\Order\Modules\Service\OrderNotice(
-//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-//			'FA70200698030574',
-//			"InstalmentWithhold");
-//
-//		$notice->notify();
-
-
-//		$a = new \App\Order\Controllers\Api\v1\WithholdController();
-//		$b = $a->crontab_createpay();
-//		v($b);
-
-//		$data = [
-//			'payment_no'    => 'required',
-//			'out_no'        => 'FA62602377858037',
-//			'status'        => 'success',
-//			'reason'        => '',
-//		];
-//
-//		$a = \App\Order\Modules\Service\OrderWithhold::repaymentNotify($data);
-//		v($a);
-//		die;
-//		$a = new OrderNotice(1, 1, SceneConfig::ORDER_CREATE);
-//		$a->notify();
 	}
 }
 ?>

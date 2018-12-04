@@ -92,14 +92,20 @@ class OrderReturnRepository
      * 查询退货、退款列表
      * @param $where
      * @param $additional
+     * @param $whereInArray渠道类型
      * @return array
      *
      */
-    public static function get_list(array $where,array $additional){
+    public static function get_list(array $where,$whereInArray,array $additional){
         $parcels = DB::table('order_return')
             ->leftJoin('order_info','order_return.order_no', '=', 'order_info.order_no')
             ->leftJoin('order_goods',[['order_return.order_no', '=', 'order_goods.order_no'],['order_return.goods_no', '=', 'order_goods.goods_no']])
-            ->where($where)
+            ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                return $join->whereIn('order_info.channel_id', $whereInArray);
+            })
+            ->when(!empty($where),function($join) use ($where) {
+                return $join->where($where);
+            })
             ->select('order_return.create_time as c_time','order_return.*','order_info.create_time','order_info.mobile','order_info.order_amount','order_info.order_status','order_goods.goods_name','order_goods.zuqi')
             ->orderBy('order_return.create_time', 'DESC')
             ->paginate($additional['size'],$columns = ['*'], $pageName = 'page', $additional['page']);
@@ -222,10 +228,12 @@ class OrderReturnRepository
      * 'page'        =>'',   【可选】  页数       int
      * 'size'        =>''    【可选】  条数       int
      * ]
+     *
      */
     public static function getAdminOrderList($param = array(), $pagesize=5)
     {
         $whereArray = array();
+     //   $whereInArray = array();
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
@@ -289,6 +297,11 @@ class OrderReturnRepository
 
             $page = 1;
         }
+        //第三方渠道类型
+      /*  if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
+            $whereInArray = $param['channel_id'];
+        }*/
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
@@ -310,6 +323,12 @@ class OrderReturnRepository
             ->join('order_delivery',function($join){
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
+          /*  ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                return $join->whereIn('order_info.channel_id', $whereInArray);
+            })
+            ->when(!empty($whereArray),function($join) use ($whereArray) {
+                return $join->where($whereArray);
+            })*/
             ->where($whereArray)
             ->first();
 
@@ -333,6 +352,12 @@ class OrderReturnRepository
                 ->join('order_delivery',function($join){
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
+             /*   ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                    return $join->whereIn('order_info.channel_id', $whereInArray);
+                })
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })*/
                 ->where($whereArray)
                 ->orderBy('order_goods.end_time', 'ASC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
@@ -402,12 +427,15 @@ class OrderReturnRepository
      *   'keyword'   =>'',   //关键词    string  【可选】
      *   'page'      =>'',   //页数       int    【可选】
      *   'size'      =>'',   //条数       int    【可选】
+     *  'channel_id'   =>''   //渠道       【必传】
      * ]
+     *
      *@return array
      *
      */
     public static function underLineReturn($param = array(), $pagesize=5){
         $whereArray = array();
+      //  $whereInArray = array();
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
@@ -442,6 +470,11 @@ class OrderReturnRepository
 
         $whereArray[] = ['order_return.business_type','=',ReturnStatus::UnderLineBusiness];  //线下业务
         $whereArray[] = ['order_return.business_key','=',OrderStatus::BUSINESS_RETURN];      //退货业务
+        //第三方渠道类型
+       /* if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
+            $whereInArray = $param['channel_id'];
+        }*/
 
         LogApi::debug("【underLineReturn】搜索条件",$whereArray);
 
@@ -456,6 +489,12 @@ class OrderReturnRepository
             ->join('order_goods',function($join){
                 $join->on('order_return.order_no', '=', 'order_goods.order_no');
             }, null,null,'left')
+          /*  ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                return $join->whereIn('order_info.channel_id', $whereInArray);
+            })
+            ->when(!empty($whereArray),function($join) use ($whereArray) {
+                return $join->where($whereArray);
+            })*/
             ->where($whereArray)
             ->first();
 
@@ -476,6 +515,12 @@ class OrderReturnRepository
                 ->join('order_goods',function($join){
                     $join->on('order_return.order_no', '=', 'order_goods.order_no');
                 }, null,null,'left')
+              /*  ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                    return $join->whereIn('order_info.channel_id', $whereInArray);
+                })
+                ->when(!empty($whereArray),function($join) use ($whereArray) {
+                    return $join->where($whereArray);
+                })*/
                 ->where($whereArray)
                 ->orderBy('order_return.create_time', 'DESC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)

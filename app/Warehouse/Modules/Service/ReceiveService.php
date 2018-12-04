@@ -77,8 +77,13 @@ class ReceiveService
             }
         }
 
+        if($params['channel_id']){
+            $whereIn = $params['channel_id'];
+        }else{
+            $whereIn = null;
+        }
 
-        $collect = ReceiveRepository::list($whereParams, $logic_params, $limit, $page);
+        $collect = ReceiveRepository::list($whereParams, $logic_params, $limit, $page, $whereIn);
         $items = $collect->items();
 
         if (!$items) {
@@ -367,6 +372,8 @@ class ReceiveService
                 'business_key'=>$model->business_key,
                 'business_no'=>$model->business_no,
                 'predict_delivery_time'=>0,
+                'channel_id'=>$model->channel_id,
+                'appid'=>$model->appid,
             ];
             foreach ($goods as $k=>$item){
                 $data['delivery_detail'][]=[

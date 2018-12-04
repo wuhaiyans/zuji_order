@@ -22,6 +22,7 @@ class UpdateRiskYajin extends Command
     protected $signature = 'command:UpdateRiskYajin';
 
     /**
+     *
      * The console command description.
      *
      * @var string
@@ -53,7 +54,7 @@ class UpdateRiskYajin extends Command
         $total = Order::query()->whereIn("order_status",$orderStatus)->count();
         $bar = $this->output->createProgressBar($total);
         try{
-            $limit = 200;
+            $limit = 100;
             $page =1;
             $totalpage = ceil($total/$limit);
             $arr =[];
@@ -73,6 +74,7 @@ class UpdateRiskYajin extends Command
 
                     $bar->advance();
                 }
+                sleep(1);
                 ++$page;
 
             } while ($page <= $totalpage);
@@ -80,7 +82,8 @@ class UpdateRiskYajin extends Command
             if(empty($arr)){
                 echo "发送成功";die;
             }
-            echo "失败订单";var_dump($arr);die;
+            LogApi::error("MianyajinReduce-error:",$arr);
+            echo "发送失败";die;
         }catch (\Exception $e){
             echo $e->getMessage();
             die;

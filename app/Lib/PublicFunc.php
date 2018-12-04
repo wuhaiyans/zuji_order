@@ -455,28 +455,28 @@ function getBeoverduetime($type){
     $day  = strtotime($time);    
     switch($type){
         case 'M0'://未逾期
-            $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];    
+            $whereArray[]= ['order_goods_instalment.withhold_day', '>=', $day];
             break;
         case 'M1': //逾期0-30
-            $whereArray =  [['order_goods_instalment.withhold_day', '>=', $day-30*86400],['order_goods_instalment.withhold_day', '<=', $day]];
+            $whereArray =  [['order_goods_instalment.withhold_day', '>=', $day-30*86400],['order_goods_instalment.withhold_day', '<', $day]];
         break;   
         case 'M2': //逾期31-60
-            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-60*86400],['order_goods_instalment.withhold_day', '<=', $day-31*86400]];
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-60*86400],['order_goods_instalment.withhold_day', '<', $day-31*86400]];
         break; 
         case 'M3': //逾期61-90
-            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-90*86400],['order_goods_instalment.withhold_day', '<=', $day-61*86400]];
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-90*86400],['order_goods_instalment.withhold_day', '<', $day-61*86400]];
         break;      
         case 'M4': //逾期91-120
-            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-120*86400],['order_goods_instalment.withhold_day', '<=', $day-91*86400]];
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-120*86400],['order_goods_instalment.withhold_day', '<', $day-91*86400]];
         break; 
         case 'M5': //逾期121-150
-            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-150*86400],['order_goods_instalment.withhold_day', '<=', $day-121*86400]];
+            $whereArray = [['order_goods_instalment.withhold_day', '>=', $day-150*86400],['order_goods_instalment.withhold_day', '<', $day-121*86400]];
         break;                                 
         case 'M6': //逾期大于151
-            $whereArray[]= ['order_goods_instalment.withhold_day', '<=', $day-151*86400];
+            $whereArray[]= ['order_goods_instalment.withhold_day', '<', $day-151*86400];
         break;   
         default://未逾期
-           $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];                          
+           $whereArray[]= ['order_goods_instalment.withhold_day', '>=', $day];
                         
     }
     return $whereArray;

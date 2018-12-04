@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
-
+    protected static $email = ['qinliping@huishoubao.com.cn'];
     /**
      * 延期
      * @author maxiaoyu
@@ -104,6 +104,11 @@ class ToolController extends Controller
 
             return apiResponse([],ApiStatus::CODE_0,"success");
         }catch(\Exception $exs){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'延期失败',//错误信息提示
+                'data'=>['$ex'=>$exs],//错误返回数据
+            ],self::$email);
             LogApi::error('订单延期处理异常',$exs);
             return apiResponse([],ApiStatus::CODE_50004,$exs->getMessage());
         }
@@ -134,6 +139,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::refundRefuse($param['order_no'] ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-退款审核拒绝失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -156,6 +166,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::refuseSign($param['order_no'] ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-拒签失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33009,"修改失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -188,6 +203,11 @@ class ToolController extends Controller
         }
         $res= OrderReturnCreater::advanceReturn($param ,$orders['userinfo']);
         if(!$res){
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'异常订单-中途退机失败',//错误信息提示
+                'data'=>['$ex'=>$res],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_33009,"修改失败");
         }
         return apiResponse([],ApiStatus::CODE_0);
@@ -211,7 +231,8 @@ class ToolController extends Controller
 
             $orders =$request->all();
             $params = $orders['params'];
-
+           // $params['channel_id'] = json_decode($orders['userinfo']['channel_id'], true);
+          //  LogApi::debug("[overDue]接收用户信息",['params'=>$params,'channel_id'=>$params['channel_id']]);
             $orderData = OrderReturnCreater::overDue($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
@@ -223,6 +244,11 @@ class ToolController extends Controller
             }
 
         }catch (\Exception $e) {
+            \App\Lib\Common\LogApi::alert('tool-create:exception-error', [
+                'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+                'tip'=>'获取逾期列表失败',//错误信息提示
+                'data'=>['$ex'=>$e],//错误返回数据
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 
         }

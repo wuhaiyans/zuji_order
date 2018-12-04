@@ -5,6 +5,10 @@ use App\Order\Modules\Repository\Pay\Channel;
 
 class PayInc{
     /**
+     * @var int 花呗预授权支付
+     */
+    const FlowerFundauth = 10;
+    /**
      * @var int 线下支付
      */
     const UnderLinePay = 9;
@@ -60,6 +64,7 @@ class PayInc{
             self::WeChatPay=>'微信支付',
             self::PcreditPayInstallment=>'花呗分期+预授权',
             self::UnderLinePay=>'线下支付',
+            self::FlowerFundauth=>'花呗预授权',
         ];
     }
 
@@ -77,6 +82,7 @@ class PayInc{
             self::LebaifenPay=>Channel::Lebaifen,
             self::WeChatPay=>Channel::Wechat,
             self::PcreditPayInstallment=>Channel::Alipay,
+            self::FlowerFundauth=>Channel::Alipay,
         ];
     }
 

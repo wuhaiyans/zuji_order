@@ -36,8 +36,10 @@ class ReceiveController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
+        $request = request()->input();
 
         try {
+            $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
             $list = $this->receive->list($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
@@ -84,6 +86,8 @@ class ReceiveController extends Controller
             'customer_mobile' => 'required',
             'customer_address' => 'required',
             'receive_detail' => 'required',
+            'channel_id' => 'required',
+            'appid' => 'required',
             'business_no' => 'required'
         ];
         $params = $this->_dealParams($rules);

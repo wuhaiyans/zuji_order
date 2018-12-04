@@ -87,9 +87,16 @@ class ImeiService
             array_push($logic_params, ['create_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
 
-        $page = isset($params['page']) ? $params['page'] : 1;
 
-        $collect = ImeiRepository::list($whereParams,$logic_params , $limit, $page);
+        $page = isset($params['page']) ? $params['page'] : 1;
+        if($params['channel_id']){
+            $whereIn = $params['channel_id'];
+            $daochu = false;
+        }else{
+            $whereIn = null;
+            $daochu = true;
+        }
+        $collect = ImeiRepository::list($whereParams,$logic_params , $limit, $page,$whereIn);
         $items = $collect->items();
 
         if (!$items) {
@@ -105,7 +112,7 @@ class ImeiService
             }
         }
 
-        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total()];
+        return ['data'=>$items, 'size'=>$limit, 'page'=>$collect->currentPage(), 'total'=>$collect->total(),'is_out_channel ' => $daochu];
     }
 
 

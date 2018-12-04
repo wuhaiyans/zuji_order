@@ -110,6 +110,13 @@ class Zuji implements BusinessPayInterface{
             $arr['paymentAmount'] = $zujin;
         }
 
+        //花呗预授权
+        if($payType == PayInc::FlowerFundauth){
+            if($zujin + $yajin > 0){
+                $arr['isFundauth'] = true;
+            }
+        }
+
         return $arr;
 
 

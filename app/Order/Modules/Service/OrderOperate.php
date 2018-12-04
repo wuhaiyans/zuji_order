@@ -90,9 +90,7 @@ class OrderOperate
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
             if(!$order){
-                set_error("获取订单信息失败");
-//                LogApi::alert("OrderDelivery:获取订单信息失败",$orderDetail,[config('web.order_warning_user')]);
-//                LogApi::error(config('app.env')."环境 OrderDelivery:获取订单信息失败",$orderDetail);
+                set_msg("获取订单信息失败");
                 DB::rollBack();
                 return false;
             }
@@ -102,9 +100,7 @@ class OrderOperate
                 //更新订单表状态
                 $b=$order->deliveryFinish();
                 if(!$b){
-                    set_error("更新订单状态失败");
-//                    LogApi::alert("OrderDelivery:更新订单状态失败",$orderDetail,[config('web.order_warning_user')]);
-//                    LogApi::error(config('app.env')."环境 OrderDelivery:更新订单状态失败",$orderDetail);
+                    set_msg("更新订单状态失败");
                     DB::rollBack();
                     return false;
                 }
@@ -112,9 +108,7 @@ class OrderOperate
                 //增加订单发货信息
                 $b =DeliveryDetail::addOrderDelivery($orderDetail);
                 if(!$b){
-                    set_error("增加订单发货信息");
-//                    LogApi::alert("OrderDelivery:增加订单发货信息",$orderDetail,[config('web.order_warning_user')]);
-//                    LogApi::error(config('app.env')."环境 OrderDelivery:增加订单发货信息",$orderDetail);
+                    set_msg("增加订单发货信息");
                     DB::rollBack();
                     return false;
                 }
@@ -122,18 +116,14 @@ class OrderOperate
                 //增加发货详情
                 $b =DeliveryDetail::addGoodsDeliveryDetail($orderDetail['order_no'],$goodsInfo);
                 if(!$b){
-                    set_error("增加发货详情失败");
-//                    LogApi::alert("OrderDelivery:增加发货详情失败",$orderDetail,[config('web.order_warning_user')]);
-//                    LogApi::error(config('app.env')."环境 OrderDelivery:增加发货详情失败",$orderDetail);
+                    set_msg("增加发货详情失败");
                     DB::rollBack();
                     return false;
                 }
                 //增加发货时生成合同
                $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
                 if(!$b) {
-                    set_error("生成合同失败");
-//                    LogApi::alert("OrderDelivery:生成合同失败",$orderDetail,[config('web.order_warning_user')]);
-//                    LogApi::error(config('app.env')."环境 OrderDelivery:生成合同失败",$orderDetail);
+                    set_msg("生成合同失败");
                     DB::rollBack();
                     return false;
                 }
@@ -144,7 +134,6 @@ class OrderOperate
                 }
                 //判断短租订单服务时间
                 if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY){
-
                     //判断发货三天后的起租时间 是否 大于 起租时间
                     $beginTime = strtotime(date("Y-m-d",time()+86400*3));
                     $goodsData = OrderGoodsRepository::getGoodsByOrderNo($orderDetail['order_no']);
@@ -160,20 +149,16 @@ class OrderOperate
                                 'begin_time'=>$beginTime,
                                 'end_time'=>$endTime,
                             ]);
-
                             if(!$b){
-                                set_error("修改商品服务时间失败");
-//                                LogApi::alert("OrderDelivery:修改商品服务时间失败",$orderDetail,[config('web.order_warning_user')]);
-//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改商品服务时间失败",$orderDetail);
+                                set_msg("修改商品服务时间失败");
                                 DB::rollBack();
                                 return false;
                             }
                             //修改 服务周期表时间
-                            $b =ServicePeriod::updateUnitTime($orderDetail['order_no'],$beginTime,$endTime);
+                            $b =ServicePeriod::updateUnitTime($v['goods_no'],$beginTime,$endTime);
+
                             if(!$b){
-                                set_error("修改短租服务时间失败");
-//                                LogApi::alert("OrderDelivery:修改短租服务时间失败",$orderDetail,[config('web.order_warning_user')]);
-//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改短租服务时间失败",$orderDetail);
+                                set_msg("修改短租服务时间失败");
                                 DB::rollBack();
                                 return false;
                             }
@@ -182,9 +167,7 @@ class OrderOperate
                             //修改订单分期扣款时间
                             $b = OrderGoodsInstalmentRepository::delayInstalment($orderDetail['order_no'],$delayDay);
                             if(!$b){
-                                set_error("修改分期延期扣款时间失败");
-//                                LogApi::alert("OrderDelivery:修改分期延期扣款时间失败",$orderDetail,[config('web.order_warning_user')]);
-//                                LogApi::error(config('app.env')."环境 OrderDelivery:修改分期延期扣款时间失败",$orderDetail);
+                                set_msg("修改分期延期扣款时间失败");
                                 DB::rollBack();
                                 return false;
 
@@ -194,7 +177,6 @@ class OrderOperate
                         }
                     }
                 }
-
                 DB::commit();
                 //增加确认收货队列
                 if($orderInfo['zuqi_type'] ==1){
@@ -1048,8 +1030,36 @@ class OrderOperate
             return  ApiStatus::CODE_31001;
         }
         $userId = $userInfo['uid'];
+        //增加操作日志
+
+        $resonInfo = '';
+
+        if ($reasonId) {
+
+            $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
+        }
+
+        if ($resonText) {
+
+            $resonInfo = $resonText;
+
+        }
         //查询订单的状态
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
+
+        //如果订单为已支付 取消订单走申请退款方法
+        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed){
+            $params=[
+                'order_no'=>$orderNo,
+                'user_id'=>$userId,
+                'reason_text'=>$resonInfo,
+            ];
+            $b = OrderReturnCreater::createRefund($params,$userInfo);
+            if(!$b){
+                return ApiStatus::CODE_31010;
+            }
+            return ApiStatus::CODE_0;
+        }
 
         if ($orderInfoData['order_status']!=Inc\OrderStatus::OrderWaitPaying)  return  ApiStatus::CODE_31007;
         //开启事物
@@ -1127,8 +1137,10 @@ class OrderOperate
             //返回风控押金信息
             $b =self::YajinRecovery($orderNo,$userId,Inc\OrderStatus::OrderCancel);
             if(!$b){
+                LogApi::alert("CancelOrder:返回风控押金信息",['order_no'=>$orderNo],[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."环境 CancelOrder:返回风控押金信息",['order_no'=>$orderNo]);
                 DB::rollBack();
-                return ApiStatus::CODE_60002;
+                return ApiStatus::CODE_31009;
             }
 
             //优惠券归还
@@ -1158,20 +1170,7 @@ class OrderOperate
 
 
 
-            //增加操作日志
 
-            $resonInfo = '';
-
-            if ($reasonId) {
-
-                $resonInfo = Inc\OrderStatus::getOrderCancelResasonName($reasonId);
-            }
-
-            if ($resonText) {
-
-                $resonInfo = $resonText;
-
-            }
             OrderLogRepository::add($userId ,$userInfo['username'],\App\Lib\PublicInc::Type_User,$orderNo,$resonInfo."取消","用户未支付取消");
 
             return ApiStatus::CODE_0;
@@ -1648,6 +1647,7 @@ class OrderOperate
         $orderListArray = OrderRepository::getAdminOrderList($param);
 //        dd($orderListArray);
 
+
 //        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
@@ -2008,7 +2008,6 @@ class OrderOperate
             'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
-
         //到期时间多于1个月不出现到期处理
         foreach($goodsList as $keys=>$values) {
             $actArray = $orderListArray['data'][$values['order_no']]['admin_Act_Btn'];

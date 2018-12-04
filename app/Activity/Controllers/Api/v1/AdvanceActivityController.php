@@ -159,7 +159,7 @@ class AdvanceActivityController extends Controller
             $activityInfo['zuqi_day'] = $count;
             $activityInfo['zuqi'] -= $count;
             $activityInfo['type'] = 2;
-            $activityInfo['content'] = '尊敬的客户您好，请您于2018年11月25日10：00点——19:00到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
+            $activityInfo['content'] = '尊敬的客户您好，请您到店领取商品。 地址为：天津市西青区师范大学南门华木里底商711便利店直走100米——拿趣用数码共享便利店。 客服电话：18611002204';
             $activityInfo['destine_name'] = DestineStatus::getStatusName($activityInfo['destine_status']);
             //把一元活动数据追加到苹果预约数据后面
 
@@ -174,16 +174,21 @@ class AdvanceActivityController extends Controller
                 //获取活动主题信息 门店开业显示前往认证
                 $themeInfo = ActivityThemeRepository::getInfo(['activity_id'=>1]);
                 if(time()>=$themeInfo['opening_time']){
+                    $switch = env("ACTIVITY_FENGKONG");
                     //获取认证信息 通过认证显示领取
-                    /*$risk = new Risk();
-                    $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
-                    if($riskInfo['is_chsi']==1){
+                    if($switch){
+                        $risk = new Risk();
+                        $riskInfo = $risk->getKnight(['user_id'=>$userInfo['uid']]);
+                        if(isset($riskInfo['is_chsi']) && $riskInfo['is_chsi']==1){
+                            $lingqu_btn = true;
+                        }
+                        else{
+                            $renzheng_btn =true;
+                        }
+                    }else{
                         $lingqu_btn = true;
                     }
-                    else{
-                        $renzheng_btn =true;
-                    }*/
-                    $lingqu_btn = true;
+
                 }
             };
             $activityInfo['yaoqin_btn'] = $yaoqin_btn;

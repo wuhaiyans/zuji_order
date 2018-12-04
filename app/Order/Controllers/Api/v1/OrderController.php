@@ -178,6 +178,7 @@ class OrderController extends Controller
             $coupon = \App\Lib\Coupon\Coupon::checkedCoupon([
                 'sku_id' => $sku[0]['sku_id'],
                 'auth_token' => $params['auth_token'],
+                'appid'=>$appid,
             ]);
             if(isset($coupon[0])){
                 $coupon = $coupon[0];
@@ -353,8 +354,10 @@ class OrderController extends Controller
     public function orderList(Request $request){
         try{
 
-            $params = $request->input('params');
+            $allParams = $request->all();
+            $params =   $allParams['params'];
 
+            $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
             $orderData = Service\OrderOperate::getOrderList($params);
 
             if ($orderData['code']===ApiStatus::CODE_0) {
@@ -800,9 +803,9 @@ class OrderController extends Controller
         }
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
-            LogApi::alert("OrderDelivery:".get_error(),$params,[config('web.order_warning_user')]);
-            LogApi::error("OrderDelivery:".config('app.env').get_error());
-            return apiResponse([],ApiStatus::CODE_30014,get_error());
+            LogApi::alert("OrderDelivery:".get_msg(),$params,[config('web.order_warning_user')]);
+            LogApi::error("OrderDelivery:".get_msg());
+            return apiResponse([],ApiStatus::CODE_30014,get_msg());
         }
         return apiResponse([],ApiStatus::CODE_0);
     }

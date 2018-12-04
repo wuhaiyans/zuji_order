@@ -180,6 +180,7 @@ class InstalmentComponnet implements OrderCreater
         $payType = [
             PayInc::WithhodingPay,
             PayInc::MiniAlipay,
+            PayInc::FlowerFundauth,
         ];
         if(!in_array($this->payType,$payType)){
             return true;
