@@ -287,17 +287,16 @@ class WithholdController extends Controller
                  * 查询用户下单时 预授权信息 获取支付系统授权码
                  */
                 $authInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
-
-                $params = [
+                $unfreezeAndPayData = [
                     'name'			=> $subject,                //交易名称
                     'out_trade_no'	=> $business_no,            //业务系统授权码
-                    'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
+                    'fundauth_no'	=> $authInfo->getFundauthNo(), //支付系统授权码
                     'amount'		=> $amount,                 //交易金额；单位：分
                     'back_url'		=> $backUrl,                //后台通知地址
                     'user_id'		=> $orderInfo['user_id'],   //用户id
                     'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                 ];
-                $succss = CommonFundAuthApi::unfreezeAndPay($params);
+                $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
 
                 LogApi::info(__method__.'[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
 
