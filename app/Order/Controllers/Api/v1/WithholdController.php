@@ -308,6 +308,7 @@ class WithholdController extends Controller
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
+                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
             }
 
         }else {
