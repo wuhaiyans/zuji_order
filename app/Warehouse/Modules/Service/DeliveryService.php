@@ -298,10 +298,10 @@ class DeliveryService
 
         if($params['channel_id']){
             $whereIn = $params['channel_id'];
-            $daochu = false;
+            $daochu = true;
         }else{
             $whereIn = null;
-            $daochu = true;
+            $daochu = false;
         }
 
         $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page, $whereIn);

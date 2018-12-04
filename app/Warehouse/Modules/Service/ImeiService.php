@@ -91,10 +91,10 @@ class ImeiService
         $page = isset($params['page']) ? $params['page'] : 1;
         if($params['channel_id']){
             $whereIn = $params['channel_id'];
-            $daochu = false;
+            $daochu = true;
         }else{
             $whereIn = null;
-            $daochu = true;
+            $daochu = false;
         }
         $collect = ImeiRepository::list($whereParams,$logic_params , $limit, $page,$whereIn);
         $items = $collect->items();

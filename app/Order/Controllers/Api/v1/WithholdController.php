@@ -296,6 +296,7 @@ class WithholdController extends Controller
                     'user_id'		=> $orderInfo['user_id'],   //用户id
                     'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                 ];
+                LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unfreezeAndPayData);
 
                 $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
 
