@@ -389,7 +389,7 @@ class DeliveryService
             'current_page'=>$collect->currentPage(),
             'status_list' => $status_list,
             'kw_types' => self::searchKws(),
-            'is_out_channel ' => $daochu
+            'is_out_channel' => $daochu
         ];
 
     }
