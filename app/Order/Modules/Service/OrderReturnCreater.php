@@ -3653,12 +3653,17 @@ class OrderReturnCreater
         $create_data['refund_amount'] = $data['pay_amount'];//应退金额
         $create_data['auth_unfreeze_amount'] = $data['auth_unfreeze_amount'];//应退押金
         $create_data['auth_deduction_amount'] = $data['auth_deduction_amount'];//应扣押金
-
+        if(isset($createData['out_payment_no'])){
+            $create_data['out_payment_no'] = $createData['out_payment_no'];
+        }
+        if(isset($createData['out_auth_no'])){
+            $create_data['out_auth_no'] = $createData['out_auth_no'];
+        }
         LogApi::info("[createClear]创建退款清单参数",$create_data);
 
         $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
         LogApi::info("[createClear]创建退款清单执行结果",$create_clear);
-      return $create_clear;
+        return $create_clear;
     }
 
     public static function refundSuccessCallback($order_info,$userinfo,$return_info){
