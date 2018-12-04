@@ -482,8 +482,8 @@ class OrderReturnCreater
 
         }catch( \Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
-            die;
+            LogApi::debug("[createRefund]通知收发货系统取消发货失败:".$exc->getMessage());
+            return false;
         }
     }
 
