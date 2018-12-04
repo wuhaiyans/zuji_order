@@ -311,11 +311,20 @@ class OrderReturnCreater
             //订单的支付方式，获取应退款金额|| 应解冻金额|| 支付编号
             $getPayInfo = self::getPayInfo($order_info);
             if( $getPayInfo ){
-                if( isset( $getPayInfo['data'] ) ){
-                    $data[] = $getPayInfo['data'];
+                if( isset( $getPayInfo['data']['auth_unfreeze_amount'] ) ){
+                    $data['auth_unfreeze_amount'] = $getPayInfo['data']['auth_unfreeze_amount'];
+                }
+                if( isset( $getPayInfo['data']['pay_amount'] ) ){
+                    $data['pay_amount'] = $getPayInfo['data']['pay_amount'];
+                }
+                if( isset( $getPayInfo['data']['refund_amount'] ) ){
+                    $data['refund_amount'] = $getPayInfo['data']['refund_amount'];
+                }
+                if( isset( $getPayInfo['data']['auth_deduction_amount'] ) ){
+                    $data['auth_deduction_amount'] = $getPayInfo['data']['auth_deduction_amount'];
                 }
                 if( isset( $getPayInfo['create_data'] ) ){
-                    $create_data[] = $getPayInfo['create_data'];
+                    $create_data = $getPayInfo['create_data'];
                 }
             }
             LogApi::debug("[createRefund]订单支付金额参数",[
@@ -3630,7 +3639,7 @@ class OrderReturnCreater
      * 创建清算单
      */
     public static function createClear($order_info,$data,$createData){
-
+        LogApi::info("[createClear]创建清单编码参数",$createData);
         //创建清算单
         $create_data['order_no'] = $order_info['order_no'];//订单类型
         if($order_info['pay_type'] == PayInc::LebaifenPay){
@@ -3644,12 +3653,17 @@ class OrderReturnCreater
         $create_data['refund_amount'] = $data['pay_amount'];//应退金额
         $create_data['auth_unfreeze_amount'] = $data['auth_unfreeze_amount'];//应退押金
         $create_data['auth_deduction_amount'] = $data['auth_deduction_amount'];//应扣押金
-
+        if(isset($createData['out_payment_no'])){
+            $create_data['out_payment_no'] = $createData['out_payment_no'];
+        }
+        if(isset($createData['out_auth_no'])){
+            $create_data['out_auth_no'] = $createData['out_auth_no'];
+        }
         LogApi::info("[createClear]创建退款清单参数",$create_data);
 
         $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单
         LogApi::info("[createClear]创建退款清单执行结果",$create_clear);
-      return $create_clear;
+        return $create_clear;
     }
 
     public static function refundSuccessCallback($order_info,$userinfo,$return_info){
