@@ -692,7 +692,7 @@ class OrderReturnCreater
             }
             if( $status == true ){
                 //解冻订单
-                $orderInfo   = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no']);
+                $orderInfo   = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no'],true);
                 $updateOrder = $orderInfo->returnClose();
                 if(!$updateOrder){
                     DB::rollBack();
@@ -708,7 +708,7 @@ class OrderReturnCreater
                     return false;
                 }
                 $order_info = $getOrderInfo->getData();
-
+                LogApi::debug("[returnOfGoods]获取订单信息",$order_info);
                 //获取用户下单信息
                 $userAddress = \App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
                 if(!$userAddress){
