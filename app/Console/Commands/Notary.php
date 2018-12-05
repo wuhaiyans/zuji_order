@@ -248,7 +248,7 @@ class Notary extends Command
 		}
 		$data['user_info'] = [
 			'id'			=> $user_info->id,
-			'iusernamed'	=> $user_info->username,
+			'username'		=> $user_info->username,
 			'mobile'		=> $user_info->mobile,
 			'register_time' => $user_info->register_time>0?date('Y-m-d H:i:s',$user_info->register_time):'',
 			'register_ip'	=> $user_info->register_ip,
