@@ -436,7 +436,6 @@ class OrderReturnCreater
             LogApi::debug("[createRefund]创建退款单参数",$data);
             //创建申请退款记录
             $addresult = OrderReturnRepository::createRefund($data);
-            LogApi::debug("[createRefund]111");
             if( !$addresult ){
                 LogApi::debug("[createRefund]创建申请退款记录失败",$data);
                 //事务回滚
@@ -444,12 +443,10 @@ class OrderReturnCreater
                 return false;//创建失败
             }
 
-            LogApi::debug("[createRefund]222");
             $no_list['refund_no'] = $data['refund_no'];
             //操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
             if($data['status'] == ReturnStatus::ReturnAgreed){
-                LogApi::debug("[createRefund]333");
                 //-+------------------------------------------------------------
                 // 如果待退款金额为0，则直接调退款成功的回调
 
@@ -459,20 +456,19 @@ class OrderReturnCreater
                     || $data['auth_deduction_amount']>0
                 ) ){
                     $return_info['refund_no'] = $data['refund_no'];
-                }
                     $b = self::refundSuccessCallback($order_info,$userinfo,$return_info);
                     if( !$b ){
                         //事务回滚
                         DB::rollBack();
                         return false;
                     }
-                DB::commit();
-                return true;
+                    DB::commit();
+                    return true;
                 }
-            LogApi::debug("[createRefund]444");
+
+                }
                //创建清算单
                 $create_clear = self::createClear($order_info,$data,$create_data);
-            LogApi::debug("[createRefund]555");
                 if(!$create_clear){
                     //事务回滚
                     DB::rollBack();
@@ -481,9 +477,7 @@ class OrderReturnCreater
 
             //通知收发货取消发货
             if($order_info['order_status'] == OrderStatus::OrderInStock ){
-                LogApi::debug("[createRefund]666");
                 $cancel = Delivery::cancel($params['order_no']);
-                LogApi::debug("[createRefund]777");
                 if( !$cancel ){
                     LogApi::debug("[createRefund]通知收发货系统取消发货失败");
                     //事务回滚
