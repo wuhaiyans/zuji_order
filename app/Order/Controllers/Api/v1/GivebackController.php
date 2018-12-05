@@ -255,7 +255,7 @@ class GivebackController extends Controller
 						'business_no' => $giveback_no,
 						'zuqi' => $orderGoodsInfo['zuqi'],
 						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
-						'channel_id' => $orderInfo['channel_id'],
+						'channel_id' => $orderInfo[0]['channel_id'],
 						'appid' => $orderInfo['appid'],
 					],
 				],[
@@ -266,7 +266,7 @@ class GivebackController extends Controller
 					'customer' => $userInfo['name'],
 					'customer_mobile' => $userInfo['consignee_mobile'],
 					'customer_address' => $userInfo['address_info'],
-						'channel_id' => $orderInfo['channel_id'],
+						'channel_id' => $orderInfo[0]['channel_id'],
 						'appid' => $orderInfo['appid'],
 				]);
 				if( !$warehouseResult ){
