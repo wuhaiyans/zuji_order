@@ -720,6 +720,8 @@ class OrderReturnCreater
                 $user_data['customer'] = $user_info['name'];             //用户名
                 $user_data['customer_address'] = $user_info['address_info']; //用户地址
                 $user_data['business_key'] = $params['business_key'];//业务类型
+                $user_data['channel_id'] = $order_info['channel_id'];
+                $user_data['appid'] = $order_info['appid'];
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no'  => $goodsDeliveryInfo[$k]['goods_no'],
@@ -731,8 +733,8 @@ class OrderReturnCreater
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
-                        'channel_id'  =>$order_info['channel_id'],
-                        'appid'       =>$order_info['appid']
+                       // 'channel_id'  =>$order_info['channel_id'],
+                    //    'appid'       =>$order_info['appid']
                     ];
                 }
                 LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);
