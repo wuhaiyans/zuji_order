@@ -29,7 +29,7 @@ class ReceiveGoodsRepository
      */
     public static function list($params,$logic_params, $limit, $page=null, $type, $whereIn=null)
     {
-        $query = ReceiveGoods::whereHas('receive', function ($query, $whereIn) use($params) {
+        $query = ReceiveGoods::whereHas('receive', function ($query) use($params,$whereIn) {
             if (is_array($params)) {
                 foreach ($params as $k => $v) {
                     if (in_array($k, [self::SEARCH_TYPE_MOBILE, self::SEARCH_TYPE_ORDER_NO])) {
