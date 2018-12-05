@@ -39,7 +39,8 @@ class ImeiController extends Controller
     public function list()
     {
         $params = $this->_dealParams([]);
-
+        $request = request()->input();
+        $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
         $list = $this->imei->list($params);
         return \apiResponse($list);
     }

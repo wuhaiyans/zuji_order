@@ -455,7 +455,7 @@ function getBeoverduetime($type){
     $day  = strtotime($time);    
     switch($type){
         case 'M0'://未逾期
-            $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];
+            $whereArray[]= ['order_goods_instalment.withhold_day', '>=', $day];
             break;
         case 'M1': //逾期0-30
             $whereArray =  [['order_goods_instalment.withhold_day', '>=', $day-30*86400],['order_goods_instalment.withhold_day', '<', $day]];
@@ -476,7 +476,7 @@ function getBeoverduetime($type){
             $whereArray[]= ['order_goods_instalment.withhold_day', '<', $day-151*86400];
         break;   
         default://未逾期
-           $whereArray[]= ['order_goods_instalment.withhold_day', '>', $day];
+           $whereArray[]= ['order_goods_instalment.withhold_day', '>=', $day];
                         
     }
     return $whereArray;

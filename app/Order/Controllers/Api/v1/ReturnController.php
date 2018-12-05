@@ -112,6 +112,10 @@ class ReturnController extends Controller
         if(count($data)<3){
             return  apiResponse([],ApiStatus::CODE_20001);
         }
+        LogApi::debug("申请退款参数",[
+            'params'=> $params,
+            'userinfo'=>$orders['userinfo']
+        ]);
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);
         if(!$return){
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
@@ -226,9 +230,9 @@ class ReturnController extends Controller
             'channe_id'=>$params['channel_id']]);
         $return_list = $this->OrderReturnCreater->get_list($params);
         //根据渠道判断是否显示导出按钮
-        $return_list['is_out_channel '] = true;//默认显示
+        $return_list['is_out_channel '] = false;//默认显示
         if(!empty($params['channel_id'])){
-            $return_list['is_out_channel '] = false;
+            $return_list['is_out_channel'] = true;
         }
 
         return  apiResponse($return_list,ApiStatus::CODE_0,'success');
