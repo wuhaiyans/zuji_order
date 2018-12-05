@@ -65,7 +65,7 @@ class ReceiveGoodsRepository
 //
 //        }
         if ($whereIn) {
-            $query->whereIn('channel_id',$whereIn);
+            $query->whereIn('zuji_receive.channel_id',$whereIn);
         }
         $query->orderByDesc('id');
 
