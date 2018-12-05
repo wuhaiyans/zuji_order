@@ -66,14 +66,15 @@ class Receive extends Warehouse
         'status_time',
         'create_time',
         'app_id',
-        'receive_type',
         'receive_time',
         'check_time',
         'check_result',
         'check_description',
         'exchange_description',
         'business_key',
-        'business_no'
+        'business_no',
+        'channel_id',
+        'appid',
     ];
 
     /**

@@ -363,6 +363,7 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    DB::commit();
                     return true;
 
                 }
@@ -381,7 +382,10 @@ class OrderReturnCreater
                 LogApi::debug("[createRefund]出账参数",$cleanAccount);
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
-                if ($accountRes['code']==0) return true;
+                if ($accountRes['code']==0){
+                    DB::commit();
+                    return true;
+                }
                 //事务回滚
                 DB::rollBack();
                 return false;
@@ -459,7 +463,8 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
-                    return true;
+                DB::commit();
+                return true;
                 }
                //创建清算单
                 $create_clear = self::createClear($order_info,$data,$create_data);

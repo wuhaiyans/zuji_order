@@ -72,11 +72,13 @@ class Delivery extends Warehouse
         'status',
         'create_time',
         'delivery_time',
+        'logistics_note',
         'status_remark',
         'business_key',
         'business_no',
         'predict_delivery_time',
         'channel_id',
+        'appid',
     ];
 
     /**
