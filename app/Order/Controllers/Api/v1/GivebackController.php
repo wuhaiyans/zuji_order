@@ -255,6 +255,7 @@ class GivebackController extends Controller
 						'business_no' => $giveback_no,
 						'zuqi' => $orderGoodsInfo['zuqi'],
 						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
+						'channel_id' => $orderInfo['channel_id'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
