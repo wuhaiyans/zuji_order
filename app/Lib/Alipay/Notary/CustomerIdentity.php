@@ -1,6 +1,6 @@
 <?php
 /**
- * 蚂蚁金服 金融科技 客户身份标识 封装
+ * 蚂蚁金服 金融科技 客户实名身份标识 封装
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  * @copyright (c) 2018, Huishoubao
@@ -10,8 +10,8 @@
 namespace App\Lib\Alipay\Notary;
 
 /**
- * CustomerIdentity 客户身份标识 类
- * <p><b>注意：</b>客户身份信息，必须实名，否则无法使用可信存证</p>
+ * CustomerIdentity 客户实名身份标识 类
+ * <p><b>注意：</b>客户实名身份信息，必须实名，否则无法使用可信存证</p>
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -110,19 +110,40 @@ class CustomerIdentity {
 	}
 
 
-	public function toArray(): array{
-		$arr = [];
-		foreach(get_object_vars($this) as $p => $v){
+	/**
+	 * 转化成数组
+	 * @param bool $empty  是否返回空值属性
+	 * @return array
+	 */
+	public function toArray( bool $empty=true ): array{
+		$data = [
+			'userType'		=> $this->userType,
+			'certName'		=> $this->certName,
+			'certType'		=> $this->certType,
+			'certNo'		=> $this->certNo,
+			'mobileNo'		=> $this->mobileNo,
+			'properties'	=> $this->properties,
+		];
+		if( !$empty ){
+			foreach($data as $p => $v){
 			if( empty($v) ){
+					unset($data[$p]);
 				continue;
 			}
-			if(is_object($v) && method_exists($v, 'toArray')){
-				$arr[$p] = $v->toArray();
-			}else{
-				$arr[$p] = $v;
 			}
 		}
-		return $arr;
+		return $data;
+	}
+	
+	public static function fromArray( array $data ): CustomerIdentity{
+		$entity = new CustomerIdentity();
+		$entity->userType	= $data['userType'];
+		$entity->certName	= $data['certName'];
+		$entity->certType	= $data['certType'];
+		$entity->certNo		= $data['certNo'];
+		$entity->mobileNo	= $data['mobileNo'];
+		$entity->properties = $data['properties'];
+		return $entity;
 	}
 
 }
