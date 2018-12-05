@@ -27,7 +27,7 @@ class ReceiveGoodsRepository
      *
      * 列表
      */
-    public static function list($params,$logic_params, $limit, $page=null, $type)
+    public static function list($params,$logic_params, $limit, $page=null, $type, $whereIn=null)
     {
         $query = ReceiveGoods::whereHas('receive', function ($query) use($params) {
             if (is_array($params)) {
@@ -64,6 +64,9 @@ class ReceiveGoodsRepository
 //            }
 //
 //        }
+        if ($whereIn) {
+            $query->whereIn('channel_id',$whereIn);
+        }
         $query->orderByDesc('id');
 
         return $query->with(['receive'])->paginate($limit,
