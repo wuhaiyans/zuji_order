@@ -27,9 +27,9 @@ class ReceiveGoodsRepository
      *
      * 列表
      */
-    public static function list($params,$logic_params, $limit, $page=null, $type)
+    public static function list($params,$logic_params, $limit, $page=null, $type, $whereIn=null)
     {
-        $query = ReceiveGoods::whereHas('receive', function ($query) use($params) {
+        $query = ReceiveGoods::whereHas('receive', function ($query, $whereIn) use($params) {
             if (is_array($params)) {
                 foreach ($params as $k => $v) {
                     if (in_array($k, [self::SEARCH_TYPE_MOBILE, self::SEARCH_TYPE_ORDER_NO])) {
@@ -38,6 +38,9 @@ class ReceiveGoodsRepository
                 }
                 if (isset($params['return_type'])) {
                     $query->where('zuji_receive.type', '=', $params['return_type']);
+                }
+                if ($whereIn) {
+                    $query->whereIn('zuji_receive.channel_id',$whereIn);
                 }
             }
         });
@@ -64,6 +67,7 @@ class ReceiveGoodsRepository
 //            }
 //
 //        }
+
         $query->orderByDesc('id');
 
         return $query->with(['receive'])->paginate($limit,

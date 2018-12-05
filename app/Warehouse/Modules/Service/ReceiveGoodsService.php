@@ -62,7 +62,13 @@ class ReceiveGoodsService
             array_push($logic_params, ['check_time', '<=', strtotime($params['end_time'].' 23:59:59')]);
         }
 
-        $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type);
+        if($params['channel_id']){
+            $whereIn = $params['channel_id'];
+        }else{
+            $whereIn = null;
+        }
+
+        $collect = ReceiveGoodsRepository::list($whereParams, $logic_params, $limit, $page, $type, $whereIn);
 
         $items = $collect->items();
 
