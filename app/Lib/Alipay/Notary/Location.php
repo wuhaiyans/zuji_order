@@ -84,22 +84,22 @@ class Location {
 		return $this->properties;
 	}
 
-	public function setIp(string $ip) {
+	public function setIp(string $ip):Location {
 		$this->ip = $ip;
 		return $this;
 	}
 
-	public function setWifiMac(string $wifiMac) {
+	public function setWifiMac(string $wifiMac):Location {
 		$this->wifiMac = $wifiMac;
 		return $this;
 	}
 
-	public function setImei(string $imei) {
+	public function setImei(string $imei):Location {
 		$this->imei = $imei;
 		return $this;
 	}
 
-	public function setImsi(string $imsi) {
+	public function setImsi(string $imsi):Location {
 		$this->imsi = $imsi;
 		return $this;
 	}
@@ -109,30 +109,52 @@ class Location {
 		return $this;
 	}
 
-	public function setLongitude(string $longitude) {
+	public function setLongitude(string $longitude):Location {
 		$this->longitude = $longitude;
 		return $this;
 	}
 
-	public function setProperties(string $properties) {
+	public function setProperties(string $properties):Location {
 		$this->properties = $properties;
 		return $this;
 	}
 
-
-	public function toArray(): array{
-		$arr = [];
-		foreach(get_object_vars($this) as $p => $v){
+	/**
+	 * 转化成数组
+	 * @param bool $empty  是否返回空值属性
+	 * @return array
+	 */
+	public function toArray( bool $empty=true ): array{
+		$data = [
+			'ip'		=> $this->ip,
+			'wifiMac'	=> $this->wifiMac,
+			'imei'		=> $this->imei,
+			'imsi'		=> $this->imsi,
+			'latitude'	=> $this->latitude,
+			'longitude' => $this->longitude,
+			'properties' => $this->properties,
+		];
+		if( !$empty ){
+			foreach($data as $p => $v){
 			if( empty($v) ){
+					unset($data[$p]);
 				continue;
 			}
-			if(is_object($v) && method_exists($v, 'toArray')){
-				$arr[$p] = $v->toArray();
-			}else{
-				$arr[$p] = $v;
 			}
 		}
-		return $arr;
+		return $data;
+	}
+	
+	public static function fromArray( array $data ):Location{
+		$self = new self();
+		$self->ip		= $data['ip'];
+		$self->wifiMac	= $data['wifiMac'];
+		$self->imei		= $data['imei'];
+		$self->imsi		= $data['imsi'];
+		$self->latitude	= $data['latitude'];
+		$self->longitude= $data['longitude'];
+		$self->properties = $data['properties'];
+		return $self;
 	}
 	
 	

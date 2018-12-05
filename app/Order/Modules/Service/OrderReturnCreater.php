@@ -363,6 +363,7 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    DB::commit();
                     return true;
 
                 }
@@ -381,7 +382,10 @@ class OrderReturnCreater
                 LogApi::debug("[createRefund]出账参数",$cleanAccount);
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
-                if ($accountRes['code']==0) return true;
+                if ($accountRes['code']==0){
+                    DB::commit();
+                    return true;
+                }
                 //事务回滚
                 DB::rollBack();
                 return false;
@@ -429,6 +433,7 @@ class OrderReturnCreater
 
 
             $data['status'] = $returnStatus;
+            LogApi::debug("[createRefund]创建退款单参数",$data);
             //创建申请退款记录
             $addresult = OrderReturnRepository::createRefund($data);
             if( !$addresult ){
@@ -437,7 +442,6 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;//创建失败
             }
-
 
             $no_list['refund_no'] = $data['refund_no'];
             //操作日志
@@ -452,14 +456,16 @@ class OrderReturnCreater
                     || $data['auth_deduction_amount']>0
                 ) ){
                     $return_info['refund_no'] = $data['refund_no'];
-                }
                     $b = self::refundSuccessCallback($order_info,$userinfo,$return_info);
                     if( !$b ){
                         //事务回滚
                         DB::rollBack();
                         return false;
                     }
+                    DB::commit();
                     return true;
+                }
+
                 }
                //创建清算单
                 $create_clear = self::createClear($order_info,$data,$create_data);
@@ -692,7 +698,7 @@ class OrderReturnCreater
             }
             if( $status == true ){
                 //解冻订单
-                $orderInfo   = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no']);
+                $orderInfo   = \App\Order\Modules\Repository\Order\Order::getByNo($returnInfo[0]['order_no'],true);
                 $updateOrder = $orderInfo->returnClose();
                 if(!$updateOrder){
                     DB::rollBack();
@@ -702,13 +708,13 @@ class OrderReturnCreater
             //存在审核同意商品
             if(isset($goodsDeliveryInfo)){
                 //获取订单信息
-                $order = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
-                if ( !$order ){
+                $getOrderInfo = \App\Order\Modules\Repository\Order\Order::getByNo($order, true);
+                if ( !$getOrderInfo ){
                     LogApi::debug("[returnOfGoods]获取订单信息失败".$order);
                     return false;
                 }
-                $order_info = $order->getData();
-
+                $order_info = $getOrderInfo->getData();
+                LogApi::debug("[returnOfGoods]获取订单信息",$order_info);
                 //获取用户下单信息
                 $userAddress = \App\Order\Modules\Repository\Order\Address::getByOrderNo($order);
                 if(!$userAddress){
@@ -720,6 +726,8 @@ class OrderReturnCreater
                 $user_data['customer'] = $user_info['name'];             //用户名
                 $user_data['customer_address'] = $user_info['address_info']; //用户地址
                 $user_data['business_key'] = $params['business_key'];//业务类型
+                $user_data['channel_id'] = $order_info['channel_id'];
+                $user_data['appid'] = $order_info['appid'];
                 foreach($goodsDeliveryInfo as $k=>$v){
                     $receive_data[$k] =[
                         'goods_no'  => $goodsDeliveryInfo[$k]['goods_no'],
@@ -731,8 +739,8 @@ class OrderReturnCreater
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
-                        'channel_id'  =>$order_info['channel_id'],
-                        'appid'       =>$order_info['appid']
+                       // 'channel_id'  =>$order_info['channel_id'],
+                    //    'appid'       =>$order_info['appid']
                     ];
                 }
                 LogApi::debug("[returnOfGoods]创建收货单参数",$user_data);

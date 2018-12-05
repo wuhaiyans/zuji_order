@@ -26,19 +26,31 @@ class Notary {
 	private $id;
 
 	/**
+	 * 事务ID
+	 * @var int
+	 */
+	private $transactionId;
+	
+	/**
 	 * 事务凭证
 	 * @var string
 	 */
 	private $transactionToken;
 
 	/**
-	 * 存证凭证
+	 * 事务阶段
+	 * @var string
+	 */
+	private $phase;
+
+	/**
+	 * 存证哈希
 	 * @var string
 	 */
 	private $txHash;
 
 	/**
-	 * 元数据
+	 * 存证元数据
 	 * @var NotaryMeta
 	 */
 	private $meta;
@@ -50,7 +62,7 @@ class Notary {
 	private $type;
 
 	/**
-	 * 存证内容：
+	 * 存存在原始内容：
 	 * type=1时，保存文本内容
 	 * type=2时，保存文件地址
 	 * @var string
@@ -58,24 +70,27 @@ class Notary {
 	private $content;
 
 	/**
-	 * 存证内容Hash：content的 sha256 Hash值
+	 * 存在原始内容哈希：文本内容或文件内容的 sha256 Hash值
 	 * @var string
 	 */
 	private $contentHash;
 
 	/**
 	 * 构造器
-	 * @param int $id
-	 * @param string $transactionToken
-	 * @param string $txHash
-	 * @param string $type
-	 * @param string $content
-	 * @param string $contentHash
-	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
+	 * @param int $id					主键ID
+	 * @param string $transactionToken	事务ID
+	 * @param string $phase				事务阶段
+	 * @param string $txHash			存证哈希
+	 * @param string $type				存在类型
+	 * @param string $content			存在原始内容
+	 * @param string $contentHash		存在原始内容哈希
+	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta	存证元数据
 	 */
-	public function __construct(int $id, string $transactionToken, string $txHash, int $type, string $content, string $contentHash, NotaryMeta $meta) {
+	public function __construct(int $id, int $transactionId, string $transactionToken, string $phase, string $txHash, int $type, string $content, string $contentHash, NotaryMeta $meta=null) {
 		$this->id = $id;
+		$this->transactionId = $transactionId;
 		$this->transactionToken = $transactionToken;
+		$this->phase = $phase;
 		$this->txHash = $txHash;
 		$this->type = $type;
 		$this->content = $content;
@@ -92,6 +107,15 @@ class Notary {
 	}
 
 	/**
+	 * 读取 事务ID
+	 * @return string
+	 */
+	public function getTransactionId(): int {
+		return $this->transactionId;
+	}
+
+
+	/**
 	 * 读取 事务凭证
 	 * @return string
 	 */
@@ -99,6 +123,14 @@ class Notary {
 		return $this->transactionToken;
 	}
 
+	/**
+	 * 读取 事务阶段
+	 * @return string
+	 */
+	public function getPhase(): string {
+		return $this->phase;
+	}
+	
 	/**
 	 * 读取 存证凭证
 	 * @return string
@@ -154,10 +186,30 @@ class Notary {
 	 * @param string $transactionToken
 	 * @return $this
 	 */
+	public function setTransactionId(int $transactionId) {
+		$this->transactionId = $transactionId;
+		return $this;
+	}
+	
+	/**
+	 * 设置 事务凭证
+	 * @param string $transactionToken
+	 * @return $this
+	 */
 	public function setTransactionToken(string $transactionToken) {
 		$this->transactionToken = $transactionToken;
 		return $this;
 	}
+	/**
+	 * 设置 事务阶段
+	 * @param string $phase
+	 * @return $this
+	 */
+	public function setPhase(string $phase) {
+		$this->phase = $phase;
+		return $this;
+	}
+
 
 	/**
 	 * 设置 存证凭证
@@ -209,4 +261,50 @@ class Notary {
 		return $this;
 	}
 
+	/**
+	 * 转化成数组，排除空值属性
+	 * @return array
+	 */
+	public function notEmptyToArray(): array{
+		$data = $this->toArray();
+		foreach($data as $p => $v){
+			if( empty($v) ){
+				continue;
+			}
+			if(is_object($v) && method_exists($v, 'notEmptyToArray')){
+				$arr[$p] = $v->notEmptyToArray();
+			}else{
+				$arr[$p] = $v;
+			}
+		}
+		return $arr;
+	}
+
+	/**
+	 * 转化成数组
+	 * @param bool $empty  是否返回空值属性
+	 * @return array
+	 */
+	public function toArray( bool $empty=true ): array{
+		$meta = $this->meta->toArray($empty);
+		$data = [
+			'id'		=> $this->id,
+			'transactionToken' => $this->transactionToken,
+			'phase'		=> $this->phase,
+			'txHash'	=> $this->txHash,
+			'meta'		=> $this->$meta,
+			'type'		=> $this->type,
+			'content'	=> $this->content,
+			'contentHash' => $this->contentHash,
+		];
+		if( !$empty ){
+			foreach($data as $p => $v){
+				if( empty($v) ){
+					unset($data[$p]);
+					continue;
+				}
+			}
+		}
+		return $data;
+	}
 }
