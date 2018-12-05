@@ -40,12 +40,12 @@ class ReceiveController extends Controller
 
         try {
             $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
-            $list = $this->receive->list($params);
+//            $list = $this->receive->list($params);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
-        return \apiResponse($list);
+        return \apiResponse($params);
     }
 
     /**
