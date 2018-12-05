@@ -11,6 +11,13 @@ namespace App\Lib\Alipay\Notary;
 
 /**
  * NotaryApp 可信存证 应用
+ * <ul>
+ * <li>第一步：获取存证事务：startTransactionBy*()开启已有事务；registerTransaction()注册新事务</li>
+ * <li>第二步：创建存证：createTextNotary()创建文本存证 或 createFileNotary()创建文件存证</li>
+ * <li>第三步：存证上传区块链：uploadNotary()</li>
+ * </ul>
+ * <b>注意：第二步和第三步 必须 在同一个事务中执行（即：执行期间，不可以切换事务）</b>
+ * <b>注意：这里的“事务”与数据库中事务的概念不同，只是指一组存证的标识</b>
  * @access public
  * @author liuhongxing <liuhongxing@huishoubao.com.cn>
  */
@@ -201,7 +208,7 @@ class NotaryApp {
 	}
 
 	/**
-	 * 
+	 * 查询 存证
 	 * @param int $id
 	 */
 	public function queryNotary( int $id, Notary &$notary=null):bool{
