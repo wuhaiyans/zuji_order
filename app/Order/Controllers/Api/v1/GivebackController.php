@@ -266,6 +266,8 @@ class GivebackController extends Controller
 					'customer' => $userInfo['name'],
 					'customer_mobile' => $userInfo['consignee_mobile'],
 					'customer_address' => $userInfo['address_info'],
+						'channel_id' => $orderInfo['channel_id'],
+						'appid' => $orderInfo['appid'],
 				]);
 				if( !$warehouseResult ){
 					\App\Lib\Common\LogApi::alert('giveback-create:warehouse-error', [

@@ -660,6 +660,7 @@ class OrderRepository
         $whereArray = array();
         $orWhereArray = array();
         $whereInArray = array();
+        $isUncontact = 0;
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -738,7 +739,13 @@ class OrderRepository
         }
 
         if (isset($param['visit_id'])) {
-            $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
+            if (empty($param['visit_id'])) {
+                $isUncontact = 1;
+            } else {
+
+                $whereArray[] = ['order_info_visit.visit_id', '=', $param['visit_id']];
+            }
+
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
@@ -777,6 +784,12 @@ class OrderRepository
                 ->when(!empty($whereArray),function($join) use ($whereArray) {
                     return $join->where($whereArray);
                 })
+                ->when(!empty($isUncontact),function($join) {
+                    return $join-> whereNull('order_info_visit.visit_id');
+                })
+                ->when(!empty($isUncontact),function($join) {
+                    return $join->orWhere('order_info_visit.visit_id','=',0);
+                })
                 ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
                     return $join->where($orWhereArray);
                 })
@@ -801,6 +814,12 @@ class OrderRepository
                 })
                 ->when(!empty($whereArray),function($join) use ($whereArray) {
                     return $join->where($whereArray);
+                })
+                ->when(!empty($isUncontact),function($join) {
+                    return $join-> whereNull('order_info_visit.visit_id');
+                })
+                ->when(!empty($isUncontact),function($join) {
+                    return $join->orWhere('order_info_visit.visit_id','=',0);
                 })
                 ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
                     return $join->where($orWhereArray);

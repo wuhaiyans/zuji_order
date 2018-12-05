@@ -22,8 +22,8 @@ class NotaryException extends \Exception {
 		
 		$this->data = $data;
 		
-		if( isset($data['errMessage']) ){
-			$message = $data['errMessage'];
+		if( isset($data['responseData']) ){
+			$message = $data['responseData'];
 		}
 		parent::__construct( $message );
 	}

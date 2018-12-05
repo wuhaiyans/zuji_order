@@ -363,6 +363,7 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    DB::commit();
                     return true;
 
                 }
@@ -381,7 +382,10 @@ class OrderReturnCreater
                 LogApi::debug("[createRefund]出账参数",$cleanAccount);
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
-                if ($accountRes['code']==0) return true;
+                if ($accountRes['code']==0){
+                    DB::commit();
+                    return true;
+                }
                 //事务回滚
                 DB::rollBack();
                 return false;
@@ -429,6 +433,7 @@ class OrderReturnCreater
 
 
             $data['status'] = $returnStatus;
+            LogApi::debug("[createRefund]创建退款单参数",$data);
             //创建申请退款记录
             $addresult = OrderReturnRepository::createRefund($data);
             if( !$addresult ){
@@ -437,7 +442,6 @@ class OrderReturnCreater
                 DB::rollBack();
                 return false;//创建失败
             }
-
 
             $no_list['refund_no'] = $data['refund_no'];
             //操作日志
@@ -452,14 +456,16 @@ class OrderReturnCreater
                     || $data['auth_deduction_amount']>0
                 ) ){
                     $return_info['refund_no'] = $data['refund_no'];
-                }
                     $b = self::refundSuccessCallback($order_info,$userinfo,$return_info);
                     if( !$b ){
                         //事务回滚
                         DB::rollBack();
                         return false;
                     }
+                    DB::commit();
                     return true;
+                }
+
                 }
                //创建清算单
                 $create_clear = self::createClear($order_info,$data,$create_data);
