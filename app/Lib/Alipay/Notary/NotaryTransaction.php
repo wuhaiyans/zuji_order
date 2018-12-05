@@ -17,16 +17,22 @@ namespace App\Lib\Alipay\Notary;
 class NotaryTransaction {
 
 	/**
-	 * 业务类型
+	 * 主键ID
 	 * @var int
 	 */
-	private $business_type;
+	private $id;
 
 	/**
-	 * 业务数据标识
+	 * 订单编号
 	 * @var string
 	 */
-	private $business_no;
+	private $order_no;
+
+	/**
+	 * 商品编号
+	 * @var string
+	 */
+	private $goods_no;
 
 	/**
 	 * 租户ID
@@ -48,31 +54,53 @@ class NotaryTransaction {
 
 	/**
 	 * 构造器
-	 * @param int $business_type	业务类型
-	 * @param string $business_no	业务数据标识
+	 * @param int $id
+	 * @param string $order_no		订单编号
+	 * @param string $goods_no		商品编号
+	 * @param string $accountId
+	 * @param string $token
+	 * @param \App\Lib\Alipay\Notary\CustomerIdentity $customer
 	 */
-	public function __construct(int $business_type, string $business_no, string $accountId, string $token, CustomerIdentity $customer) {
-		$this->business_type = $business_type;
-		$this->business_no = $business_no;
+	public function __construct(int $id, string $order_no, string $goods_no, string $accountId, string $token, CustomerIdentity $customer) {
+		$this->id = $id;
+		$this->order_no = $order_no;
+		$this->goods_no = $goods_no;
 		$this->accountId = $accountId;
 		$this->token = $token;
 		$this->customer = $customer;
 	}
 
 	/**
-	 * 获取 业务类型
+	 * 获取主键ID
+	 * @param int $id
+	 * @return \App\Lib\Alipay\Notary\NotaryTransaction
+	 */
+	public function setId(int $id):NotaryTransaction{
+		$this->id = $id;
+		return $this;
+	}
+	/**
+	 * 获取主键ID
 	 * @return int
 	 */
-	public function getBusinessType(): int {
-		return $this->business_type;
+	public function getId():int{
+		return $this->id;
+	}
+	
+	/**
+	 * 获取 订单编号
+	 * @return int
+	 */
+	public function getOrderNo(): string {
+		return $this->order_no;
 	}
 
 	/**
-	 * 获取 业务数据标识
+	 * 获取 商品编号
 	 * @return string
 	 */
-	public function getBusinessNo(): string {
-		return $this->business_no;
+	public function getGoodsNo(): string {
+		return $this->goods_no;
 	}
 
 	public function getAccountId(): string {
@@ -97,23 +125,19 @@ class NotaryTransaction {
 
 	/**
 	 * 文本存证
-	 * @param string $content
-	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
-	 * @return \App\Lib\Alipay\Notary\Notary
+	 * @param \App\Lib\Alipay\Notary\Notary		$notary
+	 * @return 
+	 * @throws NotaryException
 	 */
-	public function textNotary(string $content, NotaryMeta $meta): Notary {
+	public function textNotary( Notary $notary) {
+		$meta = $notary->getMeta();
 		$meta->setAccountId($this->accountId);
 		$meta->setToken($this->token);
-		// 文本存证
-		$txhash = NotaryApi::textNotary( $content, $meta );
-		$contentHash = hash('sha256', $content);
+		$meta->setTimestamp( date('Y-m-d H:i:s') );
 		
-		// 保存
-		$id = 123;
-		
-		$textNotary = new Notary($id, $this->token, $txhash, Notary::TYPE_TEXT, $content, $contentHash, $meta);
-		
-		return $textNotary;
+		// 文本存证（上传文本哈希具有相同效应）
+		$txHash = NotaryApi::textNotary( $notary->getContentHash(), $meta );
+		$notary->setTxHash($txHash);
 	}
 	public function textNotaryGet($txHash):string{
 		$meta = new NotaryMeta();
@@ -124,24 +148,20 @@ class NotaryTransaction {
 
 	/**
 	 * 文件存证
-	 * @param string $file
-	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
-	 * @return \App\Lib\Alipay\Notary\Notary
+	 * @param \App\Lib\Alipay\Notary\Notary		$notary
+	 * @return 
 	 */
-	public function fileNotary(string $file, NotaryMeta $meta): Notary {
+	public function fileNotary(Notary $notary) {
+		$meta = $notary->getMeta();
 		$meta->setAccountId($this->accountId);
 		$meta->setToken($this->token);
+		$meta->setTimestamp( date('Y-m-d H:i:s') );
+		
 		// 文件存证
-		$txhash = NotaryApi::fileNotary( $file, $meta );
-		$content = file_get_contents($file);
-		$contentHash = hash('sha256', $content);
+		$txHash = NotaryApi::fileNotary( $notary->getContent(), $meta );
 		
-		// 保存
-		$id = 123;
+		$notary->setTxHash($txHash);
 		
-		$textNotary = new Notary($id, $this->token, $txhash, Notary::TYPE_TEXT, $file, $contentHash, $meta);
-		
-		return $textNotary;
 	}
 	
 	/**
@@ -160,12 +180,15 @@ class NotaryTransaction {
 	 * 核验存证
 	 * @param string $txHash	存证凭证
 	 * @param string $contentHash	存证内容hash值
-	 * @return bool	true：存证；false：不存在
+	 * @return string
 	 */
 	public function notaryStatus( string $txHash, string $contentHash ):string{
 		$meta = new NotaryMeta();
 		$meta->setAccountId($this->accountId);
 		$meta->setToken($this->token);
+		
+		$contentHash = hash('sha256',$contentHash);
+		
 		return NotaryApi::notaryStatus( $txHash, $contentHash, $meta);
 	}
 	

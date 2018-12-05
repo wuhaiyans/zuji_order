@@ -32,7 +32,9 @@ class NotaryApp {
 	 * 存证事务
 	 * @var NotaryTransaction
 	 */
-	private $transation;
+	private $transaction;
+
+	private $handler;
 
 	/**
 	 * 构造函数
@@ -49,98 +51,145 @@ class NotaryApp {
 		$this->enterprise->setLegalPersonId('420102198108011012');
 		$this->enterprise->setAgent('赵明亮');
 		$this->enterprise->setAgentId('232301199005211535');
+		
+		$this->handler = new NotaryDataHandler();
+	}
+	
+	/**
+	 * 开启 存证事务
+	 * 通过数据库查询，初始化存证事务
+	 * @param string $order_no		订单编号
+	 * @param string $goods_no		商品编号
+	 * @return bool
+	 */
+	public function startTransactionByBusiness(string $order_no, string $goods_no):bool{
+		return $this->handler->queryTransactionByBusiness($order_no, $goods_no, $this->transaction);
+	}
+	/**
+	 * 开启 存证事务
+	 * 通过数据库查询，初始化存证事务
+	 * @param string $order_no		订单编号
+	 * @param string $goods_no		商品编号
+	 * @return bool
+	 */
+	public function startTransactionByToken(string $token):bool{
+		return $this->handler->queryTransactionByToken($token, $this->transaction);
 	}
 
 	/**
 	 * 注册 存证事务
-	 * @param int $business_type
-	 * @param string $business_no
+	 * @param string $order_no		订单编号
+	 * @param string $goods_no		商品编号
 	 * @param \App\Lib\Alipay\Notary\CustomerIdentity $customer
 	 * @return bool
 	 */
-	public function registerTransation(int $business_type, string $business_no, CustomerIdentity $customer): bool {
+	public function registerTransaction(string $order_no, string $goods_no, CustomerIdentity $customer): bool {
 
 		// 业务是否已经注册过存证事务
 		// 注册存证事务
 		$token = NotaryApi::notaryToken($this->accountId, $this->enterprise, $customer);
 
-		// 保存本地
+		// 创建事务对象
+		$this->transaction = new NotaryTransaction(0,$order_no, $goods_no, $this->accountId, $token, $customer);
 
-		$this->transation = new NotaryTransaction($business_type, $business_no, $this->accountId, $token, $customer);
+		// 持久化事务
+		$b = $this->handler->createTransaction( $this->transaction );
 
-		return true;
+		return $b;
 	}
 
-	/**
-	 * 开启 存证事务
-	 * @param int $business_type	业务类型
-	 * @param string $business_no	业务数据标识
-	 */
-	public function startTransation(int $business_type, string $business_no): bool {
-		if ($this->transation) {
-			return true;
-		}
-
-		//
-		$token = '123';
-		$customer = new CustomerIdentity();
-		$customer->setCertNo('130423198906021038');
-		$customer->setCertName('刘红星');
-		$customer->setMobileNo('15300001111');
-
-		$this->transation = new NotaryTransaction($business_type, $business_no, $token, $customer);
-		return true;
-	}
 	
-	public function getTransationToken():string{
-		return $this->transation->getToken();
+	/**
+	 * 获取 事务ID
+	 * @return string
+	 */
+	public function getTransactionToken():string{
+		return $this->transaction->getToken();
 	}
 
 	/**
-	 * 文本存证
-	 * @param string $content
-	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
+	 * 创建 文本存证
+	 * @param string $content	文本内容
+	 * @param string $phase		阶段值
 	 * @return \App\Lib\Alipay\Notary\Notary
 	 */
-	public function textNotary(string $content, NotaryMeta $meta): Notary {
-		return $this->transation->textNotary($content, $meta);
+	public function createTextNotary(string $content, string $phase): Notary {
+		
+		// 内容哈希值
+		$contentHash = hash('sha256', $content);
+		
+		// 存证元数据
+		$meta = new NotaryMeta();
+		$meta->setPhase( $phase );
+		
+		// 存证实例
+		$notary = new Notary(0, $this->transaction->getId(), $this->transaction->getToken(), $phase, '', Notary::TYPE_TEXT, $content, $contentHash, $meta);
+		
+		// 存证持久化
+		$this->handler->createNotary($notary);
+		
+		return $notary;
 	}
 
 	/**
 	 * 下载 文本存证
-	 * @param string $txHash
-	 * @return string
+	 * @param string $txHash	存证凭证
+	 * @return string	文本内容
 	 */
 	public function textNotaryGet(string $txHash): string {
-		return $this->transation->textNotaryGet($txHash);
+		// 本地存证查询
+		//$b = $this->handler->queryNotary(['txHash'=>$txHash], $notary);
+		// 接口查询存证内容
+		$content = $this->transaction->textNotaryGet($txHash);
+		
+		return $content;
 	}
 
 	/**
 	 * 文件存证
-	 * @param string $file
-	 * @param \App\Lib\Alipay\Notary\NotaryMeta $meta
-	 * @return \App\Lib\Alipay\Notary\Notary
+	 * @param string $file		文件路径
+	 * @param string $phase		阶段值
+	 * @return \App\Lib\Alipay\Notary\Notary	存证实例
 	 */
-	public function fileNotary(string $file, NotaryMeta $meta): Notary {
-		return $this->transation->fileNotary($file, $meta);
+	public function createFileNotary(string $file, string $phase): Notary {
+		// 读取文件内容
+		$content = file_get_contents($file);
+		// 内容哈希值
+		$contentHash = hash('sha256', $content);
+		
+		// 存证元数据
+		$meta = new NotaryMeta();
+		$meta->setPhase( $phase );
+		
+		// 存证实例
+		$notary = new Notary(0, $this->transaction->getId(), $this->transaction->getToken(), '', '', Notary::TYPE_TEXT, $content, $contentHash, $meta);
+		
+		// 存证持久化
+		$this->handler->createNotary($notary);
+		
+		return $notary;
 	}
 	/**
 	 * 下载 文件存证
-	 * @param string $txHash
-	 * @return string
+	 * @param string $txHash	存证凭证
+	 * @return string	文件内容
 	 */
 	public function fileNotaryGet(string $txHash): string {
-		return $this->transation->fileNotaryGet($txHash);
+		// 本地存证查询
+		//$b = $this->handler->queryNotary(['txHash'=>$txHash], $notary);
+		// 接口查询存证内容
+		$content = $this->transaction->fileNotaryGet($txHash);
+		return $content;
 	}
 
 	/**
 	 * 核验存证
 	 * @param string $txHash	存证凭证
 	 * @param string $contentHash	存证内容hash值
-	 * @return bool	true：存证；false：不存在
+	 * @return string
 	 */
 	public function notaryStatus(string $txHash, string $contentHash): string {
-		return $this->transation->notaryStatus($txHash, $contentHash);
+		return $this->transaction->notaryStatus($txHash, $contentHash);
 	}
 	
 	/**
@@ -148,7 +197,30 @@ class NotaryApp {
 	 * @return string
 	 */
 	public function notaryTransactionGet():string{
-		return $this->transation->notaryTransactionGet( );
+		return $this->transaction->notaryTransactionGet( );
 	}
+
+	/**
+	 * 
+	 * @param int $id
+	 */
+	public function queryNotary( int $id, Notary &$notary=null):bool{
+		return $this->handler->queryNotary(['id'=>$id], $notary);
+	}
+	/**
+	 * 
+	 * 上传存证
+	 * @param \App\Lib\Alipay\Notary\Notary		$notary
+	 * @return bool
+	 * @throws NotaryException
+	 */
+	public function uploadNotary(Notary $notary):bool {
+		// 存证上链
+		$this->transaction->textNotary( $notary );
+		// 存在持久化
+		$b = $this->handler->uploadNotary($notary);
+		return $b;
+	}
+
 
 }
