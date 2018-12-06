@@ -83,6 +83,7 @@ class OrderOperate
 
         $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
         if($res>1){
+            set_msg("五分钟内禁止操作");
             return false;
         }
 
