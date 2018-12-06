@@ -89,6 +89,8 @@ $api->version('v1', [
         $api->any('otherMonth', 'TestExcelController@otherMonth');
         $api->any('riskMonth', 'TestExcelController@riskMonth');
         $api->any('riskAll', 'TestExcelController@riskAll');
+        /*******************逾期数据导出--临时***************************/
+        $api->any('overdueDetail', 'TestExcelController@overdueDetail');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
