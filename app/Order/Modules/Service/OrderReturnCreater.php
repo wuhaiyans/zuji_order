@@ -4,6 +4,7 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\NotFoundException;
 use App\Lib\Order\OrderInfo;
+use App\Lib\PublicInc;
 use App\Lib\Warehouse\Receive;
 use \App\Lib\Common\SmsApi;
 use App\Order\Controllers\Api\v1\OrderCleaningController;
@@ -108,18 +109,17 @@ class OrderReturnCreater
                     return false;//支付单不存在
                 }
                 //短租不允许退货
-                if($order_info['zuqi_type'] ==OrderStatus::ZUQI_TYPE1){
+                if($order_info['zuqi_type'] == OrderStatus::ZUQI_TYPE1){
                     return false;
                 }
-
                 //乐百分支付的用户在14天内可申请退货
                 if( $order_info['pay_type'] == PayInc::LebaifenPay){
-                    if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time()) {
+                    if( $goodsInfo['begin_time'] > 0 &&  ( $goodsInfo['begin_time'] + config('web.lebaifen_service_days')) < time() ) {
                         return false;
                     }
                 }else{
                     //拿趣用平台下单用户必须在收货后7天内才可以申请退换货
-                    if ($goodsInfo['begin_time'] > 0 &&  ($goodsInfo['begin_time'] + config('web.month_service_days')) < time()) {
+                    if( $goodsInfo['begin_time'] > 0 &&  ( $goodsInfo['begin_time'] + config('web.month_service_days')) < time() ) {
                         return false;
                     }
                 }
@@ -127,7 +127,7 @@ class OrderReturnCreater
                 //获取商品数组
                 $goods_info = $goods->getData();
                 //代扣+预授权
-                if($order_info['pay_type'] == PayInc::WithhodingPay){
+                if( $order_info['pay_type'] == PayInc::WithhodingPay ){
                     $result['auth_unfreeze_amount'] = $goods_info['yajin'];//商品实际支付押金
 
                 }
@@ -476,7 +476,7 @@ class OrderReturnCreater
                 }
 
             //通知收发货取消发货
-            if($order_info['order_status'] == OrderStatus::OrderInStock ){
+            if( $order_info['order_status'] == OrderStatus::OrderInStock ){
                 $cancel = Delivery::cancel($params['order_no']);
                 if( !$cancel ){
                     LogApi::debug("[createRefund]通知收发货系统取消发货失败");
@@ -487,17 +487,19 @@ class OrderReturnCreater
             }
             //事务提交
             DB::commit();
+           if( $userinfo['type'] == PublicInc::Type_Admin){
+               //根据订单风控审核状态 申请发送短信
+               if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                   //风控不通过取消订单
+                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                   $orderNoticeObj->notify();
+               }else{
+                   //其他默认通过
+                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                   $orderNoticeObj->notify();
+               }
 
-            //根据订单风控审核状态 申请发送短信
-            if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
-                //风控不通过取消订单
-                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
-                $orderNoticeObj->notify();
-            }else{
-                //其他默认通过
-                $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
-                $orderNoticeObj->notify();
-            }
+           }
 
 
             return $no_list;
@@ -2359,7 +2361,7 @@ class OrderReturnCreater
                 $return_info = $return->getData();
                 LogApi::debug("[createchange]换货信息",$return_info);
                 //插入操作日志
-                $goodsLog=\App\Order\Modules\Repository\GoodsLogRepository::add([
+                $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
                     'order_no'     =>$detail['order_no'],
                     'action'       =>'换货发货',
                     'business_key' => \App\Order\Modules\Inc\OrderStatus::BUSINESS_BARTER,
@@ -2378,6 +2380,7 @@ class OrderReturnCreater
             if(!$goods_result){
                 return false;//创建换货记录失败
             }
+            LogApi::debug("[createchange]换货发货最终返回结果");
             return true;
         }catch (\Exception $exc) {
             echo $exc->getMessage();
@@ -3682,6 +3685,13 @@ class OrderReturnCreater
         return $create_clear;
     }
 
+    /**
+     * 退款成功调用回调
+     * @param $order_info
+     * @param $userinfo
+     * @param $return_info
+     * @return bool
+     */
     public static function refundSuccessCallback($order_info,$userinfo,$return_info){
         //如果是小程序的订单
         if($order_info['order_type'] == OrderStatus::orderMiniService){

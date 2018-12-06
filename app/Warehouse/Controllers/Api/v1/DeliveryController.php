@@ -335,7 +335,7 @@ class DeliveryController extends Controller
 
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
-         //   LogApi::info('delivery_send_order_info:',$result['order_no'].'_'.$a);
+            LogApi::info('delivery_send_order_info:',$result['order_no'].'_'.$a);
             if($a){
                 //修改发货信息
                 $this->delivery->send($params);
