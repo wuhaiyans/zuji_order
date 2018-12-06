@@ -30,7 +30,6 @@ class CronOverdue
      */
     public static function detail()
     {
-        echo 1232;die;
         //error_reporting(E_ALL ^ E_NOTICE);
         $where = [
             ['id','<>',0]
@@ -61,12 +60,13 @@ class CronOverdue
         $channelId = "10,14,15,16";
 
         $limit = 500;
+        var_dump($where);
         echo sql_profiler();
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
         echo "wwwwwwwwwwwwwwwwwwwww";
-        var_dump($where);
+
         die;
         $data = [];
         $single = 0;
