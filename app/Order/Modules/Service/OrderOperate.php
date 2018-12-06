@@ -207,6 +207,7 @@ class OrderOperate
                 $b = OrderReturnCreater::createchange($orderDetail, $goodsInfo,$operatorInfo);
                 LogApi::error("OrderDelivery-createchange:");
                 if (!$b) {
+                    set_msg("换货发货失败");
                     LogApi::error("OrderDelivery-createchange1:");
                     DB::rollBack();
                     return false;
