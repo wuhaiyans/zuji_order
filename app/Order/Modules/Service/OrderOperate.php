@@ -80,13 +80,11 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
-
-        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
+        $res=redisIncr("order_delivery".$orderDetail['order_no'],60);
         if($res>1){
-            set_msg("五分钟内禁止操作");
+            set_msg("一分钟内禁止操作");
             return false;
         }
-
         DB::beginTransaction();
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);

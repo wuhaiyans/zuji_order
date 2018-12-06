@@ -37,7 +37,7 @@ class OrderBlock {
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
-        
+
         // 订单编号
         $data = [];
 
