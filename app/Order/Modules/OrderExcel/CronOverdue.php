@@ -30,6 +30,7 @@ class CronOverdue
      */
     public static function detail()
     {
+        echo 1232;die;
         //error_reporting(E_ALL ^ E_NOTICE);
         $where = [
             ['id','<>',0]
