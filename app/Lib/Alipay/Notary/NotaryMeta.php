@@ -102,7 +102,7 @@ class NotaryMeta {
 		return $this;
 	}
 
-	public function setEntity(Identity $entity) {
+	public function setEntity(CustomerIdentity $entity) {
 		$this->entity = $entity;
 		return $this;
 	}
@@ -123,19 +123,58 @@ class NotaryMeta {
 	}
 
 
-	public function toArray(): array{
-		$arr = [];
-		foreach(get_object_vars($this) as $p => $v){
+	/**
+	 * 转化成数组
+	 * @param bool $empty  是否返回空值属性
+	 * @return array
+	 */
+	public function toArray( bool $empty=true ): array{
+		$entity = $location = null;
+		if( $this->entity ){
+			$entity = $this->entity->toArray($empty);
+		}
+		if( $this->entity ){
+			$location = $this->location->toArray($empty);
+		}
+		
+		$data = [
+			'accountId'		=> $this->accountId,
+			'token'			=> $this->token,
+			'phase'			=> $this->phase,
+			'entity'		=> $entity,
+			'timestamp'		=> $this->timestamp,
+			'location'		=> $location,
+			'properties'	=> $this->properties,
+		];
+		if( !$empty ){
+			foreach($data as $p => $v){
 			if( empty($v) ){
+					unset($data[$p]);
 				continue;
 			}
-			if(is_object($v) && method_exists($v, 'toArray')){
-				$arr[$p] = $v->toArray();
-			}else{
-				$arr[$p] = $v;
 			}
 		}
-		return $arr;
+		return $data;
+	}
+	
+	public static function fromArray( array $data ): NotaryMeta{
+		$entity = $location = null;
+		if( $data['entity'] ){
+			$entity = CustomerIdentity::fromArray($data['entity']);
+		}
+		if( $data['location'] ){
+			$location = Location::fromArray($data['location']);
+		}
+		
+		$self = new self();
+		$self->accountId	= $data['accountId'];
+		$self->token		= $data['token'];
+		$self->phase		= $data['phase'];
+		$self->entity		= $entity;
+		$self->timestamp	= $data['timestamp'];
+		$self->location		= $location;
+		$self->properties	= $data['properties'];
+		return $self; 
 	}
 	
 	

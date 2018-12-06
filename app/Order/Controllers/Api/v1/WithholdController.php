@@ -187,9 +187,9 @@ class WithholdController extends Controller
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制
-//        if(redisIncr($instalmentKey, 300) > 1){
-//            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
-//        }
+        if(redisIncr($instalmentKey, 300) > 1){
+            return apiResponse([],ApiStatus::CODE_92500,'当前分期正在操作，不能重复操作');
+        }
 
         // 生成交易码
         $business_no = createNo();
@@ -286,11 +286,15 @@ class WithholdController extends Controller
                 /**
                  * 查询用户下单时 预授权信息 获取支付系统授权码
                  */
-                $authInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                $fundauthNo = $orderAuthInfo->getFundauthNo();
+
+                $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
                 $unfreezeAndPayData = [
                     'name'			=> $subject,                //交易名称
                     'out_trade_no'	=> $business_no,            //业务系统授权码
-                    'fundauth_no'	=> $authInfo->getFundauthNo(), //支付系统授权码
+                    'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount'		=> $amount,                 //交易金额；单位：分
                     'back_url'		=> $backUrl,                //后台通知地址
                     'user_id'		=> $orderInfo['user_id'],   //用户id
@@ -308,6 +312,7 @@ class WithholdController extends Controller
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
+                return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
             }
 
         }else {
@@ -425,8 +430,6 @@ class WithholdController extends Controller
                 continue;
             }
 
-            $remark = "代扣多项扣款";
-
             // 分期详情
             $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
             if (!is_array($instalmentInfo)) {
@@ -478,7 +481,7 @@ class WithholdController extends Controller
 
             // 价格
             // $amount = $instalmentInfo['amount'] * 100;// 存在浮点计算精度问题
-            $amount = intval( strval($instalmentInfo['amount'] * 100) );
+            $amount = bcmul($instalmentInfo['amount'] , 100 );
             if ($amount < 0) {
                 LogApi::error("multiCreatepay扣款金额不能小于1分");
                 continue;
@@ -491,6 +494,8 @@ class WithholdController extends Controller
             if(!$paying){
                 LogApi::error('[multiCreatepay]修改分期支付中状态：'.$subject);
             }
+
+            $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
             //判断支付方式 小程序
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
@@ -520,6 +525,47 @@ class WithholdController extends Controller
                 }else{
                     continue;
                 }
+
+            }else if( $orderInfo['pay_type'] == PayInc::FlowerFundauth ){
+                // 花呗支付方式 扣除押金 - 扣除预授权 金额
+                if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
+                    continue;
+                }
+
+                try{
+                    /**
+                     * 查询用户下单时 预授权信息 获取支付系统授权码
+                     */
+                    $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                    $fundauthNo = $orderAuthInfo->getFundauthNo();
+
+                    $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
+                    $unfreezeAndPayData = [
+                        'name'			=> $subject,                //交易名称
+                        'out_trade_no'	=> $business_no,            //业务系统授权码
+                        'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
+                        'amount'		=> $amount,                 //交易金额；单位：分
+                        'back_url'		=> $backUrl,                //后台通知地址
+                        'user_id'		=> $orderInfo['user_id'],   //用户id
+                        'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
+                    ];
+                    LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unfreezeAndPayData);
+
+                    $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
+
+                    LogApi::info('[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
+
+                }catch(\App\Lib\ApiException $exc){
+
+                    LogApi::alert("fundauth_createpay:花呗分期代扣押金",[$exc->getMessage()],self::$email);
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+
+                    continue;
+                }
+
             } else {
 
                 // 代扣协议编号
@@ -538,7 +584,7 @@ class WithholdController extends Controller
                 }
                 // 代扣接口
                 $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
 
                 $withholding_data = [
                     'agreement_no'  => $agreementNo,            //支付平台代扣协议号
@@ -793,6 +839,7 @@ class WithholdController extends Controller
                 }
             }
 
+            $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
             //判断支付方式
             if ($orderInfo['pay_type'] == PayInc::MiniAlipay) {
@@ -823,6 +870,47 @@ class WithholdController extends Controller
                 }else{
                     continue;
                 }
+
+            }else if( $orderInfo['pay_type'] == PayInc::FlowerFundauth ){
+                // 花呗支付方式 扣除押金 - 扣除预授权 金额
+                if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
+                    continue;
+                }
+
+                try{
+                    /**
+                     * 查询用户下单时 预授权信息 获取支付系统授权码
+                     */
+                    $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderInfo['order_no']);
+                    $fundauthNo = $orderAuthInfo->getFundauthNo();
+
+                    $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
+                    $unfreezeAndPayData = [
+                        'name'			=> $subject,                //交易名称
+                        'out_trade_no'	=> $business_no,            //业务系统授权码
+                        'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
+                        'amount'		=> $amount,                 //交易金额；单位：分
+                        'back_url'		=> $backUrl,                //后台通知地址
+                        'user_id'		=> $orderInfo['user_id'],   //用户id
+                        'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
+                    ];
+                    LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unfreezeAndPayData);
+
+                    $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
+
+                    LogApi::info('[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
+
+                }catch(\App\Lib\ApiException $exc){
+
+                    LogApi::alert("fundauth_createpay:花呗分期代扣押金",[$exc->getMessage()],self::$email);
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
+                    OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
+
+                    continue;
+                }
+
             } else {
 
                 try{
@@ -840,7 +928,7 @@ class WithholdController extends Controller
                     }
                     // 代扣接口
                     $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-                    $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
 
                     $withholding_data = [
                         'agreement_no'  => $agreementNo,            //支付平台代扣协议号
