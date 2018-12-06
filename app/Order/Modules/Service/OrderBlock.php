@@ -13,14 +13,14 @@ class OrderBlock {
 
     /**
      *  区块链节点
-     *  OrderBlockNode:下单，支付，风控审核，发货，确认收货，扣款（主动还款）
+     *  OrderBlockNode:下单，支付，确认订单，发货，确认收货，扣款（主动还款）
      *
      */
     //下单
     const OrderUnPay = 'order_unpay';
     //支付
     const OrderPayed = 'order_payed';
-    //风控审核
+    //确认订单
     const OrderConfirmed = 'order_confirmed';
     //发货
     const OrderShipped = 'order_shipped';
@@ -33,6 +33,7 @@ class OrderBlock {
     /**
      * 创建
      * @param type $order_no
+     * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
@@ -89,7 +90,7 @@ class OrderBlock {
         // 支付信息
         $pay_info = self::_getPayInfo( $order_no, $order_info['order_type'] );
         if( !$pay_info ){
-            return 4;
+            $pay_info = [];
         }
         $data['pay_info'] = $pay_info;
         // 兼容 历史数据没有支付时间

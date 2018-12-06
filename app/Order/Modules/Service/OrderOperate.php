@@ -194,7 +194,12 @@ class OrderOperate
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
                 $orderNoticeObj->notify();
                 //$orderNoticeObj->alipay_notify();
-
+                //推送到区块链
+                $b =OrderBlock::orderPushBlock($orderDetail['order_no'],OrderBlock::OrderShipped);
+                if($b){
+                    LogApi::error("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
+                    LogApi::alert("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b,[],[config('web.order_warning_user')]);
+                }
                 return true;
 
             }else {
@@ -674,6 +679,13 @@ class OrderOperate
             //取消任务队列
             $cancel = JobQueueApi::cancel(config('app.env')."DeliveryReceive".$orderNo);
             DB::commit();
+
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderTakeDeliver);
+            if($b){
+                LogApi::error("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
+                LogApi::alert("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
+            }
             return true;
 
     }
@@ -880,6 +892,13 @@ class OrderOperate
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
+
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
+            if($b){
+                LogApi::error("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
+                LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
+            }
             return true;
         }catch (\Exception $exc){
             DB::rollBack();

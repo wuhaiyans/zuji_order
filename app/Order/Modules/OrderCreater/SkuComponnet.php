@@ -74,7 +74,7 @@ class SkuComponnet implements OrderCreater
         $this->componnet = $componnet;
         $mobile = $this->componnet->getOrderCreater()->getUserComponnet()->getMobile();
         try{
-            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') ,$mobile);
+            $goodsArr = Goods::getSkuList( array_column($sku, 'sku_id') ,$mobile);var_dump($goodsArr);die;
         }catch (\Exception $e){
             LogApi::alert("OrderCreate:获取商品接口失败",array_column($sku, 'sku_id'),[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-GetSkuList-error:".$e->getMessage());
