@@ -64,7 +64,7 @@ class CronOverdue
         echo sql_profiler();
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
-            ->whereIn("order_info.channel_id",$channelId)->count();
+            ->wherein("order_info.channel_id",$channelId)->count();
         echo "wwwwwwwwwwwwwwwwwwwww";
 
         die;
@@ -74,14 +74,14 @@ class CronOverdue
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i*$limit;
             $orderList = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
-                ->where($where)->whereIn("order_info.channel_id",$channelId)
+                ->where($where)->wherein("order_info.channel_id",$channelId)
                 ->offset($offset)->limit($limit)->get()->toArray();
             $single += count($orderList);
             //拆分出订单号
             $orderNos = array_column($orderList,"order_no");
 
             //获取支付用户信息
-            $miniUser = OrderMini::query()->whereIn("order_no",$orderNos)->get()->toArray();
+            $miniUser = OrderMini::query()->wherein("order_no",$orderNos)->get()->toArray();
             $miniUser = array_column($miniUser,null,"order_no");
 
             foreach($orderList as $item){
