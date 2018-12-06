@@ -31,12 +31,6 @@ class CronOverdue
     public static function detail()
     {
         //error_reporting(E_ALL ^ E_NOTICE);
-        $where = [
-            ['id','<>',0]
-        ];
-        if($_GET['channel_id']){
-            $where[] = ['channel_id','=',$_GET['channel_id']];
-        }
         if(isset($_GET['begin']) && isset($_GET['end'])){
             $beginDay = $_GET['begin'];
             $endDay = $_GET['end'];
@@ -57,24 +51,19 @@ class CronOverdue
         $where[] = ['order_info.order_status','=',Inc\OrderStatus::OrderInService,];
 
         //渠道条件设置所有小程序
-        $channelId = "10,14,15,16";
-
+        $channelId = [10,14,15,16];
         $limit = 500;
-        var_dump($where);
-        echo sql_profiler();
+
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
-            ->wherein("order_info.channel_id",$channelId)->count();
-        echo "wwwwwwwwwwwwwwwwwwwww";
-
-        die;
+            ->whereIn("order_info.channel_id",$channelId)->count();
         $data = [];
         $single = 0;
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i*$limit;
             $orderList = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
-                ->where($where)->wherein("order_info.channel_id",$channelId)
+                ->where($where)->whereIn("order_info.channel_id",$channelId)
                 ->offset($offset)->limit($limit)->get()->toArray();
             $single += count($orderList);
             //拆分出订单号
