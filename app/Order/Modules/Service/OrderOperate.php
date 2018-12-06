@@ -205,7 +205,7 @@ class OrderOperate
             }else {
                 //判断订单冻结类型 冻结就走换货发货
                 $b = OrderReturnCreater::createchange($orderDetail, $goodsInfo,$operatorInfo);
-                LogApi::error("OrderDelivery-createchange:".$orderDetail['order_no']."-".$b);
+             //   LogApi::error("OrderDelivery-createchange:".$orderDetail['order_no']."-".$b);
                 if (!$b) {
                     DB::rollBack();
                     return false;
