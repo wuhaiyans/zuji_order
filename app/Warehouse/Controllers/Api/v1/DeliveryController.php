@@ -342,7 +342,7 @@ class DeliveryController extends Controller
 
             }else{
                 DB::rollBack();
-                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
             }
 
             DB::commit();

@@ -61,6 +61,14 @@ class OrderPayNotify
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
+
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderPayed);
+            if($b){
+                LogApi::error("OrderPay-addOrderBlock:".$orderNo."-".$b);
+                LogApi::alert("OrderPay-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
+            }
+
             //发送支付宝推送消息
             //$orderNoticeObj->alipay_notify();
             //增加操作日志
