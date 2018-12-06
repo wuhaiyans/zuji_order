@@ -64,6 +64,7 @@ class CronOverdue
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
+        echo "wwwwwwwwwwwwwwwwwwwww";
         die;
         $data = [];
         $single = 0;
