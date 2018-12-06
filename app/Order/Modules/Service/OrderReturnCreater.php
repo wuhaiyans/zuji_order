@@ -305,6 +305,7 @@ class OrderReturnCreater
             $data['auth_unfreeze_amount'] = 0.00; //应退押金
             $data['auth_deduction_amount'] = 0.00; //应扣押金
             $return_info = [];
+            $create_data = [];
             //退货单状态默认值为审核同意
             $returnStatus = ReturnStatus::ReturnAgreed;
 
