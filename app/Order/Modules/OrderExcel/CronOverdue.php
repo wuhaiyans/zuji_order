@@ -60,9 +60,11 @@ class CronOverdue
         $channelId = "10,14,15,16";
 
         $limit = 500;
+        echo sql_profiler();
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
+        die;
         $data = [];
         $single = 0;
         //分批获取订单信息
