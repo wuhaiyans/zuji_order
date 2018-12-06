@@ -30,7 +30,7 @@ class CronOverdue
      */
     public static function detail()
     {
-        error_reporting(E_ALL ^ E_NOTICE);
+        //error_reporting(E_ALL ^ E_NOTICE);
         $where = [
             ['id','<>',0]
         ];
@@ -65,6 +65,7 @@ class CronOverdue
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
         echo "wwwwwwwwwwwwwwwwwwwww";
+        var_dump($where);
         die;
         $data = [];
         $single = 0;
