@@ -384,6 +384,19 @@ class OrderReturnCreater
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
                     DB::commit();
+                    if( $userinfo['type'] == PublicInc::Type_Admin){
+                        //根据订单风控审核状态 申请发送短信
+                        if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                            //风控不通过取消订单
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                            $orderNoticeObj->notify();
+                        }else{
+                            //其他默认通过
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                            $orderNoticeObj->notify();
+                        }
+
+                    }
                     return true;
                 }
                 //事务回滚
