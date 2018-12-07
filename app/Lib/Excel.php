@@ -111,7 +111,6 @@ class Excel
         }
 
         $spreadsheet = new Spreadsheet();
-        $spreadsheet->getSheet(0)->setTitle("逾期报表");
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($data as $k => $v) {

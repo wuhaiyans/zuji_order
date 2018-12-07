@@ -59,6 +59,7 @@ class CronOverdue
         //未还时间条件
         $whereBack[] = ['order_goods.end_time', '>=', $backBegin,];
         $whereBack[] = ['order_goods.end_time', '<=', $backEnd,];
+        $whereBack[] = ['order_info.order_status','=',Inc\OrderStatus::OrderInService,];
         //坏账时间条件
         $where[] = ['order_goods.end_time', '>=', $someday,];
         $where[] = ['order_goods.end_time', '<=', $overdueTime];
