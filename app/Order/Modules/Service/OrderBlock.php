@@ -180,9 +180,9 @@ class OrderBlock {
                 $contract_content = file_get_contents( $contract_file );
             }else{
                 $contract_content = file_get_contents( $contract_info->download_url );
-                if( $contract_content ){
-                    file_put_contents($contract_file, $contract_content);
-                }
+//                if( $contract_content ){
+//                    file_put_contents($contract_file, $contract_content);
+//                }
             }
             // 合同内容哈希
             $hash = hash('sha256', $contract_content);
