@@ -3,6 +3,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Repository\OrderLogRepository;
 use Illuminate\Http\Request;
 use App\Order\Modules\Service\OrderGoodsInstalment;
@@ -349,7 +350,27 @@ class InstalmentController extends Controller
         set_time_limit(0);
         try{
 
-            $params = $request->all();
+            $params  = $request->all()['params'];
+
+            $additional['page']    = isset($request['page']) ? $request['page'] : 1;
+            $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
+
+
+
+            if(isset($params['keywords'])){
+                if($params['kw_type'] == 1){
+                    $params['order_no'] = $params['keywords'];
+                }
+                elseif($params['kw_type'] == 2){
+                    $params['mobile'] = $params['keywords'];
+                }
+                else{
+                    $params['order_no'] = $params['keywords'];
+                }
+            }
+            $params['is_instalment_list'] = 1;
+
+            LogApi::info("[instalmentListExport]",$params);
 
             $params['page']     = !empty($params['page']) ? $params['page'] : 1;
             $outPages           = !empty($params['page']) ? $params['page'] : 1;
