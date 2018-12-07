@@ -64,6 +64,7 @@ class OrderPayNotify
 
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderPayed);
+            LogApi::info("OrderPay-addOrderBlock:".$orderNo."-".$b);
             if($b){
                 LogApi::error("OrderPay-addOrderBlock:".$orderNo."-".$b);
                 LogApi::alert("OrderPay-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
