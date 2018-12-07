@@ -225,19 +225,8 @@ class ReletController extends Controller
     public function listReletExport(Request $request){
         set_time_limit(0);
         try {
-            //接收参数
-            $params = $request->all();
+            $params = $request->input('params');
 
-            $params['page']     = !empty($params['page']) ? $params['page'] : 1;
-            $outPages           = !empty($params['page']) ? $params['page'] : 1;
-
-            $total_export_count = 5000;
-
-            $pre_count = 500;
-
-            $smallPage = ceil($total_export_count/$pre_count);
-
-            $i = 1;
             header ( "Content-type:application/vnd.ms-excel" );
             header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台续租列表数据导出" ) . ".csv" );
 
@@ -255,46 +244,33 @@ class ReletController extends Controller
             // 将标题名称通过fputcsv写到文件句柄
             fputcsv($fp, $column_name);
 
+            $params['pagesize'] = 10000;
 
-            while(true){
-                if ($i > $smallPage) {
-                    exit;
-                }
+            $list = $this->relet->getList($params);
+            $list = $list['data'];
+            $data = [];
 
-                $offset = ( $outPages - 1) * $total_export_count;
+            foreach($list as &$item){
+                $reletType =  \App\Order\Modules\Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
 
-                $params['page'] = intval(($offset / $pre_count) + $i) ;
-                ++$i;
-
-                $list = $this->relet->getList($params);
-                $list = $list['data'];
-                $data = [];
-
-
-
-                foreach($list as &$item){
-
-                    $reletType =  \App\Order\Modules\Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
-
-                    $data[] = [
-                        $item['order_no'],          // 订单编号
-                        $item['create_time'],       // 下单时间
-                        $item['trade_no'],          // 交易流水号
-                        $item['pay_type'],          // 支付方式及通道
-                        $item['user_name'],         // 用户名
-                        $item['user_name'],         // 手机号
-                        $item['goods_id'],          // 设备名称
-                        $item['relet_amount'],      // 订单金额
-                        $item['zuqi'],              // 租期
-                        $item['goods_id'],          // 续租设备
-                        $item['relet_amount'],      // 应支付金额
-                        $item['zuqi'] . $reletType, // 续租时长
-                        $item['status']             // 状态
-                    ];
-                }
-
-                $Excel =  Excel::csvOrderListWrite($data, $fp);
+                $data[] = [
+                    $item['order_no'],          // 订单编号
+                    $item['create_time'],       // 下单时间
+                    $item['trade_no'],          // 交易流水号
+                    $item['pay_type'],          // 支付方式及通道
+                    $item['user_name'],         // 用户名
+                    $item['user_name'],         // 手机号
+                    $item['goods_id'],          // 设备名称
+                    $item['relet_amount'],      // 订单金额
+                    $item['zuqi'],              // 租期
+                    $item['goods_id'],          // 续租设备
+                    $item['relet_amount'],      // 应支付金额
+                    $item['zuqi'] . $reletType, // 续租时长
+                    $item['status']             // 状态
+                ];
             }
+
+            $Excel =  Excel::csvOrderListWrite($data, $fp);
 
 
             return $Excel;
