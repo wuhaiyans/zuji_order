@@ -8,6 +8,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Common\LogApi;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Service\OrderRelet;
@@ -225,7 +226,8 @@ class ReletController extends Controller
     public function listReletExport(Request $request){
         set_time_limit(0);
         try {
-            $params = $request->input('params');
+            $params = $request->all();
+            LogApi::info("[listReletExport]",$params);
 
             header ( "Content-type:application/vnd.ms-excel" );
             header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台续租列表数据导出" ) . ".csv" );
