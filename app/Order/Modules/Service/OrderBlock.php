@@ -227,8 +227,7 @@ class OrderBlock {
 //			// 上传 文本存证
 //			$b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
-
-            if( $data['contract_info']['hash'] ){
+            if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );
