@@ -8,15 +8,13 @@ use App\Warehouse\Models\Imei;
 use App\Warehouse\Models\ReceiveGoods;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ReceiveService;
+use App\Warehouse\Modules\Service\WarehouseWarning;
 use Illuminate\Support\Facades\DB;
 
 
 /**
  * Class ReceiveController
  * @package App\Warehouse\Controllers\Api\v1
- *
- *
- *
  */
 class ReceiveController extends Controller
 {
@@ -98,6 +96,7 @@ class ReceiveController extends Controller
         try {
             $receiveNo = $this->receive->create($params);
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[收货单创建]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -124,6 +123,7 @@ class ReceiveController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[取消收货单]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -153,6 +153,7 @@ class ReceiveController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[签收-收货]失败',[$params,$userinfo,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -176,6 +177,7 @@ class ReceiveController extends Controller
             $this->receive->imeiIn($params['receive_no']);
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[确认入库]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
         DB::commit();
@@ -203,6 +205,7 @@ class ReceiveController extends Controller
         } catch (\Exception $e){
             DB::rollBack();
             LogApi::debug("Receive[orderImeiIn]error:",$e->getMessage());
+            WarehouseWarning::warningWarehouse('[确认入库-订单2.0工具]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_50000, $e->getMessage());
         }
         DB::commit();
@@ -347,6 +350,7 @@ class ReceiveController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             LogApi::info('checkItemsFinish_info_Receive_error',$e->getMessage());
+            WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -443,6 +447,7 @@ class ReceiveController extends Controller
             \App\Lib\Order\Receive::checkResult($receive->order_no, $receive->type,$goods_info);
 
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[完成签收针对收货单-收货]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -499,6 +504,7 @@ class ReceiveController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[确认同意换货]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
         return \apiResponse([]);
