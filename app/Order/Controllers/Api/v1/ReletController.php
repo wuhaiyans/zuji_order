@@ -227,7 +227,6 @@ class ReletController extends Controller
         set_time_limit(0);
         try {
             $params = $request->all();
-            LogApi::info("[listReletExport]",$params);
 
             header ( "Content-type:application/vnd.ms-excel" );
             header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台续租列表数据导出" ) . ".csv" );
