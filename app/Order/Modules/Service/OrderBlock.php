@@ -38,7 +38,6 @@ class OrderBlock {
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
 
-        return 0;
         // 订单编号
         $data = [];
 
@@ -181,9 +180,9 @@ class OrderBlock {
                 $contract_content = file_get_contents( $contract_file );
             }else{
                 $contract_content = file_get_contents( $contract_info->download_url );
-                if( $contract_content ){
-                    file_put_contents($contract_file, $contract_content);
-                }
+//                if( $contract_content ){
+//                    file_put_contents($contract_file, $contract_content);
+//                }
             }
             // 合同内容哈希
             $hash = hash('sha256', $contract_content);
@@ -228,8 +227,7 @@ class OrderBlock {
 //			// 上传 文本存证
 //			$b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
-
-            if( $data['contract_info']['hash'] ){
+            if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );

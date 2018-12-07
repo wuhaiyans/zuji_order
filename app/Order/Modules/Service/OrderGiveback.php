@@ -618,8 +618,8 @@ class OrderGiveback
         }
 
         //应用来源ID
-        if (isset($where['order_appid']) && !empty($where['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $where['order_appid']];
+        if (isset($where['appid']) && !empty($where['appid'])) {
+            $whereArray[] = ['order_info.appid', '=', $where['appid']];
         }
         //还机单创建开始时间
         if ( isset($where['begin_time']) && !empty($where['begin_time']) ) {

@@ -59,12 +59,12 @@ class NotaryApi {
 	public static function notaryToken(string $accountId, EnterpriseIdentity $entity, CustomerIdentity $customer ): string{
 		$url = self::$url.'/api/notaryToken';
 		$timestamp = self::_getTimestamp();
-		$bizId = '2';
+		$bizId = '3'; //业务分类 3: 租赁； subBizId 留空 2018-12-07 邹雪晴（阿里巴巴）要求修改的
 		$params = [
 			'accountId' => $accountId,
 			'entity'	=> $entity->toArray(),
-			'bizId'		=> $bizId,		// 业务类型；2：合同
-			'subBizId'	=> 'LEASING',	// 子业务类型； LEASING：租赁合同
+			'bizId'		=> $bizId,		// 业务类型；
+			'subBizId'	=> '',			// 子业务类型；
 			'customer'	=> [			// 您的客户身份标识
 				'userType'	=> $customer->getUserType(),
 				'certName'	=> $customer->getCertName(),
