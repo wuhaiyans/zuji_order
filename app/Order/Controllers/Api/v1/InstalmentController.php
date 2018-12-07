@@ -350,7 +350,7 @@ class InstalmentController extends Controller
         set_time_limit(0);
         try{
 
-            $params  = $request->all()['params'];
+            $params  = $request->all();
 
             if(isset($params['keywords'])){
                 if($params['kw_type'] == 1){
@@ -394,7 +394,7 @@ class InstalmentController extends Controller
             // 将标题名称通过fputcsv写到文件句柄
             fputcsv($fp, $column_name);
 
-
+            p($params);
             while(true){
                 if ($i > $smallPage) {
                     exit;
