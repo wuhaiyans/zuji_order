@@ -89,6 +89,8 @@ $api->version('v1', [
         $api->any('otherMonth', 'TestExcelController@otherMonth');
         $api->any('riskMonth', 'TestExcelController@riskMonth');
         $api->any('riskAll', 'TestExcelController@riskAll');
+        /*******************逾期数据导出--临时***************************/
+        $api->any('overdueDetail', 'TestExcelController@overdueDetail');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
@@ -122,6 +124,10 @@ $api->version('v1', [
         $api->any('payIncomeQueryExport', 'PayController@payIncomeQueryExport');
         //出账记录导出
         $api->any('cleanListExport', 'OrderCleaningController@cleanListExport');
+
+        //出账记录导出
+        $api->any('listReletExport', 'ReletController@listReletExport');
+
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************

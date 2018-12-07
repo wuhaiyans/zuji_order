@@ -6,6 +6,7 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\Log;
+use App\Order\Modules\Service\OrderBlock;
 
 class OrderWithhold
 {
@@ -269,6 +270,9 @@ class OrderWithhold
 
             // 发送支付宝消息通知
 				//$notice->alipay_notify();
+
+            // 支付宝订单区块链推送服务
+            OrderBlock::orderPushBlock($instalmentInfo['order_no'],OrderBlock::OrderWithHold);
 
 
             // 提交蚁盾用户还款数据

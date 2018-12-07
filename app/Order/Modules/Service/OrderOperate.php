@@ -80,12 +80,11 @@ class OrderOperate
      */
 
     public static function delivery($orderDetail,$goodsInfo,$operatorInfo=[]){
-
-        $res=redisIncr("order_delivery".$orderDetail['order_no'],5*60);
+        $res=redisIncr("order_delivery".$orderDetail['order_no'],60);
         if($res>1){
+            set_msg("一分钟内禁止操作");
             return false;
         }
-
         DB::beginTransaction();
             //更新订单状态
             $order = Order::getByNo($orderDetail['order_no']);
@@ -194,13 +193,22 @@ class OrderOperate
                 $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
                 $orderNoticeObj->notify();
                 //$orderNoticeObj->alipay_notify();
-
+                //推送到区块链
+                $b =OrderBlock::orderPushBlock($orderDetail['order_no'],OrderBlock::OrderShipped);
+                LogApi::info("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
+                if($b){
+                    LogApi::error("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
+                    LogApi::alert("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b,[],[config('web.order_warning_user')]);
+                }
                 return true;
 
             }else {
                 //判断订单冻结类型 冻结就走换货发货
                 $b = OrderReturnCreater::createchange($orderDetail, $goodsInfo,$operatorInfo);
+                LogApi::error("OrderDelivery-createchange:");
                 if (!$b) {
+                    set_msg("换货发货失败");
+                    LogApi::error("OrderDelivery-createchange1:");
                     DB::rollBack();
                     return false;
                 }
@@ -674,6 +682,14 @@ class OrderOperate
             //取消任务队列
             $cancel = JobQueueApi::cancel(config('app.env')."DeliveryReceive".$orderNo);
             DB::commit();
+
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderTakeDeliver);
+            LogApi::info("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
+            if($b){
+                LogApi::error("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
+                LogApi::alert("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
+            }
             return true;
 
     }
@@ -880,6 +896,14 @@ class OrderOperate
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
 
             DB::commit();
+
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
+            LogApi::info("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
+            if($b){
+                LogApi::error("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
+                LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
+            }
             return true;
         }catch (\Exception $exc){
             DB::rollBack();

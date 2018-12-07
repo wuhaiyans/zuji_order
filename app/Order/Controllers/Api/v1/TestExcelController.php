@@ -7,6 +7,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderExcel\CronCollection;
 use App\Order\Modules\OrderExcel\CronOperator;
+use App\Order\Modules\OrderExcel\CronOverdue;
 use App\Order\Modules\OrderExcel\CronRisk;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use Illuminate\Http\Request;
@@ -151,6 +152,12 @@ class TestExcelController extends Controller
     public function riskAll(){
         $obj = new CronRisk();
         $obj->everAll();
+        echo "success";
+    }
+
+    public function overdueDetail(){
+        $obj = new CronOverdue();
+        $obj->detail();
         echo "success";
     }
 }
