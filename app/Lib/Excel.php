@@ -111,6 +111,7 @@ class Excel
         }
 
         $spreadsheet = new Spreadsheet();
+        $spreadsheet->getSheet(0)->setTitle("逾期报表");
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($data as $k => $v) {
@@ -263,5 +264,64 @@ class Excel
 
 
 
+    }
+
+    /**
+     * 导出多个工作表到本地服务器
+     * @param $headers 标题 【可选】二维数组
+     * @param $body 主体内容 【必须】二维数组
+     * @param $fileName 文件名称 【必须】string
+     * @param $title 工作表名称 【必须】二维数组
+     * @param $path 文件目录 【必须】
+     * @return bool
+     *
+     * 写文件
+     */
+    public static function xlsxExport($body,$headers,$title, $fileName='数据导出',$path)
+    {
+        if ( !$body) {
+            return false;
+        }
+
+
+
+        $spreadsheet = new Spreadsheet();
+
+        foreach($body as $keys=>$value){
+            $data = [];
+            $rows = 1;
+            if ($headers) {
+                foreach ($headers[$keys] as $k => $v) {
+                    $data[self::intToChr($k) . $rows] = $v;
+                }
+            }
+
+            foreach ($value as $k => $items) {
+                $rows++;
+                foreach ($items as $key => $item) {
+                    $data[self::intToChr($key) . $rows] = $item;
+                }
+            }
+
+            if($keys==0){
+                $spreadsheet->getSheet($keys)->setTitle($title[$keys]);
+            }
+            else{
+                $spreadsheet->createSheet();
+                $spreadsheet->getSheet($keys)->setTitle($title[$keys]);
+            }
+            $sheet = $spreadsheet->setActiveSheetIndex($keys);
+            foreach ($data as $k => $v) {
+                $sheet->setCellValue($k, $v);
+            }
+        }
+        $spreadsheet->setActiveSheetIndex(0);
+        if (ob_get_length()> 0) {
+            ob_end_clean();
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
+        $writer->save(dirname(dirname(dirname(__FILE__)))."/public/excel/".$path."/".$fileName.".xlsx");
     }
 }

@@ -31,21 +31,36 @@ class CronOverdue
     public static function detail()
     {
         //error_reporting(E_ALL ^ E_NOTICE);
+        //截止时间
+        $deadline = "";
         if(isset($_GET['begin']) && isset($_GET['end'])){
-            $beginDay = $_GET['begin'];
-            $endDay = $_GET['end'];
-            $where[] = ['create_time', '>=', strtotime($beginDay." 00:00:00"),];
-            $where[] = ['create_time', '<=', strtotime($endDay." 23:59:59"),];
+            $someday = strtotime($_GET['begin']." -30 day");
+            $overdueTime = strtotime($_GET['end']." -30 day");
+            $backBegin = strtotime($_GET['begin']);
+            $backEnd = strtotime($_GET['end']);
         }
         else{
-            //检测以前是否执行过，是用上次执行时间计算，否初始化全部
-            if(true){
-                $someday = strtotime(date("2018-11-30 -30 day"));
-                $where[] = ['order_goods.end_time', '>=', $someday,];
+            $deadline = "2018-08-24";
+            //检测以前是否执行过，是用上次执行时间计算，否从第一个租用中订单开始
+            $someday = strtotime(date("2018-08-24"));
+            $backBegin = $someday;
+            $lastDay = "2018-08-30";
+            if($lastDay){
+                $deadline = $lastDay;
+                $someday = strtotime($lastDay." -30 day");
+                $backBegin = strtotime($lastDay);
             }
+            $deadline.= "|".date("Y-m-d");
+
             $overdueTime = strtotime(date("Y-m-d")." -30 day");
-            $where[] = ['order_goods.end_time', '<=', $overdueTime];
+            $backEnd = time();
         }
+        //未还时间条件
+        $whereBack[] = ['order_goods.end_time', '>=', $backBegin,];
+        $whereBack[] = ['order_goods.end_time', '<=', $backEnd,];
+        //坏账时间条件
+        $where[] = ['order_goods.end_time', '>=', $someday,];
+        $where[] = ['order_goods.end_time', '<=', $overdueTime];
 
         //订单状态
         $where[] = ['order_info.order_status','=',Inc\OrderStatus::OrderInService,];
@@ -53,12 +68,24 @@ class CronOverdue
         //渠道条件设置所有小程序
         $channelId = [10,14,15,16];
         $limit = 500;
-
+        //未还订单数
+        $backCount = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
+            ->where($whereBack)
+            ->whereIn("order_info.channel_id",$channelId)->count();
+        $backGoodsYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
+            ->where($whereBack)
+            ->whereIn("order_info.channel_id",$channelId)->sum("order_info.goods_yajin");
+        $backOrderYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
+            ->where($whereBack)
+            ->whereIn("order_info.channel_id",$channelId)->sum("order_info.order_yajin");
+        $backMianyajin = $backGoodsYajin-$backOrderYajin;
+        //坏账订单数
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
         $data = [];
         $single = 0;
+        $mianyajinSum = 0;
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i*$limit;
@@ -76,6 +103,7 @@ class CronOverdue
             foreach($orderList as $item){
                 $channelName = self::$channel[$item['channel_id']];
                 $miniUserId = isset($miniUser[$item['order_no']]['user_id'])?$miniUser[$item['order_no']]['user_id']:"";
+                $goodsName = $item['goods_name'];
                 $mianyajin =  $item['goods_yajin']-$item['order_yajin'];
                 $beginTime = date("Y-m-d H:i:s",$item['begin_time']);
                 $endTime = date("Y-m-d H:i:s",$item['end_time']);
@@ -85,6 +113,7 @@ class CronOverdue
                 $data[] = [
                     $channelName,
                     $miniUserId,
+                    $goodsName,
                     $mianyajin,
                     $beginTime,
                     $endTime,
@@ -93,10 +122,35 @@ class CronOverdue
                     "FaceId",
                     $overdueDay,
                 ];
+
+                $mianyajinSum+=$mianyajin;
             }
         }
+        $num[] = [
+            $deadline,
+            $backCount+$count,
+            $mianyajinSum+$backMianyajin,
+            $backCount+$count,
+            $backCount,
+            $count,
+            $mianyajinSum
+        ];
+        //定义工作表名称
+        $title = [
+            "累计报表",
+            "坏账明细",
+        ];
         //定义excel头部参数名称
-        $headers = [
+        $headers[] = [
+            "截止日期",
+            '订单数',
+            '免押金额',
+            '用户数',
+            '到期未还订单数',
+            '坏账订单数',
+            '坏账订单免押金额',
+        ];
+        $headers[] = [
             "订单渠道",
             '用户支付宝账号',
             '商品名称',
@@ -108,8 +162,11 @@ class CronOverdue
             '人脸认证厂商',
             '逾期未归还天数',
         ];
-
-        Excel::localWrite($data,$headers,date("Y-m-d"),"overdue");
+        $body = [
+            $num,
+            $data
+        ];
+        Excel::xlsxExport($body,$headers,$title,date("Y-m-d"),"overdue");
         echo "订单总数:".$single."<br/><br/>";
         return;
     }
