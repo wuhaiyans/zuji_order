@@ -36,7 +36,7 @@ class NotaryTransaction extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['transaction_token','account_id','order_no','goods_no','customer','create_time'];
 
     /**
      * 获取当前时间
