@@ -352,11 +352,6 @@ class InstalmentController extends Controller
 
             $params  = $request->all()['params'];
 
-            $additional['page']    = isset($request['page']) ? $request['page'] : 1;
-            $additional['limit']   = isset($request['limit']) ? $request['limit'] : config("web.pre_page_size");
-
-
-
             if(isset($params['keywords'])){
                 if($params['kw_type'] == 1){
                     $params['order_no'] = $params['keywords'];
