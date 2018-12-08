@@ -82,90 +82,89 @@ class OrderCreater
 
         try{
 
-//            //订单创建构造器
-//            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
-//
-//            // 用户
-//            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
-//            $orderCreater->setUserComponnet($userComponnet);
-//
-//            // 商品
-//            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
-//            $orderCreater->setSkuComponnet($skuComponnet);
-//
-//            //风控
-//            $orderCreater = new RiskComponnet($orderCreater);
-//
-//            //活动
-//            $orderCreater = new ActivityComponnet($orderCreater,$data['destine_no']);
-//
-//            //优惠券
-//            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
-//
-//            //押金
-//           $orderCreater = new DepositComponnet($orderCreater);
-//
-//            //收货地址
-//            $orderCreater = new AddressComponnet($orderCreater);
-//
-//            //门店地址
-//            $orderCreater = new StoreAddressComponnet($orderCreater);
-//
-//            //渠道
-//            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
-//
-//            //分期
-//            $orderCreater = new InstalmentComponnet($orderCreater);
-//
-//            //支付
-//            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id']);
-//
-//
-//            //调用各个组件 过滤一些参数 和无法下单原因
-//            $b = $orderCreater->filter();
-//            if(!$b){
-//                DB::rollBack();
-//                //把无法下单的原因放入到用户表中
-//                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
-//                set_msg($orderCreater->getOrderCreater()->getError());
-//                return false;
-//            }
-//            $schemaData = $orderCreater->getDataSchema();
-//
-//            DB::beginTransaction();
-//            //调用各个组件 创建方法
-//            $b = $orderCreater->create();
-//            //创建成功组装数据返回结果
-//            if(!$b){
-//                DB::rollBack();
-//                set_msg($orderCreater->getOrderCreater()->getError());
-//                return false;
-//            }
-//
-//            DB::commit();
-//            //组合数据
-//            $result = [
-//                'pay_type'=>$data['pay_type'],
-//                'order_no'=>$orderNo,
-//                'pay_info'=>$schemaData['pay_info'],
-//                'app_id'=>$data['appid'],
-//
-//            ];
-//           // 创建订单后 发送支付短信。;
-//            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
-//            $orderNoticeObj->notify();
-//
-//            //发送订单消息队列
-//            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
-//            //发送订单风控信息保存队列
-//            $schedule->OrderRisk();
-//            //发送取消订单队列
-//            $schedule->CancelOrder();
-//            //发送订单押金信息返回风控系统
-//            $schedule->YajinReduce();
+            //订单创建构造器
+            $orderCreater = new OrderComponnet($orderNo,$data['user_id'],$data['appid'],$orderType);
+
+            // 用户
+            $userComponnet = new UserComponnet($orderCreater,$data['user_id'],$data['address_id']);
+            $orderCreater->setUserComponnet($userComponnet);
+
+            // 商品
+            $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
+            $orderCreater->setSkuComponnet($skuComponnet);
+
+            //风控
+            $orderCreater = new RiskComponnet($orderCreater);
+
+            //活动
+            $orderCreater = new ActivityComponnet($orderCreater,$data['destine_no']);
+
+            //优惠券
+            $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
+
+            //押金
+           $orderCreater = new DepositComponnet($orderCreater);
+
+            //收货地址
+            $orderCreater = new AddressComponnet($orderCreater);
+
+            //门店地址
+            $orderCreater = new StoreAddressComponnet($orderCreater);
+
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+
+            //分期
+            $orderCreater = new InstalmentComponnet($orderCreater);
+
+            //支付
+            $orderCreater = new OrderPayComponnet($orderCreater,$data['user_id']);
+
+
+            //调用各个组件 过滤一些参数 和无法下单原因
+            $b = $orderCreater->filter();
+            if(!$b){
+                DB::rollBack();
+                //把无法下单的原因放入到用户表中
+                User::setRemark($data['user_id'],$orderCreater->getOrderCreater()->getError());
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
+            $schemaData = $orderCreater->getDataSchema();
+
+            DB::beginTransaction();
+            //调用各个组件 创建方法
+            $b = $orderCreater->create();
+            //创建成功组装数据返回结果
+            if(!$b){
+                DB::rollBack();
+                set_msg($orderCreater->getOrderCreater()->getError());
+                return false;
+            }
+
+            DB::commit();
+            //组合数据
+            $result = [
+                'pay_type'=>$data['pay_type'],
+                'order_no'=>$orderNo,
+                'pay_info'=>$schemaData['pay_info'],
+                'app_id'=>$data['appid'],
+
+            ];
+           // 创建订单后 发送支付短信。;
+            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_CREATE);
+            $orderNoticeObj->notify();
+
+            //发送订单消息队列
+            $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
+            //发送订单风控信息保存队列
+            $schedule->OrderRisk();
+            //发送取消订单队列
+            $schedule->CancelOrder();
+            //发送订单押金信息返回风控系统
+            $schedule->YajinReduce();
             //推送到区块链
-            $b =OrderBlock::orderPushBlock("AC08142140936467",OrderBlock::OrderUnPay);
-            var_dump($b);die;
+            $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
             if($b){
                 LogApi::error("OrderCreate-addOrderBlock:".$orderNo."-".$b);
