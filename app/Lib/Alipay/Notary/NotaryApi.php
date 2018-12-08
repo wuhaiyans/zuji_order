@@ -324,7 +324,7 @@ class NotaryApi {
 			return false;
 		}
 
-		if( !array_key_exists('responseData',$result2)
+		if( !isset($result2['responseData'])
 				|| !isset($result2['success'])
 				|| !isset($result2['errMessage'])
 				|| !isset($result2['code']) ){
