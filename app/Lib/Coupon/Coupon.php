@@ -71,10 +71,11 @@ class Coupon extends \App\Lib\BaseApi{
      * ]
      * @return string or array
      */
-    public static function useCoupon($arr){
+    public static function useCoupon($arr,$appid){
         $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
         $data['method'] ='zuji.goods.coupon.status1.set';
         $data['params'] = [
+            'appid'=>$appid,
             'coupon_id'=>$arr,
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
@@ -101,11 +102,12 @@ class Coupon extends \App\Lib\BaseApi{
      * ]
      * @return string or array
      */
-    public static function setCoupon($arr){
+    public static function setCoupon($arr,$appid){
         $data = config('tripartite.Interior_Goods_Request_data');//请求参数信息（版本 ，appid ）
         $data['method'] ='zuji.goods.coupon.status0.set';
         $data['params'] = [
             'user_id'=>$arr['user_id'],
+            'appid'=>$appid,
             'coupon_id'=>$arr['coupon_id'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));

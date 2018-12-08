@@ -1173,7 +1173,7 @@ class OrderOperate
 
             if ($orderCouponData) {
                 $coupon_id = array_column($orderCouponData, 'coupon_id');
-                $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
+                $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id],$orderInfoData['appid']);
 
                 if ($success) {
                     LogApi::alert("CancelOrder:恢复优惠券失败",$orderCouponData,[config('web.order_warning_user')]);
