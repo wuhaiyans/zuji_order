@@ -447,10 +447,10 @@ class OrderReturnCreater
             $no_list['refund_no'] = $data['refund_no'];
             //操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
+            $return_info['refund_no'] = $data['refund_no'];
             if($data['status'] == ReturnStatus::ReturnAgreed){
                 //-+------------------------------------------------------------
                 // 如果待退款金额为0，则直接调退款成功的回调
-                $return_info['refund_no'] = $data['refund_no'];
                 if( !(
                     $data['pay_amount']>0
                     || $data['auth_unfreeze_amount']>0
