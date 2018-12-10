@@ -350,7 +350,7 @@ class OrderReturnCreater
             //已支付，直接退款
             if( $order_info['order_status'] == OrderStatus::OrderPayed ){
                 $return_info['refund_no'] = '';
-                $data['refund_no'] = $params['order_no'];
+                $return_info['refund_no'] = $params['order_no'];
 
                 if (!(
                     $data['pay_amount'] > 0
@@ -385,6 +385,7 @@ class OrderReturnCreater
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
                     DB::commit();
+
                     return true;
                 }
                 //事务回滚

@@ -59,12 +59,12 @@ class NotaryApi {
 	public static function notaryToken(string $accountId, EnterpriseIdentity $entity, CustomerIdentity $customer ): string{
 		$url = self::$url.'/api/notaryToken';
 		$timestamp = self::_getTimestamp();
-		$bizId = '2';
+		$bizId = '3'; //业务分类 3: 租赁； subBizId 留空 2018-12-07 邹雪晴（阿里巴巴）要求修改的
 		$params = [
 			'accountId' => $accountId,
 			'entity'	=> $entity->toArray(),
-			'bizId'		=> $bizId,		// 业务类型；2：合同
-			'subBizId'	=> 'LEASING',	// 子业务类型； LEASING：租赁合同
+			'bizId'		=> $bizId,		// 业务类型；
+			'subBizId'	=> 'LEASING',			// 子业务类型；
 			'customer'	=> [			// 您的客户身份标识
 				'userType'	=> $customer->getUserType(),
 				'certName'	=> $customer->getCertName(),
@@ -79,7 +79,6 @@ class NotaryApi {
 		];
 		$params = json_encode($params);
 		$response_str = \App\Lib\Curl::post($url, $params, self::$header);
-		
 		// 解析返回值
 		if( !self::_parseResult($response_str, $result)){
 			throw new NotaryException( $result );
@@ -89,7 +88,6 @@ class NotaryApi {
 		if( self::_verifyResult($result) ){
 			 return $result['responseData'];
 		}
-		
 		throw new NotaryException( $result );
 	}
 	
@@ -325,6 +323,7 @@ class NotaryApi {
 		if( empty( $result2 ) || !is_array($result2) ){
 			return false;
 		}
+
 		if( !isset($result2['responseData'])
 				|| !isset($result2['success'])
 				|| !isset($result2['errMessage'])

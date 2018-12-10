@@ -163,6 +163,40 @@ class PayQuery {
         if( $info ){
             return $info->toArray();
         }
-        throw new \App\Lib\NotFoundException('支付系统预授权不存在');
+        throw new \App\Lib\NotFoundException('预授权协议不存在');
+    }
+	
+    /**
+     * 根据订单编号，获取代扣协议信息
+     * @param string $orderNo
+     * @return array
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getWithholdInfoByWithholdNo( string $withholdNo ){
+        $info = \App\Order\Models\OrderPayWithholdModel::where([
+            'withhold_no'	=> $withholdNo,
+        ])->first();
+        if( $info ){
+            return $info->toArray();
+        }
+        throw new \App\Lib\NotFoundException('代扣协议不存在');
+    }
+	
+    /**
+     * 根据业务，获取代扣协议信息
+     * @param string $business_type
+     * @param string $business_no
+     * @return array
+     * @throws \App\Lib\NotFoundException
+     */
+    public static function getWithholdByBusiness( string $business_type, string $business_no ){
+        $info = \App\Order\Models\OrderPayWithholdBusinessModel::where([
+            'business_type'	=> $business_type,
+            'business_no'	=> $business_no,
+        ])->first();
+        if( $info ){
+            return $info->toArray();
+        }
+        throw new \App\Lib\NotFoundException('业务代扣协议不存在');
     }
 }

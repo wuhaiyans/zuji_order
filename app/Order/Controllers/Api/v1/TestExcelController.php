@@ -2,11 +2,13 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Excel;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\OrderExcel\CronCollection;
 use App\Order\Modules\OrderExcel\CronOperator;
+use App\Order\Modules\OrderExcel\CronOverdue;
 use App\Order\Modules\OrderExcel\CronRisk;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
 use Illuminate\Http\Request;
@@ -151,6 +153,15 @@ class TestExcelController extends Controller
     public function riskAll(){
         $obj = new CronRisk();
         $obj->everAll();
+        echo "success";
+    }
+
+    public function overdueDetail(){
+        LogApi::alert("test-email","错误数据",[
+            "limin@huishoubao.com.cn"
+        ]);die;
+        $obj = new CronOverdue();
+        $obj->detail();
         echo "success";
     }
 }
