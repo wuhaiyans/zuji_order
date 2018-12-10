@@ -468,7 +468,9 @@ class MiniOrderController extends Controller
             'remark_id'  => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params['params']);
+        $userInfo =$params['userinfo'];
         $param = $params['params'];
+
         //开启事务
         DB::beginTransaction();
         try {
@@ -497,7 +499,8 @@ class MiniOrderController extends Controller
                 return apiResponse(['reason' => \App\Lib\Payment\mini\MiniApi::getError()], ApiStatus::CODE_35005);
             }
             //取消订单修改订单状态
-            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($miniOrderInfo['order_no'], $orderInfo['user_id']);
+            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($miniOrderInfo['order_no'], $userInfo);
+
             if ($code != ApiStatus::CODE_0) {
                 //回滚事务
                 DB::rollBack();
