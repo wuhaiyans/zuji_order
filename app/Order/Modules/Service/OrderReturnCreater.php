@@ -370,7 +370,7 @@ class OrderReturnCreater
                 }
 
                 //创建清单
-                $create_clear = self::createClear($order_info, $data, $create_data);
+                $create_clear = self::createClear($order_info, $data, $create_data,$return_info);
                 if (!$create_clear) {
                     //事务回滚
                     DB::rollBack();
@@ -385,7 +385,6 @@ class OrderReturnCreater
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
                     DB::commit();
-
                     return true;
                 }
                 //事务回滚
@@ -470,7 +469,7 @@ class OrderReturnCreater
 
                 }
                //创建清算单
-                $create_clear = self::createClear($order_info,$data,$create_data);
+                $create_clear = self::createClear($order_info,$data,$create_data,$return_info);
                 if(!$create_clear){
                     //事务回滚
                     DB::rollBack();
@@ -2436,16 +2435,16 @@ class OrderReturnCreater
            if($return){
                $return_info = $return->getData();
                //获取订单信息
-               $order=\App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
-               if(!$order){
+               $order = \App\Order\Modules\Repository\Order\Order::getByNo($return_info['order_no']);
+               if( !$order ){
                    LogApi::debug("[refundUpdate]未找到订单记录");
                    return false;
                }
            }
-           if(!$return){
+           if( !$return ){
                //获取订单信息
-               $order=\App\Order\Modules\Repository\Order\Order::getByNo($params['business_no']);
-               if(!$order){
+               $order = \App\Order\Modules\Repository\Order\Order::getByNo($params['business_no']);
+               if( !$order ){
                    LogApi::debug("[refundUpdate]未找到订单记录");
                    return false;
                }
@@ -3658,8 +3657,29 @@ class OrderReturnCreater
 
     /**
      * 创建清算单
+     * $params  array $order_info
+     * [
+     * 'order_no' => '',//订单编号 string 【必传】
+     * 'pay_type' => '',//支付类型  int   【必传】
+     * ]
+     *$data
+     * [
+     *  'pay_amount'           => '',  //支付金额    decimal  【必传】
+     * 'auth_unfreeze_amount'  => '',  //预授权金额  decimal  【必传】
+     * 'auth_deduction_amount' => '',  //应扣押金     decimal 【必传】
+     * ]
+     * $createData
+     * [
+     * 'out_payment_no' => '', //支付编码     string  【可选】
+     * 'out_auth_no'    =>'',  //预授权编码   string  【可选】
+     * ]
+     * $return_info
+     * [
+     *  'refund_no'  =>'',//申请退款标识  （订单编号/退款编码）【必传】
+     * ]
+     *
      */
-    public static function createClear($order_info,$data,$createData){
+    public static function createClear($order_info,$data,$createData,$return_info){
         LogApi::info("[createClear]创建清单编码参数",$createData);
         $create_data = [];
         //创建清算单
@@ -3670,7 +3690,7 @@ class OrderReturnCreater
             $create_data['order_type'] = $order_info['order_type'];//订单类型
         }
         $create_data['business_type'] = OrderCleaningStatus::businessTypeRefund;//业务类型
-        $create_data['business_no'] = $data['refund_no'];//业务编号
+        $create_data['business_no'] = $return_info['refund_no'];//业务编号
         $create_data['refund_status'] = OrderCleaningStatus::refundUnpayed;//退款状态待退款
         $create_data['refund_amount'] = $data['pay_amount'];//应退金额
         $create_data['auth_unfreeze_amount'] = $data['auth_unfreeze_amount'];//应退押金
