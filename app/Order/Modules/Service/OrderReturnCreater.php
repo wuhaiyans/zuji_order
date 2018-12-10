@@ -3661,6 +3661,7 @@ class OrderReturnCreater
      */
     public static function createClear($order_info,$data,$createData){
         LogApi::info("[createClear]创建清单编码参数",$createData);
+        $create_data = [];
         //创建清算单
         $create_data['order_no'] = $order_info['order_no'];//订单类型
         if($order_info['pay_type'] == PayInc::LebaifenPay){
