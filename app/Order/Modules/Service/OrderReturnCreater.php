@@ -450,13 +450,12 @@ class OrderReturnCreater
             if($data['status'] == ReturnStatus::ReturnAgreed){
                 //-+------------------------------------------------------------
                 // 如果待退款金额为0，则直接调退款成功的回调
-
+                $return_info['refund_no'] = $data['refund_no'];
                 if( !(
                     $data['pay_amount']>0
                     || $data['auth_unfreeze_amount']>0
                     || $data['auth_deduction_amount']>0
                 ) ){
-                    $return_info['refund_no'] = $data['refund_no'];
                     $b = self::refundSuccessCallback($order_info,$userinfo,$return_info);
                     if( !$b ){
                         //事务回滚
