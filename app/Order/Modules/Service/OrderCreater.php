@@ -165,6 +165,7 @@ class OrderCreater
             $schedule->YajinReduce();
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
+            LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
             if($b){
                 LogApi::error("OrderCreate-addOrderBlock:".$orderNo."-".$b);
                 LogApi::alert("OrderCreate-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
@@ -277,6 +278,7 @@ class OrderCreater
             $schedule->YajinReduce();
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderUnPay);
+            LogApi::info("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
             if($b){
                 LogApi::error("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
             }

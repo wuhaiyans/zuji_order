@@ -12,6 +12,7 @@ use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Repository\ImeiRepository;
 use App\Warehouse\Modules\Service\ImeiService;
 use App\Lib\ApiStatus;
+use App\Warehouse\Modules\Service\WarehouseWarning;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
@@ -161,6 +162,7 @@ class ImeiController extends Controller
         try {
             $this->imei->import($params['imeis']);
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[导入imei]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 

@@ -182,6 +182,8 @@ class OrderRelet
                         'status'=>ReletStatus::STATUS1,
                     ];
 
+                    LogApi::info("[OrderRelet]创建续租信息", $data);
+
                     if(ReletRepository::createRelet($data)){
 //                        //修改设备状态 续租中
 //                        if( !$goodsObj->setGoodsStatusReletOn() ){

@@ -89,6 +89,8 @@ $api->version('v1', [
         $api->any('otherMonth', 'TestExcelController@otherMonth');
         $api->any('riskMonth', 'TestExcelController@riskMonth');
         $api->any('riskAll', 'TestExcelController@riskAll');
+        /*******************逾期数据导出--临时***************************/
+        $api->any('overdueDetail', 'TestExcelController@overdueDetail');
 
         //退款列表导出
         $api->any('refundListExport', 'ReturnController@refundListExport');
@@ -180,7 +182,7 @@ $api->version('v1', [
     'namespace' => 'App\ClientApi\Controllers',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
-    'middleware' => 'api'
+    'middleware' => 'api.throttle'
 ], function($api){
     $api->any('header', 'AuthRefferController@header');
 
