@@ -349,7 +349,6 @@ class OrderReturnCreater
             LogApi::debug("[createRefund]创建退款单参数",$data);
             //已支付，直接退款
             if( $order_info['order_status'] == OrderStatus::OrderPayed ){
-                $return_info['refund_no'] = '';
                 $return_info['refund_no'] = $params['order_no'];
 
                 if (!(
@@ -903,18 +902,18 @@ class OrderReturnCreater
                 }
 
                 //创建清单
-                $create_data['order_no']=$order_info['order_no'];//订单类型
+                $create_data['order_no'] = $order_info['order_no'];//订单类型
                 if($order_info['pay_type'] == PayInc::LebaifenPay){
-                    $create_data['order_type']= OrderStatus::miniRecover;//订单类型
+                    $create_data['order_type']        = OrderStatus::miniRecover;//订单类型
                 }else{
-                    $create_data['order_type']=$order_info['order_type'];//订单类型
+                    $create_data['order_type']         = $order_info['order_type'];//订单类型
                 }
-                $create_data['business_type']=OrderCleaningStatus::businessTypeRefund;//业务类型
-                $create_data['business_no']=$return_info['refund_no'];//业务编号
-                $create_data['refund_status']=OrderCleaningStatus::refundUnpayed;//退款状态待退款
-                $create_data['refund_amount']=$return_info['pay_amount'];//应退金额
-                $create_data['auth_unfreeze_amount']=$return_info['auth_unfreeze_amount'];//应退押金
-                $create_data['auth_deduction_amount']=$return_info['auth_deduction_amount'];//应扣押金
+                $create_data['business_type']          = OrderCleaningStatus::businessTypeRefund;//业务类型
+                $create_data['business_no']            = $return_info['refund_no'];//业务编号
+                $create_data['refund_status']          = OrderCleaningStatus::refundUnpayed;//退款状态待退款
+                $create_data['refund_amount']          = $return_info['pay_amount'];//应退金额
+                $create_data['auth_unfreeze_amount']  = $return_info['auth_unfreeze_amount'];//应退押金
+                $create_data['auth_deduction_amount'] = $return_info['auth_deduction_amount'];//应扣押金
                 //退款：直接支付
               /*  if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
                     $create_data['refund_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
@@ -3065,6 +3064,14 @@ class OrderReturnCreater
                  //应退金额=实付租金+意外险+实付押金
                  $data['refund_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
              }
+             //花呗预授权
+             if($order_info['pay_type'] == PayInc::FlowerFundauth){
+                 if($payInfo){
+                     //预授权金额=实付租金+意外险+实付押金
+                     $data['auth_unfreeze_amount'] = $order_info['order_amount']+$order_info['order_insurance']+$order_info['order_yajin'];
+                 }
+
+             }
              //冻结订单
              $orderFreeze = $order->refundOpen();
              if( !$orderFreeze ){
@@ -3239,7 +3246,7 @@ class OrderReturnCreater
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
                 $result['refund_amount'] = $result['pay_amount'];
             }
-            //花呗分期+预授权
+            //不是乐百分、小程序、微信支付
             if($order_info['pay_type'] != PayInc::LebaifenPay && $order_info['pay_type'] != PayInc::MiniAlipay && $order_info['pay_type'] != PayInc::WeChatPay  ){
                 if($payInfo){
                     if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
@@ -3262,6 +3269,7 @@ class OrderReturnCreater
                 }
 
             }
+            //小程序
             if($order_info['pay_type'] == PayInc::MiniAlipay){
                 LogApi::debug("【advanceReturn】此订单是小程序订单");
                 if( $goods_info['yajin'] >= $params['compensate_amount']){
@@ -3282,6 +3290,15 @@ class OrderReturnCreater
                 //赔偿金大于押金和租金的总和则退款金额为0
                 if($goods_info['amount_after_discount']+$goods_info['yajin']<$params['compensate_amount']){
                     $result['auth_deduction_amount'] =  $goods_info['amount_after_discount']+$goods_info['yajin'];//应扣押金金额
+                }else{
+                    $result['auth_deduction_amount'] = $params['compensate_amount'];
+                }
+            }
+            //花呗预授权
+            if($order_info['pay_type'] == PayInc::FlowerFundauth){
+                $result['auth_unfreeze_amount'] = $goods_info['yajin'] + $goods_info['amount_after_discount'];//应退押金
+                if( $goods_info['yajin'] + $goods_info['amount_after_discount'] < $params['compensate_amount']){
+                    $result['auth_deduction_amount'] = $goods_info['yajin'] + $goods_info['amount_after_discount'];//应退押金
                 }else{
                     $result['auth_deduction_amount'] = $params['compensate_amount'];
                 }
