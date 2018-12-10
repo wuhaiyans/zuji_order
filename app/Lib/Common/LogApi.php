@@ -129,7 +129,12 @@ class LogApi {
 	 */
 	public static function alert( string $msg, $data=[], array $mail_list )
 	{
-		return self::log('Alert', $msg, $data, $mail_list);
+        if (config('app.env')   == 'production') {
+            return self::log('Alert', $msg, $data, $mail_list);
+        } else {
+            return self::log('Error', $msg, $data);
+        }
+
 	}
 	
 	/**
