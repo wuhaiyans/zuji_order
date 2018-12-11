@@ -887,6 +887,7 @@ class OrderRepository
     {
         $whereArray = array();
         $orWhereArray = array();
+        $isUncontact = 0;
 //        $visitWhere = array();
         //根据用户id
         if (isset($param['user_id']) && !empty($param['user_id'])) {
@@ -957,6 +958,12 @@ class OrderRepository
         }
 
         if (isset($param['visit_id'])) {
+            if (empty($param['visit_id'])) {
+                $isUncontact = 1;
+            } else {
+
+                $whereArray[] = ['v.visit_id', '=', $param['visit_id']];
+            }
             $whereArray[] = ['v.visit_id', '=', $param['visit_id']];
         }
 
@@ -983,6 +990,12 @@ class OrderRepository
             ->join('order_user_certified as c',function($join){
                 $join->on('o.order_no', '=', 'c.order_no');
             }, null,null,'left')
+            ->when(!empty($isUncontact),function($join) {
+                return $join-> whereNull('v.visit_id');
+            })
+            ->when(!empty($isUncontact),function($join) {
+                return $join->orWhere('v.visit_id','=',0);
+            })
             ->where($whereArray)
             ->where($orWhereArray)
             ->orderBy('o.create_time', 'DESC')
