@@ -118,11 +118,11 @@ class ReturnController extends Controller
         ]);
         $return = $this->OrderReturnCreater->createRefund($params,$orders['userinfo']);
         if(!$return){
-            /*\App\Lib\Common\LogApi::alert('return-create:exception-error', [
+            \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'申请退款失败',//错误信息提示
                 'data'=>['$ex'=>$return],//错误返回数据
-            ],self::$email);*/
+            ],self::$email);
             return apiResponse([],ApiStatus::CODE_34005,"取消订单失败");
         }
         return apiResponse($return,ApiStatus::CODE_0);
