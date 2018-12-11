@@ -598,7 +598,11 @@ class MiniOrderController extends Controller
                 continue;
             }
             //取消订单修改订单状态
-            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($val['order_no'],$val['user_id']);
+            $userinfo =[
+                'uid'=>$val['user_id'],
+                'username'=>'系統',
+            ];
+            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($val['order_no'],$userinfo);
             if( $code != ApiStatus::CODE_0){
                 \App\Lib\Common\LogApi::debug('小程序定时取消商户端订单失败',$val['order_no']);
                 continue;
