@@ -3299,8 +3299,10 @@ class OrderReturnCreater
                 $result['auth_unfreeze_amount'] = $goods_info['yajin'] + $goods_info['amount_after_discount'];//应退押金
                 if( $goods_info['yajin'] + $goods_info['amount_after_discount'] < $params['compensate_amount']){
                     $result['auth_deduction_amount'] = $goods_info['yajin'] + $goods_info['amount_after_discount'];//应退押金
+                    $result['auth_unfreeze_amount'] = 0.00 ;//应退押金
                 }else{
                     $result['auth_deduction_amount'] = $params['compensate_amount'];
+                    $result['auth_unfreeze_amount'] = $goods_info['yajin'] + $goods_info['amount_after_discount'] - $params['compensate_amount'] ;//应退押金
                 }
             }
             // 创建退换货单参数
