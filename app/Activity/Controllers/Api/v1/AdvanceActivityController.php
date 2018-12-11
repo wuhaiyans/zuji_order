@@ -155,6 +155,7 @@ class AdvanceActivityController extends Controller
         $count = ActiveInviteRepository::getCount(['uid'=>$userInfo['uid'],'activity_id'=>1]);
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($userInfo['uid'],1);
+        $activityInfo['app_id'] = 139;
         if($activityInfo){
             $activityInfo['zuqi_day'] = $count;
             $activityInfo['zuqi'] -= $count;
