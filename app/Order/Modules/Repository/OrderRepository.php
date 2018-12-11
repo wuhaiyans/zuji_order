@@ -785,10 +785,12 @@ class OrderRepository
                     return $join->where($whereArray);
                 })
                 ->when(!empty($isUncontact),function($join) {
-                    return $join-> whereNull('order_info_visit.visit_id');
-                })
-                ->when(!empty($isUncontact),function($join) {
-                    return $join->orWhere('order_info_visit.visit_id','=',0);
+                    return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
+                        $join-> whereNull('order_info_visit.visit_id')
+                            ->orWhere([
+                                ['order_info_visit.visit_id', '0']
+                            ]);
+                    });
                 })
                 ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
                     return $join->where($orWhereArray);
@@ -816,10 +818,12 @@ class OrderRepository
                     return $join->where($whereArray);
                 })
                 ->when(!empty($isUncontact),function($join) {
-                    return $join-> whereNull('order_info_visit.visit_id');
-                })
-                ->when(!empty($isUncontact),function($join) {
-                    return $join->orWhere('order_info_visit.visit_id','=',0);
+                    return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
+                        $join-> whereNull('order_info_visit.visit_id')
+                            ->orWhere([
+                                ['order_info_visit.visit_id', '0']
+                            ]);
+                    });
                 })
                 ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
                     return $join->where($orWhereArray);
@@ -964,7 +968,6 @@ class OrderRepository
 
                 $whereArray[] = ['v.visit_id', '=', $param['visit_id']];
             }
-            $whereArray[] = ['v.visit_id', '=', $param['visit_id']];
         }
 
 
@@ -974,7 +977,6 @@ class OrderRepository
 
             $page = 1;
         }
-
         $orderArrays = array();
         $orderList =  DB::connection("mysql_read")->table('order_info as o')
             ->select('o.order_no','o.order_amount','o.order_amount','o.goods_yajin','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching','c.cret_no')
@@ -990,17 +992,20 @@ class OrderRepository
             ->join('order_user_certified as c',function($join){
                 $join->on('o.order_no', '=', 'c.order_no');
             }, null,null,'left')
-            ->when(!empty($isUncontact),function($join) {
-                return $join-> whereNull('v.visit_id');
-            })
-            ->when(!empty($isUncontact),function($join) {
-                return $join->orWhere('v.visit_id','=',0);
-            })
             ->where($whereArray)
             ->where($orWhereArray)
+            ->when(!empty($isUncontact),function($join) {
+                return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
+                    $join-> whereNull('v.visit_id')
+                        ->orWhere([
+                            ['v.visit_id', '0']
+                        ]);
+                });
+            })
             ->orderBy('o.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
+
         $orderArrays = array_column(objectToArray($orderList),NULL,'order_no');
 
         return $orderArrays;
