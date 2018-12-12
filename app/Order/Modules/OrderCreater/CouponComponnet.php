@@ -154,11 +154,11 @@ class CouponComponnet implements OrderCreater
             }
 
         }
-
+        $appid =$this->getOrderCreater()->getAppid();
         /**
          * 调用优惠券使用接口
          */
-        $coupon = Coupon::useCoupon($coupon);
+        $coupon = Coupon::useCoupon($coupon,$appid);
         if($coupon !=ApiStatus::CODE_0){
             LogApi::alert("OrderCreate:调用优惠券使用接口失败",$coupon,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-useCoupon-interface-error",$coupon);

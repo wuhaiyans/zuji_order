@@ -163,6 +163,13 @@ class OrderCreater
             $schedule->CancelOrder();
             //发送订单押金信息返回风控系统
             $schedule->YajinReduce();
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
+            LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
+            if($b){
+                LogApi::error("OrderCreate-addOrderBlock:".$orderNo."-".$b);
+                LogApi::alert("OrderCreate-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
+            }
 
 
 //            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
@@ -269,6 +276,12 @@ class OrderCreater
             $schedule->miniCancelOrder();
             //发送订单押金信息返回风控系统
             $schedule->YajinReduce();
+            //推送到区块链
+            $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderUnPay);
+            LogApi::info("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
+            if($b){
+                LogApi::error("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
+            }
 
 
 //            //发送订单风控信息保存队列
@@ -321,9 +334,15 @@ class OrderCreater
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
             
             //代扣+预授权 ，小程序发的分期信息
-            if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay) {
-                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额
-                $schemaData['sku'][$key]['first_amount'] = normalizeNum($value['instalment'][0]['amount']); //首期支付金额
+            if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay || $payType == PayInc::FlowerFundauth) {
+                if ($schemaData['order']['zuqi_type'] == 1) {
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum($value['instalment'][0]['amount']); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum($value['instalment'][0]['amount']); //首期支付金额
+                }else{
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum($value['instalment'][1]['amount']); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum($value['instalment'][0]['amount']); //首期支付金额
+                }
+
 
 
             } //乐百分支付的分期信息

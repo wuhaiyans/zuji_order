@@ -617,9 +617,9 @@ class OrderGiveback
             $whereArray[] = ['order_giveback.payment_status', '=', $where['payment_status']];
         }
 
-        //应用来源ID
-        if (isset($where['order_appid']) && !empty($where['order_appid'])) {
-            $whereArray[] = ['order_info.appid', '=', $where['order_appid']];
+        //应用来源ID(前端的渠道id用appid传入后端)
+        if (isset($where['appid']) && !empty($where['appid'])) {
+            $whereArray[] = ['order_info.channel_id', '=', $where['appid']];
         }
         //还机单创建开始时间
         if ( isset($where['begin_time']) && !empty($where['begin_time']) ) {

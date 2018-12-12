@@ -11,6 +11,7 @@ use App\Warehouse\Modules\Service\DeliveryCreater;
 use App\Warehouse\Modules\Service\DeliveryService;
 use App\Warehouse\Modules\Service\ReceiveGoodsService;
 use App\Warehouse\Modules\Service\ReceiveService;
+use App\Warehouse\Modules\Service\WarehouseWarning;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Warehouse\Config;
@@ -75,6 +76,7 @@ class DeliveryController extends Controller
             $this->DeliveryCreate->confirmation($params);
         } catch (\Exception $e) {
 			\App\Lib\Common\LogApi::type('error')::error('[发货申请]失败', $e);
+            WarehouseWarning::warningWarehouse('[发货申请]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 		\App\Lib\Common\LogApi::debug('[发货申请]成功');
@@ -129,6 +131,7 @@ class DeliveryController extends Controller
         try {
             $this->delivery->match($params['delivery_no']);
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[配货完成]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -154,6 +157,7 @@ class DeliveryController extends Controller
         try {
             $this->delivery->cancel($params['order_no']);
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[取消发货,订单系统过来的请求]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -183,6 +187,7 @@ class DeliveryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[取消发货后,退货退款审核未通过,继续发货]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -206,6 +211,7 @@ class DeliveryController extends Controller
         try {
             $this->delivery->cancelDelivery($params['delivery_no']);
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[客服取消发货]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -238,6 +244,7 @@ class DeliveryController extends Controller
             //\App\Lib\Warehouse\Delivery::receive($deliveryInfo['order_no'], ['receive_type'=>$params['receive_type'],'user_id'=>$params['user_id'],'user_name'=>$params['user_name']]);
 
         } catch (\Exception $e) {
+            WarehouseWarning::warningWarehouse('[签收-发货]失败',[$params,$e]);
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
 
@@ -342,12 +349,13 @@ class DeliveryController extends Controller
 
             }else{
                 DB::rollBack();
-                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
             }
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            WarehouseWarning::warningWarehouse('[发货]失败',[$params,$e]);
             return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
         }
 

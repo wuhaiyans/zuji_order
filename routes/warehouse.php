@@ -16,7 +16,7 @@ $api->version('v1', [
     'namespace' => 'App\Warehouse\Controllers\Api\v1',
     'limit' => config('api.rate_limits.access.limit'),
     'expires' => config('api.rate_limits.access.expires'),
-    'middleware' => 'api'
+    'middleware' => 'api.throttle'
 ], function($api) {
 
     $apiMap = config('apimapwarehouse');
@@ -26,21 +26,6 @@ $api->version('v1', [
 		$api->post('/',  $apiMap[$method]);
 	}
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //
 //

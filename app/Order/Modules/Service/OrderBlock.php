@@ -13,14 +13,14 @@ class OrderBlock {
 
     /**
      *  区块链节点
-     *  OrderBlockNode:下单，支付，风控审核，发货，确认收货，扣款（主动还款）
+     *  OrderBlockNode:下单，支付，确认订单，发货，确认收货，扣款（主动还款）
      *
      */
     //下单
     const OrderUnPay = 'order_unpay';
     //支付
     const OrderPayed = 'order_payed';
-    //风控审核
+    //确认订单
     const OrderConfirmed = 'order_confirmed';
     //发货
     const OrderShipped = 'order_shipped';
@@ -33,10 +33,12 @@ class OrderBlock {
     /**
      * 创建
      * @param type $order_no
+     * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
 
+        return 0;
         // 订单编号
         $data = [];
 
@@ -89,7 +91,7 @@ class OrderBlock {
         // 支付信息
         $pay_info = self::_getPayInfo( $order_no, $order_info['order_type'] );
         if( !$pay_info ){
-            return 4;
+            $pay_info = [];
         }
         $data['pay_info'] = $pay_info;
         // 兼容 历史数据没有支付时间
@@ -179,9 +181,9 @@ class OrderBlock {
                 $contract_content = file_get_contents( $contract_file );
             }else{
                 $contract_content = file_get_contents( $contract_info->download_url );
-                if( $contract_content ){
-                    file_put_contents($contract_file, $contract_content);
-                }
+//                if( $contract_content ){
+//                    file_put_contents($contract_file, $contract_content);
+//                }
             }
             // 合同内容哈希
             $hash = hash('sha256', $contract_content);
@@ -203,7 +205,7 @@ class OrderBlock {
         $accountId = 'DCODMVCN';
 
         $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
-
+        try{
         // 开启存证事务
         if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
             // 用户实名身份信息
@@ -217,17 +219,13 @@ class OrderBlock {
             }
         }
 
-
-        try{
-
             // 创建 文本存证
             $notary = $notaryApp->createTextNotary( $notary_content, $orderBlockNode );
 //			var_dump( $notary );
 //			// 上传 文本存证
 //			$b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
-
-            if( $data['contract_info']['hash'] ){
+            if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );

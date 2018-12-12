@@ -8,10 +8,12 @@
 
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Common\LogApi;
 use App\Lib\ApiStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Service\OrderRelet;
 use Illuminate\Http\Request;
+use App\Lib\Excel;
 
 class ReletController extends Controller
 {
@@ -213,6 +215,75 @@ class ReletController extends Controller
         }
 
     }
+
+    /**
+     * 续租列表导出
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function listReletExport(Request $request){
+        set_time_limit(0);
+        try {
+            $params = $request->all();
+
+            header ( "Content-type:application/vnd.ms-excel" );
+            header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", "后台续租列表数据导出" ) . ".csv" );
+
+            // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+            $fp = fopen('php://output', 'a');
+
+            // 租期，成色，颜色，容量，网络制式
+            $headers = ['订单编号','下单时间','交易流水号', '支付方式及通道','用户名','手机号','设备名称','订单金额','租期','续租设备','应支付金额','续租时长','状态'];
+
+            // 将中文标题转换编码，否则乱码
+            foreach ($headers as $k => $v) {
+                $column_name[$k] = iconv('utf-8', 'GB18030', $v);
+            }
+
+            // 将标题名称通过fputcsv写到文件句柄
+            fputcsv($fp, $column_name);
+
+            $params['pagesize'] = 10000;
+
+            $list = $this->relet->getList($params);
+            $list = $list['data'];
+            $data = [];
+
+            foreach($list as &$item){
+                $reletType =  \App\Order\Modules\Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
+
+                $data[] = [
+                    $item['order_no'],          // 订单编号
+                    $item['create_time'],       // 下单时间
+                    $item['trade_no'],          // 交易流水号
+                    $item['pay_type'],          // 支付方式及通道
+                    $item['user_name'],         // 用户名
+                    $item['user_name'],         // 手机号
+                    $item['goods_id'],          // 设备名称
+                    $item['relet_amount'],      // 订单金额
+                    $item['zuqi'],              // 租期
+                    $item['goods_id'],          // 续租设备
+                    $item['relet_amount'],      // 应支付金额
+                    $item['zuqi'] . $reletType, // 续租时长
+                    $item['status']             // 状态
+                ];
+            }
+
+            $Excel =  Excel::csvOrderListWrite($data, $fp);
+
+
+            return $Excel;
+
+        } catch (\Exception $e) {
+
+            return apiResponse([],ApiStatus::CODE_50000,$e);
+
+        }
+
+    }
+
 
     /**
      * 推送到催收列表

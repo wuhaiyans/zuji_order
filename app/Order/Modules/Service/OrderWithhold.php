@@ -6,6 +6,10 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\OrderInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use Illuminate\Support\Facades\Log;
+use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\Pay\PayQuery;
+use App\Lib\Payment\CommonFundAuthApi;
 use App\Order\Modules\Service\OrderBlock;
 
 class OrderWithhold
@@ -62,51 +66,93 @@ class OrderWithhold
             return false;
         }
 
+        $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
         //判断支付方式
-        if( $orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::MiniAlipay ){
+        if( $orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::MiniAlipay ) {
             //获取订单的芝麻订单编号
-            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo( $instalmentInfo['order_no'] );
-            if( empty($miniOrderInfo) ){
-                LogApi::info('[giveBackWihthold]本地小程序确认订单回调记录查询失败',$orderInfo['order_no']);
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($instalmentInfo['order_no']);
+            if (empty($miniOrderInfo)) {
+                LogApi::info('[giveBackWihthold]本地小程序确认订单回调记录查询失败', $orderInfo['order_no']);
                 return false;
             }
             //芝麻小程序扣款请求
-            $miniParams['out_order_no']     = $miniOrderInfo['order_no'];
-            $miniParams['zm_order_no']      = $miniOrderInfo['zm_order_no'];
+            $miniParams['out_order_no'] = $miniOrderInfo['order_no'];
+            $miniParams['zm_order_no'] = $miniOrderInfo['zm_order_no'];
             //扣款交易号
-            $miniParams['out_trans_no']     = $business_no;
-            $miniParams['pay_amount']       = $instalmentInfo['amount'];
-            $miniParams['remark']           = $subject;
-            $miniParams['app_id']           = $miniOrderInfo['app_id'];
+            $miniParams['out_trans_no'] = $business_no;
+            $miniParams['pay_amount'] = $instalmentInfo['amount'];
+            $miniParams['remark'] = $subject;
+            $miniParams['app_id'] = $miniOrderInfo['app_id'];
             // 保存 备注，更新状态 修改分期状态为扣款中
             $data = [
-                'remark'        => $subject,
-                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+                'remark' => $subject,
+                'status' => OrderInstalmentStatus::PAYING,// 扣款中
             ];
-            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
-            if(!$result){
+            $result = OrderGoodsInstalment::save(['id' => $instalmentId], $data);
+            if (!$result) {
                 LogApi::error("[giveBackWihthold]扣款备注保存失败");
                 return false;
             }
-            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold( $miniParams );
+            $pay_status = \App\Lib\Payment\mini\MiniApi::withhold($miniParams);
             //判断请求发送是否成功
-            if($pay_status == 'PAY_SUCCESS'){
+            if ($pay_status == 'PAY_SUCCESS') {
                 // 提交事务
                 return true;
-            }elseif($pay_status =='PAY_FAILED'){
+            } elseif ($pay_status == 'PAY_FAILED') {
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 // 提交事务
                 Log::error("[giveBackWihthold]小程序扣款请求失败（用户余额不足）");
                 return false;
-            }elseif($pay_status == 'PAY_INPROGRESS'){
+            } elseif ($pay_status == 'PAY_INPROGRESS') {
                 // 提交事务
                 Log::error("[giveBackWihthold]小程序扣款处理中请等待");
                 return false;
-            }else{
+            } else {
                 // 事物回滚
                 Log::error("[giveBackWihthold]小程序扣款处理失败（内部失败）");
                 return false;
             }
+
+        }else if( $orderInfo['pay_type'] == PayInc::FlowerFundauth ){
+                // 花呗支付方式 扣除押金 - 扣除预授权 金额
+                if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
+                    return false;
+                }
+
+                try{
+                    /**
+                     * 查询用户下单时 预授权信息 获取支付系统授权码
+                     */
+                    $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $instalmentInfo['order_no']);
+                    $fundauthNo = $orderAuthInfo->getFundauthNo();
+
+                    $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
+                    $unfreezeAndPayData = [
+                        'name'			=> $subject,                //交易名称
+                        'out_trade_no'	=> $business_no,            //业务系统授权码
+                        'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
+                        'amount'		=> $amount,                 //交易金额；单位：分
+                        'back_url'		=> $backUrl,                //后台通知地址
+                        'user_id'		=> $orderInfo['user_id'],   //用户id
+                        'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
+                    ];
+                    LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unfreezeAndPayData);
+
+                    $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
+
+                    LogApi::info('[fundauth_createpay]花呗分期代扣押金，返回的结果：',$succss);
+
+                }catch(\App\Lib\ApiException $exc){
+
+                    LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
+                    OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
+
+                    return false;
+                }
+
         }else {
             // 保存 备注，更新状态
             $data = [
@@ -134,7 +180,7 @@ class OrderWithhold
             // 代扣接口
             $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
-            $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
+
 
             $withholding_data = [
                 'agreement_no'  => $agreementNo,            //支付平台代扣协议号
