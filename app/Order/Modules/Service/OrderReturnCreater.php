@@ -364,6 +364,19 @@ class OrderReturnCreater
                         return false;
                     }
                     DB::commit();
+                    if( $userinfo['type'] == PublicInc::Type_Admin){
+                        //根据订单风控审核状态 申请发送短信
+                        if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                            //风控不通过取消订单
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                            $orderNoticeObj->notify();
+                        }else{
+                            //其他默认通过
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                            $orderNoticeObj->notify();
+                        }
+
+                    }
                     return true;
 
                 }
@@ -384,6 +397,19 @@ class OrderReturnCreater
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
                     DB::commit();
+                    if( $userinfo['type'] == PublicInc::Type_Admin){
+                        //根据订单风控审核状态 申请发送短信
+                        if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
+                            //风控不通过取消订单
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
+                            $orderNoticeObj->notify();
+                        }else{
+                            //其他默认通过
+                            $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
+                            $orderNoticeObj->notify();
+                        }
+
+                    }
                     return true;
                 }
                 //事务回滚
@@ -486,20 +512,6 @@ class OrderReturnCreater
             }
             //事务提交
             DB::commit();
-           if( $userinfo['type'] == PublicInc::Type_Admin){
-               //根据订单风控审核状态 申请发送短信
-               if($order_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
-                   //风控不通过取消订单
-                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_REFUSE);
-                   $orderNoticeObj->notify();
-               }else{
-                   //其他默认通过
-                   $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$params['order_no'],SceneConfig::REFUND_APPLY_RISK_ACCEPT);
-                   $orderNoticeObj->notify();
-               }
-
-           }
-
 
             return $no_list;
 
@@ -3240,7 +3252,7 @@ class OrderReturnCreater
             $result['refund_amount'] = 0.00;
             $result['auth_unfreeze_amount'] = 0.00;
             $result['auth_deduction_amount'] = 0.00;
-                LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
+            LogApi::debug("【advanceReturn】获取订单支付类型".$order_info['pay_type']);
             if($order_info['pay_type'] == PayInc::LebaifenPay ){
                 //应退退款金额：商品实际支付优惠后总租金+商品实际支付押金+意外险
                 $result['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['yajin']+$goods_info['insurance'];
@@ -3316,20 +3328,20 @@ class OrderReturnCreater
                 'user_id'       => $order_info['user_id'],
                 'status'        => ReturnStatus::ReturnAgreed,
                 'refund_no'     => create_return_no(),
-                'pay_amount'    =>$result['pay_amount'] ,            //实付金额
-                'auth_unfreeze_amount'  =>$result['auth_unfreeze_amount'],   //应退押金
+                'pay_amount'    => $result['pay_amount'] ,            //实付金额
+                'auth_unfreeze_amount'  => $result['auth_unfreeze_amount'],   //应退押金
                 'auth_deduction_amount' =>  $result['auth_deduction_amount'],  //应扣押金
                 'refund_amount'  => $result['refund_amount'] ,           //应退金额
-                'evaluation_status' =>ReturnStatus::ReturnEvaluationSuccess,
-                'evaluation_remark' =>'中途退机，与客户协商的异常订单',
+                'evaluation_status' => ReturnStatus::ReturnEvaluationSuccess,
+                'evaluation_remark' => '中途退机，与客户协商的异常订单',
                 'remark'              => '异常订单',
-                'check_time' =>time(),
+                'check_time' => time(),
                 'create_time'   => time(),
             ];
             LogApi::debug("【advanceReturn】创建退货单参数",$data);
-            //创建退换货单
+            //创建退换货单b
             $create = OrderReturnRepository::createReturn($data);
-            if(!$create){
+            if( !$create ){
                 LogApi::debug("【advanceReturn】创建退换货单失败");
                 //事务回滚
                 DB::rollBack();
@@ -3396,14 +3408,14 @@ class OrderReturnCreater
             }
 
             //创建清单参数
-            $create_data['order_no']=$params['order_no']; //订单类型
+            $create_data['order_no'] = $params['order_no']; //订单类型
             if($order_info['pay_type'] == PayInc::LebaifenPay){
                 $create_data['order_type'] = OrderStatus::miniRecover;//订单类型
             }else{
                 $create_data['order_type'] = $order_info['order_type'];//订单类型
             }
             $create_data['business_type'] = OrderStatus::BUSINESS_RETURN;//业务类型
-            $create_data['business_no'] = $data['refund_no'];//业务编号
+            $create_data['business_no']   = $data['refund_no'];//业务编号
             if($payInfo){
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $create_data['out_payment_no'] = $payInfo['payment_no'];//支付编号
@@ -3413,9 +3425,9 @@ class OrderReturnCreater
                 }
             }
 
-            $create_data['auth_unfreeze_amount']=isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
-            $create_data['auth_deduction_amount']=isset($params['compensate_amount'])?$params['compensate_amount']:0.00;//应扣押金金额
-            $create_data['refund_amount']= $result['refund_amount'];//退款金额
+            $create_data['auth_unfreeze_amount']  = isset($result['auth_unfreeze_amount'])?$result['auth_unfreeze_amount']:0.00;//预授权解冻金额
+            $create_data['auth_deduction_amount'] = isset($params['compensate_amount'])?$params['compensate_amount']:0.00;//应扣押金金额
+            $create_data['refund_amount'] = $result['refund_amount'];//退款金额
 
 
             LogApi::debug("【advanceReturn】创建清单参数",$create_data);
