@@ -1045,7 +1045,7 @@ class OrderOperate
      * 取消订单
      * Author: heaven
      * @param $orderNo 订单编号
-     * @param string $userId 用户id
+     * @param string $userInfo 数组
      * @return bool|string
      */
     public static function cancelOrder($orderNo,$userInfo='',$reasonId = '', $resonText='')
