@@ -1003,7 +1003,7 @@ class OrderOperate
         $jianmian = ($orderInfo['goods_yajin']-$orderInfo['order_yajin'])*100;
         //请求押金接口
         try{
-            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
+            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo,'appid'=>$orderInfo['appid']]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderYajinReduce] Yajin-interface-error-".$orderNo.":".$e->getMessage());
             return  ApiStatus::CODE_31006;
