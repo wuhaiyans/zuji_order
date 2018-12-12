@@ -1003,7 +1003,7 @@ class OrderOperate
         $jianmian = ($orderInfo['goods_yajin']-$orderInfo['order_yajin'])*100;
         //请求押金接口
         try{
-            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
+            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo,'appid'=>$orderInfo['appid']]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderYajinReduce] Yajin-interface-error-".$orderNo.":".$e->getMessage());
             return  ApiStatus::CODE_31006;
@@ -1045,7 +1045,7 @@ class OrderOperate
      * 取消订单
      * Author: heaven
      * @param $orderNo 订单编号
-     * @param string $userId 用户id
+     * @param string $userInfo 数组
      * @return bool|string
      */
     public static function cancelOrder($orderNo,$userInfo='',$reasonId = '', $resonText='')

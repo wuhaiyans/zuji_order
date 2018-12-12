@@ -40,6 +40,7 @@ class Yajin extends \App\Lib\BaseApi {
      *      'user_id'		=> '',	// 【必选】用户ID
      *      'order_no'      =>'',   // 【必选】订单编号
      *      'jianmian'      =>'',   // 【必选】押金减免值 单位：分
+     *      'appid'      =>'',      // 【必选】渠道APPID
      * ]
      * @return array
      */

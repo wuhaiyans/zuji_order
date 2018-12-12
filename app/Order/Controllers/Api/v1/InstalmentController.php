@@ -154,7 +154,7 @@ class InstalmentController extends Controller
 
             // 是否允许扣款
             $item['allow_pay']  = 0;
-            if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService){
+            if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['pay_type'] != \App\Order\Modules\Inc\PayInc::FlowerFundauth){
                 if($item['status'] == OrderInstalmentStatus::UNPAID || $item['status'] == OrderInstalmentStatus::FAIL ){
                     if($allow == 0){
                         $item['allow_pay']  = 1;
