@@ -216,7 +216,6 @@ class LogApi {
 			// 请求失败
 			if( Curl::getErrno() !=0 ){
 				$err_flag = true;
-				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
 				$__data['message'] = '日志Api请求Curl错误';
 				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
 				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
@@ -245,15 +244,14 @@ class LogApi {
 			}
 			// 请求错误
 			if( $err_flag ){
-				dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
 				$__data['data']['id'] = 'LogApi';
 				$__data['data']['type'] = 'api-error';
 				$__data['data']['level'] = 'Error';
 				$__data['data']['serial_no'] = self::_autoincrement();
-				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
+				//\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
 			}
 		} catch (\Exception $exc) {
-			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
+			
 		}
 
 		
