@@ -2062,10 +2062,7 @@ class OrderOperate
                 if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
                     if ($orderListArray['data'][$values['order_no']]['pay_type'] == Inc\PayInc::FlowerFundauth)
                     {
-                        if ($goodsList[$keys]['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE1) {
-                            $goodsList[$keys]['yajin'] = $goodsList[$keys]['yajin']+$goodsList[$keys]['amount_after_discount'];
-                        }
-
+                        $goodsList[$keys]['goods_yajin'];
                     }
 
                     $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
