@@ -86,11 +86,11 @@ return [
 
         'mysql_read' => [
             'driver' => 'mysql',
-            'host' => env('DB_HOST_READ',env('DB_HOST','119.29.141.207')),
+            'host' => env('DB_READ_HOST',env('DB_HOST','119.29.141.207')),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'zuji_order'),
-            'username' => env('DB_USERNAME', 'hjx'),
-            'password' => env('DB_PASSWORD', '123456'),
+            'username' => env('DB_READ_USERNAME',env('DB_USERNAME', 'hjx')),
+            'password' => env('DB_READ_PASSWORD',env('DB_PASSWORD', '123456')),
             'unix_socket' => env('DB_SOCKET_READ', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -221,41 +221,41 @@ return [
     |
     */
 
-//    'redis' => [
-//
-//        'client' => 'predis',
-//
-//        'default' => [
-//            'host' => env('REDIS_HOST', '127.0.0.1'),
-//            'password' => env('REDIS_PASSWORD', null),
-//            'port' => env('REDIS_PORT', 6379),
-//            'database' => 0,
-//        ],
-//
-//    ],
-
-
     'redis' => [
 
-        'client' => 'phpredis',
-        'options'=>[
-            'timeout'=>8*3600,
-            'read_timeout'=>8*3600,
-            'read_write_timeout'=>8*3600,
-            'persistent'=>true
-        ],
+        'client' => 'predis',
+
         'default' => [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),
             'database' => 0,
-            'prefix' => env('REDIS_PREFIX', ''),
-            'timeout'=>8*3600,
-            'read_timeout'=>8*3600,
-            'read_write_timeout'=>8*3600,
-            'persistent'=>true
         ],
 
     ],
+
+
+//    'redis' => [
+//
+//        'client' => 'phpredis',
+//        'options'=>[
+//            'timeout'=>8*3600,
+//            'read_timeout'=>8*3600,
+//            'read_write_timeout'=>8*3600,
+//            'persistent'=>true
+//        ],
+//        'default' => [
+//            'host' => env('REDIS_HOST', '127.0.0.1'),
+//            'password' => env('REDIS_PASSWORD', null),
+//            'port' => env('REDIS_PORT', 6379),
+//            'database' => 0,
+//            'prefix' => env('REDIS_PREFIX', ''),
+//            'timeout'=>8*3600,
+//            'read_timeout'=>8*3600,
+//            'read_write_timeout'=>8*3600,
+//            'persistent'=>true
+//        ],
+//
+//    ],
 
 ];
