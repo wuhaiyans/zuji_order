@@ -1883,10 +1883,7 @@ class OrderOperate
 
                //处于租期中，获取剩余未支付租金
                if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
-                   $where = array();
-                   $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
-                   $where[] = ['goods_no','=',$values['goods_no']];
-                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($values['goods_no']);
                    if ($instaulment){
 
                        $goodsList[$keys]['left_zujin'] = $instaulment['amount'];
