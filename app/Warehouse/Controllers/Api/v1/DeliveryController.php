@@ -636,6 +636,61 @@ class DeliveryController extends Controller
         ]);
     }
 
+    /**
+     * 渠道商发货
+     */
+    public function channelSend(){
+        $rules = [
+            'delivery_no' => 'required',//发货单号必填
+            'imei' => 'required',//IMEI必填
+            'order_no' => 'required',//订单编号必填
+            'goods_no' => 'required', //商品编号
+            'apple_serial' => 'required',//设备序列号选填
+            'price' => 'required',//采购价选填
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (count($params)<4) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        $request = request()->input();
+        $user = json_decode($request['userinfo'], true);
+
+        try {
+            DB::beginTransaction();
+            $result = $this->_info($params['delivery_no']);
+            $orderDetail = [
+                'order_no' => $result['order_no'],
+                'logistics_id' => $result['delivery_info']['logistics_id'],
+                'logistics_no' => $result['delivery_info']['logistics_no'],
+                'logistics_note'=>$result['delivery_info']['logistics_note']
+            ];
+
+            //操作员信息,用户或管理员操作有
+            $user_info['user_id'] = $user['uid'];
+            $user_info['user_name'] = $user['username'];
+            $user_info['type'] = $user['type'];
+            //通知订单接口
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            if($a){
+                //修改发货信息
+                DeliveryService::channelSend($params);
+            }else{
+                DB::rollBack();
+                return \apiResponse([$params['delivery_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            WarehouseWarning::warningWarehouse('[渠道商发货]失败',[$params,$e]);
+            return \apiResponse([$params['delivery_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
 
     protected function _info($delivery_no)
     {
@@ -666,11 +721,8 @@ class DeliveryController extends Controller
             }
         }
 
-        return ['order_no'=>$model->order_no, 'goods_info'=>$result];
+        return ['order_no'=>$model->order_no, 'goods_info'=>$result, 'delivery_info'=>$model->toArray()];
     }
-
-
-
 
 
 }
