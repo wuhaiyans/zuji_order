@@ -64,7 +64,7 @@ class NotaryApi {
 			'accountId' => $accountId,
 			'entity'	=> $entity->toArray(),
 			'bizId'		=> $bizId,		// 业务类型；
-			'subBizId'	=> 'LEASING',			// 子业务类型；
+		//	'subBizId'	=> 'LEASING',			// 子业务类型；
 			'customer'	=> [			// 您的客户身份标识
 				'userType'	=> $customer->getUserType(),
 				'certName'	=> $customer->getCertName(),

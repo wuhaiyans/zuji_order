@@ -31,12 +31,44 @@ class OrderGoodsInstalmentRepository
         if (!$result) return false;
         return $result->toArray();
     }
+
     /**
      * 查询分期统计应付金额
+     * @$goods_no 商品编号
      */
-    public static function getSumAmount($params){
-        if (empty($params)) return false;
-        $result =  OrderGoodsInstalment::select(DB::raw("count(*) as fenqishu,sum(amount) as amount"))->where($params)->first();
+    public static function getSumAmount($goods_no){
+        if ($goods_no == "") return false;
+
+        //获取订单商品信息
+        $goodsObj = \App\Order\Modules\Repository\Order\Goods::getByGoodsNo($goods_no);
+        if(empty($goodsObj)){
+            return false;
+        }
+        $goodsInfo = $goodsObj->getData();
+
+        //获取订单信息
+        $orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$goodsInfo['order_no']));
+        if(!$orderInfo){
+            return false;
+        }
+
+        // 花呗预授权 不参与 总金额计算
+        if($orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerFundauth){
+            return [
+                'amount'    => 0,
+                'fenqishu'  => 0,
+            ];
+        }
+
+        // 查询未完成分期
+        $where[] = ['goods_no','=',$goods_no];
+
+        $statusArr = [OrderInstalmentStatus::UNPAID,  OrderInstalmentStatus::FAIL];
+        $result =  OrderGoodsInstalment::select(DB::raw("count(*) as fenqishu,sum(amount) as amount"))
+            ->where($where)
+            ->whereIn('status',$statusArr)
+            ->first()->toArray();
+
         if (!$result) return false;
         return $result;
     }
@@ -315,4 +347,32 @@ class OrderGoodsInstalmentRepository
     }
 
 
+    /**
+     * 根据订单号 或者 商品编号 扣除未完成分期
+     * @param order_no 订单号
+     * @return boolean
+     */
+    public static function UnFinishWithhold($order_no){
+        if ( $order_no == "") {
+            return false;
+        }
+
+        $statusArr = [OrderInstalmentStatus::UNPAID,  OrderInstalmentStatus::FAIL];
+
+        $instalmentList =  OrderGoodsInstalment::query()
+            ->select('id')
+            ->where([['order_no','=',$order_no]])
+            ->whereIn('order_goods_instalment.status',$statusArr)
+            ->get()
+            ->toArray();
+        if (!$instalmentList) return true;
+        /**
+         * 未完成分期 循环执行扣款操作
+         */
+        foreach($instalmentList as $item){
+            \App\Order\Modules\Service\OrderWithhold::instalment_withhold($item['id']);
+        }
+
+        return true;
+    }
 }
