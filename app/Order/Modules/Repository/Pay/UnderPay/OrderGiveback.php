@@ -133,7 +133,7 @@ class OrderGiveback implements UnderLine {
 					throw new \Exception("更新商品表状态失败");
 				}
 				//解冻订单
-				if(!OrderGiveback::__unfreeze($orderGoodsInfo['order_no'])){
+				if(!OG::__unfreeze($orderGoodsInfo['order_no'])){
 					\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 					throw new \Exception("订单解冻失败");
 				}
@@ -173,7 +173,7 @@ class OrderGiveback implements UnderLine {
 						throw new \Exception("更新商品表状态失败");
 					}
 					//解冻订单
-					if(!OrderGiveback::__unfreeze($orderGoodsInfo['order_no'])){
+					if(!OG::__unfreeze($orderGoodsInfo['order_no'])){
 						\App\Lib\Common\LogApi::debug('还机单线下支付[huanji-xianxiazhifu]订单解冻失败', ['$orderGivebackInfo'=>$orderGivebackInfo]);
 						throw new \Exception("订单解冻失败");
 					}
